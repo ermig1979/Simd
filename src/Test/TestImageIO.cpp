@@ -797,7 +797,7 @@ namespace Test
 
         f2.Call(data, size, format, dst2);
 
-        int differenceMax = ToLower(ExtensionByPath(path)) == "png" ? 0 : 4;
+        int differenceMax = ToLower(ExtensionByPath(path)) == "png" ? 1 : 4;
 
         result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
 

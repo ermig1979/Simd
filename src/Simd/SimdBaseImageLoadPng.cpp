@@ -374,11 +374,6 @@ namespace Simd
 
 #define PNG__BYTECAST(x)  ((uint8_t) ((x) & 255))  // truncate int to byte without warnings
 
-        static uint8_t png__compute_y(int r, int g, int b)
-        {
-            return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
-        }
-
         struct Png
         {
             uint32_t width, height;
@@ -393,89 +388,6 @@ namespace Simd
             }
         };
 
-        static int ConvertFormat(Png & a, int img_n, int req_comp, unsigned int x, unsigned int y)
-        {
-            SIMD_PERF_FUNC();
-
-            if (req_comp == img_n)
-                return 1;
-            assert(req_comp >= 1 && req_comp <= 4);
-
-            a.buf1.Resize(req_comp * x * y * 1);
-            if(a.buf1.Empty())
-                return PngError("outofmem", "Out of memory");
-
-            for (int j = 0; j < (int)y; ++j)
-            {
-                uint8_t* src = a.buf0.data + j * x * img_n;
-                uint8_t* dest = a.buf1.data + j * x * req_comp;
-#define PNG__COMBO(a,b)  ((a)*8+(b))
-#define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(int i=x-1; i >= 0; --i, src += a, dest += b)
-                switch (PNG__COMBO(img_n, req_comp))
-                {
-                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 255; } break;
-                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 255; } break;
-                    PNG__CASE(2, 1) { dest[0] = src[0]; } break;
-                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
-                    PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 255; } break;
-                    PNG__CASE(3, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
-                    PNG__CASE(3, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = 255; } break;
-                    PNG__CASE(4, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
-                    PNG__CASE(4, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = src[3]; } break;
-                    PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
-                default: assert(0); return PngError("unsupported", "Unsupported format conversion");
-                }
-#undef PNG__CASE
-            }
-            return a.Swap();
-        }
-
-        static uint16_t png__compute_y_16(int r, int g, int b)
-        {
-            return (uint16_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
-        }
-
-        static int ConvertFormat16(Png& a, int img_n, int req_comp, unsigned int x, unsigned int y)
-        {
-            SIMD_PERF_FUNC();
-
-            if (req_comp == img_n)
-                return 1;
-            assert(req_comp >= 1 && req_comp <= 4);
-
-            a.buf1.Resize(req_comp * x * y * 2);
-            if (a.buf1.Empty())
-                return PngError("outofmem", "Out of memory");
-
-            for (int j = 0; j < (int)y; ++j)
-            {
-                uint16_t* src = (uint16_t*)a.buf0.data + j * x * img_n;
-                uint16_t* dest = (uint16_t*)a.buf1.data + j * x * req_comp;
-
-#define PNG__COMBO(a,b)  ((a)*8+(b))
-#define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(int i=x-1; i >= 0; --i, src += a, dest += b)
-                switch (PNG__COMBO(img_n, req_comp)) {
-                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 0xffff; } break;
-                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 0xffff; } break;
-                    PNG__CASE(2, 1) { dest[0] = src[0]; } break;
-                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
-                    PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 0xffff; } break;
-                    PNG__CASE(3, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
-                    PNG__CASE(3, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = 0xffff; } break;
-                    PNG__CASE(4, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
-                    PNG__CASE(4, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = src[3]; } break;
-                    PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
-                default: assert(0); return PngError("unsupported", "Unsupported format conversion");
-                }
-#undef PNG__CASE
-            }
-            return a.Swap();
-        }
-
         enum 
         {
             PNG__F_none = 0,
@@ -487,7 +399,7 @@ namespace Simd
             PNG__F_paeth_first
         };
 
-        static uint8_t first_row_filter[5] =
+        static uint8_t FirstRowFilter[5] =
         {
            PNG__F_none,
            PNG__F_sub,
@@ -496,18 +408,7 @@ namespace Simd
            PNG__F_paeth_first
         };
 
-        static int png__paeth(int a, int b, int c)
-        {
-            int p = a + b - c;
-            int pa = abs(p - a);
-            int pb = abs(p - b);
-            int pc = abs(p - c);
-            if (pa <= pb && pa <= pc) return a;
-            if (pb <= pc) return b;
-            return c;
-        }
-
-        static const uint8_t png__depth_scale_table[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
+        static const uint8_t DepthScaleTable[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
 
         static int CreatePngImageRaw(Png& a, const uint8_t* raw, uint32_t raw_len, int out_n, uint32_t x, uint32_t y, int depth, int color)
         {
@@ -515,7 +416,7 @@ namespace Simd
             uint32_t i, j, stride = x * out_n * bytes;
             uint32_t img_len, img_width_bytes;
             int k;
-            int img_n = a.channels; // copy it into a local for later
+            int img_n = a.channels;
 
             int output_bytes = out_n * bytes;
             int filter_bytes = img_n * bytes;
@@ -551,19 +452,18 @@ namespace Simd
                     width = img_width_bytes;
                 }
                 prior = cur - stride; // bugfix: need to compute this after 'cur +=' computation above
+                if (j == 0) 
+                    filter = FirstRowFilter[filter];
 
-                // if first row, use special filter that doesn't sample previous row
-                if (j == 0) filter = first_row_filter[filter];
-
-                // handle first byte explicitly
                 for (k = 0; k < filter_bytes; ++k) 
                 {
-                    switch (filter) {
+                    switch (filter) 
+                    {
                     case PNG__F_none: cur[k] = raw[k]; break;
                     case PNG__F_sub: cur[k] = raw[k]; break;
                     case PNG__F_up: cur[k] = PNG__BYTECAST(raw[k] + prior[k]); break;
                     case PNG__F_avg: cur[k] = PNG__BYTECAST(raw[k] + (prior[k] >> 1)); break;
-                    case PNG__F_paeth: cur[k] = PNG__BYTECAST(raw[k] + png__paeth(0, prior[k], 0)); break;
+                    case PNG__F_paeth: cur[k] = PNG__BYTECAST(raw[k] + Paeth(0, prior[k], 0)); break;
                     case PNG__F_avg_first: cur[k] = raw[k]; break;
                     case PNG__F_paeth_first: cur[k] = raw[k]; break;
                     }
@@ -594,8 +494,6 @@ namespace Simd
                     cur += 1;
                     prior += 1;
                 }
-
-                // this is a little gross, so that we don't switch per-pixel or per-component
                 if (depth < 8 || img_n == out_n) 
                 {
                     int nk = (width - 1) * filter_bytes;
@@ -603,14 +501,13 @@ namespace Simd
              case f:     \
                 for (k=0; k < nk; ++k)
                     switch (filter) {
-                        // "none" filter turns into a memcpy here; make that explicit.
                     case PNG__F_none:         memcpy(cur, raw, nk); break;
                         PNG__CASE(PNG__F_sub) { cur[k] = PNG__BYTECAST(raw[k] + cur[k - filter_bytes]); } break;
                         PNG__CASE(PNG__F_up) { cur[k] = PNG__BYTECAST(raw[k] + prior[k]); } break;
                         PNG__CASE(PNG__F_avg) { cur[k] = PNG__BYTECAST(raw[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(raw[k] + png__paeth(cur[k - filter_bytes], prior[k], prior[k - filter_bytes])); } break;
+                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(raw[k] + Paeth(cur[k - filter_bytes], prior[k], prior[k - filter_bytes])); } break;
                         PNG__CASE(PNG__F_avg_first) { cur[k] = PNG__BYTECAST(raw[k] + (cur[k - filter_bytes] >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(raw[k] + png__paeth(cur[k - filter_bytes], 0, 0)); } break;
+                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(raw[k] + Paeth(cur[k - filter_bytes], 0, 0)); } break;
                     }
 #undef PNG__CASE
                     raw += nk;
@@ -627,42 +524,26 @@ namespace Simd
                         PNG__CASE(PNG__F_sub) { cur[k] = PNG__BYTECAST(raw[k] + cur[k - output_bytes]); } break;
                         PNG__CASE(PNG__F_up) { cur[k] = PNG__BYTECAST(raw[k] + prior[k]); } break;
                         PNG__CASE(PNG__F_avg) { cur[k] = PNG__BYTECAST(raw[k] + ((prior[k] + cur[k - output_bytes]) >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(raw[k] + png__paeth(cur[k - output_bytes], prior[k], prior[k - output_bytes])); } break;
+                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(raw[k] + Paeth(cur[k - output_bytes], prior[k], prior[k - output_bytes])); } break;
                         PNG__CASE(PNG__F_avg_first) { cur[k] = PNG__BYTECAST(raw[k] + (cur[k - output_bytes] >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(raw[k] + png__paeth(cur[k - output_bytes], 0, 0)); } break;
+                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(raw[k] + Paeth(cur[k - output_bytes], 0, 0)); } break;
                     }
 #undef PNG__CASE
-
-                    // the loop above sets the high byte of the pixels' alpha, but for
-                    // 16 bit png files we also need the low byte set. we'll do that here.
                     if (depth == 16) 
                     {
-                        cur = a.buf0.data + stride * j; // start at the beginning of the row again
+                        cur = a.buf0.data + stride * j;
                         for (i = 0; i < x; ++i, cur += output_bytes) 
                             cur[filter_bytes + 1] = 255;
                     }
                 }
             }
-
-            // we make a separate pass to expand bits to pixels; for performance,
-            // this could run two scanlines behind the above code, so it won't
-            // intefere with filtering but will still be in the cache.
             if (depth < 8)
             {
                 for (j = 0; j < y; ++j)
                 {
                     uint8_t* cur = a.buf0.data + stride * j;
                     const uint8_t* in = a.buf0.data + stride * j + x * out_n - img_width_bytes;
-                    // unpack 1/2/4-bit into a 8-bit buffer. allows us to keep the common 8-bit path optimal at minimal cost for 1/2/4-bit
-                    // png guarante byte alignment, if width is not multiple of 8/4/2 we'll decode dummy trailing data that will be skipped in the later loop
-                    uint8_t scale = (color == 0) ? png__depth_scale_table[depth] : 1; // scale grayscale values to 0..255 range
-
-                    // note that the final byte might overshoot and write more data than desired.
-                    // we can allocate enough data that this never writes out of memory, but it
-                    // could also overwrite the next scanline. can it overwrite non-empty data
-                    // on the next scanline? yes, consider 1-pixel-wide scanlines with 1-bit-per-pixel.
-                    // so we need to explicitly clamp the final ones
-
+                    uint8_t scale = (color == 0) ? DepthScaleTable[depth] : 1;
                     if (depth == 4) 
                     {
                         for (k = x * img_n; k >= 2; k -= 2, ++in) 
@@ -713,7 +594,6 @@ namespace Simd
                     if (img_n != out_n) 
                     {
                         int q;
-                        // insert alpha = 255
                         cur = a.buf0.data + stride * j;
                         if (img_n == 1) 
                         {
@@ -739,17 +619,11 @@ namespace Simd
             }
             else if (depth == 16) 
             {
-                // force the image data from big-endian to platform-native.
-                // this is done in a separate pass due to the decoding relying
-                // on the data being untouched, but could probably be done
-                // per-line during decode if care is taken.
                 uint8_t* cur = a.buf0.data;
                 uint16_t* cur16 = (uint16_t*)cur;
-
                 for (i = 0; i < x * y * out_n; ++i, cur16++, cur += 2)
                     *cur16 = (cur[0] << 8) | cur[1];
             }
-
             return 1;
         }
 
@@ -855,6 +729,94 @@ namespace Simd
             return a.Swap();
         }
 
+        static uint8_t png__compute_y(int r, int g, int b)
+        {
+            return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
+        }
+
+        static int ConvertFormat(Png& a, int img_n, int req_comp, unsigned int x, unsigned int y)
+        {
+            SIMD_PERF_FUNC();
+
+            if (req_comp == img_n)
+                return 1;
+            assert(req_comp >= 1 && req_comp <= 4);
+
+            a.buf1.Resize(req_comp * x * y * 1);
+            if (a.buf1.Empty())
+                return PngError("outofmem", "Out of memory");
+
+            for (int j = 0; j < (int)y; ++j)
+            {
+                uint8_t* src = a.buf0.data + j * x * img_n;
+                uint8_t* dest = a.buf1.data + j * x * req_comp;
+#define PNG__COMBO(a,b)  ((a)*8+(b))
+#define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(int i=x-1; i >= 0; --i, src += a, dest += b)
+                switch (PNG__COMBO(img_n, req_comp))
+                {
+                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 255; } break;
+                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
+                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 255; } break;
+                    PNG__CASE(2, 1) { dest[0] = src[0]; } break;
+                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
+                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
+                    PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 255; } break;
+                    PNG__CASE(3, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
+                    PNG__CASE(3, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = 255; } break;
+                    PNG__CASE(4, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
+                    PNG__CASE(4, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = src[3]; } break;
+                    PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
+                default: assert(0); return PngError("unsupported", "Unsupported format conversion");
+                }
+#undef PNG__CASE
+            }
+            return a.Swap();
+        }
+
+        static uint16_t png__compute_y_16(int r, int g, int b)
+        {
+            return (uint16_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
+        }
+
+        static int ConvertFormat16(Png& a, int img_n, int req_comp, unsigned int x, unsigned int y)
+        {
+            SIMD_PERF_FUNC();
+
+            if (req_comp == img_n)
+                return 1;
+            assert(req_comp >= 1 && req_comp <= 4);
+
+            a.buf1.Resize(req_comp * x * y * 2);
+            if (a.buf1.Empty())
+                return PngError("outofmem", "Out of memory");
+
+            for (int j = 0; j < (int)y; ++j)
+            {
+                uint16_t* src = (uint16_t*)a.buf0.data + j * x * img_n;
+                uint16_t* dest = (uint16_t*)a.buf1.data + j * x * req_comp;
+
+#define PNG__COMBO(a,b)  ((a)*8+(b))
+#define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(int i=x-1; i >= 0; --i, src += a, dest += b)
+                switch (PNG__COMBO(img_n, req_comp)) {
+                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 0xffff; } break;
+                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
+                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 0xffff; } break;
+                    PNG__CASE(2, 1) { dest[0] = src[0]; } break;
+                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
+                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
+                    PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 0xffff; } break;
+                    PNG__CASE(3, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
+                    PNG__CASE(3, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = 0xffff; } break;
+                    PNG__CASE(4, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
+                    PNG__CASE(4, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = src[3]; } break;
+                    PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
+                default: assert(0); return PngError("unsupported", "Unsupported format conversion");
+                }
+#undef PNG__CASE
+            }
+            return a.Swap();
+        }
+
         //---------------------------------------------------------------------
 
         ImagePngLoader::ImagePngLoader(const ImageLoaderParam& param)
@@ -880,8 +842,6 @@ namespace Simd
 
         bool ImagePngLoader::FromStream()
         {
-            const int req_comp = 4;
-
             if (!ParseFile())
                 return false;
 
@@ -895,6 +855,10 @@ namespace Simd
             OutputMemoryStream zDst(AlignHi(size_t(_width) * _depth, 8) * _height * _channels + _height);
             if(!Zlib::Decode(zSrc, zDst, !_iPhone))
                 return false;
+
+            int req_comp = 4;
+            if (Image::ChannelCount((Image::Format)_param.format) == _channels && _depth != 16)
+                req_comp = _channels;
 
             if ((req_comp == p.channels + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
                 p.img_out_n = p.channels + 1;
@@ -947,24 +911,33 @@ namespace Simd
             }
             if (p.buf0.data)
             {
-                size_t stride = 4 * p.width;
+                size_t stride = req_comp * p.width;
                 _image.Recreate(p.width, p.height, (Image::Format)_param.format);
                 switch (_param.format)
                 {
                 case SimdPixelFormatGray8:
-                    Base::RgbaToGray(p.buf0.data, p.width, p.height, stride, _image.data, _image.stride);
+                    if(req_comp != 4)
+                        Base::Copy(p.buf0.data, stride, p.width, p.height, _image.PixelSize(), _image.data, _image.stride);
+                    else
+                        Base::RgbaToGray(p.buf0.data, p.width, p.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgr24:
-                    Base::BgraToRgb(p.buf0.data, p.width, p.height, stride, _image.data, _image.stride);
+                    if (req_comp != 4)
+                        Base::BgrToRgb(p.buf0.data, p.width, p.height, stride, _image.data, _image.stride);
+                    else
+                        Base::BgraToRgb(p.buf0.data, p.width, p.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgra32:
                     Base::BgraToRgba(p.buf0.data, p.width, p.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgb24:
-                    Base::BgraToBgr(p.buf0.data, p.width, p.height, stride, _image.data, _image.stride);
+                    if (req_comp != 4)
+                        Base::Copy(p.buf0.data, stride, p.width, p.height, _image.PixelSize(), _image.data, _image.stride);
+                    else
+                        Base::BgraToBgr(p.buf0.data, p.width, p.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgba32:
-                    Base::Copy(p.buf0.data, stride, p.width, p.height, 4, _image.data, _image.stride);
+                    Base::Copy(p.buf0.data, stride, p.width, p.height, _image.PixelSize(), _image.data, _image.stride);
                     break;
                 default: 
                     break;
@@ -1132,7 +1105,7 @@ namespace Simd
                 if (_depth != 16)
                 {
                     for (size_t k = 0; k < _channels; ++k)
-                        _tc[k] = uint8_t(_tc16[k]) * png__depth_scale_table[_depth];
+                        _tc[k] = uint8_t(_tc16[k]) * DepthScaleTable[_depth];
                 }
             }
             return true;
