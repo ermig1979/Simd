@@ -248,6 +248,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(Laplace);
     TEST_ADD_GROUP_AD0(LaplaceAbs);
     TEST_ADD_GROUP_A0S(GaussianBlur);
+    TEST_ADD_GROUP_A00(RecursiveBilateralFilter);
 
     TEST_ADD_GROUP_AD0(Histogram);
     TEST_ADD_GROUP_AD0(HistogramMasked);

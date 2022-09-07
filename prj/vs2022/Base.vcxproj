@@ -141,6 +141,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseNeural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBasePerformance.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseRecursiveBilateralFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseReduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray3x3.cpp" />

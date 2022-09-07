@@ -66,6 +66,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdGaussianBlur.h"
 #include "Simd/SimdImageLoad.h"
 #include "Simd/SimdImageSave.h"
+#include "Simd/SimdRecursiveBilateralFilter.h"
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdSynetConvolution8i.h"
 #include "Simd/SimdSynetConvolution32f.h"
@@ -4379,6 +4380,20 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
     else
 #endif
         Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
+}
+
+SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange)
+{
+    SIMD_EMPTY();
+    typedef void* (*SimdRecursiveBilateralFilterInitPtr) (size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
+    const static SimdRecursiveBilateralFilterInitPtr simdRecursiveBilateralFilterInit = SIMD_FUNC0(RecursiveBilateralFilterInit);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    return simdRecursiveBilateralFilterInit(width, height, channels, sigmaSpatial, sigmaRange);
+}
+
+SIMD_API void SimdRecursiveBilateralFilterRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+{
+    SIMD_EMPTY();
+    ((RecursiveBilateralFilter*)filter)->Run(src, srcStride, dst, dstStride);
 }
 
 SIMD_API void SimdReduceColor2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,

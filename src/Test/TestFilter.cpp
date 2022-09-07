@@ -27,6 +27,7 @@
 #include "Test/TestString.h"
 
 #include "Simd/SimdGaussianBlur.h"
+#include "Simd/SimdRecursiveBilateralFilter.h"
 
 namespace Test
 {
@@ -709,7 +710,7 @@ namespace Test
 
 //#define TEST_GAUSSIAN_BLUR_REAL_IMAGE
 
-    bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float sigma, FuncGB f1, FuncGB f2)
+    bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float sigma, float epsilon, FuncGB f1, FuncGB f2)
     {
         bool result = true;
 
@@ -728,7 +729,6 @@ namespace Test
         default:
             assert(0);
         }
-        const float epsilon = 0.001f;
 
         View src(width, height, format, NULL, TEST_ALIGN(width));
 #ifdef TEST_GAUSSIAN_BLUR_REAL_IMAGE
@@ -762,8 +762,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GaussianBlurAutoTest(W, H, channels, sigma, f1, f2);
-        result = result && GaussianBlurAutoTest(W + O, H - O, channels, sigma, f1, f2);
+        const float epsilon = 0.001f;
+        result = result && GaussianBlurAutoTest(W, H, channels, sigma, epsilon, f1, f2);
+        result = result && GaussianBlurAutoTest(W + O, H - O, channels, epsilon, sigma, f1, f2);
 
         return result;
     }
@@ -772,7 +773,7 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && GaussianBlurAutoTest(12, 8, 1, 5.0f, f1, f2);
+        //result = result && GaussianBlurAutoTest(12, 8, 1, 5.0f, 0.001f, f1, f2);
 
         for (int channels = 1; channels <= 4; channels++)
         {
@@ -813,7 +814,132 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncRBF
+        {
+            typedef void* (*FuncPtr)(size_t width, size_t height, size_t channels, const float* spatial, const float* range);
+
+            FuncPtr func;
+            String description;
+
+            FuncRBF(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Update(size_t c, float s, float r)
+            {
+                std::stringstream ss;
+                ss << description;
+                ss << "[" << ToString(s, 1, true) << "-" << ToString(s, 1, true) << "-" << c << "]";
+                description = ss.str();
+            }
+
+            void Call(const View& src, float spatial, float range, View& dst) const
+            {
+                void* filter = NULL;
+                filter = func(src.width, src.height, src.ChannelCount(), &spatial, &range);
+                {
+                    TEST_PERFORMANCE_TEST(description);
+                    SimdRecursiveBilateralFilterRun(filter, src.data, src.stride, dst.data, dst.stride);
+                }
+                SimdRelease(filter);
+            }
+        };
+    }
+
+#define FUNC_RBF(function) \
+    FuncRBF(function, std::string(#function))
+
+    //#define TEST_RBF_REAL_IMAGE
+
+    bool RecursiveBilateralFilterAutoTest(size_t width, size_t height, size_t channels, float spatial, float range, FuncRBF f1, FuncRBF f2)
+    {
+        bool result = true;
+
+        f1.Update(channels, spatial, range);
+        f2.Update(channels, spatial, range);
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View::Format format;
+        switch (channels)
+        {
+        case 1: format = View::Gray8; break;
+        case 2: format = View::Uv16; break;
+        case 3: format = View::Bgr24; break;
+        case 4: format = View::Bgra32; break;
+        default:
+            assert(0);
+        }
+
+        View src(width, height, format, NULL, TEST_ALIGN(width));
+#ifdef TEST_RBF_IMAGE
+        FillPicture(src);
+#else
+        FillRandom(src);
+#endif
+        View dst1(width, height, format, NULL, TEST_ALIGN(width));
+        View dst2(width, height, format, NULL, TEST_ALIGN(width));
+        Simd::Fill(dst1, 0x01);
+        Simd::Fill(dst2, 0x03);
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, spatial, range, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, spatial, range, dst2));
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
+#ifdef TEST_RBF_REAL_IMAGE
+        if (format == View::Bgr24)
+        {
+            src.Save("src.ppm");
+            dst1.Save(String("dst_") + ToString((double)sigma, 1) + ".ppm");
+        }
+#endif
+
+        return result;
+    }
+
+    bool RecursiveBilateralFilterAutoTest(int channels, float spatial, const FuncRBF& f1, const FuncRBF& f2)
+    {
+        bool result = true;
+
+        const float range = 0.001f;
+        result = result && RecursiveBilateralFilterAutoTest(W, H, channels, spatial, range, f1, f2);
+        result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, f1, f2);
+
+        return result;
+    }
+
+    bool RecursiveBilateralFilterAutoTest(const FuncRBF& f1, const FuncRBF& f2)
+    {
+        bool result = true;
+
+        //result = result && RecursiveBilateralFilterAutoTest(12, 8, 1, 5.0f, 0.001f, f1, f2);
+
+        for (int channels = 1; channels <= 4; channels++)
+        {
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.5f, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 1.0f, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 3.0f, f1, f2);
+        }
+
+        return result;
+    }
+
+    bool RecursiveBilateralFilterAutoTest()
+    {
+        bool result = true;
+
+        result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Base::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+
+        return result;
+    }
+
+    //---------------------------------------------------------------------------------------------
 
     bool ColorFilterDataTest(bool create, int width, int height, View::Format format, const FuncC & f)
     {

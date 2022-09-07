@@ -430,6 +430,11 @@
 */
 
 /*! @ingroup filter
+    @defgroup recursive_bilateral_filter Recursive Bilateral Filters
+    \short Recursive bilateral image filters.
+*/
+
+/*! @ingroup filter
     @defgroup sobel_filter Sobel Filters
     \short Sobel image filters.
 */

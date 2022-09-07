@@ -3248,7 +3248,7 @@ extern "C"
         \param [in] width - a width of input and output image.
         \param [in] height - a height of input and output image.    
         \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
-        \param [in] sigma - a pointer to sigma parameter (blur radius). MIts value must be greater than 0.000001.
+        \param [in] sigma - a pointer to sigma parameter (blur radius). Its value must be greater than 0.000001.
         \param [in] epsilon - a pointer to epsilon parameter (permissible relative error). 
                               Its value must be greater than 0.000001. Pointer can be NULL and by default value 0.001 is used.
         \return a pointer to filter context. On error it returns NULL.
@@ -5097,6 +5097,37 @@ extern "C"
     */
     SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
         uint8_t * dst, size_t stride, size_t width, size_t height);
+
+    /*! @ingroup recursive_bilateral_filter
+
+        \fn void * SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
+
+        \short Creates Recursive bilateral filter context.
+
+        \param [in] width - a width of input and output image.
+        \param [in] height - a height of input and output image.
+        \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
+        \param [in] sigmaSpatial - a pointer to sigma spatial parameter.
+        \param [in] sigmaRange - a pointer to sigma range parameter.
+        \return a pointer to filter context. On error it returns NULL.
+                This pointer is used in functions ::SimdRecursiveBilateralFilterRun.
+                It must be released with using of function ::SimdRelease.
+    */
+    SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
+
+    /*! @ingroup recursive_bilateral_filter
+
+        \fn void SimdRecursiveBilateralFilterRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+
+        \short Performs image recursive bilateral filtering.
+
+        \param [in] filter - a filter context. It must be created by function ::SimdRecursiveBilateralFilterInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to pixels data of the original input image.
+        \param [in] srcStride - a row size (in bytes) of the input image.
+        \param [out] dst - a pointer to pixels data of the filtered output image.
+        \param [in] dstStride - a row size (in bytes) of the output image.
+    */
+    SIMD_API void SimdRecursiveBilateralFilterRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
     /*! @ingroup resizing
 
