@@ -25,12 +25,52 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 #include "Test/TestString.h"
+#include "Test/TestFile.h"
 
 #include "Simd/SimdGaussianBlur.h"
 #include "Simd/SimdRecursiveBilateralFilter.h"
 
 namespace Test
 {
+#define TEST_REAL_IMAGE
+    static bool GetTestImage(View& image, size_t width, size_t height, size_t channels, const String& desc1, const String& desc2)
+    {
+        bool result = true;
+        View::Format format;
+        switch (channels)
+        {
+        case 1: format = View::Gray8; break;
+        case 2: format = View::Uv16; break;
+        case 3: format = View::Bgr24; break;
+        case 4: format = View::Bgra32; break;
+        default:
+            assert(0);
+        }
+        if (REAL_IMAGE.empty())
+        {
+            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
+            image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
+#ifdef TEST_REAL_IMAGE
+            ::srand(0);
+            FillPicture(image);
+#else
+            FillRandom(image);
+#endif
+        }
+        else
+        {
+            String path = ROOT_PATH + "/data/image/" + REAL_IMAGE;
+            if (!image.Load(path, format))
+            {
+                TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
+                return false;
+            }
+            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << REAL_IMAGE << " [" << image.width << "x" << image.height << "].");
+        }
+        TEST_ALIGN(SIMD_ALIGN);
+        return result;
+    }
+
     namespace
     {
         struct FuncC
@@ -708,8 +748,6 @@ namespace Test
 #define FUNC_GB(function) \
     FuncGB(function, std::string(#function))
 
-//#define TEST_GAUSSIAN_BLUR_REAL_IMAGE
-
     bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float sigma, float epsilon, FuncGB f1, FuncGB f2)
     {
         bool result = true;
@@ -717,27 +755,12 @@ namespace Test
         f1.Update(channels, sigma);
         f2.Update(channels, sigma);
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        View src;
+        if (!GetTestImage(src, width, height, channels, f1.description, f2.description))
+            return false;
 
-        View::Format format;
-        switch (channels)
-        {
-        case 1: format = View::Gray8; break;
-        case 2: format = View::Uv16; break;
-        case 3: format = View::Bgr24; break;
-        case 4: format = View::Bgra32; break;
-        default:
-            assert(0);
-        }
-
-        View src(width, height, format, NULL, TEST_ALIGN(width));
-#ifdef TEST_GAUSSIAN_BLUR_REAL_IMAGE
-        FillPicture(src);
-#else
-        FillRandom(src);
-#endif
-        View dst1(width, height, format, NULL, TEST_ALIGN(width));
-        View dst2(width, height, format, NULL, TEST_ALIGN(width));
+        View dst1(src.width, src.height, src.format, NULL, TEST_ALIGN(width));
+        View dst2(src.width, src.height, src.format, NULL, TEST_ALIGN(width));
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -747,8 +770,8 @@ namespace Test
 
         result = result && Compare(dst1, dst2, 1, true, 64);
 
-#ifdef TEST_GAUSSIAN_BLUR_REAL_IMAGE
-        if (format == View::Bgr24)
+#ifdef TEST_REAL_IMAGE
+        if (src.format == View::Bgr24)
         {
             src.Save("src.ppm");
             dst1.Save(String("dst_") + ToString((double)sigma, 1) + ".ppm");
@@ -831,7 +854,7 @@ namespace Test
             {
                 std::stringstream ss;
                 ss << description;
-                ss << "[" << ToString(s, 1, true) << "-" << ToString(s, 1, true) << "-" << c << "]";
+                ss << "[" << ToString(s, 2, 1) << "-" << ToString(r, 2, 1) << "-" << c << "]";
                 description = ss.str();
             }
 
@@ -851,7 +874,13 @@ namespace Test
 #define FUNC_RBF(function) \
     FuncRBF(function, std::string(#function))
 
-    //#define TEST_RBF_REAL_IMAGE
+    SIMD_INLINE bool SaveRbf(const View & view, const String& desc, size_t width, size_t height, size_t channels, float spatial, float range)
+    {
+        std::stringstream ss;
+        ss << MakePath("_out", desc) << "_" << width << "x" << height << "x" << channels;
+        ss << "_" << ToString(spatial, 2, 1) << "_" << ToString(range, 2, 1) << ".png";
+        return CreatePathIfNotExist(ss.str(), true) && view.Save(ss.str(), SimdImageFilePng);
+    }
 
     bool RecursiveBilateralFilterAutoTest(size_t width, size_t height, size_t channels, float spatial, float range, FuncRBF f1, FuncRBF f2)
     {
@@ -860,27 +889,12 @@ namespace Test
         f1.Update(channels, spatial, range);
         f2.Update(channels, spatial, range);
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        View src;
+        if (!GetTestImage(src, width, height, channels, f1.description, f2.description))
+            return false;
 
-        View::Format format;
-        switch (channels)
-        {
-        case 1: format = View::Gray8; break;
-        case 2: format = View::Uv16; break;
-        case 3: format = View::Bgr24; break;
-        case 4: format = View::Bgra32; break;
-        default:
-            assert(0);
-        }
-
-        View src(width, height, format, NULL, TEST_ALIGN(width));
-#ifdef TEST_RBF_IMAGE
-        FillPicture(src);
-#else
-        FillRandom(src);
-#endif
-        View dst1(width, height, format, NULL, TEST_ALIGN(width));
-        View dst2(width, height, format, NULL, TEST_ALIGN(width));
+        View dst1(src.width, src.height, src.format, NULL, TEST_ALIGN(width));
+        View dst2(src.width, src.height, src.format, NULL, TEST_ALIGN(width));
         Simd::Fill(dst1, 0x01);
         Simd::Fill(dst2, 0x03);
 
@@ -892,22 +906,19 @@ namespace Test
 
         result = result && Compare(dst1, dst2, 0, true, 64);
 
-#ifdef TEST_RBF_REAL_IMAGE
-        if (format == View::Bgr24)
-        {
-            src.Save("src.ppm");
-            dst1.Save(String("dst_") + ToString((double)sigma, 1) + ".ppm");
-        }
+#ifdef TEST_REAL_IMAGE
+        SaveRbf(src, "src", width, height, channels, spatial, range);
+        SaveRbf(dst1, "dst1", width, height, channels, spatial, range);
+        SaveRbf(dst2, "dst2", width, height, channels, spatial, range);
 #endif
 
         return result;
     }
 
-    bool RecursiveBilateralFilterAutoTest(int channels, float spatial, const FuncRBF& f1, const FuncRBF& f2)
+    bool RecursiveBilateralFilterAutoTest(int channels, float spatial, float range, const FuncRBF& f1, const FuncRBF& f2)
     {
         bool result = true;
 
-        const float range = 0.001f;
         result = result && RecursiveBilateralFilterAutoTest(W, H, channels, spatial, range, f1, f2);
         result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, f1, f2);
 
@@ -918,14 +929,12 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && RecursiveBilateralFilterAutoTest(12, 8, 1, 5.0f, 0.001f, f1, f2);
+        result = result && RecursiveBilateralFilterAutoTest(1024 + 0, 768, 3, 0.12f, 0.09f, f1, f2);
 
-        for (int channels = 1; channels <= 4; channels++)
-        {
-            result = result && RecursiveBilateralFilterAutoTest(channels, 0.5f, f1, f2);
-            result = result && RecursiveBilateralFilterAutoTest(channels, 1.0f, f1, f2);
-            result = result && RecursiveBilateralFilterAutoTest(channels, 3.0f, f1, f2);
-        }
+        //for (int channels = 1; channels <= 4; channels++)
+        //{
+        //    result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, f1, f2);
+        //}
 
         return result;
     }

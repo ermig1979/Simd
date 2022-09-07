@@ -65,6 +65,10 @@ namespace Test
     bool CreatePath(const String & path);
 
     bool CreatePathIfNotExist(const String & path, bool file);
+
+    bool FileLoad(const char* path, uint8_t** data, size_t* size);
+
+    bool FileSave(const uint8_t* data, size_t size, const char* path);
 }
 
 #endif//__TestFile_h__

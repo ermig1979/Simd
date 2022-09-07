@@ -99,4 +99,32 @@ namespace Test
         }
         return true;
     }
+
+    bool FileLoad(const char* path, uint8_t** data, size_t* size)
+    {
+        bool result = false;
+        ::FILE* file = ::fopen(path, "rb");
+        if (file)
+        {
+            ::fseek(file, 0, SEEK_END);
+            *size = ::ftell(file);
+            *data = (uint8_t*)SimdAllocate(*size, SimdAlignment());
+            ::fseek(file, 0, SEEK_SET);
+            result = ::fread(*data, 1, *size, file) == *size;
+            ::fclose(file);
+        }
+        return result;
+    }
+
+    bool FileSave(const uint8_t* data, size_t size, const char* path)
+    {
+        bool result = false;
+        ::FILE* file = ::fopen(path, "wb");
+        if (file)
+        {
+            result = ::fwrite(data, 1, size, file) == size;
+            ::fclose(file);
+        }
+        return result;
+    }
 }

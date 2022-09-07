@@ -61,6 +61,7 @@
     <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdPow.h" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdRecursiveBilateralFilter.h" />
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
     <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
@@ -78,6 +79,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTransform.h" />
+    <ClInclude Include="..\..\src\Simd\SimdUnpack.h" />
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h" />
