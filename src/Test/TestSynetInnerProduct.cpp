@@ -26,8 +26,9 @@
 #include "Test/TestData.h"
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
-#include "Simd/SimdSynet.h"
+#include "Test/TestRandom.h"
 
+#include "Simd/SimdSynet.h"
 #include "Simd/SimdSynetInnerProduct32f.h"
 
 namespace Test

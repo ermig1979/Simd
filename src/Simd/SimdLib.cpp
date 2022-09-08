@@ -4386,7 +4386,7 @@ SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, siz
 {
     SIMD_EMPTY();
     typedef void* (*SimdRecursiveBilateralFilterInitPtr) (size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
-    const static SimdRecursiveBilateralFilterInitPtr simdRecursiveBilateralFilterInit = SIMD_FUNC0(RecursiveBilateralFilterInit);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdRecursiveBilateralFilterInitPtr simdRecursiveBilateralFilterInit = SIMD_FUNC1(RecursiveBilateralFilterInit, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_NEON_FUNC);
     return simdRecursiveBilateralFilterInit(width, height, channels, sigmaSpatial, sigmaRange);
 }
 

@@ -24,6 +24,7 @@
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
+#include "Test/TestRandom.h"
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 #define SIMD_CHECK_PERFORMANCE() TEST_PERFORMANCE_TEST_(SIMD_FUNCTION)

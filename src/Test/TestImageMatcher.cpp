@@ -24,6 +24,7 @@
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
+#include "Test/TestRandom.h"
 
 //-----------------------------------------------------------------------------
 

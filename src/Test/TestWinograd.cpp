@@ -26,6 +26,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestData.h"
 #include "Test/TestString.h"
+#include "Test/TestRandom.h"
 
 namespace Test
 {

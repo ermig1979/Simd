@@ -26,13 +26,14 @@
 #include "Test/TestData.h"
 #include "Test/TestString.h"
 #include "Test/TestFile.h"
+#include "Test/TestRandom.h"
 
 #include "Simd/SimdGaussianBlur.h"
 #include "Simd/SimdRecursiveBilateralFilter.h"
 
 namespace Test
 {
-#define TEST_REAL_IMAGE
+//#define TEST_REAL_IMAGE
     static bool GetTestImage(View& image, size_t width, size_t height, size_t channels, const String& desc1, const String& desc2)
     {
         bool result = true;
@@ -52,7 +53,8 @@ namespace Test
             image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
 #ifdef TEST_REAL_IMAGE
             ::srand(0);
-            FillPicture(image);
+            CreateTestImage(image, 10, 10);
+            //FillPicture(image);
 #else
             FillRandom(image);
 #endif
@@ -907,9 +909,12 @@ namespace Test
         result = result && Compare(dst1, dst2, 0, true, 64);
 
 #ifdef TEST_REAL_IMAGE
-        SaveRbf(src, "src", width, height, channels, spatial, range);
-        SaveRbf(dst1, "dst1", width, height, channels, spatial, range);
-        SaveRbf(dst2, "dst2", width, height, channels, spatial, range);
+        if (channels != 2)
+        {
+            SaveRbf(src, "src", width, height, channels, spatial, range);
+            SaveRbf(dst1, "dst1", width, height, channels, spatial, range);
+            SaveRbf(dst2, "dst2", width, height, channels, spatial, range);
+        }
 #endif
 
         return result;
@@ -920,7 +925,7 @@ namespace Test
         bool result = true;
 
         result = result && RecursiveBilateralFilterAutoTest(W, H, channels, spatial, range, f1, f2);
-        result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, f1, f2);
+        //result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, f1, f2);
 
         return result;
     }
@@ -929,12 +934,12 @@ namespace Test
     {
         bool result = true;
 
-        result = result && RecursiveBilateralFilterAutoTest(1024 + 0, 768, 3, 0.12f, 0.09f, f1, f2);
+        //result = result && RecursiveBilateralFilterAutoTest(1024 + 0, 768, 3, 0.12f, 0.09f, f1, f2);
 
-        //for (int channels = 1; channels <= 4; channels++)
-        //{
-        //    result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, f1, f2);
-        //}
+        for (int channels = 1; channels <= 4; channels++)
+        {
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, f1, f2);
+        }
 
         return result;
     }
@@ -944,6 +949,11 @@ namespace Test
         bool result = true;
 
         result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Base::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Sse41::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+#endif 
 
         return result;
     }

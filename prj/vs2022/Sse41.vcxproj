@@ -64,6 +64,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41NeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Operation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41RecursiveBilateralFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Reduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray3x3.cpp" />

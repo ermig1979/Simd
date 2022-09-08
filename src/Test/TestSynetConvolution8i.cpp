@@ -26,6 +26,7 @@
 #include "Test/TestData.h"
 #include "Test/TestTensor.h"
 #include "Test/TestSynetConvolutionParam.h"
+#include "Test/TestRandom.h"
 
 #include "Simd/SimdSynetConvolution8i.h"
 #include "Simd/SimdSynet.h"
