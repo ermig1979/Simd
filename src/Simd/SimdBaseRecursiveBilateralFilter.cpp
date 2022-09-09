@@ -58,40 +58,29 @@ namespace Simd
     {
         namespace Rbf
         {
-            template<size_t channels> int DiffFactor(const unsigned char* color1, const unsigned char* color2)
+            template<size_t channels> int DiffFactor(const uint8_t* color1, const uint8_t* color2)
             {
-                int final_diff;
-                int component_diff[4];
-
+                int final_diff, component_diff[4];
                 for (int i = 0; i < channels; i++)
-                {
                     component_diff[i] = abs(color1[i] - color2[i]);
-                }
-
                 switch (channels)
                 {
                 case 1:
                     final_diff = component_diff[0];
                     break;
-
                 case 2:
                     final_diff = ((component_diff[0] + component_diff[1]) >> 1);
                     break;
-
                 case 3:
                     final_diff = ((component_diff[0] + component_diff[2]) >> 2) + (component_diff[1] >> 1);
                     break;
-
                 case 4:
                     final_diff = ((component_diff[0] + component_diff[1] + component_diff[2] + component_diff[3]) >> 2);
                     break;
-
                 default:
                     final_diff = 0;
                 }
-
                 assert(final_diff >= 0 && final_diff <= 255);
-
                 return final_diff;
             }
 
@@ -120,7 +109,7 @@ namespace Simd
 
             template<size_t channels>
             void HorizontalFilter(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride, size_t width, size_t height, 
-                float* range_table_f, float inv_alpha_f, float* left_Color_Buffer, float* left_Factor_Buffer, float* right_Color_Buffer, float* right_Factor_Buffer)
+                float* ranges, float alpha, float* left_Color_Buffer, float* left_Factor_Buffer, float* right_Color_Buffer, float* right_Factor_Buffer)
             {
                 size_t size = width * channels, cLast = size - 1, fLast = width - 1;
                 for (size_t y = 0; y < height; y++)
@@ -141,14 +130,12 @@ namespace Simd
                     const float* right_prev_factor = right_Factor;
                     const float* right_prev_color = right_Color;
 
+                    *left_Factor++ = 1.f;
+                    *right_Factor-- = 1.f;
+                    for (int c = 0; c < channels; c++)
                     {
-                        *left_Factor++ = 1.f;
-                        *right_Factor-- = 1.f;
-                        for (int c = 0; c < channels; c++)
-                        {
-                            *left_Color++ = *src_left_color++;
-                            *right_Color-- = *src_right_color--;
-                        }
+                        *left_Color++ = *src_left_color++;
+                        *right_Color-- = *src_right_color--;
                     }
                     for (size_t x = 1; x < width; x++)
                     {
@@ -158,15 +145,15 @@ namespace Simd
                         int right_diff = DiffFactor<channels> (src_right_color, src_right_prev);
                         src_right_prev = src_right_color;
 
-                        float left_alpha_f = range_table_f[left_diff];
-                        float right_alpha_f = range_table_f[right_diff];
-                        *left_Factor++ = inv_alpha_f + left_alpha_f * (*left_prev_factor++);
-                        *right_Factor-- = inv_alpha_f + right_alpha_f * (*right_prev_factor--);
+                        float left_alpha_f = ranges[left_diff];
+                        float right_alpha_f = ranges[right_diff];
+                        *left_Factor++ = alpha + left_alpha_f * (*left_prev_factor++);
+                        *right_Factor-- = alpha + right_alpha_f * (*right_prev_factor--);
 
                         for (int c = 0; c < channels; c++)
                         {
-                            *left_Color++ = (inv_alpha_f * (*src_left_color++) + left_alpha_f * (*left_prev_color++));
-                            *right_Color-- = (inv_alpha_f * (*src_right_color--) + right_alpha_f * (*right_prev_color--));
+                            *left_Color++ = (alpha * (*src_left_color++) + left_alpha_f * (*left_prev_color++));
+                            *right_Color-- = (alpha * (*src_right_color--) + right_alpha_f * (*right_prev_color--));
                         }
                     }
                 }
@@ -174,52 +161,54 @@ namespace Simd
             }
 
             template<size_t channels>
-            void VerticalFilter(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride, int Width, int Height, 
+            void VerticalFilter(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride, int width, int height, 
                 float* range_table_f, float inv_alpha_f, float* down_Color_Buffer, float* down_Factor_Buffer, float* up_Color_Buffer, float* up_Factor_Buffer)
             {
-                int Stride = Width * channels;
-                const unsigned char* src_color_first_hor = dst;
-                const unsigned char* src_down_color = src;
+                size_t size = width * channels, srcTail = srcStride - size, dstTail = dstStride - size;
+
+                const uint8_t* src_color_first_hor = dst;
+                const uint8_t* src_down_color = src;
                 float* down_color = down_Color_Buffer;
                 float* down_factor = down_Factor_Buffer;
 
-                const unsigned char* src_down_prev = src_down_color;
+                const uint8_t* src_down_prev = src_down_color;
                 const float* down_prev_color = down_color;
                 const float* down_prev_factor = down_factor;
 
-
-                int last_index = Stride * Height - 1;
-                const unsigned char* src_up_color = src + last_index;
-                const unsigned char* src_color_last_hor = dst + last_index;
+                int last_index = size * height - 1;
+                const uint8_t* src_up_color = src + srcStride * (height - 1) + size - 1;
+                const uint8_t* src_color_last_hor = dst + dstStride * (height - 1) + size - 1;
                 float* up_color = up_Color_Buffer + last_index;
-                float* up_factor = up_Factor_Buffer + (Width * Height - 1);
+                float* up_factor = up_Factor_Buffer + (width * height - 1);
 
                 const float* up_prev_color = up_color;
                 const float* up_prev_factor = up_factor;
 
+                for (int x = 0; x < width; x++)
                 {
-                    for (int x = 0; x < Width; x++)
+                    *down_factor++ = 1.f;
+                    *up_factor-- = 1.f;
+                    for (int c = 0; c < channels; c++)
                     {
-                        *down_factor++ = 1.f;
-                        *up_factor-- = 1.f;
-                        for (int c = 0; c < channels; c++)
-                        {
-                            *down_color++ = *src_color_first_hor++;
-                            *up_color-- = *src_color_last_hor--;
-                        }
-                        src_down_color += channels;
-                        src_up_color -= channels;
+                        *down_color++ = *src_color_first_hor++;
+                        *up_color-- = *src_color_last_hor--;
                     }
+                    src_down_color += channels;
+                    src_up_color -= channels;
                 }
-                for (int y = 1; y < Height; y++)
+                src_color_first_hor += dstTail;
+                src_color_last_hor -= dstTail;
+                src_down_color += srcTail;
+                src_up_color -= srcTail;
+                for (int y = 1; y < height; y++)
                 {
-                    for (int x = 0; x < Width; x++)
+                    for (int x = 0; x < width; x++)
                     {
-                        int down_diff = DiffFactor<channels>(src_down_color, src_down_prev);
+                        int down_diff = DiffFactor<channels>(src_down_color, src_down_color - srcStride);
                         src_down_prev += channels;
                         src_down_color += channels;
                         src_up_color -= channels;
-                        int up_diff = DiffFactor<channels>(src_up_color, src_up_color + Stride);
+                        int up_diff = DiffFactor<channels>(src_up_color, src_up_color + srcStride);
                         float down_alpha_f = range_table_f[down_diff];
                         float up_alpha_f = range_table_f[up_diff];
 
@@ -232,9 +221,13 @@ namespace Simd
                             *up_color-- = inv_alpha_f * (*src_color_last_hor--) + up_alpha_f * (*up_prev_color--);
                         }
                     }
+                    src_color_first_hor += dstTail;
+                    src_color_last_hor -= dstTail;
+                    src_down_color += srcTail;
+                    src_up_color -= srcTail;
                 }
 
-                SetOut<channels>(down_Color_Buffer, down_Factor_Buffer, up_Color_Buffer, up_Factor_Buffer, Width, Height, dst, dstStride);
+                SetOut<channels>(down_Color_Buffer, down_Factor_Buffer, up_Color_Buffer, up_Factor_Buffer, width, height, dst, dstStride);
             }
 
             template<size_t channels>
@@ -321,7 +314,6 @@ namespace Simd
 
         void RecursiveBilateralFilterDefault::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            assert(srcStride == dstStride);
             switch (_param.channels)
             {
             case 1: Rbf::Filter<1>(src, srcStride, dst, dstStride, (int)_param.width, (int)_param.height, _param.spatial, _param.range); break;
@@ -331,7 +323,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            
         }
 
         //-----------------------------------------------------------------------------------------

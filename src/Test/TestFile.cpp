@@ -36,7 +36,17 @@
 
 namespace Test
 {
-     bool DirectoryExists(const String & path)
+    bool FileExists(const String& path)
+    {
+#if defined(WIN32)
+        DWORD fileAttribute = ::GetFileAttributes(path.c_str());
+        return (fileAttribute != INVALID_FILE_ATTRIBUTES);
+#else
+        return (::access(path.c_str(), F_OK) != -1);
+#endif
+    }
+
+    bool DirectoryExists(const String & path)
     {
 #if defined(WIN32)
         DWORD fileAttribute = GetFileAttributes(path.c_str());

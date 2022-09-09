@@ -33,7 +33,7 @@
 
 namespace Test
 {
-//#define TEST_REAL_IMAGE
+#define TEST_REAL_IMAGE
     static bool GetTestImage(View& image, size_t width, size_t height, size_t channels, const String& desc1, const String& desc2)
     {
         bool result = true;
@@ -62,6 +62,11 @@ namespace Test
         else
         {
             String path = ROOT_PATH + "/data/image/" + REAL_IMAGE;
+            if (!FileExists(path))
+            {
+                TEST_LOG_SS(Error, "File '" << path << "' is not exist!");
+                return false;
+            }
             if (!image.Load(path, format))
             {
                 TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
@@ -879,7 +884,7 @@ namespace Test
     SIMD_INLINE bool SaveRbf(const View & view, const String& desc, size_t width, size_t height, size_t channels, float spatial, float range)
     {
         std::stringstream ss;
-        ss << MakePath("_out", desc) << "_" << width << "x" << height << "x" << channels;
+        ss << MakePath("_out", desc) << "_" << view.width << "x" << view.height << "x" << View::ChannelCount(view.format);
         ss << "_" << ToString(spatial, 2, 1) << "_" << ToString(range, 2, 1) << ".png";
         return CreatePathIfNotExist(ss.str(), true) && view.Save(ss.str(), SimdImageFilePng);
     }
@@ -920,12 +925,12 @@ namespace Test
         return result;
     }
 
-    bool RecursiveBilateralFilterAutoTest(int channels, float spatial, float range, const FuncRBF& f1, const FuncRBF& f2)
+    bool RecursiveBilateralFilterAutoTest(size_t channels, float spatial, float range, const FuncRBF& f1, const FuncRBF& f2)
     {
         bool result = true;
 
         result = result && RecursiveBilateralFilterAutoTest(W, H, channels, spatial, range, f1, f2);
-        //result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, f1, f2);
+        result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, f1, f2);
 
         return result;
     }
@@ -935,9 +940,10 @@ namespace Test
         bool result = true;
 
         //result = result && RecursiveBilateralFilterAutoTest(1024 + 0, 768, 3, 0.12f, 0.09f, f1, f2);
-
         for (int channels = 1; channels <= 4; channels++)
         {
+            if (!REAL_IMAGE.empty() && channels == 2)
+                continue;
             result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, f1, f2);
         }
 

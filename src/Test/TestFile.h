@@ -58,6 +58,8 @@ namespace Test
         return a + (a[a.size() - 1] == s[0] ? "" : s) + b;
     }
 
+    bool FileExists(const String& path);
+
     bool DirectoryExists(const String & path);
 
     String DirectoryByPath(const String & path);
