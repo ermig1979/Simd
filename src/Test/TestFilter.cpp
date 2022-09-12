@@ -33,7 +33,7 @@
 
 namespace Test
 {
-#define TEST_REAL_IMAGE
+//#define TEST_REAL_IMAGE
     static bool GetTestImage(View& image, size_t width, size_t height, size_t channels, const String& desc1, const String& desc2)
     {
         bool result = true;
@@ -942,7 +942,7 @@ namespace Test
         //result = result && RecursiveBilateralFilterAutoTest(1024 + 0, 768, 3, 0.12f, 0.09f, f1, f2);
         for (int channels = 1; channels <= 4; channels++)
         {
-            if (!REAL_IMAGE.empty() && channels == 2)
+            if (/*!REAL_IMAGE.empty() && */channels == 2)
                 continue;
             result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, f1, f2);
         }
