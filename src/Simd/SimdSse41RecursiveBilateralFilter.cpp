@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdRecursiveBilateralFilter.h"
+#include "Simd/SimdPerformance.h"
 
 namespace Simd
 {
@@ -157,6 +158,94 @@ namespace Simd
             }
         }
 
+        template<> SIMD_INLINE void SetOut<1>(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst)
+        {
+            size_t widthF = AlignLo(width, F), x = 0;
+            __m128 _1 = _mm_set1_ps(1.0f);
+            for (; x < widthF; x += F)
+            {
+                __m128 _bf = _mm_loadu_ps(bf + x);
+                __m128 _ef = _mm_loadu_ps(ef + x);
+                __m128 factor = _mm_div_ps(_1, _mm_add_ps(_bf, _ef));
+                __m128 _bc = _mm_loadu_ps(bc + x);
+                __m128 _ec = _mm_loadu_ps(ec + x);
+                __m128 f32 = _mm_mul_ps(factor, _mm_add_ps(_bc, _ec));
+                __m128i i32 = _mm_cvtps_epi32(_mm_floor_ps(f32));
+                __m128i u8 = _mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO);
+                *(int32_t*)(dst + x) = _mm_cvtsi128_si32(u8);
+            }
+            for (; x < width; x++)
+            {
+                float factor = 1.0f / (bf[x] + ef[x]);
+                dst[x] = uint8_t(factor * (bc[x] + ec[x]));
+            }
+        }
+
+        template<> SIMD_INLINE void SetOut<2>(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst)
+        {
+            size_t widthHF = AlignLo(width, 2), x = 0, o = 0;
+            __m128 _1 = _mm_set1_ps(1.0f);
+            for (; x < widthHF; x += HF, o += F)
+            {
+                __m128 _bf = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(bf + x))), 0x50));
+                __m128 _ef = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(ef + x))), 0x50));
+                __m128 factor = _mm_div_ps(_1, _mm_add_ps(_bf, _ef));
+                __m128 _bc = _mm_loadu_ps(bc + o);
+                __m128 _ec = _mm_loadu_ps(ec + o);
+                __m128 f32 = _mm_mul_ps(factor, _mm_add_ps(_bc, _ec));
+                __m128i i32 = _mm_cvtps_epi32(_mm_floor_ps(f32));
+                __m128i u8 = _mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO);
+                *(int32_t*)(dst + o) = _mm_cvtsi128_si32(u8);
+            }
+            for (; x < width; x++, o += 2)
+            {
+                float factor = 1.0f / (bf[x] + ef[x]);
+                dst[o + 0] = uint8_t(factor * (bc[o + 0] + ec[o + 0]));
+                dst[o + 1] = uint8_t(factor * (bc[o + 1] + ec[o + 1]));
+            }
+        }
+
+        template<> SIMD_INLINE void SetOut<3>(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst)
+        {
+            size_t width1 = width - 1, x = 0, o = 0;
+            __m128 _1 = _mm_set1_ps(1.0f);
+            for (; x < width1; x += 1, o += 3)
+            {
+                __m128 _bf = _mm_set1_ps(bf[x]);
+                __m128 _ef = _mm_set1_ps(ef[x]);
+                __m128 factor = _mm_div_ps(_1, _mm_add_ps(_bf, _ef));
+                __m128 _bc = _mm_loadu_ps(bc + o);
+                __m128 _ec = _mm_loadu_ps(ec + o);
+                __m128 f32 = _mm_mul_ps(factor, _mm_add_ps(_bc, _ec));
+                __m128i i32 = _mm_cvtps_epi32(_mm_floor_ps(f32));
+                __m128i u8 = _mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO);
+                *(int32_t*)(dst + o) = _mm_cvtsi128_si32(u8);
+            }
+            float factor = 1.0f / (bf[x] + ef[x]);
+            dst[o + 0] = uint8_t(factor * (bc[o + 0] + ec[o + 0]));
+            dst[o + 1] = uint8_t(factor * (bc[o + 1] + ec[o + 1]));
+            dst[o + 2] = uint8_t(factor * (bc[o + 2] + ec[o + 2]));
+        }
+
+        template<> SIMD_INLINE void SetOut<4>(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst)
+        {
+            __m128 _1 = _mm_set1_ps(1.0f);
+            for (size_t x = 0, o = 0; x < width; x += 1, o += 4)
+            {
+                __m128 _bf = _mm_set1_ps(bf[x]);
+                __m128 _ef = _mm_set1_ps(ef[x]);
+                __m128 factor = _mm_div_ps(_1, _mm_add_ps(_bf, _ef));
+                __m128 _bc = _mm_loadu_ps(bc + o);
+                __m128 _ec = _mm_loadu_ps(ec + o);
+                __m128 f32 = _mm_mul_ps(factor, _mm_add_ps(_bc, _ec));
+                __m128i i32 = _mm_cvtps_epi32(_mm_floor_ps(f32));
+                __m128i u8 = _mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO);
+                *(int32_t*)(dst + o) = _mm_cvtsi128_si32(u8);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         template<size_t channels> void HorFilter(const RbfParam& p, RbfAlg& a, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             size_t size = p.width * channels, cLast = size - 1, fLast = p.width - 1;
@@ -191,6 +280,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------------------------
+
         template<size_t channels> void VerSetEdge(const uint8_t* src, size_t width, float* factor, float* colors)
         {
             size_t widthF = AlignLo(width, F);
@@ -211,6 +302,8 @@ namespace Simd
             for (; i < size; i++)
                 colors[i] = src[i];
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template<size_t channels> void VerSetMain(const uint8_t* hor, size_t width,
             float alpha, const float* ranges, const float* pf, const float* pc, float* cf, float* cc)
