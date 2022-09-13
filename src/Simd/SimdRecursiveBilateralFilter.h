@@ -56,6 +56,13 @@ namespace Simd
 
     namespace Base
     {
+        struct RbfAlg
+        {
+            float alpha;
+            Array32f ranges;
+            Array32f fb0, cb0, fb1, cb1;
+        };
+
         class RecursiveBilateralFilterDefault : public Simd::RecursiveBilateralFilter
         {
         public:
@@ -64,6 +71,12 @@ namespace Simd
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
         protected:
+            typedef void (*FilterPtr)(const RbfParam& p, RbfAlg& a, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            RbfAlg _alg;
+            FilterPtr _hFilter, _vFilter;
+
+            void InitAlg();
+            void InitBuf();
         };
 
         void * RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
