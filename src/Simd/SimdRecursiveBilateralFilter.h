@@ -56,11 +56,38 @@ namespace Simd
 
     namespace Base
     {
+        template<size_t channels> SIMD_INLINE int Diff(const uint8_t* src1, const uint8_t* src2)
+        {
+            int diff, diffs[4];
+            for (int c = 0; c < channels; c++)
+                diffs[c] = ::abs(src1[c] - src2[c]);
+            switch (channels)
+            {
+            case 1:
+                diff = diffs[0];
+                break;
+            case 2:
+                diff = (diffs[0] + diffs[1]) >> 1;
+                break;
+            case 3:
+            case 4:
+                diff = (diffs[0] + diffs[1] * 2 + diffs[2]) >> 2;
+                break;
+                //diff = ((diffs[0] + diffs[2]) >> 2) + (diffs[1] >> 1);
+                //diff = ((diffs[0] + diffs[1] + diffs[2] + diffs[3]) >> 2);
+                //break;
+            default:
+                diff = 0;
+            }
+            assert(diff >= 0 && diff <= 255);
+            return diff;
+        }
+
         struct RbfAlg
         {
             float alpha;
             Array32f ranges;
-            Array32f fb0, cb0, fb1, cb1;
+            Array32f fb0, cb0, fb1, cb1, rb0;
         };
 
         class RecursiveBilateralFilterDefault : public Simd::RecursiveBilateralFilter

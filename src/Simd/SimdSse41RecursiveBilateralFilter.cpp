@@ -31,32 +31,118 @@ namespace Simd
     {
         typedef Base::RbfAlg RbfAlg;
 
-        template<size_t channels> int Diff(const uint8_t* src1, const uint8_t* src2)
+        template<size_t channels> void RowRanges(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst);
+
+        SIMD_INLINE void Ranges1(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
         {
-            int diff, diffs[4];
-            for (int c = 0; c < channels; c++)
-                diffs[c] = abs(src1[c] - src2[c]);
-            switch (channels)
-            {
-            case 1:
-                diff = diffs[0];
-                break;
-            case 2:
-                diff = ((diffs[0] + diffs[1]) >> 1);
-                break;
-            case 3:
-                diff = ((diffs[0] + diffs[2]) >> 2) + (diffs[1] >> 1);
-                break;
-            case 4:
-                //diff = ((diffs[0] + diffs[2]) >> 2) + (diffs[1] >> 1);
-                diff = ((diffs[0] + diffs[1] + diffs[2] + diffs[3]) >> 2);
-                break;
-            default:
-                diff = 0;
-            }
-            assert(diff >= 0 && diff <= 255);
-            return diff;
+            __m128i s0 = _mm_loadu_si128((__m128i*)src0);
+            __m128i s1 = _mm_loadu_si128((__m128i*)src1);
+            __m128i d = _mm_sub_epi8(_mm_max_epu8(s0, s1), _mm_min_epu8(s0, s1));
+            SIMD_ALIGNED(A) uint8_t diff[A];
+            _mm_storeu_si128((__m128i*)diff, d);
+            for (size_t i = 0; i < A; ++i)
+                dst[i] = ranges[diff[i]];
         }
+
+        template<> void RowRanges<1>(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
+        {
+            size_t widthA = AlignLo(width, A), x = 0;
+            for (; x < widthA; x += A)
+                Ranges1(src0 + x, src1 + x, ranges, dst + x);
+            if(widthA < width)
+            {
+                x = width - A;
+                Ranges1(src0 + x, src1 + x, ranges, dst + x);
+            }
+        }
+
+        SIMD_INLINE void Ranges2(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
+        {
+            __m128i s0 = _mm_loadu_si128((__m128i*)src0);
+            __m128i s1 = _mm_loadu_si128((__m128i*)src1);
+            __m128i d8 = _mm_sub_epi8(_mm_max_epu8(s0, s1), _mm_min_epu8(s0, s1));
+            __m128i d16_0 = _mm_and_si128(d8, K16_00FF);
+            __m128i d16_1 = _mm_and_si128(_mm_srli_si128(d8, 1), K16_00FF);
+            __m128i a16 = _mm_srli_epi16(_mm_add_epi16(d16_0, d16_1), 1);
+            SIMD_ALIGNED(A) uint16_t diff[HA];
+            _mm_storeu_si128((__m128i*)diff, a16);
+            for (size_t i = 0; i < HA; ++i)
+                dst[i] = ranges[diff[i]];
+        }
+
+        template<> void RowRanges<2>(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
+        {
+            size_t widthHA = AlignLo(width, HA), x = 0, o = 0;
+            for (; x < widthHA; x += HA, o += A)
+                Ranges2(src0 + o, src1 + o, ranges, dst + x);
+            if (widthHA < width)
+            {
+                x = width - HA, o = x * 2;
+                Ranges2(src0 + o, src1 + o, ranges, dst + x);
+            }
+        }
+
+        SIMD_INLINE void Ranges3(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
+        {
+            static const __m128i K0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x3, -1, -1, -1, 0x6, -1, -1, -1, 0x9, -1, -1, -1);
+            static const __m128i K1 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x4, -1, -1, -1, 0x7, -1, -1, -1, 0xa, -1, -1, -1);
+            static const __m128i K2 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x5, -1, -1, -1, 0x8, -1, -1, -1, 0xb, -1, -1, -1);
+            __m128i s0 = _mm_loadu_si128((__m128i*)src0);
+            __m128i s1 = _mm_loadu_si128((__m128i*)src1);
+            __m128i d8 = _mm_sub_epi8(_mm_max_epu8(s0, s1), _mm_min_epu8(s0, s1));
+            __m128i d32_0 = _mm_shuffle_epi8(d8, K0);
+            __m128i d32_1 = _mm_shuffle_epi8(d8, K1);
+            __m128i d32_2 = _mm_shuffle_epi8(d8, K2);
+            __m128i a32 = _mm_srli_epi16(_mm_add_epi32(_mm_add_epi32(d32_0, d32_1), _mm_add_epi32(d32_1, d32_2)), 2);
+            SIMD_ALIGNED(A) uint32_t diff[F];
+            _mm_storeu_si128((__m128i*)diff, a32);
+            for (size_t i = 0; i < F; ++i)
+                dst[i] = ranges[diff[i]];
+        }
+
+        template<> void RowRanges<3>(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
+        {
+            size_t widthF = AlignLo(width, F), x = 0, o = 0;
+            for (; x < widthF; x += F, o += F * 3)
+                Ranges3(src0 + o, src1 + o, ranges, dst + x);
+            if (widthF < width)
+            {
+                x = width - F, o = x * 3;
+                Ranges3(src0 + o, src1 + o, ranges, dst + x);
+            }
+        }
+
+        SIMD_INLINE void Ranges4(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
+        {
+            static const __m128i K0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xc, -1, -1, -1);
+            static const __m128i K1 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xd, -1, -1, -1);
+            static const __m128i K2 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xa, -1, -1, -1, 0xe, -1, -1, -1);
+            __m128i s0 = _mm_loadu_si128((__m128i*)src0);
+            __m128i s1 = _mm_loadu_si128((__m128i*)src1);
+            __m128i d8 = _mm_sub_epi8(_mm_max_epu8(s0, s1), _mm_min_epu8(s0, s1));
+            __m128i d32_0 = _mm_shuffle_epi8(d8, K0);
+            __m128i d32_1 = _mm_shuffle_epi8(d8, K1);
+            __m128i d32_2 = _mm_shuffle_epi8(d8, K2);
+            __m128i a32 = _mm_srli_epi16(_mm_add_epi32(_mm_add_epi32(d32_0, d32_1), _mm_add_epi32(d32_1, d32_2)), 2);
+            SIMD_ALIGNED(A) uint32_t diff[F];
+            _mm_storeu_si128((__m128i*)diff, a32);
+            for (size_t i = 0; i < F; ++i)
+                dst[i] = ranges[diff[i]];
+        }
+
+        template<> void RowRanges<4>(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
+        {
+            size_t widthF = AlignLo(width, F), x = 0, o = 0;
+            for (; x < widthF; x += F, o += A)
+                Ranges4(src0 + o, src1 + o, ranges, dst + x);
+            if (widthF < width)
+            {
+                x = width - F, o = x * 4;
+                Ranges4(src0 + o, src1 + o, ranges, dst + x);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
 
         template<size_t channels> SIMD_INLINE void SetOut(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst)
         {
@@ -86,12 +172,11 @@ namespace Simd
                     *lc++ = *sl++;
                     *rc-- = *sr--;
                 }
+                RowRanges<channels>(src, src + channels, p.width - 1, a.ranges.data, a.rb0.data + 1);
                 for (size_t x = 1; x < p.width; x++)
                 {
-                    int ld = Diff<channels>(sl, sl - channels);
-                    int rd = Diff<channels>(sr + 1 - channels, sr + 1);
-                    float la = a.ranges[ld];
-                    float ra = a.ranges[rd];
+                    float la = a.rb0[x];
+                    float ra = a.rb0[p.width - x];
                     *lf++ = a.alpha + la * lf[-1];
                     *rf-- = a.alpha + ra * rf[+1];
                     for (int c = 0; c < channels; c++)
@@ -127,6 +212,17 @@ namespace Simd
                 colors[i] = src[i];
         }
 
+        template<size_t channels> void VerSetMain(const uint8_t* hor, size_t width,
+            float alpha, const float* ranges, const float* pf, const float* pc, float* cf, float* cc)
+        {
+            for (size_t x = 0, o = 0; x < width; x++)
+            {
+                cf[x] = alpha + ranges[x] * pf[x];
+                for (size_t e = o + channels; o < e; o++)
+                    cc[o] = alpha * hor[o] + ranges[x] * pc[o];
+            }
+        }
+
         template<size_t channels> void VerFilter(const RbfParam& p, RbfAlg& a, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             size_t size = p.width * channels, srcTail = srcStride - size, dstTail = dstStride - size;
@@ -136,51 +232,30 @@ namespace Simd
             const uint8_t* duc = dst + dstStride * (p.height - 1);
             float* uf = ufb + p.width * (p.height - 1);
             float* uc = ucb + size * (p.height - 1);
-
             VerSetEdge<channels>(duc, p.width, uf, uc);
-            duc -= dstStride;
-            suc -= srcStride;
-            uf -= p.width;
-            uc -= size;
-            for (int y = 1; y < p.height; y++)
+            for (size_t y = 1; y < p.height; y++)
             {
-                for (int x = 0, o = 0; x < p.width; x++, o += channels)
-                {
-                    int ud = Diff<channels>(suc + o, suc + o + srcStride);
-                    float ua = a.ranges[ud];
-                    uf[x] = a.alpha + ua * uf[x + p.width];
-                    for (int c = 0; c < channels; c++)
-                        uc[o + c] = a.alpha * duc[o + c] + ua * uc[o + c + size];
-                }
                 duc -= dstStride;
                 suc -= srcStride;
                 uf -= p.width;
                 uc -= size;
+                RowRanges<channels>(suc, suc + srcStride, p.width, a.ranges.data, a.rb0.data);
+                VerSetMain<channels>(duc, p.width, a.alpha, a.rb0.data, uf + p.width, uc + size, uf, uc);
             }
 
             VerSetEdge<channels>(dst, p.width, dfb, dcb);
             SetOut<channels>(dcb, dfb, ucb, ufb, p.width, dst);
-            for (int y = 1; y < p.height; y++)
+            for (size_t y = 1; y < p.height; y++)
             {
-                const uint8_t* sdc = src + y * srcStride;
-                const uint8_t* ddc = dst + y * dstStride;
+                src += srcStride;
+                dst += dstStride;
                 float* dc = dcb + (y & 1) * size;
                 float* df = dfb + (y & 1) * p.width;
                 const float* dpc = dcb + ((y - 1) & 1) * size;
                 const float* dpf = dfb + ((y - 1) & 1) * p.width;
-
-                for (int x = 0; x < p.width; x++)
-                {
-                    int dd = Diff<channels>(sdc, sdc - srcStride);
-                    sdc += channels;
-                    float da = a.ranges[dd];
-                    *df++ = a.alpha + da * (*dpf++);
-                    for (int c = 0; c < channels; c++)
-                        *dc++ = a.alpha * (*ddc++) + da * (*dpc++);
-                }
-                ddc += dstTail;
-                sdc += srcTail;
-                SetOut<channels>(dcb + (y & 1) * size, dfb + (y & 1) * p.width, ucb + y * size, ufb + y * p.width, p.width, dst + y * dstStride);
+                RowRanges<channels>(src, src - srcStride, p.width, a.ranges.data, a.rb0.data);
+                VerSetMain<channels>(dst, p.width, a.alpha, a.rb0.data, dpf, dpc, df, dc);
+                SetOut<channels>(dc, df, ucb + y * size, ufb + y * p.width, p.width, dst);
             }
         }
 
@@ -189,14 +264,17 @@ namespace Simd
         RecursiveBilateralFilterDefault::RecursiveBilateralFilterDefault(const RbfParam& param)
             :Base::RecursiveBilateralFilterDefault(param)
         {
-            switch (_param.channels)
+            if (_param.width * _param.channels >= A)
             {
-            case 1: _hFilter = HorFilter<1>; _vFilter = VerFilter<1>; break;
-            case 2: _hFilter = HorFilter<2>; _vFilter = VerFilter<2>; break;
-            case 3: _hFilter = HorFilter<3>; _vFilter = VerFilter<3>; break;
-            case 4: _hFilter = HorFilter<4>; _vFilter = VerFilter<4>; break;
-            default:
-                assert(0);
+                switch (_param.channels)
+                {
+                case 1: _hFilter = HorFilter<1>; _vFilter = VerFilter<1>; break;
+                case 2: _hFilter = HorFilter<2>; _vFilter = VerFilter<2>; break;
+                case 3: _hFilter = HorFilter<3>; _vFilter = VerFilter<3>; break;
+                case 4: _hFilter = HorFilter<4>; _vFilter = VerFilter<4>; break;
+                default:
+                    assert(0);
+                }
             }
         }
 

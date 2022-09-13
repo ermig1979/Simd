@@ -56,33 +56,6 @@ namespace Simd
 
     namespace Base
     {
-        template<size_t channels> int Diff(const uint8_t* src1, const uint8_t* src2)
-        {
-            int diff, diffs[4];
-            for (int c = 0; c < channels; c++)
-                diffs[c] = abs(src1[c] - src2[c]);
-            switch (channels)
-            {
-            case 1:
-                diff = diffs[0];
-                break;
-            case 2:
-                diff = ((diffs[0] + diffs[1]) >> 1);
-                break;
-            case 3:
-                diff = ((diffs[0] + diffs[2]) >> 2) + (diffs[1] >> 1);
-                break;
-            case 4:
-                //diff = ((diffs[0] + diffs[2]) >> 2) + (diffs[1] >> 1);
-                diff = ((diffs[0] + diffs[1] + diffs[2] + diffs[3]) >> 2);
-                break;
-            default:
-                diff = 0;
-            }
-            assert(diff >= 0 && diff <= 255);
-            return diff;
-        }
-
         template<size_t channels> SIMD_INLINE void SetOut(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst)
         {
             for (size_t x = 0; x < width; x++)
@@ -139,6 +112,18 @@ namespace Simd
                 colors[i] = src[i];
         }
 
+        template<size_t channels> void VerSetMain(const uint8_t* hor, const uint8_t* src0, const uint8_t* src1, size_t width,
+            float alpha, const float *ranges, const float* pf, const float* pc, float* cf, float* cc)
+        {
+            for (size_t x = 0, o = 0; x < width; x++)
+            {
+                float ua = ranges[Diff<channels>(src0 + o, src1 + o)];
+                cf[x] = alpha + ua * pf[x];
+                for (size_t e = o + channels; o < e; o++)
+                    cc[o] = alpha * hor[o] + ua * pc[o];
+            }
+        }
+
         template<size_t channels> void VerFilter(const RbfParam& p, RbfAlg& a, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             size_t size = p.width * channels, srcTail = srcStride - size, dstTail = dstStride - size;
@@ -148,51 +133,28 @@ namespace Simd
             const uint8_t* duc = dst + dstStride * (p.height - 1);
             float* uf = ufb + p.width * (p.height - 1);
             float* uc = ucb + size * (p.height - 1);
-
             VerSetEdge<channels>(duc, p.width, uf, uc);
-            duc -= dstStride;
-            suc -= srcStride;
-            uf -= p.width;
-            uc -= size;
-            for (int y = 1; y < p.height; y++)
+            for (size_t y = 1; y < p.height; y++)
             {
-                for (int x = 0, o = 0; x < p.width; x++, o += channels)
-                {
-                    int ud = Diff<channels>(suc + o, suc + o + srcStride);
-                    float ua = a.ranges[ud];
-                    uf[x] = a.alpha + ua * uf[x + p.width];
-                    for (int c = 0; c < channels; c++)
-                        uc[o + c] = a.alpha * duc[o + c] + ua * uc[o + c + size];
-                }
                 duc -= dstStride;
                 suc -= srcStride;
                 uf -= p.width;
                 uc -= size;
+                VerSetMain<channels>(duc, suc, suc + srcStride, p.width, a.alpha, a.ranges.data, uf + p.width, uc + size, uf, uc);
             }
 
             VerSetEdge<channels>(dst, p.width, dfb, dcb);
             SetOut<channels>(dcb, dfb, ucb, ufb, p.width, dst);
-            for (int y = 1; y < p.height; y++)
+            for (size_t y = 1; y < p.height; y++)
             {
-                const uint8_t* sdc = src + y * srcStride;
-                const uint8_t* ddc = dst + y * dstStride;
+                src += srcStride;
+                dst += dstStride;
                 float* dc = dcb + (y & 1) * size;
                 float* df = dfb + (y & 1) * p.width;
                 const float* dpc = dcb + ((y - 1)&1) * size;
                 const float* dpf = dfb + ((y - 1) & 1) * p.width;
-
-                for (int x = 0; x < p.width; x++)
-                {
-                    int dd = Diff<channels>(sdc, sdc - srcStride);
-                    sdc += channels;
-                    float da = a.ranges[dd];
-                    *df++ = a.alpha + da * (*dpf++);
-                    for (int c = 0; c < channels; c++)
-                        *dc++ = a.alpha * (*ddc++) + da * (*dpc++);
-                }
-                ddc += dstTail;
-                sdc += srcTail;
-                SetOut<channels>(dcb + (y & 1) * size, dfb + (y & 1) * p.width, ucb + y * size, ufb + y * p.width, p.width, dst + y * dstStride);
+                VerSetMain<channels>(dst, src, src - srcStride, p.width, a.alpha, a.ranges.data, dpf, dpc, df, dc);
+                SetOut<channels>(dc, df, ucb + y * size, ufb + y * p.width, p.width, dst);
             }
         }
 
@@ -236,6 +198,7 @@ namespace Simd
             _alg.fb0.Resize(p.width * 2);
             _alg.cb1.Resize(p.width * p.channels * p.height);
             _alg.fb1.Resize(p.width * p.height);
+            _alg.rb0.Resize(p.width);
         }
 
         void RecursiveBilateralFilterDefault::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
