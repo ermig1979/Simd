@@ -33,7 +33,7 @@
 
 namespace Test
 {
-//#define TEST_REAL_IMAGE
+#define TEST_REAL_IMAGE
     static bool GetTestImage(View& image, size_t width, size_t height, size_t channels, const String& desc1, const String& desc2)
     {
         bool result = true;
@@ -850,25 +850,25 @@ namespace Test
     {
         struct FuncRBF
         {
-            typedef void* (*FuncPtr)(size_t width, size_t height, size_t channels, const float* spatial, const float* range);
+            typedef void* (*FuncPtr)(size_t width, size_t height, size_t channels, const float* spatial, const float* range, SimdRecursiveBilateralFilterFlags flags);
 
             FuncPtr func;
             String description;
 
             FuncRBF(const FuncPtr& f, const String& d) : func(f), description(d) {}
 
-            void Update(size_t c, float s, float r)
+            void Update(size_t c, float s, float r, SimdRecursiveBilateralFilterFlags f)
             {
                 std::stringstream ss;
                 ss << description;
-                ss << "[" << ToString(s, 2, 1) << "-" << ToString(r, 2, 1) << "-" << c << "]";
+                ss << "[" << (Simd::Precise(f) ? "p" : "f") << "-" << c << "]";
                 description = ss.str();
             }
 
-            void Call(const View& src, float spatial, float range, View& dst) const
+            void Call(const View& src, float spatial, float range, SimdRecursiveBilateralFilterFlags flags, View& dst) const
             {
                 void* filter = NULL;
-                filter = func(src.width, src.height, src.ChannelCount(), &spatial, &range);
+                filter = func(src.width, src.height, src.ChannelCount(), &spatial, &range, flags);
                 {
                     TEST_PERFORMANCE_TEST(description);
                     SimdRecursiveBilateralFilterRun(filter, src.data, src.stride, dst.data, dst.stride);
@@ -881,20 +881,21 @@ namespace Test
 #define FUNC_RBF(function) \
     FuncRBF(function, std::string(#function))
 
-    SIMD_INLINE bool SaveRbf(const View & view, const String& desc, size_t width, size_t height, size_t channels, float spatial, float range)
+    SIMD_INLINE bool SaveRbf(const View & view, const String& desc, size_t width, size_t height, size_t channels, float spatial, float range, SimdRecursiveBilateralFilterFlags flags)
     {
         std::stringstream ss;
         ss << MakePath("_out", desc) << "_" << view.width << "x" << view.height << "x" << View::ChannelCount(view.format);
-        ss << "_" << ToString(spatial, 2, 1) << "_" << ToString(range, 2, 1) << ".png";
+        ss << "_" << ToString(spatial, 2, 1) << "_" << ToString(range, 2, 1) << "_" << (Simd::Precise(flags) ? "p" : "f") << ".png";
         return CreatePathIfNotExist(ss.str(), true) && view.Save(ss.str(), SimdImageFilePng);
     }
 
-    bool RecursiveBilateralFilterAutoTest(size_t width, size_t height, size_t channels, float spatial, float range, FuncRBF f1, FuncRBF f2)
+    bool RecursiveBilateralFilterAutoTest(size_t width, size_t height, size_t channels, 
+        float spatial, float range, SimdRecursiveBilateralFilterFlags flags, FuncRBF f1, FuncRBF f2)
     {
         bool result = true;
 
-        f1.Update(channels, spatial, range);
-        f2.Update(channels, spatial, range);
+        f1.Update(channels, spatial, range, flags);
+        f2.Update(channels, spatial, range, flags);
 
         View src;
         if (!GetTestImage(src, width, height, channels, f1.description, f2.description))
@@ -907,30 +908,34 @@ namespace Test
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, spatial, range, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, spatial, range, flags, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, spatial, range, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, spatial, range, flags, dst2));
 
-        result = result && Compare(dst1, dst2, 0, true, 64);
+        int maxDifference = 0;
+        if (!Simd::FmaAvoid(flags))
+            maxDifference = 1;
+
+        result = result && Compare(dst1, dst2, maxDifference, true, 64);
 
 #ifdef TEST_REAL_IMAGE
         if (channels != 2)
         {
-            SaveRbf(src, "src", width, height, channels, spatial, range);
-            SaveRbf(dst1, "dst1", width, height, channels, spatial, range);
-            SaveRbf(dst2, "dst2", width, height, channels, spatial, range);
+            SaveRbf(src, "src", width, height, channels, spatial, range, flags);
+            SaveRbf(dst1, "dst1", width, height, channels, spatial, range, flags);
+            SaveRbf(dst2, "dst2", width, height, channels, spatial, range, flags);
         }
 #endif
 
         return result;
     }
 
-    bool RecursiveBilateralFilterAutoTest(size_t channels, float spatial, float range, const FuncRBF& f1, const FuncRBF& f2)
+    bool RecursiveBilateralFilterAutoTest(size_t channels, float spatial, float range, SimdRecursiveBilateralFilterFlags flags, const FuncRBF& f1, const FuncRBF& f2)
     {
         bool result = true;
 
-        result = result && RecursiveBilateralFilterAutoTest(W, H, channels, spatial, range, f1, f2);
-        result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, f1, f2);
+        result = result && RecursiveBilateralFilterAutoTest(W, H, channels, spatial, range, flags, f1, f2);
+        result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, flags, f1, f2);
 
         return result;
     }
@@ -939,12 +944,15 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && RecursiveBilateralFilterAutoTest(1024 + 0, 768, 3, 0.12f, 0.09f, f1, f2);
+        int f = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterFmaAvoid;
+        int p = SimdRecursiveBilateralFilterPrecise | SimdRecursiveBilateralFilterFmaAvoid;
+
         for (int channels = 1; channels <= 4; channels++)
         {
             if (!REAL_IMAGE.empty() && channels == 2)
                 continue;
-            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)f, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)p, f1, f2);
         }
 
         return result;

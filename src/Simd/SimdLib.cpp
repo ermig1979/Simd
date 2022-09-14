@@ -4382,12 +4382,13 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
         Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
 }
 
-SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange)
+SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, 
+    const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags)
 {
     SIMD_EMPTY();
-    typedef void* (*SimdRecursiveBilateralFilterInitPtr) (size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
+    typedef void* (*SimdRecursiveBilateralFilterInitPtr) (size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
     const static SimdRecursiveBilateralFilterInitPtr simdRecursiveBilateralFilterInit = SIMD_FUNC1(RecursiveBilateralFilterInit, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_NEON_FUNC);
-    return simdRecursiveBilateralFilterInit(width, height, channels, sigmaSpatial, sigmaRange);
+    return simdRecursiveBilateralFilterInit(width, height, channels, sigmaSpatial, sigmaRange, flags);
 }
 
 SIMD_API void SimdRecursiveBilateralFilterRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)

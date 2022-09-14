@@ -30,6 +30,16 @@
 
 namespace Simd
 {
+    SIMD_INLINE bool Precise(SimdRecursiveBilateralFilterFlags flags)
+    {
+        return flags & SimdRecursiveBilateralFilterPrecise;
+    }
+
+    SIMD_INLINE bool FmaAvoid(SimdRecursiveBilateralFilterFlags flags)
+    {
+        return flags & SimdRecursiveBilateralFilterFmaAvoid;
+    }
+
     struct RbfParam
     {
         size_t width;
@@ -37,10 +47,16 @@ namespace Simd
         size_t channels;
         float spatial;
         float range;
+        SimdRecursiveBilateralFilterFlags flags;
         size_t align;
 
-        RbfParam(size_t w, size_t h, size_t c, const float* s, const float * r, size_t a);
+        RbfParam(size_t w, size_t h, size_t c, const float* s, const float * r, SimdRecursiveBilateralFilterFlags f, size_t a);
         bool Valid() const;
+
+        float alpha;
+        float ranges[256];
+
+        void Init();
     };
 
     class RecursiveBilateralFilter : Deletable
@@ -50,8 +66,17 @@ namespace Simd
 
         virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride) = 0;
 
+        size_t BufferSize() const
+        {
+            return _buffer.RawSize();
+        }
+
     protected:
+        typedef void (*FilterPtr)(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+
         RbfParam _param;
+        Array8u _buffer;
+        FilterPtr _hFilter, _vFilter;
     };
 
     namespace Base
@@ -83,46 +108,30 @@ namespace Simd
             return diff;
         }
 
-        struct RbfAlg
-        {
-            float alpha;
-            Array32f ranges;
-            Array32f fb0, cb0, fb1, cb1, rb0;
-        };
-
-        class RecursiveBilateralFilterDefault : public Simd::RecursiveBilateralFilter
+        class RecursiveBilateralFilterPrecize : public Simd::RecursiveBilateralFilter
         {
         public:
-            RecursiveBilateralFilterDefault(const RbfParam& param);
+            RecursiveBilateralFilterPrecize(const RbfParam& param);
 
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
         protected:
-            typedef void (*FilterPtr)(const RbfParam& p, RbfAlg& a, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-            RbfAlg _alg;
-            FilterPtr _hFilter, _vFilter;
-
-            void InitAlg();
-            void InitBuf();
+            float* GetBuffer();
         };
 
-        void * RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
+        void * RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        class RecursiveBilateralFilterDefault : public Base::RecursiveBilateralFilterDefault
+        class RecursiveBilateralFilterPrecize : public Base::RecursiveBilateralFilterPrecize
         {
         public:
-            RecursiveBilateralFilterDefault(const RbfParam& param);
-
-            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-
-        protected:
+            RecursiveBilateralFilterPrecize(const RbfParam& param);
         };
 
-        void* RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
+        void* RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
     }
 #endif
 
@@ -144,4 +153,4 @@ namespace Simd
     }
 #endif
 }
-#endif//__SimdRecursiveBilateralFilter_h__
+#endif

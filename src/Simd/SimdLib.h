@@ -336,6 +336,16 @@ typedef enum
     SimdPixelFormatUyvy16,
 } SimdPixelFormatType;
 
+/*! @ingroup recursive_bilateral_filter
+    Describes Recursive Bilateral Filter flags. This type used in function ::SimdRecursiveBilateralFilterInit.
+*/
+typedef enum
+{
+    SimdRecursiveBilateralFilterFast = 0, /*!< Fast implementation of Recursive Bilateral Filter. */
+    SimdRecursiveBilateralFilterPrecise = 1, /*!< Precise implementation of Recursive Bilateral Filter. */
+    SimdRecursiveBilateralFilterFmaAvoid = 2, /*!< Not use FMA instructions (for debug purposes). */
+} SimdRecursiveBilateralFilterFlags;
+
 /*! @ingroup c_types
     Describes type of algorithm used for image reducing (downscale in 2 times) (see function Simd::ReduceGray).
 */
@@ -5100,7 +5110,7 @@ extern "C"
 
     /*! @ingroup recursive_bilateral_filter
 
-        \fn void * SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
+        \fn void * SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
 
         \short Creates Recursive bilateral filter context.
 
@@ -5109,11 +5119,13 @@ extern "C"
         \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
         \param [in] sigmaSpatial - a pointer to sigma spatial parameter.
         \param [in] sigmaRange - a pointer to sigma range parameter.
+        \param [in] flags - a flags of algorithm parameters.
         \return a pointer to filter context. On error it returns NULL.
                 This pointer is used in functions ::SimdRecursiveBilateralFilterRun.
                 It must be released with using of function ::SimdRelease.
     */
-    SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange);
+    SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, 
+        const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
 
     /*! @ingroup recursive_bilateral_filter
 
