@@ -33,7 +33,8 @@
 
 namespace Test
 {
-#define TEST_REAL_IMAGE
+    const bool NOISE_IMAGE = true;
+
     static bool GetTestImage(View& image, size_t width, size_t height, size_t channels, const String& desc1, const String& desc2)
     {
         bool result = true;
@@ -51,13 +52,16 @@ namespace Test
         {
             TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
             image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
-#ifdef TEST_REAL_IMAGE
-            ::srand(0);
-            CreateTestImage(image, 10, 10);
-            //FillPicture(image);
-#else
-            FillRandom(image);
-#endif
+            if(NOISE_IMAGE)
+            {
+                FillRandom(image);
+            }
+            else
+            {
+                ::srand(0);
+                CreateTestImage(image, 10, 10);
+                //FillPicture(image);
+            }
         }
         else
         {
@@ -777,13 +781,11 @@ namespace Test
 
         result = result && Compare(dst1, dst2, 1, true, 64);
 
-#ifdef TEST_REAL_IMAGE
-        if (src.format == View::Bgr24)
+        if (src.format == View::Bgr24 && NOISE_IMAGE == false)
         {
             src.Save("src.ppm");
             dst1.Save(String("dst_") + ToString((double)sigma, 1) + ".ppm");
         }
-#endif
 
         return result;
     }
@@ -918,14 +920,12 @@ namespace Test
 
         result = result && Compare(dst1, dst2, maxDifference, true, 64);
 
-#ifdef TEST_REAL_IMAGE
-        if (channels != 2)
+        if (!REAL_IMAGE.empty() || NOISE_IMAGE == false)
         {
             SaveRbf(src, "src", width, height, channels, spatial, range, flags);
             SaveRbf(dst1, "dst1", width, height, channels, spatial, range, flags);
             SaveRbf(dst2, "dst2", width, height, channels, spatial, range, flags);
         }
-#endif
 
         return result;
     }
@@ -949,7 +949,7 @@ namespace Test
 
         for (int channels = 1; channels <= 4; channels++)
         {
-            if (!REAL_IMAGE.empty() && channels == 2)
+            if (channels == 2 && (!REAL_IMAGE.empty() || NOISE_IMAGE == false))
                 continue;
             result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)f, f1, f2);
             result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)p, f1, f2);

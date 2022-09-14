@@ -119,6 +119,19 @@ namespace Simd
             float* GetBuffer();
         };
 
+        class RecursiveBilateralFilterFast : public Simd::RecursiveBilateralFilter
+        {
+        public:
+            RecursiveBilateralFilterFast(const RbfParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+
+        protected:
+            uint8_t* GetBuffer();
+        private:
+            size_t _size, _stride;
+        };
+
         void * RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
     }
 
@@ -129,6 +142,12 @@ namespace Simd
         {
         public:
             RecursiveBilateralFilterPrecize(const RbfParam& param);
+        };
+
+        class RecursiveBilateralFilterFast : public Base::RecursiveBilateralFilterFast
+        {
+        public:
+            RecursiveBilateralFilterFast(const RbfParam& param);
         };
 
         void* RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
