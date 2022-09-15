@@ -223,105 +223,98 @@ namespace Simd
 
         namespace Fast
         {
-            template<size_t channels> SIMD_INLINE void SetOut(const float* factor, const float* colors, size_t width, uint8_t* dst)
+            template<int dir> SIMD_INLINE void Set(int value, uint8_t* dst);
+
+            template<> SIMD_INLINE void Set<+1>(int value, uint8_t* dst)
             {
-                for (size_t x = 0, o = 0; x < width; x++)
-                {
-                    for (size_t e = o + channels; o < e; o++)
-                        dst[o] = uint8_t(colors[o] / factor[x]);
-                }
+                dst[0] = uint8_t(value);
             }
 
-            template<size_t channels> SIMD_INLINE void AddOut(const float* factor, const float* colors, size_t width, uint8_t* dst)
+            template<> SIMD_INLINE void Set<-1>(int value, uint8_t* dst)
             {
-                for (size_t x = 0, o = 0; x < width; x++)
+                dst[0] = uint8_t((value + dst[0] + 1) / 2);
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template<size_t channels, int dir> void HorRow(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* dst)
+            {
+                float factor = 1.0f, colors[channels];
+                for (int c = 0; c < channels; c++)
                 {
-                    for (size_t e = o + channels; o < e; o++)
-                        dst[o] = uint8_t((int(colors[o] / factor[x]) + dst[o] + 1) / 2);
+                    colors[c] = src[c];
+                    Set<dir>(src[c], dst + c);
+                }
+                for (size_t x = 1; x < width; x += 1)
+                {
+                    src += channels * dir;
+                    dst += channels * dir;
+                    float range = ranges[Base::Diff<channels>(src, src - channels * dir)];
+                    factor = alpha + range * factor;
+                    for (int c = 0; c < channels; c++)
+                    {
+                        colors[c] = alpha * src[c] + range * colors[c];
+                        Set<dir>(int(colors[c] / factor), dst + c);
+                    }
                 }
             }
 
             template<size_t channels> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
-                size_t size = p.width * channels, cLast = size - 1, fLast = p.width - 1;
+                size_t last = (p.width - 1) * channels;
                 for (size_t y = 0; y < p.height; y++)
                 {
-                    const uint8_t* sl = src;
-                    float* lc = buf, * lf = buf + size;
-                    *lf++ = 1.f;
-                    for (int c = 0; c < channels; c++)
-                        *lc++ = *sl++;
-                    for (size_t x = 1; x < p.width; x += 1)
-                    {
-                        float la = p.ranges[Diff<channels>(sl, sl - channels)];
-                        *lf++ = p.alpha + la * lf[-1];
-                        for (int c = 0; c < channels; c++)
-                            *lc++ = (p.alpha * (*sl++) + la * lc[-channels]);
-                    }
-                    SetOut<channels>(buf + size, buf, p.width, dst);
-
-                    const uint8_t* sr = src + cLast;
-                    float* rc = buf + cLast, * rf = buf + size + fLast;
-                    *rf-- = 1.f;
-                    for (int c = 0; c < channels; c++)
-                        *rc-- = *sr--;
-                    for (size_t x = 1; x < p.width; x++)
-                    {
-                        float ra = p.ranges[Diff<channels>(sr + 1, sr - channels + 1)];
-                        *rf-- = p.alpha + ra * rf[+1];
-                        for (int c = 0; c < channels; c++)
-                            *rc-- = (p.alpha * (*sr--) + ra * rc[+channels]);
-                    }
-                    AddOut<channels>(buf + size, buf, p.width, dst);
+                    HorRow<channels, +1>(src, p.width, p.alpha, p.ranges, dst);
+                    HorRow<channels, -1>(src + last, p.width, p.alpha, p.ranges, dst + last);
                     src += srcStride;
                     dst += dstStride;
                 }
             }
 
-            template<size_t channels> void VerSetEdge(const uint8_t* src, size_t width, float* factor, float* colors)
+            //-----------------------------------------------------------------------------------------
+
+            template<size_t channels, int dir> void VerEdge(const uint8_t* src, size_t width, float* factor, float* colors, uint8_t* dst)
             {
                 for (size_t x = 0; x < width; x++)
                     factor[x] = 1.0f;
                 for (size_t i = 0, n = width * channels; i < n; i++)
+                {
                     colors[i] = src[i];
+                    Set<dir>(src[i], dst + i);
+                }
             }
 
-            template<size_t channels> void VerSetMain(const uint8_t* src0, const uint8_t* src1, size_t width, float alpha,
-                const float* ranges, float* factor, float* colors)
+            template<size_t channels, int dir> void VerMain(const uint8_t* src0, const uint8_t* src1, size_t width, float alpha,
+                const float* ranges, float* factor, float* colors, uint8_t* dst)
             {
                 for (size_t x = 0, o = 0; x < width; x++)
                 {
-                    float ua = ranges[Diff<channels>(src0 + o, src1 + o)];
-                    factor[x] = alpha + ua * factor[x];
+                    float range = ranges[Base::Diff<channels>(src0 + o, src1 + o)];
+                    factor[x] = alpha + range * factor[x];
                     for (size_t e = o + channels; o < e; o++)
-                        colors[o] = alpha * src0[o] + ua * colors[o];
+                    {
+                        colors[o] = alpha * src0[o] + range * colors[o];
+                        Set<dir>(int(colors[o] / factor[x]), dst + o);
+                    }
                 }
             }
 
             template<size_t channels> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t size = p.width * channels;
-
-                const uint8_t* suc = src + srcStride * (p.height - 1);
-                uint8_t* duc = dst + dstStride * (p.height - 1);
-                VerSetEdge<channels>(suc, p.width, buf + size, buf);
-                SetOut<channels>(buf + size, buf, p.width, duc);
-                for (size_t y = 1; y < p.height; y++)
-                {
-                    duc -= dstStride;
-                    suc -= srcStride;
-                    VerSetMain<channels>(suc, suc + srcStride, p.width, p.alpha, p.ranges, buf + size, buf);
-                    SetOut<channels>(buf + size, buf, p.width, duc);
-                }
-
-                VerSetEdge<channels>(dst, p.width, buf + size, buf);
-                AddOut<channels>(buf + size, buf, p.width, duc);
+                VerEdge<channels, +1>(src, p.width, buf + size, buf, dst);
                 for (size_t y = 1; y < p.height; y++)
                 {
                     src += srcStride;
                     dst += dstStride;
-                    VerSetMain<channels>(src, src - srcStride, p.width, p.alpha, p.ranges, buf + size, buf);
-                    AddOut<channels>(buf + size, buf, p.width, dst);
+                    VerMain<channels, +1>(src, src - srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                }
+                VerEdge<channels, -1>(src, p.width, buf + size, buf, dst);
+                for (size_t y = 1; y < p.height; y++)
+                {
+                    src -= srcStride;
+                    dst -= dstStride;
+                    VerMain<channels, -1>(src, src + srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
                 }
             }
         }
@@ -351,7 +344,7 @@ namespace Simd
                 _size = _stride * p.height;
                 size_t size = 0;
                 size += _size;
-                size += p.width * p.channels * 2 * sizeof(float);
+                size += _stride * 2 * sizeof(float);
                 _buffer.Resize(size);
             }
             return _buffer.data;

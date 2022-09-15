@@ -40,6 +40,8 @@ namespace Simd
         return flags & SimdRecursiveBilateralFilterFmaAvoid;
     }
 
+    //-----------------------------------------------------------------------------------------
+
     struct RbfParam
     {
         size_t width;
@@ -58,6 +60,8 @@ namespace Simd
 
         void Init();
     };
+
+    //-----------------------------------------------------------------------------------------
 
     class RecursiveBilateralFilter : Deletable
     {
@@ -79,34 +83,25 @@ namespace Simd
         FilterPtr _hFilter, _vFilter;
     };
 
+    //-----------------------------------------------------------------------------------------
+
     namespace Base
     {
         template<size_t channels> SIMD_INLINE int Diff(const uint8_t* src1, const uint8_t* src2)
         {
-            int diff, diffs[4];
+            int diff[4];
             for (int c = 0; c < channels; c++)
-                diffs[c] = ::abs(src1[c] - src2[c]);
+                diff[c] = ::abs(src1[c] - src2[c]);
             switch (channels)
             {
-            case 1:
-                diff = diffs[0];
-                break;
-            case 2:
-                diff = (diffs[0] + diffs[1]) >> 1;
-                break;
+            case 1: return diff[0];
+            case 2: return (diff[0] + diff[1]) >> 1;
             case 3:
-            case 4:
-                diff = (diffs[0] + diffs[1] * 2 + diffs[2]) >> 2;
-                break;
-                //diff = ((diffs[0] + diffs[2]) >> 2) + (diffs[1] >> 1);
-                //diff = ((diffs[0] + diffs[1] + diffs[2] + diffs[3]) >> 2);
-                //break;
-            default:
-                diff = 0;
+            case 4: return (diff[0] + diff[1] * 2 + diff[2]) >> 2;
             }
-            assert(diff >= 0 && diff <= 255);
-            return diff;
         }
+
+        //-----------------------------------------------------------------------------------------
 
         class RecursiveBilateralFilterPrecize : public Simd::RecursiveBilateralFilter
         {

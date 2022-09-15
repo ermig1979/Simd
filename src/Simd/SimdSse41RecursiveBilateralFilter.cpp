@@ -31,20 +31,71 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+        SIMD_INLINE __m128i AbsDiff8u(const uint8_t* src0, const uint8_t* src1)
+        {
+            __m128i s0 = _mm_loadu_si128((__m128i*)src0);
+            __m128i s1 = _mm_loadu_si128((__m128i*)src1);
+            return _mm_sub_epi8(_mm_max_epu8(s0, s1), _mm_min_epu8(s0, s1));
+        }
+
+        SIMD_INLINE void Ranges1(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
+        {
+            __m128i d = AbsDiff8u(src0, src1);
+            SIMD_ALIGNED(A) uint8_t diff[A];
+            _mm_storeu_si128((__m128i*)diff, d);
+            for (size_t i = 0; i < A; ++i)
+                dst[i] = ranges[diff[i]];
+        }
+
+        SIMD_INLINE void Ranges2(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
+        {
+            __m128i d8 = AbsDiff8u(src0, src1);
+            __m128i d16_0 = _mm_and_si128(d8, K16_00FF);
+            __m128i d16_1 = _mm_and_si128(_mm_srli_si128(d8, 1), K16_00FF);
+            __m128i a16 = _mm_srli_epi16(_mm_add_epi16(d16_0, d16_1), 1);
+            SIMD_ALIGNED(A) uint16_t diff[HA];
+            _mm_storeu_si128((__m128i*)diff, a16);
+            for (size_t i = 0; i < HA; ++i)
+                dst[i] = ranges[diff[i]];
+        }
+
+        SIMD_INLINE void Ranges3(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
+        {
+            static const __m128i K0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x3, -1, -1, -1, 0x6, -1, -1, -1, 0x9, -1, -1, -1);
+            static const __m128i K1 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x4, -1, -1, -1, 0x7, -1, -1, -1, 0xa, -1, -1, -1);
+            static const __m128i K2 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x5, -1, -1, -1, 0x8, -1, -1, -1, 0xb, -1, -1, -1);
+            __m128i d8 = AbsDiff8u(src0, src1);
+            __m128i d32_0 = _mm_shuffle_epi8(d8, K0);
+            __m128i d32_1 = _mm_shuffle_epi8(d8, K1);
+            __m128i d32_2 = _mm_shuffle_epi8(d8, K2);
+            __m128i a32 = _mm_srli_epi16(_mm_add_epi32(_mm_add_epi32(d32_0, d32_1), _mm_add_epi32(d32_1, d32_2)), 2);
+            SIMD_ALIGNED(A) uint32_t diff[F];
+            _mm_storeu_si128((__m128i*)diff, a32);
+            for (size_t i = 0; i < F; ++i)
+                dst[i] = ranges[diff[i]];
+        }
+
+        SIMD_INLINE void Ranges4(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
+        {
+            static const __m128i K0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xc, -1, -1, -1);
+            static const __m128i K1 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xd, -1, -1, -1);
+            static const __m128i K2 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xa, -1, -1, -1, 0xe, -1, -1, -1);
+            __m128i d8 = AbsDiff8u(src0, src1);
+            __m128i d32_0 = _mm_shuffle_epi8(d8, K0);
+            __m128i d32_1 = _mm_shuffle_epi8(d8, K1);
+            __m128i d32_2 = _mm_shuffle_epi8(d8, K2);
+            __m128i a32 = _mm_srli_epi16(_mm_add_epi32(_mm_add_epi32(d32_0, d32_1), _mm_add_epi32(d32_1, d32_2)), 2);
+            SIMD_ALIGNED(A) uint32_t diff[F];
+            _mm_storeu_si128((__m128i*)diff, a32);
+            for (size_t i = 0; i < F; ++i)
+                dst[i] = ranges[diff[i]];
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         namespace Prec
         {
             template<size_t channels> void RowRanges(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst);
-
-            SIMD_INLINE void Ranges1(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
-            {
-                __m128i s0 = _mm_loadu_si128((__m128i*)src0);
-                __m128i s1 = _mm_loadu_si128((__m128i*)src1);
-                __m128i d = _mm_sub_epi8(_mm_max_epu8(s0, s1), _mm_min_epu8(s0, s1));
-                SIMD_ALIGNED(A) uint8_t diff[A];
-                _mm_storeu_si128((__m128i*)diff, d);
-                for (size_t i = 0; i < A; ++i)
-                    dst[i] = ranges[diff[i]];
-            }
 
             template<> void RowRanges<1>(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
             {
@@ -56,20 +107,6 @@ namespace Simd
                     x = width - A;
                     Ranges1(src0 + x, src1 + x, ranges, dst + x);
                 }
-            }
-
-            SIMD_INLINE void Ranges2(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
-            {
-                __m128i s0 = _mm_loadu_si128((__m128i*)src0);
-                __m128i s1 = _mm_loadu_si128((__m128i*)src1);
-                __m128i d8 = _mm_sub_epi8(_mm_max_epu8(s0, s1), _mm_min_epu8(s0, s1));
-                __m128i d16_0 = _mm_and_si128(d8, K16_00FF);
-                __m128i d16_1 = _mm_and_si128(_mm_srli_si128(d8, 1), K16_00FF);
-                __m128i a16 = _mm_srli_epi16(_mm_add_epi16(d16_0, d16_1), 1);
-                SIMD_ALIGNED(A) uint16_t diff[HA];
-                _mm_storeu_si128((__m128i*)diff, a16);
-                for (size_t i = 0; i < HA; ++i)
-                    dst[i] = ranges[diff[i]];
             }
 
             template<> void RowRanges<2>(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
@@ -84,24 +121,6 @@ namespace Simd
                 }
             }
 
-            SIMD_INLINE void Ranges3(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
-            {
-                static const __m128i K0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x3, -1, -1, -1, 0x6, -1, -1, -1, 0x9, -1, -1, -1);
-                static const __m128i K1 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x4, -1, -1, -1, 0x7, -1, -1, -1, 0xa, -1, -1, -1);
-                static const __m128i K2 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x5, -1, -1, -1, 0x8, -1, -1, -1, 0xb, -1, -1, -1);
-                __m128i s0 = _mm_loadu_si128((__m128i*)src0);
-                __m128i s1 = _mm_loadu_si128((__m128i*)src1);
-                __m128i d8 = _mm_sub_epi8(_mm_max_epu8(s0, s1), _mm_min_epu8(s0, s1));
-                __m128i d32_0 = _mm_shuffle_epi8(d8, K0);
-                __m128i d32_1 = _mm_shuffle_epi8(d8, K1);
-                __m128i d32_2 = _mm_shuffle_epi8(d8, K2);
-                __m128i a32 = _mm_srli_epi16(_mm_add_epi32(_mm_add_epi32(d32_0, d32_1), _mm_add_epi32(d32_1, d32_2)), 2);
-                SIMD_ALIGNED(A) uint32_t diff[F];
-                _mm_storeu_si128((__m128i*)diff, a32);
-                for (size_t i = 0; i < F; ++i)
-                    dst[i] = ranges[diff[i]];
-            }
-
             template<> void RowRanges<3>(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
             {
                 size_t widthF = AlignLo(width, F), x = 0, o = 0;
@@ -112,24 +131,6 @@ namespace Simd
                     x = width - F, o = x * 3;
                     Ranges3(src0 + o, src1 + o, ranges, dst + x);
                 }
-            }
-
-            SIMD_INLINE void Ranges4(const uint8_t* src0, const uint8_t* src1, const float* ranges, float* dst)
-            {
-                static const __m128i K0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xc, -1, -1, -1);
-                static const __m128i K1 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xd, -1, -1, -1);
-                static const __m128i K2 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xa, -1, -1, -1, 0xe, -1, -1, -1);
-                __m128i s0 = _mm_loadu_si128((__m128i*)src0);
-                __m128i s1 = _mm_loadu_si128((__m128i*)src1);
-                __m128i d8 = _mm_sub_epi8(_mm_max_epu8(s0, s1), _mm_min_epu8(s0, s1));
-                __m128i d32_0 = _mm_shuffle_epi8(d8, K0);
-                __m128i d32_1 = _mm_shuffle_epi8(d8, K1);
-                __m128i d32_2 = _mm_shuffle_epi8(d8, K2);
-                __m128i a32 = _mm_srli_epi16(_mm_add_epi32(_mm_add_epi32(d32_0, d32_1), _mm_add_epi32(d32_1, d32_2)), 2);
-                SIMD_ALIGNED(A) uint32_t diff[F];
-                _mm_storeu_si128((__m128i*)diff, a32);
-                for (size_t i = 0; i < F; ++i)
-                    dst[i] = ranges[diff[i]];
             }
 
             template<> void RowRanges<4>(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
@@ -524,108 +525,179 @@ namespace Simd
 
         namespace Fast
         {
-            template<int add> SIMD_INLINE void Set(float factor, float color, uint8_t* dst);
+            template<int dir> SIMD_INLINE void Set(int value, uint8_t* dst);
 
-            template<> SIMD_INLINE void Set<0>(float factor, float color, uint8_t* dst)
+            template<> SIMD_INLINE void Set<+1>(int value, uint8_t* dst)
             {
-                dst[0] = uint8_t(color / factor);
+                dst[0] = uint8_t(value);
             }
 
-            template<> SIMD_INLINE void Set<1>(float factor, float color, uint8_t* dst)
+            template<> SIMD_INLINE void Set<-1>(int value, uint8_t* dst)
             {
-                dst[0] = uint8_t((int(color / factor) + dst[0] + 1) / 2);
+                dst[0] = uint8_t((value + dst[0] + 1) / 2);
             }
 
-            template<size_t channels, int add> SIMD_INLINE void SetOut(const float* factor, const float* colors, size_t width, uint8_t* dst)
+            //-----------------------------------------------------------------------------------------
+
+            SIMD_INLINE void AbsDiffRow(const uint8_t* src0, const uint8_t* src1, size_t size, uint8_t* dst)
             {
-                for (size_t x = 0, o = 0; x < width; x++)
+                for (size_t i = 0; i < size; i += A)
+                    _mm_storeu_si128((__m128i*)(dst + i), AbsDiff8u(src0 + i, src1 + i));
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template<size_t channels, int dir> void HorRow(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* buf, uint8_t* dst)
+            {
+                float factor = 1.0f, colors[channels];
+                for (int c = 0; c < channels; c++)
                 {
-                    for (size_t e = o + channels; o < e; o++)
-                        Set<add>(factor[x], colors[o], dst + o);
+                    colors[c] = src[c];
+                    Set<dir>(src[c], dst + c);
+                }
+                for (size_t x = 1; x < width; x += 1)
+                {
+                    src += channels * dir;
+                    dst += channels * dir;
+                    float range = ranges[Base::Diff<channels>(src, src - channels * dir)];
+                    factor = alpha + range * factor;
+                    for (int c = 0; c < channels; c++)
+                    {
+                        colors[c] = alpha * src[c] + range * colors[c];
+                        Set<dir>(int(colors[c] / factor), dst + c);
+                    }
                 }
             }
 
+            //-----------------------------------------------------------------------------------------
+
+            template<size_t channels, int dir> void HorRow4x(const uint8_t* src, size_t srcStride, size_t width, 
+                float alpha, const float* ranges, uint8_t* buf, uint8_t* dst, size_t dstStride)
+            {
+                HorRow<channels, dir>(src + 0 * srcStride, width, alpha, ranges, buf, dst + 0 * dstStride);
+                HorRow<channels, dir>(src + 1 * srcStride, width, alpha, ranges, buf, dst + 1 * dstStride);
+                HorRow<channels, dir>(src + 2 * srcStride, width, alpha, ranges, buf, dst + 2 * dstStride);
+                HorRow<channels, dir>(src + 3 * srcStride, width, alpha, ranges, buf, dst + 3 * dstStride);
+            }
+
+            template<> void HorRow4x<1, +1>(const uint8_t* src, size_t srcStride, size_t width,
+                float alpha, const float* ranges, uint8_t* buf, uint8_t* dst, size_t dstStride)
+            {
+                const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+                __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
+                size_t x = 0, widthA = AlignLo(width, A);
+                AbsDiffRow(src + so0, src + so0 + 1, width, buf + do0);
+                AbsDiffRow(src + so1, src + so1 + 1, width, buf + do1);
+                AbsDiffRow(src + so2, src + so2 + 1, width, buf + do2);
+                AbsDiffRow(src + so3, src + so3 + 1, width, buf + do3);
+                for (; x < width; x += 1)
+                {
+                    __m128 _range = _mm_setr_ps(ranges[buf[do0]], ranges[buf[do1]], ranges[buf[do2]], ranges[buf[do3]]);
+                    __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
+                    dst[do0] = _mm_extract_epi32(_dst, 0);
+                    dst[do1] = _mm_extract_epi32(_dst, 1);
+                    dst[do2] = _mm_extract_epi32(_dst, 2);
+                    dst[do3] = _mm_extract_epi32(_dst, 3);
+                    src += 1, dst += 1, buf += 1;
+                    __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
+                    _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
+                    _colors = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(_src)), _mm_mul_ps(_range, _colors));
+                }
+            }
+
+            template<> void HorRow4x<1, -1>(const uint8_t* src, size_t srcStride, size_t width,
+                float alpha, const float* ranges, uint8_t* buf, uint8_t* dst, size_t dstStride)
+            {
+                const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+                __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
+                size_t x = 0, widthA = AlignLo(width, A);
+                buf += width - 2;
+                for (; x < width; x += 1)
+                {
+                    __m128 _range = _mm_setr_ps(ranges[buf[do0]], ranges[buf[do1]], ranges[buf[do2]], ranges[buf[do3]]);
+                    __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
+                    __m128i _old = _mm_setr_epi32(dst[do0], dst[do1], dst[do2], dst[do3]);
+                    _dst = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_dst, _old), K32_00000001), 1);
+                    dst[do0] = _mm_extract_epi32(_dst, 0);
+                    dst[do1] = _mm_extract_epi32(_dst, 1);
+                    dst[do2] = _mm_extract_epi32(_dst, 2);
+                    dst[do3] = _mm_extract_epi32(_dst, 3);
+                    src -= 1, dst -= 1, buf -= 1;
+                    __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
+                    _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
+                    _colors = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(_src)), _mm_mul_ps(_range, _colors));
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------
+
             template<size_t channels> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
-                size_t size = p.width * channels, cLast = size - 1, fLast = p.width - 1;
-                for (size_t y = 0; y < p.height; y++)
+                size_t last = (p.width - 1) * channels, height4 = AlignLo(p.height, 4), y = 0;
+                for (; y < height4; y += 4)
                 {
-                    const uint8_t* sl = src;
-                    float* lc = buf, * lf = buf + size;
-                    *lf++ = 1.f;
-                    for (int c = 0; c < channels; c++)
-                        *lc++ = *sl++;
-                    for (size_t x = 1; x < p.width; x += 1)
-                    {
-                        float la = p.ranges[Base::Diff<channels>(sl, sl - channels)];
-                        *lf++ = p.alpha + la * lf[-1];
-                        for (int c = 0; c < channels; c++)
-                            *lc++ = (p.alpha * (*sl++) + la * lc[-channels]);
-                    }
-                    SetOut<channels, 0>(buf + size, buf, p.width, dst);
-
-                    const uint8_t* sr = src + cLast;
-                    float* rc = buf + cLast, * rf = buf + size + fLast;
-                    *rf-- = 1.f;
-                    for (int c = 0; c < channels; c++)
-                        *rc-- = *sr--;
-                    for (size_t x = 1; x < p.width; x++)
-                    {
-                        float ra = p.ranges[Base::Diff<channels>(sr + 1, sr - channels + 1)];
-                        *rf-- = p.alpha + ra * rf[+1];
-                        for (int c = 0; c < channels; c++)
-                            *rc-- = (p.alpha * (*sr--) + ra * rc[+channels]);
-                    }
-                    SetOut<channels, 1>(buf + size, buf, p.width, dst);
+                    HorRow4x<channels, +1>(src, srcStride, p.width, p.alpha, p.ranges, (uint8_t*)buf, dst, dstStride);
+                    HorRow4x<channels, -1>(src + last, srcStride, p.width, p.alpha, p.ranges, (uint8_t*)buf, dst + last, dstStride);
+                    src += 4 * srcStride;
+                    dst += 4 * dstStride;
+                }
+                for (; y < p.height; y++)
+                {
+                    HorRow<channels, +1>(src, p.width, p.alpha, p.ranges, (uint8_t*)buf, dst);
+                    HorRow<channels, -1>(src + last, p.width, p.alpha, p.ranges, (uint8_t*)buf, dst + last);
                     src += srcStride;
                     dst += dstStride;
                 }
             }
 
-            template<size_t channels> void VerSetEdge(const uint8_t* src, size_t width, float* factor, float* colors)
+            //-----------------------------------------------------------------------------------------
+
+            template<size_t channels, int dir> void VerEdge(const uint8_t* src, size_t width, float* factor, float* colors, uint8_t* dst)
             {
                 for (size_t x = 0; x < width; x++)
                     factor[x] = 1.0f;
                 for (size_t i = 0, n = width * channels; i < n; i++)
+                {
                     colors[i] = src[i];
+                    Set<dir>(src[i], dst + i);
+                }
             }
 
-            template<size_t channels> void VerSetMain(const uint8_t* src0, const uint8_t* src1, size_t width, float alpha,
-                const float* ranges, float* factor, float* colors)
+            template<size_t channels, int dir> void VerMain(const uint8_t* src0, const uint8_t* src1, size_t width, float alpha,
+                const float* ranges, float* factor, float* colors, uint8_t* dst)
             {
                 for (size_t x = 0, o = 0; x < width; x++)
                 {
-                    float ua = ranges[Base::Diff<channels>(src0 + o, src1 + o)];
-                    factor[x] = alpha + ua * factor[x];
+                    float range = ranges[Base::Diff<channels>(src0 + o, src1 + o)];
+                    factor[x] = alpha + range * factor[x];
                     for (size_t e = o + channels; o < e; o++)
-                        colors[o] = alpha * src0[o] + ua * colors[o];
+                    {
+                        colors[o] = alpha * src0[o] + range * colors[o];
+                        Set<dir>(int(colors[o]/factor[x]), dst + o);
+                    }
                 }
             }
 
             template<size_t channels> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t size = p.width * channels;
-
-                const uint8_t* suc = src + srcStride * (p.height - 1);
-                uint8_t* duc = dst + dstStride * (p.height - 1);
-                VerSetEdge<channels>(suc, p.width, buf + size, buf);
-                SetOut<channels, 0>(buf + size, buf, p.width, duc);
-                for (size_t y = 1; y < p.height; y++)
-                {
-                    duc -= dstStride;
-                    suc -= srcStride;
-                    VerSetMain<channels>(suc, suc + srcStride, p.width, p.alpha, p.ranges, buf + size, buf);
-                    SetOut<channels, 0>(buf + size, buf, p.width, duc);
-                }
-
-                VerSetEdge<channels>(dst, p.width, buf + size, buf);
-                SetOut<channels, 1>(buf + size, buf, p.width, duc);
+                VerEdge<channels, +1>(src, p.width, buf + size, buf, dst);
                 for (size_t y = 1; y < p.height; y++)
                 {
                     src += srcStride;
                     dst += dstStride;
-                    VerSetMain<channels>(src, src - srcStride, p.width, p.alpha, p.ranges, buf + size, buf);
-                    SetOut<channels, 1>(buf + size, buf, p.width, dst);
+                    VerMain<channels, +1>(src, src - srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                }
+                VerEdge<channels, -1>(src, p.width, buf + size, buf, dst);
+                for (size_t y = 1; y < p.height; y++)
+                {
+                    src -= srcStride;
+                    dst -= dstStride;
+                    VerMain<channels, -1>(src, src + srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
                 }
             }
         }
