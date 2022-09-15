@@ -848,6 +848,14 @@ namespace Test
 
     //---------------------------------------------------------------------------------------------
 
+    SIMD_INLINE String ToStr(SimdRecursiveBilateralFilterFlags flags)
+    {
+        std::stringstream ss;
+        ss << (Simd::Precise(flags) ? "p" : "f");
+        ss << (Simd::DiffType(flags) == Simd::RbfDiffAvg ? "a" : (Simd::DiffType(flags) == Simd::RbfDiffMax ? "m" : "s"));
+        return ss.str();
+    }
+
     namespace
     {
         struct FuncRBF
@@ -863,7 +871,7 @@ namespace Test
             {
                 std::stringstream ss;
                 ss << description;
-                ss << "[" << (Simd::Precise(f) ? "p" : "f") << "-" << c << "]";
+                ss << "[" << ToStr(f) << "-" << c << "]";
                 description = ss.str();
             }
 
@@ -887,7 +895,7 @@ namespace Test
     {
         std::stringstream ss;
         ss << MakePath("_out", desc) << "_" << view.width << "x" << view.height << "x" << View::ChannelCount(view.format);
-        ss << "_" << ToString(spatial, 2, 1) << "_" << ToString(range, 2, 1) << "_" << (Simd::Precise(flags) ? "p" : "f") << ".png";
+        ss << "_" << ToString(spatial, 2, 1) << "_" << ToString(range, 2, 1) << "_" << ToStr(flags) << ".png";
         return CreatePathIfNotExist(ss.str(), true) && view.Save(ss.str(), SimdImageFilePng);
     }
 
@@ -944,15 +952,19 @@ namespace Test
     {
         bool result = true;
 
-        int f = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterFmaAvoid;
-        int p = SimdRecursiveBilateralFilterPrecise | SimdRecursiveBilateralFilterFmaAvoid;
+        int fa = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffAvg | SimdRecursiveBilateralFilterFmaAvoid;
+        int fm = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffMax | SimdRecursiveBilateralFilterFmaAvoid;
+        int fs = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffSum | SimdRecursiveBilateralFilterFmaAvoid;
+        int pa = SimdRecursiveBilateralFilterPrecise | SimdRecursiveBilateralFilterDiffAvg | SimdRecursiveBilateralFilterFmaAvoid;
 
         for (int channels = 1; channels <= 4; channels++)
         {
             if (channels == 2 && (!REAL_IMAGE.empty() || NOISE_IMAGE == false))
                 continue;
-            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)f, f1, f2);
-            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)p, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fa, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fm, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fs, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)pa, f1, f2);
         }
 
         return result;

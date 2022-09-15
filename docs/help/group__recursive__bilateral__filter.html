@@ -56,7 +56,15 @@ Enumerations</h2></td></tr>
 , <br />
 &#160;&#160;<a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00af703efeacdf942f5c8af6987c8be23b5">SimdRecursiveBilateralFilterPrecise</a> = 1
 , <br />
-&#160;&#160;<a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00afccf303dab9b62716f8cd3f73cc81f8a">SimdRecursiveBilateralFilterFmaAvoid</a> = 2
+&#160;&#160;<a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00a2f73ccebed363aea47d5ef9c7305479b">SimdRecursiveBilateralFilterDiffAvg</a> = 0
+, <br />
+&#160;&#160;<a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00a83028088bf14e00698b659cabb443e43">SimdRecursiveBilateralFilterDiffMax</a> = 2
+, <br />
+&#160;&#160;<a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00afe24b92510cd5af0e7f5f7535b0fbbeb">SimdRecursiveBilateralFilterDiffSum</a> = 4
+, <br />
+&#160;&#160;<a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00a4e6b9cb5f6b2ab13008911425e7aaf77">SimdRecursiveBilateralFilterDiffMask</a> = 6
+, <br />
+&#160;&#160;<a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00afccf303dab9b62716f8cd3f73cc81f8a">SimdRecursiveBilateralFilterFmaAvoid</a> = 8
 <br />
  }</td></tr>
 <tr class="separator:gaf478bdbccbc789303a50cde967337d00"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -89,6 +97,14 @@ Functions</h2></td></tr>
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaf478bdbccbc789303a50cde967337d00a7d31cb01f6d14554b3a3cbe5d3aca9d4" name="ggaf478bdbccbc789303a50cde967337d00a7d31cb01f6d14554b3a3cbe5d3aca9d4"></a>SimdRecursiveBilateralFilterFast&#160;</td><td class="fielddoc"><p >Fast implementation of Recursive Bilateral Filter. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ggaf478bdbccbc789303a50cde967337d00af703efeacdf942f5c8af6987c8be23b5" name="ggaf478bdbccbc789303a50cde967337d00af703efeacdf942f5c8af6987c8be23b5"></a>SimdRecursiveBilateralFilterPrecise&#160;</td><td class="fielddoc"><p >Precise implementation of Recursive Bilateral Filter. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaf478bdbccbc789303a50cde967337d00a2f73ccebed363aea47d5ef9c7305479b" name="ggaf478bdbccbc789303a50cde967337d00a2f73ccebed363aea47d5ef9c7305479b"></a>SimdRecursiveBilateralFilterDiffAvg&#160;</td><td class="fielddoc"><p >Use averaging to estimate result color difference. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaf478bdbccbc789303a50cde967337d00a83028088bf14e00698b659cabb443e43" name="ggaf478bdbccbc789303a50cde967337d00a83028088bf14e00698b659cabb443e43"></a>SimdRecursiveBilateralFilterDiffMax&#160;</td><td class="fielddoc"><p >Use channel difference maximum to estimate result color difference. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaf478bdbccbc789303a50cde967337d00afe24b92510cd5af0e7f5f7535b0fbbeb" name="ggaf478bdbccbc789303a50cde967337d00afe24b92510cd5af0e7f5f7535b0fbbeb"></a>SimdRecursiveBilateralFilterDiffSum&#160;</td><td class="fielddoc"><p >Use saturated sum to estimate result color difference. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaf478bdbccbc789303a50cde967337d00a4e6b9cb5f6b2ab13008911425e7aaf77" name="ggaf478bdbccbc789303a50cde967337d00a4e6b9cb5f6b2ab13008911425e7aaf77"></a>SimdRecursiveBilateralFilterDiffMask&#160;</td><td class="fielddoc"><p >Color difference type mask. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ggaf478bdbccbc789303a50cde967337d00afccf303dab9b62716f8cd3f73cc81f8a" name="ggaf478bdbccbc789303a50cde967337d00afccf303dab9b62716f8cd3f73cc81f8a"></a>SimdRecursiveBilateralFilterFmaAvoid&#160;</td><td class="fielddoc"><p >Not use FMA instructions (for debug purposes). </p>
 </td></tr>

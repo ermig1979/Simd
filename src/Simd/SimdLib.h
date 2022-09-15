@@ -343,7 +343,11 @@ typedef enum
 {
     SimdRecursiveBilateralFilterFast = 0, /*!< Fast implementation of Recursive Bilateral Filter. */
     SimdRecursiveBilateralFilterPrecise = 1, /*!< Precise implementation of Recursive Bilateral Filter. */
-    SimdRecursiveBilateralFilterFmaAvoid = 2, /*!< Not use FMA instructions (for debug purposes). */
+    SimdRecursiveBilateralFilterDiffAvg = 0, /*!< Use averaging to estimate result color difference. */
+    SimdRecursiveBilateralFilterDiffMax = 2, /*!< Use channel difference maximum to estimate result color difference. */
+    SimdRecursiveBilateralFilterDiffSum = 4, /*!< Use saturated sum to estimate result color difference. */
+    SimdRecursiveBilateralFilterDiffMask = 6, /*!< Color difference type mask. */
+    SimdRecursiveBilateralFilterFmaAvoid = 8, /*!< Not use FMA instructions (for debug purposes). */
 } SimdRecursiveBilateralFilterFlags;
 
 /*! @ingroup c_types

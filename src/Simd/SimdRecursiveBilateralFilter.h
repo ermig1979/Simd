@@ -30,6 +30,13 @@
 
 namespace Simd
 {
+    enum RbfDiffType
+    {
+        RbfDiffAvg = SimdRecursiveBilateralFilterDiffAvg,
+        RbfDiffMax = SimdRecursiveBilateralFilterDiffMax,
+        RbfDiffSum = SimdRecursiveBilateralFilterDiffSum,
+    };    
+    
     SIMD_INLINE bool Precise(SimdRecursiveBilateralFilterFlags flags)
     {
         return flags & SimdRecursiveBilateralFilterPrecise;
@@ -38,6 +45,11 @@ namespace Simd
     SIMD_INLINE bool FmaAvoid(SimdRecursiveBilateralFilterFlags flags)
     {
         return flags & SimdRecursiveBilateralFilterFmaAvoid;
+    }
+
+    SIMD_INLINE RbfDiffType DiffType(SimdRecursiveBilateralFilterFlags flags)
+    {
+        return (RbfDiffType)(flags & SimdRecursiveBilateralFilterDiffMask);
     }
 
     //-----------------------------------------------------------------------------------------
@@ -75,9 +87,9 @@ namespace Simd
             return _buffer.RawSize();
         }
 
-    protected:
         typedef void (*FilterPtr)(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
+    protected:
         RbfParam _param;
         Array8u _buffer;
         FilterPtr _hFilter, _vFilter;
@@ -87,17 +99,40 @@ namespace Simd
 
     namespace Base
     {
-        template<size_t channels> SIMD_INLINE int Diff(const uint8_t* src1, const uint8_t* src2)
+        template<RbfDiffType type> SIMD_INLINE int Diff(int ch0, int ch1)
         {
-            int diff[4];
-            for (int c = 0; c < channels; c++)
-                diff[c] = ::abs(src1[c] - src2[c]);
+            switch (type)
+            {
+            case RbfDiffAvg: return Average(ch0, ch1);
+            case RbfDiffMax: return Max(ch0, ch1);
+            case RbfDiffSum: return Max(ch0 + ch1, 255);
+            default:
+                assert(0); return 0;
+            }
+        }
+
+        template<RbfDiffType type> SIMD_INLINE int Diff(int ch0, int ch1, int ch2)
+        {
+            switch (type)
+            {
+            case RbfDiffAvg: return Average(ch1, Average(ch0, ch2));
+            case RbfDiffMax: return Max(Max(ch0, ch1), ch2);
+            case RbfDiffSum: return Max(ch0 + ch1 + ch2, 255);
+            default:
+                assert(0); return 0;
+            }
+        }
+
+        template<size_t channels, RbfDiffType type> SIMD_INLINE int Diff(const uint8_t* src1, const uint8_t* src2)
+        {
             switch (channels)
             {
-            case 1: return diff[0];
-            case 2: return (diff[0] + diff[1]) >> 1;
-            case 3:
-            case 4: return (diff[0] + diff[1] * 2 + diff[2]) >> 2;
+            case 1: return ::abs(src1[0] - src2[0]);
+            case 2: return Diff<type>(::abs(src1[0] - src2[0]), ::abs(src1[1] - src2[1]));
+            case 3: 
+            case 4: return Diff<type>(::abs(src1[0] - src2[0]), ::abs(src1[1] - src2[1]), ::abs(src1[2] - src2[2]));
+            default:
+                assert(0); return 0;
             }
         }
 

@@ -70,12 +70,14 @@ namespace Simd
 
     namespace Base
     {
+        typedef RecursiveBilateralFilter::FilterPtr FilterPtr;
+
         namespace Prec
         {
-            template<size_t channels> void RowRanges(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
+            template<size_t channels, RbfDiffType type> void RowRanges(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
             {
                 for (size_t x = 0, o = 0; x < width; x += 1, o += channels)
-                    dst[x] = ranges[Diff<channels>(src0 + o, src1 + o)];
+                    dst[x] = ranges[Diff<channels, type>(src0 + o, src1 + o)];
             }
 
             template<size_t channels> SIMD_INLINE void SetOut(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst)
@@ -91,7 +93,7 @@ namespace Simd
                 }
             }
 
-            template<size_t channels> void HorFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<size_t channels, RbfDiffType type> void HorFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t size = p.width * channels, cLast = size - 1, fLast = p.width - 1;
                 float* cb0 = buf, * cb1 = cb0 + size, * fb0 = cb1 + size, * fb1 = fb0 + p.width, * rb0 = fb1 + p.width;
@@ -107,7 +109,7 @@ namespace Simd
                         *lc++ = *sl++;
                         *rc-- = *sr--;
                     }
-                    RowRanges<channels>(src, src + channels, p.width - 1, p.ranges, rb0 + 1);
+                    RowRanges<channels, type>(src, src + channels, p.width - 1, p.ranges, rb0 + 1);
                     for (size_t x = 1; x < p.width; x++)
                     {
                         float la = rb0[x];
@@ -146,7 +148,7 @@ namespace Simd
                 }
             }
 
-            template<size_t channels> void VerFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<size_t channels, RbfDiffType type> void VerFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t size = p.width * channels, srcTail = srcStride - size, dstTail = dstStride - size;
                 float *rb0 = buf, *dcb = rb0 + p.width, * dfb = dcb + size * 2, * ucb = dfb + p.width * 2, * ufb = ucb + size * p.height;
@@ -162,7 +164,7 @@ namespace Simd
                     suc -= srcStride;
                     uf -= p.width;
                     uc -= size;
-                    RowRanges<channels>(suc, suc + srcStride, p.width, p.ranges, rb0);
+                    RowRanges<channels, type>(suc, suc + srcStride, p.width, p.ranges, rb0);
                     VerSetMain<channels>(duc, p.width, p.alpha, rb0, uf + p.width, uc + size, uf, uc);
                 }
 
@@ -176,9 +178,42 @@ namespace Simd
                     float* df = dfb + (y & 1) * p.width;
                     const float* dpc = dcb + ((y - 1) & 1) * size;
                     const float* dpf = dfb + ((y - 1) & 1) * p.width;
-                    RowRanges<channels>(src, src - srcStride, p.width, p.ranges, rb0);
+                    RowRanges<channels, type>(src, src - srcStride, p.width, p.ranges, rb0);
                     VerSetMain<channels>(dst, p.width, p.alpha, rb0, dpf, dpc, df, dc);
                     SetOut<channels>(dc, df, ucb + y * size, ufb + y * p.width, p.width, dst);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template <size_t channels, RbfDiffType type> void Set(FilterPtr &horFilter, FilterPtr &verFilter)
+            {
+                horFilter = HorFilter<channels, type>;
+                verFilter = VerFilter<channels, type>;
+            }
+
+            template <RbfDiffType type> void Set(size_t channels, FilterPtr &horFilter, FilterPtr &verFilter)
+            {
+                switch (channels)
+                {
+                case 1: Set<1, type>(horFilter, verFilter); break;
+                case 2: Set<2, type>(horFilter, verFilter); break;
+                case 3: Set<3, type>(horFilter, verFilter); break;
+                case 4: Set<4, type>(horFilter, verFilter); break;
+                default:
+                    assert(0);
+                }
+            }
+
+            void Set(const RbfParam& param, FilterPtr &horFilter, FilterPtr &verFilter)
+            {
+                switch (DiffType(param.flags))
+                {
+                case RbfDiffAvg: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                case RbfDiffMax: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                case RbfDiffSum: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                default:
+                    assert(0);
                 }
             }
         }
@@ -188,15 +223,7 @@ namespace Simd
         RecursiveBilateralFilterPrecize::RecursiveBilateralFilterPrecize(const RbfParam& param)
             : Simd::RecursiveBilateralFilter(param)
         {
-            switch (_param.channels)
-            {
-            case 1: _hFilter = Prec::HorFilter<1>; _vFilter = Prec::VerFilter<1>; break;
-            case 2: _hFilter = Prec::HorFilter<2>; _vFilter = Prec::VerFilter<2>; break;
-            case 3: _hFilter = Prec::HorFilter<3>; _vFilter = Prec::VerFilter<3>; break;
-            case 4: _hFilter = Prec::HorFilter<4>; _vFilter = Prec::VerFilter<4>; break;
-            default:
-                assert(0);
-            }
+            Prec::Set(_param, _hFilter, _vFilter);
         }
 
         float* RecursiveBilateralFilterPrecize::GetBuffer()
@@ -237,7 +264,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, int dir> void HorRow(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* dst)
+            template<size_t channels, RbfDiffType type, int dir> void HorRow(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* dst)
             {
                 float factor = 1.0f, colors[channels];
                 for (int c = 0; c < channels; c++)
@@ -249,7 +276,7 @@ namespace Simd
                 {
                     src += channels * dir;
                     dst += channels * dir;
-                    float range = ranges[Base::Diff<channels>(src, src - channels * dir)];
+                    float range = ranges[Base::Diff<channels, type>(src, src - channels * dir)];
                     factor = alpha + range * factor;
                     for (int c = 0; c < channels; c++)
                     {
@@ -259,13 +286,13 @@ namespace Simd
                 }
             }
 
-            template<size_t channels> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<size_t channels, RbfDiffType type> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t last = (p.width - 1) * channels;
                 for (size_t y = 0; y < p.height; y++)
                 {
-                    HorRow<channels, +1>(src, p.width, p.alpha, p.ranges, dst);
-                    HorRow<channels, -1>(src + last, p.width, p.alpha, p.ranges, dst + last);
+                    HorRow<channels, type, +1>(src, p.width, p.alpha, p.ranges, dst);
+                    HorRow<channels, type, -1>(src + last, p.width, p.alpha, p.ranges, dst + last);
                     src += srcStride;
                     dst += dstStride;
                 }
@@ -284,12 +311,12 @@ namespace Simd
                 }
             }
 
-            template<size_t channels, int dir> void VerMain(const uint8_t* src0, const uint8_t* src1, size_t width, float alpha,
+            template<size_t channels, RbfDiffType type, int dir> void VerMain(const uint8_t* src0, const uint8_t* src1, size_t width, float alpha,
                 const float* ranges, float* factor, float* colors, uint8_t* dst)
             {
                 for (size_t x = 0, o = 0; x < width; x++)
                 {
-                    float range = ranges[Base::Diff<channels>(src0 + o, src1 + o)];
+                    float range = ranges[Base::Diff<channels, type>(src0 + o, src1 + o)];
                     factor[x] = alpha + range * factor[x];
                     for (size_t e = o + channels; o < e; o++)
                     {
@@ -299,7 +326,7 @@ namespace Simd
                 }
             }
 
-            template<size_t channels> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<size_t channels, RbfDiffType type> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t size = p.width * channels;
                 VerEdge<channels, +1>(src, p.width, buf + size, buf, dst);
@@ -307,14 +334,47 @@ namespace Simd
                 {
                     src += srcStride;
                     dst += dstStride;
-                    VerMain<channels, +1>(src, src - srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                    VerMain<channels, type, +1>(src, src - srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
                 }
                 VerEdge<channels, -1>(src, p.width, buf + size, buf, dst);
                 for (size_t y = 1; y < p.height; y++)
                 {
                     src -= srcStride;
                     dst -= dstStride;
-                    VerMain<channels, -1>(src, src + srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                    VerMain<channels, type, -1>(src, src + srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template <size_t channels, RbfDiffType type> void Set(FilterPtr& horFilter, FilterPtr& verFilter)
+            {
+                horFilter = HorFilter<channels, type>;
+                verFilter = VerFilter<channels, type>;
+            }
+
+            template <RbfDiffType type> void Set(size_t channels, FilterPtr& horFilter, FilterPtr& verFilter)
+            {
+                switch (channels)
+                {
+                case 1: Set<1, type>(horFilter, verFilter); break;
+                case 2: Set<2, type>(horFilter, verFilter); break;
+                case 3: Set<3, type>(horFilter, verFilter); break;
+                case 4: Set<4, type>(horFilter, verFilter); break;
+                default:
+                    assert(0);
+                }
+            }
+
+            void Set(const RbfParam& param, FilterPtr& horFilter, FilterPtr& verFilter)
+            {
+                switch (DiffType(param.flags))
+                {
+                case RbfDiffAvg: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                case RbfDiffMax: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                case RbfDiffSum: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                default:
+                    assert(0);
                 }
             }
         }
@@ -324,15 +384,7 @@ namespace Simd
         RecursiveBilateralFilterFast::RecursiveBilateralFilterFast(const RbfParam& param)
             : Simd::RecursiveBilateralFilter(param)
         {
-            switch (_param.channels)
-            {
-            case 1: _hFilter = Fast::HorFilter<1>; _vFilter = Fast::VerFilter<1>; break;
-            case 2: _hFilter = Fast::HorFilter<2>; _vFilter = Fast::VerFilter<2>; break;
-            case 3: _hFilter = Fast::HorFilter<3>; _vFilter = Fast::VerFilter<3>; break;
-            case 4: _hFilter = Fast::HorFilter<4>; _vFilter = Fast::VerFilter<4>; break;
-            default:
-                assert(0);
-            }
+            Fast::Set(_param, _hFilter, _vFilter);
         }
 
         uint8_t* RecursiveBilateralFilterFast::GetBuffer()
