@@ -597,16 +597,38 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            SIMD_INLINE void AbsDiffRow(const uint8_t* src0, const uint8_t* src1, size_t size, uint8_t* dst)
+            template<size_t channels, RbfDiffType type> SIMD_INLINE void RowDiff(const uint8_t* src0, const uint8_t* src1, size_t width, uint8_t* dst)
             {
-                for (size_t i = 0; i < size; i += A)
-                    _mm_storeu_si128((__m128i*)(dst + i), AbsDiff8u(src0 + i, src1 + i));
+                switch (channels)
+                {
+                case 1:
+                {
+                    for (size_t x = 0; x < width; x += A)
+                        _mm_storeu_si128((__m128i*)(dst + x), AbsDiff8u(src0 + x, src1 + x));
+                    break;
+                }
+                default:
+                    for (size_t x = 0, o = 0; x < width; x += 1, o += channels)
+                        dst[x] = Base::Diff<channels, type>(src0 + o, src1 + o);
+                }
+            }
+
+            template<size_t channels, RbfDiffType type> void RowDiff4x(const uint8_t* src0, const uint8_t* src1, size_t srcStride, size_t width, uint8_t* dst, size_t dstStride)
+            {
+                for (size_t i = 0; i < 4; ++i)
+                {
+                    RowDiff<channels, type>(src0, src1, width, dst);
+                    src0 += srcStride;
+                    src1 += srcStride;
+                    dst += dstStride;
+                }
             }
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, RbfDiffType type, int dir> void HorRow(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* buf, uint8_t* dst)
+            template<size_t channels, int dir> void HorRow(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* diff, uint8_t* dst)
             {
+                if (dir == -1) diff += width - 2;
                 float factor = 1.0f, colors[channels];
                 for (int c = 0; c < channels; c++)
                 {
@@ -617,96 +639,96 @@ namespace Simd
                 {
                     src += channels * dir;
                     dst += channels * dir;
-                    float range = ranges[Base::Diff<channels, type>(src, src - channels * dir)];
+                    float range = ranges[diff[0]];
                     factor = alpha + range * factor;
                     for (int c = 0; c < channels; c++)
                     {
                         colors[c] = alpha * src[c] + range * colors[c];
                         Set<dir>(int(colors[c] / factor), dst + c);
                     }
+                    diff += dir;
                 }
             }
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, RbfDiffType type, int dir> void HorRow4x(const uint8_t* src, size_t srcStride, size_t width,
-                float alpha, const float* ranges, uint8_t* buf, uint8_t* dst, size_t dstStride)
+            template<size_t channels, int dir> void HorRow4x(const uint8_t* src, size_t srcStride, size_t width,
+                float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
             {
-                HorRow<channels, type, dir>(src + 0 * srcStride, width, alpha, ranges, buf, dst + 0 * dstStride);
-                HorRow<channels, type, dir>(src + 1 * srcStride, width, alpha, ranges, buf, dst + 1 * dstStride);
-                HorRow<channels, type, dir>(src + 2 * srcStride, width, alpha, ranges, buf, dst + 2 * dstStride);
-                HorRow<channels, type, dir>(src + 3 * srcStride, width, alpha, ranges, buf, dst + 3 * dstStride);
+                HorRow<channels, dir>(src + 0 * srcStride, width, alpha, ranges, diff + 0 * dstStride, dst + 0 * dstStride);
+                HorRow<channels, dir>(src + 1 * srcStride, width, alpha, ranges, diff + 1 * dstStride, dst + 1 * dstStride);
+                HorRow<channels, dir>(src + 2 * srcStride, width, alpha, ranges, diff + 2 * dstStride, dst + 2 * dstStride);
+                HorRow<channels, dir>(src + 3 * srcStride, width, alpha, ranges, diff + 3 * dstStride, dst + 3 * dstStride);
             }
 
-            //template<> void HorRow4x<1, +1>(const uint8_t* src, size_t srcStride, size_t width,
-            //    float alpha, const float* ranges, uint8_t* buf, uint8_t* dst, size_t dstStride)
-            //{
-            //    const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
-            //    const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
-            //    __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
-            //    __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
-            //    size_t x = 0, widthA = AlignLo(width, A);
-            //    AbsDiffRow(src + so0, src + so0 + 1, width, buf + do0);
-            //    AbsDiffRow(src + so1, src + so1 + 1, width, buf + do1);
-            //    AbsDiffRow(src + so2, src + so2 + 1, width, buf + do2);
-            //    AbsDiffRow(src + so3, src + so3 + 1, width, buf + do3);
-            //    for (; x < width; x += 1)
-            //    {
-            //        __m128 _range = _mm_setr_ps(ranges[buf[do0]], ranges[buf[do1]], ranges[buf[do2]], ranges[buf[do3]]);
-            //        __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
-            //        dst[do0] = _mm_extract_epi32(_dst, 0);
-            //        dst[do1] = _mm_extract_epi32(_dst, 1);
-            //        dst[do2] = _mm_extract_epi32(_dst, 2);
-            //        dst[do3] = _mm_extract_epi32(_dst, 3);
-            //        src += 1, dst += 1, buf += 1;
-            //        __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
-            //        _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
-            //        _colors = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(_src)), _mm_mul_ps(_range, _colors));
-            //    }
-            //}
+            template<> void HorRow4x<1, +1>(const uint8_t* src, size_t srcStride, size_t width,
+                float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+            {
+                const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+                __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
+                size_t x = 0, widthA = AlignLo(width, A);
+                for (; x < width; x += 1)
+                {
+                    __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
+                    __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
+                    dst[do0] = _mm_extract_epi32(_dst, 0);
+                    dst[do1] = _mm_extract_epi32(_dst, 1);
+                    dst[do2] = _mm_extract_epi32(_dst, 2);
+                    dst[do3] = _mm_extract_epi32(_dst, 3);
+                    src += 1, dst += 1, diff += 1;
+                    __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
+                    _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
+                    _colors = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(_src)), _mm_mul_ps(_range, _colors));
+                }
+            }
 
-            //template<> void HorRow4x<1, -1>(const uint8_t* src, size_t srcStride, size_t width,
-            //    float alpha, const float* ranges, uint8_t* buf, uint8_t* dst, size_t dstStride)
-            //{
-            //    const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
-            //    const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
-            //    __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
-            //    __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
-            //    size_t x = 0, widthA = AlignLo(width, A);
-            //    buf += width - 2;
-            //    for (; x < width; x += 1)
-            //    {
-            //        __m128 _range = _mm_setr_ps(ranges[buf[do0]], ranges[buf[do1]], ranges[buf[do2]], ranges[buf[do3]]);
-            //        __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
-            //        __m128i _old = _mm_setr_epi32(dst[do0], dst[do1], dst[do2], dst[do3]);
-            //        _dst = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_dst, _old), K32_00000001), 1);
-            //        dst[do0] = _mm_extract_epi32(_dst, 0);
-            //        dst[do1] = _mm_extract_epi32(_dst, 1);
-            //        dst[do2] = _mm_extract_epi32(_dst, 2);
-            //        dst[do3] = _mm_extract_epi32(_dst, 3);
-            //        src -= 1, dst -= 1, buf -= 1;
-            //        __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
-            //        _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
-            //        _colors = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(_src)), _mm_mul_ps(_range, _colors));
-            //    }
-            //}
+            template<> void HorRow4x<1, -1>(const uint8_t* src, size_t srcStride, size_t width,
+                float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+            {
+                const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+                __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
+                size_t x = 0, widthA = AlignLo(width, A);
+                diff += width - 2;
+                for (; x < width; x += 1)
+                {
+                    __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
+                    __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
+                    __m128i _old = _mm_setr_epi32(dst[do0], dst[do1], dst[do2], dst[do3]);
+                    _dst = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_dst, _old), K32_00000001), 1);
+                    dst[do0] = _mm_extract_epi32(_dst, 0);
+                    dst[do1] = _mm_extract_epi32(_dst, 1);
+                    dst[do2] = _mm_extract_epi32(_dst, 2);
+                    dst[do3] = _mm_extract_epi32(_dst, 3);
+                    src -= 1, dst -= 1, diff -= 1;
+                    __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
+                    _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
+                    _colors = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(_src)), _mm_mul_ps(_range, _colors));
+                }
+            }
 
             //-----------------------------------------------------------------------------------------
 
             template<size_t channels, RbfDiffType type> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t last = (p.width - 1) * channels, height4 = AlignLo(p.height, 4), y = 0;
+                uint8_t* diff = (uint8_t*)buf;
                 for (; y < height4; y += 4)
                 {
-                    HorRow4x<channels, type, +1>(src, srcStride, p.width, p.alpha, p.ranges, (uint8_t*)buf, dst, dstStride);
-                    HorRow4x<channels, type, -1>(src + last, srcStride, p.width, p.alpha, p.ranges, (uint8_t*)buf, dst + last, dstStride);
+                    RowDiff4x<channels, type>(src, src + channels, srcStride, p.width - 1, diff, dstStride);
+                    HorRow4x<channels, +1>(src, srcStride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
+                    HorRow4x<channels, -1>(src + last, srcStride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
                     src += 4 * srcStride;
                     dst += 4 * dstStride;
                 }
                 for (; y < p.height; y++)
                 {
-                    HorRow<channels, type, +1>(src, p.width, p.alpha, p.ranges, (uint8_t*)buf, dst);
-                    HorRow<channels, type, -1>(src + last, p.width, p.alpha, p.ranges, (uint8_t*)buf, dst + last);
+                    RowDiff<channels, type>(src, src + channels, p.width - 1, diff);
+                    HorRow<channels, +1>(src, p.width, p.alpha, p.ranges, diff, dst);
+                    HorRow<channels, -1>(src + last, p.width, p.alpha, p.ranges, diff, dst + last);
                     src += srcStride;
                     dst += dstStride;
                 }
@@ -725,16 +747,16 @@ namespace Simd
                 }
             }
 
-            template<size_t channels, RbfDiffType type, int dir> void VerMain(const uint8_t* src0, const uint8_t* src1, size_t width, float alpha,
+            template<size_t channels, RbfDiffType type, int dir> void VerMain(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
                 const float* ranges, float* factor, float* colors, uint8_t* dst)
             {
                 for (size_t x = 0, o = 0; x < width; x++)
                 {
-                    float range = ranges[Base::Diff<channels, type>(src0 + o, src1 + o)];
+                    float range = ranges[diff[x]];
                     factor[x] = alpha + range * factor[x];
                     for (size_t e = o + channels; o < e; o++)
                     {
-                        colors[o] = alpha * src0[o] + range * colors[o];
+                        colors[o] = alpha * src[o] + range * colors[o];
                         Set<dir>(int(colors[o]/factor[x]), dst + o);
                     }
                 }
@@ -743,19 +765,22 @@ namespace Simd
             template<size_t channels, RbfDiffType type> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t size = p.width * channels;
+                uint8_t* diff = (uint8_t*)(buf + size + p.width);
                 VerEdge<channels, +1>(src, p.width, buf + size, buf, dst);
                 for (size_t y = 1; y < p.height; y++)
                 {
                     src += srcStride;
                     dst += dstStride;
-                    VerMain<channels, type, +1>(src, src - srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                    RowDiff<channels, type>(src, src - srcStride, p.width, diff);
+                    VerMain<channels, type, +1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
                 }
                 VerEdge<channels, -1>(src, p.width, buf + size, buf, dst);
                 for (size_t y = 1; y < p.height; y++)
                 {
                     src -= srcStride;
                     dst -= dstStride;
-                    VerMain<channels, type, -1>(src, src + srcStride, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                    RowDiff<channels, type>(src, src + srcStride, p.width, diff);
+                    VerMain<channels, type, -1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
                 }
             }
 

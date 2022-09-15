@@ -397,6 +397,7 @@ namespace Simd
                 size_t size = 0;
                 size += _size;
                 size += _stride * 2 * sizeof(float);
+                size += 4 * _stride;
                 _buffer.Resize(size);
             }
             return _buffer.data;
