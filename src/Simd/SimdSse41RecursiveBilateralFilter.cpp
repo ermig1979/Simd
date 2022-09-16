@@ -619,6 +619,18 @@ namespace Simd
                         _mm_storeu_si128((__m128i*)(dst + x), AbsDiff8u(src0 + x, src1 + x));
                     break;
                 }
+                case 2:
+                {
+                    for (size_t x = 0, c = 0; x < width; x += A, c += 2 * A)
+                    {
+                        __m128i ad0 = AbsDiff8u(src0 + c + 0, src1 + c + 0);
+                        __m128i d0 = Diff<type>(_mm_and_si128(ad0, K16_00FF), _mm_and_si128(_mm_srli_si128(ad0, 1), K16_00FF));
+                        __m128i ad1 = AbsDiff8u(src0 + c + A, src1 + c + A);
+                        __m128i d1 = Diff<type>(_mm_and_si128(ad1, K16_00FF), _mm_and_si128(_mm_srli_si128(ad1, 1), K16_00FF));
+                        _mm_storeu_si128((__m128i*)(dst + x), _mm_packus_epi16(d0, d1));
+                    }
+                    break;
+                }
                 default:
                     for (size_t x = 0, o = 0; x < width; x += 1, o += channels)
                         dst[x] = Base::Diff<channels, type>(src0 + o, src1 + o);
@@ -664,63 +676,83 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, int dir> void HorRow4x(const uint8_t* src, size_t srcStride, size_t width,
-                float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+            template<size_t channels> struct HorRow4x
             {
-                HorRow<channels, dir>(src + 0 * srcStride, width, alpha, ranges, diff + 0 * dstStride, dst + 0 * dstStride);
-                HorRow<channels, dir>(src + 1 * srcStride, width, alpha, ranges, diff + 1 * dstStride, dst + 1 * dstStride);
-                HorRow<channels, dir>(src + 2 * srcStride, width, alpha, ranges, diff + 2 * dstStride, dst + 2 * dstStride);
-                HorRow<channels, dir>(src + 3 * srcStride, width, alpha, ranges, diff + 3 * dstStride, dst + 3 * dstStride);
-            }
-
-            template<> void HorRow4x<1, +1>(const uint8_t* src, size_t srcStride, size_t width,
-                float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
-            {
-                const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
-                const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
-                __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
-                __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
-                size_t x = 0, widthA = AlignLo(width, A);
-                for (; x < width; x += 1)
+                template<int dir> static void Run(const uint8_t* src, size_t srcStride, size_t width,
+                    float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
                 {
-                    __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
-                    __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
-                    dst[do0] = _mm_extract_epi32(_dst, 0);
-                    dst[do1] = _mm_extract_epi32(_dst, 1);
-                    dst[do2] = _mm_extract_epi32(_dst, 2);
-                    dst[do3] = _mm_extract_epi32(_dst, 3);
-                    src += 1, dst += 1, diff += 1;
-                    __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
-                    _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
-                    _colors = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(_src)), _mm_mul_ps(_range, _colors));
+                    HorRow<channels, dir>(src + 0 * srcStride, width, alpha, ranges, diff + 0 * dstStride, dst + 0 * dstStride);
+                    HorRow<channels, dir>(src + 1 * srcStride, width, alpha, ranges, diff + 1 * dstStride, dst + 1 * dstStride);
+                    HorRow<channels, dir>(src + 2 * srcStride, width, alpha, ranges, diff + 2 * dstStride, dst + 2 * dstStride);
+                    HorRow<channels, dir>(src + 3 * srcStride, width, alpha, ranges, diff + 3 * dstStride, dst + 3 * dstStride);
                 }
-            }
+            };
 
-            template<> void HorRow4x<1, -1>(const uint8_t* src, size_t srcStride, size_t width,
-                float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+            template<> struct HorRow4x<1>
             {
-                const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
-                const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
-                __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
-                __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
-                size_t x = 0, widthA = AlignLo(width, A);
-                diff += width - 2;
-                for (; x < width; x += 1)
+                template<int dir> static void Run(const uint8_t* src, size_t srcStride, size_t width,
+                    float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
                 {
-                    __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
-                    __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
-                    __m128i _old = _mm_setr_epi32(dst[do0], dst[do1], dst[do2], dst[do3]);
-                    _dst = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_dst, _old), K32_00000001), 1);
-                    dst[do0] = _mm_extract_epi32(_dst, 0);
-                    dst[do1] = _mm_extract_epi32(_dst, 1);
-                    dst[do2] = _mm_extract_epi32(_dst, 2);
-                    dst[do3] = _mm_extract_epi32(_dst, 3);
-                    src -= 1, dst -= 1, diff -= 1;
-                    __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
-                    _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
-                    _colors = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(_src)), _mm_mul_ps(_range, _colors));
+                    const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                    const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+                    __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                    __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
+                    if(dir == -1) diff += width - 2;
+                    for (size_t x = 0; x < width; x += 1)
+                    {
+                        __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
+                        __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
+                        if (dir == -1) _dst = _mm_avg_epu8(_dst, _mm_setr_epi32(dst[do0], dst[do1], dst[do2], dst[do3]));
+                        dst[do0] = _mm_extract_epi32(_dst, 0);
+                        dst[do1] = _mm_extract_epi32(_dst, 1);
+                        dst[do2] = _mm_extract_epi32(_dst, 2);
+                        dst[do3] = _mm_extract_epi32(_dst, 3);
+                        src += dir, dst += dir, diff += dir;
+                        __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
+                        _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
+                        _colors = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(_src)), _mm_mul_ps(_range, _colors));
+                    }                
                 }
-            }
+            };
+
+            template<> struct HorRow4x<2>
+            {
+                static SIMD_INLINE __m128i Load(const uint8_t* src0, const uint8_t* src1)
+                {
+                    int lo = *(uint16_t*)src0, hi = *(uint16_t*)src1, val = lo | (hi << 16);
+                    return _mm_cvtepu8_epi32(_mm_cvtsi32_si128(val));
+                }
+
+                template<int dir> static void Run(const uint8_t* src, size_t srcStride, size_t width,
+                    float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+                {
+                    const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                    const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+                    __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                    __m128 colors0 = _mm_cvtepi32_ps(Load(src + so0, src + so1));
+                    __m128 colors1 = _mm_cvtepi32_ps(Load(src + so2, src + so3));
+                    if (dir == -1) diff += width - 2;
+                    for (size_t x = 0; x < width; x += 1)
+                    {
+                        __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
+                        __m128i dst0 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors0, Shuffle32f<0x50>(_factor))));
+                        __m128i dst1 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors1, Shuffle32f<0xFA>(_factor))));
+                        if (dir == -1) dst0 = _mm_avg_epu8(dst0, Load(dst + do0, dst + do1));
+                        if (dir == -1) dst1 = _mm_avg_epu8(dst1, Load(dst + do2, dst + do3));
+                        __m128i _dst = _mm_packus_epi16(_mm_packus_epi32(dst0, dst1), _mm_setzero_si128());
+                        *(uint16_t*)(dst + do0) = _mm_extract_epi16(_dst, 0);
+                        *(uint16_t*)(dst + do1) = _mm_extract_epi16(_dst, 1);
+                        *(uint16_t*)(dst + do2) = _mm_extract_epi16(_dst, 2);
+                        *(uint16_t*)(dst + do3) = _mm_extract_epi16(_dst, 3);
+                        src += dir * 2, dst += dir * 2, diff += dir;
+                        _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
+                        __m128i src0 = Load(src + so0, src + so1);
+                        colors0 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(src0)), _mm_mul_ps(Shuffle32f<0x50>(_range), colors0));
+                        __m128i src1 = Load(src + so2, src + so3);
+                        colors1 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(src1)), _mm_mul_ps(Shuffle32f<0xFA>(_range), colors1));
+                    }
+                }
+            };
 
             //-----------------------------------------------------------------------------------------
 
@@ -731,8 +763,8 @@ namespace Simd
                 for (; y < height4; y += 4)
                 {
                     RowDiff4x<channels, type>(src, src + channels, srcStride, p.width - 1, diff, dstStride);
-                    HorRow4x<channels, +1>(src, srcStride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
-                    HorRow4x<channels, -1>(src + last, srcStride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
+                    HorRow4x<channels>::template Run<+1>(src, srcStride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
+                    HorRow4x<channels>::template Run<-1>(src + last, srcStride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
                     src += 4 * srcStride;
                     dst += 4 * dstStride;
                 }
