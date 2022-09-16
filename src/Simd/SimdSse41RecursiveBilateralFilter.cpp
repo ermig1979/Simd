@@ -595,6 +595,18 @@ namespace Simd
                 dst[0] = uint8_t((value + dst[0] + 1) / 2);
             }
 
+            template<int dir> SIMD_INLINE void Set16(__m128i value, uint8_t* dst);
+
+            template<> SIMD_INLINE void Set16<+1>(__m128i value, uint8_t* dst)
+            {
+                _mm_storeu_si128((__m128i*)dst, value);
+            }
+
+            template<> SIMD_INLINE void Set16<-1>(__m128i value, uint8_t* dst)
+            {
+                _mm_storeu_si128((__m128i*)dst, _mm_avg_epu8(_mm_loadu_si128((__m128i*)dst), value));
+            }
+
             //-----------------------------------------------------------------------------------------
 
             template<size_t channels, RbfDiffType type> SIMD_INLINE void RowDiff(const uint8_t* src0, const uint8_t* src1, size_t width, uint8_t* dst)
@@ -738,29 +750,88 @@ namespace Simd
 
             template<size_t channels, int dir> void VerEdge(const uint8_t* src, size_t width, float* factor, float* colors, uint8_t* dst)
             {
-                for (size_t x = 0; x < width; x++)
+                __m128 _1 = _mm_set1_ps(1.0f);
+                size_t widthF = AlignLo(width, F), x = 0;
+                for (; x < widthF; x += F)
+                    _mm_storeu_ps(factor + x, _1);
+                for (; x < width; x++)
                     factor[x] = 1.0f;
-                for (size_t i = 0, n = width * channels; i < n; i++)
+
+                size_t size = width * channels, sizeF = AlignLo(size, F), i = 0;
+                for (; i < sizeF; i += F)
                 {
-                    colors[i] = src[i];
-                    Set<dir>(src[i], dst + i);
+                    __m128i i32 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(int32_t*)(src + i)));
+                    _mm_storeu_ps(colors + i, _mm_cvtepi32_ps(i32));
                 }
+                for (; i < size; i++)
+                    colors[i] = src[i];
+
+                size_t sizeA = AlignLo(size, A);
+                for (i = 0; i < sizeA; i += A)
+                    Set16<dir>(_mm_loadu_si128((__m128i*)(src + i)), dst + i);
+                for (; i < size; i += 1)
+                    Set<dir>(src[i], dst + i);
             }
 
-            template<size_t channels, RbfDiffType type, int dir> void VerMain(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
-                const float* ranges, float* factor, float* colors, uint8_t* dst)
+            //-----------------------------------------------------------------------------------------
+
+            template<size_t channels> struct VerMain
             {
-                for (size_t x = 0, o = 0; x < width; x++)
+                template<int dir> static void Run(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
+                    const float* ranges, float* factor, float* colors, uint8_t* dst)
                 {
-                    float range = ranges[diff[x]];
-                    factor[x] = alpha + range * factor[x];
-                    for (size_t e = o + channels; o < e; o++)
+                    for (size_t x = 0, o = 0; x < width; x++)
                     {
-                        colors[o] = alpha * src[o] + range * colors[o];
-                        Set<dir>(int(colors[o]/factor[x]), dst + o);
+                        float range = ranges[diff[x]];
+                        factor[x] = alpha + range * factor[x];
+                        for (size_t e = o + channels; o < e; o++)
+                        {
+                            colors[o] = alpha * src[o] + range * colors[o];
+                            Set<dir>(int(colors[o] / factor[x]), dst + o);
+                        }
                     }
                 }
-            }
+            };
+
+            template<> struct VerMain<1>
+            {
+                template<int offs> static SIMD_INLINE __m128i RunF(__m128i src, const uint8_t* diff,
+                    __m128 alpha, const float* ranges, float* factor, float* colors)
+                {
+                    __m128 _range = _mm_setr_ps(ranges[diff[offs + 0]], ranges[diff[offs + 1]], ranges[diff[offs + 2]], ranges[diff[offs + 3]]);
+                    __m128 _factor = _mm_add_ps(alpha, _mm_mul_ps(_range, _mm_loadu_ps(factor + offs)));
+                    __m128 _src = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_srli_si128(src, offs)));
+                    __m128 _colors = _mm_add_ps(_mm_mul_ps(alpha, _src), _mm_mul_ps(_range, _mm_loadu_ps(colors + offs)));
+                    _mm_storeu_ps(factor + offs, _factor);
+                    _mm_storeu_ps(colors + offs, _colors);
+                    return _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
+                }
+
+                template<int dir> static void Run(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
+                    const float* ranges, float* factor, float* colors, uint8_t* dst)
+                {
+                    size_t widthA = AlignLo(width, A), x = 0;
+                    __m128 _alpha = _mm_set1_ps(alpha);
+                    for (; x < widthA; x += A)
+                    {
+                        __m128i _src = _mm_loadu_si128((__m128i*)(src + x));
+                        __m128i d0 = RunF<0 * 4>(_src, diff + x, _alpha, ranges, factor + x, colors + x);
+                        __m128i d1 = RunF<1 * 4>(_src, diff + x, _alpha, ranges, factor + x, colors + x);
+                        __m128i d2 = RunF<2 * 4>(_src, diff + x, _alpha, ranges, factor + x, colors + x);
+                        __m128i d3 = RunF<3 * 4>(_src, diff + x, _alpha, ranges, factor + x, colors + x);
+                        Set16<dir>(_mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)), dst + x);
+                    }
+                    for (; x < width; x++)
+                    {
+                        float range = ranges[diff[x]];
+                        factor[x] = alpha + range * factor[x];
+                        colors[x] = alpha * src[x] + range * colors[x];
+                        Set<dir>(int(colors[x] / factor[x]), dst + x);
+                    }
+                }
+            };
+
+            //-----------------------------------------------------------------------------------------
 
             template<size_t channels, RbfDiffType type> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
@@ -772,7 +843,7 @@ namespace Simd
                     src += srcStride;
                     dst += dstStride;
                     RowDiff<channels, type>(src, src - srcStride, p.width, diff);
-                    VerMain<channels, type, +1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                    VerMain<channels>::template Run<+1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
                 }
                 VerEdge<channels, -1>(src, p.width, buf + size, buf, dst);
                 for (size_t y = 1; y < p.height; y++)
@@ -780,7 +851,7 @@ namespace Simd
                     src -= srcStride;
                     dst -= dstStride;
                     RowDiff<channels, type>(src, src + srcStride, p.width, diff);
-                    VerMain<channels, type, -1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                    VerMain<channels>::template Run<-1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
                 }
             }
 
