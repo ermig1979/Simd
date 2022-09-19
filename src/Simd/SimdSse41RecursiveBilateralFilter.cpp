@@ -609,6 +609,22 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
+            template<RbfDiffType type> SIMD_INLINE __m128i Diff3(__m128i src)
+            {
+                static const __m128i K0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x3, -1, -1, -1, 0x6, -1, -1, -1, 0x9, -1, -1, -1);
+                static const __m128i K1 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x4, -1, -1, -1, 0x7, -1, -1, -1, 0xa, -1, -1, -1);
+                static const __m128i K2 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x5, -1, -1, -1, 0x8, -1, -1, -1, 0xb, -1, -1, -1);
+                return Diff<type>(_mm_shuffle_epi8(src, K0), _mm_shuffle_epi8(src, K1), _mm_shuffle_epi8(src, K2));
+            }
+
+            template<RbfDiffType type> SIMD_INLINE __m128i Diff4(__m128i src)
+            {
+                static const __m128i K0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xc, -1, -1, -1);
+                static const __m128i K1 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xd, -1, -1, -1);
+                static const __m128i K2 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xa, -1, -1, -1, 0xe, -1, -1, -1);
+                return Diff<type>(_mm_shuffle_epi8(src, K0), _mm_shuffle_epi8(src, K1), _mm_shuffle_epi8(src, K2));
+            }
+
             template<size_t channels, RbfDiffType type> SIMD_INLINE void RowDiff(const uint8_t* src0, const uint8_t* src1, size_t width, uint8_t* dst)
             {
                 switch (channels)
@@ -628,6 +644,30 @@ namespace Simd
                         __m128i ad1 = AbsDiff8u(src0 + c + A, src1 + c + A);
                         __m128i d1 = Diff<type>(_mm_and_si128(ad1, K16_00FF), _mm_and_si128(_mm_srli_si128(ad1, 1), K16_00FF));
                         _mm_storeu_si128((__m128i*)(dst + x), _mm_packus_epi16(d0, d1));
+                    }
+                    break;
+                }
+                case 3:
+                {
+                    for (size_t x = 0, c = 0; x < width; x += A, c += 3 * A)
+                    {
+                        __m128i d0 = Diff3<type>(AbsDiff8u(src0 + c + 0 * 12, src1 + c + 0 * 12));
+                        __m128i d1 = Diff3<type>(AbsDiff8u(src0 + c + 1 * 12, src1 + c + 1 * 12));
+                        __m128i d2 = Diff3<type>(AbsDiff8u(src0 + c + 2 * 12, src1 + c + 2 * 12));
+                        __m128i d3 = Diff3<type>(AbsDiff8u(src0 + c + 3 * 12, src1 + c + 3 * 12));
+                        _mm_storeu_si128((__m128i*)(dst + x), _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+                    }
+                    break;
+                }
+                case 4:
+                {
+                    for (size_t x = 0, c = 0; x < width; x += A, c += 4 * A)
+                    {
+                        __m128i d0 = Diff4<type>(AbsDiff8u(src0 + c + 0 * A, src1 + c + 0 * A));
+                        __m128i d1 = Diff4<type>(AbsDiff8u(src0 + c + 1 * A, src1 + c + 1 * A));
+                        __m128i d2 = Diff4<type>(AbsDiff8u(src0 + c + 2 * A, src1 + c + 2 * A));
+                        __m128i d3 = Diff4<type>(AbsDiff8u(src0 + c + 3 * A, src1 + c + 3 * A));
+                        _mm_storeu_si128((__m128i*)(dst + x), _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
                     }
                     break;
                 }
@@ -750,6 +790,57 @@ namespace Simd
                         colors0 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(src0)), _mm_mul_ps(Shuffle32f<0x50>(_range), colors0));
                         __m128i src1 = Load(src + so2, src + so3);
                         colors1 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(src1)), _mm_mul_ps(Shuffle32f<0xFA>(_range), colors1));
+                    }
+                }
+            };
+
+            template<> struct HorRow4x<3>
+            {
+                static SIMD_INLINE __m128i Load(const uint8_t* src)
+                {
+                    return _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(uint32_t*)src));
+                }
+
+                static SIMD_INLINE void Store(uint8_t* dst, __m128i val)
+                {
+                    static const __m128i SHFL = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+                    uint32_t _val = _mm_cvtsi128_si32(_mm_shuffle_epi8(val, SHFL));
+                    *(uint16_t*)dst = _val;
+                    dst[2] = (_val >> 16) & 0xFF;
+                }
+
+                template<int dir> static void Run(const uint8_t* src, size_t srcStride, size_t width,
+                    float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+                {
+                    const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                    const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+                    __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                    __m128 colors0 = _mm_cvtepi32_ps(Load(src + so0));
+                    __m128 colors1 = _mm_cvtepi32_ps(Load(src + so1));
+                    __m128 colors2 = _mm_cvtepi32_ps(Load(src + so2));
+                    __m128 colors3 = _mm_cvtepi32_ps(Load(src + so3));
+                    if (dir == -1) diff += width - 2;
+                    for (size_t x = 0; x < width; x += 1)
+                    {
+                        __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
+                        __m128i dst0 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors0, Shuffle32f<0x00>(_factor))));
+                        __m128i dst1 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors1, Shuffle32f<0x55>(_factor))));
+                        __m128i dst2 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors2, Shuffle32f<0xAA>(_factor))));
+                        __m128i dst3 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors3, Shuffle32f<0xFF>(_factor))));
+                        if (dir == -1) dst0 = _mm_avg_epu8(dst0, Load(dst + do0));
+                        if (dir == -1) dst1 = _mm_avg_epu8(dst1, Load(dst + do1));                        
+                        if (dir == -1) dst2 = _mm_avg_epu8(dst2, Load(dst + do2)); 
+                        if (dir == -1) dst3 = _mm_avg_epu8(dst3, Load(dst + do3));
+                        Store(dst + do0, dst0);
+                        Store(dst + do1, dst1);
+                        Store(dst + do2, dst2);
+                        Store(dst + do3, dst3);
+                        src += dir * 3, dst += dir * 3, diff += dir;
+                        _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
+                        colors0 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(Load(src + so0))), _mm_mul_ps(Shuffle32f<0x00>(_range), colors0));
+                        colors1 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(Load(src + so1))), _mm_mul_ps(Shuffle32f<0x55>(_range), colors1));
+                        colors2 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(Load(src + so2))), _mm_mul_ps(Shuffle32f<0xAA>(_range), colors2));
+                        colors3 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(Load(src + so3))), _mm_mul_ps(Shuffle32f<0xFF>(_range), colors3));
                     }
                 }
             };
