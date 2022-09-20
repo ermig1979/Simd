@@ -70,10 +70,10 @@ namespace Simd
 #elif (defined __GNUC__)
             if (__get_cpuid_max(0, NULL) < eax)
                 return false;
-            __cpuid_count(eax, ecx, 
-                registers[Cpuid::Eax], 
-                registers[Cpuid::Ebx], 
-                registers[Cpuid::Ecx], 
+            __cpuid_count(eax, ecx,
+                registers[Cpuid::Eax],
+                registers[Cpuid::Ebx],
+                registers[Cpuid::Ecx],
                 registers[Cpuid::Edx]);
 #else
 #error Do not know how to detect CPU info!
@@ -121,7 +121,7 @@ namespace Simd
         void GetLogicalProcessorInformation(std::vector<Info> & info)
         {
             DWORD size = 0;
-            ::GetLogicalProcessorInformation(0, &size); 
+            ::GetLogicalProcessorInformation(0, &size);
             info.resize(size / sizeof(Info));
             ::GetLogicalProcessorInformation(info.data(), &size);
         }
@@ -135,7 +135,7 @@ namespace Simd
                 if (info[i].Relationship == ::RelationNumaNode)
                     number++;
             return number;
-        }            
+        }
 
         size_t CpuCoreNumber()
         {
@@ -196,9 +196,21 @@ namespace Simd
         {
             switch (level)
             {
-            case 1: return CorrectIfZero(::sysconf(_SC_LEVEL1_DCACHE_SIZE), 32 * 1024);
-            case 2: return CorrectIfZero(::sysconf(_SC_LEVEL2_CACHE_SIZE), 256 * 1024);
-            case 3: return CorrectIfZero(::sysconf(_SC_LEVEL3_CACHE_SIZE), 2048 * 1024);
+            case 1:
+            {
+                const size_t sz = ::sysconf(_SC_LEVEL1_DCACHE_SIZE) < 0 ? 0 : ::sysconf(_SC_LEVEL1_DCACHE_SIZE);
+                return CorrectIfZero(sz, 32 * 1024);
+            }
+            case 2:
+            {
+                const size_t sz = ::sysconf(_SC_LEVEL2_CACHE_SIZE) < 0 ? 0 : ::sysconf(_SC_LEVEL2_CACHE_SIZE);
+                return CorrectIfZero(sz, 256 * 1024);
+            }
+            case 3:
+            {
+                const size_t sz = ::sysconf(_SC_LEVEL3_CACHE_SIZE) < 0 ? 0 : ::sysconf(_SC_LEVEL3_CACHE_SIZE);
+                return CorrectIfZero(sz, 2048 * 1024);
+            }
             default:
                 return 0;
             }
