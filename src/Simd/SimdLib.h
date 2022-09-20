@@ -334,6 +334,8 @@ typedef enum
     SimdPixelFormatRgba32,
     /*! A 16-bit (2 8-bit channels) UYVY422 pixel format. */
     SimdPixelFormatUyvy16,
+    /*! A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format. */
+    SimdPixelFormatArgb32,
 } SimdPixelFormatType;
 
 /*! @ingroup recursive_bilateral_filter
@@ -1136,9 +1138,9 @@ extern "C"
 
         \short Performs premultiply operation.
 
-        All images must have the same width, height and format (BGRA32).
+        All images must have the same width, height and format (BGRA32, RGBA32).
 
-        For every point:
+        For every point (sample for BGRA32):
         \verbatim
          dst[x, y, 0] = src[x, y, 0] * src[x, y, 3] / 255;
          dst[x, y, 1] = src[x, y, 1] * src[x, y, 3] / 255;
@@ -1165,9 +1167,9 @@ extern "C"
 
         \short Performs unpremultiply operation.
 
-        All images must have the same width, height and format (BGRA32).
+        All images must have the same width, height and format (BGRA32, RGBA32).
 
-        For every point:
+        For every point (sample for BGRA32):
         \verbatim
          dst[x, y, 0] = src[x, y, 0] / src[x, y, 3] * 255;
          dst[x, y, 1] = src[x, y, 1] / src[x, y, 3] * 255;

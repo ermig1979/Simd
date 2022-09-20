@@ -370,9 +370,9 @@ namespace Simd
 
         \short Performs premultiply operation.
 
-        All images must have the same width, height and format (BGRA32).
+        All images must have the same width, height and format (BGRA32, RGBA32).
 
-        For every point:
+        For every point (sample for BGRA32):
         \verbatim
          dst[x, y, 0] = src[x, y, 0] * src[x, y, 3] / 255;
          dst[x, y, 1] = src[x, y, 1] * src[x, y, 3] / 255;
@@ -389,7 +389,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void AlphaPremultiply(const View<A>& src, View<A>& dst)
     {
-        assert(Compatible(src, dst) && src.format == View<A>::Bgra32);
+        assert(Compatible(src, dst) && (src.format == View<A>::Bgra32 || src.format == View<A>::Rgba32));
 
         SimdAlphaPremultiply(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
@@ -400,9 +400,9 @@ namespace Simd
 
         \short Performs unpremultiply operation.
 
-        All images must have the same width, height and format (BGRA32).
+        All images must have the same width, height and format (BGRA32, RGBA32).
 
-        For every point:
+        For every point (sample for BGRA32):
         \verbatim
          dst[x, y, 0] = src[x, y, 0] / src[x, y, 3] * 255;
          dst[x, y, 1] = src[x, y, 1] / src[x, y, 3] * 255;
@@ -419,7 +419,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void AlphaUnpremultiply(const View<A>& src, View<A>& dst)
     {
-        assert(Compatible(src, dst) && src.format == View<A>::Bgra32);
+        assert(Compatible(src, dst) && (src.format == View<A>::Bgra32 || src.format == View<A>::Rgba32));
 
         SimdAlphaUnpremultiply(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }

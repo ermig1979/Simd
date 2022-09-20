@@ -113,6 +113,8 @@ namespace Simd
             Rgba32,
             /*! A 16-bit (2 8-bit channels) UYVY422 pixel format. */
             Uyvy16,
+            /*! A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format. */
+            Argb32,
         };
 
         /*!
@@ -1129,6 +1131,7 @@ namespace Simd
         case Rgb24:     return 3;
         case Rgba32:    return 4;
         case Uyvy16:    return 2;
+        case Argb32:    return 4;
         default: assert(0); return 0;
         }
     }
@@ -1161,6 +1164,7 @@ namespace Simd
         case Rgb24:     return 1;
         case Rgba32:    return 1;
         case Uyvy16:    return 1;
+        case Argb32:    return 1;
         default: assert(0); return 0;
         }
     }
@@ -1193,6 +1197,7 @@ namespace Simd
         case Rgb24:     return 3;
         case Rgba32:    return 4;
         case Uyvy16:    return 2;
+        case Argb32:    return 4;
         default: assert(0); return 0;
         }
     }

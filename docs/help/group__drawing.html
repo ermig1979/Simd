@@ -522,8 +522,8 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 </div><div class="memdoc">
 
 <p>Performs premultiply operation. </p>
-<p >All images must have the same width, height and format (BGRA32).</p>
-<p >For every point: </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] * src[x, y, 3] / 255;
+<p >All images must have the same width, height and format (BGRA32, RGBA32).</p>
+<p >For every point (sample for BGRA32): </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] * src[x, y, 3] / 255;
  dst[x, y, 1] = src[x, y, 1] * src[x, y, 3] / 255;
  dst[x, y, 2] = src[x, y, 2] * src[x, y, 3] / 255;
  dst[x, y, 3] = src[x, y, 3];
@@ -594,8 +594,8 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 </div><div class="memdoc">
 
 <p>Performs unpremultiply operation. </p>
-<p >All images must have the same width, height and format (BGRA32).</p>
-<p >For every point: </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] / src[x, y, 3] * 255;
+<p >All images must have the same width, height and format (BGRA32, RGBA32).</p>
+<p >For every point (sample for BGRA32): </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] / src[x, y, 3] * 255;
  dst[x, y, 1] = src[x, y, 1] / src[x, y, 3] * 255;
  dst[x, y, 2] = src[x, y, 2] / src[x, y, 3] * 255;
  dst[x, y, 3] = src[x, y, 3];
@@ -849,8 +849,8 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 </div><div class="memdoc">
 
 <p>Performs premultiply operation. </p>
-<p >All images must have the same width, height and format (BGRA32).</p>
-<p >For every point: </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] * src[x, y, 3] / 255;
+<p >All images must have the same width, height and format (BGRA32, RGBA32).</p>
+<p >For every point (sample for BGRA32): </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] * src[x, y, 3] / 255;
  dst[x, y, 1] = src[x, y, 1] * src[x, y, 3] / 255;
  dst[x, y, 2] = src[x, y, 2] * src[x, y, 3] / 255;
  dst[x, y, 3] = src[x, y, 3];
@@ -893,8 +893,8 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 </div><div class="memdoc">
 
 <p>Performs unpremultiply operation. </p>
-<p >All images must have the same width, height and format (BGRA32).</p>
-<p >For every point: </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] / src[x, y, 3] * 255;
+<p >All images must have the same width, height and format (BGRA32, RGBA32).</p>
+<p >For every point (sample for BGRA32): </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] / src[x, y, 3] * 255;
  dst[x, y, 1] = src[x, y, 1] / src[x, y, 3] * 255;
  dst[x, y, 2] = src[x, y, 2] / src[x, y, 3] * 255;
  dst[x, y, 3] = src[x, y, 3];
