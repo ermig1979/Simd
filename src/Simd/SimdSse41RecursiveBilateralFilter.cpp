@@ -845,6 +845,55 @@ namespace Simd
                 }
             };
 
+            template<> struct HorRow4x<4>
+            {
+                static SIMD_INLINE __m128i Load(const uint8_t* src)
+                {
+                    return _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(uint32_t*)src));
+                }
+
+                static SIMD_INLINE void Store(uint8_t* dst, __m128i val)
+                {
+                    static const __m128i SHFL = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x8, 0xC, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+                    *(uint32_t*)dst =  _mm_cvtsi128_si32(_mm_shuffle_epi8(val, SHFL));
+                }
+
+                template<int dir> static void Run(const uint8_t* src, size_t srcStride, size_t width,
+                    float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+                {
+                    const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                    const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+                    __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                    __m128 colors0 = _mm_cvtepi32_ps(Load(src + so0));
+                    __m128 colors1 = _mm_cvtepi32_ps(Load(src + so1));
+                    __m128 colors2 = _mm_cvtepi32_ps(Load(src + so2));
+                    __m128 colors3 = _mm_cvtepi32_ps(Load(src + so3));
+                    if (dir == -1) diff += width - 2;
+                    for (size_t x = 0; x < width; x += 1)
+                    {
+                        __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
+                        __m128i dst0 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors0, Shuffle32f<0x00>(_factor))));
+                        __m128i dst1 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors1, Shuffle32f<0x55>(_factor))));
+                        __m128i dst2 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors2, Shuffle32f<0xAA>(_factor))));
+                        __m128i dst3 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors3, Shuffle32f<0xFF>(_factor))));
+                        if (dir == -1) dst0 = _mm_avg_epu8(dst0, Load(dst + do0));
+                        if (dir == -1) dst1 = _mm_avg_epu8(dst1, Load(dst + do1));
+                        if (dir == -1) dst2 = _mm_avg_epu8(dst2, Load(dst + do2));
+                        if (dir == -1) dst3 = _mm_avg_epu8(dst3, Load(dst + do3));
+                        Store(dst + do0, dst0);
+                        Store(dst + do1, dst1);
+                        Store(dst + do2, dst2);
+                        Store(dst + do3, dst3);
+                        src += dir * 4, dst += dir * 4, diff += dir;
+                        _factor = _mm_add_ps(_alpha, _mm_mul_ps(_range, _factor));
+                        colors0 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(Load(src + so0))), _mm_mul_ps(Shuffle32f<0x00>(_range), colors0));
+                        colors1 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(Load(src + so1))), _mm_mul_ps(Shuffle32f<0x55>(_range), colors1));
+                        colors2 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(Load(src + so2))), _mm_mul_ps(Shuffle32f<0xAA>(_range), colors2));
+                        colors3 = _mm_add_ps(_mm_mul_ps(_alpha, _mm_cvtepi32_ps(Load(src + so3))), _mm_mul_ps(Shuffle32f<0xFF>(_range), colors3));
+                    }
+                }
+            };
+
             //-----------------------------------------------------------------------------------------
 
             template<size_t channels, RbfDiffType type> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
@@ -1043,6 +1092,49 @@ namespace Simd
                         float range = ranges[diff[x]];
                         factor[x] = alpha + range * factor[x];
                         for (size_t e = o + 3; o < e; o++)
+                        {
+                            colors[o] = alpha * src[o] + range * colors[o];
+                            Set<dir>(int(colors[o] / factor[x]), dst + o);
+                        }
+                    }
+                }
+            };
+
+            template<> struct VerMain<4>
+            {
+                template<int offs> static SIMD_INLINE __m128i RunC(__m128i src, __m128 alpha, __m128 range, const __m128& factor, float* colors)
+                {
+                    __m128 _src = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_srli_si128(src, offs)));
+                    __m128 _colors = _mm_add_ps(_mm_mul_ps(alpha, _src), _mm_mul_ps(range, _mm_loadu_ps(colors + offs)));
+                    _mm_storeu_ps(colors + offs, _colors);
+                    return _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, factor)));
+                }
+
+                static SIMD_INLINE __m128i RunF(const uint8_t* src, const uint8_t* diff, __m128 alpha, const float* ranges, float* factor, float* colors)
+                {
+                    __m128i _src = _mm_loadu_si128((__m128i*)src);
+                    __m128 _range = _mm_setr_ps(ranges[diff[0]], ranges[diff[1]], ranges[diff[2]], ranges[diff[3]]);
+                    __m128 _factor = _mm_add_ps(alpha, _mm_mul_ps(_range, _mm_loadu_ps(factor)));
+                    _mm_storeu_ps(factor, _factor);
+                    __m128i dst0 = RunC<0x0>(_src, alpha, Shuffle32f<0x00>(_range), Shuffle32f<0x00>(_factor), colors);
+                    __m128i dst1 = RunC<0x4>(_src, alpha, Shuffle32f<0x55>(_range), Shuffle32f<0x55>(_factor), colors);
+                    __m128i dst2 = RunC<0x8>(_src, alpha, Shuffle32f<0xAA>(_range), Shuffle32f<0xAA>(_factor), colors);
+                    __m128i dst3 = RunC<0xC>(_src, alpha, Shuffle32f<0xFF>(_range), Shuffle32f<0xFF>(_factor), colors);
+                    return _mm_packus_epi16(_mm_packs_epi32(dst0, dst1), _mm_packs_epi32(dst2, dst3));
+                }
+
+                template<int dir> static void Run(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
+                    const float* ranges, float* factor, float* colors, uint8_t* dst)
+                {
+                    size_t widthF = AlignLo(width, F), x = 0, o = 0;
+                    __m128 _alpha = _mm_set1_ps(alpha);
+                    for (; x < widthF; x += F, o += A)
+                        Set16<dir>(RunF(src + o, diff + x, _alpha, ranges, factor + x, colors + o), dst + o);
+                    for (; x < width; x++)
+                    {
+                        float range = ranges[diff[x]];
+                        factor[x] = alpha + range * factor[x];
+                        for (size_t e = o + 4; o < e; o++)
                         {
                             colors[o] = alpha * src[o] + range * colors[o];
                             Set<dir>(int(colors[o] / factor[x]), dst + o);
