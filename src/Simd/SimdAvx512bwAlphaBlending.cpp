@@ -322,14 +322,15 @@ namespace Simd
             return Divide16uBy255(_mm512_mullo_epi16(value, alpha));
         }
 
-        const __m512i K8_SHUFFLE_BGRA_TO_A0A0 = SIMD_MM512_SETR_EPI8(
-            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
-            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
-            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
-            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1);
+        template<bool argb> SIMD_INLINE void AlphaPremultiply(const uint8_t* src, uint8_t* dst, __mmask64 tail = -1);
 
-        SIMD_INLINE void AlphaPremultiply(const uint8_t* src, uint8_t* dst, __mmask64 tail = -1)
+        template<> SIMD_INLINE void AlphaPremultiply<false>(const uint8_t* src, uint8_t* dst, __mmask64 tail)
         {
+            static const __m512i K8_SHUFFLE_BGRA_TO_A0A0 = SIMD_MM512_SETR_EPI8(
+                0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
+                0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
+                0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
+                0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1);
             __m512i bgra = _mm512_maskz_loadu_epi8(tail, src);
             __m512i a0a0 = _mm512_shuffle_epi8(bgra, K8_SHUFFLE_BGRA_TO_A0A0);
             __m512i b0r0 = _mm512_and_si512(bgra, K16_00FF);
@@ -339,7 +340,23 @@ namespace Simd
             _mm512_mask_storeu_epi8(dst, tail, _mm512_or_si512(B0R0, _mm512_slli_epi32(G0A0, 8)));
         }
 
-        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> SIMD_INLINE void AlphaPremultiply<true>(const uint8_t* src, uint8_t* dst, __mmask64 tail)
+        {
+            static const __m512i K8_SHUFFLE_ARGB_TO_A0A0 = SIMD_MM512_SETR_EPI8(
+                0x0, -1, 0x0, -1, 0x4, -1, 0x4, -1, 0x8, -1, 0x8, -1, 0xC, -1, 0xC, -1,
+                0x0, -1, 0x0, -1, 0x4, -1, 0x4, -1, 0x8, -1, 0x8, -1, 0xC, -1, 0xC, -1,
+                0x0, -1, 0x0, -1, 0x4, -1, 0x4, -1, 0x8, -1, 0x8, -1, 0xC, -1, 0xC, -1,
+                0x0, -1, 0x0, -1, 0x4, -1, 0x4, -1, 0x8, -1, 0x8, -1, 0xC, -1, 0xC, -1);
+            __m512i argb = _mm512_maskz_loadu_epi8(tail, src);
+            __m512i a0a0 = _mm512_shuffle_epi8(argb, K8_SHUFFLE_ARGB_TO_A0A0);
+            __m512i f0g0 = _mm512_or_si512(_mm512_and_si512(argb, K32_00FF0000), K32_000000FF);
+            __m512i r0b0 = _mm512_and_si512(_mm512_srli_epi32(argb, 8), K16_00FF);
+            __m512i F0A0 = AlphaPremultiply16i(f0g0, a0a0);
+            __m512i R0B0 = AlphaPremultiply16i(r0b0, a0a0);
+            _mm512_mask_storeu_epi8(dst, tail, _mm512_or_si512(F0A0, _mm512_slli_epi32(R0B0, 8)));
+        }
+
+        template<bool argb> void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             size_t size = width * 4;
             size_t sizeA = AlignLo(size, A);
@@ -348,50 +365,60 @@ namespace Simd
             {
                 size_t i = 0;
                 for (; i < sizeA; i += A)
-                    AlphaPremultiply(src + i, dst + i);
+                    AlphaPremultiply<argb>(src + i, dst + i);
                 if (i < size)
-                    AlphaPremultiply(src + i, dst + i, tail);
+                    AlphaPremultiply<argb>(src + i, dst + i, tail);
                 src += srcStride;
                 dst += dstStride;
             }
         }
 
+        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb)
+        {
+            if (argb)
+                AlphaPremultiply<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                AlphaPremultiply<false>(src, srcStride, width, height, dst, dstStride);
+        }
+
         //---------------------------------------------------------------------
 
 #if defined(_MSC_VER) && _MSC_VER < 1927
-        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb)
         {
-            Avx2::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+            Avx2::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride, argb);
         }
 #else
-        const __m512i K8_SHUFFLE_BGRA_TO_B = SIMD_MM512_SETR_EPI8(
+        const __m512i K8_SHUFFLE_0123_TO_0 = SIMD_MM512_SETR_EPI8(
             0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1,
             0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1,
             0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1,
             0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1);
-        const __m512i K8_SHUFFLE_BGRA_TO_G = SIMD_MM512_SETR_EPI8(
+        const __m512i K8_SHUFFLE_0123_TO_1 = SIMD_MM512_SETR_EPI8(
             0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
             0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
             0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
             0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
-        const __m512i K8_SHUFFLE_BGRA_TO_R = SIMD_MM512_SETR_EPI8(
+        const __m512i K8_SHUFFLE_0123_TO_2 = SIMD_MM512_SETR_EPI8(
             0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1,
             0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1,
             0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1,
             0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1);
-        const __m512i K8_SHUFFLE_BGRA_TO_A = SIMD_MM512_SETR_EPI8(
+        const __m512i K8_SHUFFLE_0123_TO_3 = SIMD_MM512_SETR_EPI8(
             0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
             0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
             0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
             0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1);
 
-        SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst, __m512 _255, __mmask64 tail = -1)
+        template<bool argb>  void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst, __m512 _255, __mmask64 tail = -1);
+
+        template<> SIMD_INLINE void AlphaUnpremultiply<false>(const uint8_t* src, uint8_t* dst, __m512 _255, __mmask64 tail)
         {
             __m512i _src = _mm512_maskz_loadu_epi8(tail, src);
-            __m512i b = _mm512_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_B);
-            __m512i g = _mm512_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_G);
-            __m512i r = _mm512_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_R);
-            __m512i a = _mm512_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_A);
+            __m512i b = _mm512_shuffle_epi8(_src, K8_SHUFFLE_0123_TO_0);
+            __m512i g = _mm512_shuffle_epi8(_src, K8_SHUFFLE_0123_TO_1);
+            __m512i r = _mm512_shuffle_epi8(_src, K8_SHUFFLE_0123_TO_2);
+            __m512i a = _mm512_shuffle_epi8(_src, K8_SHUFFLE_0123_TO_3);
             __m512 k = _mm512_cvtepi32_ps(a);
             k = _mm512_maskz_div_ps(_mm512_cmp_ps_mask(k, _mm512_setzero_ps(), _CMP_NEQ_UQ), _255, k);
             b = _mm512_cvtps_epi32(_mm512_min_ps(_mm512_floor_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(b), k)), _255));
@@ -403,7 +430,25 @@ namespace Simd
             _mm512_mask_storeu_epi8(dst, tail, _dst);
         }
 
-        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> SIMD_INLINE void AlphaUnpremultiply<true>(const uint8_t* src, uint8_t* dst, __m512 _255, __mmask64 tail)
+        {
+            __m512i _src = _mm512_maskz_loadu_epi8(tail, src);
+            __m512i a = _mm512_shuffle_epi8(_src, K8_SHUFFLE_0123_TO_0);
+            __m512i r = _mm512_shuffle_epi8(_src, K8_SHUFFLE_0123_TO_1);
+            __m512i g = _mm512_shuffle_epi8(_src, K8_SHUFFLE_0123_TO_2);
+            __m512i b = _mm512_shuffle_epi8(_src, K8_SHUFFLE_0123_TO_3);
+            __m512 k = _mm512_cvtepi32_ps(a);
+            k = _mm512_maskz_div_ps(_mm512_cmp_ps_mask(k, _mm512_setzero_ps(), _CMP_NEQ_UQ), _255, k);
+            b = _mm512_cvtps_epi32(_mm512_min_ps(_mm512_floor_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(b), k)), _255));
+            g = _mm512_cvtps_epi32(_mm512_min_ps(_mm512_floor_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(g), k)), _255));
+            r = _mm512_cvtps_epi32(_mm512_min_ps(_mm512_floor_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(r), k)), _255));
+            __m512i _dst = _mm512_or_si512(a, _mm512_slli_epi32(r, 8));
+            _dst = _mm512_or_si512(_dst, _mm512_slli_epi32(g, 16));
+            _dst = _mm512_or_si512(_dst, _mm512_slli_epi32(b, 24));
+            _mm512_mask_storeu_epi8(dst, tail, _dst);
+        }
+
+        template<bool argb> void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             __m512 _255 = _mm512_set1_ps(255.00001f);
             size_t size = width * 4;
@@ -413,12 +458,20 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < sizeA; col += A)
-                    AlphaUnpremultiply(src + col, dst + col, _255);
+                    AlphaUnpremultiply<argb>(src + col, dst + col, _255);
                 if(col < size)
-                    AlphaUnpremultiply(src + col, dst + col, _255, tail);
+                    AlphaUnpremultiply<argb>(src + col, dst + col, _255, tail);
                 src += srcStride;
                 dst += dstStride;
             }
+        }
+
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb)
+        {
+            if (argb)
+                AlphaUnpremultiply<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                AlphaUnpremultiply<false>(src, srcStride, width, height, dst, dstStride);
         }
 #endif
     }

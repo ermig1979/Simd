@@ -36,7 +36,9 @@ namespace Simd
             return (value + 1 + (value >> 8)) >> 8;
         }
 
-        SIMD_INLINE void AlphaPremultiply(const uint8_t* src, uint8_t* dst)
+        template<bool argb> void AlphaPremultiply(const uint8_t* src, uint8_t* dst);
+
+        template<> SIMD_INLINE void AlphaPremultiply<false>(const uint8_t* src, uint8_t* dst)
         {
             int alpha = src[3];
             dst[0] = DivideBy255(src[0] * alpha);
@@ -45,13 +47,33 @@ namespace Simd
             dst[3] = alpha;
         }
 
-        SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst)
+        template<> SIMD_INLINE void AlphaPremultiply<true>(const uint8_t* src, uint8_t* dst)
+        {
+            int alpha = src[0];
+            dst[0] = alpha;
+            dst[1] = DivideBy255(src[1] * alpha);
+            dst[2] = DivideBy255(src[2] * alpha);
+            dst[3] = DivideBy255(src[3] * alpha);
+        }
+
+        template<bool argb> void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst);
+
+        template<> SIMD_INLINE void AlphaUnpremultiply<false>(const uint8_t* src, uint8_t* dst)
         {
             float alpha = src[3] ? 255.00001f / src[3] : 0.0f;
             dst[0] = RestrictRange(int(src[0] * alpha));
             dst[1] = RestrictRange(int(src[1] * alpha));
             dst[2] = RestrictRange(int(src[2] * alpha));
             dst[3] = src[3];
+        }
+
+        template<> SIMD_INLINE void AlphaUnpremultiply<true>(const uint8_t* src, uint8_t* dst)
+        {
+            float alpha = src[0] ? 255.00001f / src[0] : 0.0f;
+            dst[0] = src[0];
+            dst[1] = RestrictRange(int(src[1] * alpha));
+            dst[2] = RestrictRange(int(src[2] * alpha));
+            dst[3] = RestrictRange(int(src[3] * alpha));
         }
     }
 

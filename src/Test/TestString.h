@@ -87,6 +87,7 @@ namespace Test
         case View::Rgb24:     return "Rgb24";
         case View::Rgba32:    return "Rgba32";
         case View::Uyvy16:    return "Uyvy16";
+        case View::Argb32:    return "Argb32";
         default: assert(0);  return "";
         }
     }

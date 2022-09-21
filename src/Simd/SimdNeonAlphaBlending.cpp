@@ -338,7 +338,9 @@ namespace Simd
             return vshrq_n_u16(vaddq_u16(vaddq_u16(prem, K16_0001), vshrq_n_u16(prem, 8)), 8);
         }
 
-        SIMD_INLINE void AlphaPremultiply2(const uint8_t* src, uint8_t* dst)
+        template<bool argb> void AlphaPremultiply2(const uint8_t* src, uint8_t* dst);
+
+        template<> SIMD_INLINE void AlphaPremultiply2<false>(const uint8_t* src, uint8_t* dst)
         {
             uint8x8x4_t bgra = LoadHalf4<false>(src);
             uint16x8_t alpha = vmovl_u8(bgra.val[3]);
@@ -348,7 +350,17 @@ namespace Simd
             Store4<false>(dst, bgra);
         }
 
-        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> SIMD_INLINE void AlphaPremultiply2<true>(const uint8_t* src, uint8_t* dst)
+        {
+            uint8x8x4_t argb = LoadHalf4<false>(src);
+            uint16x8_t alpha = vmovl_u8(argb.val[0]);
+            argb.val[1] = vmovn_u16(AlphaPremultiply(vmovl_u8(argb.val[1]), alpha));
+            argb.val[2] = vmovn_u16(AlphaPremultiply(vmovl_u8(argb.val[2]), alpha));
+            argb.val[3] = vmovn_u16(AlphaPremultiply(vmovl_u8(argb.val[3]), alpha));
+            Store4<false>(dst, argb);
+        }
+
+        template<bool argb> void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             size_t size = width * 4;
             size_t sizeA2 = AlignLo(size, A * 2);
@@ -356,17 +368,27 @@ namespace Simd
             {
                 size_t i = 0;
                 for (; i < sizeA2; i += A * 2)
-                    AlphaPremultiply2(src + i, dst + i);
+                    AlphaPremultiply2<argb>(src + i, dst + i);
                 for (; i < size; i += 4)
-                    Base::AlphaPremultiply(src + i, dst + i);
+                    Base::AlphaPremultiply<argb>(src + i, dst + i);
                 src += srcStride;
                 dst += dstStride;
             }
         }
 
+        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb)
+        {
+            if (argb)
+                AlphaPremultiply<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                AlphaPremultiply<false>(src, srcStride, width, height, dst, dstStride);
+        }
+
         //-----------------------------------------------------------------------
 
-        SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst, float32x4_t _0, float32x4_t _255)
+        template<bool argb> void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst, float32x4_t _0, float32x4_t _255);
+
+        template<> SIMD_INLINE void AlphaUnpremultiply<false>(const uint8_t* src, uint8_t* dst, float32x4_t _0, float32x4_t _255)
         {
             uint32x4_t _src = Load<false>((uint32_t*)src);
             uint32x4_t b = vandq_u32(_src, K32_000000FF);
@@ -384,7 +406,25 @@ namespace Simd
             Store<false>((uint32_t*)dst, _dst);
         }
 
-        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> SIMD_INLINE void AlphaUnpremultiply<true>(const uint8_t* src, uint8_t* dst, float32x4_t _0, float32x4_t _255)
+        {
+            uint32x4_t _src = Load<false>((uint32_t*)src);
+            uint32x4_t a = vandq_u32(_src, K32_000000FF);
+            uint32x4_t r = vandq_u32(vshrq_n_u32(_src, 8), K32_000000FF);
+            uint32x4_t g = vandq_u32(vshrq_n_u32(_src, 16), K32_000000FF);
+            uint32x4_t b = vshrq_n_u32(_src, 24);
+            float32x4_t k = vcvtq_f32_u32(a);
+            k = vbslq_f32(vceqq_f32(k, _0), k, Div<-1>(_255, k));
+            b = vcvtq_u32_f32(vminq_f32(vmulq_f32(vcvtq_f32_u32(b), k), _255));
+            g = vcvtq_u32_f32(vminq_f32(vmulq_f32(vcvtq_f32_u32(g), k), _255));
+            r = vcvtq_u32_f32(vminq_f32(vmulq_f32(vcvtq_f32_u32(r), k), _255));
+            uint32x4_t _dst = vorrq_u32(a, vshlq_n_u32(r, 8));
+            _dst = vorrq_u32(_dst, vshlq_n_u32(g, 16));
+            _dst = vorrq_u32(_dst, vshlq_n_u32(b, 24));
+            Store<false>((uint32_t*)dst, _dst);
+        }
+
+        template<bool argb> void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             float32x4_t _0 = vdupq_n_f32(0.0f);
             float32x4_t _255 = vdupq_n_f32(255.00001f);
@@ -394,12 +434,20 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < sizeA; col += A)
-                    AlphaUnpremultiply(src + col, dst + col, _0, _255);
+                    AlphaUnpremultiply<argb>(src + col, dst + col, _0, _255);
                 for (; col < size; col += 4)
-                    Base::AlphaUnpremultiply(src + col, dst + col);
+                    Base::AlphaUnpremultiply<argb>(src + col, dst + col);
                 src += srcStride;
                 dst += dstStride;
             }
+        }
+
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb)
+        {
+            if (argb)
+                AlphaUnpremultiply<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                AlphaUnpremultiply<false>(src, srcStride, width, height, dst, dstStride);
         }
     }
 #endif// SIMD_NEON_ENABLE

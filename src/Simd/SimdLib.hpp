@@ -318,7 +318,7 @@ namespace Simd
 
         For every point:
         \verbatim
-        dst[x, y, c] = (src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha))/255;
+        dst[x, y, c] = (src[x, y, c]*alpha + dst[x, y, c]*(255 - alpha))/255;
         \endverbatim
 
         This function is used for image drawing.
@@ -370,7 +370,7 @@ namespace Simd
 
         \short Performs premultiply operation.
 
-        All images must have the same width, height and format (BGRA32, RGBA32).
+        All images must have the same width, height and format (BGRA32, RGBA32, ARGB32).
 
         For every point (sample for BGRA32):
         \verbatim
@@ -389,9 +389,9 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void AlphaPremultiply(const View<A>& src, View<A>& dst)
     {
-        assert(Compatible(src, dst) && (src.format == View<A>::Bgra32 || src.format == View<A>::Rgba32));
+        assert(Compatible(src, dst) && (src.format == View<A>::Bgra32 || src.format == View<A>::Rgba32 || src.format == View<A>::Argb32));
 
-        SimdAlphaPremultiply(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+        SimdAlphaPremultiply(src.data, src.stride, src.width, src.height, dst.data, dst.stride, src.format == View<A>::Argb32 ? SimdTrue : SimdFalse);
     }
 
     /*! @ingroup drawing
@@ -400,7 +400,7 @@ namespace Simd
 
         \short Performs unpremultiply operation.
 
-        All images must have the same width, height and format (BGRA32, RGBA32).
+        All images must have the same width, height and format (BGRA32, RGBA32, ARGB32).
 
         For every point (sample for BGRA32):
         \verbatim
@@ -419,9 +419,9 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void AlphaUnpremultiply(const View<A>& src, View<A>& dst)
     {
-        assert(Compatible(src, dst) && (src.format == View<A>::Bgra32 || src.format == View<A>::Rgba32));
+        assert(Compatible(src, dst) && (src.format == View<A>::Bgra32 || src.format == View<A>::Rgba32 || src.format == View<A>::Argb32));
 
-        SimdAlphaUnpremultiply(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+        SimdAlphaUnpremultiply(src.data, src.stride, src.width, src.height, dst.data, dst.stride, src.format == View<A>::Argb32 ? SimdTrue : SimdFalse);
     }
 
     /*! @ingroup background

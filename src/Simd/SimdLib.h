@@ -1086,7 +1086,7 @@ extern "C"
 
         For every point:
         \verbatim
-        dst[x, y, c] = (src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha))/255;
+        dst[x, y, c] = (src[x, y, c]*alpha + dst[x, y, c]*(255 - alpha))/255;
         \endverbatim
 
         This function is used for image drawing.
@@ -1134,11 +1134,11 @@ extern "C"
 
     /*! @ingroup drawing
 
-        \fn void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+        \fn void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb);
 
         \short Performs premultiply operation.
 
-        All images must have the same width, height and format (BGRA32, RGBA32).
+        All images must have the same width, height and format (BGRA32, RGBA32, ARGB32).
 
         For every point (sample for BGRA32):
         \verbatim
@@ -1158,16 +1158,17 @@ extern "C"
         \param [in] height - an image height.
         \param [out] dst - a pointer to pixels data of output premultiplyed image.
         \param [in] dstStride - a row size of the output premultiplyed image.
+        \param [in] argb - a boolean flag describing image format (BGRA32, RGBA32 - SimdFalse; ARGB32 - SimdTrue).
     */
-    SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+    SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb);
 
     /*! @ingroup drawing
 
-        \fn void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+        \fn void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb);
 
         \short Performs unpremultiply operation.
 
-        All images must have the same width, height and format (BGRA32, RGBA32).
+        All images must have the same width, height and format (BGRA32, RGBA32, ARGB32).
 
         For every point (sample for BGRA32):
         \verbatim
@@ -1187,8 +1188,9 @@ extern "C"
         \param [in] height - an image height.
         \param [out] dst - a pointer to pixels data of output unpremultiplyed image.
         \param [in] dstStride - a row size of the output unpremultiplyed image.
+        \param [in] argb - a boolean flag describing image format (BGRA32, RGBA32 - SimdFalse; ARGB32 - SimdTrue).
     */
-    SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+    SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb);
 
     /*! @ingroup background
 

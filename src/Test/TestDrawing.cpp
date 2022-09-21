@@ -409,7 +409,7 @@ namespace Test
     {
         struct FuncAP
         {
-            typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+            typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb);
             FuncPtr func;
             String description;
 
@@ -418,22 +418,22 @@ namespace Test
             void Call(const View& src, const View& dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+                func(src.data, src.stride, src.width, src.height, dst.data, dst.stride, src.format == View::Argb32 ? SimdTrue : SimdFalse);
             }
         };
     }
 
 #define FUNC_AP(func) FuncAP(func, #func)
 
-    bool AlphaPremultiplyAutoTest(bool inv, int width, int height, const FuncAP& f1, const FuncAP& f2)
+    bool AlphaPremultiplyAutoTest(bool inv, int width, int height, View::Format format, const FuncAP& f1, const FuncAP& f2)
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "x" << height << "-" << ToString(format) << "].");
 
-        View s(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View s(width, height, format, NULL, TEST_ALIGN(width));
         FillRandom(s);
-        s.data[3] = 0;
+        s.data[format == View::Argb32 ? 0 : 3] = 0;
         if (inv)
             Simd::AlphaPremultiply(s, s);
         s.data[0] = 7;
@@ -441,8 +441,8 @@ namespace Test
         s.data[2] = 7;
         s.data[3] = 7;
 
-        View d1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
-        View d2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
@@ -457,8 +457,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AlphaPremultiplyAutoTest(inv, W, H, f1, f2);
-        result = result && AlphaPremultiplyAutoTest(inv, W + O, H - O, f1, f2);
+        result = result && AlphaPremultiplyAutoTest(inv, W, H, View::Bgra32, f1, f2);
+        result = result && AlphaPremultiplyAutoTest(inv, W + O, H - O, View::Rgba32, f1, f2);
+        result = result && AlphaPremultiplyAutoTest(inv, W, H, View::Argb32, f1, f2);
 
         return result;
     }

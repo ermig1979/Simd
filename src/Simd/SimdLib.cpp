@@ -566,56 +566,56 @@ SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, si
         Base::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
 }
 
-SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb)
 {
     SIMD_EMPTY();
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
-        Avx512bw::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+        Avx512bw::AlphaPremultiply(src, srcStride, width, height, dst, dstStride, argb);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
-        Avx2::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+        Avx2::AlphaPremultiply(src, srcStride, width, height, dst, dstStride, argb);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable)
-        Sse41::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+        Sse41::AlphaPremultiply(src, srcStride, width, height, dst, dstStride, argb);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable)
-        Neon::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+        Neon::AlphaPremultiply(src, srcStride, width, height, dst, dstStride, argb);
     else
 #endif
-        Base::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+        Base::AlphaPremultiply(src, srcStride, width, height, dst, dstStride, argb);
 }
 
-SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb)
 {
     SIMD_EMPTY();
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
-        Avx512bw::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+        Avx512bw::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride, argb);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
-        Avx2::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+        Avx2::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride, argb);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable)
-        Sse41::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+        Sse41::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride, argb);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable)
-        Neon::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+        Neon::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride, argb);
     else
 #endif
-        Base::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+        Base::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride, argb);
 }
 
 SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,

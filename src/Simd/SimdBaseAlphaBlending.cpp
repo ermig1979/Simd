@@ -202,28 +202,44 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<bool argb> void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0, end = width*4; col < end; col += 4)
-                    AlphaPremultiply(src + col, dst + col);
+                    AlphaPremultiply<argb>(src + col, dst + col);
                 src += srcStride;
                 dst += dstStride;
             }
         }
 
+        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb)
+        {
+            if (argb)
+                AlphaPremultiply<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                AlphaPremultiply<false>(src, srcStride, width, height, dst, dstStride);
+        }
+
         //-----------------------------------------------------------------------------------------
 
-        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<bool argb> void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0, end = width * 4; col < end; col += 4)
-                    AlphaUnpremultiply(src + col, dst + col);
+                    AlphaUnpremultiply<argb>(src + col, dst + col);
                 src += srcStride;
                 dst += dstStride;
             }
+        }
+
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb)
+        {
+            if (argb)
+                AlphaUnpremultiply<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                AlphaUnpremultiply<false>(src, srcStride, width, height, dst, dstStride);
         }
     }
 }
