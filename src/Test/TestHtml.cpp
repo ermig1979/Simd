@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 #include "Test/TestHtml.h"
-#include "Test/TestUtils.h"
+#include "Test/TestCompare.h"
 
 namespace Test
 {

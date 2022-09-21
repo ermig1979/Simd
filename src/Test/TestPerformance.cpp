@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 #include "Test/TestPerformance.h"
-#include "Test/TestUtils.h"
+#include "Test/TestCompare.h"
 #include "Test/TestFile.h"
 #include "Test/TestTable.h"
 #include "Test/TestString.h"

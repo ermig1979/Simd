@@ -23,7 +23,7 @@
 */
 #include "Test/TestTable.h"
 #include "Test/TestHtml.h"
-#include "Test/TestUtils.h"
+#include "Test/TestCompare.h"
 #include "Test/TestString.h"
 
 namespace Test

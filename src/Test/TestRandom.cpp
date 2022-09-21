@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Test/TestUtils.h"
+#include "Test/TestCompare.h"
 #include "Test/TestTensor.h"
 #include "Simd/SimdDrawing.hpp"
 #include "Simd/SimdFont.hpp"

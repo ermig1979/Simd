@@ -78,6 +78,7 @@
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
     <ClCompile Include="..\..\src\Test\TestCheckC.c" />
     <ClCompile Include="..\..\src\Test\TestCheckCpp.cpp" />
+    <ClCompile Include="..\..\src\Test\TestCompare.cpp" />
     <ClCompile Include="..\..\src\Test\TestConditional.cpp" />
     <ClCompile Include="..\..\src\Test\TestContour.cpp" />
     <ClCompile Include="..\..\src\Test\TestCopy.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\Test\TestCompare.h" />
     <ClInclude Include="..\..\src\Test\TestConfig.h" />
     <ClInclude Include="..\..\src\Test\TestConsole.h" />
     <ClInclude Include="..\..\src\Test\TestData.h" />

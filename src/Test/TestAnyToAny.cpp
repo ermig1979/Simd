@@ -22,7 +22,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Test/TestUtils.h"
+#include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 #include "Test/TestString.h"
@@ -423,110 +423,6 @@ namespace Test
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Neon::RgbaToGray), FUNC_O(SimdRgbaToGray));
 #endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    template<class Func> bool AnyToAnyDataTest(bool create, int width, int height, View::Format srcType, View::Format dstType, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View src(width, height, srcType, NULL, TEST_ALIGN(width));
-
-        View dst1(width, height, dstType, NULL, TEST_ALIGN(width));
-        View dst2(width, height, dstType, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(src);
-
-            TEST_SAVE(src);
-
-            f.Call(src, dst1);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, dst2);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, 0, true, 64, 0);
-        }
-
-        return result;
-    }
-
-    bool BgraToBgrDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToAnyDataTest(create, DW, DH, View::Bgra32, View::Bgr24, FUNC_O(SimdBgraToBgr));
-
-        return result;
-    }
-
-    bool BgraToGrayDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToAnyDataTest(create, DW, DH, View::Bgra32, View::Gray8, FUNC_O(SimdBgraToGray));
-
-        return result;
-    }
-
-    bool BgrToGrayDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToAnyDataTest(create, DW, DH, View::Bgr24, View::Gray8, FUNC_O(SimdBgrToGray));
-
-        return result;
-    }
-
-    bool BgrToHslDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToAnyDataTest(create, DW, DH, View::Bgr24, View::Hsl24, FUNC_O(SimdBgrToHsl));
-
-        return result;
-    }
-
-    bool BgrToHsvDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToAnyDataTest(create, DW, DH, View::Bgr24, View::Hsv24, FUNC_O(SimdBgrToHsv));
-
-        return result;
-    }
-
-    bool GrayToBgrDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToAnyDataTest(create, DW, DH, View::Gray8, View::Bgr24, FUNC_O(SimdGrayToBgr));
-
-        return result;
-    }
-
-    bool Int16ToGrayDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToAnyDataTest(create, DW, DH, View::Int16, View::Gray8, FUNC_O(SimdInt16ToGray));
 
         return result;
     }

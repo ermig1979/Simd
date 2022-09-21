@@ -24,7 +24,7 @@
 * SOFTWARE.
 */
 #include "Test/TestPerformance.h"
-#include "Test/TestUtils.h"
+#include "Test/TestCompare.h"
 #include "Test/TestLog.h"
 #include "Test/TestString.h"
 
@@ -94,16 +94,16 @@ namespace Test
 
     TEST_ADD_GROUP_A00(AddFeatureDifference);
 
-    TEST_ADD_GROUP_AD0(BgraToBgr);
-    TEST_ADD_GROUP_AD0(BgraToGray);
+    TEST_ADD_GROUP_A00(BgraToBgr);
+    TEST_ADD_GROUP_A00(BgraToGray);
     TEST_ADD_GROUP_A00(BgraToRgb);
     TEST_ADD_GROUP_A00(BgraToRgba);
-    TEST_ADD_GROUP_AD0(BgrToGray);
-    TEST_ADD_GROUP_AD0(BgrToHsl);
-    TEST_ADD_GROUP_AD0(BgrToHsv);
+    TEST_ADD_GROUP_A00(BgrToGray);
+    TEST_ADD_GROUP_A00(BgrToHsl);
+    TEST_ADD_GROUP_A00(BgrToHsv);
     TEST_ADD_GROUP_A00(BgrToRgb);
-    TEST_ADD_GROUP_AD0(GrayToBgr);
-    TEST_ADD_GROUP_AD0(Int16ToGray);
+    TEST_ADD_GROUP_A00(GrayToBgr);
+    TEST_ADD_GROUP_A00(Int16ToGray);
     TEST_ADD_GROUP_A00(RgbToGray);
     TEST_ADD_GROUP_A00(RgbaToGray);
     TEST_ADD_GROUP_00S(ConvertImage);

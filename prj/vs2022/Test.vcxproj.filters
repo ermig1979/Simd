@@ -238,6 +238,9 @@
     <ClCompile Include="..\..\src\Test\TestRandom.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestCompare.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">
@@ -280,6 +283,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Test\TestRandom.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestCompare.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
