@@ -80,7 +80,7 @@ namespace Test
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest, name##SpecialTest)); return true; } \
     bool name##AtList = name##AddToList();
 
-    TEST_ADD_GROUP_AD0(AbsDifference);
+    TEST_ADD_GROUP_A00(AbsDifference);
 
     TEST_ADD_GROUP_AD0(AbsDifferenceSum);
     TEST_ADD_GROUP_AD0(AbsDifferenceSumMasked);
@@ -92,7 +92,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(SquaredDifferenceKahanSum32f);
     TEST_ADD_GROUP_AD0(CosineDistance32f);
 
-    TEST_ADD_GROUP_AD0(AddFeatureDifference);
+    TEST_ADD_GROUP_A00(AddFeatureDifference);
 
     TEST_ADD_GROUP_AD0(BgraToBgr);
     TEST_ADD_GROUP_AD0(BgraToGray);
