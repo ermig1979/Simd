@@ -401,6 +401,29 @@ namespace Simd
     }
 #endif
 
+#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
+    namespace Amx
+    {
+#if defined(SIMD_AMX_EMULATE)
+        class SynetConvolution8iNhwcDirect : public Avx512bw::SynetConvolution8iNhwcDirect
+#else
+        class SynetConvolution8iNhwcDirect : public Avx512vnni::SynetConvolution8iNhwcDirect
+#endif
+        {
+        public:
+            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+
+            virtual String Ext() const { return "Amx"; }
+        };
+
+        void SetDirectAny(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+
+        void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+
+        void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {

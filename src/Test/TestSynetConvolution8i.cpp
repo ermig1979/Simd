@@ -218,7 +218,7 @@ namespace Test
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 128, _1, _1, _1, _0, _0, 1, aMi, t1, u8, u8), 1, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 128, _3, _1, _1, _1, _1, 128, aMi, t1, u8, u8), 1, c, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 224, 12, 12, 224, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 224, 12, 14, 224, _3, _1, _1, Size(0, 1), Size(0, 1), 1, aPr, t1, u8, u8), 1, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 112, 24, 24, 112, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
@@ -276,6 +276,11 @@ namespace Test
 #ifdef SIMD_AVX512VNNI_ENABLE
         if (Simd::Avx512vnni::Enable)
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx512vnni::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+#endif
+
+#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+        if (Simd::Amx::Enable)
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Amx::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

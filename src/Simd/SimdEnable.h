@@ -145,7 +145,7 @@ namespace Simd
 #define SIMD_AVX512BW_FUNC(func)
 #endif
 
-#ifdef SIMD_AVX512VNNI_ENABLE
+#if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
 #define SIMD_AVX512VNNI_FUNC(func) Simd::Avx512vnni::Enable ? Simd::Avx512vnni::func : 
 #else
 #define SIMD_AVX512VNNI_FUNC(func)
