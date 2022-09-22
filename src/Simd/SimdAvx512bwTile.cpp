@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdTile.h"
+#include "Simd/SimdSynet.h"
 
 namespace Simd
 {
@@ -200,6 +201,73 @@ namespace Simd
                 }
                 _mm512_mask_storeu_ps(dstTile.f32[m], tailN, dst0);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template<bool overflow> void TileMatMul8u8i(int dst, int a, int b)
+        {
+            assert(dst < TileRegCount&& a < TileRegCount&& b < TileRegCount);
+
+            TileReg& dstTile = g_tileRegs[dst];
+            const TileReg& aTile = g_tileRegs[a];
+            const TileReg& bTile = g_tileRegs[b];
+
+            int M = g_tileConf.rows[dst], N = g_tileConf.colsb[dst] / 4, K = g_tileConf.colsb[a] / 4;
+
+            assert(M <= 16 && N <= 16 && K <= 16);
+
+            __mmask16 tailN = TailMask16(N);
+
+            __m512i a0, b0;
+            int m = 0;
+            for (int M4 = M & (~3); m < M4; m += 4)
+            {
+                __m512i d0 = _mm512_maskz_loadu_epi32(tailN, dstTile.i32[m + 0]);
+                __m512i d1 = _mm512_maskz_loadu_epi32(tailN, dstTile.i32[m + 1]);
+                __m512i d2 = _mm512_maskz_loadu_epi32(tailN, dstTile.i32[m + 2]);
+                __m512i d3 = _mm512_maskz_loadu_epi32(tailN, dstTile.i32[m + 3]);
+                for (int k = 0; k < K; k++)
+                {
+                    b0 = _mm512_maskz_loadu_epi32(tailN, bTile.i32[k]);
+                    a0 = _mm512_set1_epi32(aTile.i32[m + 0][k]), Madd4<overflow>(d0, a0, b0);
+                    a0 = _mm512_set1_epi32(aTile.i32[m + 1][k]), Madd4<overflow>(d1, a0, b0);
+                    a0 = _mm512_set1_epi32(aTile.i32[m + 2][k]), Madd4<overflow>(d2, a0, b0);
+                    a0 = _mm512_set1_epi32(aTile.i32[m + 3][k]), Madd4<overflow>(d3, a0, b0);
+                }
+                _mm512_mask_storeu_epi32(dstTile.i32[m + 0], tailN, d0);
+                _mm512_mask_storeu_epi32(dstTile.i32[m + 1], tailN, d1);
+                _mm512_mask_storeu_epi32(dstTile.i32[m + 2], tailN, d2);
+                _mm512_mask_storeu_epi32(dstTile.i32[m + 3], tailN, d3);
+            }
+            for (int M2 = M & (~1); m < M2; m += 2)
+            {
+                __m512i d0 = _mm512_maskz_loadu_epi32(tailN, dstTile.i32[m + 0]);
+                __m512i d1 = _mm512_maskz_loadu_epi32(tailN, dstTile.i32[m + 1]);
+                for (int k = 0; k < K; k++)
+                {
+                    b0 = _mm512_maskz_loadu_epi32(tailN, bTile.i32[k]);
+                    a0 = _mm512_set1_epi32(aTile.i32[m + 0][k]), Madd4<overflow>(d0, a0, b0);
+                    a0 = _mm512_set1_epi32(aTile.i32[m + 1][k]), Madd4<overflow>(d1, a0, b0);
+                }
+                _mm512_mask_storeu_epi32(dstTile.i32[m + 0], tailN, d0);
+                _mm512_mask_storeu_epi32(dstTile.i32[m + 1], tailN, d1);
+            }
+            for (; m < M; m++)
+            {
+                __m512i d0 = _mm512_maskz_loadu_epi32(tailN, dstTile.i32[m]);
+                for (int k = 0; k < K; k++)
+                {
+                    b0 = _mm512_maskz_loadu_epi32(tailN, bTile.i32[k]);
+                    a0 = _mm512_set1_epi32(aTile.i32[m][k]), Madd4<overflow>(d0, a0, b0);
+                }
+                _mm512_mask_storeu_epi32(dstTile.i32[m], tailN, d0);
+            }
+        }
+
+        void TileMatMul8u8i(int dst, int a, int b)
+        {
+            TileMatMul8u8i<true>(dst, a, b);
         }
     }
 #endif

@@ -73,6 +73,8 @@ namespace Simd
         void TileStore(int src, void* base, int stride);
 
         void TileMatMulBf16(int dst, int a, int b);
+
+        void TileMatMul8u8i(int dst, int a, int b);
     }
 #endif
 
@@ -124,6 +126,11 @@ namespace Simd
 #undef _tile_dpbf16ps
 #endif
 #define _tile_dpbf16ps Simd::Avx512bw::TileMatMulBf16
+
+#ifdef _tile_dpbusd
+#undef _tile_dpbusd
+#endif
+#define _tile_dpbusd Simd::Avx512bw::TileMatMul8u8i
 
 #endif
 
