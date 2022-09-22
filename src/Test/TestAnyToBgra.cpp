@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -174,65 +173,6 @@ namespace Test
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToBgraAutoTest(View::Rgb24, FUNC(Simd::Neon::RgbToBgra), FUNC(SimdRgbToBgra));
 #endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool AnyToBgraDataTest(bool create, int width, int height, View::Format srcType, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View src(width, height, srcType, NULL, TEST_ALIGN(width));
-
-        View dst1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
-        View dst2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(src);
-
-            TEST_SAVE(src);
-
-            f.Call(src, dst1, 0xFF);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, dst2, 0xFF);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, 0, true, 32, 0);
-        }
-
-        return result;
-    }
-
-    bool BgrToBgraDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToBgraDataTest(create, DW, DH, View::Bgr24, FUNC(SimdBgrToBgra));
-
-        return result;
-    }
-
-    bool GrayToBgraDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToBgraDataTest(create, DW, DH, View::Gray8, FUNC(SimdGrayToBgra));
 
         return result;
     }

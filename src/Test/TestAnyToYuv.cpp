@@ -24,7 +24,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -553,117 +552,6 @@ namespace Test
         if (Simd::Neon::Enable && W >= Simd::Neon::DA)
             result = result && BgraToYuvaAutoTest(FUNC_YUVA(Simd::Neon::BgraToYuva420p), FUNC_YUVA(SimdBgraToYuva420p));
 #endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    template<class FuncYuv> bool AnyToYuvDataTest(bool create, int width, int height, View::Format srcType, int dx, int dy, const FuncYuv & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        const int uvWidth = width / dx;
-        const int uvHeight = height / dy;
-
-        View src(width, height, srcType, NULL, TEST_ALIGN(width));
-
-        View y1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View u1(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
-        View v1(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
-
-        View y2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View u2(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
-        View v2(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
-
-        if (create)
-        {
-            FillRandom(src);
-
-            TEST_SAVE(src);
-
-            f.Call(src, y1, u1, v1);
-
-            TEST_SAVE(y1);
-            TEST_SAVE(u1);
-            TEST_SAVE(v1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(y1);
-            TEST_LOAD(u1);
-            TEST_LOAD(v1);
-
-            f.Call(src, y2, u2, v2);
-
-            TEST_SAVE(y2);
-            TEST_SAVE(u2);
-            TEST_SAVE(v2);
-
-            result = result && Compare(y1, y2, 0, true, 64, 0, "y");
-            result = result && Compare(u1, u2, 0, true, 64, 0, "u");
-            result = result && Compare(v1, v2, 0, true, 64, 0, "v");
-        }
-
-        return result;
-    }
-
-    bool BgraToYuv420pDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgra32, 2, 2, FUNC_YUVO(SimdBgraToYuv420p));
-
-        return result;
-    }
-
-    bool BgraToYuv422pDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgra32, 2, 1, FUNC_YUVO(SimdBgraToYuv422p));
-
-        return result;
-    }
-
-    bool BgraToYuv444pDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgra32, 1, 1, FUNC_YUVO(SimdBgraToYuv444p));
-
-        return result;
-    }
-
-    bool BgrToYuv420pDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgr24, 2, 2, FUNC_YUVO(SimdBgrToYuv420p));
-
-        return result;
-    }
-
-    bool BgrToYuv422pDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgr24, 2, 1, FUNC_YUVO(SimdBgrToYuv422p));
-
-        return result;
-    }
-
-    bool BgrToYuv444pDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgr24, 1, 1, FUNC_YUVO(SimdBgrToYuv444p));
 
         return result;
     }

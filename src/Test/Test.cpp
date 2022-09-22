@@ -108,32 +108,32 @@ namespace Test
     TEST_ADD_GROUP_A00(RgbaToGray);
     TEST_ADD_GROUP_00S(ConvertImage);
 
-    TEST_ADD_GROUP_AD0(BgraToBayer);
-    TEST_ADD_GROUP_AD0(BgrToBayer);
+    TEST_ADD_GROUP_A00(BgraToBayer);
+    TEST_ADD_GROUP_A00(BgrToBayer);
 
-    TEST_ADD_GROUP_AD0(BgrToBgra);
-    TEST_ADD_GROUP_AD0(GrayToBgra);
+    TEST_ADD_GROUP_A00(BgrToBgra);
+    TEST_ADD_GROUP_A00(GrayToBgra);
     TEST_ADD_GROUP_A00(RgbToBgra);
 
-    TEST_ADD_GROUP_AD0(BgraToYuv420p);
+    TEST_ADD_GROUP_A00(BgraToYuv420p);
     TEST_ADD_GROUP_A00(BgraToYuv420pV2);
-    TEST_ADD_GROUP_AD0(BgraToYuv422p);
-    TEST_ADD_GROUP_AD0(BgraToYuv444p);
+    TEST_ADD_GROUP_A00(BgraToYuv422p);
+    TEST_ADD_GROUP_A00(BgraToYuv444p);
     TEST_ADD_GROUP_A00(BgraToYuv444pV2);
-    TEST_ADD_GROUP_AD0(BgrToYuv420p);
-    TEST_ADD_GROUP_AD0(BgrToYuv422p);
-    TEST_ADD_GROUP_AD0(BgrToYuv444p);
+    TEST_ADD_GROUP_A00(BgrToYuv420p);
+    TEST_ADD_GROUP_A00(BgrToYuv422p);
+    TEST_ADD_GROUP_A00(BgrToYuv444p);
     TEST_ADD_GROUP_A00(Uyvy422ToYuv420p);
     TEST_ADD_GROUP_A00(BgraToYuva420p);
 
-    TEST_ADD_GROUP_AD0(BackgroundGrowRangeSlow);
-    TEST_ADD_GROUP_AD0(BackgroundGrowRangeFast);
-    TEST_ADD_GROUP_AD0(BackgroundIncrementCount);
-    TEST_ADD_GROUP_AD0(BackgroundAdjustRange);
-    TEST_ADD_GROUP_AD0(BackgroundAdjustRangeMasked);
-    TEST_ADD_GROUP_AD0(BackgroundShiftRange);
-    TEST_ADD_GROUP_AD0(BackgroundShiftRangeMasked);
-    TEST_ADD_GROUP_AD0(BackgroundInitMask);
+    TEST_ADD_GROUP_A00(BackgroundGrowRangeSlow);
+    TEST_ADD_GROUP_A00(BackgroundGrowRangeFast);
+    TEST_ADD_GROUP_A00(BackgroundIncrementCount);
+    TEST_ADD_GROUP_A00(BackgroundAdjustRange);
+    TEST_ADD_GROUP_A00(BackgroundAdjustRangeMasked);
+    TEST_ADD_GROUP_A00(BackgroundShiftRange);
+    TEST_ADD_GROUP_A00(BackgroundShiftRangeMasked);
+    TEST_ADD_GROUP_A00(BackgroundInitMask);
 
     TEST_ADD_GROUP_A00(Base64Decode);
     TEST_ADD_GROUP_A00(Base64Encode);

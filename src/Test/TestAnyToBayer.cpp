@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
@@ -137,75 +136,6 @@ namespace Test
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Neon::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool AnyToBayerDataTest(bool create, int width, int height, View::Format srcType, View::Format dstType, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View src(width, height, srcType, NULL, TEST_ALIGN(width));
-
-        View dst1(width, height, dstType, NULL, TEST_ALIGN(width));
-        View dst2(width, height, dstType, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(src);
-
-            TEST_SAVE(src);
-
-            f.Call(src, dst1);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, dst2);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, 0, true, 32, 0);
-        }
-
-        return result;
-    }
-
-    bool BgrToBayerDataTest(bool create)
-    {
-        bool result = true;
-
-        Func f = FUNC(SimdBgrToBayer);
-        for (View::Format dstType = View::BayerGrbg; dstType <= View::BayerBggr; dstType = View::Format(dstType + 1))
-        {
-            Func fc = Func(f.func, f.description + Data::Description(dstType));
-            result = result && AnyToBayerDataTest(create, DW, DH, View::Bgr24, dstType, fc);
-        }
-
-        return result;
-    }
-
-    bool BgraToBayerDataTest(bool create)
-    {
-        bool result = true;
-
-        Func f = FUNC(SimdBgraToBayer);
-        for (View::Format dstType = View::BayerGrbg; dstType <= View::BayerBggr; dstType = View::Format(dstType + 1))
-        {
-            Func fc = Func(f.func, f.description + Data::Description(dstType));
-            result = result && AnyToBayerDataTest(create, DW, DH, View::Bgra32, dstType, fc);
-        }
 
         return result;
     }
