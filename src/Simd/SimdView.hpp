@@ -1285,12 +1285,20 @@ namespace Simd
     {
         if (_owner && data)
             Allocator::Free(data);
+#ifdef SIMD_CPP_2011_ENABLE
         *(void**)&data = nullptr;
+#else
+        *(void**)&data = NULL;
+#endif
         _owner = false;
         *(size_t*)&width = 0;
         *(size_t*)&height = 0;
         *(ptrdiff_t *)&stride = 0;
+#ifdef SIMD_CPP_2011_ENABLE
         *(Format*)&format = Format::None;
+#else
+        *(Format*)&format = (Format)(0); // Modified for c++ 98
+#endif
     }
 
     template <template<class> class A> SIMD_INLINE uint8_t* View<A>::Release(size_t* size)
