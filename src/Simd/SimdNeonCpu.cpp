@@ -26,8 +26,12 @@
 
 #if defined(__GNUC__) && (defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
 #include <fcntl.h>
+#if !defined(__APPLE__)
 #include <sys/auxv.h>
+#if !defined(__FreeBSD__)
 #include <asm/hwcap.h>
+#endif
+#endif
 #endif
 
 namespace Simd
