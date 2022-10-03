@@ -89,12 +89,14 @@ namespace Simd
         */
         Frame(const Frame & frame);
 
+#ifdef SIMD_CPP_2011_ENABLE
         /*!
             Move constructor of Frame structure.
 
             \param [in] frame - a moved Frame.
         */
         Frame(Frame&& frame) noexcept;
+#endif
 
         /*!
             Creates a new one plane Frame structure on the base of the image view.
@@ -107,6 +109,7 @@ namespace Simd
         */
         Frame(const View<A> & view, bool flipped_ = false, double timestamp_ = 0);
 
+#ifdef SIMD_CPP_2011_ENABLE
         /*!
             Creates a new one plane Frame structure on the base of the temporal image view.
 
@@ -115,6 +118,7 @@ namespace Simd
             \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
         */
         Frame(View<A>&& view, bool flipped_ = false, double timestamp_ = 0);
+#endif
 
         /*!
             Creates a new Frame structure with specified width, height and pixel format.
@@ -193,6 +197,7 @@ namespace Simd
         */
         Frame & operator = (const Frame & frame);
 
+#ifdef SIMD_CPP_2011_ENABLE
         /*!
             Moves Frame structure.
 
@@ -200,6 +205,7 @@ namespace Simd
             \return a reference to itself.
         */
         Frame& operator = (Frame&& frame);
+#endif
 
         /*!
             Creates reference to itself.
@@ -424,6 +430,7 @@ namespace Simd
             planes[i] = frame.planes[i];
     }
 
+#ifdef SIMD_CPP_2011_ENABLE
     template <template<class> class A> SIMD_INLINE Frame<A>::Frame(Frame && frame) noexcept
         : width(0)
         , height(0)
@@ -433,6 +440,7 @@ namespace Simd
     {
         Swap(frame);
     }
+#endif
 
     template <template<class> class A> SIMD_INLINE Frame<A>::Frame(const View<A> & view, bool flipped_, double timestamp_)
         : width(view.width)
@@ -454,6 +462,7 @@ namespace Simd
         planes[0] = view;
     }
 
+#ifdef SIMD_CPP_2011_ENABLE
     template <template<class> class A> SIMD_INLINE Frame<A>::Frame(View<A>&& view, bool flipped_, double timestamp_)
         : width(view.width)
         , height(view.height)
@@ -473,6 +482,7 @@ namespace Simd
         }
         planes[0] = std::move(view);
     }
+#endif
 
     template <template<class> class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, bool flipped_, double timestamp_)
         : width(0)
@@ -585,6 +595,7 @@ namespace Simd
         return *this;
     }
 
+#ifdef SIMD_CPP_2011_ENABLE
     template <template<class> class A> SIMD_INLINE Frame<A>& Frame<A>::operator = (Frame<A>&& frame)
     {
         if (this != &frame)
@@ -594,6 +605,7 @@ namespace Simd
         }
         return *this;
     }
+#endif
     /*! \endcond */
 
     template <template<class> class A> SIMD_INLINE Frame<A> & Frame<A>::Ref()

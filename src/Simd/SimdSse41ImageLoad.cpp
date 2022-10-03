@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
+#ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
         ImagePgmTxtLoader::ImagePgmTxtLoader(const ImageLoaderParam& param)
@@ -144,7 +144,7 @@ namespace Simd
             ImageLoaderParam param(data, size, *format);
             if (param.Validate())
             {
-                std::unique_ptr<ImageLoader> loader(CreateImageLoader(param));
+                Holder<ImageLoader> loader(CreateImageLoader(param));
                 if (loader)
                 {
                     if (loader->FromStream())

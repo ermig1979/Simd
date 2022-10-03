@@ -168,8 +168,16 @@
 #define SIMD_X64_ENABLE
 #endif
 
-#ifdef __BIG_ENDIAN__
+#if defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN) || defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__)
 #define SIMD_BIG_ENDIAN
+#elif defined(__GLIBC__) || (defined(__GNUC__) && !defined(__llvm__) && !defined(__MINGW32__) && !defined(__FreeBSD__) && defined(__BYTE_ORDER__))
+  #include <endian.h>
+  #if defined(__BYTE_ORDER) && (__BYTE_ORDER == __BIG_ENDIAN)
+    #define SIMD_BIG_ENDIAN
+  #endif
+#elif defined(__sparc) || defined(__sparc__) || defined(_POWER) || defined(__powerpc__) || defined(__ppc__) ||         \
+    defined(__hpux) || defined(_MIPSEB) || defined(_POWER) || defined(__s390__)
+  #define SIMD_BIG_ENDIAN
 #endif
 
 #ifdef __powerpc__
@@ -232,7 +240,7 @@
 #define SIMD_VSX_ENABLE
 #endif
 
-#endif//defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) 
+#endif//defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE)
 
 #if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 

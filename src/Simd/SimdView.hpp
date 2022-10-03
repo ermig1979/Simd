@@ -156,12 +156,14 @@ namespace Simd
         */
         View(const View & view);
 
+#ifdef SIMD_CPP_2011_ENABLE
         /*!
             Move constructor of View structure.
 
             \param [in] view - a moved View.
         */
         View(View&& view) noexcept;
+#endif
 
 #ifdef SIMD_OPENCV_ENABLE
         /*!
@@ -271,6 +273,7 @@ namespace Simd
         */
         View & operator = (const View & view);
 
+#ifdef SIMD_CPP_2011_ENABLE
         /*!
             Moves View structure.
 
@@ -278,6 +281,7 @@ namespace Simd
             \return a reference to itself.
         */
         View& operator = (View&& view);
+#endif
 
 #ifdef SIMD_OPENCV_ENABLE
         /*!
@@ -292,7 +296,7 @@ namespace Simd
 #endif
 
         /*!
-            Creates reference to itself. 
+            Creates reference to itself.
             It may be useful if we need to create reference to the temporary object:
             \verbatim
             #include "Simd/SimdLib.hpp"
@@ -528,13 +532,13 @@ namespace Simd
 
         /*!
             Loads image from file.
-            
+
             Supported formats are described by ::SimdImageFileType enumeration.
 
             \note PGM and PPM files with comments are not supported.
 
             \param [in] path - a path to image file.
-            \param [in] format - a desired format of loaded image. 
+            \param [in] format - a desired format of loaded image.
                 Supported values are View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 and View::None.
                 Default value is View::None (loads image in native pixel format of image file).
             \return - a result of loading.
@@ -559,7 +563,7 @@ namespace Simd
 
         /*!
             Saves image to file.
- 
+
             \param [in] path - a path to file.
             \param [in] type - a image file format. By default is equal to ::SimdImageFileUndefined (format auto choice).
             \param [in] quality - a parameter of compression quality (if file format supports it).
@@ -741,6 +745,7 @@ namespace Simd
     {
     }
 
+#ifdef SIMD_CPP_2011_ENABLE
     template <template<class> class A> SIMD_INLINE View<A>::View(View<A> && view) noexcept
         : width(0)
         , height(0)
@@ -751,6 +756,7 @@ namespace Simd
     {
         Swap(view);
     }
+#endif
     /*! \endcond */
 
 #ifdef SIMD_OPENCV_ENABLE
@@ -949,6 +955,7 @@ namespace Simd
         return *this;
     }
 
+#ifdef SIMD_CPP_2011_ENABLE
     template <template<class> class A> SIMD_INLINE View<A>& View<A>::operator = (View<A>&& view)
     {
         if (this != &view)
@@ -958,6 +965,7 @@ namespace Simd
         }
         return *this;
     }
+#endif
     /*! \endcond */
 
 #ifdef SIMD_OPENCV_ENABLE
