@@ -3,7 +3,9 @@ if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND (NOT(CMAKE_CXX_COMPILER_VERSION VER
 endif()
 
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-	set(CXX_NEON_FLAG "-mfpu=neon -mfpu=neon-fp16")
+    if( NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND (CMAKE_CXX_COMPILER MATCHES "clang"))
+	  set(CXX_NEON_FLAG "-mfpu=neon -mfpu=neon-fp16")
+	endif()
 	if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 		set(CXX_NEON_FLAG "${CXX_NEON_FLAG} -mfp16-format=ieee")
 	endif()

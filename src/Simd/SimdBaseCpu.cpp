@@ -25,7 +25,9 @@
 #include "Simd/SimdCpu.h"
 
 #include <vector>
+#ifdef SIMD_CPP_2011_ENABLE
 #include <thread>
+#endif
 #include <sstream>
 #include <iostream>
 
@@ -48,9 +50,11 @@
 
 #if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 #include <fcntl.h>
+#if !defined(__APPLE__)
 #include <sys/auxv.h>
-#if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#if (defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)) && !defined(__FreeBSD__)
 #include <asm/hwcap.h>
+#endif
 #endif
 #endif
 
@@ -83,7 +87,7 @@ namespace Simd
         }
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
-#if defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
+#if defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)) && !defined(__APPLE__)
         bool CheckBit(int at, int bit)
         {
             bool result = false;
@@ -109,12 +113,14 @@ namespace Simd
             ::close(file);
             return result;
         }
-#endif//defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
+#endif//defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)) && !defined(__APPLE__)
 
+#ifdef SIMD_CPP_2011_ENABLE
         size_t CpuThreadNumber()
         {
             return std::thread::hardware_concurrency();
         }
+#endif
 
 #if defined(_MSC_VER)
         typedef SYSTEM_LOGICAL_PROCESSOR_INFORMATION Info;
@@ -239,7 +245,9 @@ namespace Simd
     {
         const size_t SOCKET_NUMBER = Base::CpuSocketNumber();
         const size_t CORE_NUMBER = Base::CpuCoreNumber();
+#ifdef SIMD_CPP_2011_ENABLE
         const size_t THREAD_NUMBER = Base::CpuThreadNumber();
+#endif
         const size_t L1_CACHE_SIZE = Base::CpuCacheSize(1);
         const size_t L2_CACHE_SIZE = Base::CpuCacheSize(2);
         const size_t L3_CACHE_SIZE = Base::CpuCacheSize(3);

@@ -302,8 +302,11 @@ namespace Simd
 
     class OutputMemoryStream
     {
+#ifdef SIMD_CPP_2011_ENABLE
         const size_t CAPACITY_MIN = 64;
-
+#else
+        const size_t CAPACITY_MIN;
+#endif
         uint8_t * _data;
         size_t _pos, _size, _capacity, _bitCount;
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
@@ -326,7 +329,11 @@ namespace Simd
 
     public:
         SIMD_INLINE OutputMemoryStream(size_t capacity = 0)
-            :_data(NULL)
+            :
+#ifndef SIMD_CPP_2011_ENABLE // Modified to build with c++ 98
+             CAPACITY_MIN(64),
+#endif
+             _data(NULL)
         {
             Reset(false);
             if (capacity)

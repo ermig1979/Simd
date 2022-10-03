@@ -110,7 +110,9 @@ namespace Simd
 
         size_t CpuCoreNumber();
 
+#ifdef SIMD_CPP_2011_ENABLE
         size_t CpuThreadNumber();
+#endif
 
         size_t CpuCacheSize(size_t level);
 
