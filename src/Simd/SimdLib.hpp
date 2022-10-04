@@ -303,7 +303,7 @@ namespace Simd
     {
         assert(Compatible(src0, src1, dst) && Compatible(alpha0, alpha1) && EqualSize(dst, alpha0) && alpha0.format == View<A>::Gray8 && dst.ChannelSize() == 1);
 
-        SimdAlphaBlending2x(src0.data, src0.stride, alpha0.data, alpha0.stride, 
+        SimdAlphaBlending2x(src0.data, src0.stride, alpha0.data, alpha0.stride,
             src1.data, src1.stride, alpha1.data, alpha1.stride,
             dst.width, dst.height, dst.ChannelCount(), dst.data, dst.stride);
     }
@@ -2731,7 +2731,7 @@ namespace Simd
 
         \fn void LitterCpuCache(size_t k = 2)
 
-        \short It creates a large buffer and fills it. 
+        \short It creates a large buffer and fills it.
 
         This function litters CPU cache. It is useful for test purposes.
 
@@ -3205,7 +3205,7 @@ namespace Simd
             Point<ptrdiff_t> size = src.Size() << level;
             if (level)
             {
-                std::vector<View<A>> pyramid(level);
+                std::vector<View<A> > pyramid(level);
                 pyramid[0].Resize(size, src.format);
                 Simd::ResizeBilinear(src, pyramid[0]);
                 for (size_t i = 1; i < level; ++i)
@@ -4117,7 +4117,7 @@ namespace Simd
 
         SimdSquareSum(src.data, src.stride, src.width, src.height, &sum);
     }
-    
+
     /*! @ingroup other_statistic
 
         \fn void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)

@@ -31,7 +31,7 @@ namespace Simd
     enum UpdateType
     {
         UpdateSet = 0,
-        UpdateAdd = 1,
+        UpdateAdd = 1
     };
 
     namespace Base
@@ -75,10 +75,10 @@ namespace Simd
         template <> SIMD_INLINE void Update<UpdateAdd, true>(float  * p, __m128 a)
         {
             Store<true>(p, _mm_add_ps(Load<true>(p), a));
-        }   
+        }
 
         //-----------------------------------------------------------------------------------------
-        
+
         template <UpdateType update, bool align> SIMD_INLINE void Update(int32_t  * p, __m128i a)
         {
             Store<align>((__m128i*)p, a);
