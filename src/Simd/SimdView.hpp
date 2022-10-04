@@ -5,7 +5,8 @@
 *               2014-2019 Antonenka Mikhail,
 *               2018-2019 Dmitry Fedorov,
 *               2019-2019 Artur Voronkov,
-*               2022-2022 Fabien Spindler.
+*               2022-2022 Fabien Spindler,
+*               2022-2022 Souriya Trinh.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
