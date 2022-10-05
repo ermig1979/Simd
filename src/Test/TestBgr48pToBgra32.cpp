@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -116,66 +115,6 @@ namespace Test
         if (Simd::Neon::Enable && W >= Simd::Neon::HA)
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Neon::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool Bgr48pToBgra32DataTest(bool create, int width, int height, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View blue(width, height, View::Int16, NULL, TEST_ALIGN(width));
-        View green(width, height, View::Int16, NULL, TEST_ALIGN(width));
-        View red(width, height, View::Int16, NULL, TEST_ALIGN(width));
-
-        uint8_t alpha = 0xFF;
-
-        View bgra1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
-        View bgra2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(blue);
-            FillRandom(green);
-            FillRandom(red);
-
-            TEST_SAVE(blue);
-            TEST_SAVE(green);
-            TEST_SAVE(red);
-
-            f.Call(blue, green, red, bgra1, alpha);
-
-            TEST_SAVE(bgra1);
-        }
-        else
-        {
-            TEST_LOAD(blue);
-            TEST_LOAD(green);
-            TEST_LOAD(red);
-
-            TEST_LOAD(bgra1);
-
-            f.Call(blue, green, red, bgra2, alpha);
-
-            TEST_SAVE(bgra2);
-
-            result = result && Compare(bgra1, bgra2, 0, true, 32);
-        }
-
-        return result;
-    }
-
-    bool Bgr48pToBgra32DataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && Bgr48pToBgra32DataTest(create, DW, DH, FUNC(SimdBgr48pToBgra32));
 
         return result;
     }

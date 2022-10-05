@@ -138,17 +138,17 @@ namespace Test
     TEST_ADD_GROUP_A00(Base64Decode);
     TEST_ADD_GROUP_A00(Base64Encode);
 
-    TEST_ADD_GROUP_AD0(BayerToBgr);
+    TEST_ADD_GROUP_A00(BayerToBgr);
 
-    TEST_ADD_GROUP_AD0(BayerToBgra);
+    TEST_ADD_GROUP_A00(BayerToBgra);
 
     TEST_ADD_GROUP_A00(Float32ToBFloat16);
     TEST_ADD_GROUP_A00(BFloat16ToFloat32);
 
-    TEST_ADD_GROUP_AD0(Bgr48pToBgra32);
+    TEST_ADD_GROUP_A00(Bgr48pToBgra32);
 
-    TEST_ADD_GROUP_AD0(Binarization);
-    TEST_ADD_GROUP_AD0(AveragingBinarization);
+    TEST_ADD_GROUP_A00(Binarization);
+    TEST_ADD_GROUP_A00(AveragingBinarization);
     TEST_ADD_GROUP_A00(AveragingBinarizationV2);
 
     TEST_ADD_GROUP_AD0(ConditionalCount8u);

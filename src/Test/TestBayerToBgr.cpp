@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
@@ -109,61 +108,6 @@ namespace Test
         if (Simd::Neon::Enable && W >= Simd::Neon::A + 2)
             result = result && BayerToBgrAutoTest(FUNC(Simd::Neon::BayerToBgr), FUNC(SimdBayerToBgr));
 #endif 
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool BayerToBgrDataTest(bool create, int width, int height, View::Format format, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View src(width, height, format, NULL, TEST_ALIGN(width));
-
-        View dst1(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
-        View dst2(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(src);
-
-            TEST_SAVE(src);
-
-            f.Call(src, dst1);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, dst2);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, 0, true, 32, 0);
-        }
-
-        return result;
-    }
-
-    bool BayerToBgrDataTest(bool create)
-    {
-        bool result = true;
-
-        Func f = FUNC(SimdBayerToBgr);
-        for (View::Format format = View::BayerGrbg; format <= View::BayerBggr; format = View::Format(format + 1))
-        {
-            Func fc = Func(f.func, f.description + Data::Description(format));
-            result = result && BayerToBgrDataTest(create, DW, DH, format, fc);
-        }
 
         return result;
     }

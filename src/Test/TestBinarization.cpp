@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
@@ -299,122 +298,6 @@ namespace Test
         bool result = true;
 
         result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Base::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool BinarizationDataTest(bool create, int width, int height, SimdCompareType type, const FuncB & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-
-        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-
-        const uint8_t value = 127;
-        const uint8_t positive = 0xAA;
-        const uint8_t negative = 0x11;
-
-        if (create)
-        {
-            FillRandom(src);
-
-            TEST_SAVE(src);
-
-            f.Call(src, value, positive, negative, dst1, type);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, value, positive, negative, dst2, type);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool BinarizationDataTest(bool create)
-    {
-        bool result = true;
-
-        FuncB f = FUNC_B(SimdBinarization);
-        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
-        {
-            result = result && BinarizationDataTest(create, DW, DH, type, FuncB(f.func, f.description + Data::Description(type)));
-        }
-
-        return result;
-    }
-
-    bool AveragingBinarizationDataTest(bool create, int width, int height, SimdCompareType type, const FuncAB & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-
-        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-
-        const uint8_t value = 127;
-        const size_t neighborhood = 17;
-        const uint8_t threshold = 128;
-        const uint8_t positive = 7;
-        const uint8_t negative = 3;
-
-        if (create)
-        {
-            FillRandom(src);
-
-            TEST_SAVE(src);
-
-            f.Call(src, value, neighborhood, threshold, positive, negative, dst1, type);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, value, neighborhood, threshold, positive, negative, dst2, type);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool AveragingBinarizationDataTest(bool create)
-    {
-        bool result = true;
-
-        FuncAB f = FUNC_AB(SimdAveragingBinarization);
-        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
-        {
-            result = result && AveragingBinarizationDataTest(create, DW, DH, type, FuncAB(f.func, f.description + Data::Description(type)));
-        }
 
         return result;
     }
