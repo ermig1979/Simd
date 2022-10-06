@@ -151,12 +151,12 @@ namespace Test
     TEST_ADD_GROUP_A00(AveragingBinarization);
     TEST_ADD_GROUP_A00(AveragingBinarizationV2);
 
-    TEST_ADD_GROUP_AD0(ConditionalCount8u);
-    TEST_ADD_GROUP_AD0(ConditionalCount16i);
-    TEST_ADD_GROUP_AD0(ConditionalSum);
-    TEST_ADD_GROUP_AD0(ConditionalSquareSum);
-    TEST_ADD_GROUP_AD0(ConditionalSquareGradientSum);
-    TEST_ADD_GROUP_AD0(ConditionalFill);
+    TEST_ADD_GROUP_A00(ConditionalCount8u);
+    TEST_ADD_GROUP_A00(ConditionalCount16i);
+    TEST_ADD_GROUP_A00(ConditionalSum);
+    TEST_ADD_GROUP_A00(ConditionalSquareSum);
+    TEST_ADD_GROUP_A00(ConditionalSquareGradientSum);
+    TEST_ADD_GROUP_A00(ConditionalFill);
 
     TEST_ADD_GROUP_AD0(ContourMetricsMasked);
     TEST_ADD_GROUP_AD0(ContourAnchors);
