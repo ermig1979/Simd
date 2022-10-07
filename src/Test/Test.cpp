@@ -158,8 +158,8 @@ namespace Test
     TEST_ADD_GROUP_A00(ConditionalSquareGradientSum);
     TEST_ADD_GROUP_A00(ConditionalFill);
 
-    TEST_ADD_GROUP_AD0(ContourMetricsMasked);
-    TEST_ADD_GROUP_AD0(ContourAnchors);
+    TEST_ADD_GROUP_A00(ContourMetricsMasked);
+    TEST_ADD_GROUP_A00(ContourAnchors);
     TEST_ADD_GROUP_00S(ContourDetector);
 
     TEST_ADD_GROUP_AD0(Copy);

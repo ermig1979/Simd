@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -32,15 +31,15 @@ namespace Test
     {
         struct FuncM
         {
-            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-                const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
+            typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+                const uint8_t* mask, size_t maskStride, uint8_t indexMin, uint8_t* dst, size_t dstStride);
 
             FuncPtr func;
             String description;
 
-            FuncM(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncM(const FuncPtr& f, const String& d) : func(f), description(d) {}
 
-            void Call(const View & src, const View & mask, uint8_t indexMin, View & dst) const
+            void Call(const View& src, const View& mask, uint8_t indexMin, View& dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, mask.data, mask.stride, indexMin, dst.data, dst.stride);
@@ -51,7 +50,7 @@ namespace Test
 #define FUNC_M(function) \
     FuncM(function, std::string(#function))
 
-    bool ContourMetricsMaskedAutoTest(int width, int height, const FuncM & f1, const FuncM & f2)
+    bool ContourMetricsMaskedAutoTest(int width, int height, const FuncM& f1, const FuncM& f2)
     {
         bool result = true;
 
@@ -75,7 +74,7 @@ namespace Test
         return result;
     }
 
-    bool ContourMetricsMaskedAutoTest(const FuncM & f1, const FuncM & f2)
+    bool ContourMetricsMaskedAutoTest(const FuncM& f1, const FuncM& f2)
     {
         bool result = true;
 
@@ -123,15 +122,15 @@ namespace Test
     {
         struct FuncA
         {
-            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-                size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
+            typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+                size_t step, int16_t threshold, uint8_t* dst, size_t dstStride);
 
             FuncPtr func;
             String description;
 
-            FuncA(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncA(const FuncPtr& f, const String& d) : func(f), description(d) {}
 
-            void Call(const View & src, size_t step, int16_t threshold, View & dst) const
+            void Call(const View& src, size_t step, int16_t threshold, View& dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, step, threshold, dst.data, dst.stride);
@@ -142,7 +141,7 @@ namespace Test
 #define FUNC_A(function) \
     FuncA(function, std::string(#function))
 
-    bool ContourAnchorsAutoTest(int width, int height, const FuncA & f1, const FuncA & f2)
+    bool ContourAnchorsAutoTest(int width, int height, const FuncA& f1, const FuncA& f2)
     {
         bool result = true;
 
@@ -165,7 +164,7 @@ namespace Test
         return result;
     }
 
-    bool ContourAnchorsAutoTest(const FuncA & f1, const FuncA & f2)
+    bool ContourAnchorsAutoTest(const FuncA& f1, const FuncA& f2)
     {
         bool result = true;
 
@@ -205,112 +204,6 @@ namespace Test
         if (Simd::Neon::Enable && W > Simd::Neon::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Neon::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool ContourMetricsMaskedDataTest(bool create, int width, int height, const FuncM & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-
-        View dst1(width, height, View::Int16, NULL, TEST_ALIGN(width));
-        View dst2(width, height, View::Int16, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(src);
-            FillRandom(mask);
-
-            TEST_SAVE(src);
-            TEST_SAVE(mask);
-
-            f.Call(src, mask, 128, dst1);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-            TEST_LOAD(mask);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, mask, 128, dst2);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, 0, true, 32, 0);
-        }
-
-        return result;
-    }
-
-    bool ContourMetricsMaskedDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && ContourMetricsMaskedDataTest(create, DW, DH, FUNC_M(SimdContourMetricsMasked));
-
-        return result;
-    }
-
-    bool ContourAnchorsDataTest(bool create, int width, int height, const FuncA & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View s(width, height, View::Int16, NULL, TEST_ALIGN(width));
-
-        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(s);
-
-            TEST_SAVE(s);
-
-            Simd::Fill(d1, 0);
-
-            f.Call(s, 3, 0, d1);
-
-            TEST_SAVE(d1);
-        }
-        else
-        {
-            TEST_LOAD(s);
-
-            TEST_LOAD(d1);
-
-            Simd::Fill(d2, 0);
-
-            f.Call(s, 3, 0, d2);
-
-            TEST_SAVE(d2);
-
-            result = result && Compare(d1, d2, 0, true, 32, 0);
-        }
-
-        return result;
-    }
-
-    bool ContourAnchorsDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && ContourAnchorsDataTest(create, DW, DH, FUNC_A(SimdContourAnchors));
 
         return result;
     }
