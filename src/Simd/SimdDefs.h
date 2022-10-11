@@ -93,6 +93,10 @@
 #define SIMD_ARM_ENABLE
 #endif
 
+#if defined _M_ARM64
+#define SIMD_ARM64_ENABLE
+#endif
+
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
 #if !defined(SIMD_SSE41_DISABLE) && _MSC_VER >= 1500
