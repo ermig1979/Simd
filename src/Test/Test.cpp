@@ -162,15 +162,15 @@ namespace Test
     TEST_ADD_GROUP_A00(ContourAnchors);
     TEST_ADD_GROUP_00S(ContourDetector);
 
-    TEST_ADD_GROUP_AD0(Copy);
-    TEST_ADD_GROUP_AD0(CopyFrame);
+    TEST_ADD_GROUP_A00(Copy);
+    TEST_ADD_GROUP_A00(CopyFrame);
 
     TEST_ADD_GROUP_A00(Crc32);
-    TEST_ADD_GROUP_AD0(Crc32c);
+    TEST_ADD_GROUP_A00(Crc32c);
 
-    TEST_ADD_GROUP_AD0(DeinterleaveUv);
-    TEST_ADD_GROUP_AD0(DeinterleaveBgr);
-    TEST_ADD_GROUP_AD0(DeinterleaveBgra);
+    TEST_ADD_GROUP_A00(DeinterleaveUv);
+    TEST_ADD_GROUP_A00(DeinterleaveBgr);
+    TEST_ADD_GROUP_A00(DeinterleaveBgra);
 
     TEST_ADD_GROUP_AD0(DetectionHaarDetect32fp);
     TEST_ADD_GROUP_AD0(DetectionHaarDetect32fi);

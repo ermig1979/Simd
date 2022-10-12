@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
@@ -175,126 +174,6 @@ namespace Test
         bool result = true;
 
         result = result && CopyFrameAutoTest(FUNC_F(Simd::Base::CopyFrame), FUNC_F(SimdCopyFrame));
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool CopyDataTest(bool create, View::Format format, int width, int height, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View s(width, height, format, NULL, TEST_ALIGN(width));
-
-        View d1(width, height, format, NULL, TEST_ALIGN(width));
-        View d2(width, height, format, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(s);
-
-            TEST_SAVE(s);
-
-            f.Call(s, d1);
-
-            TEST_SAVE(d1);
-        }
-        else
-        {
-            TEST_LOAD(s);
-
-            TEST_LOAD(d1);
-
-            f.Call(s, d2);
-
-            TEST_SAVE(d2);
-
-            result = result && Compare(d1, d2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool CopyDataTest(bool create)
-    {
-        bool result = true;
-
-        Func f = FUNC(SimdCopy);
-
-        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
-        {
-            if (format == View::Float || format == View::Double)
-                continue;
-
-            result = result && CopyDataTest(create, format, DW, DH, Func(f.func, f.description + Data::Description(format)));
-        }
-
-        return result;
-    }
-
-    bool CopyFrameDataTest(bool create, View::Format format, int width, int height, const FuncF & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View s(width, height, format, NULL, TEST_ALIGN(width));
-
-        Rect frame(width * 1 / 15, height * 2 / 15, width * 11 / 15, height * 12 / 15);
-
-        View d1(width, height, format, NULL, TEST_ALIGN(width));
-        View d2(width, height, format, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(s);
-
-            TEST_SAVE(s);
-
-            Simd::Fill(d1, 0);
-
-            f.Call(s, frame, d1);
-
-            TEST_SAVE(d1);
-        }
-        else
-        {
-            TEST_LOAD(s);
-
-            Simd::Fill(d2, 0);
-
-            TEST_LOAD(d1);
-
-            f.Call(s, frame, d2);
-
-            TEST_SAVE(d2);
-
-            result = result && Compare(d1, d2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool CopyFrameDataTest(bool create)
-    {
-        bool result = true;
-
-        FuncF f = FUNC_F(SimdCopyFrame);
-
-        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
-        {
-            if (format == View::Float || format == View::Double)
-                continue;
-
-            result = result && CopyFrameDataTest(create, format, DW, DH, FuncF(f.func, f.description + Data::Description(format)));
-        }
 
         return result;
     }

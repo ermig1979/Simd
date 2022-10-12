@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -106,55 +105,6 @@ namespace Test
         if (Simd::Sse41::Enable)
             result = result && Crc32AutoTest(FUNC(Simd::Sse41::Crc32c), FUNC(SimdCrc32c));
 #endif 
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool Crc32cDataTest(bool create, int size, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
-
-        std::vector<uint8_t> src(size);
-
-        uint32_t crc1, crc2;
-
-        if (create)
-        {
-            SetRandom(src.data(), src.size());
-
-            TEST_SAVE(src);
-
-            crc1 = f.Call(src);
-
-            TEST_SAVE(crc1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(crc1);
-
-            crc2 = f.Call(src);
-
-            TEST_SAVE(crc2);
-
-            TEST_CHECK_VALUE(crc);
-        }
-
-        return result;
-    }
-
-    bool Crc32cDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && Crc32cDataTest(create, DW, FUNC(SimdCrc32c));
 
         return result;
     }
