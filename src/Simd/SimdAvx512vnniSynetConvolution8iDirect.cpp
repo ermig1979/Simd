@@ -38,7 +38,7 @@ namespace Simd
         SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
             : Avx512bw::SynetConvolution8iNhwcDirect(p)
         {
-            SetAlgParam(F, 2 * F, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), 12);
+            SetAlgParam(F, 2 * F, 12, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (p.Is1x1())
                 SetDirect1x1(p, _alg, _convolutions);
             else

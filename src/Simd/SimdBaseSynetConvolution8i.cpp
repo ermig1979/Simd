@@ -412,10 +412,8 @@ namespace Simd
         {
             const ConvParam8i& p = _param;
             size_t size = SynetConvolution8i::ExternalBufferSize();
-            if (_alg.macroC < p.srcC)
-                size += AlignHi(_sizeD * sizeof(int32_t), SIMD_ALIGN);
-            if(_sizeP)
-                size += AlignHi(_sizeP * sizeof(uint8_t), SIMD_ALIGN);
+            size += AlignHi(_sizeP * sizeof(uint8_t), SIMD_ALIGN);
+            size += AlignHi(_sizeB * sizeof(int32_t), SIMD_ALIGN);
             return size;
         }
 
@@ -445,7 +443,7 @@ namespace Simd
             return srcSteps >= padSteps*1.3;
         }
 
-        void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, size_t microC)
+        void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t microC, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam8i& p = _param;
             _alg.F = F;
@@ -458,7 +456,7 @@ namespace Simd
                     break;
             }
             _alg.macroD = Simd::Min(AlignLoAny(L3 / p.kernelY / p.kernelX / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
-            _alg.size = (p.dstT == SimdTensorData32f ? 4 : 1);
+            _alg.size = _dst8u ? 1 : 4;
             if (PadEnable(microC))
             {
                 _paramP = p;
@@ -469,6 +467,7 @@ namespace Simd
             }
             else
                 _sizeP = 0;
+            _sizeB = (_alg.macroC < p.srcC || microC >= 32) && _dst8u ? _sizeD : 0;
         }
 
         void SynetConvolution8iNhwcDirect::ReorderWeight()
@@ -506,7 +505,7 @@ namespace Simd
 
         void SynetConvolution8iNhwcDirect::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
-            int32_t * sum = _alg.macroC < _param.srcC ? Allocate<int32_t>(buf, _sizeD) : NULL;
+            int32_t * sum = _sizeB ? Allocate<int32_t>(buf, _sizeB) : (int32_t*)dst;
             uint8_t * pad = _sizeP ? Allocate<uint8_t>(buf, _sizeP) : NULL;
             for (size_t m = 0; m < _merge; ++m)
             {
@@ -574,8 +573,7 @@ namespace Simd
                     params += macroD;
                 shift += macroD;
                 scale += macroD;
-                if (buf)
-                    buf += _alg.macroD;
+                buf += _alg.macroD;
                 dst += _alg.macroD * _alg.size;
             }
         }

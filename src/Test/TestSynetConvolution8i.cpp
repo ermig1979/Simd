@@ -51,7 +51,12 @@ namespace Test
             void Update(const Param & p, SimdSynetCompatibilityType c)
             {
                 const char* afs[] = { "-id", "-re", "-lr", "-rr", "-pr", "-el", "-hs", "-mi", "-hi", "-sw" };
-                desc = desc + p.Decription(String(afs[p.conv.activation]) + (Simd::Base::Overflow(c) ? "-o" : Simd::Base::Narrowed(c) ? "-n" : "-p"));
+                std::stringstream extra;
+                extra << (p.conv.srcT == SimdTensorData32f ? "-f" : "-u");
+                extra << (p.conv.dstT == SimdTensorData32f ? "f" : "u");
+                extra << afs[p.conv.activation];
+                extra << (Simd::Base::Overflow(c) ? "-o" : Simd::Base::Narrowed(c) ? "-n" : "-p");
+                desc = desc + p.Decription(extra.str());
             }
 
             void Call(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst) const
@@ -160,7 +165,7 @@ namespace Test
 #endif
 
         if(p.conv.dstT == SimdTensorData32f)
-            result = result && Compare(dst32f1, dst32f2, eps*eps, true, 64, DifferenceBoth);
+            result = result && Compare(dst32f1, dst32f2, eps, true, 64, DifferenceBoth);
         else
             result = result && Compare(dst8u1, dst8u2, differenceMax, true, 64);
 
@@ -223,11 +228,13 @@ namespace Test
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 224, 12, 14, 224, _3, _1, _1, Size(0, 1), Size(0, 1), 1, aPr, t1, u8, u8), 1, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 112, 24, 24, 112, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 112, 24, 26, 112, _3, _1, _1, Size(0, 1), Size(0, 1), 1, aPr, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 64, 70, 102, 64, _5, _1, _2, _2, _2, 64, aPr, t1, u8, f32), 0, c, f1, f2);
 #endif
 #if 1
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 80, 100, 100, 80, _1, _1, _1, _0, _0, 1, aSw, t1, u8, u8), 0, c, f1, f2);
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 384, 8, 12, 256, _3, _1, _1, _1, _1, 1, aSw, t1, u8, u8), 1, c, f1, f2);
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 64, 70, 102, 64, _5, _1, _2, _2, _2, 64, aSw, t1, u8, f32), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 384, 8, 12, 256, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 5000, 30, 30, 400, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 2000, 30, 30, 64, _1, _1, _1, _0, _0, 1, aLr, t1, u8, f32), 1, c, f1, f2);
 #endif
 #else
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 2000, 30, 30, 64, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);

@@ -238,7 +238,7 @@ namespace Simd
                 const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first);
 
         protected:
-            void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, size_t microC);
+            void SetAlgParam(size_t F, size_t microD, size_t microC, size_t L1, size_t L2, size_t L3);
             void ReorderWeight();
             bool PadEnable(size_t microC);
             void PadInput(const uint8_t* src, uint8_t* dst);
@@ -247,7 +247,7 @@ namespace Simd
             void Forward8u(const uint8_t* src, const ConvParam8i & p, int32_t* buf, uint8_t* dst);
 
             AlgParam _alg;
-            size_t _sizeP;
+            size_t _sizeP, _sizeB;
             ConvParam8i _paramP;
             ConvolutionPtr _convolutions[3];
         };

@@ -655,7 +655,7 @@ namespace Simd
         SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
             : Base::SynetConvolution8iNhwcDirect(p)
         {
-            SetAlgParam(F, 2 * F, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), 5);
+            SetAlgParam(F, 2 * F, 5, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             Set(p, _alg, _convolutions);
             _convertSrc = Neon::SynetConvert32fTo8u;
         }
