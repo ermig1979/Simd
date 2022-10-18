@@ -808,6 +808,57 @@ namespace Simd
     }
 #endif//SIMD_AVX512BW_ENABLE
 
+#if defined(SIMD_AMX_ENABLE)  
+    namespace Amx
+    {
+        template <Term8iType term> struct Term8i
+        {
+            template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Apply(uint8_t* dst, const int32_t* src,
+                const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
+            {
+            }
+        };
+
+        template <> struct Term8i<Term8iLast8u>
+        {
+            template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Apply(uint8_t* dst, const int32_t* src,
+                const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
+            {
+                __m512i i32 = _mm512_maskz_loadu_epi32(tail, src + index * F);
+                __m512 f32 = Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(i32), norm[index], bias[index]), params, index);
+                __m128i u8 = Cvt32fTo8u(Fmadd<nofma>(f32, scale[index], shift[index]));
+                _mm_mask_storeu_epi8(dst + index * F, tail, _mm_min_epu8(u8, upper));
+            }
+        };
+
+        template <> struct Term8i<Term8iLast32f>
+        {
+            template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Apply(uint8_t* dst, const int32_t* src,
+                const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
+            {
+                __m512i i32 = _mm512_maskz_loadu_epi32(tail, src + index * F);
+                __m512 f32 = Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(i32), norm[index], bias[index]), params, index);
+                _mm512_mask_storeu_ps((float*)dst + index * F, tail, f32);
+            }
+        };
+
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        SIMD_INLINE void Apply1(uint8_t* dst, const int32_t* src, const __m512* norm, const __m512* bias,
+            const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
+        {
+            Term8i<term>::template Apply<type, 0, nofma>(dst, src, norm, bias, params, scale, shift, upper, tail);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        SIMD_INLINE void Apply2(uint8_t* dst, const int32_t* src, const __m512* norm, const __m512* bias,
+            const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
+        {
+            Term8i<term>::template Apply<type, 0, nofma>(dst, src, norm, bias, params, scale, shift, upper);
+            Term8i<term>::template Apply<type, 1, nofma>(dst, src, norm, bias, params, scale, shift, upper, tail);
+        }
+    }
+#endif //SIMD_AMX_ENABLE
+
 #if defined(SIMD_NEON_ENABLE)
     namespace Neon
     {

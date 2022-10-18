@@ -28,6 +28,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdAmx.h"
+#include "Simd/SimdTile.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -38,265 +39,324 @@ namespace Simd
         using AlgParam = SynetConvolution8iNhwcDirect::AlgParam;
         using ConvolutionPtr = SynetConvolution8iNhwcDirect::ConvolutionPtr;
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
-        template<Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(
-            const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
-            const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
+        template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x2(const uint8_t* src0,
+            const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm, 
+            const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
-            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
-            size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
+            size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dW = 64, srcC64 = AlignLo(srcC, 64);
+            int strideB = dB * 4;
             const int8_t* weight1 = weight0 + DivHi(p.srcC, 4) * A;
-            const uint8_t* src1 = src0 + 1 * dS;
-            const uint8_t* src2 = src0 + 2 * dS;
-            const uint8_t* src3 = src0 + 3 * dS;
-            const uint8_t* src4 = src0 + 4 * dS;
-            const uint8_t* src5 = src0 + 5 * dS;
+            const uint8_t* src1 = src0 + 16 * dS;
             __m128i upper = _mm_set1_epi32(a.upper);
-            if (dstC > F)
+
+            TileConf conf;
+            conf.rows[0] = 16;
+            conf.rows[1] = 16;
+            conf.rows[2] = uint8_t(dstS - 16);
+            conf.rows[3] = uint8_t(dstS - 16);
+            conf.rows[4] = 16;
+            conf.rows[5] = uint8_t(dstS - 16);
+            conf.rows[6] = 16;
+            conf.rows[7] = 16;
+            conf.colsb[0] = 64;
+            conf.colsb[1] = uint16_t((dstC - 16) * 4);
+            conf.colsb[2] = 64;
+            conf.colsb[3] = uint16_t((dstC - 16) * 4);
+            conf.colsb[4] = 64;
+            conf.colsb[5] = 64;
+            conf.colsb[6] = 64;
+            conf.colsb[7] = uint16_t((dstC - 16) * 4);
+            _tile_loadconfig(&conf);
+
+            if (first)
             {
-                if (first)
-                {
-                    if (M > 0x0) d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
-                    if (M > 0x1) d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
-                    if (M > 0x2) d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
-                    if (M > 0x3) d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
-                    if (M > 0x4) d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
-                    if (M > 0x5) d50 = _mm512_setzero_si512(), d51 = _mm512_setzero_si512();
-                    if (M > 0x6) d60 = _mm512_setzero_si512(), d61 = _mm512_setzero_si512();
-                    if (M > 0x7) d70 = _mm512_setzero_si512(), d71 = _mm512_setzero_si512();
-                    if (M > 0x8) d80 = _mm512_setzero_si512(), d81 = _mm512_setzero_si512();
-                    if (M > 0x9) d90 = _mm512_setzero_si512(), d91 = _mm512_setzero_si512();
-                    if (M > 0xA) dA0 = _mm512_setzero_si512(), dA1 = _mm512_setzero_si512();
-                    if (M > 0xB) dB0 = _mm512_setzero_si512(), dB1 = _mm512_setzero_si512();
-                }
-                else
-                {
-                    if (M > 0x0) d00 = _mm512_loadu_si512(buf + 0x0 * dB + 0), d01 = _mm512_loadu_si512(buf + 0x0 * dB + F);
-                    if (M > 0x1) d10 = _mm512_loadu_si512(buf + 0x1 * dB + 0), d11 = _mm512_loadu_si512(buf + 0x1 * dB + F);
-                    if (M > 0x2) d20 = _mm512_loadu_si512(buf + 0x2 * dB + 0), d21 = _mm512_loadu_si512(buf + 0x2 * dB + F);
-                    if (M > 0x3) d30 = _mm512_loadu_si512(buf + 0x3 * dB + 0), d31 = _mm512_loadu_si512(buf + 0x3 * dB + F);
-                    if (M > 0x4) d40 = _mm512_loadu_si512(buf + 0x4 * dB + 0), d41 = _mm512_loadu_si512(buf + 0x4 * dB + F);
-                    if (M > 0x5) d50 = _mm512_loadu_si512(buf + 0x5 * dB + 0), d51 = _mm512_loadu_si512(buf + 0x5 * dB + F);
-                    if (M > 0x6) d60 = _mm512_loadu_si512(buf + 0x6 * dB + 0), d61 = _mm512_loadu_si512(buf + 0x6 * dB + F);
-                    if (M > 0x7) d70 = _mm512_loadu_si512(buf + 0x7 * dB + 0), d71 = _mm512_loadu_si512(buf + 0x7 * dB + F);
-                    if (M > 0x8) d80 = _mm512_loadu_si512(buf + 0x8 * dB + 0), d81 = _mm512_loadu_si512(buf + 0x8 * dB + F);
-                    if (M > 0x9) d90 = _mm512_loadu_si512(buf + 0x9 * dB + 0), d91 = _mm512_loadu_si512(buf + 0x9 * dB + F);
-                    if (M > 0xA) dA0 = _mm512_loadu_si512(buf + 0xA * dB + 0), dA1 = _mm512_loadu_si512(buf + 0xA * dB + F);
-                    if (M > 0xB) dB0 = _mm512_loadu_si512(buf + 0xB * dB + 0), dB1 = _mm512_loadu_si512(buf + 0xB * dB + F);
-                }
-                if (Base::Overflow(p.compatibility) || Base::Narrowed(p.compatibility))
-                {
-                    for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
-                    {
-                        w0 = _mm512_loadu_si512((__m512i*)weight0);
-                        w1 = _mm512_loadu_si512((__m512i*)weight1);
-                        if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<true>(d00, s0, w0), Madd4<true>(d01, s0, w1);
-                        if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<true>(d10, s0, w0), Madd4<true>(d11, s0, w1);
-                        if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<true>(d20, s0, w0), Madd4<true>(d21, s0, w1);
-                        if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<true>(d30, s0, w0), Madd4<true>(d31, s0, w1);
-                        if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<true>(d40, s0, w0), Madd4<true>(d41, s0, w1);
-                        if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<true>(d50, s0, w0), Madd4<true>(d51, s0, w1);
-                        if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<true>(d60, s0, w0), Madd4<true>(d61, s0, w1);
-                        if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<true>(d70, s0, w0), Madd4<true>(d71, s0, w1);
-                        if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<true>(d80, s0, w0), Madd4<true>(d81, s0, w1);
-                        if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<true>(d90, s0, w0), Madd4<true>(d91, s0, w1);
-                        if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<true>(dA0, s0, w0), Madd4<true>(dA1, s0, w1);
-                        if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<true>(dB0, s0, w0), Madd4<true>(dB1, s0, w1);
-                        weight0 += A, weight1 += A;
-                    }
-                }
-                else
-                {
-                    for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
-                    {
-                        w0 = _mm512_loadu_si512((__m512i*)weight0);
-                        w1 = _mm512_loadu_si512((__m512i*)weight1);
-                        if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<false>(d00, s0, w0), Madd4<false>(d01, s0, w1);
-                        if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<false>(d10, s0, w0), Madd4<false>(d11, s0, w1);
-                        if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<false>(d20, s0, w0), Madd4<false>(d21, s0, w1);
-                        if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<false>(d30, s0, w0), Madd4<false>(d31, s0, w1);
-                        if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<false>(d40, s0, w0), Madd4<false>(d41, s0, w1);
-                        if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<false>(d50, s0, w0), Madd4<false>(d51, s0, w1);
-                        if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<false>(d60, s0, w0), Madd4<false>(d61, s0, w1);
-                        if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<false>(d70, s0, w0), Madd4<false>(d71, s0, w1);
-                        if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<false>(d80, s0, w0), Madd4<false>(d81, s0, w1);
-                        if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<false>(d90, s0, w0), Madd4<false>(d91, s0, w1);
-                        if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<false>(dA0, s0, w0), Madd4<false>(dA1, s0, w1);
-                        if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<false>(dB0, s0, w0), Madd4<false>(dB1, s0, w1);
-                        weight0 += A, weight1 += A;
-                    }
-                }
-                __mmask16 tail = TailMask16(dstC - F);
-                if (Base::FmaAvoid(p.compatibility))
-                {
-                    if (M > 0x0) Save2<term, type, true>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x1) Save2<term, type, true>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x2) Save2<term, type, true>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x3) Save2<term, type, true>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x4) Save2<term, type, true>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x5) Save2<term, type, true>(dst, buf, d50, d51, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x6) Save2<term, type, true>(dst, buf, d60, d61, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x7) Save2<term, type, true>(dst, buf, d70, d71, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x8) Save2<term, type, true>(dst, buf, d80, d81, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x9) Save2<term, type, true>(dst, buf, d90, d91, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0xA) Save2<term, type, true>(dst, buf, dA0, dA1, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0xB) Save2<term, type, true>(dst, buf, dB0, dB1, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                }
-                else
-                {
-                    if (M > 0x0) Save2<term, type, false>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x1) Save2<term, type, false>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x2) Save2<term, type, false>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x3) Save2<term, type, false>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x4) Save2<term, type, false>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x5) Save2<term, type, false>(dst, buf, d50, d51, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x6) Save2<term, type, false>(dst, buf, d60, d61, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x7) Save2<term, type, false>(dst, buf, d70, d71, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x8) Save2<term, type, false>(dst, buf, d80, d81, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x9) Save2<term, type, false>(dst, buf, d90, d91, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0xA) Save2<term, type, false>(dst, buf, dA0, dA1, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0xB) Save2<term, type, false>(dst, buf, dB0, dB1, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                }
+                _tile_zero(0);
+                _tile_zero(1);
+                _tile_zero(2);
+                _tile_zero(3);
             }
             else
             {
-                if (first)
-                {
-                    if (M > 0x0) d00 = _mm512_setzero_si512();
-                    if (M > 0x1) d10 = _mm512_setzero_si512();
-                    if (M > 0x2) d20 = _mm512_setzero_si512();
-                    if (M > 0x3) d30 = _mm512_setzero_si512();
-                    if (M > 0x4) d40 = _mm512_setzero_si512();
-                    if (M > 0x5) d50 = _mm512_setzero_si512();
-                    if (M > 0x6) d60 = _mm512_setzero_si512();
-                    if (M > 0x7) d70 = _mm512_setzero_si512();
-                    if (M > 0x8) d80 = _mm512_setzero_si512();
-                    if (M > 0x9) d90 = _mm512_setzero_si512();
-                    if (M > 0xA) dA0 = _mm512_setzero_si512();
-                    if (M > 0xB) dB0 = _mm512_setzero_si512();
-                }
-                else
-                {
-                    if (M > 0x0) d00 = _mm512_loadu_si512(buf + 0x0 * dB + 0);
-                    if (M > 0x1) d10 = _mm512_loadu_si512(buf + 0x1 * dB + 0);
-                    if (M > 0x2) d20 = _mm512_loadu_si512(buf + 0x2 * dB + 0);
-                    if (M > 0x3) d30 = _mm512_loadu_si512(buf + 0x3 * dB + 0);
-                    if (M > 0x4) d40 = _mm512_loadu_si512(buf + 0x4 * dB + 0);
-                    if (M > 0x5) d50 = _mm512_loadu_si512(buf + 0x5 * dB + 0);
-                    if (M > 0x6) d60 = _mm512_loadu_si512(buf + 0x6 * dB + 0);
-                    if (M > 0x7) d70 = _mm512_loadu_si512(buf + 0x7 * dB + 0);
-                    if (M > 0x8) d80 = _mm512_loadu_si512(buf + 0x8 * dB + 0);
-                    if (M > 0x9) d90 = _mm512_loadu_si512(buf + 0x9 * dB + 0);
-                    if (M > 0xA) dA0 = _mm512_loadu_si512(buf + 0xA * dB + 0);
-                    if (M > 0xB) dB0 = _mm512_loadu_si512(buf + 0xB * dB + 0);
-                }
-                if (Base::Overflow(p.compatibility) || Base::Narrowed(p.compatibility))
-                {
-                    for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
-                    {
-                        w0 = _mm512_loadu_si512((__m512i*)weight0);
-                        if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<true>(d00, s0, w0);
-                        if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<true>(d10, s0, w0);
-                        if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<true>(d20, s0, w0);
-                        if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<true>(d30, s0, w0);
-                        if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<true>(d40, s0, w0);
-                        if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<true>(d50, s0, w0);
-                        if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<true>(d60, s0, w0);
-                        if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<true>(d70, s0, w0);
-                        if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<true>(d80, s0, w0);
-                        if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<true>(d90, s0, w0);
-                        if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<true>(dA0, s0, w0);
-                        if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<true>(dB0, s0, w0);
-                        weight0 += A;
-                    }
-                }
-                else
-                {
-                    for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
-                    {
-                        w0 = _mm512_loadu_si512((__m512i*)weight0);
-                        if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<false>(d00, s0, w0);
-                        if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<false>(d10, s0, w0);
-                        if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<false>(d20, s0, w0);
-                        if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<false>(d30, s0, w0);
-                        if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<false>(d40, s0, w0);
-                        if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<false>(d50, s0, w0);
-                        if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<false>(d60, s0, w0);
-                        if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<false>(d70, s0, w0);
-                        if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<false>(d80, s0, w0);
-                        if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<false>(d90, s0, w0);
-                        if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<false>(dA0, s0, w0);
-                        if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<false>(dB0, s0, w0);
-                        weight0 += A;
-                    }
-                }
-                __mmask16 tail = TailMask16(dstC);
+                _tile_loadd(0, buf + 0, strideB);
+                _tile_loadd(1, buf + F, strideB);
+                _tile_loadd(2, buf + 16 * dB + 0, strideB);
+                _tile_loadd(3, buf + 16 * dB + F, strideB);
+            }
+            size_t sc = 0;
+            for (; sc < srcC64; sc += 64)
+            {
+                _tile_loadd(4, src0 + sc, dS);
+                _tile_loadd(6, weight0 + sc * 16, dW);
+                _tile_dpbusd(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 16, dW);
+                _tile_dpbusd(1, 4, 7);
+                _tile_loadd(5, src1 + sc, dS);
+                _tile_dpbusd(2, 5, 6);
+                _tile_dpbusd(3, 5, 7);
+            }
+            if (sc < srcC)
+            {
+                size_t tailC = AlignHi(srcC - sc, 4);
+                conf.rows[6] = uint8_t(tailC / 4);
+                conf.rows[7] = uint8_t(tailC / 4);
+                conf.colsb[4] = uint16_t(tailC);
+                conf.colsb[5] = uint16_t(tailC);
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, dS);
+                _tile_loadd(6, weight0 + sc * 16, dW);
+                _tile_dpbusd(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 16, dW);
+                _tile_dpbusd(1, 4, 7);
+                _tile_loadd(5, src1 + sc, dS);
+                _tile_dpbusd(2, 5, 6);
+                _tile_dpbusd(3, 5, 7);
+            }
+            _tile_stored(0, buf + 0, strideB);
+            _tile_stored(1, buf + F, strideB);
+            _tile_stored(2, buf + 16 * dB + 0, strideB);
+            _tile_stored(3, buf + 16 * dB + F, strideB);
+            if (term < Term8iInterim)
+            {
+                __mmask16 tailD = TailMask16(dstC - F);
+                size_t dstS8 = AlignLo(dstS, 8), s = 0;
                 if (Base::FmaAvoid(p.compatibility))
                 {
-                    if (M > 0x0) Save1<term, type, true>(dst, buf, d00, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x1) Save1<term, type, true>(dst, buf, d10, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x2) Save1<term, type, true>(dst, buf, d20, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x3) Save1<term, type, true>(dst, buf, d30, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x4) Save1<term, type, true>(dst, buf, d40, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x5) Save1<term, type, true>(dst, buf, d50, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x6) Save1<term, type, true>(dst, buf, d60, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x7) Save1<term, type, true>(dst, buf, d70, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x8) Save1<term, type, true>(dst, buf, d80, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x9) Save1<term, type, true>(dst, buf, d90, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0xA) Save1<term, type, true>(dst, buf, dA0, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0xB) Save1<term, type, true>(dst, buf, dB0, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
+                    for (; s < dstS; ++s, buf += dB, dst += dD)
+                        Apply2<term, type, true>(dst, buf, norm, bias, params, scale, shift, upper, tailD);
                 }
                 else
                 {
-                    if (M > 0x0) Save1<term, type, false>(dst, buf, d00, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x1) Save1<term, type, false>(dst, buf, d10, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x2) Save1<term, type, false>(dst, buf, d20, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x3) Save1<term, type, false>(dst, buf, d30, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x4) Save1<term, type, false>(dst, buf, d40, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x5) Save1<term, type, false>(dst, buf, d50, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x6) Save1<term, type, false>(dst, buf, d60, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x7) Save1<term, type, false>(dst, buf, d70, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x8) Save1<term, type, false>(dst, buf, d80, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0x9) Save1<term, type, false>(dst, buf, d90, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0xA) Save1<term, type, false>(dst, buf, dA0, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
-                    if (M > 0xB) Save1<term, type, false>(dst, buf, dB0, norm, bias, params, scale, shift, upper, tail), dst += dD, buf += dB;
+                    for (; s < dstS; ++s, buf += dB, dst += dD)
+                        Apply2<term, type, false>(dst, buf, norm, bias, params, scale, shift, upper, tailD);
                 }
             }
         }
 
-        typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC,
-            const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first);
-
-        template<Term8iType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect1x1_2xM_Ptr GetConvolutionNhwcDirect1x1_2xM(size_t M)
+        template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x1(const uint8_t* src0,
+            const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm,
+            const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
-            switch (M)
+            size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dW = 64, srcC64 = AlignLo(srcC, 64);
+            int strideB = dB * 4;
+            const uint8_t* src1 = src0 + 16 * dS;
+            __m128i upper = _mm_set1_epi32(a.upper);
+
+            TileConf conf;
+            conf.rows[0] = 16;
+            conf.rows[2] = uint8_t(dstS - 16);
+            conf.rows[4] = 16;
+            conf.rows[5] = uint8_t(dstS - 16);
+            conf.rows[6] = 16;
+            conf.colsb[0] = uint16_t(dstC * 4);
+            conf.colsb[2] = uint16_t(dstC * 4);
+            conf.colsb[4] = 64;
+            conf.colsb[5] = 64;
+            conf.colsb[6] = uint16_t(dstC * 4);
+            _tile_loadconfig(&conf);
+
+            if (first)
             {
-            case 0x0: return NULL;
-            case 0x1: return ConvolutionNhwcDirect1x1_2xM< term, type, 0x1>;
-            case 0x2: return ConvolutionNhwcDirect1x1_2xM< term, type, 0x2>;
-            case 0x3: return ConvolutionNhwcDirect1x1_2xM< term, type, 0x3>;
-            case 0x4: return ConvolutionNhwcDirect1x1_2xM< term, type, 0x4>;
-            case 0x5: return ConvolutionNhwcDirect1x1_2xM< term, type, 0x5>;
-            case 0x6: return ConvolutionNhwcDirect1x1_2xM< term, type, 0x6>;
-            case 0x7: return ConvolutionNhwcDirect1x1_2xM< term, type, 0x7>;
-            case 0x8: return ConvolutionNhwcDirect1x1_2xM< term, type, 0x8>;
-            case 0x9: return ConvolutionNhwcDirect1x1_2xM< term, type, 0x9>;
-            case 0xA: return ConvolutionNhwcDirect1x1_2xM< term, type, 0xA>;
-            case 0xB: return ConvolutionNhwcDirect1x1_2xM< term, type, 0xB>;
-            case 0xC: return ConvolutionNhwcDirect1x1_2xM< term, type, 0xC>;
+                _tile_zero(0);
+                _tile_zero(2);
             }
-            assert(0);
-            return NULL;
+            else
+            {
+                _tile_loadd(0, buf + 0, strideB);
+                _tile_loadd(2, buf + 16 * dB + 0, strideB);
+            }
+            size_t sc = 0;
+            for (; sc < srcC64; sc += 64)
+            {
+                _tile_loadd(4, src0 + sc, dS);
+                _tile_loadd(6, weight0 + sc * 16, dW);
+                _tile_dpbusd(0, 4, 6);
+                _tile_loadd(5, src1 + sc, dS);
+                _tile_dpbusd(2, 5, 6);
+            }
+            if (sc < srcC)
+            {
+                size_t tailC = AlignHi(srcC - sc, 4);
+                conf.rows[6] = uint8_t(tailC / 4);
+                conf.colsb[4] = uint16_t(tailC);
+                conf.colsb[5] = uint16_t(tailC);
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, dS);
+                _tile_loadd(6, weight0 + sc * 16, dW);
+                _tile_dpbusd(0, 4, 6);
+                _tile_loadd(5, src1 + sc, dS);
+                _tile_dpbusd(2, 5, 6);
+            }
+            _tile_stored(0, buf + 0, strideB);
+            _tile_stored(2, buf + 16 * dB + 0, strideB);
+            if (type)
+            {
+                __mmask16 tailD = TailMask16(dstC);
+                size_t dstS8 = AlignLo(dstS, 8), s = 0;
+                if (Base::FmaAvoid(p.compatibility))
+                {
+                    for (; s < dstS; ++s, buf += dB, dst += dD)
+                        Apply1<term, type, true>(dst, buf, norm, bias, params, scale, shift, upper, tailD);
+                }
+                else
+                {
+                    for (; s < dstS; ++s, buf += dB, dst += dD)
+                        Apply1<term, type, false>(dst, buf, norm, bias, params, scale, shift, upper, tailD);
+                }
+            }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const uint8_t* src,
-            const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
+        template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_1x2(const uint8_t* src0,
+            const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm,
+            const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
+        {
+            size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dW = 64, srcC64 = AlignLo(srcC, 64);
+            int strideB = dB * 4;
+            const int8_t* weight1 = weight0 + DivHi(p.srcC, 4) * A;
+            __m128i upper = _mm_set1_epi32(a.upper);
+
+            TileConf conf;
+            conf.rows[0] = uint8_t(dstS);
+            conf.rows[1] = uint8_t(dstS);
+            conf.rows[4] = uint8_t(dstS);
+            conf.rows[6] = 16;
+            conf.rows[7] = 16;
+            conf.colsb[0] = 64;
+            conf.colsb[1] = uint16_t((dstC - 16) * 4);
+            conf.colsb[4] = 64;
+            conf.colsb[6] = 64;
+            conf.colsb[7] = uint16_t((dstC - 16) * 4);
+            _tile_loadconfig(&conf);
+
+            if (first)
+            {
+                _tile_zero(0);
+                _tile_zero(1);
+            }
+            else
+            {
+                _tile_loadd(0, buf + 0, strideB);
+                _tile_loadd(1, buf + F, strideB);
+            }
+            size_t sc = 0;
+            for (; sc < srcC64; sc += 64)
+            {
+                _tile_loadd(4, src0 + sc, dS);
+                _tile_loadd(6, weight0 + sc * 16, dW);
+                _tile_dpbusd(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 16, dW);
+                _tile_dpbusd(1, 4, 7);
+            }
+            if (sc < srcC)
+            {
+                size_t tailC = AlignHi(srcC - sc, 4);
+                conf.rows[6] = uint8_t(tailC / 4);
+                conf.rows[7] = uint8_t(tailC / 4);
+                conf.colsb[4] = uint16_t(tailC);
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, dS);
+                _tile_loadd(6, weight0 + sc * 16, dW);
+                _tile_dpbusd(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 16, dW);
+                _tile_dpbusd(1, 4, 7);
+            }
+            _tile_stored(0, buf + 0, strideB);
+            _tile_stored(1, buf + F, strideB);
+            if (type)
+            {
+                __mmask16 tailD = TailMask16(dstC - F);
+                size_t dstS8 = AlignLo(dstS, 8), s = 0;
+                if (Base::FmaAvoid(p.compatibility))
+                {
+                    for (; s < dstS; ++s, buf += dB, dst += dD)
+                        Apply2<term, type, true>(dst, buf, norm, bias, params, scale, shift, upper, tailD);
+                }
+                else
+                {
+                    for (; s < dstS; ++s, buf += dB, dst += dD)
+                        Apply2<term, type, false>(dst, buf, norm, bias, params, scale, shift, upper, tailD);
+                }
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_1x1(const uint8_t* src0,
+            const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm,
+            const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
+        {
+            size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dW = 64, srcC64 = AlignLo(srcC, 64);
+            int strideB = dB * 4;
+            __m128i upper = _mm_set1_epi32(a.upper);
+
+            TileConf conf;
+            conf.rows[0] = uint8_t(dstS);
+            conf.rows[4] = uint8_t(dstS);
+            conf.rows[6] = 16;
+            conf.colsb[0] = uint16_t(dstC * 4);
+            conf.colsb[4] = 64;
+            conf.colsb[6] = uint16_t(dstC * 4);
+            _tile_loadconfig(&conf);
+
+            if (first)
+            {
+                _tile_zero(0);
+            }
+            else
+            {
+                _tile_loadd(0, buf + 0, strideB);
+            }
+            size_t sc = 0;
+            for (; sc < srcC64; sc += 64)
+            {
+                _tile_loadd(4, src0 + sc, dS);
+                _tile_loadd(6, weight0 + sc * 16, dW);
+                _tile_dpbusd(0, 4, 6);
+            }
+            if (sc < srcC)
+            {
+                size_t tailC = AlignHi(srcC - sc, 4);
+                conf.rows[6] = uint8_t(tailC / 4);
+                conf.colsb[4] = uint16_t(tailC);
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, dS);
+                _tile_loadd(6, weight0 + sc * 16, dW);
+                _tile_dpbusd(0, 4, 6);
+            }
+            _tile_stored(0, buf + 0, strideB);
+            if (type)
+            {
+                __mmask16 tailD = TailMask16(dstC);
+                size_t dstS8 = AlignLo(dstS, 8), s = 0;
+                if (Base::FmaAvoid(p.compatibility))
+                {
+                    for (; s < dstS; ++s, buf += dB, dst += dD)
+                        Apply1<term, type, true>(dst, buf, norm, bias, params, scale, shift, upper, tailD);
+                }
+                else
+                {
+                    for (; s < dstS; ++s, buf += dB, dst += dD)
+                        Apply1<term, type, false>(dst, buf, norm, bias, params, scale, shift, upper, tailD);
+                }
+            }
+        }
+
+        typedef void(*ConvolutionNhwcDirect1x1_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC,
+            const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first);
+
+        template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const uint8_t* src, 
+            const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight, 
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
-            size_t n = 12, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
-            ConvolutionNhwcDirect1x1_2xM_Ptr convolutionNhwcDirect1x1_2xN = GetConvolutionNhwcDirect1x1_2xM<term, type>(n);
-            ConvolutionNhwcDirect1x1_2xM_Ptr convolutionNhwcDirect1x1_2xM = GetConvolutionNhwcDirect1x1_2xM<term, type>(m);
+            size_t n = 32, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(srcC, 4) * A;
+            ConvolutionNhwcDirect1x1_Ptr body_2 = ConvolutionNhwcDirect1x1_2x2<term, type>;
+            ConvolutionNhwcDirect1x1_Ptr tail_2 = m > 16 ? ConvolutionNhwcDirect1x1_2x2<term, type> : ConvolutionNhwcDirect1x1_1x2<term, type>;
+            ConvolutionNhwcDirect1x1_Ptr body_1 = ConvolutionNhwcDirect1x1_2x1<term, type>;
+            ConvolutionNhwcDirect1x1_Ptr tail_1 = m > 16 ? ConvolutionNhwcDirect1x1_2x1<term, type> : ConvolutionNhwcDirect1x1_1x1<term, type>;
+
             __m512 _norm[2], _bias[2], _params[2], _scale[2], _shift[2];
             _params[0] = _mm512_set1_ps(params[0]);
             _params[1] = _mm512_set1_ps(params[1]);
@@ -320,15 +380,25 @@ namespace Simd
                 uint8_t* d = dst + (dc + yBeg * p.dstW * p.dstC) * a.size;
                 int32_t* b = buf + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
-                for (; i < nn; i += n, s += p.srcC * n, b += p.dstC * n, d += p.dstC * a.size * n)
-                    convolutionNhwcDirect1x1_2xN(s, p, a, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
-                for (; i < n1; i += m, s += p.srcC * m, b += p.dstC * m, d += p.dstC * a.size * m)
-                    convolutionNhwcDirect1x1_2xM(s, p, a, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
+                if (dC > F)
+                {
+                    for (; i < nn; i += n, s += p.srcC * n, b += p.dstC * n, d += p.dstC * a.size * n)
+                        body_2(s, p, a, srcC, n, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
+                    for (; i < n1; i += m, s += p.srcC * m, b += p.dstC * m, d += p.dstC * a.size * m)
+                        tail_2(s, p, a, srcC, m, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
+                }
+                else
+                {
+                    for (; i < nn; i += n, s += p.srcC * n, b += p.dstC * n, d += p.dstC * a.size * n)
+                        body_1(s, p, a, srcC, n, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
+                    for (; i < n1; i += m, s += p.srcC * m, b += p.dstC * m, d += p.dstC * a.size * m)
+                        tail_1(s, p, a, srcC, m, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
+                }
                 weight += DivHi(p.srcC, 4) * DA;
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <Term8iType term, SimdConvolutionActivationType activation> void SetDirect1x1(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
         {

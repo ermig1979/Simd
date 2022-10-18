@@ -787,7 +787,7 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AMX_ENABLE    
+#if defined(SIMD_AMX_ENABLE)  
     namespace Amx
     {
         template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(const float* src, float* dst, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))

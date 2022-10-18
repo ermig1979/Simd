@@ -590,6 +590,7 @@ namespace Simd
 #if defined(SIMD_AMX_EMULATE)
         using namespace Avx512bw;
 #else
+        using namespace Avx512vnni;
         using namespace Avx512bf16;
 #endif
     }
