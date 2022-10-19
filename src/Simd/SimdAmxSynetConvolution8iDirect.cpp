@@ -42,8 +42,8 @@ namespace Simd
             : Avx512vnni::SynetConvolution8iNhwcDirect(p)
 #endif
         {
-            size_t microC = p.Is1x1() ? 2 * F : 12;
-            SetAlgParam(F, 2 * F, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            size_t microHW = p.Is1x1() ? 2 * F : 12;
+            SetAlgParam(F, 2 * F, microHW, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (p.Is1x1())
                 SetDirect1x1(p, _alg, _convolutions);
             else

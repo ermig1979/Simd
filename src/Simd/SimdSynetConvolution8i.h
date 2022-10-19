@@ -238,9 +238,9 @@ namespace Simd
                 const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first);
 
         protected:
-            void SetAlgParam(size_t F, size_t microD, size_t microC, size_t L1, size_t L2, size_t L3);
+            void SetAlgParam(size_t F, size_t microD, size_t microHW, size_t L1, size_t L2, size_t L3);
             void ReorderWeight();
-            bool PadEnable(size_t microC);
+            bool PadEnable(size_t microHW);
             void PadInput(const uint8_t* src, uint8_t* dst);
 
             virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);

@@ -430,20 +430,22 @@ namespace Simd
             return false;
         }
 
-        bool SynetConvolution8iNhwcDirect::PadEnable(size_t microC)
+        bool SynetConvolution8iNhwcDirect::PadEnable(size_t microHW)
         {
             const ConvParam8i& p = _param;
             if (p.padX == 0 && p.padW == 0)
                 return false;
+            if (microHW >= 32)
+                return true;
             if (_alg.macroH < p.dstH)
                 return false;
             size_t nose = p.NoseW(), body = p.BodyW() - nose, tail = DivHi(p.padW, p.strideX);
-            size_t srcSteps = nose + DivHi(body, microC) + tail;
-            size_t padSteps = DivHi(nose + body + tail, microC);
+            size_t srcSteps = nose + DivHi(body, microHW) + tail;
+            size_t padSteps = DivHi(nose + body + tail, microHW);
             return srcSteps >= padSteps*1.3;
         }
 
-        void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t microC, size_t L1, size_t L2, size_t L3)
+        void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t microHW, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam8i& p = _param;
             _alg.F = F;
@@ -457,7 +459,7 @@ namespace Simd
             }
             _alg.macroD = Simd::Min(AlignLoAny(L3 / p.kernelY / p.kernelX / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
             _alg.size = _dst8u ? 1 : 4;
-            if (PadEnable(microC))
+            if (PadEnable(microHW))
             {
                 _paramP = p;
                 _paramP.srcW = p.srcW + p.padX + p.padW;
@@ -467,7 +469,7 @@ namespace Simd
             }
             else
                 _sizeP = 0;
-            _sizeB = (_alg.macroC < p.srcC || microC >= 32) && _dst8u ? _sizeD : 0;
+            _sizeB = (_alg.macroC < p.srcC || microHW >= 32) && _dst8u ? _sizeD : 0;
         }
 
         void SynetConvolution8iNhwcDirect::ReorderWeight()
