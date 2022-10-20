@@ -433,7 +433,7 @@ namespace Simd
         bool SynetConvolution8iNhwcDirect::PadEnable(size_t microHW)
         {
             const ConvParam8i& p = _param;
-            if (p.padX == 0 && p.padW == 0)
+            if (p.padX == 0 && p.padW == 0 && p.padY == 0 && p.padH == 0)
                 return false;
             if (microHW >= 32)
                 return true;
@@ -462,10 +462,13 @@ namespace Simd
             if (PadEnable(microHW))
             {
                 _paramP = p;
+                _paramP.srcH = p.srcH + p.padY + p.padH;
+                _paramP.padY = 0;
+                _paramP.padH = 0;
                 _paramP.srcW = p.srcW + p.padX + p.padW;
                 _paramP.padX = 0;
                 _paramP.padW = 0;
-                _sizeP = p.srcH * _paramP.srcW * p.srcC;
+                _sizeP = _paramP.srcH * _paramP.srcW * p.srcC;
             }
             else
                 _sizeP = 0;
@@ -526,15 +529,19 @@ namespace Simd
         void SynetConvolution8iNhwcDirect::PadInput(const uint8_t* src, uint8_t* dst)
         {
             const ConvParam8i& p = _param;
-            size_t nose = p.padX * p.srcC * sizeof(uint8_t);
-            size_t body = p.srcW * p.srcC * sizeof(uint8_t);
-            size_t tail = p.padW * p.srcC * sizeof(uint8_t);
+            size_t noseX = p.padX * p.srcC * sizeof(uint8_t);
+            size_t bodyX = p.srcW * p.srcC * sizeof(uint8_t);
+            size_t tailX = p.padW * p.srcC * sizeof(uint8_t);
+            size_t noseY = (noseX + bodyX + tailX) * p.padY;
+            size_t tailY = (noseX + bodyX + tailX) * p.padH;
+            memset(dst, _srcCvt.zero[0], noseY), dst += noseY;
             for (size_t y = 0; y < p.srcH; ++y)
             {
-                memset(dst, _srcCvt.zero[0], nose), dst += nose;
-                memcpy(dst, src, body), src += body, dst += body;
-                memset(dst, _srcCvt.zero[0], tail), dst += tail;
+                memset(dst, _srcCvt.zero[0], noseX), dst += noseX;
+                memcpy(dst, src, bodyX), src += bodyX, dst += bodyX;
+                memset(dst, _srcCvt.zero[0], tailX), dst += tailX;
             }
+            memset(dst, _srcCvt.zero[0], tailY), dst += tailY;
         }
 
         void SynetConvolution8iNhwcDirect::Forward8u(const uint8_t* src, const ConvParam8i& p, int32_t* buf, uint8_t* dst)
