@@ -462,9 +462,12 @@ namespace Simd
             if (PadEnable(microHW))
             {
                 _paramP = p;
-                _paramP.srcH = p.srcH + p.padY + p.padH;
-                _paramP.padY = 0;
-                _paramP.padH = 0;
+                //if (microHW >= 32)
+                {
+                    _paramP.srcH = p.srcH + p.padY + p.padH;
+                    _paramP.padY = 0;
+                    _paramP.padH = 0;
+                }
                 _paramP.srcW = p.srcW + p.padX + p.padW;
                 _paramP.padX = 0;
                 _paramP.padW = 0;
@@ -534,14 +537,16 @@ namespace Simd
             size_t tailX = p.padW * p.srcC * sizeof(uint8_t);
             size_t noseY = (noseX + bodyX + tailX) * p.padY;
             size_t tailY = (noseX + bodyX + tailX) * p.padH;
-            memset(dst, _srcCvt.zero[0], noseY), dst += noseY;
+            if(_paramP.padY != p.padY)
+                memset(dst, _srcCvt.zero[0], noseY), dst += noseY;
             for (size_t y = 0; y < p.srcH; ++y)
             {
                 memset(dst, _srcCvt.zero[0], noseX), dst += noseX;
                 memcpy(dst, src, bodyX), src += bodyX, dst += bodyX;
                 memset(dst, _srcCvt.zero[0], tailX), dst += tailX;
             }
-            memset(dst, _srcCvt.zero[0], tailY), dst += tailY;
+            if (_paramP.padH != p.padH)
+                memset(dst, _srcCvt.zero[0], tailY), dst += tailY;
         }
 
         void SynetConvolution8iNhwcDirect::Forward8u(const uint8_t* src, const ConvParam8i& p, int32_t* buf, uint8_t* dst)
