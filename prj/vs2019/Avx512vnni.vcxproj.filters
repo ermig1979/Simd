@@ -113,9 +113,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirectAny.cpp">
       <Filter>Avx512vnni</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iDepthwise.cpp">
-      <Filter>Avx512vnni</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iInput.cpp">
       <Filter>Avx512vnni</Filter>
     </ClCompile>

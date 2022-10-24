@@ -774,6 +774,10 @@ namespace Simd
             size_t microD = 16 * 2;
             size_t microHW = 16 * 2;
             size_t microC = 16 * 2;
+#if !defined(SIMD_AMX_EMULATE)
+            if (p.srcC < 2 * microC)
+                return;
+#endif
             SetAlgParam(microD, microHW, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
 #if defined(SIMD_AMX_EMULATE)
             if (_alg.mode)
