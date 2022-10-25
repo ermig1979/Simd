@@ -44,7 +44,7 @@ namespace Simd
             SetSize(Avx512bw::F);
             _cvt32fTo8u = _s8u ? NULL : Avx512bw::Convert32fTo8u;
             if(_param.conv[0].Is1x1())
-                Avx512bw::SetInput(_param.conv[0], _input);
+                SetInput(_param.conv[0], _input);
             else
             {
 #if defined(SIMD_AMX_EMULATE)
@@ -54,7 +54,7 @@ namespace Simd
 #endif
             }
             Avx512bw::SetDepthwise(_param.conv[1], _depthwise);
-            Avx512bw::SetOutput(_param.conv[2], _output);
+            SetOutput(_param.conv[2], _output);
         }
 
         //---------------------------------------------------------------------
@@ -69,7 +69,7 @@ namespace Simd
             SetSize(Avx512bw::F);
             _cvt32fTo8u = _s8u ? NULL : Avx512bw::Convert32fTo8u;
             if (_param.conv[0].Is1x1())
-                Avx512bw::SetInput(_param.conv[0], _input);
+                SetInput(_param.conv[0], _input);
             else
             {
 #if defined(SIMD_AMX_EMULATE)
@@ -93,7 +93,7 @@ namespace Simd
             SetSize(Avx512bw::F);
             _cvt8uTo32f = _s8u ? (Convert8uTo32fPtr)Avx512bw::Convert8uTo32f : NULL;
             Avx512bw::SetDepthwise(_param.conv[0], _depthwise);
-            Avx512bw::SetOutput(_param.conv[1], _output);
+            SetOutput(_param.conv[1], _output);
         }
 
         //---------------------------------------------------------------------

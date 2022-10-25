@@ -41,6 +41,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTile.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h" />
@@ -56,6 +57,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16Input.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16Output.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution8i.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution8iInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution8iOutput.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemDefinitionGroup>

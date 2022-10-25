@@ -114,6 +114,9 @@
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAmxCpu.cpp">
@@ -141,6 +144,12 @@
       <Filter>Amx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution8i.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution8iInput.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution8iOutput.cpp">
       <Filter>Amx</Filter>
     </ClCompile>
   </ItemGroup>
