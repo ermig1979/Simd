@@ -55,11 +55,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16Input.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16Output.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution8i.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;SIMD_AMX_EMULATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>

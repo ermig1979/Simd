@@ -295,7 +295,7 @@ namespace Simd
 
         void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
     }
-#endif//SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
@@ -332,7 +332,7 @@ namespace Simd
 
         void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
     }
-#endif//SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
@@ -375,7 +375,7 @@ namespace Simd
 
         void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
     }
-#endif//SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
@@ -410,6 +410,53 @@ namespace Simd
 
         void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
     }
-#endif//SIMD_AVX512VNNI_ENABLE
+#endif
+
+#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+    namespace Amx
+    {
+        void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+
+        void SetOutput(const ConvParam8i& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+
+#if defined(SIMD_AMX_EMULATE)
+        class SynetMergedConvolution8iCdc : public Avx512bw::SynetMergedConvolution8iCdc
+#else
+        class SynetMergedConvolution8iCdc : public Avx512vnni::SynetMergedConvolution8iCdc
+#endif
+        {
+        public:
+            SynetMergedConvolution8iCdc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Amx"; }
+        };
+
+#if defined(SIMD_AMX_EMULATE)
+        class SynetMergedConvolution8iCd : public Avx512bw::SynetMergedConvolution8iCd
+#else
+        class SynetMergedConvolution8iCd : public Avx512vnni::SynetMergedConvolution8iCd
+#endif        
+        {
+        public:
+            SynetMergedConvolution8iCd(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Amx"; }
+        };
+
+#if defined(SIMD_AMX_EMULATE)
+        class SynetMergedConvolution8iDc : public Avx512bw::SynetMergedConvolution8iDc
+#else
+        class SynetMergedConvolution8iDc : public Avx512vnni::SynetMergedConvolution8iDc
+#endif
+        {
+        public:
+            SynetMergedConvolution8iDc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Amx"; }
+        };
+
+        void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+    }
+#endif
 }
 #endif//__SimdSynetMergedConvolution8i_h__

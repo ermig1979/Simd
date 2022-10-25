@@ -140,5 +140,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetConvolution8iDirectAny.cpp">
       <Filter>Amx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution8i.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
