@@ -321,7 +321,7 @@ namespace Test
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 120, 7, 35), Cnv(a0, 1, 1, 40), Cnv(a1, 3, 1), u8, u8, 1, n), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 8, 32), Cnv(a0, 1, 1, 32), Cnv(a1, 3, 1), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 128), u8, u8, 1, n), f1, f2);
 #endif
         return result;
     }

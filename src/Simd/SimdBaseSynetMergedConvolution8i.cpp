@@ -523,7 +523,7 @@ namespace Simd
                             _params[1].data + c * a.dp[1], _cvt[1].scale.data + c, _cvt[1].shift.data + c, buf3);
                         if (c + maC == C)
                             _output[0](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data, 
-                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, maC == C ? NULL : buf4, dst, maC == C ? 1 : 0);
+                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst, maC == C ? 1 : 0);
                         else
                             _output[1](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data,
                                 _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst, c == 0 ? 1 : 0);
@@ -719,7 +719,7 @@ namespace Simd
                             _params[0].data + c * a.dp[0], _cvt[1].scale.data + c, _cvt[1].shift.data + c, buf2);
                         if (c + maC == C)
                             _output[0](buf2, c1, a, maC, yBeg2, yEnd2, _weight8i[0].data + c * a.dw[1], _norm[0].data, _bias[1].data,
-                                _params[1].data, _cvt[2].scale.data, _cvt[2].shift.data, maC == C ? NULL : buf4, dst, maC == C ? 1 : 0);
+                                _params[1].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst, maC == C ? 1 : 0);
                         else
                             _output[1](buf2, c1, a, maC, yBeg2, yEnd2, _weight8i[0].data + c * a.dw[1], _norm[0].data, _bias[1].data,
                                 _params[1].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst, c == 0 ? 1 : 0);

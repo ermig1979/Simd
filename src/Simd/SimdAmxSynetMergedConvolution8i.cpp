@@ -43,7 +43,7 @@ namespace Simd
         {
             SetSize(Avx512bw::F);
             _cvt32fTo8u = _s8u ? NULL : Avx512bw::Convert32fTo8u;
-            if(_param.conv[0].Is1x1())
+            if(_param.conv[0].Is1x1() && _param.conv[0].srcC >= 2 * A)
                 SetInput(_param.conv[0], _input);
             else
             {
@@ -54,7 +54,19 @@ namespace Simd
 #endif
             }
             Avx512bw::SetDepthwise(_param.conv[1], _depthwise);
-            SetOutput(_param.conv[2], _output);
+            if (_param.conv[2].srcC >= 2 * A)
+            {
+                _sizeB[4] = _sizeD;
+                SetOutput(_param.conv[2], _output);
+            }
+            else
+            {
+#if defined(SIMD_AMX_EMULATE)
+                Avx512bw::SetOutput(_param.conv[2], _output);
+#else
+                Avx512vnni::SetOutput(_param.conv[2], _output);
+#endif
+            }
         }
 
         //---------------------------------------------------------------------
@@ -68,7 +80,7 @@ namespace Simd
         {
             SetSize(Avx512bw::F);
             _cvt32fTo8u = _s8u ? NULL : Avx512bw::Convert32fTo8u;
-            if (_param.conv[0].Is1x1())
+            if (_param.conv[0].Is1x1() && _param.conv[0].srcC >= 2 * A)
                 SetInput(_param.conv[0], _input);
             else
             {
@@ -93,7 +105,19 @@ namespace Simd
             SetSize(Avx512bw::F);
             _cvt8uTo32f = _s8u ? (Convert8uTo32fPtr)Avx512bw::Convert8uTo32f : NULL;
             Avx512bw::SetDepthwise(_param.conv[0], _depthwise);
-            SetOutput(_param.conv[1], _output);
+            if (_param.conv[1].srcC >= 2 * A)
+            {
+                _sizeB[4] = _sizeD;
+                SetOutput(_param.conv[1], _output);
+            }
+            else
+            {
+#if defined(SIMD_AMX_EMULATE)
+                Avx512bw::SetOutput(_param.conv[1], _output);
+#else
+                Avx512vnni::SetOutput(_param.conv[1], _output);
+#endif
+            }
         }
 
         //---------------------------------------------------------------------
