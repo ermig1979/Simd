@@ -82,15 +82,15 @@ namespace Test
 
     TEST_ADD_GROUP_A00(AbsDifference);
 
-    TEST_ADD_GROUP_AD0(AbsDifferenceSum);
-    TEST_ADD_GROUP_AD0(AbsDifferenceSumMasked);
-    TEST_ADD_GROUP_AD0(AbsDifferenceSums3x3);
-    TEST_ADD_GROUP_AD0(AbsDifferenceSums3x3Masked);
-    TEST_ADD_GROUP_AD0(SquaredDifferenceSum);
-    TEST_ADD_GROUP_AD0(SquaredDifferenceSumMasked);
-    TEST_ADD_GROUP_AD0(SquaredDifferenceSum32f);
-    TEST_ADD_GROUP_AD0(SquaredDifferenceKahanSum32f);
-    TEST_ADD_GROUP_AD0(CosineDistance32f);
+    TEST_ADD_GROUP_A00(AbsDifferenceSum);
+    TEST_ADD_GROUP_A00(AbsDifferenceSumMasked);
+    TEST_ADD_GROUP_A00(AbsDifferenceSums3x3);
+    TEST_ADD_GROUP_A00(AbsDifferenceSums3x3Masked);
+    TEST_ADD_GROUP_A00(SquaredDifferenceSum);
+    TEST_ADD_GROUP_A00(SquaredDifferenceSumMasked);
+    TEST_ADD_GROUP_A00(SquaredDifferenceSum32f);
+    TEST_ADD_GROUP_A00(SquaredDifferenceKahanSum32f);
+    TEST_ADD_GROUP_A00(CosineDistance32f);
 
     TEST_ADD_GROUP_A00(AddFeatureDifference);
 
@@ -172,18 +172,18 @@ namespace Test
     TEST_ADD_GROUP_A00(DeinterleaveBgr);
     TEST_ADD_GROUP_A00(DeinterleaveBgra);
 
-    TEST_ADD_GROUP_AD0(DetectionHaarDetect32fp);
-    TEST_ADD_GROUP_AD0(DetectionHaarDetect32fi);
-    TEST_ADD_GROUP_AD0(DetectionLbpDetect32fp);
-    TEST_ADD_GROUP_AD0(DetectionLbpDetect32fi);
-    TEST_ADD_GROUP_AD0(DetectionLbpDetect16ip);
-    TEST_ADD_GROUP_AD0(DetectionLbpDetect16ii);
+    TEST_ADD_GROUP_A00(DetectionHaarDetect32fp);
+    TEST_ADD_GROUP_A00(DetectionHaarDetect32fi);
+    TEST_ADD_GROUP_A00(DetectionLbpDetect32fp);
+    TEST_ADD_GROUP_A00(DetectionLbpDetect32fi);
+    TEST_ADD_GROUP_A00(DetectionLbpDetect16ip);
+    TEST_ADD_GROUP_A00(DetectionLbpDetect16ii);
     TEST_ADD_GROUP_00S(Detection);
 
-    TEST_ADD_GROUP_AD0(AlphaBlending);
+    TEST_ADD_GROUP_A00(AlphaBlending);
     TEST_ADD_GROUP_A00(AlphaBlending2x);
     TEST_ADD_GROUP_A00(AlphaBlendingUniform);
-    TEST_ADD_GROUP_AD0(AlphaFilling);
+    TEST_ADD_GROUP_A00(AlphaFilling);
     TEST_ADD_GROUP_A00(AlphaPremultiply);
     TEST_ADD_GROUP_A00(AlphaUnpremultiply);
     TEST_ADD_GROUP_00S(DrawLine);
@@ -196,13 +196,13 @@ namespace Test
 
     TEST_ADD_GROUP_00S(FontDraw);
 
-    TEST_ADD_GROUP_AD0(EdgeBackgroundGrowRangeSlow);
-    TEST_ADD_GROUP_AD0(EdgeBackgroundGrowRangeFast);
-    TEST_ADD_GROUP_AD0(EdgeBackgroundIncrementCount);
-    TEST_ADD_GROUP_AD0(EdgeBackgroundAdjustRange);
-    TEST_ADD_GROUP_AD0(EdgeBackgroundAdjustRangeMasked);
-    TEST_ADD_GROUP_AD0(EdgeBackgroundShiftRange);
-    TEST_ADD_GROUP_AD0(EdgeBackgroundShiftRangeMasked);
+    TEST_ADD_GROUP_A00(EdgeBackgroundGrowRangeSlow);
+    TEST_ADD_GROUP_A00(EdgeBackgroundGrowRangeFast);
+    TEST_ADD_GROUP_A00(EdgeBackgroundIncrementCount);
+    TEST_ADD_GROUP_A00(EdgeBackgroundAdjustRange);
+    TEST_ADD_GROUP_A00(EdgeBackgroundAdjustRangeMasked);
+    TEST_ADD_GROUP_A00(EdgeBackgroundShiftRange);
+    TEST_ADD_GROUP_A00(EdgeBackgroundShiftRangeMasked);
 
     TEST_ADD_GROUP_AD0(Fill);
     TEST_ADD_GROUP_AD0(FillFrame);

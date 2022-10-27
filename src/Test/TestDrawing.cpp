@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
@@ -518,130 +517,6 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Neon::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
 #endif 
-
-        return result;
-    }
-
-    //-------------------------------------------------------------------------
-
-    bool AlphaBlendingDataTest(bool create, View::Format format, int width, int height, const FuncAB & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View s(width, height, format, NULL, TEST_ALIGN(width));
-        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View b(width, height, format, NULL, TEST_ALIGN(width));
-
-        View d1(width, height, format, NULL, TEST_ALIGN(width));
-        View d2(width, height, format, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(s);
-            FillRandom(a);
-            FillRandom(b);
-
-            TEST_SAVE(s);
-            TEST_SAVE(a);
-            TEST_SAVE(b);
-
-            f.Call(s, a, b, d1);
-
-            TEST_SAVE(d1);
-        }
-        else
-        {
-            TEST_LOAD(s);
-            TEST_LOAD(a);
-            TEST_LOAD(b);
-
-            TEST_LOAD(d1);
-
-            f.Call(s, a, b, d2);
-
-            TEST_SAVE(d2);
-
-            result = result && Compare(d1, d2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool AlphaBlendingDataTest(bool create)
-    {
-        bool result = true;
-
-        FuncAB f = FUNC_AB(SimdAlphaBlending);
-
-        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
-        {
-            result = result && AlphaBlendingDataTest(create, format, DW, DH, FuncAB(f.func, f.description + Data::Description(format)));
-        }
-
-        return result;
-    }
-
-    bool AlphaFillingDataTest(bool create, View::Format format, int width, int height, const FuncAF & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View p(1, 1, format, NULL, TEST_ALIGN(width));
-        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View b(width, height, format, NULL, TEST_ALIGN(width));
-
-        View d1(width, height, format, NULL, TEST_ALIGN(width));
-        View d2(width, height, format, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(p);
-            FillRandom(a);
-            FillRandom(b);
-
-            TEST_SAVE(p);
-            TEST_SAVE(a);
-            TEST_SAVE(b);
-
-            f.Call(p, a, b, d1);
-
-            TEST_SAVE(d1);
-        }
-        else
-        {
-            TEST_LOAD(p);
-            TEST_LOAD(a);
-            TEST_LOAD(b);
-
-            TEST_LOAD(d1);
-
-            f.Call(p, a, b, d2);
-
-            TEST_SAVE(d2);
-
-            result = result && Compare(d1, d2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool AlphaFillingDataTest(bool create)
-    {
-        bool result = true;
-
-        FuncAF f = FUNC_AF(SimdAlphaFilling);
-
-        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
-        {
-            result = result && AlphaFillingDataTest(create, format, DW, DH, FuncAF(f.func, f.description + Data::Description(format)));
-        }
 
         return result;
     }
