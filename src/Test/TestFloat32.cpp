@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -188,106 +187,6 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Neon::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
 #endif 
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool Float32ToUint8DataTest(bool create, size_t size, const FuncFB & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
-
-        View src(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(size, 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(size, 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
-
-        const float lower = -0.10, upper = 0.10;
-
-        if (create)
-        {
-            FillRandom32f(src, -0.11, 0.11);
-
-            TEST_SAVE(src);
-
-            f.Call(src, lower, upper, dst1);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, lower, upper, dst2);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, 1, true, 32);
-        }
-
-        return result;
-    }
-
-    bool Float32ToUint8DataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && Float32ToUint8DataTest(create, DH, FUNC_FB(SimdFloat32ToUint8));
-
-        return result;
-    }
-
-    bool Uint8ToFloat32DataTest(bool create, size_t size, const FuncBF & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
-
-        View src(size, 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-
-        const float lower = -0.10, upper = 0.10;
-
-        if (create)
-        {
-            FillRandom(src);
-
-            TEST_SAVE(src);
-
-            f.Call(src, lower, upper, dst1);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, lower, upper, dst2);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, EPS, true, 32);
-        }
-
-        return result;
-    }
-
-    bool Uint8ToFloat32DataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && Uint8ToFloat32DataTest(create, DH, FUNC_BF(SimdUint8ToFloat32));
 
         return result;
     }

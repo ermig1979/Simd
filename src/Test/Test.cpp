@@ -204,24 +204,24 @@ namespace Test
     TEST_ADD_GROUP_A00(EdgeBackgroundShiftRange);
     TEST_ADD_GROUP_A00(EdgeBackgroundShiftRangeMasked);
 
-    TEST_ADD_GROUP_AD0(Fill);
-    TEST_ADD_GROUP_AD0(FillFrame);
-    TEST_ADD_GROUP_AD0(FillBgra);
-    TEST_ADD_GROUP_AD0(FillBgr);
-    TEST_ADD_GROUP_AD0(FillPixel);
+    TEST_ADD_GROUP_A00(Fill);
+    TEST_ADD_GROUP_A00(FillFrame);
+    TEST_ADD_GROUP_A00(FillBgra);
+    TEST_ADD_GROUP_A00(FillBgr);
+    TEST_ADD_GROUP_A00(FillPixel);
     TEST_ADD_GROUP_A00(Fill32f);
 
-    TEST_ADD_GROUP_AD0(Float32ToFloat16);
-    TEST_ADD_GROUP_AD0(Float16ToFloat32);
-    TEST_ADD_GROUP_AD0(SquaredDifferenceSum16f);
-    TEST_ADD_GROUP_AD0(CosineDistance16f);
+    TEST_ADD_GROUP_A00(Float32ToFloat16);
+    TEST_ADD_GROUP_A00(Float16ToFloat32);
+    TEST_ADD_GROUP_A00(SquaredDifferenceSum16f);
+    TEST_ADD_GROUP_A00(CosineDistance16f);
     TEST_ADD_GROUP_A00(CosineDistancesMxNa16f);
     TEST_ADD_GROUP_A0S(CosineDistancesMxNp16f);
     TEST_ADD_GROUP_A00(VectorNormNa16f);
     TEST_ADD_GROUP_A00(VectorNormNp16f);
 
-    TEST_ADD_GROUP_AD0(Float32ToUint8);
-    TEST_ADD_GROUP_AD0(Uint8ToFloat32);
+    TEST_ADD_GROUP_A00(Float32ToUint8);
+    TEST_ADD_GROUP_A00(Uint8ToFloat32);
 
     TEST_ADD_GROUP_A00(Gemm32fNN);
     TEST_ADD_GROUP_A00(Gemm32fNT);
@@ -231,22 +231,22 @@ namespace Test
     TEST_ADD_GROUP_A00(Yuv420pSaveAsJpegToMemory);
     TEST_ADD_GROUP_A0S(ImageLoadFromMemory);
 
-    TEST_ADD_GROUP_AD0(MeanFilter3x3);
-    TEST_ADD_GROUP_AD0(MedianFilterRhomb3x3);
-    TEST_ADD_GROUP_AD0(MedianFilterRhomb5x5);
-    TEST_ADD_GROUP_AD0(MedianFilterSquare3x3);
-    TEST_ADD_GROUP_AD0(MedianFilterSquare5x5);
-    TEST_ADD_GROUP_AD0(GaussianBlur3x3);
-    TEST_ADD_GROUP_AD0(AbsGradientSaturatedSum);
-    TEST_ADD_GROUP_AD0(LbpEstimate);
-    TEST_ADD_GROUP_AD0(NormalizeHistogram);
-    TEST_ADD_GROUP_AD0(SobelDx);
-    TEST_ADD_GROUP_AD0(SobelDxAbs);
-    TEST_ADD_GROUP_AD0(SobelDy);
-    TEST_ADD_GROUP_AD0(SobelDyAbs);
-    TEST_ADD_GROUP_AD0(ContourMetrics);
-    TEST_ADD_GROUP_AD0(Laplace);
-    TEST_ADD_GROUP_AD0(LaplaceAbs);
+    TEST_ADD_GROUP_A00(MeanFilter3x3);
+    TEST_ADD_GROUP_A00(MedianFilterRhomb3x3);
+    TEST_ADD_GROUP_A00(MedianFilterRhomb5x5);
+    TEST_ADD_GROUP_A00(MedianFilterSquare3x3);
+    TEST_ADD_GROUP_A00(MedianFilterSquare5x5);
+    TEST_ADD_GROUP_A00(GaussianBlur3x3);
+    TEST_ADD_GROUP_A00(AbsGradientSaturatedSum);
+    TEST_ADD_GROUP_A00(LbpEstimate);
+    TEST_ADD_GROUP_A00(NormalizeHistogram);
+    TEST_ADD_GROUP_A00(SobelDx);
+    TEST_ADD_GROUP_A00(SobelDxAbs);
+    TEST_ADD_GROUP_A00(SobelDy);
+    TEST_ADD_GROUP_A00(SobelDyAbs);
+    TEST_ADD_GROUP_A00(ContourMetrics);
+    TEST_ADD_GROUP_A00(Laplace);
+    TEST_ADD_GROUP_A00(LaplaceAbs);
     TEST_ADD_GROUP_A0S(GaussianBlur);
     TEST_ADD_GROUP_A00(RecursiveBilateralFilter);
 
