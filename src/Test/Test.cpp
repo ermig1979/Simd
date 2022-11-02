@@ -250,24 +250,24 @@ namespace Test
     TEST_ADD_GROUP_A0S(GaussianBlur);
     TEST_ADD_GROUP_A00(RecursiveBilateralFilter);
 
-    TEST_ADD_GROUP_AD0(Histogram);
-    TEST_ADD_GROUP_AD0(HistogramMasked);
-    TEST_ADD_GROUP_AD0(HistogramConditional);
-    TEST_ADD_GROUP_AD0(AbsSecondDerivativeHistogram);
-    TEST_ADD_GROUP_AD0(ChangeColors);
+    TEST_ADD_GROUP_A00(Histogram);
+    TEST_ADD_GROUP_A00(HistogramMasked);
+    TEST_ADD_GROUP_A00(HistogramConditional);
+    TEST_ADD_GROUP_A00(AbsSecondDerivativeHistogram);
+    TEST_ADD_GROUP_A00(ChangeColors);
 
-    TEST_ADD_GROUP_AD0(HogDirectionHistograms);
-    TEST_ADD_GROUP_AD0(HogExtractFeatures);
-    TEST_ADD_GROUP_AD0(HogDeinterleave);
-    TEST_ADD_GROUP_AD0(HogFilterSeparable);
+    TEST_ADD_GROUP_A00(HogDirectionHistograms);
+    TEST_ADD_GROUP_A00(HogExtractFeatures);
+    TEST_ADD_GROUP_A00(HogDeinterleave);
+    TEST_ADD_GROUP_A00(HogFilterSeparable);
 
-    TEST_ADD_GROUP_AD0(HogLiteExtractFeatures);
-    TEST_ADD_GROUP_AD0(HogLiteFilterFeatures);
-    TEST_ADD_GROUP_AD0(HogLiteResizeFeatures);
-    TEST_ADD_GROUP_AD0(HogLiteCompressFeatures);
-    TEST_ADD_GROUP_AD0(HogLiteFilterSeparable);
-    TEST_ADD_GROUP_AD0(HogLiteFindMax7x7);
-    TEST_ADD_GROUP_AD0(HogLiteCreateMask);
+    TEST_ADD_GROUP_A00(HogLiteExtractFeatures);
+    TEST_ADD_GROUP_A00(HogLiteFilterFeatures);
+    TEST_ADD_GROUP_A00(HogLiteResizeFeatures);
+    TEST_ADD_GROUP_A00(HogLiteCompressFeatures);
+    TEST_ADD_GROUP_A00(HogLiteFilterSeparable);
+    TEST_ADD_GROUP_A00(HogLiteFindMax7x7);
+    TEST_ADD_GROUP_A00(HogLiteCreateMask);
 
     TEST_ADD_GROUP_00S(ImageMatcher);
 
