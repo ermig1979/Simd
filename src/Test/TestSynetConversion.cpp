@@ -275,7 +275,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, lower, upper, c, dst2));
 
-        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceBoth);
+        result = result && Compare(dst1, dst2, EPS*EPS, true, 64, DifferenceBoth);
 
         return result;
     }
@@ -287,6 +287,8 @@ namespace Test
         View::Format srcFormat[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
         size_t channels[2] = { 1, 3 };
         SimdTensorFormatType dstFormat[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
+
+        result = result && SynetSetInputAutoTest(3, 112, 96, View::Rgb24, SimdTensorFormatNhwc, f1, f2);
 
         for (int s = 0; s < 4; ++s)
         {

@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
@@ -138,68 +137,6 @@ namespace Test
         if (Simd::Avx512bw::Enable)
             result = result && IntegralAutoTest(FUNC(Simd::Avx512bw::Integral), FUNC(SimdIntegral));
 #endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool IntegralDataTest(bool create, int width, int height, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-
-        View sum1(width + 1, height + 1, View::Int32, NULL, TEST_ALIGN(width));
-        View sum2(width + 1, height + 1, View::Int32, NULL, TEST_ALIGN(width));
-        View sqsum1(width + 1, height + 1, View::Int32, NULL, TEST_ALIGN(width));
-        View sqsum2(width + 1, height + 1, View::Int32, NULL, TEST_ALIGN(width));
-        View tilted1(width + 1, height + 1, View::Int32, NULL, TEST_ALIGN(width));
-        View tilted2(width + 1, height + 1, View::Int32, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(src);
-
-            TEST_SAVE(src);
-
-            f.Call(src, sum1, sqsum1, tilted1);
-
-            TEST_SAVE(sum1);
-            TEST_SAVE(sqsum1);
-            TEST_SAVE(tilted1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(sum1);
-            TEST_LOAD(sqsum1);
-            TEST_LOAD(tilted1);
-
-            f.Call(src, sum2, sqsum2, tilted2);
-
-            TEST_SAVE(sum2);
-            TEST_SAVE(sqsum2);
-            TEST_SAVE(tilted2);
-
-            result = result && Compare(sum1, sum2, 0, true, 32, 0, "sum");
-            result = result && Compare(sqsum1, sqsum2, 0, true, 32, 0, "sqsum");
-            result = result && Compare(tilted1, tilted2, 0, true, 32, 0, "tilted");
-        }
-
-        return result;
-    }
-
-    bool IntegralDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && IntegralDataTest(create, DW, DH, FUNC(SimdIntegral));
 
         return result;
     }

@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -276,131 +275,6 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Neon::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 #endif 
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool InterferenceChangeDataTest(bool create, int width, int height, const Func1 & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View statisticSrc(width, height, View::Int16, NULL, TEST_ALIGN(width));
-        View statisticDst1(width, height, View::Int16, NULL, TEST_ALIGN(width));
-        View statisticDst2(width, height, View::Int16, NULL, TEST_ALIGN(width));
-
-        uint8_t value = 3;
-        int16_t saturation = 8888;
-
-        if (create)
-        {
-            FillRandom(statisticSrc, 0, 64);
-
-            TEST_SAVE(statisticSrc);
-
-            f.Call(statisticSrc, statisticDst1, value, saturation);
-
-            TEST_SAVE(statisticDst1);
-        }
-        else
-        {
-            TEST_LOAD(statisticSrc);
-
-            TEST_LOAD(statisticDst1);
-
-            f.Call(statisticSrc, statisticDst2, value, saturation);
-
-            TEST_SAVE(statisticDst2);
-
-            result = result && Compare(statisticDst1, statisticDst2, 0, true, 32, 0);
-        }
-
-        return result;
-    }
-
-    bool InterferenceIncrementDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && InterferenceChangeDataTest(create, DW, DH, FUNC1(SimdInterferenceIncrement));
-
-        return result;
-    }
-
-    bool InterferenceDecrementDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && InterferenceChangeDataTest(create, DW, DH, FUNC1(SimdInterferenceDecrement));
-
-        return result;
-    }
-
-    bool InterferenceChangeMaskedDataTest(bool create, int width, int height, const Func2 & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View statisticSrc(width, height, View::Int16, NULL, TEST_ALIGN(width));
-        View statisticDst1(width, height, View::Int16, NULL, TEST_ALIGN(width));
-        View statisticDst2(width, height, View::Int16, NULL, TEST_ALIGN(width));
-
-        uint8_t value = 3, index = 11;
-        int16_t saturation = 8888;
-
-        View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(statisticSrc, 0, 64);
-            FillRandomMask(mask, index);
-
-            TEST_SAVE(statisticSrc);
-            TEST_SAVE(mask);
-
-            f.Call(statisticSrc, statisticDst1, value, saturation, mask, index);
-
-            TEST_SAVE(statisticDst1);
-        }
-        else
-        {
-            TEST_LOAD(statisticSrc);
-            TEST_LOAD(mask);
-
-            TEST_LOAD(statisticDst1);
-
-            f.Call(statisticSrc, statisticDst2, value, saturation, mask, index);
-
-            TEST_SAVE(statisticDst2);
-
-            result = result && Compare(statisticDst1, statisticDst2, 0, true, 32, 0);
-        }
-
-        return result;
-    }
-
-    bool InterferenceIncrementMaskedDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && InterferenceChangeMaskedDataTest(create, DW, DH, FUNC2(SimdInterferenceIncrementMasked));
-
-        return result;
-    }
-
-    bool InterferenceDecrementMaskedDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && InterferenceChangeMaskedDataTest(create, DW, DH, FUNC2(SimdInterferenceDecrementMasked));
 
         return result;
     }

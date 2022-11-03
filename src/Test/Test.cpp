@@ -271,52 +271,52 @@ namespace Test
 
     TEST_ADD_GROUP_00S(ImageMatcher);
 
-    TEST_ADD_GROUP_AD0(Integral);
+    TEST_ADD_GROUP_A00(Integral);
 
-    TEST_ADD_GROUP_AD0(InterferenceIncrement);
-    TEST_ADD_GROUP_AD0(InterferenceIncrementMasked);
-    TEST_ADD_GROUP_AD0(InterferenceDecrement);
-    TEST_ADD_GROUP_AD0(InterferenceDecrementMasked);
+    TEST_ADD_GROUP_A00(InterferenceIncrement);
+    TEST_ADD_GROUP_A00(InterferenceIncrementMasked);
+    TEST_ADD_GROUP_A00(InterferenceDecrement);
+    TEST_ADD_GROUP_A00(InterferenceDecrementMasked);
 
-    TEST_ADD_GROUP_AD0(InterleaveUv);
-    TEST_ADD_GROUP_AD0(InterleaveBgr);
-    TEST_ADD_GROUP_AD0(InterleaveBgra);
+    TEST_ADD_GROUP_A00(InterleaveUv);
+    TEST_ADD_GROUP_A00(InterleaveBgr);
+    TEST_ADD_GROUP_A00(InterleaveBgra);
 
     TEST_ADD_GROUP_00S(Motion);
 
-    TEST_ADD_GROUP_AD0(NeuralConvert);
-    TEST_ADD_GROUP_AD0(NeuralProductSum);
-    TEST_ADD_GROUP_AD0(NeuralAddVectorMultipliedByValue);
-    TEST_ADD_GROUP_AD0(NeuralAddVector);
-    TEST_ADD_GROUP_AD0(NeuralAddValue);
-    TEST_ADD_GROUP_AD0(NeuralRoughSigmoid);
-    TEST_ADD_GROUP_AD0(NeuralRoughSigmoid2);
-    TEST_ADD_GROUP_AD0(NeuralDerivativeSigmoid);
-    TEST_ADD_GROUP_AD0(NeuralRoughTanh);
-    TEST_ADD_GROUP_AD0(NeuralDerivativeTanh);
-    TEST_ADD_GROUP_AD0(NeuralDerivativeRelu);
-    TEST_ADD_GROUP_AD0(NeuralPow);
-    TEST_ADD_GROUP_AD0(NeuralUpdateWeights);
-    TEST_ADD_GROUP_AD0(NeuralAdaptiveGradientUpdate);
-    TEST_ADD_GROUP_AD0(NeuralPooling1x1Max3x3);
-    TEST_ADD_GROUP_AD0(NeuralPooling2x2Max2x2);
-    TEST_ADD_GROUP_AD0(NeuralPooling2x2Max3x3);
+    TEST_ADD_GROUP_A00(NeuralConvert);
+    TEST_ADD_GROUP_A00(NeuralProductSum);
+    TEST_ADD_GROUP_A00(NeuralAddVectorMultipliedByValue);
+    TEST_ADD_GROUP_A00(NeuralAddVector);
+    TEST_ADD_GROUP_A00(NeuralAddValue);
+    TEST_ADD_GROUP_A00(NeuralRoughSigmoid);
+    TEST_ADD_GROUP_A00(NeuralRoughSigmoid2);
+    TEST_ADD_GROUP_A00(NeuralDerivativeSigmoid);
+    TEST_ADD_GROUP_A00(NeuralRoughTanh);
+    TEST_ADD_GROUP_A00(NeuralDerivativeTanh);
+    TEST_ADD_GROUP_A00(NeuralDerivativeRelu);
+    TEST_ADD_GROUP_A00(NeuralPow);
+    TEST_ADD_GROUP_A00(NeuralUpdateWeights);
+    TEST_ADD_GROUP_A00(NeuralAdaptiveGradientUpdate);
+    TEST_ADD_GROUP_A00(NeuralPooling1x1Max3x3);
+    TEST_ADD_GROUP_A00(NeuralPooling2x2Max2x2);
+    TEST_ADD_GROUP_A00(NeuralPooling2x2Max3x3);
     TEST_ADD_GROUP_00S(NeuralPredict);
     TEST_ADD_GROUP_00S(NeuralTrain);
 
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution2x2Forward);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution3x3Forward);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution4x4Forward);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution5x5Forward);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution2x2Backward);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution3x3Backward);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution4x4Backward);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution5x5Backward);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution2x2Sum);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution3x3Sum);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution4x4Sum);
-    TEST_ADD_GROUP_AD0(NeuralAddConvolution5x5Sum);
-    TEST_ADD_GROUP_AD0(NeuralConvolutionForward);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution2x2Forward);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution3x3Forward);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution4x4Forward);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution5x5Forward);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution2x2Backward);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution3x3Backward);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution4x4Backward);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution5x5Backward);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution2x2Sum);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution3x3Sum);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution4x4Sum);
+    TEST_ADD_GROUP_A00(NeuralAddConvolution5x5Sum);
+    TEST_ADD_GROUP_A00(NeuralConvolutionForward);
 
     TEST_ADD_GROUP_AD0(OperationBinary8u);
     TEST_ADD_GROUP_AD0(OperationBinary16i);
