@@ -980,6 +980,11 @@ namespace Test
             result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Sse41::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Avx2::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+#endif
+
         return result;
     }
 

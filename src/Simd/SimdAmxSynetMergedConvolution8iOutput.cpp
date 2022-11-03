@@ -45,7 +45,7 @@ namespace Simd
             const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t dS = a.maC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, srcC64 = AlignLo(srcC, 64);
-            int strideW = 128, strideS = dS, strideB = dB * 4;
+            int strideW = 128, strideS = (int)dS, strideB = (int)dB * 4;
             const int8_t* weight1 = weight0 + A;
             const uint8_t* src1 = src0 + 16 * dS;
             __m128i upper = _mm_set1_epi32(a.upper);
@@ -139,7 +139,7 @@ namespace Simd
             const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t dS = a.maC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, srcC64 = AlignLo(srcC, 64);
-            int strideW = 128, strideS = dS, strideB = dB * 4;
+            int strideW = 128, strideS = (int)dS, strideB = (int)dB * 4;
             const uint8_t* src1 = src0 + 16 * dS;
             __m128i upper = _mm_set1_epi32(a.upper);
 
@@ -213,7 +213,7 @@ namespace Simd
             const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t dS = a.maC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, srcC64 = AlignLo(srcC, 64);
-            int strideW = 128, strideS = dS, strideB = dB * 4;
+            int strideW = 128, strideS = (int)dS, strideB = (int)dB * 4;
             const int8_t* weight1 = weight0 + A;
             __m128i upper = _mm_set1_epi32(a.upper);
 
@@ -287,7 +287,7 @@ namespace Simd
             const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t dS = a.maC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, srcC64 = AlignLo(srcC, 64);
-            int strideW = 128, strideS = dS, strideB = dB * 4;
+            int strideW = 128, strideS = (int)dS, strideB = (int)dB * 4;
             __m128i upper = _mm_set1_epi32(a.upper);
             TileConf conf;
             conf.rows[0] = uint8_t(dstS);

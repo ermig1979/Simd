@@ -187,6 +187,13 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        class RecursiveBilateralFilterFast : public Sse41::RecursiveBilateralFilterFast
+        {
+        public:
+            RecursiveBilateralFilterFast(const RbfParam& param);
+        };
+
+        void* RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
     }
 #endif
 

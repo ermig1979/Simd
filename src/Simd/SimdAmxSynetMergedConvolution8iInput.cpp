@@ -57,7 +57,7 @@ namespace Simd
             size_t dstS, const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t srcC64 = AlignLo(p.srcC, 64);
-            int strideW = 128, strideS = p.srcC;
+            int strideW = 128, strideS = (int)p.srcC;
             const int8_t* weight1 = weight0 + A;
             const uint8_t* src1 = src0 + 16 * p.srcC;
 
@@ -135,7 +135,7 @@ namespace Simd
             size_t dstS, const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t srcC64 = AlignLo(p.srcC, 64);
-            int strideW = 128, strideS = p.srcC;
+            int strideW = 128, strideS = (int)p.srcC;
             const uint8_t* src1 = src0 + 16 * p.srcC;
 
             TileConf conf;
@@ -195,7 +195,7 @@ namespace Simd
             size_t dstS, const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t srcC64 = AlignLo(p.srcC, 64);
-            int strideW = 128, strideS = p.srcC;
+            int strideW = 128, strideS = (int)p.srcC;
             const int8_t* weight1 = weight0 + A;
 
             TileConf conf;
@@ -255,7 +255,7 @@ namespace Simd
             size_t dstS, const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t srcC64 = AlignLo(p.srcC, 64);
-            int strideW = 128, strideS = p.srcC;
+            int strideW = 128, strideS = (int)p.srcC;
 
             TileConf conf;
             conf.rows[0] = 16;

@@ -692,6 +692,30 @@ namespace Simd
                 _mm256_shuffle_epi8(_mm256_permute4x64_epi64(value, 0x4E), _mm256_add_epi8(shuffle, K8_SHUFFLE_1)));
         }
 
+        template<bool nofma> __m128 Fmadd(__m128 a, __m128 b, __m128 c);
+
+        template <> SIMD_INLINE __m128 Fmadd<false>(__m128 a, __m128 b, __m128 c)
+        {
+            return _mm_fmadd_ps(a, b, c);
+        }
+
+        template <> SIMD_INLINE __m128 Fmadd<true>(__m128 a, __m128 b, __m128 c)
+        {
+            return _mm_add_ps(_mm_or_ps(_mm_mul_ps(a, b), _mm_setzero_ps()), c);
+        }
+
+        template<bool nofma> __m128 Fmadd(__m128 a, __m128 b, __m128 c, __m128 d);
+
+        template <> SIMD_INLINE __m128 Fmadd<false>(__m128 a, __m128 b, __m128 c, __m128 d)
+        {
+            return _mm_fmadd_ps(a, b, _mm_mul_ps(c, d));
+        }
+
+        template <> SIMD_INLINE __m128 Fmadd<true>(__m128 a, __m128 b, __m128 c, __m128 d)
+        {
+            return _mm_add_ps(_mm_or_ps(_mm_mul_ps(a, b), _mm_setzero_ps()), _mm_or_ps(_mm_mul_ps(c, d), _mm_setzero_ps()));
+        }
+
         template<bool nofma> __m256 Fmadd(__m256 a, __m256 b, __m256 c);
 
         template <> SIMD_INLINE __m256 Fmadd<false>(__m256 a, __m256 b, __m256 c)

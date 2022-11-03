@@ -47,7 +47,7 @@ namespace Simd
         {
             size_t dS = p.srcC * p.strideX, dY = (p.srcW + p.padX + p.padW) * p.srcC * p.dilationY, dX = p.srcC * p.dilationX,
                 kY = p.kernelY, kX = p.kernelX, dD = p.dstC * a.size, dB = p.dstC, dW = DivHi(p.srcC, 4) * A, srcC64 = AlignLo(srcC, 64);
-            int strideW = 64, strideB = dB * 4;
+            int strideW = 64, strideS = (int)dS, strideB = (int)dB * 4;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * dW;
             const uint8_t* src1 = src0 + 16 * dS;
             __m128i upper = _mm_set1_epi32(a.upper);
@@ -101,24 +101,24 @@ namespace Simd
                     _tile_loadconfig(&body);
                     for (; sc < srcC64; sc += 64)
                     {
-                        _tile_loadd(4, src0 + offs + sc, dS);
+                        _tile_loadd(4, src0 + offs + sc, strideS);
                         _tile_loadd(6, weight0 + sc * 16, strideW);
                         _tile_dpbusd(0, 4, 6);
                         _tile_loadd(7, weight1 + sc * 16, strideW);
                         _tile_dpbusd(1, 4, 7);
-                        _tile_loadd(5, src1 + offs + sc, dS);
+                        _tile_loadd(5, src1 + offs + sc, strideS);
                         _tile_dpbusd(2, 5, 6);
                         _tile_dpbusd(3, 5, 7);
                     }
                     if (sc < srcC)
                     {
                         _tile_loadconfig(&tail);
-                        _tile_loadd(4, src0 + offs + sc, dS);
+                        _tile_loadd(4, src0 + offs + sc, strideS);
                         _tile_loadd(6, weight0 + sc * 16, strideW);
                         _tile_dpbusd(0, 4, 6);
                         _tile_loadd(7, weight1 + sc * 16, strideW);
                         _tile_dpbusd(1, 4, 7);
-                        _tile_loadd(5, src1 + offs + sc, dS);
+                        _tile_loadd(5, src1 + offs + sc, strideS);
                         _tile_dpbusd(2, 5, 6);
                         _tile_dpbusd(3, 5, 7);
                     }
@@ -153,7 +153,7 @@ namespace Simd
         {
             size_t dS = p.srcC * p.strideX, dY = (p.srcW + p.padX + p.padW) * p.srcC * p.dilationY, dX = p.srcC * p.dilationX,
                 kY = p.kernelY, kX = p.kernelX, dD = p.dstC * a.size, dB = p.dstC, dW = DivHi(p.srcC, 4) * A, srcC64 = AlignLo(srcC, 64);
-            int strideW = 64, strideB = dB * 4;
+            int strideW = 64, strideS = (int)dS, strideB = (int)dB * 4;
             const uint8_t* src1 = src0 + 16 * dS;
             __m128i upper = _mm_set1_epi32(a.upper);
 
@@ -195,19 +195,19 @@ namespace Simd
                     _tile_loadconfig(&body);
                     for (; sc < srcC64; sc += 64)
                     {
-                        _tile_loadd(4, src0 + offs + sc, dS);
+                        _tile_loadd(4, src0 + offs + sc, strideS);
                         _tile_loadd(6, weight0 + sc * 16, strideW);
                         _tile_dpbusd(0, 4, 6);
-                        _tile_loadd(5, src1 + offs + sc, dS);
+                        _tile_loadd(5, src1 + offs + sc, strideS);
                         _tile_dpbusd(2, 5, 6);
                     }
                     if (sc < srcC)
                     {
                         _tile_loadconfig(&tail);
-                        _tile_loadd(4, src0 + offs + sc, dS);
+                        _tile_loadd(4, src0 + offs + sc, strideS);
                         _tile_loadd(6, weight0 + sc * 16, strideW);
                         _tile_dpbusd(0, 4, 6);
-                        _tile_loadd(5, src1 + offs + sc, dS);
+                        _tile_loadd(5, src1 + offs + sc, strideS);
                         _tile_dpbusd(2, 5, 6);
                     }
                     weight0 += dW;
@@ -238,7 +238,7 @@ namespace Simd
         {
             size_t dS = p.srcC * p.strideX, dY = (p.srcW + p.padX + p.padW) * p.srcC * p.dilationY, dX = p.srcC * p.dilationX,
                 kY = p.kernelY, kX = p.kernelX, dD = p.dstC * a.size, dB = p.dstC, dW = DivHi(p.srcC, 4) * A, srcC64 = AlignLo(srcC, 64);
-            int strideW = 64, strideB = dB * 4;
+            int strideW = 64, strideS = (int)dS, strideB = (int)dB * 4;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * dW;
             __m128i upper = _mm_set1_epi32(a.upper);
 
@@ -280,7 +280,7 @@ namespace Simd
                     _tile_loadconfig(&body);
                     for (; sc < srcC64; sc += 64)
                     {
-                        _tile_loadd(4, src0 + offs + sc, dS);
+                        _tile_loadd(4, src0 + offs + sc, strideS);
                         _tile_loadd(6, weight0 + sc * 16, strideW);
                         _tile_dpbusd(0, 4, 6);
                         _tile_loadd(7, weight1 + sc * 16, strideW);
@@ -289,7 +289,7 @@ namespace Simd
                     if (sc < srcC)
                     {
                         _tile_loadconfig(&tail);
-                        _tile_loadd(4, src0 + offs + sc, dS);
+                        _tile_loadd(4, src0 + offs + sc, strideS);
                         _tile_loadd(6, weight0 + sc * 16, strideW);
                         _tile_dpbusd(0, 4, 6);
                         _tile_loadd(7, weight1 + sc * 16, strideW);
@@ -324,7 +324,7 @@ namespace Simd
         {
             size_t dS = p.srcC * p.strideX, dY = (p.srcW + p.padX + p.padW) * p.srcC * p.dilationY, dX = p.srcC * p.dilationX,
                 kY = p.kernelY, kX = p.kernelX, dD = p.dstC * a.size, dB = p.dstC, dW = DivHi(p.srcC, 4) * A, srcC64 = AlignLo(srcC, 64);
-            int strideW = 64, strideB = dB * 4;
+            int strideW = 64, strideS = (int)dS, strideB = (int)dB * 4;
             __m128i upper = _mm_set1_epi32(a.upper);
 
             TileConf body, tail;
@@ -358,14 +358,14 @@ namespace Simd
                     _tile_loadconfig(&body);
                     for (; sc < srcC64; sc += 64)
                     {
-                        _tile_loadd(4, src0 + offs + sc, dS);
+                        _tile_loadd(4, src0 + offs + sc, strideS);
                         _tile_loadd(6, weight0 + sc * 16, strideW);
                         _tile_dpbusd(0, 4, 6);
                     }
                     if (sc < srcC)
                     {
                         _tile_loadconfig(&tail);
-                        _tile_loadd(4, src0 + offs + sc, dS);
+                        _tile_loadd(4, src0 + offs + sc, strideS);
                         _tile_loadd(6, weight0 + sc * 16, strideW);
                         _tile_dpbusd(0, 4, 6);
                     }
