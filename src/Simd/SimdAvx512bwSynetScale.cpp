@@ -29,6 +29,7 @@
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdSynetScale8i.h"
+#include "Simd/SimdFmadd.h"
 
 namespace Simd
 {

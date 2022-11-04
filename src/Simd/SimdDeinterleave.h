@@ -126,6 +126,23 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
+    {
+        template <int odd> SIMD_INLINE __m512 Deinterleave(const __m512& a, const __m512& b);
+
+        template <> SIMD_INLINE __m512 Deinterleave<0>(const __m512& a, const __m512& b)
+        {
+            return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_0, b);
+        }
+
+        template <> SIMD_INLINE __m512 Deinterleave<1>(const __m512& a, const __m512& b)
+        {
+            return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_1, b);
+        }
+    }
+#endif
 }
 
 #endif

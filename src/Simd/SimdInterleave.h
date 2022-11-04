@@ -93,6 +93,18 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        template <int part> SIMD_INLINE __m512 Interleave(const __m512& a, const __m512& b);
+
+        template <> SIMD_INLINE __m512 Interleave<0>(const __m512& a, const __m512& b)
+        {
+            return _mm512_permutex2var_ps(a, K32_INTERLEAVE_0, b);
+        }
+
+        template <> SIMD_INLINE __m512 Interleave<1>(const __m512& a, const __m512& b)
+        {
+            return _mm512_permutex2var_ps(a, K32_INTERLEAVE_1, b);
+        }
+
         template <int index> __m512i InterleaveBgr(__m512i blue, __m512i green, __m512i red);
 
         template<> SIMD_INLINE __m512i InterleaveBgr<0>(__m512i blue, __m512i green, __m512i red)

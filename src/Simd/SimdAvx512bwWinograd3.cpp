@@ -29,6 +29,8 @@
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdWinograd.h"
+#include "Simd/SimdInterleave.h"
+#include "Simd/SimdDeinterleave.h"
 
 namespace Simd
 {

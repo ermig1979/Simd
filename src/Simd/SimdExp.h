@@ -25,6 +25,7 @@
 #define __SimdExp_h__
 
 #include "Simd/SimdMath.h"
+#include "Simd/SimdFmadd.h"
 
 namespace Simd
 {

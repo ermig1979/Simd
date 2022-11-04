@@ -692,42 +692,6 @@ namespace Simd
                 _mm256_shuffle_epi8(_mm256_permute4x64_epi64(value, 0x4E), _mm256_add_epi8(shuffle, K8_SHUFFLE_1)));
         }
 
-        template<bool nofma> __m128 Fmadd(__m128 a, __m128 b, __m128 c);
-
-        template <> SIMD_INLINE __m128 Fmadd<false>(__m128 a, __m128 b, __m128 c)
-        {
-            return _mm_fmadd_ps(a, b, c);
-        }
-
-        template <> SIMD_INLINE __m128 Fmadd<true>(__m128 a, __m128 b, __m128 c)
-        {
-            return _mm_add_ps(_mm_or_ps(_mm_mul_ps(a, b), _mm_setzero_ps()), c);
-        }
-
-        template<bool nofma> __m128 Fmadd(__m128 a, __m128 b, __m128 c, __m128 d);
-
-        template <> SIMD_INLINE __m128 Fmadd<false>(__m128 a, __m128 b, __m128 c, __m128 d)
-        {
-            return _mm_fmadd_ps(a, b, _mm_mul_ps(c, d));
-        }
-
-        template <> SIMD_INLINE __m128 Fmadd<true>(__m128 a, __m128 b, __m128 c, __m128 d)
-        {
-            return _mm_add_ps(_mm_or_ps(_mm_mul_ps(a, b), _mm_setzero_ps()), _mm_or_ps(_mm_mul_ps(c, d), _mm_setzero_ps()));
-        }
-
-        template<bool nofma> __m256 Fmadd(__m256 a, __m256 b, __m256 c);
-
-        template <> SIMD_INLINE __m256 Fmadd<false>(__m256 a, __m256 b, __m256 c)
-        {
-            return _mm256_fmadd_ps(a, b, c);
-        }
-
-        template <> SIMD_INLINE __m256 Fmadd<true>(__m256 a, __m256 b, __m256 c)
-        {
-            return _mm256_add_ps(_mm256_or_ps(_mm256_mul_ps(a, b), _mm256_setzero_ps()), c);
-        }
-
         template <int part> SIMD_INLINE __m256i Cvt8uTo16i(__m256i a)
         {
             return _mm256_cvtepu8_epi16(_mm256_extractf128_si256(a, part));
@@ -888,46 +852,6 @@ namespace Simd
         template<int shift, bool mask> SIMD_INLINE __m512 Alignr(const __m512& lo, const __m512& hi, __mmask16 m)
         {
             return Mask<mask>(Alignr<shift>(lo, hi), m);
-        }
-
-        template <int part> SIMD_INLINE __m512 Interleave(const __m512& a, const __m512& b);
-
-        template <> SIMD_INLINE __m512 Interleave<0>(const __m512& a, const __m512& b)
-        {
-            return _mm512_permutex2var_ps(a, K32_INTERLEAVE_0, b);
-        }
-
-        template <> SIMD_INLINE __m512 Interleave<1>(const __m512& a, const __m512& b)
-        {
-            return _mm512_permutex2var_ps(a, K32_INTERLEAVE_1, b);
-        }
-
-        template <int odd> SIMD_INLINE __m512 Deinterleave(const __m512& a, const __m512& b);
-
-        template <> SIMD_INLINE __m512 Deinterleave<0>(const __m512& a, const __m512& b)
-        {
-            return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_0, b);
-        }
-
-        template <> SIMD_INLINE __m512 Deinterleave<1>(const __m512& a, const __m512& b)
-        {
-            return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_1, b);
-        }
-
-        template<bool nofma> __m512 Fmadd(__m512 a, __m512 b, __m512 c);
-
-        template <> SIMD_INLINE __m512 Fmadd<false>(__m512 a, __m512 b, __m512 c)
-        {
-            return _mm512_fmadd_ps(a, b, c);
-        }
-
-        template <> SIMD_INLINE __m512 Fmadd<true>(__m512 a, __m512 b, __m512 c)
-        {
-#ifdef _MSC_VER
-            return _mm512_add_ps(_mm512_fmadd_ps(a, b, _mm512_setzero_ps()), c);
-#else
-            return _mm512_maskz_add_ps(-1, _mm512_mul_ps(a, b), c);
-#endif
         }
 
         SIMD_INLINE __mmask32 TailMask32(ptrdiff_t tail)

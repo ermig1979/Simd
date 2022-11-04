@@ -27,6 +27,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdInterleave.h"
 
 #if defined(SIMD_X86_ENABLE) && defined(_MSC_VER) && _MSC_VER < 1924
 #define SIMD_MSVS2017_WIN32_RELEASE_COMPILER_ERROR

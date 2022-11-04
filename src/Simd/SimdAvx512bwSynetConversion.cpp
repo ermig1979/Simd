@@ -30,6 +30,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
+#include "Simd/SimdFmadd.h"
 
 namespace Simd
 {

@@ -32,6 +32,8 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdPow.h"
+#include "Simd/SimdInterleave.h"
+#include "Simd/SimdDeinterleave.h"
 
 namespace Simd
 {

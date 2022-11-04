@@ -26,6 +26,7 @@
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdPrefetch.h"
+#include "Simd/SimdInterleave.h"
 
 namespace Simd
 {

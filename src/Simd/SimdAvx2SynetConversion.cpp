@@ -28,6 +28,7 @@
 #include "Simd/SimdLog.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdFmadd.h"
 
 namespace Simd
 {
