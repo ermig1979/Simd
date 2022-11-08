@@ -303,16 +303,44 @@ namespace Simd
                     return _mm_packs_epi32(dst0, dst1);
                 }
 
+                template<int part, bool nofma> static SIMD_INLINE __m256i Run8(__m256i src, __m256 alpha, __m256 range, const __m256& factor, float* colors)
+                {
+                    __m256 _src = _mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_mm256_castsi256_si128(_mm256_permute4x64_epi64(src, 0x55 * part))));
+                    __m256 _colors = Fmadd<nofma>(alpha, _src, range, _mm256_loadu_ps(colors + part * F));
+                    _mm256_storeu_ps(colors + part * F, _colors);
+                    return _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors, factor)));
+                }
+
+                template<int part, bool nofma> static SIMD_INLINE __m256i Run16(__m256i src, const uint8_t* diff,
+                    __m256 alpha, const float* ranges, float* factor, float* colors)
+                {
+                    static const __m256i PART_0 = SIMD_MM256_SETR_EPI32(0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3);
+                    static const __m256i PART_1 = SIMD_MM256_SETR_EPI32(0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x7, 0x7);
+                    __m256 _range = _mm256_i32gather_ps(ranges, _mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)diff)), 4);
+                    __m256 _factor = Fmadd<nofma>(_range, _mm256_loadu_ps(factor), alpha);
+                    _mm256_storeu_ps(factor, _factor);
+                    __m256i dst0 = Run8<part + 0, nofma>(src, alpha, _mm256_permutevar8x32_ps(_range, PART_0), _mm256_permutevar8x32_ps(_factor, PART_0), colors);
+                    __m256i dst1 = Run8<part + 1, nofma>(src, alpha, _mm256_permutevar8x32_ps(_range, PART_1), _mm256_permutevar8x32_ps(_factor, PART_1), colors);
+                    return PackI32ToI16(dst0, dst1);
+                }
+
                 template<int dir, bool nofma> static void Run(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
                     const float* ranges, float* factor, float* colors, uint8_t* dst)
                 {
-                    size_t widthHA = AlignLo(width, Sse41::HA), x = 0, o = 0;
-                    __m128 _alpha = _mm_set1_ps(alpha);
-                    for (; x < widthHA; x += Sse41::HA, o += Sse41::A)
+                    size_t width8 = AlignLo(width, 8), width16 = AlignLo(width, 16), x = 0, o = 0;
+                    __m256 _alpha = _mm256_set1_ps(alpha);
+                    for (; x < width16; x += 16, o += 32)
+                    {
+                        __m256i _src = _mm256_loadu_si256((__m256i*)(src + o));
+                        __m256i dst0 = Run16<0, nofma>(_src, diff + x + 0, _alpha, ranges, factor + x + 0, colors + o);
+                        __m256i dst1 = Run16<2, nofma>(_src, diff + x + 8, _alpha, ranges, factor + x + 8, colors + o);
+                        Set32<dir>(PackI16ToU8(dst0, dst1), dst + o);
+                    }
+                    for (; x < width8; x += 8, o += 16)
                     {
                         __m128i _src = _mm_loadu_si128((__m128i*)(src + o));
-                        __m128i dst0 = Run8<0, nofma>(_src, diff + x + 0, _alpha, ranges, factor + x + 0, colors + o);
-                        __m128i dst1 = Run8<8, nofma>(_src, diff + x + 4, _alpha, ranges, factor + x + 4, colors + o);
+                        __m128i dst0 = Run8<0, nofma>(_src, diff + x + 0, _mm256_castps256_ps128(_alpha), ranges, factor + x + 0, colors + o);
+                        __m128i dst1 = Run8<8, nofma>(_src, diff + x + 4, _mm256_castps256_ps128(_alpha), ranges, factor + x + 4, colors + o);
                         Set16<dir>(_mm_packus_epi16(dst0, dst1), dst + o);
                     }
                     for (; x < width; x++)
