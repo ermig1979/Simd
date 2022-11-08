@@ -922,7 +922,7 @@ namespace Test
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, spatial, range, flags, dst2));
 
         int maxDifference = 0;
-        if (!Simd::FmaAvoid(flags))
+        if (!Simd::FmaAvoid(flags) || width != W)
             maxDifference = 1;
 
         result = result && Compare(dst1, dst2, maxDifference, true, 64);
