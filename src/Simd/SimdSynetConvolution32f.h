@@ -36,7 +36,11 @@
 namespace Simd
 {
     const bool NHWC_GEMM_COMPATIBLE = false;
+#if defined(SIMD_RUNTIME_DISABLE)
+    const bool NHWC_GEMM_RUNTIME = false;
+#else
     const bool NHWC_GEMM_RUNTIME = true;
+#endif
 
     //---------------------------------------------------------------------------------------------
 

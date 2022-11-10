@@ -110,6 +110,7 @@ There are addition build parameters:
 * `SIMD_SYNET` - Enable optimizations for Synet framework. It is switched on by default.
 * `SIMD_SINT8_DEBUG` - Enable debug INT8 capabilities for Synet framework. It is switched off by default.
 * `SIMD_HIDE` - Hide internal functions of Simd Library. It is switched off by default.
+* `SIMD_RUNTIME` - Enable of runtime faster algorithm choise. It is switched on by default.
 * `SIMD_TEST_FLAGS` - Addition compiler flags to build test framework.
 
 Using the library

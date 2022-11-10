@@ -1398,7 +1398,11 @@ namespace Simd
         {
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
+#if defined(SIMD_RUNTIME_DISABLE)
+            _old.enable = true;
+#else
             _old.enable = false;
+#endif
             if (p.IsDilation(1))
             {
                 if (p.srcC <= 3)
