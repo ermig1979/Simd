@@ -310,7 +310,7 @@ namespace Simd
                 size_t k = K - 8;
                 __m256 tail = Tail(K - K8);
                 s0 = _mm256_and_ps(tail, _mm256_loadu_ps(S0 + k));
-                w0 = _mm256_loadu_ps(W0 + k);
+                w0 = _mm256_and_ps(tail, _mm256_loadu_ps(W0 + k));
                 d00 = _mm256_fmadd_ps(s0, w0, d00);
             }
             D[0] = Avx::ExtractSum(d00) + B[0];
@@ -380,13 +380,13 @@ namespace Simd
                 size_t k = K - 8;
                 __m256 tail = Tail(K - K8);
                 s0 = _mm256_and_ps(tail, _mm256_loadu_ps(S0 + k));
-                w0 = _mm256_loadu_ps(W0 + k + 0 * F);
+                w0 = _mm256_and_ps(tail, _mm256_loadu_ps(W0 + k + 0 * F));
                 d00 = _mm256_fmadd_ps(s0, w0, d00);
-                w0 = _mm256_loadu_ps(W1 + k + 0 * F);
+                w0 = _mm256_and_ps(tail, _mm256_loadu_ps(W1 + k + 0 * F));
                 d10 = _mm256_fmadd_ps(s0, w0, d10);
-                w0 = _mm256_loadu_ps(W2 + k + 0 * F);
+                w0 = _mm256_and_ps(tail, _mm256_loadu_ps(W2 + k + 0 * F));
                 d20 = _mm256_fmadd_ps(s0, w0, d20);
-                w0 = _mm256_loadu_ps(W3 + k + 0 * F);
+                w0 = _mm256_and_ps(tail, _mm256_loadu_ps(W3 + k + 0 * F));
                 d30 = _mm256_fmadd_ps(s0, w0, d30);
             }
             _mm_storeu_ps(D, _mm_add_ps(Extract4Sums(d00, d10, d20, d30), _mm_loadu_ps(B)));
