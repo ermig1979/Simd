@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
@@ -394,61 +393,6 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && ResizerAutoTest(FUNC_RS(Simd::Neon::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif 
-
-        return result;
-    }
-
-    //---------------------------------------------------------------------------------------------
-
-    bool ResizeDataTest(bool create, int width, int height, View::Format format, const FuncRB & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        const double k = 0.7;
-
-        View s(size_t(width*k), size_t(height*k), format, NULL, TEST_ALIGN(size_t(k*width)));
-
-        View d1(width, height, format, NULL, TEST_ALIGN(width));
-        View d2(width, height, format, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(s);
-            TEST_SAVE(s);
-
-            f.Call(s, d1);
-
-            TEST_SAVE(d1);
-        }
-        else
-        {
-            TEST_LOAD(s);
-
-            TEST_LOAD(d1);
-
-            f.Call(s, d2);
-
-            TEST_SAVE(d2);
-
-            result = result && Compare(d1, d2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool ResizeBilinearDataTest(bool create)
-    {
-        bool result = true;
-
-        FuncRB f = FUNC_RB(SimdResizeBilinear);
-        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
-        {
-            result = result && ResizeDataTest(create, DW, DH, format, FuncRB(f.func, f.description + Data::Description(format)));
-        }
 
         return result;
     }

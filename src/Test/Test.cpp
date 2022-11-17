@@ -318,30 +318,30 @@ namespace Test
     TEST_ADD_GROUP_A00(NeuralAddConvolution5x5Sum);
     TEST_ADD_GROUP_A00(NeuralConvolutionForward);
 
-    TEST_ADD_GROUP_AD0(OperationBinary8u);
-    TEST_ADD_GROUP_AD0(OperationBinary16i);
-    TEST_ADD_GROUP_AD0(VectorProduct);
+    TEST_ADD_GROUP_A00(OperationBinary8u);
+    TEST_ADD_GROUP_A00(OperationBinary16i);
+    TEST_ADD_GROUP_A00(VectorProduct);
 
-    TEST_ADD_GROUP_AD0(ReduceColor2x2);
-    TEST_ADD_GROUP_AD0(ReduceGray2x2);
-    TEST_ADD_GROUP_AD0(ReduceGray3x3);
-    TEST_ADD_GROUP_AD0(ReduceGray4x4);
-    TEST_ADD_GROUP_AD0(ReduceGray5x5);
+    TEST_ADD_GROUP_A00(ReduceColor2x2);
+    TEST_ADD_GROUP_A00(ReduceGray2x2);
+    TEST_ADD_GROUP_A00(ReduceGray3x3);
+    TEST_ADD_GROUP_A00(ReduceGray4x4);
+    TEST_ADD_GROUP_A00(ReduceGray5x5);
 
-    TEST_ADD_GROUP_AD0(Reorder16bit);
-    TEST_ADD_GROUP_AD0(Reorder32bit);
-    TEST_ADD_GROUP_AD0(Reorder64bit);
+    TEST_ADD_GROUP_A00(Reorder16bit);
+    TEST_ADD_GROUP_A00(Reorder32bit);
+    TEST_ADD_GROUP_A00(Reorder64bit);
 
-    TEST_ADD_GROUP_ADS(ResizeBilinear);
+    TEST_ADD_GROUP_A0S(ResizeBilinear);
     TEST_ADD_GROUP_A00(Resizer);
     TEST_ADD_GROUP_00S(ResizeYuv420p);
 
-    TEST_ADD_GROUP_AD0(SegmentationShrinkRegion);
-    TEST_ADD_GROUP_AD0(SegmentationFillSingleHoles);
-    TEST_ADD_GROUP_AD0(SegmentationChangeIndex);
-    TEST_ADD_GROUP_AD0(SegmentationPropagate2x2);
+    TEST_ADD_GROUP_A00(SegmentationShrinkRegion);
+    TEST_ADD_GROUP_A00(SegmentationFillSingleHoles);
+    TEST_ADD_GROUP_A00(SegmentationChangeIndex);
+    TEST_ADD_GROUP_A00(SegmentationPropagate2x2);
 
-    TEST_ADD_GROUP_AD0(ShiftBilinear);
+    TEST_ADD_GROUP_A00(ShiftBilinear);
     TEST_ADD_GROUP_00S(ShiftDetectorRand);
     TEST_ADD_GROUP_00S(ShiftDetectorFile);
 

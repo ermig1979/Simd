@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -179,71 +178,6 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && ReorderAutoTest(FUNC(Simd::Neon::Reorder64bit), FUNC(SimdReorder64bit), 8);
 #endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool ReorderDataTest(bool create, int size, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
-
-        View s(size, 1, View::Gray8, NULL, TEST_ALIGN(size));
-        View d1(size, 1, View::Gray8, NULL, TEST_ALIGN(size));
-        View d2(size, 1, View::Gray8, NULL, TEST_ALIGN(size));
-
-        if (create)
-        {
-            FillRandom(s);
-            TEST_SAVE(s);
-
-            f.Call(s, d1);
-
-            TEST_SAVE(d1);
-        }
-        else
-        {
-            TEST_LOAD(s);
-            TEST_LOAD(d1);
-
-            f.Call(s, d2);
-
-            TEST_SAVE(d2);
-
-            result = result && Compare(d1, d2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool Reorder16bitDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && ReorderDataTest(create, DH, FUNC(SimdReorder16bit));
-
-        return result;
-    }
-
-    bool Reorder32bitDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && ReorderDataTest(create, DH, FUNC(SimdReorder32bit));
-
-        return result;
-    }
-
-    bool Reorder64bitDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && ReorderDataTest(create, DH, FUNC(SimdReorder64bit));
 
         return result;
     }

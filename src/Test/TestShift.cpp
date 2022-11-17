@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
@@ -33,17 +32,17 @@ namespace Test
     {
         struct Func
         {
-            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
-                const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
-                size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
+            typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+                const uint8_t* bkg, size_t bkgStride, const double* shiftX, const double* shiftY,
+                size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t* dst, size_t dstStride);
 
             FuncPtr func;
             String description;
 
-            Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func(const FuncPtr& f, const String& d) : func(f), description(d) {}
 
-            void Call(const View & src, const View & bkg, double shiftX, double shiftY,
-                size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, View & dst) const
+            void Call(const View& src, const View& bkg, double shiftX, double shiftY,
+                size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, View& dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), bkg.data, bkg.stride,
@@ -60,7 +59,7 @@ namespace Test
 #define FUNC(function) \
     Func(function, std::string(#function))
 
-    bool ShiftAutoTest(View::Format format, int width, int height, double dx, double dy, int crop, const Func & f1, const Func & f2)
+    bool ShiftAutoTest(View::Format format, int width, int height, double dx, double dy, int crop, const Func& f1, const Func& f2)
     {
         bool result = true;
 
@@ -84,18 +83,18 @@ namespace Test
         return result;
     }
 
-    bool ShiftAutoTest(View::Format format, int width, int height, const Func & f1, const Func & f2)
+    bool ShiftAutoTest(View::Format format, int width, int height, const Func& f1, const Func& f2)
     {
         bool result = true;
 
         const double x0 = 6.9, dx = -5.3, y0 = -5.2, dy = 3.7;
         for (int i = 0; i < 4; ++i)
-            result = result && ShiftAutoTest(format, width, height, x0 + i*dx, y0 + i*dy, i * 3, f1, f2);
+            result = result && ShiftAutoTest(format, width, height, x0 + i * dx, y0 + i * dy, i * 3, f1, f2);
 
         return result;
     }
 
-    bool ShiftBilinearAutoTest(const Func & f1, const Func & f2)
+    bool ShiftBilinearAutoTest(const Func& f1, const Func& f2)
     {
         bool result = true;
 
@@ -141,67 +140,9 @@ namespace Test
 
         return result;
     }
-
-    //-----------------------------------------------------------------------
-
-    bool ShiftBilinearDataTest(bool create, int width, int height, View::Format format, const Func & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        View s(width, height, format, NULL, TEST_ALIGN(width));
-        View b(width, height, format, NULL, TEST_ALIGN(width));
-        View d1(width, height, format, NULL, TEST_ALIGN(width));
-        View d2(width, height, format, NULL, TEST_ALIGN(width));
-
-        const double dx = -5.3, dy = 3.7;
-        const int crop = 3;
-
-        if (create)
-        {
-            FillRandom(s);
-            FillRandom(b);
-            TEST_SAVE(s);
-            TEST_SAVE(b);
-
-            f.Call(s, b, dx, dy, crop, crop, width - crop, height - crop, d1);
-
-            TEST_SAVE(d1);
-        }
-        else
-        {
-            TEST_LOAD(s);
-            TEST_LOAD(b);
-            TEST_LOAD(d1);
-
-            f.Call(s, b, dx, dy, crop, crop, width - crop, height - crop, d2);
-
-            TEST_SAVE(d2);
-
-            result = result && Compare(d1, d2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool ShiftBilinearDataTest(bool create)
-    {
-        bool result = true;
-
-        Func f = FUNC(SimdShiftBilinear);
-        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
-        {
-            result = result && ShiftBilinearDataTest(create, DW, DH, format, Func(f.func, f.description + Data::Description(format)));
-        }
-
-        return result;
-    }
 }
 
-//-----------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 #include "Simd/SimdShift.hpp"
 #include "Simd/SimdDrawing.hpp"
