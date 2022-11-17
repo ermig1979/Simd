@@ -24,7 +24,6 @@
 #include "Test/TestUtils.h"
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
@@ -806,63 +805,6 @@ namespace Test
             result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Neon::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
 #endif 
 
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool SynetEltwiseLayerForwardDataTest(bool create, size_t size, size_t count, SimdSynetEltwiseOperationType type, const FuncELF & f)
-    {
-        bool result = true;
-
-        Data data(f.desc);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.desc << " [" << size << "].");
-        View src(size, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        FloatPtrs psrc(count);
-        for (size_t i = 0; i < count; ++i)
-            psrc[i] = src.Row<float>(i);
-        View weight(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-
-        if (create)
-        {
-            FillRandom32f(src, -1.0, 1.0);
-            FillRandom32f(weight, -1.0, 1.0);
-
-            TEST_SAVE(src);
-            TEST_SAVE(weight);
-
-            f.Call(psrc, weight, count, size, type, dst1);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-            TEST_LOAD(weight);
-
-            TEST_LOAD(dst1);
-
-            f.Call(psrc, weight, count, size, type, dst2);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, EPS, true, 32, false);
-        }
-
-        return result;
-    }
-
-    bool SynetEltwiseLayerForwardDataTest(bool create)
-    {
-        bool result = true; 
-
-        for (SimdSynetEltwiseOperationType type = SimdSynetEltwiseOperationProduct; type <= SimdSynetEltwiseOperationMin; type = (SimdSynetEltwiseOperationType)((size_t)type + 1))
-            for (size_t count = 2; count <= 2; ++count)
-                result = result && SynetEltwiseLayerForwardDataTest(create, DH*DW, count, type, FuncELF(FUNC_ELF(SimdSynetEltwiseLayerForward), type, count));
-       
         return result;
     }
 #endif

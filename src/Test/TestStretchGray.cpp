@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -115,59 +114,6 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && StretchGrayAutoTest(FUNC(Simd::Neon::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
 #endif
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool StretchGrayDataTest(bool create, int width, int height, const Func & f, int stretch)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        const int stretchedWidth = width*stretch;
-        const int stretchedHeight = height*stretch;
-
-        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-
-        View d1(stretchedWidth, stretchedHeight, View::Gray8, NULL, TEST_ALIGN(stretchedWidth));
-        View d2(stretchedWidth, stretchedHeight, View::Gray8, NULL, TEST_ALIGN(stretchedWidth));
-
-        if (create)
-        {
-            FillRandom(s);
-
-            TEST_SAVE(s);
-
-            f.Call(s, d1);
-
-            TEST_SAVE(d1);
-        }
-        else
-        {
-            TEST_LOAD(s);
-
-            TEST_LOAD(d1);
-
-            f.Call(s, d2);
-
-            TEST_SAVE(d2);
-
-            result = result && Compare(d1, d2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool StretchGray2x2DataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && StretchGrayDataTest(create, DW, DH, FUNC(SimdStretchGray2x2), 2);
-
         return result;
     }
 }

@@ -345,30 +345,30 @@ namespace Test
     TEST_ADD_GROUP_00S(ShiftDetectorRand);
     TEST_ADD_GROUP_00S(ShiftDetectorFile);
 
-    TEST_ADD_GROUP_AD0(GetStatistic);
-    TEST_ADD_GROUP_AD0(GetMoments);
+    TEST_ADD_GROUP_A00(GetStatistic);
+    TEST_ADD_GROUP_A00(GetMoments);
     TEST_ADD_GROUP_A00(GetObjectMoments);
-    TEST_ADD_GROUP_AD0(GetRowSums);
-    TEST_ADD_GROUP_AD0(GetColSums);
-    TEST_ADD_GROUP_AD0(GetAbsDyRowSums);
-    TEST_ADD_GROUP_AD0(GetAbsDxColSums);
-    TEST_ADD_GROUP_AD0(ValueSum);
-    TEST_ADD_GROUP_AD0(SquareSum);
-    TEST_ADD_GROUP_AD0(SobelDxAbsSum);
-    TEST_ADD_GROUP_AD0(SobelDyAbsSum);
-    TEST_ADD_GROUP_AD0(LaplaceAbsSum);
-    TEST_ADD_GROUP_AD0(ValueSquareSum);
+    TEST_ADD_GROUP_A00(GetRowSums);
+    TEST_ADD_GROUP_A00(GetColSums);
+    TEST_ADD_GROUP_A00(GetAbsDyRowSums);
+    TEST_ADD_GROUP_A00(GetAbsDxColSums);
+    TEST_ADD_GROUP_A00(ValueSum);
+    TEST_ADD_GROUP_A00(SquareSum);
+    TEST_ADD_GROUP_A00(SobelDxAbsSum);
+    TEST_ADD_GROUP_A00(SobelDyAbsSum);
+    TEST_ADD_GROUP_A00(LaplaceAbsSum);
+    TEST_ADD_GROUP_A00(ValueSquareSum);
     TEST_ADD_GROUP_A00(ValueSquareSums);
-    TEST_ADD_GROUP_AD0(CorrelationSum);
+    TEST_ADD_GROUP_A00(CorrelationSum);
 
-    TEST_ADD_GROUP_AD0(StretchGray2x2);
+    TEST_ADD_GROUP_A00(StretchGray2x2);
 
-    TEST_ADD_GROUP_AD0(SvmSumLinear);
+    TEST_ADD_GROUP_A00(SvmSumLinear);
 
 #if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A00(SynetAddBias);
     TEST_ADD_GROUP_A00(SynetAdd8i);
-    TEST_ADD_GROUP_AD0(SynetEltwiseLayerForward);
+    TEST_ADD_GROUP_A00(SynetEltwiseLayerForward);
     TEST_ADD_GROUP_A00(SynetLrnLayerCrossChannels);
     TEST_ADD_GROUP_A00(SynetShuffleLayerForward);
     TEST_ADD_GROUP_A00(SynetSoftmaxLayerForward);
@@ -422,10 +422,10 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetScale8iForward);
 #endif
 
-    TEST_ADD_GROUP_AD0(TextureBoostedSaturatedGradient);
-    TEST_ADD_GROUP_AD0(TextureBoostedUv);
-    TEST_ADD_GROUP_AD0(TextureGetDifferenceSum);
-    TEST_ADD_GROUP_AD0(TexturePerformCompensation);
+    TEST_ADD_GROUP_A00(TextureBoostedSaturatedGradient);
+    TEST_ADD_GROUP_A00(TextureBoostedUv);
+    TEST_ADD_GROUP_A00(TextureGetDifferenceSum);
+    TEST_ADD_GROUP_A00(TexturePerformCompensation);
 
     TEST_ADD_GROUP_A00(TransformImage);
 
@@ -463,13 +463,13 @@ namespace Test
     TEST_ADD_GROUP_00S(WinogradKernel3x3Block4x4);
 #endif
 
-    TEST_ADD_GROUP_AD0(Yuv444pToBgr);
-    TEST_ADD_GROUP_AD0(Yuv422pToBgr);
-    TEST_ADD_GROUP_ADS(Yuv420pToBgr);
-    TEST_ADD_GROUP_AD0(Yuv444pToHsl);
-    TEST_ADD_GROUP_AD0(Yuv444pToHsv);
-    TEST_ADD_GROUP_AD0(Yuv444pToHue);
-    TEST_ADD_GROUP_AD0(Yuv420pToHue);
+    TEST_ADD_GROUP_A00(Yuv444pToBgr);
+    TEST_ADD_GROUP_A00(Yuv422pToBgr);
+    TEST_ADD_GROUP_A0S(Yuv420pToBgr);
+    TEST_ADD_GROUP_A00(Yuv444pToHsl);
+    TEST_ADD_GROUP_A00(Yuv444pToHsv);
+    TEST_ADD_GROUP_A00(Yuv444pToHue);
+    TEST_ADD_GROUP_A00(Yuv420pToHue);
     TEST_ADD_GROUP_A00(Yuv444pToRgb);
     TEST_ADD_GROUP_A00(Yuv422pToRgb);
     TEST_ADD_GROUP_A00(Yuv420pToRgb);
@@ -477,10 +477,10 @@ namespace Test
 
     TEST_ADD_GROUP_A00(Yuva420pToBgra);
     TEST_ADD_GROUP_A00(Yuva444pToBgraV2);
-    TEST_ADD_GROUP_AD0(Yuv444pToBgra);
+    TEST_ADD_GROUP_A00(Yuv444pToBgra);
     TEST_ADD_GROUP_A00(Yuv444pToBgraV2);
-    TEST_ADD_GROUP_AD0(Yuv422pToBgra);
-    TEST_ADD_GROUP_AD0(Yuv420pToBgra);
+    TEST_ADD_GROUP_A00(Yuv422pToBgra);
+    TEST_ADD_GROUP_A00(Yuv420pToBgra);
     TEST_ADD_GROUP_A00(Yuv420pToBgraV2);
 
     class Task

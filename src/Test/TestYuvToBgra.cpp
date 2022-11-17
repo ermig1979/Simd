@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -496,85 +495,6 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Neon::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
 #endif 
-
-        return result;
-    }
-
-    //---------------------------------------------------------------------------------------------
-
-    bool YuvToBgraDataTest(bool create, int width, int height, const FuncYuv & f, int dx, int dy)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
-
-        const int uvWidth = width / dx;
-        const int uvHeight = height / dy;
-
-        View y(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View u(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
-        View v(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
-
-        View bgra1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
-        View bgra2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
-
-        if (create)
-        {
-            FillRandom(y);
-            FillRandom(u);
-            FillRandom(v);
-
-            TEST_SAVE(y);
-            TEST_SAVE(u);
-            TEST_SAVE(v);
-
-            f.Call(y, u, v, bgra1);
-
-            TEST_SAVE(bgra1);
-        }
-        else
-        {
-            TEST_LOAD(y);
-            TEST_LOAD(u);
-            TEST_LOAD(v);
-
-            TEST_LOAD(bgra1);
-
-            f.Call(y, u, v, bgra2);
-
-            TEST_SAVE(bgra2);
-
-            result = result && Compare(bgra1, bgra2, 0, true, 64);
-        }
-
-        return result;
-    }
-
-    bool Yuv420pToBgraDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && YuvToBgraDataTest(create, DW, DH, FUNC_YUV(SimdYuv420pToBgra), 2, 2);
-
-        return result;
-    }
-
-    bool Yuv422pToBgraDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && YuvToBgraDataTest(create, DW, DH, FUNC_YUV(SimdYuv422pToBgra), 2, 1);
-
-        return result;
-    }
-
-    bool Yuv444pToBgraDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && YuvToBgraDataTest(create, DW, DH, FUNC_YUV(SimdYuv444pToBgra), 1, 1);
 
         return result;
     }

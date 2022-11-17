@@ -23,7 +23,6 @@
 */
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
-#include "Test/TestData.h"
 #include "Test/TestRandom.h"
 
 namespace Test
@@ -115,63 +114,6 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Neon::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
 #endif 
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool SvmSumLinearDataTest(bool create, size_t length, size_t count, const FuncSL & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << length << ", " << count << "].");
-
-        View svs(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View weights(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View x(length, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-
-        float s1, s2;
-
-        if (create)
-        {
-            FillRandom32f(svs, -10.0, 10.0);
-            FillRandom32f(weights, -10.0, 10.0);
-            FillRandom32f(x, -10.0, 10.0);
-
-            TEST_SAVE(svs);
-            TEST_SAVE(weights);
-            TEST_SAVE(x);
-
-            f.Call(x, svs, weights, length, count, &s1);
-
-            TEST_SAVE(s1);
-        }
-        else
-        {
-            TEST_LOAD(svs);
-            TEST_LOAD(weights);
-            TEST_LOAD(x);
-
-            TEST_LOAD(s1);
-
-            f.Call(x, svs, weights, length, count, &s2);
-
-            TEST_SAVE(s2);
-
-            result = result && Compare(s1, s2, EPS, true);
-        }
-
-        return result;
-    }
-
-    bool SvmSumLinearDataTest(bool create)
-    {
-        bool result = true;
-
-        result = result && SvmSumLinearDataTest(create, DW, DH, FUNC_SL(SimdSvmSumLinear));
 
         return result;
     }
