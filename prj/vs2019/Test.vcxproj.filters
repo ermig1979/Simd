@@ -37,9 +37,6 @@
     <ClCompile Include="..\..\src\Test\TestConditional.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestData.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestContour.cpp">
       <Filter>Test</Filter>
     </ClCompile>
@@ -244,9 +241,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestData.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Test\TestHtml.h">

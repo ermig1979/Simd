@@ -313,6 +313,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2NeuralConvolution.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2RecursiveBilateralFilter.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">
@@ -531,6 +534,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdFmadd.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

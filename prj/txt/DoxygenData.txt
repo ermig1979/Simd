@@ -156,8 +156,7 @@
      - `-m=a` - a auto checking mode which includes performance testing (only for library built in Release mode). 
     In this case different implementations of each functions will be compared between themselves 
     (for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
-    Also it can be `-m=c` (creation of test data for cross-platform testing), `-m=v` (cross-platform testing with using of early prepared test data)
-    and `-m=s` (running of special tests).
+    Also it can be `-m=s` (running of special tests).
      - `-tt=1` - a number of test threads.
      - `-fi=Sobel` - an include filter. In current case will be tested only functions which contain word `Sobel` in their names. 
     If you miss this parameter then full testing will be performed.
