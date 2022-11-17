@@ -263,18 +263,6 @@
 
 #endif//defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 
-#if __cplusplus >= 201103L
-#define SIMD_CPP_2011_ENABLE
-#endif
-
-#if __cplusplus >= 201402L
-#define SIMD_CPP_2014_ENABLE
-#endif
-
-#if __cplusplus >= 201703L
-#define SIMD_CPP_2017_ENABLE
-#endif
-
 #if defined(__clang__)
 #define SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR
 #endif

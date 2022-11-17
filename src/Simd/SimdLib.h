@@ -65,6 +65,18 @@ typedef signed __int64    int64_t;
 typedef unsigned __int64  uint64_t;
 #endif
 
+#if __cplusplus >= 201103L
+#define SIMD_CPP_2011_ENABLE
+#endif
+
+#if __cplusplus >= 201402L
+#define SIMD_CPP_2014_ENABLE
+#endif
+
+#if __cplusplus >= 201703L
+#define SIMD_CPP_2017_ENABLE
+#endif
+
 /*! @ingroup c_types
     Describes Bayer pixel layout.
 */
