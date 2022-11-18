@@ -148,6 +148,17 @@ namespace Simd
             }
         }
 
+        template<size_t channels, RbfDiffType type, size_t rows> void RowDiffs(const uint8_t* src0, const uint8_t* src1, size_t srcStride, size_t width, uint8_t* dst, size_t dstStride)
+        {
+            for (size_t i = 0; i < rows; ++i)
+            {
+                RowDiff<channels, type>(src0, src1, width, dst);
+                src0 += srcStride;
+                src1 += srcStride;
+                dst += dstStride;
+            }
+        }
+
         //-----------------------------------------------------------------------------------------
 
         namespace Fast
@@ -186,6 +197,96 @@ namespace Simd
             template<> SIMD_INLINE void Set32<-1>(__m256i value, uint8_t* dst)
             {
                 _mm256_storeu_si256((__m256i*)dst, _mm256_avg_epu8(_mm256_loadu_si256((__m256i*)dst), value));
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template<size_t channels, int dir, bool nofma> void HorRowRun(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* diff, uint8_t* dst)
+            {
+                if (dir == -1) diff += width - 2;
+                float factor = 1.0f, colors[channels];
+                for (int c = 0; c < channels; c++)
+                {
+                    colors[c] = src[c];
+                    Set<dir>(src[c], dst + c);
+                }
+                for (size_t x = 1; x < width; x += 1)
+                {
+                    src += channels * dir;
+                    dst += channels * dir;
+                    float range = ranges[diff[0]];
+                    factor = alpha + range * factor;
+                    for (int c = 0; c < channels; c++)
+                    {
+                        colors[c] = alpha * src[c] + range * colors[c];
+                        Set<dir>(int(colors[c] / factor), dst + c);
+                    }
+                    diff += dir;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template<size_t channels> struct HorRow
+            {
+                template<int dir, bool nofma> static void Run4x(const uint8_t* src, size_t srcStride, size_t width,
+                    float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+                {
+                    for(size_t row = 0; row < 4; ++row)
+                        HorRowRun<channels, dir, nofma>(src + row * srcStride, width, alpha, ranges, diff + row * dstStride, dst + row * dstStride);
+                }
+            };
+
+            template<> struct HorRow<1>
+            {
+                template<int dir, bool nofma> static void Run4x(const uint8_t* src, size_t srcStride, size_t width,
+                    float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+                {
+                    const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                    const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+                    __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                    __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
+                    if (dir == -1) diff += width - 2;
+                    size_t x = 0;
+                    for (; x < width; x += 1)
+                    {
+                        __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
+                        __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
+                        if (dir == -1) _dst = _mm_avg_epu8(_dst, _mm_setr_epi32(dst[do0], dst[do1], dst[do2], dst[do3]));
+                        dst[do0] = _mm_extract_epi32(_dst, 0);
+                        dst[do1] = _mm_extract_epi32(_dst, 1);
+                        dst[do2] = _mm_extract_epi32(_dst, 2);
+                        dst[do3] = _mm_extract_epi32(_dst, 3);
+                        src += dir, dst += dir, diff += dir;
+                        __m128i _src = _mm_setr_epi32(src[so0], src[so1], src[so2], src[so3]);
+                        _factor = Fmadd<nofma>(_range, _factor, _alpha);
+                        _colors = Fmadd<nofma>(_alpha, _mm_cvtepi32_ps(_src), _range, _colors);
+                    }
+                }
+            };
+
+            //-----------------------------------------------------------------------------------------
+
+            template<size_t channels, RbfDiffType type, bool nofma> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            {
+                size_t last = (p.width - 1) * channels, height4 = AlignLo(p.height, 4), y = 0;
+                uint8_t* diff = (uint8_t*)buf;
+                for (; y < height4; y += 4)
+                {
+                    RowDiffs<channels, type, 4>(src, src + channels, srcStride, p.width - 1, diff, dstStride);
+                    HorRow<channels>::template Run4x<+1, nofma>(src, srcStride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
+                    HorRow<channels>::template Run4x<-1, nofma>(src + last, srcStride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
+                    src += 4 * srcStride;
+                    dst += 4 * dstStride;
+                }
+                for (; y < p.height; y++)
+                {
+                    RowDiff<channels, type>(src, src + channels, p.width - 1, diff);
+                    HorRowRun<channels, +1, nofma>(src, p.width, p.alpha, p.ranges, diff, dst);
+                    HorRowRun<channels, -1, nofma>(src + last, p.width, p.alpha, p.ranges, diff, dst + last);
+                    src += srcStride;
+                    dst += dstStride;
+                }
             }
 
             //-----------------------------------------------------------------------------------------
@@ -554,7 +655,8 @@ namespace Simd
 
             template <size_t channels, RbfDiffType type> void Set(const RbfParam& param, FilterPtr& horFilter, FilterPtr& verFilter)
             {
-                //horFilter = HorFilter<channels, type>;
+                if(channels <= 1)
+                    horFilter = FmaAvoid(param.flags) ? HorFilter<channels, type, true> : HorFilter<channels, type, false>;
                 verFilter = FmaAvoid(param.flags) ? VerFilter<channels, type, true> : VerFilter<channels, type, false>;
             }
 
