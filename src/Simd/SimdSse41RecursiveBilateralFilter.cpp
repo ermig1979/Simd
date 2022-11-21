@@ -738,7 +738,8 @@ namespace Simd
                     __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
                     __m128 _colors = _mm_setr_ps(src[so0], src[so1], src[so2], src[so3]);
                     if(dir == -1) diff += width - 2;
-                    for (size_t x = 0; x < width; x += 1)
+                    size_t x = 0;
+                    for (; x < width; x += 1)
                     {
                         __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
                         __m128i _dst = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(_colors, _factor)));
