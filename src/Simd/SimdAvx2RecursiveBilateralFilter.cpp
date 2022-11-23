@@ -349,11 +349,11 @@ namespace Simd
 
             template<> struct HorRow<2>
             {
-                static SIMD_INLINE __m128i Load(const uint8_t* src0, const uint8_t* src1)
-                {
-                    int lo = *(uint16_t*)src0, hi = *(uint16_t*)src1, val = lo | (hi << 16);
-                    return _mm_cvtepu8_epi32(_mm_cvtsi32_si128(val));
-                }
+                //static SIMD_INLINE __m128i Load(const uint8_t* src0, const uint8_t* src1)
+                //{
+                //    int lo = *(uint16_t*)src0, hi = *(uint16_t*)src1, val = lo | (hi << 16);
+                //    return _mm_cvtepu8_epi32(_mm_cvtsi32_si128(val));
+                //}
 
                 static SIMD_INLINE __m128i LoadDiff4x1(const uint8_t* src, __m128i offs)
                 {
@@ -385,9 +385,15 @@ namespace Simd
                     return _mm256_shuffle_epi8(_mm256_i32gather_epi64((long long*)src, offs, 1), SHFL);
                 }
 
-                static SIMD_INLINE __m256 Unpack(__m256 src)
+                static SIMD_INLINE __m256 UnpackLo(__m256 src)
                 {
                     static const __m256i UNPACK = SIMD_MM256_SETR_EPI32(0, 0, 1, 1, 2, 2, 3, 3);
+                    return _mm256_permutevar8x32_ps(src, UNPACK);
+                }
+
+                static SIMD_INLINE __m256 UnpackHi(__m256 src)
+                {
+                    static const __m256i UNPACK = SIMD_MM256_SETR_EPI32(4, 4, 5, 5, 6, 6, 7, 7);
                     return _mm256_permutevar8x32_ps(src, UNPACK);
                 }
 
@@ -451,9 +457,9 @@ namespace Simd
                         for (size_t i = 0; i < 4; ++i)
                         {
                             __m256 _range = _mm256_castps128_ps256(_mm_i32gather_ps(ranges, Get<dir>(diff4, i), 4));
-                            Set<dir>(dst4, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors, Unpack(_factor)))), i);
+                            Set<dir>(dst4, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors, UnpackLo(_factor)))), i);
                             _factor = Fmadd<nofma>(_range, _factor, _alpha);
-                            _colors = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<dir>(src4, i)), Unpack(_range), _colors);
+                            _colors = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<dir>(src4, i)), UnpackLo(_range), _colors);
                         }
                         if (dir == -1) dst4 = _mm256_avg_epu8(dst4, Load4x4<dir>(dst, dstOffs));
                         Store4x4<dir>(dst4, dst, dstStride);
@@ -462,27 +468,94 @@ namespace Simd
                     for (; x < width; x += 1)
                     {
                         __m256 _range = _mm256_castps128_ps256(_mm_i32gather_ps(ranges, LoadDiff4x1(diff, dstOffs), 4));
-                        __m256i _dst = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors, Unpack(_factor))));
+                        __m256i _dst = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors, UnpackLo(_factor))));
                         if (dir == -1) _dst = _mm256_avg_epu8(_dst, Load4x1(dst, dstOffs));
                         Store4x1(_dst, dst, dstStride);
                         src += dir * 2, dst += dir * 2, diff += dir;
                         _factor = Fmadd<nofma>(_range, _factor, _alpha);
-                        _colors = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Load4x1(src, srcOffs)), Unpack(_range), _colors);
+                        _colors = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Load4x1(src, srcOffs)), UnpackLo(_range), _colors);
                     }
                 }
 
-                static SIMD_INLINE __m256i Load1x(const uint8_t* src, __m256i offs)
+                static SIMD_INLINE __m256i LoadDiff8x1(const uint8_t* src, __m256i offs)
                 {
                     return _mm256_and_si256(_mm256_i32gather_epi32((int*)src, offs, 1), K32_000000FF);
+                }
+
+                template<int dir> static SIMD_INLINE __m256i LoadDiff8x4(const uint8_t* src, __m256i offs)
+                {
+                    if (dir == -1)
+                        src -= 3;
+                    return _mm256_i32gather_epi32((int*)src, offs, 1);
+                }
+
+                static SIMD_INLINE void Store8x1(__m256i lo, __m256i hi, uint8_t* dst, size_t stride)
+                {
+                    __m256i val = _mm256_packus_epi16(_mm256_packus_epi32(lo, hi), _mm256_setzero_si256());
+                    __m128i val0 = _mm256_extractf128_si256(val, 0);
+                    __m128i val1 = _mm256_extractf128_si256(val, 1);
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val0, 0), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val0, 1), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val1, 0), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val1, 1), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val0, 2), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val0, 3), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val1, 2), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val1, 3), dst += stride;
                 }
 
                 template<int dir, bool nofma> static void Run8x(const uint8_t* src0, size_t srcStride, size_t width,
                     float alpha, const float* ranges, uint8_t* diff, uint8_t* dst0, size_t dstStride)
                 {
-                    const uint8_t* src4 = src0 + 4 * srcStride;
-                    uint8_t* dst4 = dst0 + 4 * dstStride;
+                    const uint8_t* src1 = src0 + 4 * srcStride;
+                    uint8_t* dst1 = dst0 + 4 * dstStride;
+#if 0
                     Run4x<dir, nofma>(src0, srcStride, width, alpha, ranges, diff + 0 * dstStride, dst0, dstStride);
-                    Run4x<dir, nofma>(src4, srcStride, width, alpha, ranges, diff + 4 * dstStride, dst4, dstStride);
+                    Run4x<dir, nofma>(src1, srcStride, width, alpha, ranges, diff + 4 * dstStride, dst1, dstStride);
+#else
+                    static const __m256i _01234567 = SIMD_MM256_SETR_EPI32(0, 1, 2, 3, 4, 5, 6, 7);
+                    __m256i srcOffs = _mm256_mullo_epi32(_mm256_set1_epi32((int)srcStride), _01234567);
+                    __m256i dstOffs = _mm256_mullo_epi32(_mm256_set1_epi32((int)dstStride), _01234567);
+                    __m256 _factor = _mm256_set1_ps(1.0f), _alpha = _mm256_set1_ps(alpha);
+                    __m256 _colors0 = _mm256_cvtepi32_ps(Load4x1(src0, _mm256_castsi256_si128(srcOffs)));
+                    __m256 _colors1 = _mm256_cvtepi32_ps(Load4x1(src1, _mm256_castsi256_si128(srcOffs)));
+                    if (dir == -1) diff += width - 2;
+                    size_t x = 0, width4 = width & (~3);
+                    for (; x < width4; x += 4)
+                    {
+                        __m256i _diff4 = LoadDiff8x4<dir>(diff, dstOffs);
+                        __m256i _src40 = Load4x4<dir>(src0 + dir * 2, _mm256_castsi256_si128(srcOffs));
+                        __m256i _src41 = Load4x4<dir>(src1 + dir * 2, _mm256_castsi256_si128(srcOffs));
+                        __m256i _dst40 = _mm256_setzero_si256(), _dst41 = _mm256_setzero_si256();
+                        for (size_t i = 0; i < 4; ++i)
+                        {
+                            __m256 _range = _mm256_i32gather_ps(ranges, Get<dir>(_diff4, i), 4);
+                            Set<dir>(_dst40, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors0, UnpackLo(_factor)))), i);
+                            Set<dir>(_dst41, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors1, UnpackHi(_factor)))), i);
+                            _factor = Fmadd<nofma>(_range, _factor, _alpha);
+                            _colors0 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<dir>(_src40, i)), UnpackLo(_range), _colors0);
+                            _colors1 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<dir>(_src41, i)), UnpackHi(_range), _colors1);
+                        }
+                        if (dir == -1) _dst40 = _mm256_avg_epu8(_dst40, Load4x4<dir>(dst0, _mm256_castsi256_si128(dstOffs)));
+                        if (dir == -1) _dst41 = _mm256_avg_epu8(_dst41, Load4x4<dir>(dst1, _mm256_castsi256_si128(dstOffs)));
+                        Store4x4<dir>(_dst40, dst0, dstStride);
+                        Store4x4<dir>(_dst41, dst1, dstStride);
+                        src0 += dir * 8, src1 += dir * 8, dst0 += dir * 8, dst1 += dir * 8, diff += 4 * dir;
+                    }
+                    for (; x < width; x += 1)
+                    {
+                        __m256 _range = _mm256_i32gather_ps(ranges, LoadDiff8x1(diff, dstOffs), 4);
+                        __m256i _dst0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors0, UnpackLo(_factor))));
+                        __m256i _dst1 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors1, UnpackHi(_factor))));
+                        if (dir == -1) _dst0 = _mm256_avg_epu8(_dst0, Load4x1(dst0, _mm256_castsi256_si128(dstOffs)));
+                        if (dir == -1) _dst1 = _mm256_avg_epu8(_dst1, Load4x1(dst1, _mm256_castsi256_si128(dstOffs)));
+                        Store8x1(_dst0, _dst1, dst0, dstStride);
+                        src0 += dir * 2, src1 += dir * 2, dst0 += dir * 2, dst1 += dir * 2, diff += dir;
+                        _factor = Fmadd<nofma>(_range, _factor, _alpha);
+                        _colors0 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Load4x1(src0, _mm256_castsi256_si128(srcOffs))), UnpackLo(_range), _colors0);
+                        _colors1 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Load4x1(src1, _mm256_castsi256_si128(srcOffs))), UnpackHi(_range), _colors1);
+                    }
+#endif
                 }
             };
 
