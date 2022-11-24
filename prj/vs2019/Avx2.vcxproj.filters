@@ -539,5 +539,8 @@
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRecursiveBilateralFilter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

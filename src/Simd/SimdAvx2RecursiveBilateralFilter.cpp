@@ -349,12 +349,6 @@ namespace Simd
 
             template<> struct HorRow<2>
             {
-                //static SIMD_INLINE __m128i Load(const uint8_t* src0, const uint8_t* src1)
-                //{
-                //    int lo = *(uint16_t*)src0, hi = *(uint16_t*)src1, val = lo | (hi << 16);
-                //    return _mm_cvtepu8_epi32(_mm_cvtsi32_si128(val));
-                //}
-
                 static SIMD_INLINE __m128i LoadDiff4x1(const uint8_t* src, __m128i offs)
                 {
                     return _mm_and_si128(_mm_i32gather_epi32((int*)src, offs, 1), Sse41::K32_000000FF);
@@ -509,10 +503,6 @@ namespace Simd
                 {
                     const uint8_t* src1 = src0 + 4 * srcStride;
                     uint8_t* dst1 = dst0 + 4 * dstStride;
-#if 0
-                    Run4x<dir, nofma>(src0, srcStride, width, alpha, ranges, diff + 0 * dstStride, dst0, dstStride);
-                    Run4x<dir, nofma>(src1, srcStride, width, alpha, ranges, diff + 4 * dstStride, dst1, dstStride);
-#else
                     static const __m256i _01234567 = SIMD_MM256_SETR_EPI32(0, 1, 2, 3, 4, 5, 6, 7);
                     __m256i srcOffs = _mm256_mullo_epi32(_mm256_set1_epi32((int)srcStride), _01234567);
                     __m256i dstOffs = _mm256_mullo_epi32(_mm256_set1_epi32((int)dstStride), _01234567);
@@ -555,7 +545,119 @@ namespace Simd
                         _colors0 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Load4x1(src0, _mm256_castsi256_si128(srcOffs))), UnpackLo(_range), _colors0);
                         _colors1 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Load4x1(src1, _mm256_castsi256_si128(srcOffs))), UnpackHi(_range), _colors1);
                     }
+                }
+            };
+
+            template<> struct HorRow<3>
+            {
+                static SIMD_INLINE __m128i Load(const uint8_t* src)
+                {
+                    return _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(uint32_t*)src));
+                }
+
+                static SIMD_INLINE void Store(uint8_t* dst, __m128i val)
+                {
+                    static const __m128i SHFL = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+                    uint32_t _val = _mm_cvtsi128_si32(_mm_shuffle_epi8(val, SHFL));
+                    *(uint16_t*)dst = _val;
+                    dst[2] = (_val >> 16) & 0xFF;
+                }
+
+                static SIMD_INLINE __m256i Load(const uint8_t* src0, const uint8_t* src1)
+                {
+                    uint64_t lo = *(uint32_t*)src0, hi = *(uint32_t*)src1, val = lo | (hi << 32);
+                    return _mm256_cvtepu8_epi32(_mm_cvtsi64_si128(val));
+                }
+
+                static SIMD_INLINE void Store(__m256i val, uint8_t* dst0, uint8_t* dst1)
+                {
+                    static const __m256i SHFL = SIMD_MM256_SETR_EPI8(
+                        0x0, 0x4, 0x8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                        0x0, 0x4, 0x8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+                    val = _mm256_shuffle_epi8(val, SHFL);
+                    uint32_t val0 = _mm256_extract_epi32(val, 0);
+                    *(uint16_t*)dst0 = val0;
+                    dst0[2] = (val0 >> 16) & 0xFF;
+                    uint32_t val1 = _mm256_extract_epi32(val, 4);
+                    *(uint16_t*)dst1 = val1;
+                    dst1[2] = (val1 >> 16) & 0xFF;
+                }
+
+                static SIMD_INLINE __m256 Broadcast01(__m256 src)
+                {
+                    static const __m256i PERM = SIMD_MM256_SETR_EPI32(0, 0, 0, 0, 1, 1, 1, 1);
+                    return _mm256_permutevar8x32_ps(src, PERM);
+                }
+
+                static SIMD_INLINE __m256 Broadcast23(__m256 src)
+                {
+                    static const __m256i PERM = SIMD_MM256_SETR_EPI32(2, 2, 2, 2, 3, 3, 3, 3);
+                    return _mm256_permutevar8x32_ps(src, PERM);
+                }
+
+                template<int dir, bool nofma> static void Run4x(const uint8_t* src, size_t srcStride, size_t width,
+                    float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
+                {
+                    const size_t so0 = 0, so1 = srcStride, so2 = 2 * srcStride, so3 = 3 * srcStride;
+                    const size_t do0 = 0, do1 = dstStride, do2 = 2 * dstStride, do3 = 3 * dstStride;
+#if 1
+                    __m128 _factor = _mm_set1_ps(1.0f), _alpha = _mm_set1_ps(alpha);
+                    __m128 colors0 = _mm_cvtepi32_ps(Load(src + so0));
+                    __m128 colors1 = _mm_cvtepi32_ps(Load(src + so1));
+                    __m128 colors2 = _mm_cvtepi32_ps(Load(src + so2));
+                    __m128 colors3 = _mm_cvtepi32_ps(Load(src + so3));
+                    if (dir == -1) diff += width - 2;
+                    for (size_t x = 0; x < width; x += 1)
+                    {
+                        __m128 _range = _mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]);
+                        __m128i dst0 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors0, Sse41::Shuffle32f<0x00>(_factor))));
+                        __m128i dst1 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors1, Sse41::Shuffle32f<0x55>(_factor))));
+                        __m128i dst2 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors2, Sse41::Shuffle32f<0xAA>(_factor))));
+                        __m128i dst3 = _mm_cvtps_epi32(_mm_floor_ps(_mm_div_ps(colors3, Sse41::Shuffle32f<0xFF>(_factor))));
+                        if (dir == -1) dst0 = _mm_avg_epu8(dst0, Load(dst + do0));
+                        if (dir == -1) dst1 = _mm_avg_epu8(dst1, Load(dst + do1));
+                        if (dir == -1) dst2 = _mm_avg_epu8(dst2, Load(dst + do2));
+                        if (dir == -1) dst3 = _mm_avg_epu8(dst3, Load(dst + do3));
+                        Store(dst + do0, dst0);
+                        Store(dst + do1, dst1);
+                        Store(dst + do2, dst2);
+                        Store(dst + do3, dst3);
+                        src += dir * 3, dst += dir * 3, diff += dir;
+                        _factor = Fmadd<nofma>(_range, _factor, _alpha);
+                        colors0 = Fmadd<nofma>(_alpha, _mm_cvtepi32_ps(Load(src + so0)), Sse41::Shuffle32f<0x00>(_range), colors0);
+                        colors1 = Fmadd<nofma>(_alpha, _mm_cvtepi32_ps(Load(src + so1)), Sse41::Shuffle32f<0x55>(_range), colors1);
+                        colors2 = Fmadd<nofma>(_alpha, _mm_cvtepi32_ps(Load(src + so2)), Sse41::Shuffle32f<0xAA>(_range), colors2);
+                        colors3 = Fmadd<nofma>(_alpha, _mm_cvtepi32_ps(Load(src + so3)), Sse41::Shuffle32f<0xFF>(_range), colors3);
+                    }
+#else
+                    __m256 _factor = _mm256_set1_ps(1.0f), _alpha = _mm256_set1_ps(alpha);
+                    __m256 colors0 = _mm256_cvtepi32_ps(Load(src + so0, src + so1));
+                    __m256 colors1 = _mm256_cvtepi32_ps(Load(src + so2, src + so3));
+                    if (dir == -1) diff += width - 2;
+                    for (size_t x = 0; x < width; x += 1)
+                    {
+                        __m256 _range = _mm256_castps128_ps256(_mm_setr_ps(ranges[diff[do0]], ranges[diff[do1]], ranges[diff[do2]], ranges[diff[do3]]));
+                        __m256i dst0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(colors0, Broadcast01(_factor))));
+                        __m256i dst1 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(colors1, Broadcast23(_factor))));
+                        if (dir == -1) dst0 = _mm256_avg_epu8(dst0, Load(dst + do0, dst + do1));
+                        if (dir == -1) dst1 = _mm256_avg_epu8(dst1, Load(dst + do2, dst + do3));
+                        Store(dst0, dst + do0, dst + do1);
+                        Store(dst1, dst + do2, dst + do3);
+                        src += dir * 3, dst += dir * 3, diff += dir;
+                        _factor = Fmadd<nofma>(_range, _factor, _alpha);
+                        colors0 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Load(src + so0, src + so1)), Broadcast01(_range), colors0);
+                        colors1 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Load(src + so2, src + so3)), Broadcast23(_range), colors1);
+                    }
 #endif
+                }
+
+                template<int dir, bool nofma> static void Run8x(const uint8_t* src0, size_t srcStride, size_t width,
+                    float alpha, const float* ranges, uint8_t* diff, uint8_t* dst0, size_t dstStride)
+                {
+                    const uint8_t* src1 = src0 + 4 * srcStride;
+                    uint8_t* dst1 = dst0 + 4 * dstStride;
+                    Run4x<dir, nofma>(src0, srcStride, width, alpha, ranges, diff + 0 * dstStride, dst0, dstStride);
+                    Run4x<dir, nofma>(src1, srcStride, width, alpha, ranges, diff + 4 * dstStride, dst1, dstStride);
                 }
             };
 
@@ -957,7 +1059,7 @@ namespace Simd
 
             template <size_t channels, RbfDiffType type> void Set(const RbfParam& param, FilterPtr& horFilter, FilterPtr& verFilter)
             {
-                if(channels <= 2)
+                if(channels <= 3)
                     horFilter = FmaAvoid(param.flags) ? HorFilter<channels, type, true> : HorFilter<channels, type, false>;
                 verFilter = FmaAvoid(param.flags) ? VerFilter<channels, type, true> : VerFilter<channels, type, false>;
             }

@@ -150,6 +150,7 @@
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdFloat16.h" />
+    <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />
     <ClInclude Include="..\..\src\Simd\SimdGather.h" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
@@ -172,6 +173,7 @@
     <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdPow.h" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdRecursiveBilateralFilter.h" />
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
     <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />

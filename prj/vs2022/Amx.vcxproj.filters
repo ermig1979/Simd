@@ -117,6 +117,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdFmadd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAmxCpu.cpp">
