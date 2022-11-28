@@ -651,13 +651,126 @@ namespace Simd
 #endif
                 }
 
+                static SIMD_INLINE __m256i LoadDiff8x1(const uint8_t* src, __m256i offs)
+                {
+                    return _mm256_and_si256(_mm256_i32gather_epi32((int*)src, offs, 1), K32_000000FF);
+                }
+
+                template<int dir> static SIMD_INLINE __m256i LoadDiff8x4(const uint8_t* src, __m256i offs)
+                {
+                    if (dir == -1)
+                        src -= 3;
+                    return _mm256_i32gather_epi32((int*)src, offs, 1);
+                }
+
+                static SIMD_INLINE __m256i Load8x4(const uint8_t* src, __m256i offs)
+                {
+                    return _mm256_i32gather_epi32((int*)src, offs, 1);
+                }
+
+                template<int dir> static SIMD_INLINE __m256i Get(__m256i src, int idx)
+                {
+                    return _mm256_and_si256(_mm256_srli_epi32(src, (dir > 0 ? idx : 3 - idx) * 8), K32_000000FF);
+                }
+
+                template<int dir> static SIMD_INLINE void Set(__m256i& dst, __m256i src, int idx)
+                {
+                    dst = _mm256_or_si256(_mm256_slli_epi32(src, (dir > 0 ? idx : 3 - idx) * 8), dst);
+                }
+
+                template<int dir> static SIMD_INLINE void Store8x3(__m256i val, uint8_t* dst, size_t stride)
+                {
+                    if (dir == -1)
+                        val = _mm256_srli_epi32(val, 8), dst++;
+                    __m128i val0 = _mm256_extractf128_si256(val, 0);
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val0, 0), dst[2] = _mm_extract_epi8(val0, 0x2), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val0, 2), dst[2] = _mm_extract_epi8(val0, 0x6), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val0, 4), dst[2] = _mm_extract_epi8(val0, 0xA), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val0, 6), dst[2] = _mm_extract_epi8(val0, 0xE), dst += stride;
+                    __m128i val1 = _mm256_extractf128_si256(val, 1);
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val1, 0), dst[2] = _mm_extract_epi8(val1, 0x2), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val1, 2), dst[2] = _mm_extract_epi8(val1, 0x6), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val1, 4), dst[2] = _mm_extract_epi8(val1, 0xA), dst += stride;
+                    *(uint16_t*)(dst) = _mm_extract_epi16(val1, 6), dst[2] = _mm_extract_epi8(val1, 0xE), dst += stride;
+                }
+
+                static SIMD_INLINE void Store8x4(__m256i val, uint8_t* dst, size_t stride)
+                {
+                    __m128i val0 = _mm256_extractf128_si256(val, 0);
+                    *(uint32_t*)(dst) = _mm_extract_epi32(val0, 0), dst += stride;
+                    *(uint32_t*)(dst) = _mm_extract_epi32(val0, 1), dst += stride;
+                    *(uint32_t*)(dst) = _mm_extract_epi32(val0, 2), dst += stride;
+                    *(uint32_t*)(dst) = _mm_extract_epi32(val0, 3), dst += stride;
+                    __m128i val1 = _mm256_extractf128_si256(val, 1);
+                    *(uint32_t*)(dst) = _mm_extract_epi32(val1, 0), dst += stride;
+                    *(uint32_t*)(dst) = _mm_extract_epi32(val1, 1), dst += stride;
+                    *(uint32_t*)(dst) = _mm_extract_epi32(val1, 2), dst += stride;
+                    *(uint32_t*)(dst) = _mm_extract_epi32(val1, 3), dst += stride;
+                }
+
                 template<int dir, bool nofma> static void Run8x(const uint8_t* src0, size_t srcStride, size_t width,
                     float alpha, const float* ranges, uint8_t* diff, uint8_t* dst0, size_t dstStride)
                 {
                     const uint8_t* src1 = src0 + 4 * srcStride;
                     uint8_t* dst1 = dst0 + 4 * dstStride;
+#if 1
                     Run4x<dir, nofma>(src0, srcStride, width, alpha, ranges, diff + 0 * dstStride, dst0, dstStride);
                     Run4x<dir, nofma>(src1, srcStride, width, alpha, ranges, diff + 4 * dstStride, dst1, dstStride);
+#else
+                    static const __m256i _01234567 = SIMD_MM256_SETR_EPI32(0, 1, 2, 3, 4, 5, 6, 7);
+                    __m256i srcOffs = _mm256_mullo_epi32(_mm256_set1_epi32((int)srcStride), _01234567);
+                    __m256i dstOffs = _mm256_mullo_epi32(_mm256_set1_epi32((int)dstStride), _01234567);
+                    __m256 _factor = _mm256_set1_ps(1.0f), _alpha = _mm256_set1_ps(alpha);
+                    if (dir == -1) diff += width - 2;// , src0--, dst0--;
+                    __m256i _src = Load8x4(src0, srcOffs);
+                    __m256 _colors0 = _mm256_cvtepi32_ps(Get<1>(_src, 0));
+                    __m256 _colors1 = _mm256_cvtepi32_ps(Get<1>(_src, 1));
+                    __m256 _colors2 = _mm256_cvtepi32_ps(Get<1>(_src, 2));
+                    size_t x = 0, width4 = width & (~3);
+                    //for (; x < width4; x += 4)
+                    //{
+                    //    _diff4 = LoadDiff8x4<dir>(diff, dstOffs), diff += 4 * dir;
+                    //    __m256 _range = _mm256_i32gather_ps(ranges, Get<dir>(_diff4, 0), 4);
+                    //    __m256i _dst0 = _mm256_setzero_si256(), _dst1 = _mm256_setzero_si256(), _dst2 = _mm256_setzero_si256();
+                    //    _src = Load8x4(src0, srcOffs);
+                    //    Set<dir>(_dst0, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors0, _factor))), 0);
+                    //    Set<dir>(_dst0, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors1, _factor))), 1);
+                    //    Set<dir>(_dst0, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors2, _factor))), 2);
+                    //    _factor = Fmadd<nofma>(_range, _factor, _alpha);
+                    //    _src = Load8x4(src0, srcOffs);
+                    //    _colors0 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<1>(_src, 0)), _range, _colors0);
+                    //    _colors1 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<1>(_src, 1)), _range, _colors1);
+                    //    _colors2 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<1>(_src, 2)), _range, _colors2);
+
+                    //    _range = _mm256_i32gather_ps(ranges, Get<dir>(_diff4, 0), 4);
+
+
+                    //    if (dir == -1) _dst = _mm256_avg_epu8(_dst, Load8x1(dst0, dstOffs));
+                    //    Store8x4(_dst, dst0, dstStride);
+                    //    src0 += dir * 3, dst0 += dir * 3, diff += dir;
+                    //    _factor = Fmadd<nofma>(_range, _factor, _alpha);
+                    //    _src = Load8x1(src0, srcOffs);
+                    //    _colors0 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<1>(_src, 0)), _range, _colors0);
+                    //    _colors1 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<1>(_src, 1)), _range, _colors1);
+                    //    _colors2 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<1>(_src, 2)), _range, _colors2);
+                    //}
+                    for (; x < width; x += 1)
+                    {
+                        __m256 _range = _mm256_i32gather_ps(ranges, LoadDiff8x1(diff, dstOffs), 4);
+                        __m256i _dst = _mm256_setzero_si256();
+                        Set<1>(_dst, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors0, _factor))), 0);
+                        Set<1>(_dst, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors1, _factor))), 1);
+                        Set<1>(_dst, _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_div_ps(_colors2, _factor))), 2);
+                        if (dir == -1) _dst = _mm256_avg_epu8(_dst, Load8x4(dst0, dstOffs));
+                        Store8x3<1>(_dst, dst0, dstStride);
+                        src0 += dir * 3, dst0 += dir * 3, diff += dir;
+                        _factor = Fmadd<nofma>(_range, _factor, _alpha);
+                        _src = Load8x4(src0, srcOffs);
+                        _colors0 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<1>(_src, 0)), _range, _colors0);
+                        _colors1 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<1>(_src, 1)), _range, _colors1);
+                        _colors2 = Fmadd<nofma>(_alpha, _mm256_cvtepi32_ps(Get<1>(_src, 2)), _range, _colors2);
+                    }
+#endif
                 }
             };
 
