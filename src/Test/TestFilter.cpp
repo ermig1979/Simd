@@ -956,7 +956,7 @@ namespace Test
         int fs = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffSum | SimdRecursiveBilateralFilterFmaAvoid;
         int pa = SimdRecursiveBilateralFilterPrecise | SimdRecursiveBilateralFilterDiffAvg | SimdRecursiveBilateralFilterFmaAvoid;
 
-        for (int channels = 3; channels <= 4; channels++)
+        for (int channels = 1; channels <= 4; channels++)
         {
             if (channels == 2 && (!REAL_IMAGE.empty() || NOISE_IMAGE == false))
                 continue;
