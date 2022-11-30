@@ -50,7 +50,7 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gaf9a58f41fccb87d07faa4f3d352d99db"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gaf9a58f41fccb87d07faa4f3d352d99db">SimdSynetInnerProduct32fInit</a> (size_t batch, size_t input, size_t output, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> transpose, <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> activation)</td></tr>
+<tr class="memitem:gaf9a58f41fccb87d07faa4f3d352d99db"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gaf9a58f41fccb87d07faa4f3d352d99db">SimdSynetInnerProduct32fInit</a> (size_t batch, size_t input, size_t output, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> transpose, <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> activation)</td></tr>
 <tr class="memdesc:gaf9a58f41fccb87d07faa4f3d352d99db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes FP32 inner product algorithm.  <a href="group__synet__inner__product.html#gaf9a58f41fccb87d07faa4f3d352d99db">More...</a><br /></td></tr>
 <tr class="separator:gaf9a58f41fccb87d07faa4f3d352d99db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaac5aae215c0d9e365585b950c60b5542"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gaac5aae215c0d9e365585b950c60b5542">SimdSynetInnerProduct32fInternalBufferSize</a> (const void *context)</td></tr>
@@ -65,7 +65,7 @@ Functions</h2></td></tr>
 <tr class="memitem:gadd304757589cbb35f82bdd83011f76bd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gadd304757589cbb35f82bdd83011f76bd">SimdSynetInnerProductLayerForward</a> (const float *src, const float *weight, const float *bias, size_t count, size_t size, float *dst)</td></tr>
 <tr class="memdesc:gadd304757589cbb35f82bdd83011f76bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of InnerProductLayer.  <a href="group__synet__inner__product.html#gadd304757589cbb35f82bdd83011f76bd">More...</a><br /></td></tr>
 <tr class="separator:gadd304757589cbb35f82bdd83011f76bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad6b0d81ec96511ae3116f65110429e3f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gad6b0d81ec96511ae3116f65110429e3f">SimdSynetInnerProduct8i</a> (size_t M, size_t N, size_t K, const uint8_t *src, const int8_t *weight, int32_t *dst, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
+<tr class="memitem:gad6b0d81ec96511ae3116f65110429e3f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gad6b0d81ec96511ae3116f65110429e3f">SimdSynetInnerProduct8i</a> (size_t M, size_t N, size_t K, const uint8_t *src, const int8_t *weight, int32_t *dst, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
 <tr class="memdesc:gad6b0d81ec96511ae3116f65110429e3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for INT8 forward propagation of InnerProductLayer.  <a href="group__synet__inner__product.html#gad6b0d81ec96511ae3116f65110429e3f">More...</a><br /></td></tr>
 <tr class="separator:gad6b0d81ec96511ae3116f65110429e3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -105,7 +105,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>&#160;</td>
           <td class="paramname"><em>activation</em>&#160;</td>
         </tr>
         <tr>
@@ -209,7 +209,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to inner product weights. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a flag signalized that weight is stored in the internal buffer. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to bias. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to parameters of activation functions (see <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to parameters of activation functions (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
   </table>
   </dd>
 </dl>
@@ -377,7 +377,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
           <td class="paramname"><em>compatibility</em>&#160;</td>
         </tr>
         <tr>

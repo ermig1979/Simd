@@ -130,6 +130,7 @@
     <ClCompile Include="..\..\src\Test\TestSynetInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution8i.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetScale.cpp" />
     <ClCompile Include="..\..\src\Test\TestTable.cpp" />

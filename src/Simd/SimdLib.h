@@ -121,7 +121,7 @@ typedef enum
     SimdCompareLesserOrEqual,
 } SimdCompareType;
 
-/*! @ingroup synet
+/*! @ingroup synet_types
     Describes type of activation function. 
     It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetDeconvolution32fInit, 
     ::SimdSynetInnerProduct32fInit, ::SimdSynetMergedConvolution32fInit and ::SimdSynetMergedConvolution8iInit.
@@ -411,7 +411,7 @@ typedef enum
     SimdResizeMethodAreaFast,
 } SimdResizeMethodType;
 
-/*! @ingroup synet
+/*! @ingroup synet_types
     Describes Synet calculation compatibility flags. This type used in functions ::SimdSynetAdd8i, ::SimdSynetScaleLayerForward, 
     ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i, ::SimdSynetScale8iInit,
     ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetMergedConvolution32fInit, ::SimdSynetMergedConvolution8iInit.
@@ -433,7 +433,7 @@ typedef enum
     SimdSynetCompatibility16bfMask = 48, /*!< Bit mask of options of BFloat16 (Brain Floating Point) format. */
 } SimdSynetCompatibilityType;
 
-/*! @ingroup synet
+/*! @ingroup synet_types
     Describes operation type used in function ::SimdSynetEltwiseLayerForward.
 */
 typedef enum
@@ -444,7 +444,7 @@ typedef enum
     SimdSynetEltwiseOperationMin, /*!< Minimum. */
 } SimdSynetEltwiseOperationType;
 
-/*! @ingroup synet
+/*! @ingroup synet_types
     Describes operation type used in function ::SimdSynetUnaryOperation32fLayerForward.
 */
 typedef enum
@@ -467,7 +467,7 @@ typedef enum
     SimdSynetUnaryOperation32fZero,
 } SimdSynetUnaryOperation32fType;
 
-/*! @ingroup synet
+/*! @ingroup synet_types
     Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> 4D-tensor format type.
 */
 typedef enum
@@ -487,7 +487,7 @@ typedef enum
     SimdTensorFormatOyxiXo, /*!< Unspecified hardware optimized 5D-tensor format of 2D-convolution filter. Specific format (::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o or ::SimdTensorFormatOyxi16o) is determinated by function ::SimdSynetSpecifyTensorFormat. */
 } SimdTensorFormatType;
 
-/*! @ingroup synet
+/*! @ingroup synet_types
     Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> tensor data type.
 */
 typedef enum
@@ -527,7 +527,7 @@ typedef enum
     SimdYuvTrect871, /*!< Corresponds to T-REC-T.871 standard. Uses Kr=0.299, Kb=0.114. Y, U and V use full range [0..255]. */
 } SimdYuvType;
 
-/*! @ingroup synet
+/*! @ingroup synet_types
     Describes convolution (deconvolution) parameters. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, 
     ::SimdSynetDeconvolution32fInit, ::SimdSynetMergedConvolution32fInit and ::SimdSynetMergedConvolution8iInit.
 */
@@ -6312,7 +6312,7 @@ extern "C"
     */
     SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_other
 
         \fn void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -6335,7 +6335,7 @@ extern "C"
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_other
 
         \fn void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift, uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
@@ -6641,7 +6641,7 @@ extern "C"
     */
     SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_other
 
         \fn void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
 
@@ -7092,7 +7092,7 @@ extern "C"
     */
     SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_other
 
         \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
@@ -7299,6 +7299,41 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float array.
     */
     SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
+
+    /*! @ingroup synet_other
+
+        \fn void void SimdSynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
+
+        \short Performs forward propagation of NormalizeLayer.
+
+        Algorithm's details (NHWC format, acrossSpatial is false):
+        \verbatim
+        for(b = 0; b < batch; ++b)
+            for(s = 0; s < spatial; ++s)
+            {
+                sum = 0;
+                for(c = 0; c < channels; ++c)
+                    sum += Square(src[b, s, c]);
+                for(c = 0; c < channels; ++c)
+                    dst[b, s, c] = src[b, s, c] * scale[c] / Sqrt(sum + eps);
+            }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float tensor.
+        \param [in] batch - a batch size of input and output tensor.
+        \param [in] channels - a number of channels in input and output tensor.
+        \param [in] spatial - a spatial size (height*width) of input and output tensor.
+        \param [in] scale - an array with scale parameters. The size of the array is equal to channels.
+        \param [in] eps - a pointer to epsilon parameter. It is used to prevent division by zero.
+        \param [in] acrossSpatial - a flag of whole image normalization. Otherwise the normalization is performed across channels.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
+        \param [out] buf - a pointer to external temporary buffer. The size of the buffer must be equal to spatial. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output 32-bit float tensor.
+    */
+    SIMD_API void SimdSynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial,
+        const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
 
     /*! @ingroup synet_pooling
 
@@ -7606,7 +7641,7 @@ extern "C"
     SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat, 
         const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_other
 
         \fn void SimdSynetShuffleLayerForward(const float * src0, const float * src1, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format, int type);
 
@@ -7647,7 +7682,7 @@ extern "C"
     */
     SIMD_API void SimdSynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_other
 
         \fn void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst);
 
@@ -7685,7 +7720,7 @@ extern "C"
     */
     SIMD_API void SimdSynetSoftplus32f(const float* src, size_t size, const float * beta, const float * threshold, float * dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_other
 
         \fn SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format);
 
@@ -7743,7 +7778,7 @@ extern "C"
     */
     SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope, float* dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_other
 
         \fn size_t SimdSynetTensorAlignment(SimdTensorFormatType format);
 
@@ -7756,7 +7791,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetTensorAlignment(SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_other
 
         \fn void SimdSynetUnaryOperation32fLayerForward(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 

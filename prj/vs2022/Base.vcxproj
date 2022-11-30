@@ -176,6 +176,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution32fBf16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution8i.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseTexture.cpp" />

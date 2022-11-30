@@ -50,7 +50,7 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gacd13d1f3e706143de34a17cd04c27a1b"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b">SimdSynetMergedConvolution32fInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> add, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
+<tr class="memitem:gacd13d1f3e706143de34a17cd04c27a1b"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b">SimdSynetMergedConvolution32fInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> add, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
 <tr class="memdesc:gacd13d1f3e706143de34a17cd04c27a1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes FP32 merged convolution algorithm.  <a href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b">More...</a><br /></td></tr>
 <tr class="separator:gacd13d1f3e706143de34a17cd04c27a1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga884e019594562cb69235ad8c61fdc6f5"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__fp32.html#ga884e019594562cb69235ad8c61fdc6f5">SimdSynetMergedConvolution32fExternalBufferSize</a> (const void *context)</td></tr>
@@ -105,7 +105,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
           <td class="paramname"><em>compatibility</em>&#160;</td>
         </tr>
         <tr>
@@ -263,7 +263,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to the array with pointers to parameters of the activation functions (see <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to the array with pointers to parameters of the activation functions (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
   </table>
   </dd>
 </dl>

@@ -50,7 +50,7 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga53d7304604ffae8507174504bc1c4151"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__int8.html#ga53d7304604ffae8507174504bc1c4151">SimdSynetConvolution8iInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *conv, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
+<tr class="memitem:ga53d7304604ffae8507174504bc1c4151"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__int8.html#ga53d7304604ffae8507174504bc1c4151">SimdSynetConvolution8iInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *conv, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
 <tr class="memdesc:ga53d7304604ffae8507174504bc1c4151"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes INT8 convolution algorithm.  <a href="group__synet__convolution__int8.html#ga53d7304604ffae8507174504bc1c4151">More...</a><br /></td></tr>
 <tr class="separator:ga53d7304604ffae8507174504bc1c4151"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa6fcba4caa5d1bf4844d7f5d5bd0fb61"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__int8.html#gaa6fcba4caa5d1bf4844d7f5d5bd0fb61">SimdSynetConvolution8iExternalBufferSize</a> (const void *context)</td></tr>
@@ -93,7 +93,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
           <td class="paramname"><em>compatibility</em>&#160;</td>
         </tr>
         <tr>
@@ -248,7 +248,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__convolution__int8.html#ga53d7304604ffae8507174504bc1c4151" title="Initilizes INT8 convolution algorithm.">SimdSynetConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to original (32-bit float point) convolution weights. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to original (32-bit float point) bias. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to original (32-bit float point) parameters of activation functions (see <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to original (32-bit float point) parameters of activation functions (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stats</td><td>- a pointer to pointers with statistics of input(min - stats[0], max - stats[1]) and output(min - stats[2], max - stats[3]) tensors. </td></tr>
   </table>
   </dd>

@@ -6347,6 +6347,21 @@ SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* thres
 #endif
 }
 
+SIMD_API void SimdSynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial,
+    const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float * buf, float* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetNormalizeLayerForwardPtr) (const float* src, size_t batch, size_t channels, size_t spatial,
+        const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
+    const static SimdSynetNormalizeLayerForwardPtr simdSynetNormalizeLayerForward = SIMD_FUNC0(SynetNormalizeLayerForward);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetNormalizeLayerForward(src, batch, channels, spatial, scale, eps, acrossSpatial, format, buf, dst);
+#else
+    assert(0);
+#endif
+}
+
 void SimdSynetPoolingAverage(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format)
 {

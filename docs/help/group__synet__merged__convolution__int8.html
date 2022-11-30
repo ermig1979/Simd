@@ -50,7 +50,7 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gae27c7d7b6164ccb162efc397d1ddfb9f"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f">SimdSynetMergedConvolution8iInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
+<tr class="memitem:gae27c7d7b6164ccb162efc397d1ddfb9f"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f">SimdSynetMergedConvolution8iInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
 <tr class="memdesc:gae27c7d7b6164ccb162efc397d1ddfb9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes INT8 merged convolution algorithm.  <a href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f">More...</a><br /></td></tr>
 <tr class="separator:gae27c7d7b6164ccb162efc397d1ddfb9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5cb8517d49c1df7b229cd971ef838c73"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__int8.html#ga5cb8517d49c1df7b229cd971ef838c73">SimdSynetMergedConvolution8iExternalBufferSize</a> (const void *context)</td></tr>
@@ -99,7 +99,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
           <td class="paramname"><em>compatibility</em>&#160;</td>
         </tr>
         <tr>
@@ -262,7 +262,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to the array with pointers to parameters of the activation functions (see <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to the array with pointers to parameters of the activation functions (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stats</td><td>- a pointer to pointers with statistics of input(min - stats[0], max - stats[1]), interim(min - stats[2], max - stats[3]) and output(min - stats[4], max - stats[5]) tensors. </td></tr>
   </table>
   </dd>
