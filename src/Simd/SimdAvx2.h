@@ -495,6 +495,9 @@ namespace Simd
 
         void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
 
+        void SynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale,
+            const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
+
         void SynetPoolingMax32f(const float* src, size_t srcC, size_t srcH, size_t srcW,
             size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX,
             size_t padC, size_t padY, size_t padX, float* dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format);

@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Sse41
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx2
     {
         void NormalizeNchw1(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, float eps, float* dst)
         {
@@ -38,25 +38,25 @@ namespace Simd
             size_t spatialF = AlignLo(spatial, F);
             for (size_t b = 0; b < batch; ++b)
             {
-                __m128 _sum = _mm_setzero_ps();
+                __m256 _sum = _mm256_setzero_ps();
                 size_t i = 0;
                 for (; i < sizeF; i += F)
                 {
-                    __m128 _src = _mm_loadu_ps(src + i);
-                    _sum = _mm_add_ps(_sum,_mm_mul_ps(_src, _src));
+                    __m256 _src = _mm256_loadu_ps(src + i);
+                    _sum = _mm256_add_ps(_sum, _mm256_mul_ps(_src, _src));
                 }
-                float sum = ExtractSum(_sum);
+                float sum = Avx::ExtractSum(_sum);
                 for (; i < size; ++i)
                     sum += Simd::Square(src[i]);
                 float k0 = 1.0f / ::sqrt(sum + eps);
                 for (size_t c = 0; c < channels; ++c)
                 {
-                    __m128 _k = _mm_set1_ps(scale[c] * k0);
+                    __m256 _k = _mm256_set1_ps(scale[c] * k0);
                     size_t s = 0;
                     for (; s < spatialF; s += F)
-                        _mm_storeu_ps(dst + s, _mm_mul_ps(_mm_loadu_ps(src + s), _k));
+                        _mm256_storeu_ps(dst + s, _mm256_mul_ps(_mm256_loadu_ps(src + s), _k));
                     for (; s < spatial; ++s)
-                        _mm_store_ss(dst + s, _mm_mul_ss(_mm_load_ss(src + s), _k));
+                        _mm_store_ss(dst + s, _mm_mul_ss(_mm_load_ss(src + s), _mm256_castps256_ps128(_k)));
                     dst += spatial;
                     src += spatial;
                 }
@@ -72,12 +72,12 @@ namespace Simd
                 buf = _buf.data;
             }
             size_t spatialF = AlignLo(spatial, F);
-            __m128 _eps = _mm_set1_ps(eps), _1 = _mm_set1_ps(1.0f);
+            __m256 _eps = _mm256_set1_ps(eps), _1 = _mm256_set1_ps(1.0f);
             for (size_t b = 0; b < batch; ++b)
             {
                 size_t s = 0;
                 for (; s < spatialF; s += F)
-                    _mm_storeu_ps(buf + s, _mm_setzero_ps());
+                    _mm256_storeu_ps(buf + s, _mm256_setzero_ps());
                 for (; s < spatial; ++s)
                     _mm_store_ss(buf + s, _mm_setzero_ps());
                 for (size_t c = 0; c < channels; ++c)
@@ -85,9 +85,8 @@ namespace Simd
                     const float* ps = src + c * spatial;
                     for (s = 0; s < spatialF; s += F)
                     {
-                        __m128 _src = _mm_loadu_ps(ps + s);
-                        __m128 _sum = _mm_loadu_ps(buf + s);
-                        _mm_storeu_ps(buf + s, _mm_add_ps(_sum, _mm_mul_ps(_src, _src)));
+                        __m256 _src = _mm256_loadu_ps(ps + s);
+                        _mm256_storeu_ps(buf + s, _mm256_fmadd_ps(_src, _src, _mm256_loadu_ps(buf + s)));
                     }
                     for (; s < spatial; ++s)
                     {
@@ -97,17 +96,17 @@ namespace Simd
                     }
                 }
                 for (s = 0; s < spatialF; s += F)
-                    _mm_storeu_ps(buf + s, _mm_div_ps(_1, _mm_sqrt_ps(_mm_add_ps(_mm_loadu_ps(buf + s), _eps))));
+                    _mm256_storeu_ps(buf + s, _mm256_div_ps(_1, _mm256_sqrt_ps(_mm256_add_ps(_mm256_loadu_ps(buf + s), _eps))));
                 for (; s < spatial; ++s)
-                    _mm_store_ss(buf + s, _mm_div_ss(_1, _mm_sqrt_ss(_mm_add_ss(_mm_load_ss(buf + s), _eps))));
+                    _mm_store_ss(buf + s, _mm_div_ss(_mm256_castps256_ps128(_1), _mm_sqrt_ss(_mm_add_ss(_mm_load_ss(buf + s), _mm256_castps256_ps128(_eps)))));
                 for (size_t c = 0; c < channels; ++c)
                 {
                     float k = scale[c];
-                    __m128 _k = _mm_set1_ps(k);
+                    __m256 _k = _mm256_set1_ps(k);
                     for (s = 0; s < spatialF; s += F)
-                        _mm_storeu_ps(dst + s, _mm_mul_ps(_mm_mul_ps(_mm_loadu_ps(src + s), _mm_loadu_ps(buf + s)), _k));
+                        _mm256_storeu_ps(dst + s, _mm256_mul_ps(_mm256_mul_ps(_mm256_loadu_ps(src + s), _mm256_loadu_ps(buf + s)), _k));
                     for (; s < spatial; ++s)
-                        _mm_store_ss(dst + s, _mm_mul_ss(_mm_mul_ps(_mm_load_ss(src + s), _mm_load_ss(buf + s)), _k));
+                        _mm_store_ss(dst + s, _mm_mul_ss(_mm_mul_ps(_mm_load_ss(src + s), _mm_load_ss(buf + s)), _mm256_castps256_ps128(_k)));
                     dst += spatial;
                     src += spatial;
                 }
@@ -121,24 +120,24 @@ namespace Simd
             size_t channelsF = AlignLo(channels, F);
             for (size_t b = 0; b < batch; ++b)
             {
-                __m128 _sum = _mm_setzero_ps();
+                __m256 _sum = _mm256_setzero_ps();
                 size_t i = 0;
                 for (; i < sizeF; i += F)
                 {
-                    __m128 _src = _mm_loadu_ps(src + i);
-                    _sum = _mm_add_ps(_sum, _mm_mul_ps(_src, _src));
+                    __m256 _src = _mm256_loadu_ps(src + i);
+                    _sum = _mm256_fmadd_ps(_src, _src, _sum);
                 }
-                float sum = ExtractSum(_sum);
+                float sum = Avx::ExtractSum(_sum);
                 for (; i < size; ++i)
                     sum += Simd::Square(src[i]);
-                __m128 _k = _mm_set1_ps(1.0f / ::sqrt(sum + eps));
+                __m256 _k = _mm256_set1_ps(1.0f / ::sqrt(sum + eps));
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     size_t c = 0;
                     for (; c < channelsF; c += F)
-                        _mm_storeu_ps(dst + c, _mm_mul_ps(_mm_mul_ps(_mm_loadu_ps(src + c), _mm_loadu_ps(scale + c)), _k));
+                        _mm256_storeu_ps(dst + c, _mm256_mul_ps(_mm256_mul_ps(_mm256_loadu_ps(src + c), _mm256_loadu_ps(scale + c)), _k));
                     for (; c < channels; ++c)
-                        _mm_store_ss(dst + c, _mm_mul_ss(_mm_mul_ps(_mm_load_ss(src + c), _mm_load_ss(scale + c)), _k));
+                        _mm_store_ss(dst + c, _mm_mul_ss(_mm_mul_ps(_mm_load_ss(src + c), _mm_load_ss(scale + c)), _mm256_castps256_ps128(_k)));
                     dst += channels;
                     src += channels;
                 }
@@ -152,21 +151,21 @@ namespace Simd
             {
                 for (size_t s = 0; s < spatial; ++s)
                 {
-                    __m128 _sum = _mm_setzero_ps();
+                    __m256 _sum = _mm256_setzero_ps();
                     size_t c = 0;
                     for (; c < channelsF; c += F)
                     {
-                        __m128 _src = _mm_loadu_ps(src + c);
-                        _sum = _mm_add_ps(_sum, _mm_mul_ps(_src, _src));
+                        __m256 _src = _mm256_loadu_ps(src + c);
+                        _sum = _mm256_fmadd_ps(_src, _src, _sum);
                     }
-                    float sum = ExtractSum(_sum);
+                    float sum = Avx::ExtractSum(_sum);
                     for (; c < channels; ++c)
                         sum += Simd::Square(src[c]);
-                    __m128 _k = _mm_set1_ps(1.0f / ::sqrt(sum + eps));
+                    __m256 _k = _mm256_set1_ps(1.0f / ::sqrt(sum + eps));
                     for (c = 0; c < channelsF; c += F)
-                        _mm_storeu_ps(dst + c, _mm_mul_ps(_mm_mul_ps(_mm_loadu_ps(src + c), _mm_loadu_ps(scale + c)), _k));
+                        _mm256_storeu_ps(dst + c, _mm256_mul_ps(_mm256_mul_ps(_mm256_loadu_ps(src + c), _mm256_loadu_ps(scale + c)), _k));
                     for (; c < channels; ++c)
-                        _mm_store_ss(dst + c, _mm_mul_ss(_mm_mul_ps(_mm_load_ss(src + c), _mm_load_ss(scale + c)), _k));
+                        _mm_store_ss(dst + c, _mm_mul_ss(_mm_mul_ps(_mm_load_ss(src + c), _mm_load_ss(scale + c)), _mm256_castps256_ps128(_k)));
                     dst += channels;
                     src += channels;
                 }
