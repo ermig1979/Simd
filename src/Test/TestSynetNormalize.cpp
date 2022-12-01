@@ -45,9 +45,10 @@ namespace Test
 
             FuncSNLF(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(SimdTensorFormatType format, int acrossChannels, int batch)
+            void Update(size_t batch, size_t channels, size_t spatial, int acrossChannels, SimdTensorFormatType format)
             {
-                desc = desc + "[" + ToString(format) + "-" + ToString(acrossChannels) + "-" + ToString(batch) + "]";
+                desc = desc + "[" + ToString(batch) + "x" + ToString(channels) + "x" + ToString(spatial) + "-"
+                    + ToString(acrossChannels) + "-" + ToString(format) + "]";
             }
 
             void Call(const Tensor32f & src, size_t batch, size_t channels, size_t spatial, const Tensor32f & scale, 
@@ -61,25 +62,24 @@ namespace Test
 
 #define FUNC_SNLF(function) FuncSNLF(function, #function)
 
-    bool SynetNormalizeLayerForwardAutoTest(size_t batch, size_t channels, size_t height, size_t width,
+    bool SynetNormalizeLayerForwardAutoTest(size_t batch, size_t channels, size_t spatial,
         int acrossSpatial, SimdTensorFormatType format, int extBuf, FuncSNLF f1, FuncSNLF f2)
     {
         bool result = true;
 
-        f1.Update(format, acrossSpatial, batch);
-        f2.Update(format, acrossSpatial, batch);
+        f1.Update(batch, channels, spatial, acrossSpatial, format);
+        f2.Update(batch, channels, spatial, acrossSpatial, format);
 
-        size_t spatial = width * height;
         const float eps = 0.0f;
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << batch << ", " << channels << ", " << spatial << "].");
 
-        Tensor32f src(ToShape(batch, channels, height, width, format));
+        Tensor32f src(ToShape(batch, channels, 1, spatial, format));
         Tensor32f scale(ToShape(channels));
         Tensor32f buf;
         if(extBuf)
             buf.Reshape(ToShape(spatial));
-        Tensor32f dst1(ToShape(batch, channels, height, width, format));
-        Tensor32f dst2(ToShape(batch, channels, height, width, format));
+        Tensor32f dst1(ToShape(batch, channels, 1, spatial, format));
+        Tensor32f dst2(ToShape(batch, channels, 1, spatial, format));
 
         FillRandom(src.Data(), src.Size(), -10.0, 10.0);
         FillRandom(scale.Data(), scale.Size(), -10.0, 10.0);
@@ -104,9 +104,9 @@ namespace Test
         {
             for (int acrossSpatial = 0; acrossSpatial <= 1; ++acrossSpatial)
             {
-                result = result && SynetNormalizeLayerForwardAutoTest(1, C, (int)sqrt(H), (int)sqrt(W), acrossSpatial, formats[f], 1, f1, f2);
-                result = result && SynetNormalizeLayerForwardAutoTest(8, C, (int)sqrt(H), (int)sqrt(W), acrossSpatial, formats[f], 1, f1, f2);
-                result = result && SynetNormalizeLayerForwardAutoTest(7, C - O, (int)sqrt(H) + O/2, (int)sqrt(W) + O/2, acrossSpatial, formats[f], 0, f1, f2);
+                result = result && SynetNormalizeLayerForwardAutoTest(1, C, W, acrossSpatial, formats[f], 1, f1, f2);
+                result = result && SynetNormalizeLayerForwardAutoTest(8, C, W, acrossSpatial, formats[f], 1, f1, f2);
+                result = result && SynetNormalizeLayerForwardAutoTest(7, C - O, W + O, acrossSpatial, formats[f], 0, f1, f2);
             }
         }
 
