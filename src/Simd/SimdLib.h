@@ -77,6 +77,14 @@ typedef unsigned __int64  uint64_t;
 #define SIMD_CPP_2017_ENABLE
 #endif
 
+#if defined(SIMD_CPP_2014_ENABLE)
+#define SIMD_DEPRECATED [[deprecated]]
+#define SIMD_DEPRECATED_EX(message) [[deprecated(message)]]
+#else
+#define SIMD_DEPRECATED
+#define SIMD_DEPRECATED_EX(message)
+#endif
+
 /*! @ingroup c_types
     Describes Bayer pixel layout.
 */
@@ -6303,6 +6311,8 @@ extern "C"
 
         \note The array with support vectors must has following structure: svs[length][count].
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] x - a vector of features which need to predict with using SVM.
         \param [in] svs - an array with support vectors.
         \param [in] weights - a weight coefficient of each support vector.
@@ -6310,7 +6320,7 @@ extern "C"
         \param [in] count - a count of support vectors.
         \param [out] sum - a pointer to result sum.
     */
-    SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
+    SIMD_API SIMD_DEPRECATED void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
 
     /*! @ingroup synet_other
 

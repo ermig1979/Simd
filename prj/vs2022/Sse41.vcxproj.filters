@@ -352,6 +352,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41RecursiveBilateralFilter.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetNormalize.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">

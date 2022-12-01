@@ -100,6 +100,8 @@ namespace Test
 
         SimdTensorFormatType formats[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
 
+        result = result && SynetNormalizeLayerForwardAutoTest(100, 1, 256, 1, formats[0], 1, f1, f2);
+
         for (int f = 0; f < 2; f++)
         {
             for (int acrossSpatial = 0; acrossSpatial <= 1; ++acrossSpatial)
@@ -118,6 +120,11 @@ namespace Test
         bool result = true;
 
         result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Base::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::F && C >= Simd::Sse41::F)
+            result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Sse41::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
+#endif 
 
         return result;
     }

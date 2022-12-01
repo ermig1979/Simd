@@ -50,7 +50,7 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga5b99e13e3ee458f040d2fc403fad3f19"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__svm.html#ga5b99e13e3ee458f040d2fc403fad3f19">SimdSvmSumLinear</a> (const float *x, const float *svs, const float *weights, size_t length, size_t count, float *sum)</td></tr>
+<tr class="memitem:ga5b99e13e3ee458f040d2fc403fad3f19"><td class="memItemLeft" align="right" valign="top">SIMD_API SIMD_DEPRECATED void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__svm.html#ga5b99e13e3ee458f040d2fc403fad3f19">SimdSvmSumLinear</a> (const float *x, const float *svs, const float *weights, size_t length, size_t count, float *sum)</td></tr>
 <tr class="memdesc:ga5b99e13e3ee458f040d2fc403fad3f19"><td class="mdescLeft">&#160;</td><td class="mdescRight">It is a part of linear SVM (Support Vector Machine) prediction algorithm.  <a href="group__svm.html#ga5b99e13e3ee458f040d2fc403fad3f19">More...</a><br /></td></tr>
 <tr class="separator:ga5b99e13e3ee458f040d2fc403fad3f19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -113,6 +113,7 @@ for(i = 0; i &lt; count; ++i)
     for(j = 0; j &lt; length; ++j)
         sum += x[j]*svs[j][i]*weight[i];
 </pre><dl class="section note"><dt>Note</dt><dd>The array with support vectors must has following structure: svs[length][count].</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This functionality is deprecated and can be removed in the future.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- a vector of features which need to predict with using SVM. </td></tr>

@@ -114,6 +114,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iOutput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Texture.cpp" />
