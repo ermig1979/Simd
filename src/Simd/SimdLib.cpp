@@ -6354,7 +6354,7 @@ SIMD_API void SimdSynetNormalizeLayerForward(const float* src, size_t batch, siz
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForwardPtr) (const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
-    const static SimdSynetNormalizeLayerForwardPtr simdSynetNormalizeLayerForward = SIMD_FUNC2(SynetNormalizeLayerForward, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForwardPtr simdSynetNormalizeLayerForward = SIMD_FUNC3(SynetNormalizeLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForward(src, batch, channels, spatial, scale, eps, acrossSpatial, format, buf, dst);
 #else

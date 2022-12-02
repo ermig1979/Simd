@@ -28,35 +28,39 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Avx2
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx512bw
     {
         void NormalizeNchw1(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, float eps, float* dst)
         {
             size_t size = channels * spatial;
             size_t sizeF = AlignLo(size, F);
+            __mmask16 sizeMask = TailMask16(size - sizeF);
             size_t spatialF = AlignLo(spatial, F);
+            __mmask16 spatialMask = TailMask16(spatial - spatialF);
             for (size_t b = 0; b < batch; ++b)
             {
-                __m256 _sum = _mm256_setzero_ps();
+                __m512 _sum = _mm512_setzero_ps();
                 size_t i = 0;
                 for (; i < sizeF; i += F)
                 {
-                    __m256 _src = _mm256_loadu_ps(src + i);
-                    _sum = _mm256_fmadd_ps(_src, _src, _sum);
+                    __m512 _src = _mm512_loadu_ps(src + i);
+                    _sum = _mm512_fmadd_ps(_src, _src, _sum);
                 }
-                float sum = Avx::ExtractSum(_sum);
-                for (; i < size; ++i)
-                    sum += Simd::Square(src[i]);
-                float k0 = 1.0f / ::sqrt(sum + eps);
+                if (i < size)
+                {
+                    __m512 _src = _mm512_maskz_loadu_ps(sizeMask, src + i);
+                    _sum = _mm512_fmadd_ps(_src, _src, _sum);
+                }
+                float k0 = 1.0f / ::sqrt(ExtractSum(_sum) + eps);
                 for (size_t c = 0; c < channels; ++c)
                 {
-                    __m256 _k = _mm256_set1_ps(scale[c] * k0);
+                    __m512 _k = _mm512_set1_ps(scale[c] * k0);
                     size_t s = 0;
                     for (; s < spatialF; s += F)
-                        _mm256_storeu_ps(dst + s, _mm256_mul_ps(_mm256_loadu_ps(src + s), _k));
-                    for (; s < spatial; ++s)
-                        _mm_store_ss(dst + s, _mm_mul_ss(_mm_load_ss(src + s), _mm256_castps256_ps128(_k)));
+                        _mm512_storeu_ps(dst + s, _mm512_mul_ps(_mm512_loadu_ps(src + s), _k));
+                    if(s < spatial)
+                        _mm512_mask_storeu_ps(dst + s, spatialMask, _mm512_mul_ps(_mm512_maskz_loadu_ps(spatialMask, src + s), _k));
                     dst += spatial;
                     src += spatial;
                 }
@@ -72,41 +76,43 @@ namespace Simd
                 buf = _buf.data;
             }
             size_t spatialF = AlignLo(spatial, F);
-            __m256 _eps = _mm256_set1_ps(eps), _1 = _mm256_set1_ps(1.0f);
+            __mmask16 spatialMask = TailMask16(spatial - spatialF);
+            __m512 _eps = _mm512_set1_ps(eps), _1 = _mm512_set1_ps(1.0f);
             for (size_t b = 0; b < batch; ++b)
             {
                 size_t s = 0;
                 for (; s < spatialF; s += F)
-                    _mm256_storeu_ps(buf + s, _mm256_setzero_ps());
-                for (; s < spatial; ++s)
-                    _mm_store_ss(buf + s, _mm_setzero_ps());
+                    _mm512_storeu_ps(buf + s, _mm512_setzero_ps());
+                if(s < spatial)
+                    _mm512_mask_storeu_ps(buf + s, spatialMask, _mm512_setzero_ps());
                 for (size_t c = 0; c < channels; ++c)
                 {
                     const float* ps = src + c * spatial;
                     for (s = 0; s < spatialF; s += F)
                     {
-                        __m256 _src = _mm256_loadu_ps(ps + s);
-                        _mm256_storeu_ps(buf + s, _mm256_fmadd_ps(_src, _src, _mm256_loadu_ps(buf + s)));
+                        __m512 _src = _mm512_loadu_ps(ps + s);
+                        _mm512_storeu_ps(buf + s, _mm512_fmadd_ps(_src, _src, _mm512_loadu_ps(buf + s)));
                     }
-                    for (; s < spatial; ++s)
+                    if(s < spatial)
                     {
-                        __m128 _src = _mm_load_ss(ps + s);
-                        __m128 _sum = _mm_load_ss(buf + s);
-                        _mm_store_ss(buf + s, _mm_add_ss(_sum, _mm_mul_ps(_src, _src)));
+                        __m512 _src = _mm512_maskz_loadu_ps(spatialMask, ps + s);
+                        _mm512_mask_storeu_ps(buf + s, spatialMask, _mm512_fmadd_ps(_src, _src, _mm512_maskz_loadu_ps(spatialMask, buf + s)));
                     }
                 }
                 for (s = 0; s < spatialF; s += F)
-                    _mm256_storeu_ps(buf + s, _mm256_div_ps(_1, _mm256_sqrt_ps(_mm256_add_ps(_mm256_loadu_ps(buf + s), _eps))));
-                for (; s < spatial; ++s)
-                    _mm_store_ss(buf + s, _mm_div_ss(_mm256_castps256_ps128(_1), _mm_sqrt_ss(_mm_add_ss(_mm_load_ss(buf + s), _mm256_castps256_ps128(_eps)))));
-                for (size_t c = 0; c < channels; ++c)
+                    _mm512_storeu_ps(buf + s, _mm512_div_ps(_1, _mm512_sqrt_ps(_mm512_add_ps(_mm512_loadu_ps(buf + s), _eps))));
+                if (s < spatial)
+                    _mm512_mask_storeu_ps(buf + s, spatialMask, _mm512_div_ps(_1, 
+                        _mm512_sqrt_ps(_mm512_add_ps(_mm512_maskz_loadu_ps(spatialMask, buf + s), _eps))));
+                 for (size_t c = 0; c < channels; ++c)
                 {
                     float k = scale[c];
-                    __m256 _k = _mm256_set1_ps(k);
+                    __m512 _k = _mm512_set1_ps(k);
                     for (s = 0; s < spatialF; s += F)
-                        _mm256_storeu_ps(dst + s, _mm256_mul_ps(_mm256_mul_ps(_mm256_loadu_ps(src + s), _mm256_loadu_ps(buf + s)), _k));
-                    for (; s < spatial; ++s)
-                        _mm_store_ss(dst + s, _mm_mul_ss(_mm_mul_ps(_mm_load_ss(src + s), _mm_load_ss(buf + s)), _mm256_castps256_ps128(_k)));
+                        _mm512_storeu_ps(dst + s, _mm512_mul_ps(_mm512_mul_ps(_mm512_loadu_ps(src + s), _mm512_loadu_ps(buf + s)), _k));
+                    if(s < spatial)
+                        _mm512_mask_storeu_ps(dst + s, spatialMask, _mm512_mul_ps(_mm512_mul_ps
+                        (_mm512_maskz_loadu_ps(spatialMask, src + s), _mm512_maskz_loadu_ps(spatialMask, buf + s)), _k));
                     dst += spatial;
                     src += spatial;
                 }
@@ -117,27 +123,32 @@ namespace Simd
         {
             size_t size = channels * spatial;
             size_t sizeF = AlignLo(size, F);
+            __mmask16 sizeMask = TailMask16(size - sizeF);
             size_t channelsF = AlignLo(channels, F);
+            __mmask16 channelsMask = TailMask16(channels - channelsF);
             for (size_t b = 0; b < batch; ++b)
             {
-                __m256 _sum = _mm256_setzero_ps();
+                __m512 _sum = _mm512_setzero_ps();
                 size_t i = 0;
                 for (; i < sizeF; i += F)
                 {
-                    __m256 _src = _mm256_loadu_ps(src + i);
-                    _sum = _mm256_fmadd_ps(_src, _src, _sum);
+                    __m512 _src = _mm512_loadu_ps(src + i);
+                    _sum = _mm512_fmadd_ps(_src, _src, _sum);
                 }
-                float sum = Avx::ExtractSum(_sum);
-                for (; i < size; ++i)
-                    sum += Simd::Square(src[i]);
-                __m256 _k = _mm256_set1_ps(1.0f / ::sqrt(sum + eps));
+                if (i < size)
+                {
+                    __m512 _src = _mm512_maskz_loadu_ps(sizeMask, src + i);
+                    _sum = _mm512_fmadd_ps(_src, _src, _sum);
+                }
+                __m512 _k = _mm512_set1_ps(1.0f / ::sqrt(ExtractSum(_sum) + eps));
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     size_t c = 0;
                     for (; c < channelsF; c += F)
-                        _mm256_storeu_ps(dst + c, _mm256_mul_ps(_mm256_mul_ps(_mm256_loadu_ps(src + c), _mm256_loadu_ps(scale + c)), _k));
-                    for (; c < channels; ++c)
-                        _mm_store_ss(dst + c, _mm_mul_ss(_mm_mul_ps(_mm_load_ss(src + c), _mm_load_ss(scale + c)), _mm256_castps256_ps128(_k)));
+                        _mm512_storeu_ps(dst + c, _mm512_mul_ps(_mm512_mul_ps(_mm512_loadu_ps(src + c), _mm512_loadu_ps(scale + c)), _k));
+                    if(c < channels)
+                        _mm512_mask_storeu_ps(dst + c, channelsMask, _mm512_mul_ps(_mm512_mul_ps(
+                            _mm512_maskz_loadu_ps(channelsMask, src + c), _mm512_maskz_loadu_ps(channelsMask, scale + c)), _k));
                     dst += channels;
                     src += channels;
                 }
@@ -147,25 +158,29 @@ namespace Simd
         void NormalizeNhwc0(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, float eps, float* dst)
         {
             size_t channelsF = AlignLo(channels, F);
+            __mmask16 channelsMask = TailMask16(channels - channelsF);
             for (size_t b = 0; b < batch; ++b)
             {
                 for (size_t s = 0; s < spatial; ++s)
                 {
-                    __m256 _sum = _mm256_setzero_ps();
+                    __m512 _sum = _mm512_setzero_ps();
                     size_t c = 0;
                     for (; c < channelsF; c += F)
                     {
-                        __m256 _src = _mm256_loadu_ps(src + c);
-                        _sum = _mm256_fmadd_ps(_src, _src, _sum);
+                        __m512 _src = _mm512_loadu_ps(src + c);
+                        _sum = _mm512_fmadd_ps(_src, _src, _sum);
                     }
-                    float sum = Avx::ExtractSum(_sum);
-                    for (; c < channels; ++c)
-                        sum += Simd::Square(src[c]);
-                    __m256 _k = _mm256_set1_ps(1.0f / ::sqrt(sum + eps));
+                    if (c < channels)
+                    {
+                        __m512 _src = _mm512_maskz_loadu_ps(channelsMask, src + c);
+                        _sum = _mm512_fmadd_ps(_src, _src, _sum);
+                    }
+                    __m512 _k = _mm512_set1_ps(1.0f / ::sqrt(ExtractSum(_sum) + eps));
                     for (c = 0; c < channelsF; c += F)
-                        _mm256_storeu_ps(dst + c, _mm256_mul_ps(_mm256_mul_ps(_mm256_loadu_ps(src + c), _mm256_loadu_ps(scale + c)), _k));
-                    for (; c < channels; ++c)
-                        _mm_store_ss(dst + c, _mm_mul_ss(_mm_mul_ps(_mm_load_ss(src + c), _mm_load_ss(scale + c)), _mm256_castps256_ps128(_k)));
+                        _mm512_storeu_ps(dst + c, _mm512_mul_ps(_mm512_mul_ps(_mm512_loadu_ps(src + c), _mm512_loadu_ps(scale + c)), _k));
+                    if (c < channels)
+                        _mm512_mask_storeu_ps(dst + c, channelsMask, _mm512_mul_ps(_mm512_mul_ps(
+                            _mm512_maskz_loadu_ps(channelsMask, src + c), _mm512_maskz_loadu_ps(channelsMask, scale + c)), _k));
                     dst += channels;
                     src += channels;
                 }
