@@ -164,7 +164,14 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Creates Recursive bilateral filter context. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p >An using example: </p><pre class="fragment">float sigmaSpatial = 0.2f, sigmaRange = 0.2f;
+void* filter = SimdRecursiveBilateralFilterInit(width, height, channels, &amp;sigmaSpatial, &amp;sigmaRange, SimdRecursiveBilateralFilterFast);
+if (resizer)
+{
+     SimdRecursiveBilateralFilterRun(filter, src, srcStride, dst, dstStride);
+     SimdRelease(filter);
+}
+</pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input and output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input and output image. </td></tr>

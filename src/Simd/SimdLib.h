@@ -5142,6 +5142,17 @@ extern "C"
 
         \short Creates Recursive bilateral filter context.
 
+        An using example:
+        \verbatim
+        float sigmaSpatial = 0.2f, sigmaRange = 0.2f;
+        void* filter = SimdRecursiveBilateralFilterInit(width, height, channels, &sigmaSpatial, &sigmaRange, SimdRecursiveBilateralFilterFast);
+        if (resizer)
+        {
+             SimdRecursiveBilateralFilterRun(filter, src, srcStride, dst, dstStride);
+             SimdRelease(filter);
+        }
+        \endverbatim
+
         \param [in] width - a width of input and output image.
         \param [in] height - a height of input and output image.
         \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
