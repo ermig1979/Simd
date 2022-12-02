@@ -122,13 +122,18 @@ namespace Test
         result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Base::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::F && C >= Simd::Sse41::F)
+        if (Simd::Sse41::Enable)
             result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Sse41::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::F && C >= Simd::Avx2::F)
+        if (Simd::Avx2::Enable)
             result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Avx2::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Avx512bw::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
 #endif 
 
         return result;

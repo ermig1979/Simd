@@ -110,6 +110,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iOutput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwTexture.cpp" />
