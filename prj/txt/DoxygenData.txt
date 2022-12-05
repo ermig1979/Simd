@@ -663,3 +663,8 @@
     @defgroup base64 Base64 Conversion
     \short Functions for encoding/decoding of strings in Base64 format.
 */
+
+/*! @ingroup functions
+    @defgroup warp_affine Affine Warp
+    \short Functions for Affine Warp of images.
+*/

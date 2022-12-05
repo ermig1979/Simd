@@ -523,6 +523,22 @@ typedef enum
     SimdTransformTransposeRotate270, /*!< Image transposed and rotated 270 degrees counterclockwise. It is equal to vertical mirroring of image. The output image has the same size as input image.*/
 } SimdTransformType;
 
+/*! @ingroup warp_affine
+    Describes Warp Affine flags. This type used in function ::SimdWarpAffineInit.
+*/
+typedef enum
+{
+    SimdWarpAffineDefault = 0, /*!< Default Warp Affine flags. */
+    SimdWarpAffineChannelByte = 0, /*!<  8-bit integer channel type. */
+    SimdWarpAffineChannelMask = 1, /*!< Bit mask of channel type. */
+    SimdWarpAffineInterpNearest = 0, /*!< Nearest pixel interpolation method. */
+    SimdWarpAffineInterpBilinear = 2, /*!< Bilinear pixel interpolation method. */
+    SimdWarpAffineInterpMask = 2, /*!< Bit mask of pixel interpolation options. */
+    SimdWarpAffineBorderConstant = 0, /*!< Nearest pixel interpolation method. */
+    SimdWarpAffineBorderTransparent = 4, /*!< Bilinear pixel interpolation method. */
+    SimdWarpAffineBorderMask = 4, /*!< Bit mask of pixel interpolation options. */
+} SimdWarpAffineFlags;
+
 /*! @ingroup yuv_conversion
     Describes YUV format type. It is uses in YUV to BGR forward and backward conversions.
 */
