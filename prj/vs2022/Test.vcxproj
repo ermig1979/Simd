@@ -139,6 +139,7 @@
     <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
     <ClCompile Include="..\..\src\Test\TestUyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestVideo.cpp" />
+    <ClCompile Include="..\..\src\Test\TestWarpAffine.cpp" />
     <ClCompile Include="..\..\src\Test\TestWinograd.cpp" />
     <ClCompile Include="..\..\src\Test\TestYuvToAny.cpp" />
     <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp" />

@@ -96,6 +96,7 @@
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdVmx.h" />
     <ClInclude Include="..\..\src\Simd\SimdVsx.h" />
+    <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h" />
     <ClInclude Include="..\..\src\Simd\SimdXml.hpp" />
   </ItemGroup>
   <ItemGroup>

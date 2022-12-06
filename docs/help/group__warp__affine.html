@@ -40,7 +40,8 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#enum-members">Enumerations</a>  </div>
+<a href="#enum-members">Enumerations</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">Affine Warp<div class="ingroups"><a class="el" href="group__functions.html">Functions</a></div></div></div>
 </div><!--header-->
 <div class="contents">
@@ -71,6 +72,15 @@ Enumerations</h2></td></tr>
 <br />
  }</td></tr>
 <tr class="separator:ga18ec670b06abd539fb8b7f7183065200"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga123a0d5c22a298e669e8b1bd068505ab"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__warp__affine.html#ga123a0d5c22a298e669e8b1bd068505ab">SimdWarpAffineInit</a> (size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float *mat, <a class="el" href="group__warp__affine.html#ga18ec670b06abd539fb8b7f7183065200">SimdWarpAffineFlags</a> flags, const uint8_t *border)</td></tr>
+<tr class="memdesc:ga123a0d5c22a298e669e8b1bd068505ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates wrap affine context.  <a href="group__warp__affine.html#ga123a0d5c22a298e669e8b1bd068505ab">More...</a><br /></td></tr>
+<tr class="separator:ga123a0d5c22a298e669e8b1bd068505ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7ca6d6b1d0b9adbdd236e45790a7e9f2"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__warp__affine.html#ga7ca6d6b1d0b9adbdd236e45790a7e9f2">SimdWarpAffineRun</a> (const void *context, const uint8_t *src, size_t srcStride, uint8_t *dst, size_t dstStride)</td></tr>
+<tr class="memdesc:ga7ca6d6b1d0b9adbdd236e45790a7e9f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs warp affine for current image.  <a href="group__warp__affine.html#ga7ca6d6b1d0b9adbdd236e45790a7e9f2">More...</a><br /></td></tr>
+<tr class="separator:ga7ca6d6b1d0b9adbdd236e45790a7e9f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions for Affine Warp of images. </p>
@@ -86,7 +96,7 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes Warp Affine flags. This type used in function ::SimdWarpAffineInit. </p>
+<p >Describes Warp Affine flags. This type used in function <a class="el" href="group__warp__affine.html#ga123a0d5c22a298e669e8b1bd068505ab" title="Creates wrap affine context.">SimdWarpAffineInit</a>. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200ab7eefcfd3634aec14bd2709867751d4f" name="gga18ec670b06abd539fb8b7f7183065200ab7eefcfd3634aec14bd2709867751d4f"></a>SimdWarpAffineDefault&#160;</td><td class="fielddoc"><p >Default Warp Affine flags. </p>
 </td></tr>
@@ -107,6 +117,154 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200af948782a830112127d73c8bde4c77a53" name="gga18ec670b06abd539fb8b7f7183065200af948782a830112127d73c8bde4c77a53"></a>SimdWarpAffineBorderMask&#160;</td><td class="fielddoc"><p >Bit mask of pixel interpolation options. </p>
 </td></tr>
 </table>
+
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="ga123a0d5c22a298e669e8b1bd068505ab" name="ga123a0d5c22a298e669e8b1bd068505ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga123a0d5c22a298e669e8b1bd068505ab">&#9670;&nbsp;</a></span>SimdWarpAffineInit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * SimdWarpAffineInit </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__warp__affine.html#ga18ec670b06abd539fb8b7f7183065200">SimdWarpAffineFlags</a>&#160;</td>
+          <td class="paramname"><em>flags</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>border</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates wrap affine context. </p>
+<p >Simplified, then warp affine performs next transformation for every pixel: </p><pre class="fragment">dst[x, y] = src[x * mat[0][0] + y * mat[0][1] + mat[0][2], x * mat[1][0] + y * mat[1][1] + mat[1][2]];
+</pre><p >An using example (for BGR image): </p><pre class="fragment">float mat[2][3] = { { 1.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 0.0f } };
+SimdWarpAffineFlags flags = SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant;
+void* context = SimdWarpAffineInit(srcW, srcH, dstW, dstH, 3, mat, flags, NULL);
+if (context)
+{
+     SimdWarpAffineRun(context, src, srcStride, dst, dstStride);
+     SimdRelease(context);
+}
+</pre><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- a width of input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- a height of input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a channel number of input and output image. Its value must be in range [1..4]. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>- a pointer to 2x3 matrix with coefficients of affine warp. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>- a flags of algorithm parameters. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">border</td><td>- a pointer to to the array with color of border. The size of the array mast be equal to channels. It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to warp affine context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__warp__affine.html#ga7ca6d6b1d0b9adbdd236e45790a7e9f2" title="Performs warp affine for current image.">SimdWarpAffineRun</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </dd></dl>
+
+</div>
+</div>
+<a id="ga7ca6d6b1d0b9adbdd236e45790a7e9f2" name="ga7ca6d6b1d0b9adbdd236e45790a7e9f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7ca6d6b1d0b9adbdd236e45790a7e9f2">&#9670;&nbsp;</a></span>SimdWarpAffineRun()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdWarpAffineRun </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs warp affine for current image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a warp affine context. It must be created by function <a class="el" href="group__warp__affine.html#ga123a0d5c22a298e669e8b1bd068505ab" title="Creates wrap affine context.">SimdWarpAffineInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size (in bytes) of the input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the filtered output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size (in bytes) of the output image. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

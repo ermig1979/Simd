@@ -82,6 +82,7 @@
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h" />
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h" />
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h" />
     <ClInclude Include="..\..\src\Simd\SimdXml.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
@@ -184,6 +185,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseTransform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseUyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseUyvyToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseWarpAffine.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseWinograd3.cpp" />

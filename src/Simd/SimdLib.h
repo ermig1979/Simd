@@ -8024,6 +8024,59 @@ extern "C"
     SIMD_API void SimdUyvy422ToYuv420p(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, 
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride);
 
+    /*! @ingroup warp_affine
+
+        \fn void * SimdWarpAffineInit(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t * border);
+
+        \short Creates wrap affine context.
+
+        Simplified, then warp affine performs next transformation for every pixel:
+        \verbatim
+        dst[x, y] = src[x * mat[0][0] + y * mat[0][1] + mat[0][2], x * mat[1][0] + y * mat[1][1] + mat[1][2]];
+        \endverbatim
+
+        An using example (for BGR image):
+        \verbatim
+        float mat[2][3] = { { 1.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 0.0f } };
+        SimdWarpAffineFlags flags = SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant;
+        void* context = SimdWarpAffineInit(srcW, srcH, dstW, dstH, 3, mat, flags, NULL);
+        if (context)
+        {
+             SimdWarpAffineRun(context, src, srcStride, dst, dstStride);
+             SimdRelease(context);
+        }
+        \endverbatim
+
+        \param [in] srcW - a width of input image.
+        \param [in] srcH - a height of input image.
+        \param [in] dstW - a width of output image.
+        \param [in] dstH - a height of output image.
+        \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
+        \param [in] mat - a pointer to 2x3 matrix with coefficients of affine warp.
+        \param [in] flags - a flags of algorithm parameters.
+        \param [in] border - a pointer to to the array with color of border. The size of the array mast be equal to channels.
+                             It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL.
+        \return a pointer to warp affine context. On error it returns NULL.
+                This pointer is used in functions ::SimdWarpAffineRun.
+                It must be released with using of function ::SimdRelease.
+    */
+    SIMD_API void* SimdWarpAffineInit(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, 
+        const float* mat, SimdWarpAffineFlags flags, const uint8_t * border);
+
+    /*! @ingroup warp_affine
+
+        \fn void SimdWarpAffineRun(const void* context, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+
+        \short Performs warp affine for current image.
+
+        \param [in] context - a warp affine context. It must be created by function ::SimdWarpAffineInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to pixels data of the original input image.
+        \param [in] srcStride - a row size (in bytes) of the input image.
+        \param [out] dst - a pointer to pixels data of the filtered output image.
+        \param [in] dstStride - a row size (in bytes) of the output image.
+    */
+    SIMD_API void SimdWarpAffineRun(const void* context, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+
     /*! @ingroup synet_winograd
 
         \fn void SimdWinogradKernel1x3Block1x4SetFilter(const float * src, size_t size, float * dst, SimdBool trans);

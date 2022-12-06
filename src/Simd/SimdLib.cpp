@@ -75,6 +75,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution8i.h"
 #include "Simd/SimdSynetScale8i.h"
+#include "Simd/SimdWarpAffine.h"
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse41.h"
@@ -6881,6 +6882,20 @@ SIMD_API void SimdUyvy422ToYuv420p(const uint8_t* uyvy, size_t uyvyStride, size_
     else
 #endif
         Base::Uyvy422ToYuv420p(uyvy, uyvyStride, width, height, y, yStride, u, uStride, v, vStride);
+}
+
+SIMD_API void* SimdWarpAffineInit(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border)
+{
+    SIMD_EMPTY();    
+    typedef void* (*SimdWarpAffineInitPtr) (size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
+    const static SimdWarpAffineInitPtr simdWarpAffineInit = SIMD_FUNC0(WarpAffineInit);//, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    return simdWarpAffineInit(srcW, srcH, dstW, dstH, channels, mat, flags, border);
+}
+
+SIMD_API void SimdWarpAffineRun(const void* context, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+{
+    SIMD_EMPTY();
+    ((WarpAffine*)context)->Run(src, srcStride, dst, dstStride);
 }
 
 typedef void(*SimdWinogradSetFilterPtr) (const float * src, size_t size, float * dst, SimdBool trans);
