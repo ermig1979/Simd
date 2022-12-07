@@ -25,27 +25,12 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestFile.h"
 
 #include "Simd/SimdWarpAffine.h"
 
 namespace Test
 {
-    //String ToString(SimdWarpAffineFlags flags)
-    //{
-    //    switch (method)
-    //    {
-    //    case SimdResizeMethodNearest: return "NrO";
-    //    case SimdResizeMethodNearestPytorch: return "NrP";
-    //    case SimdResizeMethodBilinear: return "BlO";
-    //    case SimdResizeMethodBilinearCaffe: return "BlC";
-    //    case SimdResizeMethodBilinearPytorch: return "BlP";
-    //    case SimdResizeMethodBicubic: return "BcO";
-    //    case SimdResizeMethodArea: return "ArO";
-    //    case SimdResizeMethodAreaFast: return "ArF";
-    //    default: assert(0); return "";
-    //    }
-    //}
-
     namespace
     {
         struct FuncWA
@@ -60,9 +45,12 @@ namespace Test
             void Update(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags)
             {
                 std::stringstream ss;
-                ss << description << "[";
-                ss << channels << ":" << srcW << "x" << srcH << "->" << dstW << "x" << dstH;
-                ss << "]";
+                ss << description << "[" << channels;
+                ss << "-" << ((flags & SimdWarpAffineChannelMask) == SimdWarpAffineChannelByte ? "b" : "?");
+                ss << "-" << ((flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpNearest ? "nr" : "bl") << "-{ ";
+                for(int i = 0; i < 6; ++i)
+                    ss << std::setprecision(1) << std::fixed << mat[i] << " ";
+                ss << "}:" << srcW << "x" << srcH << "->" << dstW << "x" << dstH << "]";
                 description = ss.str();
             }
 
@@ -85,7 +73,14 @@ namespace Test
 #define FUNC_WA(function) \
     FuncWA(function, std::string(#function))
 
-//#define TEST_WARP_AFFINE_REAL_IMAGE
+#define TEST_WARP_AFFINE_REAL_IMAGE
+
+    bool SaveImage(const View& image, const String& name)
+    {
+        const String dir = "_out";
+        String path = MakePath(dir, name + ".png");
+        return CreatePathIfNotExist(dir, false) && image.Save(path, SimdImageFilePng, 0);
+    }
 
     bool WarpAffineAutoTest(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float * mat, SimdWarpAffineFlags flags, FuncWA f1, FuncWA f2)
     {
@@ -126,10 +121,10 @@ namespace Test
 
         View dst1(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         View dst2(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
-        Simd::Fill(dst1, 0x01);
-        Simd::Fill(dst2, 0x02);
+        Simd::Fill(dst1, 0x33);
+        Simd::Fill(dst2, 0x99);
 
-        uint8_t border[4] = { 1, 2, 3, 4 };
+        uint8_t border[4] = { 11, 33, 55, 77 };
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -137,18 +132,13 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, channels, mat, flags, border));
 
-        if (format == View::Float)
-            result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
-        else if(format == View::Int16)
-            result = result && Compare(dst1, dst2, 1, true, 64);
-        else
-            result = result && Compare(dst1, dst2, 0, true, 64);
+        result = result && Compare(dst1, dst2, 0, true, 64);
 
-#if defined(TEST_WARP_AFFINE_REAL_IMAGE) && 0
+#if defined(TEST_WARP_AFFINE_REAL_IMAGE)
         if (format == View::Bgr24)
         {
-            src.Save(String("src.png"), SimdImageFilePng);
-            dst1.Save(String("dst.png"), SimdImageFilePng);
+            SaveImage(src, String("src"));
+            SaveImage(dst1, String("dst"));
         }
 #endif
 
@@ -167,7 +157,7 @@ namespace Test
 
         Buffer32f mat;
 
-        result = result && WarpAffineAutoTest(W, H, W, H, channels, Mat(mat, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f), flags, f1, f2);
+        result = result && WarpAffineAutoTest(W, H, W, H, channels, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags, f1, f2);
 
         return result;
     }
@@ -178,15 +168,19 @@ namespace Test
 
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
         std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear };
+        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
         for (size_t c = 0; c < channel.size(); ++c)
         {
             for (size_t i = 0; i < interp.size(); ++i)
             {
-                SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[c] | interp[i]);
-                result = result && WarpAffineAutoTest(1, flags, f1, f2);
-                result = result && WarpAffineAutoTest(2, flags, f1, f2);
-                result = result && WarpAffineAutoTest(3, flags, f1, f2);
-                result = result && WarpAffineAutoTest(4, flags, f1, f2);
+                for (size_t b = 0; b < border.size(); ++b)
+                {
+                    SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[c] | interp[i] | border[b]);
+                    result = result && WarpAffineAutoTest(1, flags, f1, f2);
+                    result = result && WarpAffineAutoTest(2, flags, f1, f2);
+                    result = result && WarpAffineAutoTest(3, flags, f1, f2);
+                    result = result && WarpAffineAutoTest(4, flags, f1, f2);
+                }
             }
         }
 
@@ -222,3 +216,76 @@ namespace Test
         return result;
     }
 }
+
+//-------------------------------------------------------------------------------------------------
+
+#ifdef SIMD_OPENCV_ENABLE
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+namespace Test
+{
+    bool WarpAffineOpenCvSpecialTest(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags)
+    {
+        View::Format format;
+        switch (channels)
+        {
+        case 3: format = View::Bgr24; break;
+        default:
+            assert(0);
+        }
+
+        View src(srcW, srcH, format, NULL, TEST_ALIGN(srcW));
+        ::srand(0);
+        FillPicture(src);
+
+        View dst1(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
+        View dst2(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
+        Simd::Fill(dst1, 0x77);
+        Simd::Fill(dst2, 0x77);
+
+        uint8_t border[4] = { 11, 33, 55, 77 };
+
+        void* context = SimdWarpAffineInit(src.width, src.height, dst1.width, dst1.height, channels, mat, flags, border);
+        if (context)
+        {
+            SimdWarpAffineRun(context, src.data, src.stride, dst1.data, dst1.stride);
+            SimdRelease(context);
+        }
+
+        cv::Mat cSrc = src, cDst = dst2;
+        cv::Mat cMat(2, 3, CV_64FC1);
+        for (int i = 0; i < 6; ++i)
+            ((double*)cMat.data)[i] = mat[i];
+        int cFlags = (flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpNearest ?
+            cv::INTER_NEAREST : cv::INTER_LINEAR;
+        int borderMode = (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderConstant ?
+            cv::BORDER_CONSTANT : cv::BORDER_TRANSPARENT;
+        cv::Scalar_<double> cBorder;
+        for (int i = 0; i < 4; ++i)
+            cBorder[i] = border[i];
+        cv::warpAffine(cSrc, cDst, cMat, dst2.Size(), cFlags, borderMode, cBorder);
+
+        SaveImage(src, String("src"));
+        SaveImage(dst1, String("dst1"));
+        SaveImage(dst2, String("dst2"));
+
+        return true;
+    }
+
+    bool WarpAffineOpenCvSpecialTest()
+    {
+        bool result = true;
+
+        std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
+        std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear };
+        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
+        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[0] | interp[1] | border[0]);
+        Buffer32f mat;
+
+        result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags);
+
+        return result;
+    }
+}
+#endif

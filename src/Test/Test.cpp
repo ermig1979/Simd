@@ -418,6 +418,9 @@ namespace Test
     TEST_ADD_GROUP_A0(Uyvy422ToBgr);
 
     TEST_ADD_GROUP_A0(WarpAffine);
+#ifdef SIMD_OPENCV_ENABLE
+    TEST_ADD_GROUP_0S(WarpAffineOpenCv);
+#endif
 
 #if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A0(WinogradKernel1x3Block1x4SetFilter);
