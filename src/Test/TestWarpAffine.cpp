@@ -167,8 +167,8 @@ namespace Test
         bool result = true;
 
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
-        std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear };
-        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
+        std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest/*, SimdWarpAffineInterpBilinear*/ };
+        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant/*, SimdWarpAffineBorderTransparent*/ };
         for (size_t c = 0; c < channel.size(); ++c)
         {
             for (size_t i = 0; i < interp.size(); ++i)
@@ -280,10 +280,12 @@ namespace Test
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
         std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear };
         std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
-        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[0] | interp[1] | border[0]);
+        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[0] | interp[0] | border[0]);
         Buffer32f mat;
 
-        result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags);
+        //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags);
+        //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, 0.0f, 0.7f, 0.7f, 0.0f), flags);
+        result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.6f, -0.4f, 0.0f, 0.4f, 0.6f, 0.0f), flags);
 
         return result;
     }

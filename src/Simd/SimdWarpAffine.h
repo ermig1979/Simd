@@ -34,29 +34,16 @@ namespace Simd
         static const int BorderSizeMax = 4 * 1;
 
         SimdWarpAffineFlags flags;
-        float mat[6];
+        float mat[6], inv[6];
         uint8_t border[BorderSizeMax];
         size_t srcW, srcH, dstW, dstH, channels, align;
 
-        WarpAffParam(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float * mat, SimdWarpAffineFlags flags, const uint8_t * border, size_t align)
-        {
-            this->srcW = srcW;
-            this->srcH = srcH;
-            this->dstW = dstW;
-            this->dstH = dstH;
-            this->channels = channels;
-            memcpy(this->mat, mat, 6 * sizeof(float));
-            this->flags = flags;
-            if (border && (flags & SimdWarpAffineBorderMask) == SimdWarpAffineInterpBilinear)
-                memcpy(this->border, border, this->ChannelSize());
-            else
-                memset(this->border, 0, BorderSizeMax);
-            this->align = align;
-        }
+        WarpAffParam(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border, size_t align);
 
         bool Valid() const
         {
-            return true;
+            return channels >= 1 && channels <= 4 &&
+                (inv[0] != 0.0f || inv[1] != 0.0f || inv[3] != 0.0f || inv[4] != 0.0f);
         }
 
         bool IsNearest() const
@@ -92,6 +79,7 @@ namespace Simd
     public:
         WarpAffine(const WarpAffParam & param)
             : _param(param)
+            , _empty(true)
         {
         }
 
@@ -99,6 +87,7 @@ namespace Simd
 
     protected:
         WarpAffParam _param;
+        bool _empty;
     };
 
     //---------------------------------------------------------------------------------------------
@@ -111,6 +100,15 @@ namespace Simd
             WarpAffineNearest(const WarpAffParam& param);
 
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+
+        protected:
+            void Init();
+
+            virtual void SetRange();
+            virtual void SetIndex();
+
+            Array32i _beg, _end;
+            Array16u _index;
         };
 
         //---------------------------------------------------------------------------------------------
