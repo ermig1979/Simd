@@ -56,6 +56,11 @@ namespace Simd
             return (flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpBilinear && (SimdWarpAffineChannelMask & flags) == SimdWarpAffineChannelByte;
         }
 
+        bool NeedFill() const
+        {
+            return (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderConstant;
+        }
+
         size_t ChannelSize() const
         {
             switch (SimdWarpAffineChannelMask & flags)

@@ -47,7 +47,8 @@ namespace Test
                 std::stringstream ss;
                 ss << description << "[" << channels;
                 ss << "-" << ((flags & SimdWarpAffineChannelMask) == SimdWarpAffineChannelByte ? "b" : "?");
-                ss << "-" << ((flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpNearest ? "nr" : "bl") << "-{ ";
+                ss << "-" << ((flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpNearest ? "nr" : "bl");
+                ss << "-" << ((flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderConstant ? "c" : "t") << "-{ ";
                 for(int i = 0; i < 6; ++i)
                     ss << std::setprecision(1) << std::fixed << mat[i] << " ";
                 ss << "}:" << srcW << "x" << srcH << "->" << dstW << "x" << dstH << "]";
@@ -122,8 +123,10 @@ namespace Test
         View dst1(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         View dst2(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         Simd::Fill(dst1, 0x33);
-        Simd::Fill(dst2, 0x99);
-
+        if((flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderConstant)
+            Simd::Fill(dst2, 0x99);
+        else
+            Simd::Fill(dst2, 0x33);
         uint8_t border[4] = { 11, 33, 55, 77 };
 
         TEST_ALIGN(SIMD_ALIGN);
@@ -158,6 +161,7 @@ namespace Test
         Buffer32f mat;
 
         result = result && WarpAffineAutoTest(W, H, W, H, channels, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags, f1, f2);
+        result = result && WarpAffineAutoTest(W, H, W, H, channels, Mat(mat, 0.6f, -0.4f, 0.0f, 0.4f, 0.6f, 0.0f), flags, f1, f2);
 
         return result;
     }
@@ -168,7 +172,7 @@ namespace Test
 
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
         std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest/*, SimdWarpAffineInterpBilinear*/ };
-        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant/*, SimdWarpAffineBorderTransparent*/ };
+        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
         for (size_t c = 0; c < channel.size(); ++c)
         {
             for (size_t i = 0; i < interp.size(); ++i)
@@ -221,12 +225,15 @@ namespace Test
 
 #ifdef SIMD_OPENCV_ENABLE
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/utils/logger.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 namespace Test
 {
     bool WarpAffineOpenCvSpecialTest(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags)
     {
+        bool result = true;
+
         View::Format format;
         switch (channels)
         {
@@ -253,10 +260,13 @@ namespace Test
             SimdRelease(context);
         }
 
+        cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_WARNING);
+        cv::setNumThreads(1);
+
         cv::Mat cSrc = src, cDst = dst2;
-        cv::Mat cMat(2, 3, CV_64FC1);
+        cv::Mat cMat(2, 3, CV_32FC1);
         for (int i = 0; i < 6; ++i)
-            ((double*)cMat.data)[i] = mat[i];
+            ((float*)cMat.data)[i] = mat[i];
         int cFlags = (flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpNearest ?
             cv::INTER_NEAREST : cv::INTER_LINEAR;
         int borderMode = (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderConstant ?
@@ -266,11 +276,13 @@ namespace Test
             cBorder[i] = border[i];
         cv::warpAffine(cSrc, cDst, cMat, dst2.Size(), cFlags, borderMode, cBorder);
 
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
         SaveImage(src, String("src"));
         SaveImage(dst1, String("dst1"));
         SaveImage(dst2, String("dst2"));
 
-        return true;
+        return result;
     }
 
     bool WarpAffineOpenCvSpecialTest()
@@ -280,7 +292,7 @@ namespace Test
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
         std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear };
         std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
-        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[0] | interp[0] | border[0]);
+        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[0] | interp[0] | border[1]);
         Buffer32f mat;
 
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags);

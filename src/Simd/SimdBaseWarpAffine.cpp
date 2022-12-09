@@ -87,12 +87,16 @@ namespace Simd
                 Init();
             const WarpAffParam& p = _param;
             uint16_t* index = _index.data;
+            bool fill = p.NeedFill();
             for (size_t y = 0; y < p.dstH; ++y)
             {
-                for (int x = 0, xe = _beg[y]; x < xe; ++x)
+                if (fill)
                 {
-                    for (size_t c = 0; c < p.channels; ++c)
-                        dst[x * p.channels + c] = p.border[c];
+                    for (int x = 0, xe = _beg[y]; x < xe; ++x)
+                    {
+                        for (size_t c = 0; c < p.channels; ++c)
+                            dst[x * p.channels + c] = p.border[c];
+                    }
                 }
                 for (int x = _beg[y], xe = _end[y]; x < xe; ++x)
                 {
@@ -101,10 +105,13 @@ namespace Simd
                     for (size_t c = 0; c < p.channels; ++c)
                         dst[x * p.channels + c] = src[offset + c];
                 }
-                for (int x = _end[y], xe = p.dstW; x < xe; ++x)
+                if (fill)
                 {
-                    for (size_t c = 0; c < p.channels; ++c)
-                        dst[x * p.channels + c] = p.border[c];
+                    for (int x = _end[y], xe = p.dstW; x < xe; ++x)
+                    {
+                        for (size_t c = 0; c < p.channels; ++c)
+                            dst[x * p.channels + c] = p.border[c];
+                    }
                 }
                 index += p.dstW * 2;
                 dst += dstStride;
@@ -165,8 +172,8 @@ namespace Simd
                 for (int x = _beg[y], xe = _end[y]; x < xe; ++x)
                 {
                     Point i = Conv(x, y, p.inv);
-                    index[2 * x + 0] = Round(i.y);
-                    index[2 * x + 1] = Round(i.x);
+                    index[2 * x + 0] = Simd::RestrictRange(Round(i.y), 0, (int)p.srcH - 1);
+                    index[2 * x + 1] = Simd::RestrictRange(Round(i.x), 0, (int)p.srcW - 1);
                 }
                 index += p.dstW * 2;
             }
