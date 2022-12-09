@@ -86,7 +86,6 @@ namespace Simd
 
         template <bool align> void BgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride)
         {
-            assert(width >= A);
             if (align)
                 assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(rgb) && Aligned(rgbStride));
 

@@ -22,12 +22,13 @@
 * SOFTWARE.
 */
 #include "Simd/SimdWarpAffine.h"
+#include "Simd/SimdCopyPixel.h"
 
 #include "Simd/SimdPoint.hpp"
 
 namespace Simd
 {
-    static inline void SetInv(const float * mat, float * inv)
+    static SIMD_INLINE void SetInv(const float * mat, float * inv)
     {
         double D = mat[0] * mat[4] - mat[1] * mat[3];
         D = D != 0.0 ? 1.0 / D : 0.0;
@@ -66,56 +67,50 @@ namespace Simd
 
     namespace Base
     {
-        typedef Simd::Point<float> Point;
-
-        SIMD_INLINE Point Conv(float x, float y, const float* m)
+        template<int N> void NearestRun(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint32_t* idx,
+            const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            return Point(x * m[0] + y * m[1] + m[2], x * m[3] + y * m[4] + m[5]);
+            bool fill = p.NeedFill();
+            int width = (int)p.dstW;
+            for (size_t y = 0; y < p.dstH; ++y)
+            {
+                int nose = beg[y], tail = end[y];
+                if (fill)
+                {
+                    for (int x = 0; x < nose; ++x)
+                        CopyPixel<N>(p.border, dst + x * N);
+                }
+                for (int x = nose; x < tail; ++x)
+                    CopyPixel<N>(src + NearestOffset<N>(idx[x], srcStride), dst + x * N);
+                if (fill)
+                {
+                    for (int x = tail; x < width; ++x)
+                        CopyPixel<N>(p.border, dst + x * N);
+                }
+                idx += width;
+                dst += dstStride;
+            }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------
 
         WarpAffineNearest::WarpAffineNearest(const WarpAffParam& param)
             : WarpAffine(param)
         {
-
+            switch (_param.channels)
+            {
+            case 1: _run = NearestRun<1>; break;
+            case 2: _run = NearestRun<2>; break;
+            case 3: _run = NearestRun<3>; break;
+            case 4: _run = NearestRun<4>; break;
+            }
         }
 
         void WarpAffineNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             if(_empty)
                 Init();
-            const WarpAffParam& p = _param;
-            uint16_t* index = _index.data;
-            bool fill = p.NeedFill();
-            for (size_t y = 0; y < p.dstH; ++y)
-            {
-                if (fill)
-                {
-                    for (int x = 0, xe = _beg[y]; x < xe; ++x)
-                    {
-                        for (size_t c = 0; c < p.channels; ++c)
-                            dst[x * p.channels + c] = p.border[c];
-                    }
-                }
-                for (int x = _beg[y], xe = _end[y]; x < xe; ++x)
-                {
-
-                    size_t offset = index[2 * x + 0] * srcStride + index[2 * x + 1] * p.channels;
-                    for (size_t c = 0; c < p.channels; ++c)
-                        dst[x * p.channels + c] = src[offset + c];
-                }
-                if (fill)
-                {
-                    for (int x = _end[y], xe = p.dstW; x < xe; ++x)
-                    {
-                        for (size_t c = 0; c < p.channels; ++c)
-                            dst[x * p.channels + c] = p.border[c];
-                    }
-                }
-                index += p.dstW * 2;
-                dst += dstStride;
-            }
+            _run(_param, _beg.data, _end.data, _index.data, src, srcStride, dst, dstStride);
         }
 
         void WarpAffineNearest::Init()
@@ -123,42 +118,41 @@ namespace Simd
             const WarpAffParam& p = _param;
             _beg.Resize(p.dstH);
             _end.Resize(p.dstH);
-            SetRange();
-            _index.Resize(p.dstH * p.dstW * 2);
+            _index.Resize(p.dstH * p.dstW);
+            float w = (float)(p.srcW - 1), h = (float)(p.srcH - 1);
+            Point points[4];
+            points[0] = Conv(0, 0, p.mat);
+            points[1] = Conv(w, 0, p.mat);
+            points[2] = Conv(w, h, p.mat);
+            points[3] = Conv(0, h, p.mat);
+            SetRange(points);
             SetIndex();
             _empty = false;
         }
 
-        void WarpAffineNearest::SetRange()
+        void WarpAffineNearest::SetRange(const Point* points)
         {
             const WarpAffParam& p = _param;
-
-            Point points[4];
-            points[0] = Conv(0.0f, 0.0f, p.mat);
-            points[1] = Conv((float)p.srcW - 1, 0.0f, p.mat);
-            points[2] = Conv((float)p.srcW - 1, (float)p.srcH - 1, p.mat);
-            points[3] = Conv(0.0f, (float)p.srcH - 1, p.mat);
-
-            int W = (int)p.dstW;
+            int w = (int)p.dstW;
             for (size_t y = 0; y < p.dstH; ++y)
             {
-                _beg[y] = W;
+                _beg[y] = w;
                 _end[y] = 0;
             }
             for (int v = 0; v < 4; ++v)
             {
                 const Point& curr = points[v];
                 const Point& next = points[(v + 1) & 3];
-                float yMin = Simd::Max(Simd::Min(curr.y, next.y), 0.0f);
-                float yMax = Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH);
+                int yMin = Round(Simd::Max(Simd::Min(curr.y, next.y), 0.0f));
+                int yMax = Round(Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH));
                 if (next.y == curr.y)
                     continue;
                 float k = (next.x - curr.x) / (next.y - curr.y);
-                for (int y = Round(yMin), ye = Round(yMax); y < ye; ++y)
+                for (int y = yMin; y < yMax; ++y)
                 {
                     int x = Round(curr.x + (y - curr.y) * k);
                     _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
-                    _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, W));
+                    _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, w));
                 }
             }
         }
@@ -166,16 +160,14 @@ namespace Simd
         void WarpAffineNearest::SetIndex()
         {
             const WarpAffParam& p = _param;
-            uint16_t* index = _index.data;
-            for (int y = 0, ye = (int)p.dstH; y < ye; ++y)
+            uint32_t* index = _index.data;
+            int w = (int)p.srcW - 1, h = (int)p.srcH - 1;
+            for (int y = 0, end = (int)p.dstH; y < end; ++y)
             {
-                for (int x = _beg[y], xe = _end[y]; x < xe; ++x)
-                {
-                    Point i = Conv(x, y, p.inv);
-                    index[2 * x + 0] = Simd::RestrictRange(Round(i.y), 0, (int)p.srcH - 1);
-                    index[2 * x + 1] = Simd::RestrictRange(Round(i.x), 0, (int)p.srcW - 1);
-                }
-                index += p.dstW * 2;
+                int nose = _beg[y], tail = _end[y];
+                for (int x = nose; x < tail; ++x)
+                    index[x] = NearestIndex(x, y, p.inv, w, h);
+                index += p.dstW;
             }
         }
 

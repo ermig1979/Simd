@@ -27,6 +27,8 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdMath.h"
 
+#include "Simd/SimdPoint.hpp"
+
 namespace Simd
 {
     struct WarpAffParam
@@ -77,7 +79,7 @@ namespace Simd
         }
     };
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     class WarpAffine : Deletable
     {
@@ -95,13 +97,40 @@ namespace Simd
         bool _empty;
     };
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace Base
     {
+        typedef Simd::Point<float> Point;
+
+        SIMD_INLINE Point Conv(float x, float y, const float* m)
+        {
+            return Point(x * m[0] + y * m[1] + m[2], x * m[3] + y * m[4] + m[5]);
+        }
+        
+        template<int N> SIMD_INLINE size_t NearestOffset(uint32_t index, size_t stride)
+        {
+            return (index >> 16) * stride + (index & 0x0000FFFF) * N;
+        }
+
+        SIMD_INLINE uint32_t NearestIndex(int x, int y, const float* m, int w, int h)
+        {
+            float sx = (float)x, sy = (float)y;
+            float dx = sx * m[0] + sy * m[1] + m[2];
+            float dy = sx * m[3] + sy * m[4] + m[5];
+            int ix = Simd::RestrictRange(Round(dx), 0, w);
+            int iy = Simd::RestrictRange(Round(dy), 0, h);
+            return ix | (iy << 16);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         class WarpAffineNearest : public WarpAffine
         {
         public:
+            typedef void(*RunPtr)(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint32_t* idx, 
+                const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+
             WarpAffineNearest(const WarpAffParam& param);
 
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
@@ -109,14 +138,15 @@ namespace Simd
         protected:
             void Init();
 
-            virtual void SetRange();
+            virtual void SetRange(const Point * points);
             virtual void SetIndex();
 
             Array32i _beg, _end;
-            Array16u _index;
+            Array32u _index;
+            RunPtr _run;
         };
 
-        //---------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         class WarpAffineByteBilinear : public WarpAffine
         {
@@ -126,9 +156,27 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
 
-        //---------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void * WarpAffineInit(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
     }
+
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        class WarpAffineNearest : public Base::WarpAffineNearest
+        {
+        public:
+            WarpAffineNearest(const WarpAffParam& param);
+
+        protected:
+            virtual void SetIndex();
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* WarpAffineInit(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
+    }
+#endif
 }
 #endif//__SimdWarpAffine_h__

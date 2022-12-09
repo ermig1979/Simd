@@ -160,8 +160,9 @@ namespace Test
 
         Buffer32f mat;
 
-        result = result && WarpAffineAutoTest(W, H, W, H, channels, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags, f1, f2);
-        result = result && WarpAffineAutoTest(W, H, W, H, channels, Mat(mat, 0.6f, -0.4f, 0.0f, 0.4f, 0.6f, 0.0f), flags, f1, f2);
+        //result = result && WarpAffineAutoTest(W, H, W, H, channels, Mat(mat, 0.6f, -0.4f, 0.0f, 0.4f, 0.6f, 0.0f), flags, f1, f2);
+        //result = result && WarpAffineAutoTest(W, H, W, H, channels, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags, f1, f2);
+        result = result && WarpAffineAutoTest(W, H, W, H, channels, Mat(mat, 0.9f, -0.4f, float(W / 6), 0.4f, 0.9f, float(-W / 6)), flags, f1, f2);
 
         return result;
     }
@@ -197,11 +198,11 @@ namespace Test
 
         result = result && WarpAffineAutoTest(FUNC_WA(Simd::Base::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && ResizerAutoTest(FUNC_RS(Simd::Sse41::ResizerInit), FUNC_RS(SimdResizerInit));
-//#endif
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && WarpAffineAutoTest(FUNC_WA(Simd::Sse41::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
+#endif
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && ResizerAutoTest(FUNC_RS(Simd::Avx2::ResizerInit), FUNC_RS(SimdResizerInit));
@@ -253,15 +254,18 @@ namespace Test
 
         uint8_t border[4] = { 11, 33, 55, 77 };
 
-        void* context = SimdWarpAffineInit(src.width, src.height, dst1.width, dst1.height, channels, mat, flags, border);
-        if (context)
         {
-            SimdWarpAffineRun(context, src.data, src.stride, dst1.data, dst1.stride);
-            SimdRelease(context);
+            TEST_PERFORMANCE_TEST("WarpAffineSimd");
+            void* context = SimdWarpAffineInit(src.width, src.height, dst1.width, dst1.height, channels, mat, flags, border);
+            if (context)
+            {
+                SimdWarpAffineRun(context, src.data, src.stride, dst1.data, dst1.stride);
+                SimdRelease(context);
+            }
         }
 
         cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_WARNING);
-        cv::setNumThreads(1);
+        cv::setNumThreads(12);
 
         cv::Mat cSrc = src, cDst = dst2;
         cv::Mat cMat(2, 3, CV_32FC1);
@@ -271,16 +275,23 @@ namespace Test
             cv::INTER_NEAREST : cv::INTER_LINEAR;
         int borderMode = (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderConstant ?
             cv::BORDER_CONSTANT : cv::BORDER_TRANSPARENT;
-        cv::Scalar_<double> cBorder;
+        cv::Scalar_<float> cBorder;
         for (int i = 0; i < 4; ++i)
             cBorder[i] = border[i];
-        cv::warpAffine(cSrc, cDst, cMat, dst2.Size(), cFlags, borderMode, cBorder);
+
+        {
+            TEST_PERFORMANCE_TEST("WarpAffineOpenCV");
+            cv::warpAffine(cSrc, cDst, cMat, dst2.Size(), cFlags, borderMode, cBorder);
+        }
 
         result = result && Compare(dst1, dst2, 0, true, 64);
 
-        SaveImage(src, String("src"));
-        SaveImage(dst1, String("dst1"));
-        SaveImage(dst2, String("dst2"));
+        if (format == View::Bgr24)
+        {
+            SaveImage(src, String("src"));
+            SaveImage(dst1, String("dst1"));
+            SaveImage(dst2, String("dst2"));
+        }
 
         return result;
     }
@@ -292,12 +303,18 @@ namespace Test
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
         std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear };
         std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
-        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[0] | interp[0] | border[1]);
+        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[0] | interp[0] | border[0]);
         Buffer32f mat;
 
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags);
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, 0.0f, 0.7f, 0.7f, 0.0f), flags);
-        result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.6f, -0.4f, 0.0f, 0.4f, 0.6f, 0.0f), flags);
+        //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.6f, -0.4f, 0.0f, 0.4f, 0.6f, 0.0f), flags);
+        result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.9f, -0.4f, float(W / 6), 0.4f, 0.9f, float(-W / 6)), flags);
+
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.ConsoleReport(false, true));
+        PerformanceMeasurerStorage::s_storage.Clear();
+#endif
 
         return result;
     }
