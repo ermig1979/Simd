@@ -46,19 +46,20 @@ namespace Simd
         inv[5] = (float)b2;
     }
 
-    WarpAffParam::WarpAffParam(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border, size_t align)
+    WarpAffParam::WarpAffParam(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border, size_t align)
     {
         this->srcW = srcW;
         this->srcH = srcH;
+        this->srcS = srcS;
         this->dstW = dstW;
         this->dstH = dstH;
+        this->dstS = dstS;
         this->channels = channels;
         memcpy(this->mat, mat, 6 * sizeof(float));
         this->flags = flags;
+        memset(this->border, 0, BorderSizeMax);
         if (border && (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderConstant)
             memcpy(this->border, border, this->PixelSize());
-        else
-            memset(this->border, 0, BorderSizeMax);
         this->align = align;
         SetInv(this->mat, this->inv);
     }
@@ -67,28 +68,57 @@ namespace Simd
 
     namespace Base
     {
-        template<int N> void NearestRun(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint32_t* idx,
-            const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        template<int N> void NearestRun(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
         {
             bool fill = p.NeedFill();
-            int width = (int)p.dstW;
-            for (size_t y = 0; y < p.dstH; ++y)
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 1, h = (int)p.srcH - 1;
+            for (int y = 0; y < (int)p.dstH; ++y)
             {
                 int nose = beg[y], tail = end[y];
-                if (fill)
+                if (N == 3)
                 {
-                    for (int x = 0; x < nose; ++x)
-                        CopyPixel<N>(p.border, dst + x * N);
+                    if (fill)
+                    {
+                        int x = 0, nose1 = nose - 1;
+                        for (; x < nose1; ++x)
+                            Base::CopyPixel<4>(p.border, dst + x * 3);
+                        for (; x < nose; ++x)
+                            Base::CopyPixel<3>(p.border, dst + x * 3);
+                    }
+                    {
+                        int x = nose, tail1 = tail - 1;
+                        for (; x < tail1; ++x)
+                            Base::CopyPixel<4>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
+                        for (; x < tail; ++x)
+                            Base::CopyPixel<3>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
+                    }
+                    if (fill)
+                    {
+                        int x = tail, width1 = width - 1;
+                        for (; x < width1; ++x)
+                            Base::CopyPixel<4>(p.border, dst + x * 3);
+                        for (; x < width; ++x)
+                            Base::CopyPixel<3>(p.border, dst + x * 3);
+                    }
                 }
-                for (int x = nose; x < tail; ++x)
-                    CopyPixel<N>(src + NearestOffset<N>(idx[x], srcStride), dst + x * N);
-                if (fill)
+                else
                 {
-                    for (int x = tail; x < width; ++x)
-                        CopyPixel<N>(p.border, dst + x * N);
+                    if (fill)
+                    {
+                        for (int x = 0; x < nose; ++x)
+                            CopyPixel<N>(p.border, dst + x * N);
+                    }
+                    {
+                        for (int x = nose; x < tail; ++x)
+                            CopyPixel<N>(src + NearestOffset<N>(x, y, p.inv, w, h, s), dst + x * N);
+                    }
+                    if (fill)
+                    {
+                        for (int x = tail; x < width; ++x)
+                            CopyPixel<N>(p.border, dst + x * N);
+                    }
                 }
-                idx += width;
-                dst += dstStride;
+                dst += p.dstS;
             }
         }
 
@@ -106,11 +136,12 @@ namespace Simd
             }
         }
 
-        void WarpAffineNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void WarpAffineNearest::Run(const uint8_t* src, uint8_t* dst)
         {
-            if(_empty)
+            if(_first)
                 Init();
-            _run(_param, _beg.data, _end.data, _index.data, src, srcStride, dst, dstStride);
+            _run(_param, _beg.data, _end.data, src, dst, _buf.data);
+            _first = false;
         }
 
         void WarpAffineNearest::Init()
@@ -118,7 +149,7 @@ namespace Simd
             const WarpAffParam& p = _param;
             _beg.Resize(p.dstH);
             _end.Resize(p.dstH);
-            _index.Resize(p.dstH * p.dstW);
+            _buf.Resize(p.dstW);
             float w = (float)(p.srcW - 1), h = (float)(p.srcH - 1);
             Point points[4];
             points[0] = Conv(0, 0, p.mat);
@@ -126,8 +157,6 @@ namespace Simd
             points[2] = Conv(w, h, p.mat);
             points[3] = Conv(0, h, p.mat);
             SetRange(points);
-            SetIndex();
-            _empty = false;
         }
 
         void WarpAffineNearest::SetRange(const Point* points)
@@ -157,20 +186,6 @@ namespace Simd
             }
         }
 
-        void WarpAffineNearest::SetIndex()
-        {
-            const WarpAffParam& p = _param;
-            uint32_t* index = _index.data;
-            int w = (int)p.srcW - 1, h = (int)p.srcH - 1;
-            for (int y = 0, end = (int)p.dstH; y < end; ++y)
-            {
-                int nose = _beg[y], tail = _end[y];
-                for (int x = nose; x < tail; ++x)
-                    index[x] = NearestIndex(x, y, p.inv, w, h);
-                index += p.dstW;
-            }
-        }
-
         //-----------------------------------------------------------------------------------------
 
         WarpAffineByteBilinear::WarpAffineByteBilinear(const WarpAffParam& param)
@@ -178,16 +193,16 @@ namespace Simd
         {
         }
 
-        void WarpAffineByteBilinear::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void WarpAffineByteBilinear::Run(const uint8_t* src, uint8_t* dst)
         {
 
         }
 
         //-----------------------------------------------------------------------------------------
 
-        void* WarpAffineInit(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border)
+        void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border)
         {
-            WarpAffParam param(srcW, srcH, dstW, dstH, channels, mat, flags, border, 1);
+            WarpAffParam param(srcW, srcH, srcS, dstW, dstH, dstS, channels, mat, flags, border, 1);
             if (!param.Valid())
                 return NULL;
             if (param.IsNearest())

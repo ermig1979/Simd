@@ -35,7 +35,8 @@ namespace Test
     {
         struct FuncWA
         {
-            typedef void*(*FuncPtr)(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
+            typedef void*(*FuncPtr)(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS,
+                size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
 
             FuncPtr func;
             String description;
@@ -58,12 +59,12 @@ namespace Test
             void Call(const View & src, View & dst, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border) const
             {
                 void * context = NULL;
-                context = func(src.width, src.height, dst.width, dst.height, channels, mat, flags, border);
+                context = func(src.width, src.height, src.stride, dst.width, dst.height, dst.stride, channels, mat, flags, border);
                 if (context)
                 {
                     {
                         TEST_PERFORMANCE_TEST(description);
-                        SimdWarpAffineRun(context, src.data, src.stride, dst.data, dst.stride);
+                        SimdWarpAffineRun(context, src.data, dst.data);
                     }
                     SimdRelease(context);
                 }
@@ -141,7 +142,8 @@ namespace Test
         if (format == View::Bgr24)
         {
             SaveImage(src, String("src"));
-            SaveImage(dst1, String("dst"));
+            SaveImage(dst1, String("dst1"));
+            SaveImage(dst2, String("dst2"));
         }
 #endif
 
@@ -256,16 +258,16 @@ namespace Test
 
         {
             TEST_PERFORMANCE_TEST("WarpAffineSimd");
-            void* context = SimdWarpAffineInit(src.width, src.height, dst1.width, dst1.height, channels, mat, flags, border);
+            void* context = SimdWarpAffineInit(src.width, src.height, src.stride, dst1.width, dst1.height, dst1.stride, channels, mat, flags, border);
             if (context)
             {
-                SimdWarpAffineRun(context, src.data, src.stride, dst1.data, dst1.stride);
+                SimdWarpAffineRun(context, src.data, dst1.data);
                 SimdRelease(context);
             }
         }
 
         cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_WARNING);
-        cv::setNumThreads(12);
+        cv::setNumThreads(SimdGetThreadNumber());
 
         cv::Mat cSrc = src, cDst = dst2;
         cv::Mat cMat(2, 3, CV_32FC1);
