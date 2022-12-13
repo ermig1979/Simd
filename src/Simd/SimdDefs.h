@@ -137,7 +137,7 @@
 
 #endif//defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
-#if defined(SIMD_ARM_ENABLE)
+#if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 
 #if !defined(SIMD_NEON_DISABLE) && _MSC_VER >= 1700
 #define SIMD_NEON_ENABLE
