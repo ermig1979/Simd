@@ -43,7 +43,7 @@ namespace Simd
         template<int N> void NearestRun(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
         {
             bool fill = p.NeedFill();
-            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 1, h = (int)p.srcH - 1;
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 1, h = (int)p.srcH - 1, n = A / N;
             const __m128 _4 = _mm_set1_ps(4.0f);
             static const __m128i _0123 = SIMD_MM_SETR_EPI32(0, 1, 2, 3);
             __m128 _m[6];
@@ -53,6 +53,13 @@ namespace Simd
             __m128i _h = _mm_set1_epi32(h);
             __m128i _n = _mm_set1_epi32(N);
             __m128i _s = _mm_set1_epi32(s);
+            __m128i _border;
+            switch (N)
+            {
+            case 1: _border = _mm_set1_epi8(*p.border); break;
+            case 2: _border = _mm_set1_epi16(*(uint16_t*)p.border); break;
+            case 4: _border = _mm_set1_epi32(*(uint32_t*)p.border); break;
+            }
             for (int y = 0; y < (int)p.dstH; ++y)
             {
                 int nose = beg[y], tail = end[y], tail4 = (int)AlignLo(tail - nose, 4) + nose;
@@ -98,7 +105,10 @@ namespace Simd
                 {
                     if (fill)
                     {
-                        for (int x = 0; x < nose; ++x)
+                        int x = 0, noseN = (int)AlignLo(nose, n);
+                        for (; x < noseN; x += n)
+                            _mm_storeu_si128((__m128i*)(dst + x * N), _border);
+                        for (; x < nose; ++x)
                             Base::CopyPixel<N>(p.border, dst + x * N);
                     }
                     {
@@ -107,7 +117,10 @@ namespace Simd
                     }
                     if (fill)
                     {
-                        for (int x = tail; x < width; ++x)
+                        int x = tail, widthN = (int)AlignLo(width - tail, n) + tail;
+                        for (; x < widthN; x += n)
+                            _mm_storeu_si128((__m128i*)(dst + x * N), _border);
+                        for(; x < width; ++x)
                             Base::CopyPixel<N>(p.border, dst + x * N);
                     }
                 }
