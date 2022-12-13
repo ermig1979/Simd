@@ -95,6 +95,8 @@ namespace Simd
     protected:
         WarpAffParam _param;
         bool _first;
+        Array32i _beg, _end;
+        Array32u _buf;
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -132,10 +134,8 @@ namespace Simd
         protected:
             void Init();
 
-            virtual void SetRange(const Point * points);
+            virtual void SetRange(const Base::Point * points);
 
-            Array32i _beg, _end;
-            Array32u _buf;
             RunPtr _run;
         };
 
@@ -161,6 +161,9 @@ namespace Simd
         {
         public:
             WarpAffineNearest(const WarpAffParam& param);
+
+        protected:
+            virtual void SetRange(const Base::Point* points);
         };
 
         //-------------------------------------------------------------------------------------------------

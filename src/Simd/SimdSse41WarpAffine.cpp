@@ -142,6 +142,57 @@ namespace Simd
             }
         }
 
+        void WarpAffineNearest::SetRange(const Base::Point* points)
+        {
+            const WarpAffParam& p = _param;
+            int w = (int)p.dstW, h = (int)p.dstH, h4 = (int)AlignLo(h, 4);
+            static const __m128i _0123 = SIMD_MM_SETR_EPI32(0, 1, 2, 3);
+            __m128i _w = _mm_set1_epi32(w), _1 = _mm_set1_epi32(1);
+            int y = 0;
+            for (; y < h4; y += 4)
+            {
+                _mm_store_si128((__m128i*)(_beg.data + y), _w);
+                _mm_store_si128((__m128i*)(_end.data + y), _mm_setzero_si128());
+            }
+            for (; y < h; ++y)
+            {
+                _beg[y] = w;
+                _end[y] = 0;
+            }
+            for (int v = 0; v < 4; ++v)
+            {
+                const Base::Point& curr = points[v];
+                const Base::Point& next = points[(v + 1) & 3];
+                int beg = Round(Simd::Max(Simd::Min(curr.y, next.y), 0.0f));
+                int end = Round(Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH));
+                int end4 = AlignLo(end - beg, 4) + beg;
+                if (next.y == curr.y)
+                    continue;
+                float k = (next.x - curr.x) / (next.y - curr.y);
+                __m128 _k = _mm_set1_ps(k);
+                __m128 _y0 = _mm_set1_ps(curr.y);
+                __m128 _x0 = _mm_set1_ps(curr.x);
+                int y = beg;
+                for (; y < end4; y += 4)
+                {
+                    __m128 _y = _mm_cvtepi32_ps(_mm_add_epi32(_mm_set1_epi32(y), _0123));
+                    __m128i _x = _mm_cvtps_epi32(_mm_add_ps(_x0, _mm_mul_ps(_mm_sub_ps(_y, _y0), _k)));
+                    __m128i _b = _mm_loadu_si128((__m128i*)(_beg.data + y));
+                    __m128i _e = _mm_loadu_si128((__m128i*)(_end.data + y));
+                    _b = _mm_min_epi32(_b, _mm_max_epi32(_x, _mm_setzero_si128()));
+                    _e = _mm_max_epi32(_e, _mm_min_epi32(_mm_add_epi32(_x, _1), _w));
+                    _mm_storeu_si128((__m128i*)(_beg.data + y), _b);
+                    _mm_storeu_si128((__m128i*)(_end.data + y), _e);
+                }
+                for (; y < end; ++y)
+                {
+                    int x = Round(curr.x + (y - curr.y) * k);
+                    _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
+                    _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, w));
+                }
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border)

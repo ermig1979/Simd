@@ -159,7 +159,7 @@ namespace Simd
             SetRange(points);
         }
 
-        void WarpAffineNearest::SetRange(const Point* points)
+        void WarpAffineNearest::SetRange(const Base::Point* points)
         {
             const WarpAffParam& p = _param;
             int w = (int)p.dstW;
@@ -172,12 +172,12 @@ namespace Simd
             {
                 const Point& curr = points[v];
                 const Point& next = points[(v + 1) & 3];
-                int yMin = Round(Simd::Max(Simd::Min(curr.y, next.y), 0.0f));
-                int yMax = Round(Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH));
+                int beg = Round(Simd::Max(Simd::Min(curr.y, next.y), 0.0f));
+                int end = Round(Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH));
                 if (next.y == curr.y)
                     continue;
                 float k = (next.x - curr.x) / (next.y - curr.y);
-                for (int y = yMin; y < yMax; ++y)
+                for (int y = beg; y < end; ++y)
                 {
                     int x = Round(curr.x + (y - curr.y) * k);
                     _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
