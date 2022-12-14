@@ -28,14 +28,17 @@
 
 namespace Simd
 {
-
 #if defined(_MSC_VER) && !defined(__clang__) && (defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE))
 
 #define SIMD_INIT_AS_CHAR
 
-#elif defined(__GNUC__) || defined(__clang__) || (defined(_MSC_VER) && defined(SIMD_NEON_ENABLE))
+#elif defined(__GNUC__) || defined(__clang__)
 
 #define SIMD_INIT_AS_LONGLONG
+
+#elif defined(_MSC_VER) && defined(SIMD_NEON_ENABLE)
+
+#define SIMD_INIT_AS_ULONGLONG
 
 #else
 
@@ -108,6 +111,50 @@ namespace Simd
 
 #define SIMD_LL_SET2_EPI32(a, b) \
     SIMD_INT_AS_LONGLONG(a) | (SIMD_INT_AS_LONGLONG(b) << 32)
+
+#elif defined(SIMD_INIT_AS_ULONGLONG)
+
+#define SIMD_CHAR_AS_ULONGLONG(a) (((unsigned long long)a) & 0xFF)
+
+#define SIMD_SHORT_AS_ULONGLONG(a) (((unsigned long long)a) & 0xFFFF)
+
+#define SIMD_INT_AS_ULONGLONG(a) (((unsigned long long)a) & 0xFFFFFFFF)
+
+#define SIMD_ULL_SET1_EPI8(a) \
+    SIMD_CHAR_AS_ULONGLONG(a) | (SIMD_CHAR_AS_ULONGLONG(a) << 8) | \
+    (SIMD_CHAR_AS_ULONGLONG(a) << 16) | (SIMD_CHAR_AS_ULONGLONG(a) << 24) | \
+    (SIMD_CHAR_AS_ULONGLONG(a) << 32) | (SIMD_CHAR_AS_ULONGLONG(a) << 40) | \
+    (SIMD_CHAR_AS_ULONGLONG(a) << 48) | (SIMD_CHAR_AS_ULONGLONG(a) << 56)
+
+#define SIMD_ULL_SET2_EPI8(a, b) \
+    SIMD_CHAR_AS_ULONGLONG(a) | (SIMD_CHAR_AS_ULONGLONG(b) << 8) | \
+    (SIMD_CHAR_AS_ULONGLONG(a) << 16) | (SIMD_CHAR_AS_ULONGLONG(b) << 24) | \
+    (SIMD_CHAR_AS_ULONGLONG(a) << 32) | (SIMD_CHAR_AS_ULONGLONG(b) << 40) | \
+    (SIMD_CHAR_AS_ULONGLONG(a) << 48) | (SIMD_CHAR_AS_ULONGLONG(b) << 56)
+
+#define SIMD_ULL_SETR_EPI8(a, b, c, d, e, f, g, h) \
+    SIMD_CHAR_AS_ULONGLONG(a) | (SIMD_CHAR_AS_ULONGLONG(b) << 8) | \
+    (SIMD_CHAR_AS_ULONGLONG(c) << 16) | (SIMD_CHAR_AS_ULONGLONG(d) << 24) | \
+    (SIMD_CHAR_AS_ULONGLONG(e) << 32) | (SIMD_CHAR_AS_ULONGLONG(f) << 40) | \
+    (SIMD_CHAR_AS_ULONGLONG(g) << 48) | (SIMD_CHAR_AS_ULONGLONG(h) << 56)
+
+#define SIMD_ULL_SET1_EPI16(a) \
+    SIMD_SHORT_AS_ULONGLONG(a) | (SIMD_SHORT_AS_ULONGLONG(a) << 16) | \
+    (SIMD_SHORT_AS_ULONGLONG(a) << 32) | (SIMD_SHORT_AS_ULONGLONG(a) << 48)
+
+#define SIMD_ULL_SET2_EPI16(a, b) \
+    SIMD_SHORT_AS_ULONGLONG(a) | (SIMD_SHORT_AS_ULONGLONG(b) << 16) | \
+    (SIMD_SHORT_AS_ULONGLONG(a) << 32) | (SIMD_SHORT_AS_ULONGLONG(b) << 48)
+
+#define SIMD_ULL_SETR_EPI16(a, b, c, d) \
+    SIMD_SHORT_AS_ULONGLONG(a) | (SIMD_SHORT_AS_ULONGLONG(b) << 16) | \
+    (SIMD_SHORT_AS_ULONGLONG(c) << 32) | (SIMD_SHORT_AS_ULONGLONG(d) << 48)
+
+#define SIMD_ULL_SET1_EPI32(a) \
+    SIMD_INT_AS_LONGLONG(a) | (SIMD_INT_AS_ULONGLONG(a) << 32)
+
+#define SIMD_ULL_SET2_EPI32(a, b) \
+    SIMD_INT_AS_ULONGLONG(a) | (SIMD_INT_AS_ULONGLONG(b) << 32)
 
 #else
 
@@ -538,31 +585,31 @@ namespace Simd
 #if defined(_MSC_VER) && defined(SIMD_NEON_ENABLE)
 
 #define SIMD_VEC_SET1_EPI8(a) \
-    {SIMD_LL_SET1_EPI8(a), SIMD_LL_SET1_EPI8(a)}
+    {SIMD_ULL_SET1_EPI8(a), SIMD_ULL_SET1_EPI8(a)}
 
 #define SIMD_VEC_SET2_EPI8(a0, a1) \
-    {SIMD_LL_SET2_EPI8(a0, a1), SIMD_LL_SET2_EPI8(a0, a1)}
+    {SIMD_ULL_SET2_EPI8(a0, a1), SIMD_ULL_SET2_EPI8(a0, a1)}
 
 #define SIMD_VEC_SETR_EPI8(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af) \
-    {SIMD_LL_SETR_EPI8(a0, a1, a2, a3, a4, a5, a6, a7), SIMD_LL_SETR_EPI8(a8, a9, aa, ab, ac, ad, ae, af)}
+    {SIMD_ULL_SETR_EPI8(a0, a1, a2, a3, a4, a5, a6, a7), SIMD_ULL_SETR_EPI8(a8, a9, aa, ab, ac, ad, ae, af)}
 
 #define SIMD_VEC_SET1_EPI16(a) \
-    {SIMD_LL_SET1_EPI16(a), SIMD_LL_SET1_EPI16(a)}
+    {SIMD_ULL_SET1_EPI16(a), SIMD_ULL_SET1_EPI16(a)}
 
 #define SIMD_VEC_SET2_EPI16(a0, a1) \
-    {SIMD_LL_SET2_EPI16(a0, a1), SIMD_LL_SET2_EPI16(a0, a1)}
+    {SIMD_ULL_SET2_EPI16(a0, a1), SIMD_ULL_SET2_EPI16(a0, a1)}
 
 #define SIMD_VEC_SETR_EPI16(a0, a1, a2, a3, a4, a5, a6, a7) \
-    {SIMD_LL_SETR_EPI16(a0, a1, a2, a3), SIMD_LL_SETR_EPI16(a4, a5, a6, a7)}
+    {SIMD_ULL_SETR_EPI16(a0, a1, a2, a3), SIMD_ULL_SETR_EPI16(a4, a5, a6, a7)}
 
 #define SIMD_VEC_SET1_EPI32(a) \
-    {SIMD_LL_SET1_EPI32(a), SIMD_LL_SET1_EPI32(a)}
+    {SIMD_ULL_SET1_EPI32(a), SIMD_ULL_SET1_EPI32(a)}
 
 #define SIMD_VEC_SET2_EPI32(a0, a1) \
-    {SIMD_LL_SET2_EPI32(a0, a1), SIMD_LL_SET2_EPI32(a0, a1)}
+    {SIMD_ULL_SET2_EPI32(a0, a1), SIMD_ULL_SET2_EPI32(a0, a1)}
 
 #define SIMD_VEC_SETR_EPI32(a0, a1, a2, a3) \
-    {SIMD_LL_SET2_EPI32(a0, a1), SIMD_LL_SET2_EPI32(a2, a3)}
+    {SIMD_ULL_SET2_EPI32(a0, a1), SIMD_ULL_SET2_EPI32(a2, a3)}
 
 #define SIMD_VEC_SET1_EPI64(a) \
     {a, a}
@@ -574,28 +621,28 @@ namespace Simd
     {a0, a1}
 
 #define SIMD_VEC_SET1_PI8(a) \
-    {SIMD_LL_SET1_EPI8(a)}
+    {SIMD_ULL_SET1_EPI8(a)}
 
 #define SIMD_VEC_SET2_PI8(a0, a1) \
-    {SIMD_LL_SET2_EPI8(a0, a1)}
+    {SIMD_ULL_SET2_EPI8(a0, a1)}
 
 #define SIMD_VEC_SETR_PI8(a0, a1, a2, a3, a4, a5, a6, a7) \
-    {SIMD_LL_SETR_EPI8(a0, a1, a2, a3, a4, a5, a6, a7)}
+    {SIMD_ULL_SETR_EPI8(a0, a1, a2, a3, a4, a5, a6, a7)}
 
 #define SIMD_VEC_SET1_PI16(a) \
-    {SIMD_LL_SET1_EPI16(a)}
+    {SIMD_ULL_SET1_EPI16(a)}
 
 #define SIMD_VEC_SET2_PI16(a0, a1) \
-    {SIMD_LL_SET2_EPI16(a0, a1)}
+    {SIMD_ULL_SET2_EPI16(a0, a1)}
 
 #define SIMD_VEC_SETR_PI16(a0, a1, a2, a3) \
-    {SIMD_LL_SETR_EPI16(a0, a1, a2, a3)}
+    {SIMD_ULL_SETR_EPI16(a0, a1, a2, a3)}
 
 #define SIMD_VEC_SET1_PI32(a) \
-    {SIMD_LL_SET1_EPI32(a)}
+    {SIMD_ULL_SET1_EPI32(a)}
 
 #define SIMD_VEC_SETR_PI32(a0, a1, a2, a3) \
-    {SIMD_LL_SET2_EPI32(a0, a1)}
+    {SIMD_ULL_SET2_EPI32(a0, a1)}
 
 #define SIMD_VEC_SETR_PI64(a0) \
     {a0}

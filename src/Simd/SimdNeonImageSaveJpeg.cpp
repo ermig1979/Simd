@@ -307,10 +307,10 @@ namespace Simd
             {
                 s0 = vaddq_f32(Load<false>(src + 0), Load<false>(src + 16));
                 s1 = vaddq_f32(Load<false>(src + 4), Load<false>(src + 20));
-                Store<false>(dst + 0, vmulq_f32(Hadd(s0, s1), _0_25));
+                Store<false>(dst + 0, vmulq_f32(Hadd32f(s0, s1), _0_25));
                 s0 = vaddq_f32(Load<false>(src + 8), Load<false>(src + 24));
                 s1 = vaddq_f32(Load<false>(src + 12), Load<false>(src + 28));
-                Store<false>(dst + 4, vmulq_f32(Hadd(s0, s1), _0_25));
+                Store<false>(dst + 4, vmulq_f32(Hadd32f(s0, s1), _0_25));
                 src += 32;
                 dst += 8;
             }

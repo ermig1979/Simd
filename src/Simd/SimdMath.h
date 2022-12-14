@@ -1195,6 +1195,7 @@ namespace Simd
             return vget_high_u8(a);
         }
 
+#if !defined(_MSC_VER)
         template <int part> SIMD_INLINE int8x8_t Half(int8x16_t a);
 
         template <> SIMD_INLINE int8x8_t Half<0>(int8x16_t a)
@@ -1266,6 +1267,7 @@ namespace Simd
         {
             return vget_high_f32(a);
         }
+#endif
 
         template <int part> SIMD_INLINE uint16x8_t UnpackU8(uint8x16_t a)
         {
@@ -1434,12 +1436,12 @@ namespace Simd
             return (int16x8_t)vsubl_u8(Half<part>(a), Half<part>(b));
         }
 
-        template <int part> SIMD_INLINE float32x4_t ToFloat(int16x8_t a)
+        template <int part> SIMD_INLINE float32x4_t Int16ToFloat(int16x8_t a)
         {
             return vcvtq_f32_s32(UnpackI16<part>(a));
         }
 
-        template <int part> SIMD_INLINE float32x4_t ToFloat(uint16x8_t a)
+        template <int part> SIMD_INLINE float32x4_t UInt16ToFloat(uint16x8_t a)
         {
             return vcvtq_f32_u32(UnpackU16<part>(a));
         }
@@ -1471,12 +1473,17 @@ namespace Simd
             return vdupq_lane_f32(Half<index / 2>(a), index & 1);
         }
 
-        SIMD_INLINE uint16x8_t Hadd(uint16x8_t a, uint16x8_t b)
+        SIMD_INLINE uint16x8_t Hadd16u(uint16x8_t a, uint16x8_t b)
         {
             return vcombine_u16(vpadd_u16(Half<0>(a), Half<1>(a)), vpadd_u16(Half<0>(b), Half<1>(b)));
         }
 
-        SIMD_INLINE float32x4_t Hadd(float32x4_t a, float32x4_t b)
+        SIMD_INLINE uint32x4_t Hadd32u(uint32x4_t a, uint32x4_t b)
+        {
+            return vcombine_u32(vpadd_u32(Half<0>(a), Half<1>(a)), vpadd_u32(Half<0>(b), Half<1>(b)));
+        }
+
+        SIMD_INLINE float32x4_t Hadd32f(float32x4_t a, float32x4_t b)
         {
             return vcombine_f32(vpadd_f32(Half<0>(a), Half<1>(a)), vpadd_f32(Half<0>(b), Half<1>(b)));
         }

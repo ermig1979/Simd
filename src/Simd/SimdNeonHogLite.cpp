@@ -37,16 +37,6 @@ namespace Simd
         const uint8x16_t K8_KX4 = SIMD_VEC_SETR_EPI8(1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1);
         const uint8x16_t K8_KX8 = SIMD_VEC_SETR_EPI8(1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
 
-        SIMD_INLINE uint16x8_t Hadd16u(uint16x8_t a, uint16x8_t b)
-        {
-            return vcombine_u16(vpadd_u16(Half<0>(a), Half<1>(a)), vpadd_u16(Half<0>(b), Half<1>(b)));
-        }
-
-        SIMD_INLINE uint32x4_t Hadd32u(uint32x4_t a, uint32x4_t b)
-        {
-            return vcombine_u32(vpadd_u32(Half<0>(a), Half<1>(a)), vpadd_u32(Half<0>(b), Half<1>(b)));
-        }
-
         SIMD_INLINE uint16x8_t Madd8u(uint8x16_t a, uint8x16_t b)
         {
             return Hadd16u(vmull_u8(Half<0>(a), Half<0>(b)), vmull_u8(Half<1>(a), Half<1>(b)));
@@ -277,8 +267,8 @@ namespace Simd
                     float32x4_t v10 = vaddq_f32(s10, s20);
                     float32x4_t v11 = vaddq_f32(s11, s21);
                     float32x4x2_t h;
-                    h.val[0] = Hadd(v00, v01);
-                    h.val[1] = Hadd(v10, v11);
+                    h.val[0] = Hadd32f(v00, v01);
+                    h.val[1] = Hadd32f(v10, v11);
                     float32x2_t p40 = Permute(h, K8_I40);
                     float32x2_t p51 = Permute(h, K8_I51);
                     float32x2_t p62 = Permute(h, K8_I62);
@@ -309,7 +299,7 @@ namespace Simd
                         float32x4_t h2 = vminq_f32(vmulq_f32(Broadcast<2>(s), n), _02);
                         float32x4_t h3 = vminq_f32(vmulq_f32(Broadcast<3>(s), n), _02);
                         t = vaddq_f32(t, vaddq_f32(vaddq_f32(h0, h1), vaddq_f32(h2, h3)));
-                        Store<false>(dst, vmulq_f32(_05, Hadd(Hadd(h0, h1), Hadd(h2, h3))));
+                        Store<false>(dst, vmulq_f32(_05, Hadd32f(Hadd32f(h0, h1), Hadd32f(h2, h3))));
                         dst += F;
                         src += F;
                     }
@@ -319,7 +309,7 @@ namespace Simd
                     float32x4_t h1 = vminq_f32(vmulq_f32(Broadcast<1>(s), n), _02);
                     float32x4_t h2 = vminq_f32(vmulq_f32(Broadcast<2>(s), n), _02);
                     float32x4_t h3 = vminq_f32(vmulq_f32(Broadcast<3>(s), n), _02);
-                    Store<false>(dst, vmulq_f32(_05, Hadd(Hadd(h0, h1), Hadd(h2, h3))));
+                    Store<false>(dst, vmulq_f32(_05, Hadd32f(Hadd32f(h0, h1), Hadd32f(h2, h3))));
                     dst += 4;
                     Store<false>(dst, vmulq_f32(t, _02357));
                     dst += 4;

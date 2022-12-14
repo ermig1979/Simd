@@ -48,8 +48,8 @@ namespace Simd
 
         template <bool align> void Convert(const uint16x8_t & src, const float32x4_t &_1_255, float * dst)
         {
-            Store<align>(dst + 0, vmulq_f32(ToFloat<0>(src), _1_255));
-            Store<align>(dst + F, vmulq_f32(ToFloat<1>(src), _1_255));
+            Store<align>(dst + 0, vmulq_f32(UInt16ToFloat<0>(src), _1_255));
+            Store<align>(dst + F, vmulq_f32(UInt16ToFloat<1>(src), _1_255));
         }
 
         template <bool inversion, bool align> void Convert(const uint8_t * src, const float32x4_t &_1_255, float * dst)

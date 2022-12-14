@@ -140,8 +140,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void HogDirectionHistograms(const int16x8_t & dx, const int16x8_t & dy, Buffer & buffer, size_t col)
         {
-            HogDirectionHistograms<align>(ToFloat<0>(dx), ToFloat<0>(dy), buffer, col + 0);
-            HogDirectionHistograms<align>(ToFloat<1>(dx), ToFloat<1>(dy), buffer, col + 4);
+            HogDirectionHistograms<align>(Int16ToFloat<0>(dx), Int16ToFloat<0>(dy), buffer, col + 0);
+            HogDirectionHistograms<align>(Int16ToFloat<1>(dx), Int16ToFloat<1>(dy), buffer, col + 4);
         }
 
         template <bool align> SIMD_INLINE void HogDirectionHistograms(const uint8_t * src, size_t stride, Buffer & buffer, size_t col)
@@ -255,8 +255,8 @@ namespace Simd
 
             template <bool align> SIMD_INLINE void GetHistogram(const int16x8_t & dx, const int16x8_t & dy, size_t col)
             {
-                GetHistogram<align>(ToFloat<0>(dx), ToFloat<0>(dy), col + 0);
-                GetHistogram<align>(ToFloat<1>(dx), ToFloat<1>(dy), col + 4);
+                GetHistogram<align>(Int16ToFloat<0>(dx), Int16ToFloat<0>(dy), col + 0);
+                GetHistogram<align>(Int16ToFloat<1>(dx), Int16ToFloat<1>(dy), col + 4);
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const uint8_t * src, size_t stride, size_t col)
@@ -400,7 +400,7 @@ namespace Simd
                             float32x4_t h2 = vminq_f32(vmulq_f32(Broadcast<2>(s), n), _02);
                             float32x4_t h3 = vminq_f32(vmulq_f32(Broadcast<3>(s), n), _02);
                             t = vaddq_f32(t, vaddq_f32(vaddq_f32(h0, h1), vaddq_f32(h2, h3)));
-                            Store<false>(dst, vmulq_f32(_05, Hadd(Hadd(h0, h1), Hadd(h2, h3))));
+                            Store<false>(dst, vmulq_f32(_05, Hadd32f(Hadd32f(h0, h1), Hadd32f(h2, h3))));
                             dst += 4;
                             src += 4;
                         }
@@ -408,8 +408,8 @@ namespace Simd
                             float32x4_t h0 = vminq_f32(vmulq_f32(vdupq_n_f32(*src++), n), _02);
                             float32x4_t h1 = vminq_f32(vmulq_f32(vdupq_n_f32(*src++), n), _02);
                             t = vaddq_f32(t, vaddq_f32(h0, h1));
-                            float32x4_t h = Hadd(h0, h1);
-                            Store<false>(dst, vmulq_f32(_05, Hadd(h, h)));
+                            float32x4_t h = Hadd32f(h0, h1);
+                            Store<false>(dst, vmulq_f32(_05, Hadd32f(h, h)));
                             dst += 2;
                         }
 
@@ -421,7 +421,7 @@ namespace Simd
                             float32x4_t h1 = vminq_f32(vmulq_f32(Broadcast<1>(s), n), _02);
                             float32x4_t h2 = vminq_f32(vmulq_f32(Broadcast<2>(s), n), _02);
                             float32x4_t h3 = vminq_f32(vmulq_f32(Broadcast<3>(s), n), _02);
-                            Store<false>(dst, vmulq_f32(_05, Hadd(Hadd(h0, h1), Hadd(h2, h3))));
+                            Store<false>(dst, vmulq_f32(_05, Hadd32f(Hadd32f(h0, h1), Hadd32f(h2, h3))));
                             dst += 4;
                             src += 4;
                         }

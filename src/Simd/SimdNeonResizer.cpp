@@ -266,7 +266,7 @@ namespace Simd
             _alpha.full = vld1q_u8(alpha + index.dst);
             uint16x8_t lo = vmull_u8(unpacked.half.val[0], _alpha.half.val[0]);
             uint16x8_t hi = vmull_u8(unpacked.half.val[1], _alpha.half.val[1]);
-            vst1q_u8(dst + index.dst, vreinterpretq_u8_u16(Hadd(lo, hi)));
+            vst1q_u8(dst + index.dst, vreinterpretq_u8_u16(Hadd16u(lo, hi)));
         }
 
         template <class Idx> SIMD_INLINE void ResizerByteBilinearLoadGray(const uint8_t * src, const Idx & index, uint8_t * dst)
