@@ -149,12 +149,12 @@ namespace Simd
                 {
                     if (inverse)
                     {
-                        if (y < w)
+                        if (y <= w)
                             At<A, Color>(canvas, y, x) = color;
                     }
                     else
                     {
-                        if (y < h)
+                        if (y <= h)
                             At<A, Color>(canvas, x, y) = color;
                     }
                 }
