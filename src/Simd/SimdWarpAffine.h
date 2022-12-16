@@ -104,11 +104,6 @@ namespace Simd
     namespace Base
     {
         typedef Simd::Point<float> Point;
-
-        SIMD_INLINE Point Conv(float x, float y, const float* m)
-        {
-            return Point(x * m[0] + y * m[1] + m[2], x * m[3] + y * m[4] + m[5]);
-        }
         
         template<int N> SIMD_INLINE uint32_t NearestOffset(int x, int y, const float* m, int w, int h, int s)
         {
@@ -147,6 +142,9 @@ namespace Simd
             WarpAffineByteBilinear(const WarpAffParam & param);
 
             virtual void Run(const uint8_t * src, uint8_t * dst);
+
+        protected:
+            void Init();
         };
 
         //-------------------------------------------------------------------------------------------------

@@ -29,6 +29,8 @@
 
 #include "Simd/SimdWarpAffine.h"
 
+#include "Simd/SimdDrawing.hpp"
+
 namespace Test
 {
     namespace
@@ -248,6 +250,7 @@ namespace Test
         View src(srcW, srcH, format, NULL, TEST_ALIGN(srcW));
         ::srand(0);
         FillPicture(src);
+        Simd::DrawRectangle(src, Rect(0, 0, srcW - 1, srcH - 1), Simd::Pixel::Bgr24(255, 255, 255), 1);
 
         View dst1(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         View dst2(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
@@ -267,7 +270,7 @@ namespace Test
         }
 
         cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_WARNING);
-        cv::setNumThreads(SimdGetThreadNumber());
+        cv::setNumThreads((int)SimdGetThreadNumber());
 
         cv::Mat cSrc = src, cDst = dst2;
         cv::Mat cMat(2, 3, CV_32FC1);
@@ -290,9 +293,9 @@ namespace Test
 
         if (format == View::Bgr24)
         {
-            SaveImage(src, String("src"));
-            SaveImage(dst1, String("dst1"));
-            SaveImage(dst2, String("dst2"));
+            SaveImage(src, String("_src"));
+            SaveImage(dst1, String("dst_simd"));
+            SaveImage(dst2, String("dst_ocv"));
         }
 
         return result;
@@ -311,7 +314,10 @@ namespace Test
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags);
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, 0.0f, 0.7f, 0.7f, 0.0f), flags);
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.6f, -0.4f, 0.0f, 0.4f, 0.6f, 0.0f), flags);
-        result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.9f, -0.4f, float(W / 6), 0.4f, 0.9f, float(-W / 6)), flags);
+        //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.9f, -0.4f, float(W / 6), 0.4f, 0.9f, float(-W / 6)), flags);
+        //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.9f, 0.4f, float(-W / 6), -0.4f, 0.9f, float(W / 6)), flags);
+        result = result && WarpAffineOpenCvSpecialTest(W, H, int(W * 1.3), H, 3, Mat(mat, 0.9f, 0.413f, float(+W / 12), -0.413f, 0.9f, float(W / 6)), flags);
+        //result = result && WarpAffineOpenCvSpecialTest(W, H, int(W * 1.3), H, 3, Mat(mat, 0.9f, 0.1f, float(+W / 12), -0.1f, 0.9f, float(W / 6)), flags);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
         TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.ConsoleReport(false, true));

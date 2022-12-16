@@ -163,32 +163,67 @@ namespace Simd
             {
                 const Base::Point& curr = points[v];
                 const Base::Point& next = points[(v + 1) & 3];
-                int beg = Round(Simd::Max(Simd::Min(curr.y, next.y), 0.0f));
-                int end = Round(Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH));
-                int end4 = AlignLo(end - beg, 4) + beg;
+                float yMin = Simd::Max(Simd::Min(curr.y, next.y), 0.0f);
+                float yMax = Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH);
+                int yBeg = Round(yMin);
+                int yEnd = Round(yMax);
+                int yEnd4 = (int)AlignLo(yEnd - yBeg, 4) + yBeg;
                 if (next.y == curr.y)
                     continue;
-                float k = (next.x - curr.x) / (next.y - curr.y);
-                __m128 _k = _mm_set1_ps(k);
-                __m128 _y0 = _mm_set1_ps(curr.y);
-                __m128 _x0 = _mm_set1_ps(curr.x);
-                int y = beg;
-                for (; y < end4; y += 4)
+                float a = (next.x - curr.x) / (next.y - curr.y);
+                float b = curr.x - curr.y * a;
+                __m128 _a = _mm_set1_ps(a);
+                __m128 _b = _mm_set1_ps(b);
+                if (abs(a) <= 1.0f)
                 {
-                    __m128 _y = _mm_cvtepi32_ps(_mm_add_epi32(_mm_set1_epi32(y), _0123));
-                    __m128i _x = _mm_cvtps_epi32(_mm_add_ps(_x0, _mm_mul_ps(_mm_sub_ps(_y, _y0), _k)));
-                    __m128i _b = _mm_loadu_si128((__m128i*)(_beg.data + y));
-                    __m128i _e = _mm_loadu_si128((__m128i*)(_end.data + y));
-                    _b = _mm_min_epi32(_b, _mm_max_epi32(_x, _mm_setzero_si128()));
-                    _e = _mm_max_epi32(_e, _mm_min_epi32(_mm_add_epi32(_x, _1), _w));
-                    _mm_storeu_si128((__m128i*)(_beg.data + y), _b);
-                    _mm_storeu_si128((__m128i*)(_end.data + y), _e);
+                    int y = yBeg;
+                    for (; y < yEnd4; y += 4)
+                    {
+                        __m128 _y = _mm_cvtepi32_ps(_mm_add_epi32(_mm_set1_epi32(y), _0123));
+                        __m128i _x = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(_y, _a), _b));
+                        __m128i xBeg = _mm_loadu_si128((__m128i*)(_beg.data + y));
+                        __m128i xEnd = _mm_loadu_si128((__m128i*)(_end.data + y));
+                        xBeg = _mm_min_epi32(xBeg, _mm_max_epi32(_x, _mm_setzero_si128()));
+                        xEnd = _mm_max_epi32(xEnd, _mm_min_epi32(_mm_add_epi32(_x, _1), _w));
+                        _mm_storeu_si128((__m128i*)(_beg.data + y), xBeg);
+                        _mm_storeu_si128((__m128i*)(_end.data + y), xEnd);
+                    }
+                    for (; y < yEnd; ++y)
+                    {
+                        int x = Round(y * a + b);
+                        _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
+                        _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, w));
+                    }
                 }
-                for (; y < end; ++y)
+                else
                 {
-                    int x = Round(curr.x + (y - curr.y) * k);
-                    _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
-                    _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, w));
+                    int y = yBeg;
+                    __m128 _05 = _mm_set1_ps(0.5f);
+                    __m128 _yMin = _mm_set1_ps(yMin);
+                    __m128 _yMax = _mm_set1_ps(yMax);
+                    for (; y < yEnd4; y += 4)
+                    {
+                        __m128 _y = _mm_cvtepi32_ps(_mm_add_epi32(_mm_set1_epi32(y), _0123));
+                        __m128 yM = _mm_min_ps(_mm_max_ps(_mm_sub_ps(_y, _05), _yMin), _yMax);
+                        __m128 yP = _mm_min_ps(_mm_max_ps(_mm_add_ps(_y, _05), _yMin), _yMax);
+                        __m128 xM = _mm_add_ps(_mm_mul_ps(yM, _a), _b);
+                        __m128 xP = _mm_add_ps(_mm_mul_ps(yP, _a), _b);
+                        __m128i xBeg = _mm_loadu_si128((__m128i*)(_beg.data + y));
+                        __m128i xEnd = _mm_loadu_si128((__m128i*)(_end.data + y));
+                        xBeg = _mm_min_epi32(xBeg, _mm_max_epi32(_mm_cvtps_epi32(_mm_min_ps(xM, xP)), _mm_setzero_si128()));
+                        xEnd = _mm_max_epi32(xEnd, _mm_min_epi32(_mm_add_epi32(_mm_cvtps_epi32(_mm_max_ps(xM, xP)), _1), _w));
+                        _mm_storeu_si128((__m128i*)(_beg.data + y), xBeg);
+                        _mm_storeu_si128((__m128i*)(_end.data + y), xEnd);
+                    }
+                    for (; y < yEnd; ++y)
+                    {
+                        float xM = b + Simd::RestrictRange(float(y) - 0.5f, yMin, yMax) * a;
+                        float xP = b + Simd::RestrictRange(float(y) + 0.5f, yMin, yMax) * a;
+                        int xBeg = Round(Simd::Min(xM, xP));
+                        int xEnd = Round(Simd::Max(xM, xP));
+                        _beg[y] = Simd::Min(_beg[y], Simd::Max(xBeg, 0));
+                        _end[y] = Simd::Max(_end[y], Simd::Min(xEnd + 1, w));
+                    }
                 }
             }
         }

@@ -144,6 +144,11 @@ namespace Simd
             _first = false;
         }
 
+        SIMD_INLINE Point Conv(float x, float y, const float* m)
+        {
+            return Point(x * m[0] + y * m[1] + m[2], x * m[3] + y * m[4] + m[5]);
+        }
+
         void WarpAffineNearest::Init()
         {
             const WarpAffParam& p = _param;
@@ -172,16 +177,34 @@ namespace Simd
             {
                 const Point& curr = points[v];
                 const Point& next = points[(v + 1) & 3];
-                int beg = Round(Simd::Max(Simd::Min(curr.y, next.y), 0.0f));
-                int end = Round(Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH));
+                float yMin = Simd::Max(Simd::Min(curr.y, next.y), 0.0f);
+                float yMax = Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH);
+                int yBeg = Round(yMin);
+                int yEnd = Round(yMax);
                 if (next.y == curr.y)
                     continue;
-                float k = (next.x - curr.x) / (next.y - curr.y);
-                for (int y = beg; y < end; ++y)
+                float a = (next.x - curr.x) / (next.y - curr.y);
+                float b = curr.x - curr.y * a;
+                if (abs(a) <= 1.0f)
                 {
-                    int x = Round(curr.x + (y - curr.y) * k);
-                    _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
-                    _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, w));
+                    for (int y = yBeg; y < yEnd; ++y)
+                    {
+                        int x = Round(y * a + b);
+                        _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
+                        _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, w));
+                    }
+                }
+                else
+                {
+                    for (int y = yBeg; y < yEnd; ++y)
+                    {
+                        float xM = b + Simd::RestrictRange(float(y) - 0.5f, yMin, yMax) * a;
+                        float xP = b + Simd::RestrictRange(float(y) + 0.5f, yMin, yMax) * a;
+                        int xBeg = Round(Simd::Min(xM, xP));
+                        int xEnd = Round(Simd::Max(xM, xP));
+                        _beg[y] = Simd::Min(_beg[y], Simd::Max(xBeg, 0));
+                        _end[y] = Simd::Max(_end[y], Simd::Min(xEnd + 1, w));
+                    }
                 }
             }
         }
@@ -195,7 +218,24 @@ namespace Simd
 
         void WarpAffineByteBilinear::Run(const uint8_t* src, uint8_t* dst)
         {
+            if (_first)
+                Init();
+            _first = false;
+        }
 
+        void WarpAffineByteBilinear::Init()
+        {
+            const WarpAffParam& p = _param;
+            _beg.Resize(p.dstH);
+            _end.Resize(p.dstH);
+            _buf.Resize(p.dstW);
+            float w = (float)(p.srcW - 1), h = (float)(p.srcH - 1);
+            Point points[4];
+            points[0] = Conv(0, 0, p.mat);
+            points[1] = Conv(w, 0, p.mat);
+            points[2] = Conv(w, h, p.mat);
+            points[3] = Conv(0, h, p.mat);
+            //SetRange(points);
         }
 
         //-----------------------------------------------------------------------------------------
