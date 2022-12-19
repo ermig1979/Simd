@@ -26,6 +26,7 @@
 
 #include "Simd/SimdArray.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdConst.h"
 
 #include "Simd/SimdPoint.hpp"
 
@@ -136,15 +137,35 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<int N> SIMD_INLINE void BilinearPrepare(int x, int y, const float* m, int w, int h, int s, uint32_t* offs, uint32_t * ax, uint32_t* ay)
+        {
+            float sx = (float)x, sy = (float)y;
+            float dx = sx * m[0] + sy * m[1] + m[2];
+            float dy = sx * m[3] + sy * m[4] + m[5];
+            int ix = (int)floor(dx);
+            int iy = (int)floor(dy);
+            *offs = iy * s + ix * N;
+            *ax = (int32_t)((dx - ix) * FRACTION_RANGE + 0.5f);
+            *ay = (int32_t)((dy - iy) * FRACTION_RANGE + 0.5f);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         class WarpAffineByteBilinear : public WarpAffine
         {
         public:
+            typedef void(*RunPtr)(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* offs);
+
             WarpAffineByteBilinear(const WarpAffParam & param);
 
             virtual void Run(const uint8_t * src, uint8_t * dst);
 
         protected:
             void Init();
+
+            virtual void SetRange(const Base::Point* points);
+
+            RunPtr _run;
         };
 
         //-------------------------------------------------------------------------------------------------
