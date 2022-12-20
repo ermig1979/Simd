@@ -316,7 +316,7 @@ namespace Test
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.6f, -0.4f, 0.0f, 0.4f, 0.6f, 0.0f), flags);
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.9f, -0.4f, float(W / 6), 0.4f, 0.9f, float(-W / 6)), flags);
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.9f, 0.4f, float(-W / 6), -0.4f, 0.9f, float(W / 6)), flags);
-        result = result && WarpAffineOpenCvSpecialTest(W, H, int(W * 1.3), H, 3, Mat(mat, 0.9f, 0.413f, float(+W / 12), -0.413f, 0.9f, float(W / 6)), flags);
+        result = result && WarpAffineOpenCvSpecialTest(W, H, int(W * 1.3), int(H * 1.2), 3, Mat(mat, 0.9f, 0.413f, float(+W / 12), -0.413f, 0.9f, float(W / 6)), flags);
         //result = result && WarpAffineOpenCvSpecialTest(W, H, int(W * 1.3), H, 3, Mat(mat, 0.9f, 0.1f, float(+W / 12), -0.1f, 0.9f, float(W / 6)), flags);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE

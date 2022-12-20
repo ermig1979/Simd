@@ -211,53 +211,95 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<int N> void BilinearRun(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
+        void BilinearSetRange(const WarpAffParam& p, const Base::Point* rect, uint8_t* buf, int32_t* beg, int32_t* end)
+        {
+            float* min = (float*)buf;
+            float* max = min + p.dstH + 1;
+            float w = (float)p.dstW, h = (float)p.dstH, z = 0.0f;
+            min[p.dstH] = h;
+            max[p.dstH] = z;
+            for (size_t y = 0; y < p.dstH; ++y)
+            {
+                min[y] = w;
+                max[y] = z;
+            }
+            for (int v = 0; v < 4; ++v)
+            {
+                const Point& curr = rect[v];
+                const Point& next = rect[(v + 1) & 3];
+                float yMin = Simd::Max(Simd::Min(curr.y, next.y), z);
+                float yMax = Simd::Min(Simd::Max(curr.y, next.y), h);
+                min[p.dstH] = Simd::Min(min[p.dstH], yMin);
+                max[p.dstH] = Simd::Max(max[p.dstH], yMax);
+                int yBeg = (int)floor(yMin);
+                int yEnd = (int)ceil(yMax);
+                if (next.y == curr.y)
+                    continue;
+                float a = (next.x - curr.x) / (next.y - curr.y);
+                float b = curr.x - curr.y * a;
+                for (int y = yBeg; y < yEnd; ++y)
+                {
+                    float x = y * a + b;
+                    min[y] = Simd::Min(min[y], Simd::Max(x, z));
+                    max[y] = Simd::Max(max[y], Simd::Min(x, w));
+                }
+            }
+            for (size_t y = 0; y <= p.dstH; ++y)
+            {
+                beg[y] = (int)ceil(min[y]);
+                end[y] = (int)ceil(max[y]);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template<int N> void BilinearRemap(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             bool fill = p.NeedFill();
-            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 1, h = (int)p.srcH - 1;
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
             for (int y = 0; y < (int)p.dstH; ++y)
             {
-                int nose = beg[y], tail = end[y];
-                if (N == 3)
+                int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
+                //if (N == 3)
+                //{
+                //    if (fill)
+                //    {
+                //        int x = 0, nose1 = nose - 1;
+                //        for (; x < nose1; ++x)
+                //            Base::CopyPixel<4>(p.border, dst + x * 3);
+                //        for (; x < nose; ++x)
+                //            Base::CopyPixel<3>(p.border, dst + x * 3);
+                //    }
+                //    {
+                //        int x = nose, tail1 = tail - 1;
+                //        for (; x < tail1; ++x)
+                //            Base::CopyPixel<4>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
+                //        for (; x < tail; ++x)
+                //            Base::CopyPixel<3>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
+                //    }
+                //    if (fill)
+                //    {
+                //        int x = tail, width1 = width - 1;
+                //        for (; x < width1; ++x)
+                //            Base::CopyPixel<4>(p.border, dst + x * 3);
+                //        for (; x < width; ++x)
+                //            Base::CopyPixel<3>(p.border, dst + x * 3);
+                //    }
+                //}
+                //else
                 {
                     if (fill)
                     {
-                        int x = 0, nose1 = nose - 1;
-                        for (; x < nose1; ++x)
-                            Base::CopyPixel<4>(p.border, dst + x * 3);
-                        for (; x < nose; ++x)
-                            Base::CopyPixel<3>(p.border, dst + x * 3);
-                    }
-                    {
-                        int x = nose, tail1 = tail - 1;
-                        for (; x < tail1; ++x)
-                            Base::CopyPixel<4>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
-                        for (; x < tail; ++x)
-                            Base::CopyPixel<3>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
-                    }
-                    if (fill)
-                    {
-                        int x = tail, width1 = width - 1;
-                        for (; x < width1; ++x)
-                            Base::CopyPixel<4>(p.border, dst + x * 3);
-                        for (; x < width; ++x)
-                            Base::CopyPixel<3>(p.border, dst + x * 3);
-                    }
-                }
-                else
-                {
-                    if (fill)
-                    {
-                        for (int x = 0; x < nose; ++x)
+                        for (int x = 0; x < oB; ++x)
                             CopyPixel<N>(p.border, dst + x * N);
                     }
                     {
-                        for (int x = nose; x < tail; ++x)
-                            CopyPixel<N>(src + NearestOffset<N>(x, y, p.inv, w, h, s), dst + x * N);
+                        for (int x = iB; x < iE; ++x)
+                            BilinearInterpMain<N>(x, y, p.inv, w, h, s, src, dst + x * N);
                     }
                     if (fill)
                     {
-                        for (int x = tail; x < width; ++x)
+                        for (int x = oE; x < width; ++x)
                             CopyPixel<N>(p.border, dst + x * N);
                     }
                 }
@@ -270,12 +312,13 @@ namespace Simd
         WarpAffineByteBilinear::WarpAffineByteBilinear(const WarpAffParam& param)
             : WarpAffine(param)
         {
+            _setRange = BilinearSetRange;
             switch (_param.channels)
             {
-            case 1: _run = BilinearRun<1>; break;
-            case 2: _run = BilinearRun<2>; break;
-            case 3: _run = BilinearRun<3>; break;
-            case 4: _run = BilinearRun<4>; break;
+            case 1: _remap = BilinearRemap<1>; break;
+            case 2: _remap = BilinearRemap<2>; break;
+            case 3: _remap = BilinearRemap<3>; break;
+            case 4: _remap = BilinearRemap<4>; break;
             }
         }
 
@@ -283,68 +326,34 @@ namespace Simd
         {
             if (_first)
                 Init();
-            _run(_param, _beg.data, _end.data, src, dst, _buf.data);
+            _remap(_param, _ib, _ie, _ob, _oe, src, dst, _buf.data);
             _first = false;
         }
 
         void WarpAffineByteBilinear::Init()
         {
             const WarpAffParam& p = _param;
-            _beg.Resize(p.dstH);
-            _end.Resize(p.dstH);
-            _buf.Resize(p.dstW * 3 * p.channels);
-            float w = (float)(p.srcW - 2), h = (float)(p.srcH - 2);
-            Point points[4];
-            points[0] = Conv(0, 0, p.mat);
-            points[1] = Conv(w, 0, p.mat);
-            points[2] = Conv(w, h, p.mat);
-            points[3] = Conv(0, h, p.mat);
-            SetRange(points);
-        }
-
-        void WarpAffineByteBilinear::SetRange(const Base::Point* points)
-        {
-            const WarpAffParam& p = _param;
-            int w = (int)p.dstW;
-            for (size_t y = 0; y < p.dstH; ++y)
-            {
-                _beg[y] = w;
-                _end[y] = 0;
-            }
-            for (int v = 0; v < 4; ++v)
-            {
-                const Point& curr = points[v];
-                const Point& next = points[(v + 1) & 3];
-                float yMin = Simd::Max(Simd::Min(curr.y, next.y), 0.0f);
-                float yMax = Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH);
-                int yBeg = Round(yMin);
-                int yEnd = Round(yMax);
-                if (next.y == curr.y)
-                    continue;
-                float a = (next.x - curr.x) / (next.y - curr.y);
-                float b = curr.x - curr.y * a;
-                if (abs(a) <= 1.0f)
-                {
-                    for (int y = yBeg; y < yEnd; ++y)
-                    {
-                        int x = Round(y * a + b);
-                        _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
-                        _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, w));
-                    }
-                }
-                else
-                {
-                    for (int y = yBeg; y < yEnd; ++y)
-                    {
-                        float xM = b + Simd::RestrictRange(float(y) - 0.5f, yMin, yMax) * a;
-                        float xP = b + Simd::RestrictRange(float(y) + 0.5f, yMin, yMax) * a;
-                        int xBeg = Round(Simd::Min(xM, xP));
-                        int xEnd = Round(Simd::Max(xM, xP));
-                        _beg[y] = Simd::Min(_beg[y], Simd::Max(xBeg, 0));
-                        _end[y] = Simd::Max(_end[y], Simd::Min(xEnd + 1, w));
-                    }
-                }
-            }
+            size_t size = p.dstH + 1;
+            _range.Resize(size * 4);
+            _ib = _range.data + 0 * size;
+            _ie = _range.data + 1 * size;
+            _ob = _range.data + 2 * size;
+            _oe = _range.data + 3 * size;
+            _buf.Resize(Simd::Max(p.dstW * 2 * p.channels, size * 2 * 4));
+            float z, h, w;
+            Point rect[4];
+            z = 0.0f, w = (float)(p.srcW - 1), h = (float)(p.srcH - 1);
+            rect[0] = Conv(z, z, p.mat);
+            rect[1] = Conv(w, z, p.mat);
+            rect[2] = Conv(w, h, p.mat);
+            rect[3] = Conv(z, h, p.mat);
+            _setRange(p, rect, _buf.data, _ib, _ie);
+            z = -1.0f, w = (float)(p.srcW + 0), h = (float)(p.srcH + 0);
+            rect[0] = Conv(z, z, p.mat);
+            rect[1] = Conv(w, z, p.mat);
+            rect[2] = Conv(w, h, p.mat);
+            rect[3] = Conv(z, h, p.mat);
+            _setRange(p, rect, _buf.data, _ob, _oe);
         }
 
         //-----------------------------------------------------------------------------------------

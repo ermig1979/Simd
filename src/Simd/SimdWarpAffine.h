@@ -96,8 +96,6 @@ namespace Simd
     protected:
         WarpAffParam _param;
         bool _first;
-        Array32i _beg, _end;
-        Array32u _buf;
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -132,6 +130,8 @@ namespace Simd
 
             virtual void SetRange(const Base::Point * points);
 
+            Array32i _beg, _end;
+            Array32u _buf;
             RunPtr _run;
         };
 
@@ -149,12 +149,31 @@ namespace Simd
             *ay = (int32_t)((dy - iy) * FRACTION_RANGE + 0.5f);
         }
 
+        template<int N> SIMD_INLINE void BilinearInterpMain(int x, int y, const float* m, int w, int h, int s, const uint8_t* src, uint8_t* dst)
+        {
+            float sx = (float)x, sy = (float)y;
+            float dx = sx * m[0] + sy * m[1] + m[2];
+            float dy = sx * m[3] + sy * m[4] + m[5];
+            int ix = (int)floor(dx);
+            int iy = (int)floor(dy);
+            int fx = (int)((dx - ix) * FRACTION_RANGE + 0.5f);
+            int fy = (int)((dy - iy) * FRACTION_RANGE + 0.5f);
+            const uint8_t * s0 = src + iy * s + ix * N, *s1 = s0 + s;
+            for (int c = 0; c < N; c++)
+            {
+                int r0 = s0[c] * (FRACTION_RANGE - fx) + s0[c + N] * fx;
+                int r1 = s1[c] * (FRACTION_RANGE - fx) + s1[c + N] * fx;
+                dst[c] = (r0 * (FRACTION_RANGE - fy) + r1 * fy + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         class WarpAffineByteBilinear : public WarpAffine
         {
         public:
-            typedef void(*RunPtr)(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* offs);
+            typedef void(*SetRangePtr)(const WarpAffParam& p, const Base::Point* rect, uint8_t* buf, int32_t* beg, int32_t* end);
+            typedef void(*RemapPtr)(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf);
 
             WarpAffineByteBilinear(const WarpAffParam & param);
 
@@ -163,9 +182,11 @@ namespace Simd
         protected:
             void Init();
 
-            virtual void SetRange(const Base::Point* points);
-
-            RunPtr _run;
+            Array32i _range;
+            int *_ib, *_ie, *_ob, *_oe;
+            Array8u _buf;
+            SetRangePtr _setRange;
+            RemapPtr _remap;
         };
 
         //-------------------------------------------------------------------------------------------------
