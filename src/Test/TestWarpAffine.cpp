@@ -58,12 +58,14 @@ namespace Test
                 description = ss.str();
             }
 
-            void Call(const View & src, View & dst, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border) const
+            void Call(const View & src, View & dst, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border, const View & buf) const
             {
                 void * context = NULL;
                 context = func(src.width, src.height, src.stride, dst.width, dst.height, dst.stride, channels, mat, flags, border);
                 if (context)
                 {
+                    if ((flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpBilinear && (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderTransparent)
+                        Simd::Copy(buf, dst);
                     {
                         TEST_PERFORMANCE_TEST(description);
                         SimdWarpAffineRun(context, src.data, dst.data);
@@ -81,9 +83,32 @@ namespace Test
 
     bool SaveImage(const View& image, const String& name)
     {
+        View bgr;
+        if (image.format != View::Bgr24)
+        {
+            bgr.Recreate(image.Size(), View::Bgr24);
+            if (image.format != View::Bgr24)
+            {
+                for (size_t row = 0; row < image.height; ++row)
+                {
+                    const uint8_t* src = image.Row<uint8_t>(row);
+                    uint8_t* dst = bgr.Row<uint8_t>(row);
+                    for (size_t col = 0; col < image.width; ++col, src += 2, dst += 3)
+                    {
+                        dst[0] = src[0];
+                        dst[1] = src[1];
+                        dst[2] = 0;
+                    }
+                }
+            }
+            else
+                Simd::Convert(image, bgr);
+        }
+        else
+            bgr = image;
         const String dir = "_out";
         String path = MakePath(dir, name + ".png");
-        return CreatePathIfNotExist(dir, false) && image.Save(path, SimdImageFilePng, 0);
+        return CreatePathIfNotExist(dir, false) && bgr.Save(path, SimdImageFilePng, 0);
     }
 
     bool WarpAffineAutoTest(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float * mat, SimdWarpAffineFlags flags, FuncWA f1, FuncWA f2)
@@ -123,6 +148,7 @@ namespace Test
 #endif
         }
 
+        View buf(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         View dst1(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         View dst2(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         Simd::Fill(dst1, 0x33);
@@ -130,18 +156,19 @@ namespace Test
             Simd::Fill(dst2, 0x99);
         else
             Simd::Fill(dst2, 0x33);
+        Simd::Copy(dst1, buf);
         uint8_t border[4] = { 11, 33, 55, 77 };
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1, channels, mat, flags, border));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1, channels, mat, flags, border, buf));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, channels, mat, flags, border));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, channels, mat, flags, border, buf));
 
         result = result && Compare(dst1, dst2, 0, true, 64);
 
 #if defined(TEST_WARP_AFFINE_REAL_IMAGE)
-        if (format == View::Bgr24)
+        if (!result)
         {
             SaveImage(src, String("src"));
             SaveImage(dst1, String("dst1"));
@@ -176,8 +203,8 @@ namespace Test
         bool result = true;
 
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
-        std::vector<SimdWarpAffineFlags> interp = { /*SimdWarpAffineInterpNearest, */SimdWarpAffineInterpBilinear };
-        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
+        std::vector<SimdWarpAffineFlags> interp = { /*SimdWarpAffineInterpNearest, */SimdWarpAffineInterpBilinear};
+        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent};
         for (size_t c = 0; c < channel.size(); ++c)
         {
             for (size_t i = 0; i < interp.size(); ++i)
@@ -308,7 +335,7 @@ namespace Test
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
         std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear };
         std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
-        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[0] | interp[1] | border[1]);
+        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(channel[0] | interp[1] | border[0]);
         Buffer32f mat;
 
         //result = result && WarpAffineOpenCvSpecialTest(W, H, W, H, 3, Mat(mat, 0.7f, -0.7f, float(W / 4), 0.7f, 0.7f, float(-W / 4)), flags);

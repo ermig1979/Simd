@@ -137,18 +137,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<int N> SIMD_INLINE void BilinearPrepare(int x, int y, const float* m, int w, int h, int s, uint32_t* offs, uint32_t * ax, uint32_t* ay)
-        {
-            float sx = (float)x, sy = (float)y;
-            float dx = sx * m[0] + sy * m[1] + m[2];
-            float dy = sx * m[3] + sy * m[4] + m[5];
-            int ix = (int)floor(dx);
-            int iy = (int)floor(dy);
-            *offs = iy * s + ix * N;
-            *ax = (int32_t)((dx - ix) * FRACTION_RANGE + 0.5f);
-            *ay = (int32_t)((dy - iy) * FRACTION_RANGE + 0.5f);
-        }
-
         template<int N> SIMD_INLINE void BilinearInterpMain(int x, int y, const float* m, int w, int h, int s, const uint8_t* src, uint8_t* dst)
         {
             float sx = (float)x, sy = (float)y;
@@ -156,14 +144,42 @@ namespace Simd
             float dy = sx * m[3] + sy * m[4] + m[5];
             int ix = (int)floor(dx);
             int iy = (int)floor(dy);
-            int fx = (int)((dx - ix) * FRACTION_RANGE + 0.5f);
-            int fy = (int)((dy - iy) * FRACTION_RANGE + 0.5f);
+            int fx1 = (int)((dx - ix) * FRACTION_RANGE + 0.5f);
+            int fy1 = (int)((dy - iy) * FRACTION_RANGE + 0.5f);
+            int fx0 = FRACTION_RANGE - fx1;
+            int fy0 = FRACTION_RANGE - fy1;
             const uint8_t * s0 = src + iy * s + ix * N, *s1 = s0 + s;
             for (int c = 0; c < N; c++)
             {
-                int r0 = s0[c] * (FRACTION_RANGE - fx) + s0[c + N] * fx;
-                int r1 = s1[c] * (FRACTION_RANGE - fx) + s1[c + N] * fx;
-                dst[c] = (r0 * (FRACTION_RANGE - fy) + r1 * fy + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
+                int r0 = s0[c] * fx0 + s0[c + N] * fx1;
+                int r1 = s1[c] * fx0 + s1[c + N] * fx1;
+                dst[c] = (r0 * fy0 + r1 * fy1 + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
+            }
+        }
+
+        template<int N> SIMD_INLINE void BilinearInterpEdge(int x, int y, const float* m, int w, int h, int s, const uint8_t* src, const uint8_t* brd, uint8_t* dst)
+        {
+            float sx = (float)x, sy = (float)y;
+            float dx = sx * m[0] + sy * m[1] + m[2];
+            float dy = sx * m[3] + sy * m[4] + m[5];
+            int ix = (int)floor(dx);
+            int iy = (int)floor(dy);
+            int fx1 = (int)((dx - ix) * FRACTION_RANGE + 0.5f);
+            int fy1 = (int)((dy - iy) * FRACTION_RANGE + 0.5f);
+            int fx0 = FRACTION_RANGE - fx1;
+            int fy0 = FRACTION_RANGE - fy1;
+            bool x0 = ix < 0, x1 = ix > w;
+            bool y0 = iy < 0, y1 = iy > h;
+            src += iy * s + ix * N;
+            const uint8_t* s00 = y0 || x0 ? brd : src;
+            const uint8_t* s01 = y0 || x1 ? brd : src + N;
+            const uint8_t* s10 = y1 || x0 ? brd : src + s;
+            const uint8_t* s11 = y1 || x1 ? brd : src + s + N;
+            for (int c = 0; c < N; c++)
+            {
+                int r0 = s00[c] * fx0 + s01[c] * fx1;
+                int r1 = s10[c] * fx0 + s11[c] * fx1;
+                dst[c] = (r0 * fy0 + r1 * fy1 + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
             }
         }
 
@@ -172,8 +188,7 @@ namespace Simd
         class WarpAffineByteBilinear : public WarpAffine
         {
         public:
-            typedef void(*SetRangePtr)(const WarpAffParam& p, const Base::Point* rect, uint8_t* buf, int32_t* beg, int32_t* end);
-            typedef void(*RemapPtr)(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf);
+            typedef void(*RunPtr)(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf);
 
             WarpAffineByteBilinear(const WarpAffParam & param);
 
@@ -182,11 +197,12 @@ namespace Simd
         protected:
             void Init();
 
+            virtual void SetRange(const Base::Point* rect, int* beg, int* end, const int* lo, const int* hi);
+
             Array32i _range;
             int *_ib, *_ie, *_ob, *_oe;
             Array8u _buf;
-            SetRangePtr _setRange;
-            RemapPtr _remap;
+            RunPtr _run;
         };
 
         //-------------------------------------------------------------------------------------------------

@@ -87,6 +87,11 @@ namespace Test
             Simd::Font font(size);
             font.Draw(view, "A1", View::MiddleCenter, RandomColor<N>(128, 255));
         }
+        if (flag & 8)
+        {
+            Rect rect(0, 0, view.width - 1, view.height - 1);
+            Simd::DrawRectangle(view, rect, RandomColor<N>(255), 1);
+        }
     }
 
     void FillPicture(View & view, uint64_t flag)
