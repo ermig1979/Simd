@@ -238,7 +238,7 @@ namespace Simd
                 }
                 {
                     for (int x = iB; x < iE; ++x)
-                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, src, offs + x, fx + 2 * x, fy + 2 * x);
+                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, offs + x, fx + 2 * x, fy + 2 * x);
                     for (int x = iB; x < iE; ++x)
                     {
                         int o = offs[x];
@@ -294,7 +294,7 @@ namespace Simd
                 }
                 {
                     for (int x = iB; x < iE; ++x)
-                        Base::ByteBilinearPrepMain(x, y, p.inv, 3, s, src, offs + x, fx + 2 * x, fy + 2 * x);
+                        Base::ByteBilinearPrepMain(x, y, p.inv, 3, s, offs + x, fx + 2 * x, fy + 2 * x);
                     for (int x = iB; x < iE; ++x)
                     {
                         int o = offs[x];

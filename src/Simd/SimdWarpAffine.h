@@ -141,7 +141,7 @@ namespace Simd
         const int WA_BILINEAR_ROUND_TERM = 1 << (WA_BILINEAR_SHIFT - 1);
         const int WA_FRACTION_RANGE = 1 << WA_LINEAR_SHIFT;
 
-        SIMD_INLINE void ByteBilinearPrepMain(int x, int y, const float* m, int n, int s, const uint8_t* src, uint32_t* offs, uint8_t* fx, uint16_t* fy)
+        SIMD_INLINE void ByteBilinearPrepMain(int x, int y, const float* m, int n, int s, uint32_t* offs, uint8_t* fx, uint16_t* fy)
         {
             float sx = (float)x, sy = (float)y;
             float dx = sx * m[0] + sy * m[1] + m[2];

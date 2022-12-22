@@ -233,6 +233,23 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         const __m128i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
+        const __m128i K32_WA_FRACTION_RANGE = SIMD_MM_SET1_EPI32(Base::WA_FRACTION_RANGE);
+
+        SIMD_INLINE void ByteBilinearPrepMain4(__m128 x, __m128 y, const __m128* m, __m128i n, __m128i s, uint32_t* offs, uint8_t* fx, uint16_t* fy)
+        {
+            __m128 dx = _mm_add_ps(_mm_add_ps(_mm_mul_ps(x, m[0]), _mm_mul_ps(y, m[1])), m[2]);
+            __m128 dy = _mm_add_ps(_mm_add_ps(_mm_mul_ps(x, m[3]), _mm_mul_ps(y, m[4])), m[5]);
+            __m128 ix = _mm_floor_ps(dx);
+            __m128 iy = _mm_floor_ps(dy);
+            __m128 range = _mm_cvtepi32_ps(K32_WA_FRACTION_RANGE);
+            __m128i _fx = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(dx, ix), range));
+            __m128i _fy = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(dy, iy), range));
+            _mm_storeu_si128((__m128i*)offs, _mm_add_epi32(_mm_mullo_epi32(_mm_cvtps_epi32(ix), n), _mm_mullo_epi32(_mm_cvtps_epi32(iy), s)));
+            _fx = _mm_or_si128(_mm_sub_epi32(K32_WA_FRACTION_RANGE, _fx), _mm_slli_epi32(_fx, 16));
+            _fy = _mm_or_si128(_mm_sub_epi32(K32_WA_FRACTION_RANGE, _fy), _mm_slli_epi32(_fy, 16));
+            _mm_storel_epi64((__m128i*)fx, _mm_packus_epi16(_fx, _mm_setzero_si128()));
+            _mm_storeu_si128((__m128i*)fy, _fy);
+        }
 
         template<int N> void ByteBilinearInterpMainN(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst);
 
@@ -332,6 +349,13 @@ namespace Simd
             uint16_t* fy = (uint16_t*)(fx + wa * 2);
             uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
             uint8_t* rb1 = (uint8_t*)(rb0 + wa * N * 2);
+            const __m128 _4 = _mm_set1_ps(4.0f);
+            static const __m128i _0123 = SIMD_MM_SETR_EPI32(0, 1, 2, 3);
+            __m128 _m[6];
+            for (int i = 0; i < 6; ++i)
+                _m[i] = _mm_set1_ps(p.inv[i]);
+            __m128i _n = _mm_set1_epi32(N);
+            __m128i _s = _mm_set1_epi32(s);
             __m128i _border;
             switch (N)
             {
@@ -358,9 +382,16 @@ namespace Simd
                         Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
                 }
                 {
-                    int x, iEn = (int)AlignLo(iE - iB, n) + iB;
-                    for (x = iB; x < iE; ++x)
-                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, src, offs + x, fx + 2 * x, fy + 2 * x);
+                    int x = iB, iE4 = (int)AlignLo(iE - iB, 4) + iB, iEn = (int)AlignLo(iE - iB, n) + iB;
+                    __m128 _y = _mm_cvtepi32_ps(_mm_set1_epi32(y));
+                    __m128 _x = _mm_cvtepi32_ps(_mm_add_epi32(_mm_set1_epi32(x), _0123));
+                    for (; x < iE4; x += 4)
+                    {
+                        ByteBilinearPrepMain4(_x, _y, _m, _n, _s, offs + x, fx + 2 * x, fy + 2 * x);
+                        _x = _mm_add_ps(_x, _4);
+                    }
+                    for (; x < iE; ++x)
+                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, offs + x, fx + 2 * x, fy + 2 * x);
                     for (x = iB; x < iE; ++x)
                     {
                         int o = offs[x];
@@ -433,6 +464,13 @@ namespace Simd
             uint16_t* fy = (uint16_t*)(fx + wa * 2);
             uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
             uint8_t* rb1 = (uint8_t*)(rb0 + wa * 8);
+            const __m128 _4 = _mm_set1_ps(4.0f);
+            static const __m128i _0123 = SIMD_MM_SETR_EPI32(0, 1, 2, 3);
+            __m128 _m[6];
+            for (int i = 0; i < 6; ++i)
+                _m[i] = _mm_set1_ps(p.inv[i]);
+            __m128i _n = _mm_set1_epi32(3);
+            __m128i _s = _mm_set1_epi32(s);
             for (int y = 0; y < (int)p.dstH; ++y)
             {
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
@@ -452,16 +490,23 @@ namespace Simd
                         Base::ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, dst + x * 3, dst + x * 3);
                 }
                 {
-                    for (int x = iB; x < iE; ++x)
-                        Base::ByteBilinearPrepMain(x, y, p.inv, 3, s, src, offs + x, fx + 2 * x, fy + 2 * x);
-                    for (int x = iB; x < iE; ++x)
+                    int x = iB, iE4 = (int)AlignLo(iE - iB, 4) + iB;
+                    __m128 _y = _mm_cvtepi32_ps(_mm_set1_epi32(y));
+                    __m128 _x = _mm_cvtepi32_ps(_mm_add_epi32(_mm_set1_epi32(x), _0123));
+                    for (; x < iE4; x += 4)
+                    {
+                        ByteBilinearPrepMain4(_x, _y, _m, _n, _s, offs + x, fx + 2 * x, fy + 2 * x);
+                        _x = _mm_add_ps(_x, _4);
+                    }
+                    for (; x < iE; ++x)
+                        Base::ByteBilinearPrepMain(x, y, p.inv, 3, s, offs + x, fx + 2 * x, fy + 2 * x);
+                    for (x = iB; x < iE; ++x)
                     {
                         int o = offs[x];
                         Base::CopyPixel<8>(src + o + 0, rb0 + x * 8);
                         Base::CopyPixel<8>(src + o + s, rb1 + x * 8);
                     }
-                    int x = iB, iE4 = (int)AlignLo(iE - iB, 4) + iB;
-                    for (; x < iE4; x += 4)
+                    for (x = iB; x < iE4; x += 4)
                         ByteBilinearInterpMain3x4(rb0 + x * 8, rb1 + x * 8, fx + 2 * x, fy + 2 * x, dst + x * 3);
                     for (; x < iE; ++x)
                         Base::ByteBilinearInterpMain<3>(rb0 + x * 8, rb1 + x * 8, fx + 2 * x, fy + 2 * x, dst + x * 3);
