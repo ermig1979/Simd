@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdWarpAffine.h"
 #include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdUnpack.h"
 
 #include "Simd/SimdPoint.hpp"
 
@@ -230,10 +231,58 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        const __m128i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
+
+        template<int N> SIMD_INLINE void ByteBilinearInterpMainN(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
+        {
+            for (int i = 0, n = A/N; i < n; ++i)
+                Base::ByteBilinearInterpMain<N>(src0 + i * N * 2, src1 + i * N * 2, fx + i * 2, fy + i * 2, dst + i * N);
+        }
+
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<1>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
+        {
+            __m128i fx0 = _mm_loadu_si128((__m128i*)fx + 0);
+            __m128i fx1 = _mm_loadu_si128((__m128i*)fx + 1);
+            __m128i r00 = _mm_maddubs_epi16(_mm_loadu_si128((__m128i*)src0 + 0), fx0);
+            __m128i r01 = _mm_maddubs_epi16(_mm_loadu_si128((__m128i*)src0 + 1), fx1);
+            __m128i r10 = _mm_maddubs_epi16(_mm_loadu_si128((__m128i*)src1 + 0), fx0);
+            __m128i r11 = _mm_maddubs_epi16(_mm_loadu_si128((__m128i*)src1 + 1), fx1);
+
+            __m128i s0 = _mm_madd_epi16(UnpackU16<0>(r00, r10), _mm_loadu_si128((__m128i*)fy + 0));
+            __m128i d0 = _mm_srli_epi32(_mm_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s1 = _mm_madd_epi16(UnpackU16<1>(r00, r10), _mm_loadu_si128((__m128i*)fy + 1));
+            __m128i d1 = _mm_srli_epi32(_mm_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s2 = _mm_madd_epi16(UnpackU16<0>(r01, r11), _mm_loadu_si128((__m128i*)fy + 2));
+            __m128i d2 = _mm_srli_epi32(_mm_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s3 = _mm_madd_epi16(UnpackU16<1>(r01, r11), _mm_loadu_si128((__m128i*)fy + 3));
+            __m128i d3 = _mm_srli_epi32(_mm_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packus_epi32(d0, d1), _mm_packus_epi32(d2, d3)));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+
         template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             bool fill = p.NeedFill();
-            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
+            int width = width = (int)p.dstW, size = width * N;
+            int s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2, n = A / N;
+            uint32_t* offs = (uint32_t*)buf;
+            uint8_t* fx = (uint8_t *)(offs + AlignHi(width, A));
+            uint16_t* fy = (uint16_t*)(fx + AlignHi(width, A) * 2);
+            uint8_t* rb0 = (uint8_t*)(fy + AlignHi(size, A) * 2);
+            uint8_t* rb1 = (uint8_t*)(rb0 + AlignHi(size, A) * 2);
+            __m128i _border;
+            switch (N)
+            {
+            case 1: _border = _mm_set1_epi8(*p.border); break;
+            case 2: _border = _mm_set1_epi16(*(uint16_t*)p.border); break;
+            case 4: _border = _mm_set1_epi32(*(uint32_t*)p.border); break;
+            }
             for (int y = 0; y < (int)p.dstH; ++y)
             {
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
@@ -249,7 +298,10 @@ namespace Simd
                     }
                     else
                     {
-                        for (int x = 0; x < oB; ++x)
+                        int x = 0, oBn = (int)AlignLo(oB, n);
+                        for (; x < oBn; x += n)
+                            _mm_storeu_si128((__m128i*)(dst + x * N), _border);
+                        for (; x < oB; ++x)
                             Base::CopyPixel<N>(p.border, dst + x * N);
                     }
                     for (int x = oB; x < iB; ++x)
@@ -260,9 +312,34 @@ namespace Simd
                     for (int x = oB; x < iB; ++x)
                         Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
                 }
+                if (N == 3)
                 {
                     for (int x = iB; x < iE; ++x)
-                        Base::ByteBilinearInterpMain<N>(x, y, p.inv, w, h, s, src, dst + x * N);
+                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, src, offs + x, fx + 2 * x, fy + 2 * x);
+                    for (int x = iB; x < iE; ++x)
+                    {
+                        int o = offs[x];
+                        Base::CopyPixel<N * 2>(src + o + 0, rb0 + x * N * 2);
+                        Base::CopyPixel<N * 2>(src + o + s, rb1 + x * N * 2);
+                    }
+                    for (int x = iB; x < iE; ++x)
+                        Base::ByteBilinearInterpMain<N>(rb0 + x * N * 2, rb1 + x * N * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
+                }
+                else
+                {
+                    int x, iEn = (int)AlignLo(iE - iB, n) + iB;
+                    for (x = iB; x < iE; ++x)
+                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, src, offs + x, fx + 2 * x, fy + 2 * x);
+                    for (x = iB; x < iE; ++x)
+                    {
+                        int o = offs[x];
+                        Base::CopyPixel<N * 2>(src + o + 0, rb0 + x * N * 2);
+                        Base::CopyPixel<N * 2>(src + o + s, rb1 + x * N * 2);
+                    }
+                    for (x = iB; x < iEn; x += n)
+                        ByteBilinearInterpMainN<N>(rb0 + x * N * 2, rb1 + x * N * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
+                    for (; x < iE; ++x)
+                        Base::ByteBilinearInterpMain<N>(rb0 + x * N * 2, rb1 + x * N * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
                 }
                 if (fill)
                 {
@@ -278,7 +355,10 @@ namespace Simd
                     }
                     else
                     {
-                        for (int x = oE; x < width; ++x)
+                        int x = oE, widthN = (int)AlignLo(width - oE, n) + oE;
+                        for (; x < widthN; x += n)
+                            _mm_storeu_si128((__m128i*)(dst + x * N), _border);
+                        for (; x < width; ++x)
                             Base::CopyPixel<N>(p.border, dst + x * N);
                     }
                 }

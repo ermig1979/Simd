@@ -214,7 +214,13 @@ namespace Simd
         template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             bool fill = p.NeedFill();
-            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
+            int width = width = (int)p.dstW, size = width * N;
+            int s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
+            uint32_t* offs = (uint32_t*)buf;
+            uint8_t* fx = (uint8_t*)(offs + AlignHi(width, 8));
+            uint16_t* fy = (uint16_t*)(fx + AlignHi(width, 8) * 2);
+            uint8_t* rb0 = (uint8_t*)(fy + AlignHi(size, 8) * 2);
+            uint8_t* rb1 = (uint8_t*)(rb0 + AlignHi(size, 8) * 2);
             for (int y = 0; y < (int)p.dstH; ++y)
             {
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
@@ -243,7 +249,15 @@ namespace Simd
                 }
                 {
                     for (int x = iB; x < iE; ++x)
-                        ByteBilinearInterpMain<N>(x, y, p.inv, w, h, s, src, dst + x * N);
+                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, src, offs + x, fx + 2 * x, fy + 2 * x);
+                    for (int x = iB; x < iE; ++x)
+                    {
+                        int o = offs[x];
+                        Base::CopyPixel<N * 2>(src + o + 0, rb0 + x * N * 2);
+                        Base::CopyPixel<N * 2>(src + o + s, rb1 + x * N * 2);
+                    }
+                    for (int x = iB; x < iE; ++x)
+                        Base::ByteBilinearInterpMain<N>(rb0 + x * N * 2, rb1 + x * N * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
                 }
                 if (fill)
                 {
