@@ -230,6 +230,83 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
+        {
+            bool fill = p.NeedFill();
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
+            for (int y = 0; y < (int)p.dstH; ++y)
+            {
+                int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
+                if (fill)
+                {
+                    if (N == 3)
+                    {
+                        int x = 0, oB1 = oB - 1;
+                        for (; x < oB1; ++x)
+                            Base::CopyPixel<4>(p.border, dst + x * 3);
+                        for (; x < oB; ++x)
+                            Base::CopyPixel<3>(p.border, dst + x * 3);
+                    }
+                    else
+                    {
+                        for (int x = 0; x < oB; ++x)
+                            Base::CopyPixel<N>(p.border, dst + x * N);
+                    }
+                    for (int x = oB; x < iB; ++x)
+                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
+                }
+                else
+                {
+                    for (int x = oB; x < iB; ++x)
+                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                }
+                {
+                    for (int x = iB; x < iE; ++x)
+                        Base::ByteBilinearInterpMain<N>(x, y, p.inv, w, h, s, src, dst + x * N);
+                }
+                if (fill)
+                {
+                    for (int x = iE; x < oE; ++x)
+                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
+                    if (N == 3)
+                    {
+                        int x = oE, width1 = width - 1;
+                        for (; x < width1; ++x)
+                            Base::CopyPixel<4>(p.border, dst + x * 3);
+                        for (; x < width; ++x)
+                            Base::CopyPixel<3>(p.border, dst + x * 3);
+                    }
+                    else
+                    {
+                        for (int x = oE; x < width; ++x)
+                            Base::CopyPixel<N>(p.border, dst + x * N);
+                    }
+                }
+                else
+                {
+                    for (int x = iE; x < oE; ++x)
+                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                }
+                dst += p.dstS;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        WarpAffineByteBilinear::WarpAffineByteBilinear(const WarpAffParam& param)
+            : Base::WarpAffineByteBilinear(param)
+        {
+            switch (_param.channels)
+            {
+            case 1: _run = ByteBilinearRun<1>; break;
+            case 2: _run = ByteBilinearRun<2>; break;
+            case 3: _run = ByteBilinearRun<3>; break;
+            case 4: _run = ByteBilinearRun<4>; break;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border)
         {
             WarpAffParam param(srcW, srcH, srcS, dstW, dstH, dstS, channels, mat, flags, border, A);
@@ -238,7 +315,7 @@ namespace Simd
             if (param.IsNearest())
                 return new WarpAffineNearest(param);
             else if (param.IsByteBilinear())
-                return new Base::WarpAffineByteBilinear(param);
+                return new WarpAffineByteBilinear(param);
             else
                 return NULL;
         }

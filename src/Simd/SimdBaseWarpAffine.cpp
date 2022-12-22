@@ -211,58 +211,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void BilinearSetRange(const WarpAffParam& p, const Base::Point* rect, uint8_t* buf, int* beg, int* end, const int* lo, const int* hi)
-        {
-            float* min = (float*)buf;
-            float* max = min + p.dstH + 1;
-            float w = (float)p.dstW, h = (float)p.dstH, z = 0.0f;
-            min[p.dstH] = h;
-            max[p.dstH] = z;
-            for (size_t y = 0; y < p.dstH; ++y)
-            {
-                min[y] = w;
-                max[y] = z;
-            }
-            for (int v = 0; v < 4; ++v)
-            {
-                const Point& curr = rect[v];
-                const Point& next = rect[(v + 1) & 3];
-                float yMin = Simd::Max(Simd::Min(curr.y, next.y), z);
-                float yMax = Simd::Min(Simd::Max(curr.y, next.y), h);
-                min[p.dstH] = Simd::Min(min[p.dstH], yMin);
-                max[p.dstH] = Simd::Max(max[p.dstH], yMax);
-                int yBeg = (int)ceil(yMin);
-                int yEnd = (int)ceil(yMax);
-                if (next.y == curr.y)
-                    continue;
-                float a = (next.x - curr.x) / (next.y - curr.y);
-                float b = curr.x - curr.y * a;
-                for (int y = yBeg; y < yEnd; ++y)
-                {
-                    float x = Simd::RestrictRange(float(y), yMin, yMax) * a + b;
-                    min[y] = Simd::Min(min[y], Simd::Max(x, z));
-                    max[y] = Simd::Max(max[y], Simd::Min(x, w));
-                }
-            }
-            for (size_t y = 0; y <= p.dstH; ++y)
-            {
-                beg[y] = (int)ceil(min[y]);
-                end[y] = (int)ceil(max[y]);
-                end[y] = Simd::Max(beg[y], end[y]);
-            }
-            if (hi)
-            {
-                for (size_t y = 0; y <= p.dstH; ++y)
-                {
-                    beg[y] = Simd::Min(beg[y], hi[y]);
-                    end[y] = Simd::Min(end[y], hi[y]);
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        template<int N> void BilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
+        template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             bool fill = p.NeedFill();
             int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
@@ -285,21 +234,21 @@ namespace Simd
                             CopyPixel<N>(p.border, dst + x * N);
                     }
                     for (int x = oB; x < iB; ++x)
-                        BilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
+                        ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
                 }
                 else
                 {
                     for (int x = oB; x < iB; ++x)
-                        BilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                        ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
                 }
                 {
                     for (int x = iB; x < iE; ++x)
-                        BilinearInterpMain<N>(x, y, p.inv, w, h, s, src, dst + x * N);
+                        ByteBilinearInterpMain<N>(x, y, p.inv, w, h, s, src, dst + x * N);
                 }
                 if (fill)
                 {
                     for (int x = iE; x < oE; ++x)
-                        BilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
+                        ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
                     if (N == 3)
                     {
                         int x = oE, width1 = width - 1;
@@ -317,7 +266,7 @@ namespace Simd
                 else
                 {
                     for (int x = iE; x < oE; ++x)
-                        BilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                        ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
                 }
                 dst += p.dstS;
             }
@@ -330,10 +279,10 @@ namespace Simd
         {
             switch (_param.channels)
             {
-            case 1: _run = BilinearRun<1>; break;
-            case 2: _run = BilinearRun<2>; break;
-            case 3: _run = BilinearRun<3>; break;
-            case 4: _run = BilinearRun<4>; break;
+            case 1: _run = ByteBilinearRun<1>; break;
+            case 2: _run = ByteBilinearRun<2>; break;
+            case 3: _run = ByteBilinearRun<3>; break;
+            case 4: _run = ByteBilinearRun<4>; break;
             }
         }
 
@@ -354,7 +303,7 @@ namespace Simd
             _ie = _range.data + 1 * size;
             _ob = _range.data + 2 * size;
             _oe = _range.data + 3 * size;
-            _buf.Resize(Simd::Max(p.dstW * 4 * p.channels, size * 2 * 4));
+            _buf.Resize(Simd::Max(p.dstW * 16 * p.channels, size * 2 * 4));
             float z, h, w, e = 0.0001f;
             Point rect[4];
             z = -1.0f + e, w = (float)(p.srcW + 0) - e, h = (float)(p.srcH + 0) - e;
