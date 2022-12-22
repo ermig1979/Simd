@@ -214,31 +214,20 @@ namespace Simd
         template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             bool fill = p.NeedFill();
-            int width = width = (int)p.dstW, size = width * N;
-            int s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
+            size_t wa = AlignHi(p.dstW, p.align);
             uint32_t* offs = (uint32_t*)buf;
-            uint8_t* fx = (uint8_t*)(offs + AlignHi(width, 8));
-            uint16_t* fy = (uint16_t*)(fx + AlignHi(width, 8) * 2);
-            uint8_t* rb0 = (uint8_t*)(fy + AlignHi(size, 8) * 2);
-            uint8_t* rb1 = (uint8_t*)(rb0 + AlignHi(size, 8) * 2);
+            uint8_t* fx = (uint8_t*)(offs + wa);
+            uint16_t* fy = (uint16_t*)(fx + wa * 2);
+            uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
+            uint8_t* rb1 = (uint8_t*)(rb0 + wa * N * 2);
             for (int y = 0; y < (int)p.dstH; ++y)
             {
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
                 if (fill)
                 {
-                    if (N == 3)
-                    {
-                        int x = 0, oB1 = oB - 1;
-                        for (; x < oB1; ++x)
-                            Base::CopyPixel<4>(p.border, dst + x * 3);
-                        for (; x < oB; ++x)
-                            Base::CopyPixel<3>(p.border, dst + x * 3);
-                    }
-                    else
-                    {
-                        for (int x = 0; x < oB; ++x)
-                            CopyPixel<N>(p.border, dst + x * N);
-                    }
+                    for (int x = 0; x < oB; ++x)
+                        CopyPixel<N>(p.border, dst + x * N);
                     for (int x = oB; x < iB; ++x)
                         ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
                 }
@@ -263,24 +252,72 @@ namespace Simd
                 {
                     for (int x = iE; x < oE; ++x)
                         ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
-                    if (N == 3)
-                    {
-                        int x = oE, width1 = width - 1;
-                        for (; x < width1; ++x)
-                            Base::CopyPixel<4>(p.border, dst + x * 3);
-                        for (; x < width; ++x)
-                            Base::CopyPixel<3>(p.border, dst + x * 3);
-                    }
-                    else
-                    {
-                        for (int x = oE; x < width; ++x)
-                            CopyPixel<N>(p.border, dst + x * N);
-                    }
+                    for (int x = oE; x < width; ++x)
+                        CopyPixel<N>(p.border, dst + x * N);
                 }
                 else
                 {
                     for (int x = iE; x < oE; ++x)
                         ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                }
+                dst += p.dstS;
+            }
+        }
+
+        template<> void ByteBilinearRun<3>(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
+        {
+            bool fill = p.NeedFill();
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
+            size_t wa = AlignHi(p.dstW, p.align);
+            uint32_t* offs = (uint32_t*)buf;
+            uint8_t* fx = (uint8_t*)(offs + wa);
+            uint16_t* fy = (uint16_t*)(fx + wa * 2);
+            uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
+            uint8_t* rb1 = (uint8_t*)(rb0 + wa * 8);
+            for (int y = 0; y < (int)p.dstH; ++y)
+            {
+                int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
+                if (fill)
+                {
+                    int x = 0, oB1 = oB - 1;
+                    for (; x < oB1; ++x)
+                        Base::CopyPixel<4>(p.border, dst + x * 3);
+                    for (; x < oB; ++x)
+                        Base::CopyPixel<3>(p.border, dst + x * 3);
+                    for (int x = oB; x < iB; ++x)
+                        ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, p.border, dst + x * 3);
+                }
+                else
+                {
+                    for (int x = oB; x < iB; ++x)
+                        ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, dst + x * 3, dst + x * 3);
+                }
+                {
+                    for (int x = iB; x < iE; ++x)
+                        Base::ByteBilinearPrepMain(x, y, p.inv, 3, s, src, offs + x, fx + 2 * x, fy + 2 * x);
+                    for (int x = iB; x < iE; ++x)
+                    {
+                        int o = offs[x];
+                        Base::CopyPixel<8>(src + o + 0, rb0 + x * 8);
+                        Base::CopyPixel<8>(src + o + s, rb1 + x * 8);
+                    }
+                    for (int x = iB; x < iE; ++x)
+                        Base::ByteBilinearInterpMain<3>(rb0 + x * 8, rb1 + x * 8, fx + 2 * x, fy + 2 * x, dst + x * 3);
+                }
+                if (fill)
+                {
+                    for (int x = iE; x < oE; ++x)
+                        ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, p.border, dst + x * 3);
+                    int x = oE, width1 = width - 1;
+                    for (; x < width1; ++x)
+                        Base::CopyPixel<4>(p.border, dst + x * 3);
+                    for (; x < width; ++x)
+                        Base::CopyPixel<3>(p.border, dst + x * 3);
+                }
+                else
+                {
+                    for (int x = iE; x < oE; ++x)
+                        ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, dst + x * 3, dst + x * 3);
                 }
                 dst += p.dstS;
             }
@@ -311,13 +348,13 @@ namespace Simd
         void WarpAffineByteBilinear::Init()
         {
             const WarpAffParam& p = _param;
-            size_t size = p.dstH + 1;
-            _range.Resize(size * 4);
-            _ib = _range.data + 0 * size;
-            _ie = _range.data + 1 * size;
-            _ob = _range.data + 2 * size;
-            _oe = _range.data + 3 * size;
-            _buf.Resize(Simd::Max(p.dstW * 16 * p.channels, size * 2 * 4));
+            _range.Resize(p.dstH * 4);
+            _ib = _range.data + 0 * p.dstH;
+            _ie = _range.data + 1 * p.dstH;
+            _ob = _range.data + 2 * p.dstH;
+            _oe = _range.data + 3 * p.dstH;
+            size_t na = (p.channels == 3 ? 4 : p.channels), wa = AlignHi(p.dstW, p.align);
+            _buf.Resize(Simd::Max(wa * 10 + wa * na * 4, p.dstH * 8));
             float z, h, w, e = 0.0001f;
             Point rect[4];
             z = -1.0f + e, w = (float)(p.srcW + 0) - e, h = (float)(p.srcH + 0) - e;
@@ -338,10 +375,8 @@ namespace Simd
         {
             const WarpAffParam& p = _param;
             float* min = (float*)_buf.data;
-            float* max = min + p.dstH + 1;
+            float* max = min + p.dstH;
             float w = (float)p.dstW, h = (float)p.dstH, z = 0.0f;
-            min[p.dstH] = h;
-            max[p.dstH] = z;
             for (size_t y = 0; y < p.dstH; ++y)
             {
                 min[y] = w;
@@ -353,8 +388,6 @@ namespace Simd
                 const Point& next = rect[(v + 1) & 3];
                 float yMin = Simd::Max(Simd::Min(curr.y, next.y), z);
                 float yMax = Simd::Min(Simd::Max(curr.y, next.y), h);
-                min[p.dstH] = Simd::Min(min[p.dstH], yMin);
-                max[p.dstH] = Simd::Max(max[p.dstH], yMax);
                 int yBeg = (int)ceil(yMin);
                 int yEnd = (int)ceil(yMax);
                 if (next.y == curr.y)
@@ -368,7 +401,7 @@ namespace Simd
                     max[y] = Simd::Max(max[y], Simd::Min(x, w));
                 }
             }
-            for (size_t y = 0; y <= p.dstH; ++y)
+            for (size_t y = 0; y < p.dstH; ++y)
             {
                 beg[y] = (int)ceil(min[y]);
                 end[y] = (int)ceil(max[y]);
@@ -376,7 +409,7 @@ namespace Simd
             }
             if (hi)
             {
-                for (size_t y = 0; y <= p.dstH; ++y)
+                for (size_t y = 0; y < p.dstH; ++y)
                 {
                     beg[y] = Simd::Min(beg[y], hi[y]);
                     end[y] = Simd::Min(end[y], hi[y]);

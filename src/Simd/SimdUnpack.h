@@ -84,6 +84,18 @@ namespace Simd
         {
             return _mm_unpackhi_epi16(a, b);
         }
+
+        template <int part> SIMD_INLINE __m128i UnpackU32(__m128i a, __m128i b = K_ZERO);
+
+        template <> SIMD_INLINE __m128i UnpackU32<0>(__m128i a, __m128i b)
+        {
+            return _mm_unpacklo_epi32(a, b);
+        }
+
+        template <> SIMD_INLINE __m128i UnpackU32<1>(__m128i a, __m128i b)
+        {
+            return _mm_unpackhi_epi32(a, b);
+        }
     }
 #endif// SIMD_SSE41_ENABLE
 

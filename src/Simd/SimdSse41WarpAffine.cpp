@@ -24,6 +24,7 @@
 #include "Simd/SimdWarpAffine.h"
 #include "Simd/SimdCopyPixel.h"
 #include "Simd/SimdUnpack.h"
+#include "Simd/SimdStore.h"
 
 #include "Simd/SimdPoint.hpp"
 
@@ -233,11 +234,7 @@ namespace Simd
 
         const __m128i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
 
-        template<int N> SIMD_INLINE void ByteBilinearInterpMainN(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
-        {
-            for (int i = 0, n = A/N; i < n; ++i)
-                Base::ByteBilinearInterpMain<N>(src0 + i * N * 2, src1 + i * N * 2, fx + i * 2, fy + i * 2, dst + i * N);
-        }
+        template<int N> void ByteBilinearInterpMainN(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst);
 
         template<> SIMD_INLINE void ByteBilinearInterpMainN<1>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
         {
@@ -263,19 +260,78 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packus_epi32(d0, d1), _mm_packus_epi32(d2, d3)));
         }
 
-        //-------------------------------------------------------------------------------------------------
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<2>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
+        {
+            static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF);
 
+            __m128i _fx = _mm_loadu_si128((__m128i*)fx);
+            __m128i fx0 = UnpackU16<0>(_fx, _fx);
+            __m128i fx1 = UnpackU16<1>(_fx, _fx);
+            __m128i r00 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 0), SHUFFLE), fx0);
+            __m128i r01 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 1), SHUFFLE), fx1);
+            __m128i r10 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 0), SHUFFLE), fx0);
+            __m128i r11 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 1), SHUFFLE), fx1);
+
+            __m128i fy0 = _mm_loadu_si128((__m128i*)fy + 0);
+            __m128i s0 = _mm_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
+            __m128i d0 = _mm_srli_epi32(_mm_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s1 = _mm_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
+            __m128i d1 = _mm_srli_epi32(_mm_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i fy1 = _mm_loadu_si128((__m128i*)fy + 1);
+            __m128i s2 = _mm_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
+            __m128i d2 = _mm_srli_epi32(_mm_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s3 = _mm_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
+            __m128i d3 = _mm_srli_epi32(_mm_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packus_epi32(d0, d1), _mm_packus_epi32(d2, d3)));
+        }
+
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<4>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
+        {
+            static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
+
+            __m128i _fx = _mm_loadu_si128((__m128i*)fx);
+            _fx = UnpackU16<0>(_fx, _fx);
+            __m128i fx0 = UnpackU16<0>(_fx, _fx);
+            __m128i fx1 = UnpackU16<1>(_fx, _fx);
+            __m128i r00 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 0), SHUFFLE), fx0);
+            __m128i r01 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 1), SHUFFLE), fx1);
+            __m128i r10 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 0), SHUFFLE), fx0);
+            __m128i r11 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 1), SHUFFLE), fx1);
+
+            __m128i _fy = _mm_loadu_si128((__m128i*)fy);
+            __m128i fy0 = UnpackU32<0>(_fy, _fy);
+            __m128i s0 = _mm_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
+            __m128i d0 = _mm_srli_epi32(_mm_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s1 = _mm_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
+            __m128i d1 = _mm_srli_epi32(_mm_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i fy1 = UnpackU32<1>(_fy, _fy);
+            __m128i s2 = _mm_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
+            __m128i d2 = _mm_srli_epi32(_mm_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s3 = _mm_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
+            __m128i d3 = _mm_srli_epi32(_mm_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packus_epi32(d0, d1), _mm_packus_epi32(d2, d3)));
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             bool fill = p.NeedFill();
-            int width = width = (int)p.dstW, size = width * N;
-            int s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2, n = A / N;
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2, n = A / N;
+            size_t wa = AlignHi(p.dstW, p.align);
             uint32_t* offs = (uint32_t*)buf;
-            uint8_t* fx = (uint8_t *)(offs + AlignHi(width, A));
-            uint16_t* fy = (uint16_t*)(fx + AlignHi(width, A) * 2);
-            uint8_t* rb0 = (uint8_t*)(fy + AlignHi(size, A) * 2);
-            uint8_t* rb1 = (uint8_t*)(rb0 + AlignHi(size, A) * 2);
+            uint8_t* fx = (uint8_t *)(offs + wa);
+            uint16_t* fy = (uint16_t*)(fx + wa * 2);
+            uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
+            uint8_t* rb1 = (uint8_t*)(rb0 + wa * N * 2);
             __m128i _border;
             switch (N)
             {
@@ -288,23 +344,12 @@ namespace Simd
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
                 if (fill)
                 {
-                    if (N == 3)
-                    {
-                        int x = 0, oB1 = oB - 1;
-                        for (; x < oB1; ++x)
-                            Base::CopyPixel<4>(p.border, dst + x * 3);
-                        for (; x < oB; ++x)
-                            Base::CopyPixel<3>(p.border, dst + x * 3);
-                    }
-                    else
-                    {
-                        int x = 0, oBn = (int)AlignLo(oB, n);
-                        for (; x < oBn; x += n)
-                            _mm_storeu_si128((__m128i*)(dst + x * N), _border);
-                        for (; x < oB; ++x)
-                            Base::CopyPixel<N>(p.border, dst + x * N);
-                    }
-                    for (int x = oB; x < iB; ++x)
+                    int x = 0, oBn = (int)AlignLo(oB, n);
+                    for (; x < oBn; x += n)
+                        _mm_storeu_si128((__m128i*)(dst + x * N), _border);
+                    for (; x < oB; ++x)
+                        Base::CopyPixel<N>(p.border, dst + x * N);
+                    for (x = oB; x < iB; ++x)
                         Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
                 }
                 else
@@ -312,20 +357,6 @@ namespace Simd
                     for (int x = oB; x < iB; ++x)
                         Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
                 }
-                if (N == 3)
-                {
-                    for (int x = iB; x < iE; ++x)
-                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, src, offs + x, fx + 2 * x, fy + 2 * x);
-                    for (int x = iB; x < iE; ++x)
-                    {
-                        int o = offs[x];
-                        Base::CopyPixel<N * 2>(src + o + 0, rb0 + x * N * 2);
-                        Base::CopyPixel<N * 2>(src + o + s, rb1 + x * N * 2);
-                    }
-                    for (int x = iB; x < iE; ++x)
-                        Base::ByteBilinearInterpMain<N>(rb0 + x * N * 2, rb1 + x * N * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
-                }
-                else
                 {
                     int x, iEn = (int)AlignLo(iE - iB, n) + iB;
                     for (x = iB; x < iE; ++x)
@@ -345,27 +376,110 @@ namespace Simd
                 {
                     for (int x = iE; x < oE; ++x)
                         Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
-                    if (N == 3)
-                    {
-                        int x = oE, width1 = width - 1;
-                        for (; x < width1; ++x)
-                            Base::CopyPixel<4>(p.border, dst + x * 3);
-                        for (; x < width; ++x)
-                            Base::CopyPixel<3>(p.border, dst + x * 3);
-                    }
-                    else
-                    {
-                        int x = oE, widthN = (int)AlignLo(width - oE, n) + oE;
-                        for (; x < widthN; x += n)
-                            _mm_storeu_si128((__m128i*)(dst + x * N), _border);
-                        for (; x < width; ++x)
-                            Base::CopyPixel<N>(p.border, dst + x * N);
-                    }
+                    int x = oE, widthN = (int)AlignLo(width - oE, n) + oE;
+                    for (; x < widthN; x += n)
+                        _mm_storeu_si128((__m128i*)(dst + x * N), _border);
+                    for (; x < width; ++x)
+                        Base::CopyPixel<N>(p.border, dst + x * N);
                 }
                 else
                 {
                     for (int x = iE; x < oE; ++x)
                         Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                }
+                dst += p.dstS;
+            }
+        }
+
+        SIMD_INLINE void ByteBilinearInterpMain3x4(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
+        {
+            static const __m128i SRC_SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, -1, -1, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, -1, -1);
+            static const __m128i DST_SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1);
+
+            __m128i _fx = _mm_loadu_si128((__m128i*)fx);
+            _fx = UnpackU16<0>(_fx, _fx);
+            __m128i fx0 = UnpackU16<0>(_fx, _fx);
+            __m128i fx1 = UnpackU16<1>(_fx, _fx);
+            __m128i r00 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 0), SRC_SHUFFLE), fx0);
+            __m128i r01 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 1), SRC_SHUFFLE), fx1);
+            __m128i r10 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 0), SRC_SHUFFLE), fx0);
+            __m128i r11 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 1), SRC_SHUFFLE), fx1);
+
+            __m128i _fy = _mm_loadu_si128((__m128i*)fy);
+            __m128i fy0 = UnpackU32<0>(_fy, _fy);
+            __m128i s0 = _mm_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
+            __m128i d0 = _mm_srli_epi32(_mm_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s1 = _mm_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
+            __m128i d1 = _mm_srli_epi32(_mm_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i fy1 = UnpackU32<1>(_fy, _fy);
+            __m128i s2 = _mm_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
+            __m128i d2 = _mm_srli_epi32(_mm_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s3 = _mm_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
+            __m128i d3 = _mm_srli_epi32(_mm_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            Store12(dst, _mm_shuffle_epi8(_mm_packus_epi16(_mm_packus_epi32(d0, d1), _mm_packus_epi32(d2, d3)), DST_SHUFFLE));
+        }
+
+        template<> void ByteBilinearRun<3>(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
+        {
+            bool fill = p.NeedFill();
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
+            size_t wa = AlignHi(p.dstW, p.align);
+            uint32_t* offs = (uint32_t*)buf;
+            uint8_t* fx = (uint8_t*)(offs + wa);
+            uint16_t* fy = (uint16_t*)(fx + wa * 2);
+            uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
+            uint8_t* rb1 = (uint8_t*)(rb0 + wa * 8);
+            for (int y = 0; y < (int)p.dstH; ++y)
+            {
+                int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
+                if (fill)
+                {
+                    int x = 0, oB1 = oB - 1;
+                    for (; x < oB1; ++x)
+                        Base::CopyPixel<4>(p.border, dst + x * 3);
+                    for (; x < oB; ++x)
+                        Base::CopyPixel<3>(p.border, dst + x * 3);
+                    for (int x = oB; x < iB; ++x)
+                        Base::ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, p.border, dst + x * 3);
+                }
+                else
+                {
+                    for (int x = oB; x < iB; ++x)
+                        Base::ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, dst + x * 3, dst + x * 3);
+                }
+                {
+                    for (int x = iB; x < iE; ++x)
+                        Base::ByteBilinearPrepMain(x, y, p.inv, 3, s, src, offs + x, fx + 2 * x, fy + 2 * x);
+                    for (int x = iB; x < iE; ++x)
+                    {
+                        int o = offs[x];
+                        Base::CopyPixel<8>(src + o + 0, rb0 + x * 8);
+                        Base::CopyPixel<8>(src + o + s, rb1 + x * 8);
+                    }
+                    int x = iB, iE4 = (int)AlignLo(iE - iB, 4) + iB;
+                    for (; x < iE4; x += 4)
+                        ByteBilinearInterpMain3x4(rb0 + x * 8, rb1 + x * 8, fx + 2 * x, fy + 2 * x, dst + x * 3);
+                    for (; x < iE; ++x)
+                        Base::ByteBilinearInterpMain<3>(rb0 + x * 8, rb1 + x * 8, fx + 2 * x, fy + 2 * x, dst + x * 3);
+                }
+                if (fill)
+                {
+                    for (int x = iE; x < oE; ++x)
+                        Base::ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, p.border, dst + x * 3);
+                    int x = oE, width1 = width - 1;
+                    for (; x < width1; ++x)
+                        Base::CopyPixel<4>(p.border, dst + x * 3);
+                    for (; x < width; ++x)
+                        Base::CopyPixel<3>(p.border, dst + x * 3);
+                }
+                else
+                {
+                    for (int x = iE; x < oE; ++x)
+                        Base::ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, dst + x * 3, dst + x * 3);
                 }
                 dst += p.dstS;
             }

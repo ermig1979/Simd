@@ -112,6 +112,12 @@ namespace Simd
             __m128i old = Load<align>(p);
             Store<align>(p, _mm_blendv_epi8(old, value, mask));
         }
+
+        SIMD_INLINE void Store12(uint8_t* p, __m128i a)
+        {
+            StoreHalf<0>((__m128i*)p, a);
+            ((uint32_t*)p)[2] = _mm_extract_epi32(a, 2);
+        }
     }
 #endif
 
