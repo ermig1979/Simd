@@ -306,6 +306,38 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packus_epi32(d0, d1), _mm_packus_epi32(d2, d3)));
         }
 
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<3>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
+        {
+            static const __m128i SRC_SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, -1, -1, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, -1, -1);
+            static const __m128i DST_SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1);
+
+            __m128i _fx = _mm_loadu_si128((__m128i*)fx);
+            _fx = UnpackU16<0>(_fx, _fx);
+            __m128i fx0 = UnpackU16<0>(_fx, _fx);
+            __m128i fx1 = UnpackU16<1>(_fx, _fx);
+            __m128i r00 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 0), SRC_SHUFFLE), fx0);
+            __m128i r01 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 1), SRC_SHUFFLE), fx1);
+            __m128i r10 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 0), SRC_SHUFFLE), fx0);
+            __m128i r11 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 1), SRC_SHUFFLE), fx1);
+
+            __m128i _fy = _mm_loadu_si128((__m128i*)fy);
+            __m128i fy0 = UnpackU32<0>(_fy, _fy);
+            __m128i s0 = _mm_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
+            __m128i d0 = _mm_srli_epi32(_mm_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s1 = _mm_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
+            __m128i d1 = _mm_srli_epi32(_mm_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i fy1 = UnpackU32<1>(_fy, _fy);
+            __m128i s2 = _mm_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
+            __m128i d2 = _mm_srli_epi32(_mm_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m128i s3 = _mm_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
+            __m128i d3 = _mm_srli_epi32(_mm_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            Store12(dst, _mm_shuffle_epi8(_mm_packus_epi16(_mm_packus_epi32(d0, d1), _mm_packus_epi32(d2, d3)), DST_SHUFFLE));
+        }
+
         template<> SIMD_INLINE void ByteBilinearInterpMainN<4>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
         {
             static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
@@ -422,38 +454,6 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void ByteBilinearInterpMain3x4(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
-        {
-            static const __m128i SRC_SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, -1, -1, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, -1, -1);
-            static const __m128i DST_SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1);
-
-            __m128i _fx = _mm_loadu_si128((__m128i*)fx);
-            _fx = UnpackU16<0>(_fx, _fx);
-            __m128i fx0 = UnpackU16<0>(_fx, _fx);
-            __m128i fx1 = UnpackU16<1>(_fx, _fx);
-            __m128i r00 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 0), SRC_SHUFFLE), fx0);
-            __m128i r01 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src0 + 1), SRC_SHUFFLE), fx1);
-            __m128i r10 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 0), SRC_SHUFFLE), fx0);
-            __m128i r11 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)src1 + 1), SRC_SHUFFLE), fx1);
-
-            __m128i _fy = _mm_loadu_si128((__m128i*)fy);
-            __m128i fy0 = UnpackU32<0>(_fy, _fy);
-            __m128i s0 = _mm_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
-            __m128i d0 = _mm_srli_epi32(_mm_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
-
-            __m128i s1 = _mm_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
-            __m128i d1 = _mm_srli_epi32(_mm_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
-
-            __m128i fy1 = UnpackU32<1>(_fy, _fy);
-            __m128i s2 = _mm_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
-            __m128i d2 = _mm_srli_epi32(_mm_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
-
-            __m128i s3 = _mm_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
-            __m128i d3 = _mm_srli_epi32(_mm_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
-
-            Store12(dst, _mm_shuffle_epi8(_mm_packus_epi16(_mm_packus_epi32(d0, d1), _mm_packus_epi32(d2, d3)), DST_SHUFFLE));
-        }
-
         template<> void ByteBilinearRun<3>(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             bool fill = p.NeedFill();
@@ -507,7 +507,7 @@ namespace Simd
                         Base::CopyPixel<8>(src + o + s, rb1 + x * 8);
                     }
                     for (x = iB; x < iE4; x += 4)
-                        ByteBilinearInterpMain3x4(rb0 + x * 8, rb1 + x * 8, fx + 2 * x, fy + 2 * x, dst + x * 3);
+                        ByteBilinearInterpMainN<3>(rb0 + x * 8, rb1 + x * 8, fx + 2 * x, fy + 2 * x, dst + x * 3);
                     for (; x < iE; ++x)
                         Base::ByteBilinearInterpMain<3>(rb0 + x * 8, rb1 + x * 8, fx + 2 * x, fy + 2 * x, dst + x * 3);
                 }
@@ -541,6 +541,86 @@ namespace Simd
             case 2: _run = ByteBilinearRun<2>; break;
             case 3: _run = ByteBilinearRun<3>; break;
             case 4: _run = ByteBilinearRun<4>; break;
+            }
+        }
+
+        void WarpAffineByteBilinear::SetRange(const Base::Point* rect, int* beg, int* end, const int* lo, const int* hi)
+        {
+            const WarpAffParam& p = _param;
+            float* min = (float*)_buf.data;
+            float* max = min + p.dstH;
+            float w = (float)p.dstW, h = (float)p.dstH, z = 0.0f, h4 = (int)AlignLo(h, 4);
+            static const __m128i _0123 = SIMD_MM_SETR_EPI32(0, 1, 2, 3);
+            __m128 _w = _mm_set1_ps(w), _z = _mm_set1_ps(z);
+            int y = 0;
+            for (; y < h4; y += 4)
+            {
+                _mm_store_ps(min + y, _w);
+                _mm_store_ps(max + y, _mm_setzero_ps());
+            }
+            for (; y < h; ++y)
+            {
+                min[y] = w;
+                max[y] = 0;
+            }
+            for (int v = 0; v < 4; ++v)
+            {
+                const Base::Point& curr = rect[v];
+                const Base::Point& next = rect[(v + 1) & 3];
+                if (next.y == curr.y)
+                    continue;
+                float yMin = Simd::Max(Simd::Min(curr.y, next.y), z);
+                float yMax = Simd::Min(Simd::Max(curr.y, next.y), h);
+                int yBeg = (int)ceil(yMin);
+                int yEnd = (int)ceil(yMax);
+                int yEnd4 = (int)AlignLo(yEnd - yBeg, 4) + yBeg;
+                float a = (next.x - curr.x) / (next.y - curr.y);
+                float b = curr.x - curr.y * a;
+                __m128 _a = _mm_set1_ps(a);
+                __m128 _b = _mm_set1_ps(b);
+                __m128 _yMin = _mm_set1_ps(yMin);
+                __m128 _yMax = _mm_set1_ps(yMax);
+                for (y = yBeg; y < yEnd4; y += 4)
+                {
+                    __m128 _y = _mm_cvtepi32_ps(_mm_add_epi32(_mm_set1_epi32(y), _0123));
+                    _y = _mm_min_ps(_yMax, _mm_max_ps(_y, _yMin));
+                    __m128 _x = _mm_add_ps(_mm_mul_ps(_y, _a), _b);
+                    _mm_storeu_ps(min + y, _mm_min_ps(_mm_loadu_ps(min + y), _mm_max_ps(_x, _z)));
+                    _mm_storeu_ps(max + y, _mm_max_ps(_mm_loadu_ps(max + y), _mm_min_ps(_x, _w)));
+                }
+                for (; y < yEnd; ++y)
+                {
+                    float x = Simd::RestrictRange(float(y), yMin, yMax) * a + b;
+                    min[y] = Simd::Min(min[y], Simd::Max(x, z));
+                    max[y] = Simd::Max(max[y], Simd::Min(x, w));
+                }
+            }
+            for (y = 0; y < h4; y += 4)
+            {
+                __m128i _beg = _mm_cvtps_epi32(_mm_ceil_ps(_mm_loadu_ps(min + y)));
+                __m128i _end = _mm_cvtps_epi32(_mm_ceil_ps(_mm_loadu_ps(max + y)));
+                _mm_storeu_si128((__m128i*)(beg + y), _beg);
+                _mm_storeu_si128((__m128i*)(end + y), _mm_max_epi32(_beg, _end));
+            }
+            for (; y < h; ++y)
+            {
+                beg[y] = (int)ceil(min[y]);
+                end[y] = (int)ceil(max[y]);
+                end[y] = Simd::Max(beg[y], end[y]);
+            }
+            if (hi)
+            {
+                for (y = 0; y < h4; y += 4)
+                {
+                    __m128i _hi = _mm_loadu_si128((__m128i*)(hi + y));
+                    _mm_storeu_si128((__m128i*)(beg + y), _mm_min_epi32(_mm_loadu_si128((__m128i*)(beg + y)), _hi));
+                    _mm_storeu_si128((__m128i*)(end + y), _mm_min_epi32(_mm_loadu_si128((__m128i*)(end + y)), _hi));
+                }
+                for (; y < h; ++y)
+                {
+                    beg[y] = Simd::Min(beg[y], hi[y]);
+                    end[y] = Simd::Min(end[y], hi[y]);
+                }
             }
         }
 

@@ -254,6 +254,9 @@ namespace Simd
         {
         public:
             WarpAffineByteBilinear(const WarpAffParam& param);
+
+        protected:
+            virtual void SetRange(const Base::Point* rect, int* beg, int* end, const int* lo, const int* hi);
         };
 
         //-------------------------------------------------------------------------------------------------
