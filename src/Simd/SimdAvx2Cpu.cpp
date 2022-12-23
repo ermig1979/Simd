@@ -65,6 +65,23 @@ namespace Simd
         {
             return SupportedByCPU() && SupportedByOS();
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        bool GetSlowGather()
+        {
+            const char* vendorId = Base::VendorId();
+            if (memcmp(vendorId, "GenuineIntel", 12) == 0)
+            {
+                return false;
+            }
+            else if (memcmp(vendorId, "AuthenticAMD", 12) == 0)
+            {
+                return true;
+            }
+            else 
+                return true;
+        }
     }
 #endif
 }

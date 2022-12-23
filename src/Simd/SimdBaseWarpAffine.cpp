@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdWarpAffine.h"
+#include "Simd/SimdWarpAffineCommon.h"
 #include "Simd/SimdCopyPixel.h"
 
 #include "Simd/SimdPoint.hpp"
@@ -154,7 +155,7 @@ namespace Simd
             const WarpAffParam& p = _param;
             _beg.Resize(p.dstH);
             _end.Resize(p.dstH);
-            _buf.Resize(p.dstW);
+            _buf.Resize(AlignHi(p.dstW, p.align) + p.align);
             float w = (float)(p.srcW - 1), h = (float)(p.srcH - 1);
             Point points[4];
             points[0] = Conv(0, 0, p.mat);

@@ -101,6 +101,8 @@ namespace Simd
     {
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
         bool CheckBit(int eax, int ecx, Cpuid::Register index, Cpuid::Bit bit);
+
+        const char* VendorId();
 #endif
 
 #if defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
@@ -151,6 +153,13 @@ namespace Simd
             else
                 _mm_setcsr(_mm_getcsr() & ~(SCR_FTZ | SCR_DAZ));
         }
+    }
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        extern const bool SlowGather;
     }
 #endif
 

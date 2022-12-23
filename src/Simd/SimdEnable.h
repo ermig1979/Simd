@@ -52,6 +52,10 @@ namespace Simd
         bool GetEnable();
 
         const bool Enable = GetEnable();
+
+        bool GetSlowGather();
+
+        const bool SlowGather = GetSlowGather();
     }
 #endif
 

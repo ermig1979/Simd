@@ -87,7 +87,7 @@ namespace Test
         if (image.format != View::Bgr24)
         {
             bgr.Recreate(image.Size(), View::Bgr24);
-            if (image.format != View::Bgr24)
+            if (image.format == View::Uv16)
             {
                 for (size_t row = 0; row < image.height; ++row)
                 {
@@ -203,7 +203,7 @@ namespace Test
         bool result = true;
 
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
-        std::vector<SimdWarpAffineFlags> interp = { /*SimdWarpAffineInterpNearest, */SimdWarpAffineInterpBilinear};
+        std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear};
         std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent};
         for (size_t c = 0; c < channel.size(); ++c)
         {
@@ -234,11 +234,11 @@ namespace Test
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Sse41::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 #endif
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable)
-//            result = result && ResizerAutoTest(FUNC_RS(Simd::Avx2::ResizerInit), FUNC_RS(SimdResizerInit));
-//#endif
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && WarpAffineAutoTest(FUNC_WA(Simd::Avx2::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
+#endif
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable)
 //            result = result && ResizerAutoTest(FUNC_RS(Simd::Avx512bw::ResizerInit), FUNC_RS(SimdResizerInit));

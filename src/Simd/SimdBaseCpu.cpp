@@ -68,9 +68,8 @@ namespace Simd
     namespace Base
     {
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
-        bool CheckBit(int eax, int ecx, Cpuid::Register index, Cpuid::Bit bit)
+        SIMD_INLINE bool CpuId(int eax, int ecx, unsigned int *registers)
         {
-            unsigned int registers[4] = { 0, 0, 0, 0 };
 #if defined(_MSC_VER)
             __cpuidex((int*)registers, eax, ecx);
 #elif (defined __GNUC__)
@@ -84,7 +83,23 @@ namespace Simd
 #else
 #error Do not know how to detect CPU info!
 #endif
+            return true;
+        }
+
+        bool CheckBit(int eax, int ecx, Cpuid::Register index, Cpuid::Bit bit)
+        {
+            unsigned int registers[4] = { 0, 0, 0, 0 };
+            if (!CpuId(eax, ecx, registers))
+                return false;
             return (registers[index] & bit) == bit;
+        }
+
+        const char* VendorId()
+        {
+            unsigned int regs[4] = { 0, 0, 0, 0};
+            CpuId(0, 0, regs);
+            static unsigned int vendorId[4] = { regs[1], regs[3], regs[2], 0 };
+            return (char*)vendorId;
         }
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
