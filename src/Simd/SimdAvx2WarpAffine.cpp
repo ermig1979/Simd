@@ -349,6 +349,70 @@ namespace Simd
             _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(_mm256_packus_epi32(d0, d1), _mm256_packus_epi32(d2, d3)));
         }
 
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<2>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
+        {
+            static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF,
+                0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF);
+
+            __m256i _fx = LoadPermuted<false>((__m256i*)fx);
+            __m256i fx0 = UnpackU16<0>(_fx, _fx);
+            __m256i fx1 = UnpackU16<1>(_fx, _fx);
+            __m256i r00 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src0 + 0), SHUFFLE), fx0);
+            __m256i r01 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src0 + 1), SHUFFLE), fx1);
+            __m256i r10 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src1 + 0), SHUFFLE), fx0);
+            __m256i r11 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src1 + 1), SHUFFLE), fx1);
+
+            __m256i fy0 = _mm256_loadu_si256((__m256i*)fy + 0);
+            __m256i s0 = _mm256_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
+            __m256i d0 = _mm256_srli_epi32(_mm256_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i s1 = _mm256_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
+            __m256i d1 = _mm256_srli_epi32(_mm256_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i fy1 = _mm256_loadu_si256((__m256i*)fy + 1);
+            __m256i s2 = _mm256_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
+            __m256i d2 = _mm256_srli_epi32(_mm256_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i s3 = _mm256_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
+            __m256i d3 = _mm256_srli_epi32(_mm256_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(_mm256_packus_epi32(d0, d1), _mm256_packus_epi32(d2, d3)));
+        }
+
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<4>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
+        {
+            static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+                0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
+
+            __m256i _fx = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)fx), K32_TWO_UNPACK_PERMUTE);
+            _fx = UnpackU16<0>(_fx, _fx);
+            __m256i fx0 = UnpackU16<0>(_fx, _fx);
+            __m256i fx1 = UnpackU16<1>(_fx, _fx);
+            __m256i r00 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src0 + 0), SHUFFLE), fx0);
+            __m256i r01 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src0 + 1), SHUFFLE), fx1);
+            __m256i r10 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src1 + 0), SHUFFLE), fx0);
+            __m256i r11 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src1 + 1), SHUFFLE), fx1);
+
+            __m256i _fy = LoadPermuted<false>((__m256i*)fy);
+            __m256i fy0 = UnpackU32<0>(_fy, _fy);
+            __m256i s0 = _mm256_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
+            __m256i d0 = _mm256_srli_epi32(_mm256_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i s1 = _mm256_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
+            __m256i d1 = _mm256_srli_epi32(_mm256_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i fy1 = UnpackU32<1>(_fy, _fy);
+            __m256i s2 = _mm256_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
+            __m256i d2 = _mm256_srli_epi32(_mm256_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i s3 = _mm256_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
+            __m256i d3 = _mm256_srli_epi32(_mm256_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(_mm256_packus_epi32(d0, d1), _mm256_packus_epi32(d2, d3)));
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
@@ -427,9 +491,9 @@ namespace Simd
             switch (_param.channels)
             {
             case 1: _run = ByteBilinearRun<1>; break;
-            //case 2: _run = ByteBilinearRun<2>; break;
+            case 2: _run = ByteBilinearRun<2>; break;
             //case 3: _run = ByteBilinearRun<3>; break;
-            //case 4: _run = ByteBilinearRun<4>; break;
+            case 4: _run = ByteBilinearRun<4>; break;
             }
         }
 
