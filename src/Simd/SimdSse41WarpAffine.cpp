@@ -52,6 +52,17 @@ namespace Simd
                 Base::CopyPixel<3>(bs, dst + i);
         }
 
+        template<int N> SIMD_INLINE __m128i InitBorder(const uint8_t* border)
+        {
+            switch (N)
+            {
+            case 1: return _mm_set1_epi8(*border);
+            case 2: return _mm_set1_epi16(*(uint16_t*)border);
+            case 3: return _mm_setzero_si128();
+            case 4: return _mm_set1_epi32(*(uint32_t*)border);
+            }
+        }
+
         //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE __m128i NearestOffset(__m128 x, __m128 y, const __m128* m, __m128i w, __m128i h, __m128i n, __m128i s)
@@ -96,13 +107,7 @@ namespace Simd
             __m128i _h = _mm_set1_epi32(h);
             __m128i _n = _mm_set1_epi32(N);
             __m128i _s = _mm_set1_epi32(s);
-            __m128i _border;
-            switch (N)
-            {
-            case 1: _border = _mm_set1_epi8(*p.border); break;
-            case 2: _border = _mm_set1_epi16(*(uint16_t*)p.border); break;
-            case 4: _border = _mm_set1_epi32(*(uint32_t*)p.border); break;
-            }
+            __m128i _border = InitBorder<N>(p.border);
             for (int y = 0; y < (int)p.dstH; ++y)
             {
                 int nose = beg[y], tail = end[y];
@@ -371,7 +376,7 @@ namespace Simd
             constexpr int M = (N == 3 ? 4 : N);
             bool fill = p.NeedFill();
             int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2, n = A / M;
-            size_t wa = AlignHi(p.dstW, p.align);
+            size_t wa = AlignHi(p.dstW, p.align) + p.align;
             uint32_t* offs = (uint32_t*)buf;
             uint8_t* fx = (uint8_t *)(offs + wa);
             uint16_t* fy = (uint16_t*)(fx + wa * 2);
@@ -384,13 +389,7 @@ namespace Simd
                 _m[i] = _mm_set1_ps(p.inv[i]);
             __m128i _n = _mm_set1_epi32(N);
             __m128i _s = _mm_set1_epi32(s);
-            __m128i _border;
-            switch (N)
-            {
-            case 1: _border = _mm_set1_epi8(*p.border); break;
-            case 2: _border = _mm_set1_epi16(*(uint16_t*)p.border); break;
-            case 4: _border = _mm_set1_epi32(*(uint32_t*)p.border); break;
-            }
+            __m128i _border = InitBorder<N>(p.border);
             for (int y = 0; y < (int)p.dstH; ++y)
             {
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
@@ -409,13 +408,11 @@ namespace Simd
                     int x = iB, iE4 = (int)AlignLo(iE - iB, 4) + iB, iEn = (int)AlignLo(iE - iB, n) + iB;
                     __m128 _y = _mm_cvtepi32_ps(_mm_set1_epi32(y));
                     __m128 _x = _mm_cvtepi32_ps(_mm_add_epi32(_mm_set1_epi32(x), _0123));
-                    for (; x < iE4; x += 4)
+                    for (; x < iE; x += 4)
                     {
                         ByteBilinearPrepMain4(_x, _y, _m, _n, _s, offs + x, fx + 2 * x, fy + 2 * x);
                         _x = _mm_add_ps(_x, _4);
                     }
-                    for (; x < iE; ++x)
-                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, offs + x, fx + 2 * x, fy + 2 * x);
                     for (x = iB; x < iE; ++x)
                     {
                         int o = offs[x];

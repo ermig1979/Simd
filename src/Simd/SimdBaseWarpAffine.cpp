@@ -354,7 +354,7 @@ namespace Simd
             _ie = _range.data + 1 * p.dstH;
             _ob = _range.data + 2 * p.dstH;
             _oe = _range.data + 3 * p.dstH;
-            size_t na = (p.channels == 3 ? 4 : p.channels), wa = AlignHi(p.dstW, p.align);
+            size_t na = (p.channels == 3 ? 4 : p.channels), wa = AlignHi(p.dstW, p.align) + p.align;
             _buf.Resize(Simd::Max(wa * 10 + wa * na * 4, p.dstH * 8));
             float z, h, w, e = 0.0001f;
             Point rect[4];
