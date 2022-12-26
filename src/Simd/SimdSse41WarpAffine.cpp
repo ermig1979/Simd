@@ -148,8 +148,8 @@ namespace Simd
             int y = 0;
             for (; y < h4; y += 4)
             {
-                _mm_store_si128((__m128i*)(_beg.data + y), _w);
-                _mm_store_si128((__m128i*)(_end.data + y), _mm_setzero_si128());
+                _mm_storeu_si128((__m128i*)(_beg.data + y), _w);
+                _mm_storeu_si128((__m128i*)(_end.data + y), _mm_setzero_si128());
             }
             for (; y < h; ++y)
             {
@@ -467,8 +467,8 @@ namespace Simd
             int y = 0, dH = (int)p.dstH, dH4 = (int)AlignLo(dH, 4);
             for (; y < dH4; y += 4)
             {
-                _mm_store_ps(min + y, _w);
-                _mm_store_ps(max + y, _mm_setzero_ps());
+                _mm_storeu_ps(min + y, _w);
+                _mm_storeu_ps(max + y, _mm_setzero_ps());
             }
             for (; y < dH; ++y)
             {

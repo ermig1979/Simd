@@ -189,7 +189,7 @@ namespace Simd
             WarpAffineNearest(const WarpAffParam& param);
 
         protected:
-            //virtual void SetRange(const Base::Point* points);
+            virtual void SetRange(const Base::Point* points);
         };
 
         //-------------------------------------------------------------------------------------------------

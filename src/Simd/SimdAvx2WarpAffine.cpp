@@ -84,6 +84,61 @@ namespace Simd
                 Base::CopyPixel<3>(src + offset[i], dst);
         }
 
+        template<> SIMD_INLINE void NearestGather<1, false>(const uint8_t* src, uint32_t* offset, int count, uint8_t* dst)
+        {
+            static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x4, 0x8, 0xC, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                0x0, 0x4, 0x8, 0xC, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+            static const __m256i PERMUTE = SIMD_MM256_SETR_EPI32(0, 4, 0, 0, 0, 0, 0, 0);
+            int i = 0, count8 = AlignLo(count, 8);
+            for (; i < count8; i += 8, dst += 8)
+            {
+                __m256i _offs = _mm256_loadu_si256((__m256i*)(offset + i));
+                __m256i _dst = _mm256_i32gather_epi32((int*)src, _offs, 1);
+                _dst = _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(_dst, SHUFFLE), PERMUTE);
+                Sse41::StoreHalf<false>((__m128i*)dst, _mm256_castsi256_si128(_dst));
+            }
+            for (; i < count; i++, dst += 1)
+                Base::CopyPixel<1>(src + offset[i], dst);
+        }
+
+        template<> SIMD_INLINE void NearestGather<2, false>(const uint8_t* src, uint32_t* offset, int count, uint8_t* dst)
+        {
+            static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1,
+                0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1);
+            int i = 0, count8 = AlignLo(count, 8);
+            for (; i < count8; i += 8, dst += 16)
+            {
+                __m256i _offs = _mm256_loadu_si256((__m256i*)(offset + i));
+                __m256i _dst = _mm256_i32gather_epi32((int*)src, _offs, 1);
+                _dst = _mm256_permute4x64_epi64(_mm256_shuffle_epi8(_dst, SHUFFLE), 0x08);
+                Sse41::Store<false>((__m128i*)dst, _mm256_castsi256_si128(_dst));
+            }
+            for (; i < count; i++, dst += 2)
+                Base::CopyPixel<2>(src + offset[i], dst);
+        }
+
+        template<> SIMD_INLINE void NearestGather<3, false>(const uint8_t* src, uint32_t* offset, int count, uint8_t* dst)
+        {
+            static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1,
+                0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1);
+            static const __m256i PERMUTE = SIMD_MM256_SETR_EPI32(0, 1, 2, 4, 5, 6, 0, 0);
+            int i = 0, count8 = AlignLo(count, 8), count1 = count - 1;
+            for (; i < count8; i += 8, dst += 24)
+            {
+                __m256i _offs = _mm256_loadu_si256((__m256i*)(offset + i));
+                __m256i _dst = _mm256_i32gather_epi32((int*)src, _offs, 1);
+                _dst = _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(_dst, SHUFFLE), PERMUTE);
+                Store24<false>(dst, _dst);
+            }
+            for (; i < count1; i++, dst += 3)
+                Base::CopyPixel<4>(src + offset[i], dst);
+            if (i < count)
+                Base::CopyPixel<3>(src + offset[i], dst);
+        }
+
         template<> SIMD_INLINE void NearestGather<4, false>(const uint8_t* src, uint32_t* offset, int count, uint8_t* dst)
         {
             int i = 0, count8 = AlignLo(count, 8);
@@ -146,13 +201,99 @@ namespace Simd
         WarpAffineNearest::WarpAffineNearest(const WarpAffParam& param)
             : Sse41::WarpAffineNearest(param)
         {
-            bool soft = SlowGather || _param.channels < 4;
+            bool soft = SlowGather;
             switch (_param.channels)
             {
             case 1: _run = soft ? NearestRun<1, true> : NearestRun<1, false>; break;
             case 2: _run = soft ? NearestRun<2, true> : NearestRun<2, false>; break;
             case 3: _run = soft ? NearestRun<3, true> : NearestRun<3, false>; break;
             case 4: _run = soft ? NearestRun<4, true> : NearestRun<4, false>; break;
+            }
+        }
+
+        void WarpAffineNearest::SetRange(const Base::Point* points)
+        {
+            const WarpAffParam& p = _param;
+            int w = (int)p.dstW, h = (int)p.dstH, h8 = (int)AlignLo(h, 8);
+            static const __m256i _01234567 = SIMD_MM256_SETR_EPI32(0, 1, 2, 3, 4, 5, 6, 7);
+            __m256i _w = _mm256_set1_epi32(w), _1 = _mm256_set1_epi32(1);
+            int y = 0;
+            for (; y < h8; y += 8)
+            {
+                _mm256_storeu_si256((__m256i*)(_beg.data + y), _w);
+                _mm256_storeu_si256((__m256i*)(_end.data + y), _mm256_setzero_si256());
+            }
+            for (; y < h; ++y)
+            {
+                _beg[y] = w;
+                _end[y] = 0;
+            }
+            for (int v = 0; v < 4; ++v)
+            {
+                const Base::Point& curr = points[v];
+                const Base::Point& next = points[(v + 1) & 3];
+                float yMin = Simd::Max(Simd::Min(curr.y, next.y), 0.0f);
+                float yMax = Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH);
+                int yBeg = Round(yMin);
+                int yEnd = Round(yMax);
+                int yEnd8 = (int)AlignLo(yEnd - yBeg, 8) + yBeg;
+                if (next.y == curr.y)
+                    continue;
+                float a = (next.x - curr.x) / (next.y - curr.y);
+                float b = curr.x - curr.y * a;
+                __m256 _a = _mm256_set1_ps(a);
+                __m256 _b = _mm256_set1_ps(b);
+                if (abs(a) <= 1.0f)
+                {
+                    int y = yBeg;
+                    for (; y < yEnd8; y += 8)
+                    {
+                        __m256 _y = _mm256_cvtepi32_ps(_mm256_add_epi32(_mm256_set1_epi32(y), _01234567));
+                        __m256i _x = _mm256_cvtps_epi32(_mm256_add_ps(_mm256_mul_ps(_y, _a), _b));
+                        __m256i xBeg = _mm256_loadu_si256((__m256i*)(_beg.data + y));
+                        __m256i xEnd = _mm256_loadu_si256((__m256i*)(_end.data + y));
+                        xBeg = _mm256_min_epi32(xBeg, _mm256_max_epi32(_x, _mm256_setzero_si256()));
+                        xEnd = _mm256_max_epi32(xEnd, _mm256_min_epi32(_mm256_add_epi32(_x, _1), _w));
+                        _mm256_storeu_si256((__m256i*)(_beg.data + y), xBeg);
+                        _mm256_storeu_si256((__m256i*)(_end.data + y), xEnd);
+                    }
+                    for (; y < yEnd; ++y)
+                    {
+                        int x = Round(y * a + b);
+                        _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
+                        _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, w));
+                    }
+                }
+                else
+                {
+                    int y = yBeg;
+                    __m256 _05 = _mm256_set1_ps(0.5f);
+                    __m256 _yMin = _mm256_set1_ps(yMin);
+                    __m256 _yMax = _mm256_set1_ps(yMax);
+                    for (; y < yEnd8; y += 8)
+                    {
+                        __m256 _y = _mm256_cvtepi32_ps(_mm256_add_epi32(_mm256_set1_epi32(y), _01234567));
+                        __m256 yM = _mm256_min_ps(_mm256_max_ps(_mm256_sub_ps(_y, _05), _yMin), _yMax);
+                        __m256 yP = _mm256_min_ps(_mm256_max_ps(_mm256_add_ps(_y, _05), _yMin), _yMax);
+                        __m256 xM = _mm256_add_ps(_mm256_mul_ps(yM, _a), _b);
+                        __m256 xP = _mm256_add_ps(_mm256_mul_ps(yP, _a), _b);
+                        __m256i xBeg = _mm256_loadu_si256((__m256i*)(_beg.data + y));
+                        __m256i xEnd = _mm256_loadu_si256((__m256i*)(_end.data + y));
+                        xBeg = _mm256_min_epi32(xBeg, _mm256_max_epi32(_mm256_cvtps_epi32(_mm256_min_ps(xM, xP)), _mm256_setzero_si256()));
+                        xEnd = _mm256_max_epi32(xEnd, _mm256_min_epi32(_mm256_add_epi32(_mm256_cvtps_epi32(_mm256_max_ps(xM, xP)), _1), _w));
+                        _mm256_storeu_si256((__m256i*)(_beg.data + y), xBeg);
+                        _mm256_storeu_si256((__m256i*)(_end.data + y), xEnd);
+                    }
+                    for (; y < yEnd; ++y)
+                    {
+                        float xM = b + Simd::RestrictRange(float(y) - 0.5f, yMin, yMax) * a;
+                        float xP = b + Simd::RestrictRange(float(y) + 0.5f, yMin, yMax) * a;
+                        int xBeg = Round(Simd::Min(xM, xP));
+                        int xEnd = Round(Simd::Max(xM, xP));
+                        _beg[y] = Simd::Min(_beg[y], Simd::Max(xBeg, 0));
+                        _end[y] = Simd::Max(_end[y], Simd::Min(xEnd + 1, w));
+                    }
+                }
             }
         }
 

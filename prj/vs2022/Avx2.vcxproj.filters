@@ -548,5 +548,11 @@
     <ClInclude Include="..\..\src\Simd\SimdRecursiveBilateralFilter.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdWarpAffineCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
