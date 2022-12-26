@@ -64,6 +64,7 @@ namespace Simd
             case 3: return _mm256_setzero_si256();
             case 4: return _mm256_set1_epi32(*(uint32_t*)border);
             }
+            return _mm256_setzero_si256();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -304,7 +305,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        const __m256i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM256_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
         const __m256i K32_WA_FRACTION_RANGE = SIMD_MM256_SET1_EPI32(Base::WA_FRACTION_RANGE);
 
         SIMD_INLINE void ByteBilinearPrepMain8(__m256 x, __m256 y, const __m256* m, __m256i n, __m256i s, uint32_t* offs, uint8_t* fx, uint16_t* fy)
@@ -322,6 +322,79 @@ namespace Simd
             _mm_storeu_si128((__m128i*)fx, _mm256_castsi256_si128(PackI16ToU8(_fx, _mm256_setzero_si256())));
             _mm256_storeu_si256((__m256i*)fy, _fy);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<int N, bool soft> SIMD_INLINE void ByteBilinearGather(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
+        {
+            int i = 0;
+            for (; i < count; i++, dst0 += 2 * N, dst1 += 2 * N)
+            {
+                int offs = offset[i];
+                Base::CopyPixel<N * 2>(src0 + offs, dst0);
+                Base::CopyPixel<N * 2>(src1 + offs, dst1);
+            }
+        }
+
+        template<> SIMD_INLINE void ByteBilinearGather<1, false>(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
+        {
+            static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1,
+                0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1);
+            int i = 0, count8 = (int)AlignLo(count, 8);
+            for (; i < count8; i += 8, dst0 += 16, dst1 += 16)
+            {
+                __m256i _offs = _mm256_loadu_si256((__m256i*)(offset + i));
+                __m256i _dst0 = _mm256_shuffle_epi8(_mm256_i32gather_epi32((int*)src0, _offs, 1), SHUFFLE);
+                _mm_storeu_si128((__m128i*)dst0, _mm256_castsi256_si128(_mm256_permute4x64_epi64(_dst0, 0x08)));
+                __m256i _dst1 = _mm256_shuffle_epi8(_mm256_i32gather_epi32((int*)src1, _offs, 1), SHUFFLE);
+                _mm_storeu_si128((__m128i*)dst1, _mm256_castsi256_si128(_mm256_permute4x64_epi64(_dst1, 0x08)));
+            }
+            for (; i < count; i++, dst0 += 2, dst1 += 2)
+            {
+                int offs = offset[i];
+                Base::CopyPixel<2>(src0 + offs, dst0);
+                Base::CopyPixel<2>(src1 + offs, dst1);
+            }
+        }
+
+        template<> SIMD_INLINE void ByteBilinearGather<2, false>(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
+        {
+            int i = 0, count8 = (int)AlignLo(count, 8);
+            for (; i < count8; i += 8, dst0 += 32, dst1 += 32)
+            {
+                __m256i _offs = _mm256_loadu_si256((__m256i*)(offset + i));
+                _mm256_storeu_si256((__m256i*)dst0, _mm256_i32gather_epi32((int*)src0, _offs, 1));
+                _mm256_storeu_si256((__m256i*)dst1, _mm256_i32gather_epi32((int*)src1, _offs, 1));
+            }
+            for (; i < count; i++, dst0 += 4, dst1 += 4)
+            {
+                int offs = offset[i];
+                Base::CopyPixel<4>(src0 + offs, dst0);
+                Base::CopyPixel<4>(src1 + offs, dst1);
+            }
+        }
+
+        template<> SIMD_INLINE void ByteBilinearGather<4, false>(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
+        {
+            int i = 0, count4 = (int)AlignLo(count, 4);
+            for (; i < count4; i += 4, dst0 += 32, dst1 += 32)
+            {
+                __m128i _offs = _mm_loadu_si128((__m128i*)(offset + i));
+                _mm256_storeu_si256((__m256i*)dst0, _mm256_i32gather_epi64((long long*)src0, _offs, 1));
+                _mm256_storeu_si256((__m256i*)dst1, _mm256_i32gather_epi64((long long*)src1, _offs, 1));
+            }
+            for (; i < count; i++, dst0 += 8, dst1 += 8)
+            {
+                int offs = offset[i];
+                Base::CopyPixel<8>(src0 + offs, dst0);
+                Base::CopyPixel<8>(src1 + offs, dst1);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        const __m256i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM256_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
 
         template<int N> void ByteBilinearInterpMainN(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst);
 
@@ -380,6 +453,44 @@ namespace Simd
             _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(_mm256_packus_epi32(d0, d1), _mm256_packus_epi32(d2, d3)));
         }
 
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<3>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
+        {
+            static const __m256i SRC_SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x3, 0x1, 0x4, 0x2, 0x5, -1, -1, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, -1, -1,
+                0x0, 0x3, 0x1, 0x4, 0x2, 0x5, -1, -1, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, -1, -1);
+            static const __m256i DST_SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1,
+                0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1);
+            static const __m256i DST_PERMUTE = SIMD_MM256_SETR_EPI32(0, 1, 2, 4, 5, 6, 0, 0);
+
+            __m256i _fx = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)fx), K32_TWO_UNPACK_PERMUTE);
+            _fx = UnpackU16<0>(_fx, _fx);
+            __m256i fx0 = UnpackU16<0>(_fx, _fx);
+            __m256i fx1 = UnpackU16<1>(_fx, _fx);
+            __m256i r00 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src0 + 0), SRC_SHUFFLE), fx0);
+            __m256i r01 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src0 + 1), SRC_SHUFFLE), fx1);
+            __m256i r10 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src1 + 0), SRC_SHUFFLE), fx0);
+            __m256i r11 = _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)src1 + 1), SRC_SHUFFLE), fx1);
+
+            __m256i _fy = LoadPermuted<false>((__m256i*)fy);
+            __m256i fy0 = UnpackU32<0>(_fy, _fy);
+            __m256i s0 = _mm256_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
+            __m256i d0 = _mm256_srli_epi32(_mm256_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i s1 = _mm256_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
+            __m256i d1 = _mm256_srli_epi32(_mm256_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i fy1 = UnpackU32<1>(_fy, _fy);
+            __m256i s2 = _mm256_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
+            __m256i d2 = _mm256_srli_epi32(_mm256_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i s3 = _mm256_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
+            __m256i d3 = _mm256_srli_epi32(_mm256_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m256i _dst = PackI16ToU8(_mm256_packus_epi32(d0, d1), _mm256_packus_epi32(d2, d3));
+            Store24<false>(dst, _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(_dst, DST_SHUFFLE), DST_PERMUTE));
+        }
+
         template<> SIMD_INLINE void ByteBilinearInterpMainN<4>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst)
         {
             static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
@@ -415,7 +526,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
+        template<int N, bool soft> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             constexpr int M = (N == 3 ? 4 : N);
             bool fill = p.NeedFill();
@@ -457,12 +568,7 @@ namespace Simd
                         ByteBilinearPrepMain8(_x, _y, _m, _n, _s, offs + x, fx + 2 * x, fy + 2 * x);
                         _x = _mm256_add_ps(_x, _8);
                     }
-                    for (x = iB; x < iE; ++x)
-                    {
-                        int o = offs[x];
-                        Base::CopyPixel<M * 2>(src + o + 0, rb0 + x * M * 2);
-                        Base::CopyPixel<M * 2>(src + o + s, rb1 + x * M * 2);
-                    }
+                    ByteBilinearGather<M, soft>(src, src + s, offs + iB, iE - iB, rb0 + 2 * M * iB, rb1 + 2 * M * iB);
                     for (x = iB; x < iEn; x += n)
                         ByteBilinearInterpMainN<N>(rb0 + x * M * 2, rb1 + x * M * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
                     for (; x < iE; ++x)
@@ -488,12 +594,13 @@ namespace Simd
         WarpAffineByteBilinear::WarpAffineByteBilinear(const WarpAffParam& param)
             : Sse41::WarpAffineByteBilinear(param)
         {
+            bool soft = SlowGather;
             switch (_param.channels)
             {
-            case 1: _run = ByteBilinearRun<1>; break;
-            case 2: _run = ByteBilinearRun<2>; break;
-            //case 3: _run = ByteBilinearRun<3>; break;
-            case 4: _run = ByteBilinearRun<4>; break;
+            case 1: _run = soft ? ByteBilinearRun<1, true> : ByteBilinearRun<1, false>; break;
+            case 2: _run = soft ? ByteBilinearRun<2, true> : ByteBilinearRun<2, false>; break;
+            case 3: _run = soft ? ByteBilinearRun<3, true> : ByteBilinearRun<3, false>; break;
+            case 4: _run = soft ? ByteBilinearRun<4, true> : ByteBilinearRun<4, false>; break;
             }
         }
 

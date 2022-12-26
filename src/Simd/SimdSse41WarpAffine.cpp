@@ -61,6 +61,7 @@ namespace Simd
             case 3: return _mm_setzero_si128();
             case 4: return _mm_set1_epi32(*(uint32_t*)border);
             }
+            return _mm_setzero_si128();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -232,7 +233,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        const __m128i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
         const __m128i K32_WA_FRACTION_RANGE = SIMD_MM_SET1_EPI32(Base::WA_FRACTION_RANGE);
 
         SIMD_INLINE void ByteBilinearPrepMain4(__m128 x, __m128 y, const __m128* m, __m128i n, __m128i s, uint32_t* offs, uint8_t* fx, uint16_t* fy)
@@ -250,6 +250,23 @@ namespace Simd
             _mm_storel_epi64((__m128i*)fx, _mm_packus_epi16(_fx, _mm_setzero_si128()));
             _mm_storeu_si128((__m128i*)fy, _fy);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<int N> SIMD_INLINE void ByteBilinearGather(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
+        {
+            int i = 0;
+            for (; i < count; i++, dst0 += 2 * N, dst1 += 2 * N)
+            {
+                int offs = offset[i];
+                Base::CopyPixel<N * 2>(src0 + offs, dst0);
+                Base::CopyPixel<N * 2>(src1 + offs, dst1);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        const __m128i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
 
         template<int N> void ByteBilinearInterpMainN(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst);
 
@@ -413,12 +430,7 @@ namespace Simd
                         ByteBilinearPrepMain4(_x, _y, _m, _n, _s, offs + x, fx + 2 * x, fy + 2 * x);
                         _x = _mm_add_ps(_x, _4);
                     }
-                    for (x = iB; x < iE; ++x)
-                    {
-                        int o = offs[x];
-                        Base::CopyPixel<M * 2>(src + o + 0, rb0 + x * M * 2);
-                        Base::CopyPixel<M * 2>(src + o + s, rb1 + x * M * 2);
-                    }
+                    ByteBilinearGather<M>(src, src + s, offs + iB, iE - iB, rb0 + 2 * M * iB, rb1 + 2 * M * iB);
                     for (x = iB; x < iEn; x += n)
                         ByteBilinearInterpMainN<N>(rb0 + x * M * 2, rb1 + x * M * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
                     for (; x < iE; ++x)
