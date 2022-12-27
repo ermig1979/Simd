@@ -79,7 +79,7 @@ namespace Test
 #define FUNC_WA(function) \
     FuncWA(function, std::string(#function))
 
-//#define TEST_WARP_AFFINE_REAL_IMAGE
+#define TEST_WARP_AFFINE_REAL_IMAGE
 
     bool SaveImage(const View& image, const String& name)
     {

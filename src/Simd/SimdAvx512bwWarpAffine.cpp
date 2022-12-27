@@ -27,6 +27,7 @@
 #include "Simd/SimdUnpack.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdEnable.h"
+#include "Simd/SimdSet.h"
 
 #include "Simd/SimdPoint.hpp"
 
@@ -348,6 +349,7 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         const __m512i K32_WA_FRACTION_RANGE = SIMD_MM512_SET1_EPI32(Base::WA_FRACTION_RANGE);
+        const __m512i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM512_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
 
         SIMD_INLINE void ByteBilinearPrepMain16(__m512 x, __m512 y, const __m512* m, __m512i n, __m512i s, uint32_t* offs, uint8_t* fx, uint16_t* fy)
         {
@@ -363,6 +365,35 @@ namespace Simd
             _fy = _mm512_or_si512(_mm512_sub_epi32(K32_WA_FRACTION_RANGE, _fy), _mm512_slli_epi32(_fy, 16));
             _mm256_storeu_si256((__m256i*)fx, _mm512_castsi512_si256(PackI16ToU8(_fx, _mm512_setzero_si512())));
             _mm512_storeu_si512((__m512i*)fy, _fy);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<int N> SIMD_INLINE void ByteBilinearInterpEdge(int x, __m128 sy, const __m128* me, __m128i wh, __m128i ns, int s, const uint8_t* src, const uint8_t* brd, uint8_t* dst)
+        {
+            static const __m128i FX = SIMD_MM_SETR_EPI8(0x4, 0x0, 0x4, 0x0, 0x4, 0x0, 0x4, 0x0, 0x4, 0x0, 0x4, 0x0, 0x4, 0x0, 0x4, 0x0);
+            static const __m128i FY = SIMD_MM_SETR_EPI8(0xC, -1, 0x8, -1, 0xC, -1, 0x8, -1, 0xC, -1, 0x8, -1, 0xC, -1, 0x8, -1);
+            static const __m128i SRC = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF);
+
+            __m128 sx = _mm_cvtepi32_ps(_mm_set1_epi32(x));
+            __m128 dxy = _mm_add_ps(_mm_add_ps(_mm_mul_ps(sx, me[0]), _mm_mul_ps(sy, me[1])), me[2]);
+            __m128 fixy = _mm_floor_ps(dxy);
+            __m128 range = _mm_cvtepi32_ps(_mm512_castsi512_si128(K32_WA_FRACTION_RANGE));
+            __m128i fxy = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(dxy, fixy), range));
+            fxy = _mm_unpacklo_epi32(fxy, _mm_sub_epi32(_mm512_castsi512_si128(K32_WA_FRACTION_RANGE), fxy));
+            __m128i ixy = _mm_cvtps_epi32(fixy);
+
+            __m128i offs = _mm_mullo_epi32(ixy, _mm_srli_si128(ns, 4));
+            offs = _mm_add_epi32(ns, _mm_shuffle_epi32(_mm_hadd_epi32(offs, offs), 0));
+            __m128i xy01 = _mm_unpacklo_epi32(_mm_cmplt_epi32(ixy, _mm_setzero_si128()), _mm_cmpgt_epi32(ixy, wh));
+            __m128i mask = _mm_or_si128(_mm_shuffle_epi32(xy01, 0x44), _mm_shuffle_epi32(xy01, 0xFA));
+            __m128i _src = _mm_mask_i32gather_epi32(_mm_set1_epi32(*(int*)brd), (int*)src, offs, _mm_andnot_si128(mask, Sse41::K_INV_ZERO), 1);
+
+            _src = _mm_shuffle_epi8(_src, SRC);
+            __m128i sum = _mm_maddubs_epi16(_src, _mm_shuffle_epi8(fxy, FX));
+            sum = _mm_madd_epi16(sum, _mm_shuffle_epi8(fxy, FY));
+            __m128i _dst = _mm_srli_epi32(_mm_add_epi32(sum, _mm512_castsi512_si128(K32_WA_BILINEAR_ROUND_TERM)), Base::WA_BILINEAR_SHIFT);
+            _mm_mask_storeu_epi8(dst, (__mmask16(-1) >> (16 - N)), _mm_shuffle_epi8(_dst, SRC));
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -443,8 +474,6 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
-
-        const __m512i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM512_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
 
         template<int N> void ByteBilinearInterpMainN(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst, int count);
 
@@ -607,23 +636,28 @@ namespace Simd
             __m512i _n = _mm512_set1_epi32(N);
             __m512i _s = _mm512_set1_epi32(s);
             __m512i _border = InitBorder<N>(p.border);
+            __m128 _me[3];
+            for (int i = 0; i < 3; ++i)
+                _me[i] = Sse41::SetFloat(p.inv[i + 0], p.inv[i + 3]);
+            __m128i _wh = Sse41::SetInt32(w, h);
+            __m128i _ns = _mm_setr_epi32(0, N, s, s + N);
             for (int y = 0; y < (int)p.dstH; ++y)
             {
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
+                __m512 _y = _mm512_cvtepi32_ps(_mm512_set1_epi32(y));
                 if (fill)
                 {
                     FillBorder<N>(dst, oB, _border, p.border);
-                    for (int x = oB; x < iB; ++x)
-                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
+                   for (int x = oB; x < iB; ++x)
+                       ByteBilinearInterpEdge<N>(x, _mm512_castps512_ps128(_y), _me, _wh, _ns, s, src, p.border, dst + x * N);
                 }
                 else
                 {
                     for (int x = oB; x < iB; ++x)
-                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                        ByteBilinearInterpEdge<N>(x, _mm512_castps512_ps128(_y), _me, _wh, _ns, s, src, dst + x * N, dst + x * N);
                 }
                 {
                     int x = iB, iEn = (int)AlignLo(iE - iB, n) + iB;
-                    __m512 _y = _mm512_cvtepi32_ps(_mm512_set1_epi32(y));
                     __m512 _x = _mm512_cvtepi32_ps(_mm512_add_epi32(_mm512_set1_epi32(x), _0123));
                     for (; x < iE; x += 16)
                     {
@@ -639,13 +673,13 @@ namespace Simd
                 if (fill)
                 {
                     for (int x = iE; x < oE; ++x)
-                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
+                        ByteBilinearInterpEdge<N>(x, _mm512_castps512_ps128(_y), _me, _wh, _ns, s, src, p.border, dst + x * N);
                     FillBorder<N>(dst + oE * N, width - oE, _border, p.border);
                 }
                 else
                 {
                     for (int x = iE; x < oE; ++x)
-                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                        ByteBilinearInterpEdge<N>(x, _mm512_castps512_ps128(_y), _me, _wh, _ns, s, src, dst + x * N, dst + x * N);
                 }
                 dst += p.dstS;
             }
