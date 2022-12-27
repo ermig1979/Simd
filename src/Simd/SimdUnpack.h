@@ -172,6 +172,18 @@ namespace Simd
             return _mm512_unpackhi_epi16(a, b);
         }
 
+        template <int part> SIMD_INLINE __m512i UnpackU32(__m512i a, __m512i b = K_ZERO);
+
+        template <> SIMD_INLINE __m512i UnpackU32<0>(__m512i a, __m512i b)
+        {
+            return _mm512_unpacklo_epi32(a, b);
+        }
+
+        template <> SIMD_INLINE __m512i UnpackU32<1>(__m512i a, __m512i b)
+        {
+            return _mm512_unpackhi_epi32(a, b);
+        }
+
         SIMD_INLINE __m512i UnpackHalfU8(__m256i a, __m256i b = Avx2::K_ZERO)
         {
             return _mm512_unpacklo_epi8(_mm512_castsi256_si512(a), _mm512_castsi256_si512(b));
