@@ -347,6 +347,266 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        const __m512i K32_WA_FRACTION_RANGE = SIMD_MM512_SET1_EPI32(Base::WA_FRACTION_RANGE);
+
+        SIMD_INLINE void ByteBilinearPrepMain16(__m512 x, __m512 y, const __m512* m, __m512i n, __m512i s, uint32_t* offs, uint8_t* fx, uint16_t* fy)
+        {
+            __m512 dx = _mm512_add_ps(_mm512_add_ps(_mm512_mul_ps(x, m[0]), _mm512_mul_ps(y, m[1])), m[2]);
+            __m512 dy = _mm512_add_ps(_mm512_add_ps(_mm512_mul_ps(x, m[3]), _mm512_mul_ps(y, m[4])), m[5]);
+            __m512 ix = _mm512_floor_ps(dx);
+            __m512 iy = _mm512_floor_ps(dy);
+            __m512 range = _mm512_cvtepi32_ps(K32_WA_FRACTION_RANGE);
+            __m512i _fx = _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_sub_ps(dx, ix), range));
+            __m512i _fy = _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_sub_ps(dy, iy), range));
+            _mm512_storeu_si512((__m512i*)offs, _mm512_add_epi32(_mm512_mullo_epi32(_mm512_cvtps_epi32(ix), n), _mm512_mullo_epi32(_mm512_cvtps_epi32(iy), s)));
+            _fx = _mm512_or_si512(_mm512_sub_epi32(K32_WA_FRACTION_RANGE, _fx), _mm512_slli_epi32(_fx, 16));
+            _fy = _mm512_or_si512(_mm512_sub_epi32(K32_WA_FRACTION_RANGE, _fy), _mm512_slli_epi32(_fy, 16));
+            _mm256_storeu_si256((__m256i*)fx, _mm512_castsi512_si256(PackI16ToU8(_fx, _mm512_setzero_si512())));
+            _mm512_storeu_si512((__m512i*)fy, _fy);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<int N, bool soft> SIMD_INLINE void ByteBilinearGather(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
+        {
+            int i = 0;
+            for (; i < count; i++, dst0 += 2 * N, dst1 += 2 * N)
+            {
+                int offs = offset[i];
+                Base::CopyPixel<N * 2>(src0 + offs, dst0);
+                Base::CopyPixel<N * 2>(src1 + offs, dst1);
+            }
+        }
+
+        template<> SIMD_INLINE void ByteBilinearGather<1, false>(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
+        {
+            static const __m512i SHUFFLE = SIMD_MM512_SETR_EPI8(
+                0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1,
+                0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1,
+                0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1,
+                0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1);
+            static const __m512i PERMUTE = SIMD_MM512_SETR_EPI64(0x0, 0x2, 0x4, 0x6, 0, 0, 0, 0);
+            int i = 0, count16 = (int)AlignLo(count, 16);
+            for (; i < count16; i += 16, dst0 += 32, dst1 += 32)
+            {
+                __m512i _offs = _mm512_loadu_si512((__m512i*)(offset + i));
+                __m512i _dst0 = _mm512_shuffle_epi8(_mm512_i32gather_epi32(_offs, src0, 1), SHUFFLE);
+                _mm256_storeu_si256((__m256i*)dst0, _mm512_castsi512_si256(_mm512_permutexvar_epi64(PERMUTE, _dst0)));
+                __m512i _dst1 = _mm512_shuffle_epi8(_mm512_i32gather_epi32(_offs, src1, 1), SHUFFLE);
+                _mm256_storeu_si256((__m256i*)dst1, _mm512_castsi512_si256(_mm512_permutexvar_epi64(PERMUTE, _dst1)));
+            }
+            if (i < count)
+            {
+                __mmask16 mask = __mmask16(-1) >> (16 + count16 - count);
+                __m512i _offs = _mm512_maskz_loadu_epi32(mask, offset + i);
+                __m512i _dst0 = _mm512_shuffle_epi8(_mm512_mask_i32gather_epi32(_offs, mask, _offs, src0, 1), SHUFFLE);
+                _mm256_mask_storeu_epi16(dst0, mask, _mm512_castsi512_si256(_mm512_permutexvar_epi64(PERMUTE, _dst0)));
+                __m512i _dst1 = _mm512_shuffle_epi8(_mm512_mask_i32gather_epi32(_offs, mask, _offs, src1, 1), SHUFFLE);
+                _mm256_mask_storeu_epi16(dst1, mask, _mm512_castsi512_si256(_mm512_permutexvar_epi64(PERMUTE, _dst1)));
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        const __m512i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM512_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
+
+        template<int N> void ByteBilinearInterpMainN(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst, int count);
+
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<1>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst, int count)
+        {
+            __m512i fx0 = _mm512_loadu_si512((__m512i*)fx + 0);
+            __m512i fx1 = _mm512_loadu_si512((__m512i*)fx + 1);
+            __m512i r00 = _mm512_maddubs_epi16(_mm512_loadu_si512((__m512i*)src0 + 0), fx0);
+            __m512i r01 = _mm512_maddubs_epi16(_mm512_loadu_si512((__m512i*)src0 + 1), fx1);
+            __m512i r10 = _mm512_maddubs_epi16(_mm512_loadu_si512((__m512i*)src1 + 0), fx0);
+            __m512i r11 = _mm512_maddubs_epi16(_mm512_loadu_si512((__m512i*)src1 + 1), fx1);
+
+            __m512i s0 = _mm512_madd_epi16(UnpackU16<0>(r00, r10), Load<false>((__m128i*)fy + 0x0, (__m128i*)fy + 0x2, (__m128i*)fy + 0x4, (__m128i*)fy + 0x6));
+            __m512i d0 = _mm512_srli_epi32(_mm512_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m512i s1 = _mm512_madd_epi16(UnpackU16<1>(r00, r10), Load<false>((__m128i*)fy + 0x1, (__m128i*)fy + 0x3, (__m128i*)fy + 0x5, (__m128i*)fy + 0x7));
+            __m512i d1 = _mm512_srli_epi32(_mm512_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m512i s2 = _mm512_madd_epi16(UnpackU16<0>(r01, r11), Load<false>((__m128i*)fy + 0x8, (__m128i*)fy + 0xA, (__m128i*)fy + 0xC, (__m128i*)fy + 0xE));
+            __m512i d2 = _mm512_srli_epi32(_mm512_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m512i s3 = _mm512_madd_epi16(UnpackU16<1>(r01, r11), Load<false>((__m128i*)fy + 0x9, (__m128i*)fy + 0xB, (__m128i*)fy + 0xD, (__m128i*)fy + 0xF));
+            __m512i d3 = _mm512_srli_epi32(_mm512_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __mmask64 mask = __mmask64(-1) >> (64 - count * 1);
+            _mm512_mask_storeu_epi8(dst, mask, PackI16ToU8(_mm512_packus_epi32(d0, d1), _mm512_packus_epi32(d2, d3)));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<int N, bool soft> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
+        {
+            constexpr int M = (N == 3 ? 4 : N);
+            bool fill = p.NeedFill();
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2, n = A / M;
+            size_t wa = AlignHi(p.dstW, p.align) + p.align;
+            uint32_t* offs = (uint32_t*)buf;
+            uint8_t* fx = (uint8_t*)(offs + wa);
+            uint16_t* fy = (uint16_t*)(fx + wa * 2);
+            uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
+            uint8_t* rb1 = (uint8_t*)(rb0 + wa * M * 2);
+            const __m512 _16 = _mm512_set1_ps(16.0f);
+            static const __m512i _0123 = SIMD_MM512_SETR_EPI32(0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF);
+            __m512 _m[6];
+            for (int i = 0; i < 6; ++i)
+                _m[i] = _mm512_set1_ps(p.inv[i]);
+            __m512i _n = _mm512_set1_epi32(N);
+            __m512i _s = _mm512_set1_epi32(s);
+            __m512i _border = InitBorder<N>(p.border);
+            for (int y = 0; y < (int)p.dstH; ++y)
+            {
+                int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
+                if (fill)
+                {
+                    FillBorder<N>(dst, oB, _border, p.border);
+                    for (int x = oB; x < iB; ++x)
+                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
+                }
+                else
+                {
+                    for (int x = oB; x < iB; ++x)
+                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                }
+                {
+                    int x = iB, iEn = (int)AlignLo(iE - iB, n) + iB;
+                    __m512 _y = _mm512_cvtepi32_ps(_mm512_set1_epi32(y));
+                    __m512 _x = _mm512_cvtepi32_ps(_mm512_add_epi32(_mm512_set1_epi32(x), _0123));
+                    for (; x < iE; x += 16)
+                    {
+                        ByteBilinearPrepMain16(_x, _y, _m, _n, _s, offs + x, fx + 2 * x, fy + 2 * x);
+                        _x = _mm512_add_ps(_x, _16);
+                    }
+                    ByteBilinearGather<M, soft>(src, src + s, offs + iB, iE - iB, rb0 + 2 * M * iB, rb1 + 2 * M * iB);
+                    for (x = iB; x < iEn; x += n)
+                        ByteBilinearInterpMainN<N>(rb0 + x * M * 2, rb1 + x * M * 2, fx + 2 * x, fy + 2 * x, dst + x * N, n);
+                    if(x < iE)
+                        ByteBilinearInterpMainN<N>(rb0 + x * M * 2, rb1 + x * M * 2, fx + 2 * x, fy + 2 * x, dst + x * N, iE - iEn);
+                }
+                if (fill)
+                {
+                    for (int x = iE; x < oE; ++x)
+                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
+                    FillBorder<N>(dst + oE * N, width - oE, _border, p.border);
+                }
+                else
+                {
+                    for (int x = iE; x < oE; ++x)
+                        Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
+                }
+                dst += p.dstS;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        WarpAffineByteBilinear::WarpAffineByteBilinear(const WarpAffParam& param)
+            : Avx2::WarpAffineByteBilinear(param)
+        {
+            bool soft = Avx2::SlowGather;
+            switch (_param.channels)
+            {
+            case 1: _run = soft ? ByteBilinearRun<1, true> : ByteBilinearRun<1, false>; break;
+            //case 2: _run = soft ? ByteBilinearRun<2, true> : ByteBilinearRun<2, false>; break;
+            //case 3: _run = soft ? ByteBilinearRun<3, true> : ByteBilinearRun<3, false>; break;
+            //case 4: _run = soft ? ByteBilinearRun<4, true> : ByteBilinearRun<4, false>; break;
+            }
+        }
+
+        void WarpAffineByteBilinear::SetRange(const Base::Point* rect, int* beg, int* end, const int* lo, const int* hi)
+        {
+            const WarpAffParam& p = _param;
+            float* min = (float*)_buf.data;
+            float* max = min + p.dstH;
+            float w = (float)p.dstW, h = (float)p.dstH, z = 0.0f;
+            static const __m512i _0123 = SIMD_MM512_SETR_EPI32(0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF);
+            __m512 _w = _mm512_set1_ps(w), _z = _mm512_set1_ps(z);
+            int y = 0, dH = (int)p.dstH, dH16 = (int)AlignLo(dH, 16);
+            for (; y < dH16; y += 16)
+            {
+                _mm512_storeu_ps(min + y, _w);
+                _mm512_storeu_ps(max + y, _mm512_setzero_ps());
+            }
+            if (y < dH)
+            {
+                __mmask16 tail = TailMask16(dH - dH16);
+                _mm512_mask_storeu_ps(min + y, tail, _w);
+                _mm512_mask_storeu_ps(max + y, tail, _mm512_setzero_ps());
+            }
+            for (int v = 0; v < 4; ++v)
+            {
+                const Base::Point& curr = rect[v];
+                const Base::Point& next = rect[(v + 1) & 3];
+                if (next.y == curr.y)
+                    continue;
+                float yMin = Simd::Max(Simd::Min(curr.y, next.y), z);
+                float yMax = Simd::Min(Simd::Max(curr.y, next.y), h);
+                int yBeg = (int)ceil(yMin);
+                int yEnd = (int)ceil(yMax);
+                int yEnd16 = (int)AlignLo(yEnd - yBeg, 16) + yBeg;
+                float a = (next.x - curr.x) / (next.y - curr.y);
+                float b = curr.x - curr.y * a;
+                __m512 _a = _mm512_set1_ps(a);
+                __m512 _b = _mm512_set1_ps(b);
+                __m512 _yMin = _mm512_set1_ps(yMin);
+                __m512 _yMax = _mm512_set1_ps(yMax);
+                for (y = yBeg; y < yEnd16; y += 16)
+                {
+                    __m512 _y = _mm512_cvtepi32_ps(_mm512_add_epi32(_mm512_set1_epi32(y), _0123));
+                    _y = _mm512_min_ps(_yMax, _mm512_max_ps(_y, _yMin));
+                    __m512 _x = _mm512_add_ps(_mm512_mul_ps(_y, _a), _b);
+                    _mm512_storeu_ps(min + y, _mm512_min_ps(_mm512_loadu_ps(min + y), _mm512_max_ps(_x, _z)));
+                    _mm512_storeu_ps(max + y, _mm512_max_ps(_mm512_loadu_ps(max + y), _mm512_min_ps(_x, _w)));
+                }
+                if(y < yEnd)
+                {
+                    __mmask16 tail = TailMask16(yEnd - yEnd16);
+                    __m512 _y = _mm512_cvtepi32_ps(_mm512_add_epi32(_mm512_set1_epi32(y), _0123));
+                    _y = _mm512_min_ps(_yMax, _mm512_max_ps(_y, _yMin));
+                    __m512 _x = _mm512_add_ps(_mm512_mul_ps(_y, _a), _b);
+                    _mm512_mask_storeu_ps(min + y, tail, _mm512_min_ps(_mm512_loadu_ps(min + y), _mm512_max_ps(_x, _z)));
+                    _mm512_mask_storeu_ps(max + y, tail, _mm512_max_ps(_mm512_loadu_ps(max + y), _mm512_min_ps(_x, _w)));
+                }
+            }
+            for (y = 0; y < dH16; y += 16)
+            {
+                __m512i _beg = _mm512_cvtps_epi32(_mm512_ceil_ps(_mm512_loadu_ps(min + y)));
+                __m512i _end = _mm512_cvtps_epi32(_mm512_ceil_ps(_mm512_loadu_ps(max + y)));
+                _mm512_storeu_si512((__m512i*)(beg + y), _beg);
+                _mm512_storeu_si512((__m512i*)(end + y), _mm512_max_epi32(_beg, _end));
+            }
+            if (y < dH)
+            {
+                __mmask16 tail = TailMask16(dH - dH16);
+                __m512i _beg = _mm512_cvtps_epi32(_mm512_ceil_ps(_mm512_maskz_loadu_ps(tail, min + y)));
+                __m512i _end = _mm512_cvtps_epi32(_mm512_ceil_ps(_mm512_maskz_loadu_ps(tail, max + y)));
+                _mm512_mask_storeu_epi32(beg + y, tail, _beg);
+                _mm512_mask_storeu_epi32(end + y, tail, _mm512_max_epi32(_beg, _end));
+            }
+            if (hi)
+            {
+                for (y = 0; y < dH16; y += 16)
+                {
+                    __m512i _hi = _mm512_loadu_si512((__m512i*)(hi + y));
+                    _mm512_storeu_si512((__m512i*)(beg + y), _mm512_min_epi32(_mm512_loadu_si512((__m512i*)(beg + y)), _hi));
+                    _mm512_storeu_si512((__m512i*)(end + y), _mm512_min_epi32(_mm512_loadu_si512((__m512i*)(end + y)), _hi));
+                }
+                if (y < dH)
+                {
+                    __mmask16 tail = TailMask16(dH - dH16);
+                    __m512i _hi = _mm512_maskz_loadu_epi32(tail, hi + y);
+                    _mm512_mask_storeu_epi32(beg + y, tail, _mm512_min_epi32(_mm512_maskz_loadu_epi32(tail, beg + y), _hi));
+                    _mm512_mask_storeu_epi32(end + y, tail, _mm512_min_epi32(_mm512_maskz_loadu_epi32(tail, end + y), _hi));
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border)
         {
             WarpAffParam param(srcW, srcH, srcS, dstW, dstH, dstS, channels, mat, flags, border, A);
@@ -355,7 +615,7 @@ namespace Simd
             if (param.IsNearest())
                 return new WarpAffineNearest(param);
             else if (param.IsByteBilinear())
-                return new Avx2::WarpAffineByteBilinear(param);
+                return new WarpAffineByteBilinear(param);
             else
                 return NULL;
         }

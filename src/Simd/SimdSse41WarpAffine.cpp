@@ -422,7 +422,7 @@ namespace Simd
                         Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
                 }
                 {
-                    int x = iB, iE4 = (int)AlignLo(iE - iB, 4) + iB, iEn = (int)AlignLo(iE - iB, n) + iB;
+                    int x = iB, iEn = (int)AlignLo(iE - iB, n) + iB;
                     __m128 _y = _mm_cvtepi32_ps(_mm_set1_epi32(y));
                     __m128 _x = _mm_cvtepi32_ps(_mm_add_epi32(_mm_set1_epi32(x), _0123));
                     for (; x < iE; x += 4)
