@@ -424,6 +424,24 @@ namespace Simd
             }
         }
 
+        template<> SIMD_INLINE void ByteBilinearGather<4, false>(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
+        {
+            int i = 0, count8 = (int)AlignLo(count, 8);
+            for (; i < count8; i += 8, dst0 += 64, dst1 += 64)
+            {
+                __m256i _offs = _mm256_loadu_si256((__m256i*)(offset + i));
+                _mm512_storeu_si512((__m512i*)dst0, _mm512_i32gather_epi64(_offs, src0, 1));
+                _mm512_storeu_si512((__m512i*)dst1, _mm512_i32gather_epi64(_offs, src1, 1));
+            }
+            if (i < count)
+            {
+                __mmask8 mask = __mmask8(-1) >> (8 + count8 - count);
+                __m256i _offs = _mm256_maskz_loadu_epi32(mask, offset + i);
+                _mm512_mask_storeu_epi64(dst0, mask, _mm512_mask_i32gather_epi64(K_ZERO, mask, _offs, src0, 1));
+                _mm512_mask_storeu_epi64(dst1, mask, _mm512_mask_i32gather_epi64(K_ZERO, mask, _offs, src1, 1));
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         const __m512i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM512_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
@@ -486,6 +504,85 @@ namespace Simd
             __m512i d3 = _mm512_srli_epi32(_mm512_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
 
             __mmask64 mask = __mmask64(-1) >> (64 - count * 2);
+            _mm512_mask_storeu_epi8(dst, mask, PackI16ToU8(_mm512_packus_epi32(d0, d1), _mm512_packus_epi32(d2, d3)));
+        }
+
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<3>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst, int count)
+        {
+            static const __m512i SRC_SHUFFLE = SIMD_MM512_SETR_EPI8(
+                0x0, 0x3, 0x1, 0x4, 0x2, 0x5, -1, -1, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, -1, -1,
+                0x0, 0x3, 0x1, 0x4, 0x2, 0x5, -1, -1, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, -1, -1,
+                0x0, 0x3, 0x1, 0x4, 0x2, 0x5, -1, -1, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, -1, -1,
+                0x0, 0x3, 0x1, 0x4, 0x2, 0x5, -1, -1, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, -1, -1);
+            static const __m512i DST_SHUFFLE = SIMD_MM512_SETR_EPI8(
+                0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1,
+                0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1,
+                0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1,
+                0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1);
+            static const __m512i DST_PERMUTE = SIMD_MM512_SETR_EPI32(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, 0x0, 0x0, 0x0, 0x0);
+
+            __m512i _fx = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_loadu_si512((__m512i*)fx));
+            _fx = UnpackU16<0>(_fx, _fx);
+            __m512i fx0 = UnpackU16<0>(_fx, _fx);
+            __m512i fx1 = UnpackU16<1>(_fx, _fx);
+            __m512i r00 = _mm512_maddubs_epi16(_mm512_shuffle_epi8(_mm512_loadu_si512((__m512i*)src0 + 0), SRC_SHUFFLE), fx0);
+            __m512i r01 = _mm512_maddubs_epi16(_mm512_shuffle_epi8(_mm512_loadu_si512((__m512i*)src0 + 1), SRC_SHUFFLE), fx1);
+            __m512i r10 = _mm512_maddubs_epi16(_mm512_shuffle_epi8(_mm512_loadu_si512((__m512i*)src1 + 0), SRC_SHUFFLE), fx0);
+            __m512i r11 = _mm512_maddubs_epi16(_mm512_shuffle_epi8(_mm512_loadu_si512((__m512i*)src1 + 1), SRC_SHUFFLE), fx1);
+
+            __m512i _fy = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _mm512_loadu_si512((__m512i*)fy));
+            __m512i fy0 = UnpackU32<0>(_fy, _fy);
+            __m512i s0 = _mm512_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
+            __m512i d0 = _mm512_srli_epi32(_mm512_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m512i s1 = _mm512_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
+            __m512i d1 = _mm512_srli_epi32(_mm512_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m512i fy1 = UnpackU32<1>(_fy, _fy);
+            __m512i s2 = _mm512_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
+            __m512i d2 = _mm512_srli_epi32(_mm512_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m512i s3 = _mm512_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
+            __m512i d3 = _mm512_srli_epi32(_mm512_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __mmask64 mask = __mmask64(-1) >> (64 - count * 3);
+            __m512i _dst = PackI16ToU8(_mm512_packus_epi32(d0, d1), _mm512_packus_epi32(d2, d3));
+            _mm512_mask_storeu_epi8(dst, mask, _mm512_permutexvar_epi32(DST_PERMUTE, _mm512_shuffle_epi8(_dst, DST_SHUFFLE)));
+        }
+
+        template<> SIMD_INLINE void ByteBilinearInterpMainN<4>(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst, int count)
+        {
+            static const __m512i SHUFFLE = SIMD_MM512_SETR_EPI8(
+                0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+                0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+                0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+                0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
+
+            __m512i _fx = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_loadu_si512((__m512i*)fx));
+            _fx = UnpackU16<0>(_fx, _fx);
+            __m512i fx0 = UnpackU16<0>(_fx, _fx);
+            __m512i fx1 = UnpackU16<1>(_fx, _fx);
+            __m512i r00 = _mm512_maddubs_epi16(_mm512_shuffle_epi8(_mm512_loadu_si512((__m512i*)src0 + 0), SHUFFLE), fx0);
+            __m512i r01 = _mm512_maddubs_epi16(_mm512_shuffle_epi8(_mm512_loadu_si512((__m512i*)src0 + 1), SHUFFLE), fx1);
+            __m512i r10 = _mm512_maddubs_epi16(_mm512_shuffle_epi8(_mm512_loadu_si512((__m512i*)src1 + 0), SHUFFLE), fx0);
+            __m512i r11 = _mm512_maddubs_epi16(_mm512_shuffle_epi8(_mm512_loadu_si512((__m512i*)src1 + 1), SHUFFLE), fx1);
+
+            __m512i _fy = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _mm512_loadu_si512((__m512i*)fy));
+            __m512i fy0 = UnpackU32<0>(_fy, _fy);
+            __m512i s0 = _mm512_madd_epi16(UnpackU16<0>(r00, r10), UnpackU32<0>(fy0, fy0));
+            __m512i d0 = _mm512_srli_epi32(_mm512_add_epi32(s0, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m512i s1 = _mm512_madd_epi16(UnpackU16<1>(r00, r10), UnpackU32<1>(fy0, fy0));
+            __m512i d1 = _mm512_srli_epi32(_mm512_add_epi32(s1, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m512i fy1 = UnpackU32<1>(_fy, _fy);
+            __m512i s2 = _mm512_madd_epi16(UnpackU16<0>(r01, r11), UnpackU32<0>(fy1, fy1));
+            __m512i d2 = _mm512_srli_epi32(_mm512_add_epi32(s2, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __m512i s3 = _mm512_madd_epi16(UnpackU16<1>(r01, r11), UnpackU32<1>(fy1, fy1));
+            __m512i d3 = _mm512_srli_epi32(_mm512_add_epi32(s3, K32_WA_BILINEAR_ROUND_TERM), Base::WA_BILINEAR_SHIFT);
+
+            __mmask64 mask = __mmask64(-1) >> (64 - count * 4);
             _mm512_mask_storeu_epi8(dst, mask, PackI16ToU8(_mm512_packus_epi32(d0, d1), _mm512_packus_epi32(d2, d3)));
         }
 
@@ -564,8 +661,8 @@ namespace Simd
             {
             case 1: _run = soft ? ByteBilinearRun<1, true> : ByteBilinearRun<1, false>; break;
             case 2: _run = soft ? ByteBilinearRun<2, true> : ByteBilinearRun<2, false>; break;
-            //case 3: _run = soft ? ByteBilinearRun<3, true> : ByteBilinearRun<3, false>; break;
-            //case 4: _run = soft ? ByteBilinearRun<4, true> : ByteBilinearRun<4, false>; break;
+            case 3: _run = soft ? ByteBilinearRun<3, true> : ByteBilinearRun<3, false>; break;
+            case 4: _run = soft ? ByteBilinearRun<4, true> : ByteBilinearRun<4, false>; break;
             }
         }
 
