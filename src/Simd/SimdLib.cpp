@@ -6888,7 +6888,7 @@ SIMD_API void* SimdWarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t 
 {
     SIMD_EMPTY();    
     typedef void* (*SimdWarpAffineInitPtr) (size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
-    const static SimdWarpAffineInitPtr simdWarpAffineInit = SIMD_FUNC2(WarpAffineInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_AVX512BW_FUNC, SIMD_NEON_FUNC);
+    const static SimdWarpAffineInitPtr simdWarpAffineInit = SIMD_FUNC3(WarpAffineInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_NEON_FUNC);
     return simdWarpAffineInit(srcW, srcH, srcS, dstW, dstH, dstS, channels, mat, flags, border);
 }
 

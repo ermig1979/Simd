@@ -98,7 +98,7 @@ namespace Simd
         template<int N> void NearestRun(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
         {
             bool fill = p.NeedFill();
-            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 1, h = (int)p.srcH - 1, n = A / N;
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 1, h = (int)p.srcH - 1;
             const __m128 _4 = _mm_set1_ps(4.0f);
             static const __m128i _0123 = SIMD_MM_SETR_EPI32(0, 1, 2, 3);
             __m128 _m[6];

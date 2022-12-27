@@ -118,6 +118,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwTransform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWarpAffine.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd3.cpp" />

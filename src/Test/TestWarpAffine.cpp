@@ -239,11 +239,11 @@ namespace Test
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Avx2::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 #endif
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && ResizerAutoTest(FUNC_RS(Simd::Avx512bw::ResizerInit), FUNC_RS(SimdResizerInit));
-//#endif
-//
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && WarpAffineAutoTest(FUNC_WA(Simd::Avx512bw::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
+#endif
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
 //            result = result && ResizerAutoTest(FUNC_RS(Simd::Neon::ResizerInit), FUNC_RS(SimdResizerInit));
