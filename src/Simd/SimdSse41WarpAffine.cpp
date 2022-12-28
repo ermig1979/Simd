@@ -77,25 +77,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<int N> SIMD_INLINE void NearestGather(const uint8_t* src, uint32_t* offset, int count, uint8_t * dst)
-        {
-            int i = 0;
-            for (; i < count; i++, dst += N)
-                Base::CopyPixel<N>(src + offset[i], dst);
-        }
-
-        template<> SIMD_INLINE void NearestGather<3>(const uint8_t* src, uint32_t* offset, int count, uint8_t* dst)
-        {
-            int i = 0, count1 = count - 1;
-            for (; i < count1; i++, dst += 3)
-                Base::CopyPixel<4>(src + offset[i], dst);
-            if(i < count)
-                Base::CopyPixel<3>(src + offset[i], dst);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        template<int N> void NearestRun(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
+        template<int N> void NearestRun(const WarpAffParam& p, int yBeg, int yEnd, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
         {
             bool fill = p.NeedFill();
             int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 1, h = (int)p.srcH - 1;
@@ -109,7 +91,8 @@ namespace Simd
             __m128i _n = _mm_set1_epi32(N);
             __m128i _s = _mm_set1_epi32(s);
             __m128i _border = InitBorder<N>(p.border);
-            for (int y = 0; y < (int)p.dstH; ++y)
+            dst += yBeg * p.dstS;
+            for (int y = yBeg; y < yEnd; ++y)
             {
                 int nose = beg[y], tail = end[y];
                 {
@@ -124,7 +107,7 @@ namespace Simd
                 }
 				if (fill)
                     FillBorder<N>(dst, nose, _border, p.border);
-                NearestGather<N>(src, buf + nose, tail - nose, dst + N * nose);
+                Base::NearestGather<N>(src, buf + nose, tail - nose, dst + N * nose);
                 if (fill)
                     FillBorder<N>(dst + tail * N, width - tail, _border, p.border);
                 dst += p.dstS;
@@ -253,19 +236,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<int N> SIMD_INLINE void ByteBilinearGather(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
-        {
-            int i = 0;
-            for (; i < count; i++, dst0 += 2 * N, dst1 += 2 * N)
-            {
-                int offs = offset[i];
-                Base::CopyPixel<N * 2>(src0 + offs, dst0);
-                Base::CopyPixel<N * 2>(src1 + offs, dst1);
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         const __m128i K32_WA_BILINEAR_ROUND_TERM = SIMD_MM_SET1_EPI32(Base::WA_BILINEAR_ROUND_TERM);
 
         template<int N> void ByteBilinearInterpMainN(const uint8_t* src0, const uint8_t* src1, const uint8_t* fx, const uint16_t* fy, uint8_t* dst);
@@ -388,7 +358,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
+        template<int N> void ByteBilinearRun(const WarpAffParam& p, int yBeg, int yEnd, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             constexpr int M = (N == 3 ? 4 : N);
             bool fill = p.NeedFill();
@@ -407,7 +377,8 @@ namespace Simd
             __m128i _n = _mm_set1_epi32(N);
             __m128i _s = _mm_set1_epi32(s);
             __m128i _border = InitBorder<N>(p.border);
-            for (int y = 0; y < (int)p.dstH; ++y)
+            dst += yBeg * p.dstS;
+            for (int y = yBeg; y < yEnd; ++y)
             {
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
                 if (fill)
@@ -430,7 +401,7 @@ namespace Simd
                         ByteBilinearPrepMain4(_x, _y, _m, _n, _s, offs + x, fx + 2 * x, fy + 2 * x);
                         _x = _mm_add_ps(_x, _4);
                     }
-                    ByteBilinearGather<M>(src, src + s, offs + iB, iE - iB, rb0 + 2 * M * iB, rb1 + 2 * M * iB);
+                    Base::ByteBilinearGather<M>(src, src + s, offs + iB, iE - iB, rb0 + 2 * M * iB, rb1 + 2 * M * iB);
                     for (x = iB; x < iEn; x += n)
                         ByteBilinearInterpMainN<N>(rb0 + x * M * 2, rb1 + x * M * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
                     for (; x < iE; ++x)

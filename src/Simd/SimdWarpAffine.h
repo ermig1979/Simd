@@ -84,17 +84,15 @@ namespace Simd
     class WarpAffine : Deletable
     {
     public:
-        WarpAffine(const WarpAffParam & param)
-            : _param(param)
-            , _first(true)
-        {
-        }
+        WarpAffine(const WarpAffParam& param);
 
         virtual void Run(const uint8_t * src, uint8_t * dst) = 0;
 
     protected:
         WarpAffParam _param;
         bool _first;
+        size_t _size, _threads;
+        Array8u _buf;
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -108,7 +106,7 @@ namespace Simd
         class WarpAffineNearest : public WarpAffine
         {
         public:
-            typedef void(*RunPtr)(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* offs);
+            typedef void(*RunPtr)(const WarpAffParam& p, int yBeg, int yEnd, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* offs);
 
             WarpAffineNearest(const WarpAffParam& param);
 
@@ -120,7 +118,6 @@ namespace Simd
             virtual void SetRange(const Base::Point * points);
 
             Array32i _beg, _end;
-            Array32u _buf;
             RunPtr _run;
         };
 
@@ -129,7 +126,7 @@ namespace Simd
         class WarpAffineByteBilinear : public WarpAffine
         {
         public:
-            typedef void(*RunPtr)(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf);
+            typedef void(*RunPtr)(const WarpAffParam& p, int yBeg, int yEnd, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf);
 
             WarpAffineByteBilinear(const WarpAffParam & param);
 
@@ -142,7 +139,6 @@ namespace Simd
 
             Array32i _range;
             int *_ib, *_ie, *_ob, *_oe;
-            Array8u _buf;
             RunPtr _run;
         };
 

@@ -202,6 +202,8 @@
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h" />
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h" />
+    <ClInclude Include="..\..\src\Simd\SimdWarpAffineCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
   </ItemGroup>

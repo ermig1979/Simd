@@ -25,6 +25,7 @@
 #define __SimdWarpAffineCommon_h__
 
 #include "Simd/SimdWarpAffine.h"
+#include "Simd/SimdCopyPixel.h"
 
 namespace Simd
 {
@@ -38,6 +39,24 @@ namespace Simd
             int ix = Simd::RestrictRange(Round(dx), 0, w);
             int iy = Simd::RestrictRange(Round(dy), 0, h);
             return iy * s + ix * N;
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template<int N> SIMD_INLINE void NearestGather(const uint8_t* src, uint32_t* offset, int count, uint8_t* dst)
+        {
+            int i = 0;
+            for (; i < count; i++, dst += N)
+                Base::CopyPixel<N>(src + offset[i], dst);
+        }
+
+        template<> SIMD_INLINE void NearestGather<3>(const uint8_t* src, uint32_t* offset, int count, uint8_t* dst)
+        {
+            int i = 0, count1 = count - 1;
+            for (; i < count1; i++, dst += 3)
+                Base::CopyPixel<4>(src + offset[i], dst);
+            if (i < count)
+                Base::CopyPixel<3>(src + offset[i], dst);
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -97,6 +116,18 @@ namespace Simd
             const uint8_t* s11 = y1 || x1 ? brd : src + s + N;
             for (int c = 0; c < N; c++)
                 dst[c] = (s00[c] * f00 + s01[c] * f01 + s10[c] * f10 + s11[c] * f11 + WA_BILINEAR_ROUND_TERM) >> WA_BILINEAR_SHIFT;
+        }
+        //-------------------------------------------------------------------------------------------------
+
+        template<int N> SIMD_INLINE void ByteBilinearGather(const uint8_t* src0, const uint8_t* src1, uint32_t* offset, int count, uint8_t* dst0, uint8_t* dst1)
+        {
+            int i = 0;
+            for (; i < count; i++, dst0 += 2 * N, dst1 += 2 * N)
+            {
+                int offs = offset[i];
+                Base::CopyPixel<N * 2>(src0 + offs, dst0);
+                Base::CopyPixel<N * 2>(src1 + offs, dst1);
+            }
         }
     }
 

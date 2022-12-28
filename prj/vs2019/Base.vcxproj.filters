@@ -522,6 +522,9 @@
     <ClInclude Include="..\..\src\Simd\SimdWarpAffineCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdFmadd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Base">

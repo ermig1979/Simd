@@ -24,8 +24,10 @@
 #include "Simd/SimdWarpAffine.h"
 #include "Simd/SimdWarpAffineCommon.h"
 #include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdBase.h"
 
 #include "Simd/SimdPoint.hpp"
+#include "Simd/SimdParallel.hpp"
 
 namespace Simd
 {
@@ -67,58 +69,60 @@ namespace Simd
 
     //---------------------------------------------------------------------------------------------
 
+    WarpAffine::WarpAffine(const WarpAffParam& param)
+        : _param(param)
+        , _first(true)
+        , _threads(Base::GetThreadNumber())
+    {
+    }
+
+    //---------------------------------------------------------------------------------------------
+
     namespace Base
     {
-        template<int N> void NearestRun(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
+        template<int N> SIMD_INLINE void FillBorder(uint8_t* dst, int count, const uint8_t* bs)
+        {
+            int i = 0, size = count * N;
+            for (int i = 0; i < size; i += N)
+                Base::CopyPixel<N>(bs, dst + i);
+        }
+
+        template<> SIMD_INLINE void FillBorder<3>(uint8_t* dst, int count, const uint8_t* bs)
+        {
+            int i = 0, size = count * 3, size3 = size - 3;
+            for (; i < size3; i += 3)
+                Base::CopyPixel<4>(bs, dst + i);
+            for (; i < size; i += 3)
+                Base::CopyPixel<3>(bs, dst + i);
+        }
+
+        //---------------------------------------------------------------------------------------------
+
+        template<int N> void NearestRun(const WarpAffParam& p, int yBeg, int yEnd, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
         {
             bool fill = p.NeedFill();
             int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 1, h = (int)p.srcH - 1;
-            for (int y = 0; y < (int)p.dstH; ++y)
+            dst += yBeg * p.dstS;
+            for (int y = yBeg; y < yEnd; ++y)
             {
                 int nose = beg[y], tail = end[y];
+                if (fill)
+                    FillBorder<N>(dst, nose, p.border);
                 if (N == 3)
                 {
-                    if (fill)
-                    {
-                        int x = 0, nose1 = nose - 1;
-                        for (; x < nose1; ++x)
-                            Base::CopyPixel<4>(p.border, dst + x * 3);
-                        for (; x < nose; ++x)
-                            Base::CopyPixel<3>(p.border, dst + x * 3);
-                    }
-                    {
-                        int x = nose, tail1 = tail - 1;
-                        for (; x < tail1; ++x)
-                            Base::CopyPixel<4>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
-                        for (; x < tail; ++x)
-                            Base::CopyPixel<3>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
-                    }
-                    if (fill)
-                    {
-                        int x = tail, width1 = width - 1;
-                        for (; x < width1; ++x)
-                            Base::CopyPixel<4>(p.border, dst + x * 3);
-                        for (; x < width; ++x)
-                            Base::CopyPixel<3>(p.border, dst + x * 3);
-                    }
+                    int x = nose, tail1 = tail - 1;
+                    for (; x < tail1; ++x)
+                        Base::CopyPixel<4>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
+                    for (; x < tail; ++x)
+                        Base::CopyPixel<3>(src + NearestOffset<3>(x, y, p.inv, w, h, s), dst + x * 3);
                 }
                 else
                 {
-                    if (fill)
-                    {
-                        for (int x = 0; x < nose; ++x)
-                            CopyPixel<N>(p.border, dst + x * N);
-                    }
-                    {
-                        for (int x = nose; x < tail; ++x)
-                            CopyPixel<N>(src + NearestOffset<N>(x, y, p.inv, w, h, s), dst + x * N);
-                    }
-                    if (fill)
-                    {
-                        for (int x = tail; x < width; ++x)
-                            CopyPixel<N>(p.border, dst + x * N);
-                    }
+                    for (int x = nose; x < tail; ++x)
+                        CopyPixel<N>(src + NearestOffset<N>(x, y, p.inv, w, h, s), dst + x * N);
                 }
+                if (fill)
+                    FillBorder<N>(dst + tail * N, width - tail, p.border);
                 dst += p.dstS;
             }
         }
@@ -141,7 +145,12 @@ namespace Simd
         {
             if(_first)
                 Init();
-            _run(_param, _beg.data, _end.data, src, dst, _buf.data);
+
+            Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t begin, size_t end)
+            {
+                _run(_param, (int)begin, (int)end, _beg.data, _end.data, src, dst, (uint32_t*)(_buf.data + thread * _size));
+            }, _threads, 1);
+
             _first = false;
         }
 
@@ -155,7 +164,8 @@ namespace Simd
             const WarpAffParam& p = _param;
             _beg.Resize(p.dstH);
             _end.Resize(p.dstH);
-            _buf.Resize(AlignHi(p.dstW, p.align) + p.align);
+            _size = (AlignHi(p.dstW, p.align) + p.align) * 4;
+            _buf.Resize(_size * _threads);
             float w = (float)(p.srcW - 1), h = (float)(p.srcH - 1);
             Point points[4];
             points[0] = Conv(0, 0, p.mat);
@@ -212,8 +222,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<int N> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
+        template<int N> void ByteBilinearRun(const WarpAffParam& p, int yBeg, int yEnd, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
+            constexpr int M = (N == 3 ? 4 : N);
             bool fill = p.NeedFill();
             int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
             size_t wa = AlignHi(p.dstW, p.align);
@@ -221,14 +232,14 @@ namespace Simd
             uint8_t* fx = (uint8_t*)(offs + wa);
             uint16_t* fy = (uint16_t*)(fx + wa * 2);
             uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
-            uint8_t* rb1 = (uint8_t*)(rb0 + wa * N * 2);
-            for (int y = 0; y < (int)p.dstH; ++y)
+            uint8_t* rb1 = (uint8_t*)(rb0 + wa * M * 2);
+            dst += yBeg * p.dstS;
+            for (int y = yBeg; y < yEnd; ++y)
             {
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
                 if (fill)
                 {
-                    for (int x = 0; x < oB; ++x)
-                        CopyPixel<N>(p.border, dst + x * N);
+                    FillBorder<N>(dst, oB, p.border);
                     for (int x = oB; x < iB; ++x)
                         ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
                 }
@@ -240,85 +251,20 @@ namespace Simd
                 {
                     for (int x = iB; x < iE; ++x)
                         Base::ByteBilinearPrepMain(x, y, p.inv, N, s, offs + x, fx + 2 * x, fy + 2 * x);
+                    ByteBilinearGather<M>(src, src + s, offs + iB, iE - iB, rb0 + 2 * M * iB, rb1 + 2 * M * iB);
                     for (int x = iB; x < iE; ++x)
-                    {
-                        int o = offs[x];
-                        Base::CopyPixel<N * 2>(src + o + 0, rb0 + x * N * 2);
-                        Base::CopyPixel<N * 2>(src + o + s, rb1 + x * N * 2);
-                    }
-                    for (int x = iB; x < iE; ++x)
-                        Base::ByteBilinearInterpMain<N>(rb0 + x * N * 2, rb1 + x * N * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
+                        Base::ByteBilinearInterpMain<N>(rb0 + x * M * 2, rb1 + x * M * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
                 }
                 if (fill)
                 {
                     for (int x = iE; x < oE; ++x)
                         ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, p.border, dst + x * N);
-                    for (int x = oE; x < width; ++x)
-                        CopyPixel<N>(p.border, dst + x * N);
+                    FillBorder<N>(dst + oE * N, width - oE, p.border);
                 }
                 else
                 {
                     for (int x = iE; x < oE; ++x)
                         ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
-                }
-                dst += p.dstS;
-            }
-        }
-
-        template<> void ByteBilinearRun<3>(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
-        {
-            bool fill = p.NeedFill();
-            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
-            size_t wa = AlignHi(p.dstW, p.align);
-            uint32_t* offs = (uint32_t*)buf;
-            uint8_t* fx = (uint8_t*)(offs + wa);
-            uint16_t* fy = (uint16_t*)(fx + wa * 2);
-            uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
-            uint8_t* rb1 = (uint8_t*)(rb0 + wa * 8);
-            for (int y = 0; y < (int)p.dstH; ++y)
-            {
-                int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
-                if (fill)
-                {
-                    int x = 0, oB1 = oB - 1;
-                    for (; x < oB1; ++x)
-                        Base::CopyPixel<4>(p.border, dst + x * 3);
-                    for (; x < oB; ++x)
-                        Base::CopyPixel<3>(p.border, dst + x * 3);
-                    for (int x = oB; x < iB; ++x)
-                        ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, p.border, dst + x * 3);
-                }
-                else
-                {
-                    for (int x = oB; x < iB; ++x)
-                        ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, dst + x * 3, dst + x * 3);
-                }
-                {
-                    for (int x = iB; x < iE; ++x)
-                        Base::ByteBilinearPrepMain(x, y, p.inv, 3, s, offs + x, fx + 2 * x, fy + 2 * x);
-                    for (int x = iB; x < iE; ++x)
-                    {
-                        int o = offs[x];
-                        Base::CopyPixel<8>(src + o + 0, rb0 + x * 8);
-                        Base::CopyPixel<8>(src + o + s, rb1 + x * 8);
-                    }
-                    for (int x = iB; x < iE; ++x)
-                        Base::ByteBilinearInterpMain<3>(rb0 + x * 8, rb1 + x * 8, fx + 2 * x, fy + 2 * x, dst + x * 3);
-                }
-                if (fill)
-                {
-                    for (int x = iE; x < oE; ++x)
-                        ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, p.border, dst + x * 3);
-                    int x = oE, width1 = width - 1;
-                    for (; x < width1; ++x)
-                        Base::CopyPixel<4>(p.border, dst + x * 3);
-                    for (; x < width; ++x)
-                        Base::CopyPixel<3>(p.border, dst + x * 3);
-                }
-                else
-                {
-                    for (int x = iE; x < oE; ++x)
-                        ByteBilinearInterpEdge<3>(x, y, p.inv, w, h, s, src, dst + x * 3, dst + x * 3);
                 }
                 dst += p.dstS;
             }
@@ -342,7 +288,12 @@ namespace Simd
         {
             if (_first)
                 Init();
-            _run(_param, _ib, _ie, _ob, _oe, src, dst, _buf.data);
+
+            Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t begin, size_t end)
+            {
+                _run(_param, (int)begin, (int)end, _ib, _ie, _ob, _oe, src, dst, _buf.data + thread * _size);
+            }, _threads, 1);
+
             _first = false;
         }
 
@@ -355,7 +306,8 @@ namespace Simd
             _ob = _range.data + 2 * p.dstH;
             _oe = _range.data + 3 * p.dstH;
             size_t na = (p.channels == 3 ? 4 : p.channels), wa = AlignHi(p.dstW, p.align) + p.align;
-            _buf.Resize(Simd::Max(wa * 10 + wa * na * 4, p.dstH * 8));
+            _size = Simd::Max(wa * 10 + wa * na * 4, p.dstH * 8);
+            _buf.Resize(_size * _threads);
             float z, h, w, e = 0.0001f;
             Point rect[4];
             z = -1.0f + e, w = (float)(p.srcW + 0) - e, h = (float)(p.srcH + 0) - e;

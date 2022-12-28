@@ -262,6 +262,42 @@ namespace Test
 
 namespace Test
 {
+    void WarpAffineSimd(const View& src, View& dst, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border, const View& buf)
+    {
+        void* context = SimdWarpAffineInit(src.width, src.height, src.stride, dst.width, dst.height, dst.stride, channels, mat, flags, border);
+        if (context)
+        {
+            if ((flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpBilinear && (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderTransparent)
+                Simd::Copy(buf, dst);
+            {
+                TEST_PERFORMANCE_TEST("WarpAffineSimd");
+                SimdWarpAffineRun(context, src.data, dst.data);
+            }
+            SimdRelease(context);
+        }
+    }
+
+    void WarpAffineOpenCv(const View& src, View& dst, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border, const View& buf)
+    {
+        cv::Mat cSrc = src, cDst = dst;
+        cv::Mat cMat(2, 3, CV_32FC1);
+        for (int i = 0; i < 6; ++i)
+            ((float*)cMat.data)[i] = mat[i];
+        int cFlags = (flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpNearest ?
+            cv::INTER_NEAREST : cv::INTER_LINEAR;
+        int borderMode = (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderConstant ?
+            cv::BORDER_CONSTANT : cv::BORDER_TRANSPARENT;
+        cv::Scalar_<float> cBorder;
+        for (int i = 0; i < 4; ++i)
+            cBorder[i] = border[i];
+        if ((flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpBilinear && (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderTransparent)
+            Simd::Copy(buf, dst);
+        {
+            TEST_PERFORMANCE_TEST("WarpAffineOpenCV");
+            cv::warpAffine(cSrc, cDst, cMat, dst.Size(), cFlags, borderMode, cBorder);
+        }
+    }
+
     bool WarpAffineOpenCvSpecialTest(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags)
     {
         bool result = true;
@@ -279,51 +315,34 @@ namespace Test
         FillPicture(src);
         Simd::DrawRectangle(src, Rect(0, 0, srcW - 1, srcH - 1), Simd::Pixel::Bgr24(255, 255, 0), 1);
 
+        View buf(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         View dst1(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         View dst2(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
+        Simd::Fill(buf, 0x77);
         Simd::Fill(dst1, 0x77);
         Simd::Fill(dst2, 0x77);
 
         uint8_t border[4] = { 11, 33, 55, 77 };
 
-        {
-            TEST_PERFORMANCE_TEST("WarpAffineSimd");
-            void* context = SimdWarpAffineInit(src.width, src.height, src.stride, dst1.width, dst1.height, dst1.stride, channels, mat, flags, border);
-            if (context)
-            {
-                SimdWarpAffineRun(context, src.data, dst1.data);
-                SimdRelease(context);
-            }
-        }
-
         cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_WARNING);
         cv::setNumThreads((int)SimdGetThreadNumber());
 
-        cv::Mat cSrc = src, cDst = dst2;
-        cv::Mat cMat(2, 3, CV_32FC1);
-        for (int i = 0; i < 6; ++i)
-            ((float*)cMat.data)[i] = mat[i];
-        int cFlags = (flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpNearest ?
-            cv::INTER_NEAREST : cv::INTER_LINEAR;
-        int borderMode = (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderConstant ?
-            cv::BORDER_CONSTANT : cv::BORDER_TRANSPARENT;
-        cv::Scalar_<float> cBorder;
-        for (int i = 0; i < 4; ++i)
-            cBorder[i] = border[i];
+        TEST_ALIGN(SIMD_ALIGN);
 
-        {
-            TEST_PERFORMANCE_TEST("WarpAffineOpenCV");
-            cv::warpAffine(cSrc, cDst, cMat, dst2.Size(), cFlags, borderMode, cBorder);
-        }
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(WarpAffineSimd(src, dst1, channels, mat, flags, border, buf));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(WarpAffineOpenCv(src, dst2, channels, mat, flags, border, buf));
 
         result = result && Compare(dst1, dst2, 0, true, 64);
 
-        if (format == View::Bgr24)
+#if defined(TEST_WARP_AFFINE_REAL_IMAGE)
+        if (!result)
         {
             SaveImage(src, String("_src"));
             SaveImage(dst1, String("dst_simd"));
             SaveImage(dst2, String("dst_ocv"));
         }
+#endif
 
         return result;
     }

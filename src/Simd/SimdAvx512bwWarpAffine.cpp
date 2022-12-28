@@ -197,7 +197,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<int N, bool soft> void NearestRun(const WarpAffParam& p, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
+        template<int N, bool soft> void NearestRun(const WarpAffParam& p, int yBeg, int yEnd, const int32_t* beg, const int32_t* end, const uint8_t* src, uint8_t* dst, uint32_t* buf)
         {
             bool fill = p.NeedFill();
             int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 1, h = (int)p.srcH - 1;
@@ -211,7 +211,8 @@ namespace Simd
             __m512i _n = _mm512_set1_epi32(N);
             __m512i _s = _mm512_set1_epi32(s);
             __m512i _border = InitBorder<N>(p.border);
-            for (int y = 0; y < (int)p.dstH; ++y)
+            dst += yBeg * p.dstS;
+            for (int y = yBeg; y < yEnd; ++y)
             {
                 int nose = beg[y], tail = end[y];
                 {
@@ -617,7 +618,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<int N, bool soft> void ByteBilinearRun(const WarpAffParam& p, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
+        template<int N, bool soft> void ByteBilinearRun(const WarpAffParam& p, int yBeg, int yEnd, const int* ib, const int* ie, const int* ob, const int* oe, const uint8_t* src, uint8_t* dst, uint8_t* buf)
         {
             constexpr int M = (N == 3 ? 4 : N);
             bool fill = p.NeedFill();
@@ -641,7 +642,8 @@ namespace Simd
                 _me[i] = Sse41::SetFloat(p.inv[i + 0], p.inv[i + 3]);
             __m128i _wh = Sse41::SetInt32(w, h);
             __m128i _ns = _mm_setr_epi32(0, N, s, s + N);
-            for (int y = 0; y < (int)p.dstH; ++y)
+            dst += yBeg * p.dstS;
+            for (int y = yBeg; y < yEnd; ++y)
             {
                 int iB = ib[y], iE = ie[y], oB = ob[y], oE = oe[y];
                 __m512 _y = _mm512_cvtepi32_ps(_mm512_set1_epi32(y));
