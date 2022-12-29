@@ -2283,6 +2283,70 @@ namespace Simd
         SimdNormalizeHistogram(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
+    /*! @ingroup histogram
+
+        \fn void uint8_t Mean(const uint32_t* histogram)
+
+        \short Calculates mean from image histogram.
+
+        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integre values).
+        \return value of mean for image with given histogram.
+    */
+    SIMD_INLINE double Mean(const uint32_t* histogram)
+    {
+        const int histogramSize = 256;
+        uint32_t totalCount = 0;
+        uint64_t totalSum = 0;
+        for (int i = 0; i < histogramSize; ++i)
+        {
+            totalCount += histogram[i];
+            totalSum += histogram[i] * i;
+        }
+        return double(totalSum) / double(totalCount);
+    }
+
+    /*! @ingroup histogram
+
+        \fn void uint8_t OtsuThreshold(const uint32_t* histogram)
+
+        \short Calculates Otsu threhsold from image histogram.
+
+        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integre values).
+        \return value of Otsu threshold for image with given histogram.
+    */
+    SIMD_INLINE uint8_t OtsuThreshold(const uint32_t* histogram)
+    {
+        const int histogramSize = 256;
+        uint32_t totalCount = 0;
+        uint64_t totalSum = 0;
+        for (int i = 0; i < histogramSize; ++i)
+        {
+            totalCount += histogram[i];
+            totalSum += histogram[i] * i;
+        }
+        int bestThreshold = 0;
+        double bestSigma = 0.0;
+        int firstCount = 0;
+        int firstSum = 0;
+        for (int threshold = 0; threshold < histogramSize - 1; ++threshold)
+        {
+            firstCount += histogram[threshold];
+            firstSum += threshold * histogram[threshold];
+            double firstProb = firstCount / (double)totalCount;
+            double secondProb = 1.0 - firstProb;
+            double firstMean = firstSum / (double)firstCount;
+            double secondMean = (totalSum - firstSum) / (double)(totalCount - firstCount);
+            double meanDelta = firstMean - secondMean;
+            double sigma = firstProb * secondProb * meanDelta * meanDelta;
+            if (sigma > bestSigma)
+            {
+                bestSigma = sigma;
+                bestThreshold = threshold;
+            }
+        }
+        return (uint8_t)bestThreshold;
+    }
+
     /*! @ingroup hog
 
         \fn void SimdHogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms);
