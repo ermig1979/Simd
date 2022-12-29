@@ -8047,6 +8047,8 @@ extern "C"
         }
         \endverbatim
 
+        \note This function has a C++ wrapper Simd::WarpAffine(const View<A>& src, const float * mat, View<A>& dst, SimdWarpAffineFlags flags = SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant, const uint8_t* border = NULL).
+
         \param [in] srcW - a width of input image.
         \param [in] srcH - a height of input image.
         \param [in] srcS - a row size (in bytes) of the input image.
@@ -8070,6 +8072,8 @@ extern "C"
         \fn void SimdWarpAffineRun(const void* context, const uint8_t* src, uint8_t* dst);
 
         \short Performs warp affine for current image.
+
+        \note This function has a C++ wrapper Simd::WarpAffine(const View<A>& src, const float * mat, View<A>& dst, SimdWarpAffineFlags flags = SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant, const uint8_t* border = NULL).
 
         \param [in] context - a warp affine context. It must be created by function ::SimdWarpAffineInit and released by function ::SimdRelease.
         \param [in] src - a pointer to pixels data of the original input image.

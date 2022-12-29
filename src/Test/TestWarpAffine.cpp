@@ -264,17 +264,10 @@ namespace Test
 {
     void WarpAffineSimd(const View& src, View& dst, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border, const View& buf)
     {
-        void* context = SimdWarpAffineInit(src.width, src.height, src.stride, dst.width, dst.height, dst.stride, channels, mat, flags, border);
-        if (context)
-        {
-            if ((flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpBilinear && (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderTransparent)
-                Simd::Copy(buf, dst);
-            {
-                TEST_PERFORMANCE_TEST("WarpAffineSimd");
-                SimdWarpAffineRun(context, src.data, dst.data);
-            }
-            SimdRelease(context);
-        }
+        if ((flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpBilinear && (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderTransparent)
+            Simd::Copy(buf, dst);
+        TEST_PERFORMANCE_TEST("WarpAffineSimd");
+        Simd::WarpAffine(src, mat, dst, flags, border);
     }
 
     void WarpAffineOpenCv(const View& src, View& dst, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border, const View& buf)
@@ -292,10 +285,8 @@ namespace Test
             cBorder[i] = border[i];
         if ((flags & SimdWarpAffineInterpMask) == SimdWarpAffineInterpBilinear && (flags & SimdWarpAffineBorderMask) == SimdWarpAffineBorderTransparent)
             Simd::Copy(buf, dst);
-        {
-            TEST_PERFORMANCE_TEST("WarpAffineOpenCV");
-            cv::warpAffine(cSrc, cDst, cMat, dst.Size(), cFlags, borderMode, cBorder);
-        }
+        TEST_PERFORMANCE_TEST("WarpAffineOpenCV");
+        cv::warpAffine(cSrc, cDst, cMat, dst.Size(), cFlags, borderMode, cBorder);
     }
 
     bool WarpAffineOpenCvSpecialTest(size_t srcW, size_t srcH, size_t dstW, size_t dstH, size_t channels, const float* mat, SimdWarpAffineFlags flags)

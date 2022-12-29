@@ -4450,6 +4450,35 @@ namespace Simd
         SimdUyvy422ToBgr(uyvy.data, uyvy.stride, uyvy.width, uyvy.height, y.data, y.stride, u.data, u.stride, v.data, v.stride);
     }
 
+    /*! @ingroup warp_affine
+
+        \fn void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, SimdWarpAffineFlags flags = SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant, const uint8_t* border = NULL)
+
+        \short Performs warp affine for current image.
+
+        \note This function is a C++ wrapper for functions ::SimdWarpAffineInit and ::SimdWarpAffineRun.
+
+        \param [in] src - an input image.
+        \param [in] mat - a pointer to 2x3 matrix with coefficients of affine warp.
+        \param [in, out] dst - an output image.
+        \param [in] flags - a flags of algorithm parameters. By default is equal to ::SimdWarpAffineChannelByte | ::SimdWarpAffineInterpBilinear | ::SimdWarpAffineBorderConstant.
+        \param [in] border - a pointer to to the array with color of border. The size of the array mast be equal to channels.
+                             It parameter is actual for SimdWarpAffineBorderConstant flag. By default is equal to NULL.
+    */
+    template<template<class> class A> SIMD_INLINE void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, 
+        SimdWarpAffineFlags flags = SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant, const uint8_t* border = NULL)
+    {
+        assert(src.format == dst.format && src.ChannelSize() == 1);
+        assert((flags & SimdWarpAffineChannelMask) == SimdWarpAffineChannelByte);
+
+        void* context = SimdWarpAffineInit(src.width, src.height, src.stride, dst.width, dst.height, dst.stride, src.ChannelCount(), mat, flags, border);
+        if (context)
+        {
+            SimdWarpAffineRun(context, src.data, dst.data);
+            SimdRelease(context);
+        }
+    }
+
     /*! @ingroup yuv_conversion
 
         \fn void Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra)
