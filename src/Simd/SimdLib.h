@@ -2713,6 +2713,8 @@ extern "C"
 
         \note This function has a C++ wrapper Simd::EdgeBackgroundGrowRangeSlow(const View<A>& value, View<A>& background).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
@@ -2720,7 +2722,7 @@ extern "C"
         \param [in, out] background - a pointer to pixels data of feature value of edge dynamic background.
         \param [in] backgroundStride - a row size of the background image.
     */
-    SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+    SIMD_API SIMD_DEPRECATED void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
     /*! @ingroup edge_background
@@ -2740,6 +2742,8 @@ extern "C"
 
         \note This function has a C++ wrapper Simd::EdgeBackgroundGrowRangeFast(const View<A>& value, View<A>& background).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
@@ -2747,7 +2751,7 @@ extern "C"
         \param [in, out] background - a pointer to pixels data of feature value of edge dynamic background.
         \param [in] backgroundStride - a row size of the background image.
     */
-    SIMD_API void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+    SIMD_API SIMD_DEPRECATED void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
     /*! @ingroup edge_background
@@ -2767,6 +2771,8 @@ extern "C"
 
         \note This function has a C++ wrapper Simd::EdgeBackgroundIncrementCount(const View<A>& value, const View<A>& backgroundValue, View<A>& backgroundCount).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
@@ -2776,7 +2782,7 @@ extern "C"
         \param [in, out] backgroundCount - a pointer to pixels data of count of feature of edge dynamic background.
         \param [in] backgroundCountStride - a row size of the backgroundCount image.
     */
-    SIMD_API void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+    SIMD_API SIMD_DEPRECATED void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
 
     /*! @ingroup edge_background
@@ -2798,6 +2804,8 @@ extern "C"
 
         \note This function has a C++ wrapper Simd::EdgeBackgroundAdjustRange(View<A>& backgroundCount, View<A>& backgroundValue, uint8_t threshold).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in, out] backgroundCount - a pointer to pixels data of count of feature of edge dynamic background.
         \param [in] backgroundCountStride - a row size of the backgroundCount image.
         \param [in] width - an image width.
@@ -2806,7 +2814,7 @@ extern "C"
         \param [in] backgroundValueStride - a row size of the backgroundValue image.
         \param [in] threshold - a count threshold.
     */
-    SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+    SIMD_API SIMD_DEPRECATED void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
         uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
 
     /*! @ingroup edge_background
@@ -2831,6 +2839,8 @@ extern "C"
 
         \note This function has a C++ wrapper Simd::EdgeBackgroundAdjustRange(View<A>& backgroundCount, View<A>& backgroundValue, uint8_t threshold, const View<A>& mask).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in, out] backgroundCount - a pointer to pixels data of count of feature of edge dynamic background.
         \param [in] backgroundCountStride - a row size of the backgroundCount image.
         \param [in] width - an image width.
@@ -2841,7 +2851,7 @@ extern "C"
         \param [in] mask - a pointer to pixels data of adjust range mask.
         \param [in] maskStride - a row size of the mask image.
     */
-    SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+    SIMD_API SIMD_DEPRECATED void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
         uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
     /*! @ingroup edge_background
@@ -2861,6 +2871,8 @@ extern "C"
 
         \note This function has a C++ wrapper Simd::EdgeBackgroundShiftRange(const View<A>& value, View<A>& background).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
@@ -2868,7 +2880,7 @@ extern "C"
         \param [in, out] background - a pointer to pixels data of feature of edge dynamic background.
         \param [in] backgroundStride - a row size of the background image.
     */
-    SIMD_API void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+    SIMD_API SIMD_DEPRECATED void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
     /*! @ingroup edge_background
@@ -2889,6 +2901,8 @@ extern "C"
 
         \note This function has a C++ wrapper Simd::EdgeBackgroundShiftRange(const View<A>& value, View<A>& background, const View<A>& mask).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
@@ -2898,7 +2912,7 @@ extern "C"
         \param [in] mask - a pointer to pixels data of shift range mask.
         \param [in] maskStride - a row size of the mask image.
     */
-    SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+    SIMD_API SIMD_DEPRECATED void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
     /*! @ingroup filling

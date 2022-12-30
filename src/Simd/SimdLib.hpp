@@ -1744,10 +1744,12 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdEdgeBackgroundGrowRangeSlow.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a current feature value.
         \param [in, out] background - a feature value of edge dynamic background.
     */
-    template<template<class> class A> SIMD_INLINE void EdgeBackgroundGrowRangeSlow(const View<A>& value, View<A>& background)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void EdgeBackgroundGrowRangeSlow(const View<A>& value, View<A>& background)
     {
         assert(Compatible(value, background) && value.format == View<A>::Gray8);
 
@@ -1771,10 +1773,12 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdEdgeBackgroundGrowRangeFast.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a current feature value.
         \param [in, out] background - a feature value of edge dynamic background.
     */
-    template<template<class> class A> SIMD_INLINE void EdgeBackgroundGrowRangeFast(const View<A>& value, View<A>& background)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void EdgeBackgroundGrowRangeFast(const View<A>& value, View<A>& background)
     {
         assert(Compatible(value, background) && value.format == View<A>::Gray8);
 
@@ -1798,11 +1802,13 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdEdgeBackgroundIncrementCount.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a current feature value.
         \param [in] backgroundValue - a value of feature of edge dynamic background.
         \param [in, out] backgroundCount - a count of feature of edge dynamic background.
     */
-    template<template<class> class A> SIMD_INLINE void EdgeBackgroundIncrementCount(const View<A>& value, const View<A>& backgroundValue, View<A>& backgroundCount)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void EdgeBackgroundIncrementCount(const View<A>& value, const View<A>& backgroundValue, View<A>& backgroundCount)
     {
         assert(Compatible(value, backgroundValue, backgroundCount) && value.format == View<A>::Gray8);
 
@@ -1829,11 +1835,13 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdEdgeBackgroundAdjustRange.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in, out] backgroundCount - a count of feature of edge dynamic background.
         \param [in, out] backgroundValue - a value of feature of edge dynamic background.
         \param [in] threshold - a count threshold.
     */
-    template<template<class> class A> SIMD_INLINE void EdgeBackgroundAdjustRange(View<A>& backgroundCount, View<A>& backgroundValue, uint8_t threshold)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void EdgeBackgroundAdjustRange(View<A>& backgroundCount, View<A>& backgroundValue, uint8_t threshold)
     {
         assert(Compatible(backgroundCount, backgroundValue) && backgroundCount.format == View<A>::Gray8);
 
@@ -1863,12 +1871,14 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdEdgeBackgroundAdjustRangeMasked.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in, out] backgroundCount - a count of feature of edge dynamic background.
         \param [in, out] backgroundValue - a value of feature of edge dynamic background.
         \param [in] threshold - a count threshold.
         \param [in] mask - an adjust range mask.
     */
-    template<template<class> class A> SIMD_INLINE void EdgeBackgroundAdjustRange(View<A>& backgroundCount, View<A>& backgroundValue, uint8_t threshold, const View<A>& mask)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void EdgeBackgroundAdjustRange(View<A>& backgroundCount, View<A>& backgroundValue, uint8_t threshold, const View<A>& mask)
     {
         assert(Compatible(backgroundCount, backgroundValue, mask) && backgroundCount.format == View<A>::Gray8);
 
@@ -1893,10 +1903,12 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdEdgeBackgroundShiftRange.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a current feature value.
         \param [in, out] background - a feature of the edge dynamic background.
     */
-    template<template<class> class A> SIMD_INLINE void EdgeBackgroundShiftRange(const View<A>& value, View<A>& background)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void EdgeBackgroundShiftRange(const View<A>& value, View<A>& background)
     {
         assert(Compatible(value, background) && value.format == View<A>::Gray8);
 
@@ -1921,11 +1933,13 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdEdgeBackgroundShiftRangeMasked.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] value - a current feature value.
         \param [in, out] background - a feature of the edge dynamic background.
         \param [in] mask - a shift range mask.
     */
-    template<template<class> class A> SIMD_INLINE void EdgeBackgroundShiftRange(const View<A>& value, View<A>& background, const View<A>& mask)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void EdgeBackgroundShiftRange(const View<A>& value, View<A>& background, const View<A>& mask)
     {
         assert(Compatible(value, background, mask) && value.format == View<A>::Gray8);
 
