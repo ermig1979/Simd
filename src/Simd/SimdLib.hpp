@@ -3012,6 +3012,35 @@ namespace Simd
         SimdVectorProduct(vertical, horizontal, dst.data, dst.stride, dst.width, dst.height);
     }
 
+    /*! @ingroup recursive_bilateral_filter
+
+        \fn void RecursiveBilateralFilter(const View<A>& src, View<A>& dst, float sigmaSpatial, float sigmaRange, SimdRecursiveBilateralFilterFlags flags = SimdRecursiveBilateralFilterFast)
+
+        \short Performs image recursive bilateral filtering.
+
+        All images must have the same width, height and pixel format.
+
+        \note This function is a C++ wrapper for functionû ::SimdRecursiveBilateralFilterInit and ::SimdRecursiveBilateralFilterRun.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a filtered output image.
+        \param [in] sigmaSpatial - a sigma spatial parameter.
+        \param [in] sigmaRange - a sigma range parameter.
+        \param [in] flags - a flags of algorithm parameters. By default it is equal to ::SimdRecursiveBilateralFilterFast.
+    */
+    template<template<class> class A> SIMD_INLINE void RecursiveBilateralFilter(const View<A>& src, View<A>& dst, 
+        float sigmaSpatial, float sigmaRange, SimdRecursiveBilateralFilterFlags flags = SimdRecursiveBilateralFilterFast)
+    {
+        assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+        void* filter = SimdRecursiveBilateralFilterInit(src.width, src.height, src.ChannelCount(), &sigmaSpatial, &sigmaRange, flags);
+        if (filter)
+        {
+            SimdRecursiveBilateralFilterRun(filter, src.data, src.stride, dst.data, dst.stride);
+            SimdRelease(filter);
+        }
+    }
+
     /*! @ingroup resizing
 
         \fn void ReduceGray2x2(const View<A>& src, View<A>& dst)

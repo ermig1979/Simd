@@ -5162,7 +5162,7 @@ extern "C"
         \verbatim
         float sigmaSpatial = 0.2f, sigmaRange = 0.2f;
         void* filter = SimdRecursiveBilateralFilterInit(width, height, channels, &sigmaSpatial, &sigmaRange, SimdRecursiveBilateralFilterFast);
-        if (resizer)
+        if (filter)
         {
              SimdRecursiveBilateralFilterRun(filter, src, srcStride, dst, dstStride);
              SimdRelease(filter);

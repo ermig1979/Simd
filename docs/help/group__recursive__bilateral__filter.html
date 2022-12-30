@@ -77,6 +77,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga76a84d0867dc68986bb7e32ca811b429"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__recursive__bilateral__filter.html#ga76a84d0867dc68986bb7e32ca811b429">SimdRecursiveBilateralFilterRun</a> (const void *filter, const uint8_t *src, size_t srcStride, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga76a84d0867dc68986bb7e32ca811b429"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs image recursive bilateral filtering.  <a href="group__recursive__bilateral__filter.html#ga76a84d0867dc68986bb7e32ca811b429">More...</a><br /></td></tr>
 <tr class="separator:ga76a84d0867dc68986bb7e32ca811b429"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac92ed57f863639dfc1fcfab6a065dd37"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:gac92ed57f863639dfc1fcfab6a065dd37"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__recursive__bilateral__filter.html#gac92ed57f863639dfc1fcfab6a065dd37">RecursiveBilateralFilter</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, float sigmaSpatial, float sigmaRange, <a class="el" href="group__recursive__bilateral__filter.html#gaf478bdbccbc789303a50cde967337d00">SimdRecursiveBilateralFilterFlags</a> flags=<a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00a7d31cb01f6d14554b3a3cbe5d3aca9d4">SimdRecursiveBilateralFilterFast</a>)</td></tr>
+<tr class="memdesc:gac92ed57f863639dfc1fcfab6a065dd37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs image recursive bilateral filtering.  <a href="group__recursive__bilateral__filter.html#gac92ed57f863639dfc1fcfab6a065dd37">More...</a><br /></td></tr>
+<tr class="separator:gac92ed57f863639dfc1fcfab6a065dd37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Recursive bilateral image filters. </p>
@@ -166,7 +170,7 @@ Functions</h2></td></tr>
 <p>Creates Recursive bilateral filter context. </p>
 <p >An using example: </p><pre class="fragment">float sigmaSpatial = 0.2f, sigmaRange = 0.2f;
 void* filter = SimdRecursiveBilateralFilterInit(width, height, channels, &amp;sigmaSpatial, &amp;sigmaRange, SimdRecursiveBilateralFilterFast);
-if (resizer)
+if (filter)
 {
      SimdRecursiveBilateralFilterRun(filter, src, srcStride, dst, dstStride);
      SimdRelease(filter);
@@ -238,6 +242,66 @@ if (resizer)
     <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size (in bytes) of the input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the filtered output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size (in bytes) of the output image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gac92ed57f863639dfc1fcfab6a065dd37" name="gac92ed57f863639dfc1fcfab6a065dd37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac92ed57f863639dfc1fcfab6a065dd37">&#9670;&nbsp;</a></span>RecursiveBilateralFilter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RecursiveBilateralFilter </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>sigmaSpatial</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>sigmaRange</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__recursive__bilateral__filter.html#gaf478bdbccbc789303a50cde967337d00">SimdRecursiveBilateralFilterFlags</a>&#160;</td>
+          <td class="paramname"><em>flags</em> = <code><a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00a7d31cb01f6d14554b3a3cbe5d3aca9d4">SimdRecursiveBilateralFilterFast</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs image recursive bilateral filtering. </p>
+<p >All images must have the same width, height and pixel format.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for functionû <a class="el" href="group__recursive__bilateral__filter.html#ga7000a8eba5de2aa5f2f130f08f335e43" title="Creates Recursive bilateral filter context.">SimdRecursiveBilateralFilterInit</a> and <a class="el" href="group__recursive__bilateral__filter.html#ga76a84d0867dc68986bb7e32ca811b429" title="Performs image recursive bilateral filtering.">SimdRecursiveBilateralFilterRun</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a filtered output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sigmaSpatial</td><td>- a sigma spatial parameter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sigmaRange</td><td>- a sigma range parameter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>- a flags of algorithm parameters. By default it is equal to <a class="el" href="group__recursive__bilateral__filter.html#ggaf478bdbccbc789303a50cde967337d00a7d31cb01f6d14554b3a3cbe5d3aca9d4">SimdRecursiveBilateralFilterFast</a>. </td></tr>
   </table>
   </dd>
 </dl>
