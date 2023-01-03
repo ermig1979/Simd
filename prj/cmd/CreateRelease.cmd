@@ -51,6 +51,10 @@ erase %TMP_DIR%\prj\cmd\GenerateHelp.cmd /q /s /f
 erase %TMP_DIR%\prj\vs*\*.txt /q /s /f
 erase %TMP_DIR%\prj\vs2019\.vs\* /q /s /f
 rmdir %TMP_DIR%\prj\vs2019\.vs /q /s
+erase %TMP_DIR%\prj\vs2022\.vs\* /q /s /f
+rmdir %TMP_DIR%\prj\vs2022\.vs /q /s
+erase %TMP_DIR%\prj\vs2022\_out\* /q /s /f
+rmdir %TMP_DIR%\prj\vs2022\_out /q /s
 erase %TMP_DIR%\docs\*.tmp /q /s /f
 
 echo Create ZIP archive:
