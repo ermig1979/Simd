@@ -55,6 +55,13 @@ namespace Simd
         float f32[16][16];
     };
 
+    struct Tile1024
+    {
+        uint16_t row;
+        uint16_t col;
+        TileReg tile;
+    };
+
     const size_t TileRegCount = 8;
 
 #ifdef SIMD_AVX512BW_ENABLE    
@@ -68,13 +75,23 @@ namespace Simd
 
         void TileZero(int dst);
 
+        void TileZero(Tile1024* dst);
+
         void TileLoad(int dst, const void* base, int stride);
+
+        void TileLoad(Tile1024* dst, const void* base, int stride);
 
         void TileStore(int src, void* base, int stride);
 
+        void TileStore(void* base, int stride, const Tile1024& src);
+
         void TileMatMulBf16(int dst, int a, int b);
 
+        void TileMatMulBf16(Tile1024* dst, const Tile1024& a, const Tile1024& b);
+
         void TileMatMul8u8i(int dst, int a, int b);
+
+        void TileMatMul8u8i(Tile1024* dst, const Tile1024& a, const Tile1024& b);
     }
 #endif
 
