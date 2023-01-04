@@ -4559,7 +4559,7 @@ namespace Simd
 
     /*! @ingroup warp_affine
 
-        \fn void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, SimdWarpAffineFlags flags = SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant, const uint8_t* border = NULL)
+        \fn void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant), const uint8_t* border = NULL)
 
         \short Performs warp affine for current image.
 
@@ -4573,7 +4573,7 @@ namespace Simd
                              It parameter is actual for SimdWarpAffineBorderConstant flag. By default is equal to NULL.
     */
     template<template<class> class A> SIMD_INLINE void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, 
-        SimdWarpAffineFlags flags = SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant, const uint8_t* border = NULL)
+        SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant), const uint8_t* border = NULL)
     {
         assert(src.format == dst.format && src.ChannelSize() == 1);
         assert((flags & SimdWarpAffineChannelMask) == SimdWarpAffineChannelByte);

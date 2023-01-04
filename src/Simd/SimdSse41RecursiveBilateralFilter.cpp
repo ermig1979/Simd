@@ -115,7 +115,7 @@ namespace Simd
 
         namespace Prec
         {
-            template<size_t channels> struct RowRanges
+            template<int channels> struct RowRanges
             {
                 template<RbfDiffType type> static void Run(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst);
             };
@@ -182,7 +182,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels> SIMD_INLINE void SetOut(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst);
+            template<int channels> SIMD_INLINE void SetOut(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst);
 
             template<> SIMD_INLINE void SetOut<1>(const float* bc, const float* bf, const float* ec, const float* ef, size_t width, uint8_t* dst)
             {
@@ -313,7 +313,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, RbfDiffType type> void HorFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<int channels, RbfDiffType type> void HorFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 //SIMD_PERF_FUNC();
                 size_t size = p.width * channels, cLast = size - 1, fLast = p.width - 1;
@@ -351,7 +351,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels> void VerSetEdge(const uint8_t* src, size_t width, float* factor, float* colors)
+            template<int channels> void VerSetEdge(const uint8_t* src, size_t width, float* factor, float* colors)
             {
                 size_t widthF = AlignLo(width, F);
                 size_t x = 0;
@@ -374,7 +374,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels> void VerSetMain(const uint8_t* hor, size_t width,
+            template<int channels> void VerSetMain(const uint8_t* hor, size_t width,
                 float alpha, const float* ranges, const float* pf, const float* pc, float* cf, float* cc);
 
             template<> void VerSetMain<1>(const uint8_t* hor, size_t width,
@@ -499,7 +499,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, RbfDiffType type> void VerFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<int channels, RbfDiffType type> void VerFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 //SIMD_PERF_FUNC();
                 size_t size = p.width * channels, srcTail = srcStride - size, dstTail = dstStride - size;
@@ -538,7 +538,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template <size_t channels, RbfDiffType type> void Set(FilterPtr& horFilter, FilterPtr& verFilter)
+            template <int channels, RbfDiffType type> void Set(FilterPtr& horFilter, FilterPtr& verFilter)
             {
                 horFilter = HorFilter<channels, type>;
                 verFilter = VerFilter<channels, type>;
@@ -625,7 +625,7 @@ namespace Simd
                 return Diff<type>(_mm_shuffle_epi8(src, K0), _mm_shuffle_epi8(src, K1), _mm_shuffle_epi8(src, K2));
             }
 
-            template<size_t channels, RbfDiffType type> SIMD_INLINE void RowDiff(const uint8_t* src0, const uint8_t* src1, size_t width, uint8_t* dst)
+            template<int channels, RbfDiffType type> SIMD_INLINE void RowDiff(const uint8_t* src0, const uint8_t* src1, size_t width, uint8_t* dst)
             {
                 switch (channels)
                 {
@@ -677,7 +677,7 @@ namespace Simd
                 }
             }
 
-            template<size_t channels, RbfDiffType type> void RowDiff4x(const uint8_t* src0, const uint8_t* src1, size_t srcStride, size_t width, uint8_t* dst, size_t dstStride)
+            template<int channels, RbfDiffType type> void RowDiff4x(const uint8_t* src0, const uint8_t* src1, size_t srcStride, size_t width, uint8_t* dst, size_t dstStride)
             {
                 for (size_t i = 0; i < 4; ++i)
                 {
@@ -690,7 +690,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, int dir> void HorRow(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* diff, uint8_t* dst)
+            template<int channels, int dir> void HorRow(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* diff, uint8_t* dst)
             {
                 if (dir == -1) diff += width - 2;
                 float factor = 1.0f, colors[channels];
@@ -716,7 +716,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels> struct HorRow4x
+            template<int channels> struct HorRow4x
             {
                 template<int dir> static void Run(const uint8_t* src, size_t srcStride, size_t width,
                     float alpha, const float* ranges, uint8_t* diff, uint8_t* dst, size_t dstStride)
@@ -897,7 +897,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, RbfDiffType type> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<int channels, RbfDiffType type> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t last = (p.width - 1) * channels, height4 = AlignLo(p.height, 4), y = 0;
                 uint8_t* diff = (uint8_t*)buf;
@@ -921,7 +921,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, int dir> void VerEdge(const uint8_t* src, size_t width, float* factor, float* colors, uint8_t* dst)
+            template<int channels, int dir> void VerEdge(const uint8_t* src, size_t width, float* factor, float* colors, uint8_t* dst)
             {
                 __m128 _1 = _mm_set1_ps(1.0f);
                 size_t widthF = AlignLo(width, F), x = 0;
@@ -948,7 +948,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels> struct VerMain
+            template<int channels> struct VerMain
             {
                 template<int dir> static void Run(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
                     const float* ranges, float* factor, float* colors, uint8_t* dst)
@@ -1146,7 +1146,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, RbfDiffType type> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<int channels, RbfDiffType type> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t size = p.width * channels;
                 uint8_t* diff = (uint8_t*)(buf + size + p.width);
@@ -1170,7 +1170,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template <size_t channels, RbfDiffType type> void Set(FilterPtr& horFilter, FilterPtr& verFilter)
+            template <int channels, RbfDiffType type> void Set(FilterPtr& horFilter, FilterPtr& verFilter)
             {
                 horFilter = HorFilter<channels, type>;
                 verFilter = VerFilter<channels, type>;

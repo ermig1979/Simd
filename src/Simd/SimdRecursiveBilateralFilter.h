@@ -123,7 +123,7 @@ namespace Simd
             }
         }
 
-        template<size_t channels, RbfDiffType type> SIMD_INLINE int Diff(const uint8_t* src1, const uint8_t* src2)
+        template<int channels, RbfDiffType type> SIMD_INLINE int Diff(const uint8_t* src1, const uint8_t* src2)
         {
             switch (channels)
             {
