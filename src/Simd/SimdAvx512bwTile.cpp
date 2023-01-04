@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -131,6 +131,72 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        template<bool overflow> SIMD_INLINE void TileMatMul8u8i(int M, int N, int K, TileReg& dst, const TileReg& a, const TileReg& b)
+        {
+            assert(M <= 16 && N <= 16 && K <= 16);
+
+            __mmask16 tailN = TailMask16(N);
+
+            __m512i a0, b0;
+            int m = 0;
+            for (int M4 = M & (~3); m < M4; m += 4)
+            {
+                __m512i d0 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 0]);
+                __m512i d1 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 1]);
+                __m512i d2 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 2]);
+                __m512i d3 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 3]);
+                for (int k = 0; k < K; k++)
+                {
+                    b0 = _mm512_maskz_loadu_epi32(tailN, b.i32[k]);
+                    a0 = _mm512_set1_epi32(a.i32[m + 0][k]), Madd4<overflow>(d0, a0, b0);
+                    a0 = _mm512_set1_epi32(a.i32[m + 1][k]), Madd4<overflow>(d1, a0, b0);
+                    a0 = _mm512_set1_epi32(a.i32[m + 2][k]), Madd4<overflow>(d2, a0, b0);
+                    a0 = _mm512_set1_epi32(a.i32[m + 3][k]), Madd4<overflow>(d3, a0, b0);
+                }
+                _mm512_mask_storeu_epi32(dst.i32[m + 0], tailN, d0);
+                _mm512_mask_storeu_epi32(dst.i32[m + 1], tailN, d1);
+                _mm512_mask_storeu_epi32(dst.i32[m + 2], tailN, d2);
+                _mm512_mask_storeu_epi32(dst.i32[m + 3], tailN, d3);
+            }
+            for (int M2 = M & (~1); m < M2; m += 2)
+            {
+                __m512i d0 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 0]);
+                __m512i d1 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 1]);
+                for (int k = 0; k < K; k++)
+                {
+                    b0 = _mm512_maskz_loadu_epi32(tailN, b.i32[k]);
+                    a0 = _mm512_set1_epi32(a.i32[m + 0][k]), Madd4<overflow>(d0, a0, b0);
+                    a0 = _mm512_set1_epi32(a.i32[m + 1][k]), Madd4<overflow>(d1, a0, b0);
+                }
+                _mm512_mask_storeu_epi32(dst.i32[m + 0], tailN, d0);
+                _mm512_mask_storeu_epi32(dst.i32[m + 1], tailN, d1);
+            }
+            for (; m < M; m++)
+            {
+                __m512i d0 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m]);
+                for (int k = 0; k < K; k++)
+                {
+                    b0 = _mm512_maskz_loadu_epi32(tailN, b.i32[k]);
+                    a0 = _mm512_set1_epi32(a.i32[m][k]), Madd4<overflow>(d0, a0, b0);
+                }
+                _mm512_mask_storeu_epi32(dst.i32[m], tailN, d0);
+            }
+        }
+
+        void TileMatMul8u8i(int dst, int a, int b)
+        {
+            assert(dst < TileRegCount&& a < TileRegCount&& b < TileRegCount); 
+            
+            TileMatMul8u8i<true>(g_tileConf.rows[dst], g_tileConf.colsb[dst] / 4, g_tileConf.colsb[a] / 4, g_tileRegs[dst], g_tileRegs[a], g_tileRegs[b]);
+        }
+
+        void TileMatMul8u8i(Tile1024* dst, const Tile1024& a, const Tile1024& b)
+        {
+            TileMatMul8u8i<true>(dst->row, dst->col, b.row, dst->tile, a.tile, b.tile);
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         SIMD_INLINE void TileMatMulBf16(int M, int N, int K, TileReg& dst, const TileReg& a, const TileReg& b)
         {
             assert(M <= 16 && N <= 16 && K <= 16);
@@ -220,7 +286,7 @@ namespace Simd
 
         void TileMatMulBf16(int dst, int a, int b)
         {
-            assert(dst < TileRegCount && a < TileRegCount && b < TileRegCount);
+            assert(dst < TileRegCount&& a < TileRegCount&& b < TileRegCount);
 
             TileMatMulBf16(g_tileConf.rows[dst], g_tileConf.colsb[dst] / 4, g_tileConf.colsb[a] / 4, g_tileRegs[dst], g_tileRegs[a], g_tileRegs[b]);
         }
@@ -232,68 +298,43 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool overflow> SIMD_INLINE void TileMatMul8u8i(int M, int N, int K, TileReg& dst, const TileReg& a, const TileReg& b)
+        SIMD_INLINE void TileMatMulFp16(int M, int N, int K, TileReg& dst, const TileReg& a, const TileReg& b)
         {
+            static const __m512i B_PERM = SIMD_MM512_SETR_EPI16(
+                0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E,
+                0x01, 0x03, 0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x11, 0x13, 0x15, 0x17, 0x19, 0x1B, 0x1D, 0x1F);
             assert(M <= 16 && N <= 16 && K <= 16);
 
             __mmask16 tailN = TailMask16(N);
 
-            __m512i a0, b0;
             int m = 0;
-            for (int M4 = M & (~3); m < M4; m += 4)
-            {
-                __m512i d0 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 0]);
-                __m512i d1 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 1]);
-                __m512i d2 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 2]);
-                __m512i d3 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 3]);
-                for (int k = 0; k < K; k++)
-                {
-                    b0 = _mm512_maskz_loadu_epi32(tailN, b.i32[k]);
-                    a0 = _mm512_set1_epi32(a.i32[m + 0][k]), Madd4<overflow>(d0, a0, b0);
-                    a0 = _mm512_set1_epi32(a.i32[m + 1][k]), Madd4<overflow>(d1, a0, b0);
-                    a0 = _mm512_set1_epi32(a.i32[m + 2][k]), Madd4<overflow>(d2, a0, b0);
-                    a0 = _mm512_set1_epi32(a.i32[m + 3][k]), Madd4<overflow>(d3, a0, b0);
-                }
-                _mm512_mask_storeu_epi32(dst.i32[m + 0], tailN, d0);
-                _mm512_mask_storeu_epi32(dst.i32[m + 1], tailN, d1);
-                _mm512_mask_storeu_epi32(dst.i32[m + 2], tailN, d2);
-                _mm512_mask_storeu_epi32(dst.i32[m + 3], tailN, d3);
-            }
-            for (int M2 = M & (~1); m < M2; m += 2)
-            {
-                __m512i d0 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 0]);
-                __m512i d1 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m + 1]);
-                for (int k = 0; k < K; k++)
-                {
-                    b0 = _mm512_maskz_loadu_epi32(tailN, b.i32[k]);
-                    a0 = _mm512_set1_epi32(a.i32[m + 0][k]), Madd4<overflow>(d0, a0, b0);
-                    a0 = _mm512_set1_epi32(a.i32[m + 1][k]), Madd4<overflow>(d1, a0, b0);
-                }
-                _mm512_mask_storeu_epi32(dst.i32[m + 0], tailN, d0);
-                _mm512_mask_storeu_epi32(dst.i32[m + 1], tailN, d1);
-            }
             for (; m < M; m++)
             {
-                __m512i d0 = _mm512_maskz_loadu_epi32(tailN, dst.i32[m]);
-                for (int k = 0; k < K; k++)
+                __m512 dst0 = _mm512_maskz_loadu_ps(tailN, dst.f32[m]);
+                for (int k = 0; k < K; k ++)
                 {
-                    b0 = _mm512_maskz_loadu_epi32(tailN, b.i32[k]);
-                    a0 = _mm512_set1_epi32(a.i32[m][k]), Madd4<overflow>(d0, a0, b0);
+                    __m512i _b = _mm512_permutexvar_epi16(B_PERM, _mm512_maskz_loadu_epi32(tailN, b.u32[k]));
+                    __m512 b0 = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_b, 0));
+                    __m512 b1 = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_b, 1));
+
+                    __m512 _a = _mm512_broadcast_f32x2(_mm_cvtph_ps(_mm_cvtsi32_si128(a.u32[m][k])));
+                    dst0 = _mm512_fmadd_ps(Broadcast<0>(_a), b0, dst0);
+                    dst0 = _mm512_fmadd_ps(Broadcast<1>(_a), b1, dst0);
                 }
-                _mm512_mask_storeu_epi32(dst.i32[m], tailN, d0);
+                _mm512_mask_storeu_ps(dst.f32[m], tailN, dst0);
             }
         }
 
-        void TileMatMul8u8i(int dst, int a, int b)
+        void TileMatMulFp16(int dst, int a, int b)
         {
-            assert(dst < TileRegCount&& a < TileRegCount&& b < TileRegCount); 
-            
-            TileMatMul8u8i<true>(g_tileConf.rows[dst], g_tileConf.colsb[dst] / 4, g_tileConf.colsb[a] / 4, g_tileRegs[dst], g_tileRegs[a], g_tileRegs[b]);
+            assert(dst < TileRegCount&& a < TileRegCount&& b < TileRegCount);
+
+            TileMatMulFp16(g_tileConf.rows[dst], g_tileConf.colsb[dst] / 4, g_tileConf.colsb[a] / 4, g_tileRegs[dst], g_tileRegs[a], g_tileRegs[b]);
         }
 
-        void TileMatMul8u8i(Tile1024* dst, const Tile1024& a, const Tile1024& b)
+        void TileMatMulFp16(Tile1024* dst, const Tile1024& a, const Tile1024& b)
         {
-            TileMatMul8u8i<true>(dst->row, dst->col, b.row, dst->tile, a.tile, b.tile);
+            TileMatMulFp16(dst->row, dst->col, b.row, dst->tile, a.tile, b.tile);
         }
     }
 #endif

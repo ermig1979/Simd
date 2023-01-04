@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -85,13 +85,17 @@ namespace Simd
 
         void TileStore(void* base, int stride, const Tile1024& src);
 
+        void TileMatMul8u8i(int dst, int a, int b);
+
+        void TileMatMul8u8i(Tile1024* dst, const Tile1024& a, const Tile1024& b);
+
         void TileMatMulBf16(int dst, int a, int b);
 
         void TileMatMulBf16(Tile1024* dst, const Tile1024& a, const Tile1024& b);
 
-        void TileMatMul8u8i(int dst, int a, int b);
+        void TileMatMulFp16(int dst, int a, int b);
 
-        void TileMatMul8u8i(Tile1024* dst, const Tile1024& a, const Tile1024& b);
+        void TileMatMulFp16(Tile1024* dst, const Tile1024& a, const Tile1024& b);
     }
 #endif
 
@@ -139,15 +143,20 @@ namespace Simd
 #endif
 #define _tile_zero Simd::Avx512bw::TileZero
 
+#ifdef _tile_dpbusd
+#undef _tile_dpbusd
+#endif
+#define _tile_dpbusd Simd::Avx512bw::TileMatMul8u8i
+
 #ifdef _tile_dpbf16ps
 #undef _tile_dpbf16ps
 #endif
 #define _tile_dpbf16ps Simd::Avx512bw::TileMatMulBf16
 
-#ifdef _tile_dpbusd
-#undef _tile_dpbusd
+#ifdef _tile_dpfp16ps
+#undef _tile_dpfp16ps
 #endif
-#define _tile_dpbusd Simd::Avx512bw::TileMatMul8u8i
+#define _tile_dpfp16ps Simd::Avx512bw::TileMatMulFp16
 
 #endif
 
