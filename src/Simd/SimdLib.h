@@ -4076,6 +4076,8 @@ extern "C"
 
         \note This function has a C++ wrappers: Simd::InterferenceIncrement(View<A> & dst, uint8_t increment, int16_t saturation).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
         \param [in] stride - a row size of statistic image.
         \param [in] width - an image width.
@@ -4083,7 +4085,7 @@ extern "C"
         \param [in] increment - an increment of statistic.
         \param [in] saturation - an upper saturation of statistic.
     */
-    SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
+    SIMD_API SIMD_DEPRECATED void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
 
     /*! @ingroup interference
 
@@ -4102,6 +4104,8 @@ extern "C"
 
         \note This function has a C++ wrappers: Simd::InterferenceIncrementMasked(View<A> & dst, uint8_t increment, int16_t saturation, const View<A>& mask, uint8_t index).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
         \param [in] statisticStride - a row size of statistic image.
         \param [in] width - an image width.
@@ -4112,7 +4116,7 @@ extern "C"
         \param [in] maskStride - a row size of mask image.
         \param [in] index - an index of mask.
     */
-    SIMD_API void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height,
+    SIMD_API SIMD_DEPRECATED void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height,
         uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
     /*! @ingroup interference
@@ -4130,6 +4134,8 @@ extern "C"
 
         \note This function has a C++ wrappers: Simd::InterferenceDecrement(View<A> & dst, uint8_t decrement, int16_t saturation).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
         \param [in] stride - a row size of statistic image.
         \param [in] width - an image width.
@@ -4137,7 +4143,7 @@ extern "C"
         \param [in] decrement - a decrement of statistic.
         \param [in] saturation - a lower saturation of statistic.
     */
-    SIMD_API void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
+    SIMD_API SIMD_DEPRECATED void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
 
     /*! @ingroup interference
 
@@ -4156,6 +4162,8 @@ extern "C"
 
         \note This function has a C++ wrappers: Simd::InterferenceDecrementMasked(View<A> & dst, uint8_t decrement, int16_t saturation, const View<A>& mask, uint8_t index).
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
         \param [in] statisticStride - a row size of statistic image.
         \param [in] width - an image width.
@@ -4166,7 +4174,7 @@ extern "C"
         \param [in] maskStride - a row size of mask image.
         \param [in] index - an index of mask.
     */
-    SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height,
+    SIMD_API SIMD_DEPRECATED void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height,
         uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
     /*! @ingroup interleave_conversion
@@ -7524,6 +7532,8 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c is not supported.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] batch - a batch (number of images in the batch).
         \param [in] channels - a number of image channels.
         \param [in] spatial - a spatial size (height*width) of image.
@@ -7532,7 +7542,7 @@ extern "C"
         \param [out] dst - a pointer to output image data.
         \param [in] dstFormat - a format of output image. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc, ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c.
     */
-    SIMD_API void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
+    SIMD_API SIMD_DEPRECATED void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
 
     /*! @ingroup synet_conversion
 
@@ -7542,6 +7552,8 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o is not supported.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] output - a number of output channels in filter.
         \param [in] input - a number of intput channels in filter.
         \param [in] kernel - a size (width*height) of filter kernel.
@@ -7550,7 +7562,7 @@ extern "C"
         \param [out] dst - a pointer to output filter data.
         \param [in] dstFormat - a format of output filter. It can be SimdTensorFormatOiyx, ::SimdTensorFormatYxio, ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o.
     */
-    SIMD_API void SimdSynetReorderFilter(size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
+    SIMD_API SIMD_DEPRECATED void SimdSynetReorderFilter(size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
 
     /*! @ingroup synet_activation
 
