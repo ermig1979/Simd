@@ -401,8 +401,8 @@ namespace Simd
     }
 #endif
 
-#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
-    namespace Amx
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
+    namespace AmxBf16
     {
 #if defined(SIMD_AMX_EMULATE)
         class SynetConvolution8iNhwcDirect : public Avx512bw::SynetConvolution8iNhwcDirect
@@ -413,7 +413,7 @@ namespace Simd
         public:
             SynetConvolution8iNhwcDirect(const ConvParam8i& p);
 
-            virtual String Ext() const { return "Amx"; }
+            virtual String Ext() const { return "AmxBf16"; }
         };
 
         void SetDirectAny(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);

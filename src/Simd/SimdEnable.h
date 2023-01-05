@@ -86,8 +86,8 @@ namespace Simd
     }
 #endif
 
-#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
-    namespace Amx
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+    namespace AmxBf16
     {
         bool GetEnable();
 
@@ -161,10 +161,10 @@ namespace Simd
 #define SIMD_AVX512BF16_FUNC(func)
 #endif
 
-#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
-#define SIMD_AMX_FUNC(func) Simd::Amx::Enable ? Simd::Amx::func : 
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+#define SIMD_AMXBF16_FUNC(func) Simd::AmxBf16::Enable ? Simd::AmxBf16::func : 
 #else
-#define SIMD_AMX_FUNC(func)
+#define SIMD_AMXBF16_FUNC(func)
 #endif
 
 #ifdef SIMD_VMX_ENABLE

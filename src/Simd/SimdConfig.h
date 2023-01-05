@@ -36,7 +36,7 @@
 
 //#define SIMD_AVX512BF16_DISABLE
  
-//#define SIMD_AMX_DISABLE
+//#define SIMD_AMXBF16_DISABLE
 
 //#define SIMD_VMX_DISABLE
 

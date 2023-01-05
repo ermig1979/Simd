@@ -127,8 +127,8 @@
 #define SIMD_AVX512BF16_ENABLE
 #endif
 
-#if !defined(SIMD_AMX_DISABLE) && _MSC_VER >= 1933
-#define SIMD_AMX_ENABLE
+#if !defined(SIMD_AMXBF16_DISABLE) && _MSC_VER >= 1933
+#define SIMD_AMXBF16_ENABLE
 #endif
 
 #if defined(NDEBUG) && _MSC_VER == 1914
@@ -229,7 +229,7 @@
 #endif
 
 #if !defined(SIMD_AMX_DISABLE) && defined(__AMX_TILE__) && defined(__AMX_INT8__) && defined(__AMX_BF16__)
-#define SIMD_AMX_ENABLE
+#define SIMD_AMXBF16_ENABLE
 #endif
 #endif
 
@@ -286,7 +286,7 @@
 
 #if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE) \
     || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE) \
-    || defined(SIMD_AMX_ENABLE)
+    || defined(SIMD_AMXBF16_ENABLE)
 #include <immintrin.h>
 #endif
 
@@ -304,7 +304,7 @@
 #include <arm_neon.h>
 #endif
 
-#if defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE)
+#if defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE) || defined(SIMD_AMXBF16_ENABLE)
 #define SIMD_ALIGN 64
 #elif defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
@@ -318,7 +318,7 @@
 #define SIMD_ALIGN 4
 #endif
 
-#if (defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE))
+#if (defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE) || defined(SIMD_AMXBF16_ENABLE))
 #ifdef SIMD_X64_ENABLE
 #if defined(__GNUC__) || (defined(_MSC_VER) && _MSC_VER >= 1915)
 #define SIMD_ZMM_COUNT 32

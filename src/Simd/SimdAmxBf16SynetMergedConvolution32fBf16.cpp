@@ -29,8 +29,8 @@
 
 namespace Simd
 {
-#if (defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)
-	namespace Amx
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)
+	namespace AmxBf16
 	{
         SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
 #if defined(SIMD_AMX_EMULATE)
@@ -122,11 +122,11 @@ namespace Simd
             if (Base::Bf16Soft(compatibility) || Base::Bf16Hard(compatibility))
             {
                 if (Base::SynetMergedConvolution32fBf16Cdc::Preferable(param))
-                    return new Amx::SynetMergedConvolution32fBf16Cdc(param);
+                    return new SynetMergedConvolution32fBf16Cdc(param);
                 else if (Base::SynetMergedConvolution32fBf16Cd::Preferable(param))
-                    return new Amx::SynetMergedConvolution32fBf16Cd(param);
+                    return new SynetMergedConvolution32fBf16Cd(param);
                 else if (Base::SynetMergedConvolution32fBf16Dc::Preferable(param))
-                    return new Amx::SynetMergedConvolution32fBf16Dc(param);
+                    return new SynetMergedConvolution32fBf16Dc(param);
                 else
                     return new Base::SynetMergedConvolution32fBf16(param);
             }

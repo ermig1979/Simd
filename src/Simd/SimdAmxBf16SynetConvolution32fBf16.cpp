@@ -27,14 +27,14 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdAvx512bf16.h"
-#include "Simd/SimdAmx.h"
+#include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdTile.h"
 
 namespace Simd
 {
-#if (defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)
-    namespace Amx
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)
+    namespace AmxBf16
     {
         typedef Base::SynetConvolution32fBf16Nhwc::AlgParam AlgParam;
         typedef Base::SynetConvolution32fBf16Nhwc::ConvertPtr Convert;
@@ -816,7 +816,7 @@ namespace Simd
             else if (Base::Bf16Soft(compatibility) || Base::Bf16Hard(compatibility))
             {
                 if (Base::SynetConvolution32fBf16Nhwc::Preferable(param))
-                    return new Amx::SynetConvolution32fBf16Nhwc(param);
+                    return new SynetConvolution32fBf16Nhwc(param);
                 else
                     return new Base::SynetConvolution32fBf16Gemm(param);
             }

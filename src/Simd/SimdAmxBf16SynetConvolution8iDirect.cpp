@@ -27,13 +27,13 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdAvx512bw.h"
-#include "Simd/SimdAmx.h"
+#include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#if (defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)  
-    namespace Amx
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)  
+    namespace AmxBf16
     {
         SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
 #if defined(SIMD_AMX_EMULATE)

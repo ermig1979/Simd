@@ -808,8 +808,8 @@ namespace Simd
     }
 #endif//SIMD_AVX512BW_ENABLE
 
-#if defined(SIMD_AMX_ENABLE)  
-    namespace Amx
+#if defined(SIMD_AMXBF16_ENABLE)  
+    namespace AmxBf16
     {
         template <Term8iType term> struct Term8i
         {

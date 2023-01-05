@@ -30,8 +30,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AMX_EMULATE) && defined(SIMD_AVX512BW_ENABLE))
-    namespace Amx
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AMX_EMULATE) && defined(SIMD_AVX512BW_ENABLE))
+    namespace AmxBf16
     {
         SIMD_INLINE bool SupportedByCPU()
         {
@@ -59,7 +59,7 @@ namespace Simd
 #if defined(SIMD_AMX_EMULATE)
                 __m512i value = _mm512_abs_epi8(_mm512_set1_epi8(1));// try to execute of AVX-512BW instructions;
 #else
-                _tile_zero(0);// try to execute of AMX instructions;
+                _tile_zero(0);// try to execute of AMX-BF16 instructions;
 #endif
                 return true;
             }

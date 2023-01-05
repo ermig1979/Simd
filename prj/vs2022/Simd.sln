@@ -43,7 +43,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Avx512bf16", "Avx512bf16.vc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "amx", "amx", "{F326BA8C-473C-4FFA-A176-2B27F3E250B0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Amx", "Amx.vcxproj", "{3E68D81A-DBC0-47B4-912B-7C9EFCE28B6F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AmxBf16", "AmxBf16.vcxproj", "{3E68D81A-DBC0-47B4-912B-7C9EFCE28B6F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

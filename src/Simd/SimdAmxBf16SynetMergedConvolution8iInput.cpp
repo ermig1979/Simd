@@ -32,8 +32,8 @@
 
 namespace Simd
 {
-#if (defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE) 
-    namespace Amx
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE) 
+    namespace AmxBf16
     {
         using AlgParam = Base::SynetMergedConvolution8i::AlgParam;
         using InputConvolutionPtr = Base::SynetMergedConvolution8i::InputConvolutionPtr;

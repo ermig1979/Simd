@@ -412,8 +412,8 @@ namespace Simd
     }
 #endif
 
-#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
-    namespace Amx
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+    namespace AmxBf16
     {
         void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
 
@@ -428,7 +428,7 @@ namespace Simd
         public:
             SynetMergedConvolution8iCdc(const MergConvParam8i& p);
 
-            virtual String Ext() const { return "Amx"; }
+            virtual String Ext() const { return "AmxBf16"; }
         };
 
 #if defined(SIMD_AMX_EMULATE)
@@ -440,7 +440,7 @@ namespace Simd
         public:
             SynetMergedConvolution8iCd(const MergConvParam8i& p);
 
-            virtual String Ext() const { return "Amx"; }
+            virtual String Ext() const { return "AmxBf16"; }
         };
 
 #if defined(SIMD_AMX_EMULATE)
@@ -452,7 +452,7 @@ namespace Simd
         public:
             SynetMergedConvolution8iDc(const MergConvParam8i& p);
 
-            virtual String Ext() const { return "Amx"; }
+            virtual String Ext() const { return "AmxBf16"; }
         };
 
         void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);

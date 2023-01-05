@@ -296,9 +296,9 @@ namespace Test
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx512vnni::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 #endif
 
-#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
-        if (Simd::Amx::Enable)
-            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Amx::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+        if (Simd::AmxBf16::Enable)
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::AmxBf16::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

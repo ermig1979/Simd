@@ -21,15 +21,15 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdAmx_h__
-#define __SimdAmx_h__
+#ifndef __SimdAmxBf16_h__
+#define __SimdAmxBf16_h__
 
 #include "Simd/SimdDefs.h"
 
 namespace Simd
 {
-#ifdef SIMD_AMX_ENABLE    
-    namespace Amx
+#ifdef SIMD_AMXBF16_ENABLE    
+    namespace AmxBf16
     {
     }
 #endif
