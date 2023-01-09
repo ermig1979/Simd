@@ -38,8 +38,10 @@ namespace Test
         struct Cnv
         {
             SimdConvolutionActivationType a;
-            size_t k, s, d;
-            Cnv(SimdConvolutionActivationType a_, size_t k_, size_t s_, size_t d_ = - 1) : a(a_), k(k_), s(s_), d(d_) {}
+            Size k, s;
+            size_t d;
+            Cnv(SimdConvolutionActivationType a_, size_t k_, size_t s_, size_t d_ = - 1) : a(a_), k(k_, k_), s(s_, s_), d(d_) {}
+            Cnv(SimdConvolutionActivationType a_, Size k_, Size s_, size_t d_ = -1) : a(a_), k(k_), s(s_), d(d_) {}
         };
 
         struct Param
@@ -77,16 +79,16 @@ namespace Test
                 conv[0].srcH = s.empty() ? conv[-1].dstH : s[2];
                 conv[0].srcW = s.empty() ? conv[-1].dstW : s[3];
                 conv[0].dstC = c.d == -1 ? conv[0].srcC : c.d;
-                conv[0].kernelY = c.k;
-                conv[0].kernelX = c.k;
+                conv[0].kernelY = c.k.y;
+                conv[0].kernelX = c.k.x;
                 conv[0].dilationY = 1;
                 conv[0].dilationX = 1;
-                conv[0].strideY = c.s;
-                conv[0].strideX = c.s;
-                conv[0].padY = c.s == 1 || (conv[0].srcH & 1) ? (c.k - 1) / 2 : (c.k - 1) / 2 - 1;
-                conv[0].padX = c.s == 1 || (conv[0].srcW & 1) ? (c.k - 1) / 2 : (c.k - 1) / 2 - 1;
-                conv[0].padH = (c.k - 1) / 2;
-                conv[0].padW = (c.k - 1) / 2;
+                conv[0].strideY = c.s.y;
+                conv[0].strideX = c.s.x;
+                conv[0].padY = c.s.y == 1 || (conv[0].srcH & 1) ? (c.k.y - 1) / 2 : (c.k.y - 1) / 2 - 1;
+                conv[0].padX = c.s.x == 1 || (conv[0].srcW & 1) ? (c.k.x - 1) / 2 : (c.k.x - 1) / 2 - 1;
+                conv[0].padH = (c.k.y - 1) / 2;
+                conv[0].padW = (c.k.x - 1) / 2;
                 conv[0].group = c.d == -1 ? conv[0].srcC : 1;
                 conv[0].activation = c.a;
                 conv[0].dstH = (conv[0].srcH + conv[0].padY + conv[0].padH - conv[0].kernelY) / conv[0].strideY + 1;
@@ -298,7 +300,9 @@ namespace Test
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 728, 14, 14), Cnv(a0, 1, 1, 728), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 728), f), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 728, 28, 28), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 728)), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 728, 14, 14), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 728)), c, f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 96, 99), Cnv(a0, 1, 1, 144), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 24), t), c, f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 96, 99), Cnv(a0, 1, 1, 144), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 24), t), c, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1, 94, 23), Cnv(a0, 1, 1, 64), Cnv(a1, Size(3, 3), Size(2, 1))), c, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 64, 47, 23), Cnv(a0, 1, 1, 128), Cnv(a1, Size(3, 3), Size(2, 1))), c, f1, f2);
 #endif
 #else
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 16, 192, 199), Cnv(a0, 1, 1, 96), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 24), f), c, f1, f2);
@@ -309,7 +313,9 @@ namespace Test
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 35, 63, 81), Cnv(a0, 1, 1, 51), Cnv(a1, 3, 2)), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps * 2.0f, Param(Shp(1, 160, 12, 15), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 160), t), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps * 2.0f, Param(Shp(1, 64, 14, 14), Cnv(a0, 1, 1, 384), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 64), t), c, f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 480, 640), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1)), c, f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 480, 640), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1)), c, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1, 94, 23), Cnv(a0, 1, 1, 64), Cnv(a1, Size(3, 3), Size(2, 1))), c, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 64, 47, 23), Cnv(a0, 1, 1, 128), Cnv(a1, Size(3, 3), Size(2, 1))), c, f1, f2);
 #endif
         return result;
     }
