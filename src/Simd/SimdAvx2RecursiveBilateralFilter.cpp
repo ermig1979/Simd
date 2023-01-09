@@ -26,6 +26,7 @@
 #include "Simd/SimdRecursiveBilateralFilter.h"
 #include "Simd/SimdPerformance.h"
 #include "Simd/SimdFmadd.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
@@ -721,8 +722,13 @@ namespace Simd
                     if (dir == -1)
                         val = _mm256_avg_epu8(val, Load2x4(dst0, dst4));
                     val = _mm256_shuffle_epi8(val, SHFL);
+#if (defined(_MSC_VER) && (_MSC_VER <= 1900))
+                    *(uint32_t*)(dst0) = Extract<uint32_t>(val, 0);
+                    *(uint32_t*)(dst4) = Extract<uint32_t>(val, 4);
+#else
                     *(uint32_t*)(dst0) = _mm256_extract_epi32(val, 0);
                     *(uint32_t*)(dst4) = _mm256_extract_epi32(val, 4);
+#endif
                 }
 
                 template<int dir> static SIMD_INLINE void Store2x16(__m256i val, uint8_t* dst0, uint8_t* dst4)
