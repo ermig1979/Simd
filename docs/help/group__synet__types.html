@@ -111,6 +111,14 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="group__synet__types.html#gga3c885cc5d2f09e6d18834f67d91f168daafff18988d5f1147546b6aad163da6af">SimdSynetCompatibility16bfSoft</a> = 32
 , <br />
 &#160;&#160;<a class="el" href="group__synet__types.html#gga3c885cc5d2f09e6d18834f67d91f168dab8cdaced392f529ace512b52b7c3d34c">SimdSynetCompatibility16bfMask</a> = 48
+, <br />
+&#160;&#160;<a class="el" href="group__synet__types.html#gga3c885cc5d2f09e6d18834f67d91f168da41a55d8599b3ee17e3bea976a0affbc2">SimdSynetCompatibility16fpAvoid</a> = 0
+, <br />
+&#160;&#160;<a class="el" href="group__synet__types.html#gga3c885cc5d2f09e6d18834f67d91f168da6e004d5c8a8eaf2979a57e74562d5cc2">SimdSynetCompatibility16fpHard</a> = 64
+, <br />
+&#160;&#160;<a class="el" href="group__synet__types.html#gga3c885cc5d2f09e6d18834f67d91f168dad78d9a21db3b02a8c1ca2e410bf3e7b0">SimdSynetCompatibility16fpSoft</a> = 128
+, <br />
+&#160;&#160;<a class="el" href="group__synet__types.html#gga3c885cc5d2f09e6d18834f67d91f168daa55825ac3b2f147801605373ea78f5b3">SimdSynetCompatibility16fpMask</a> = 192
 <br />
  }</td></tr>
 <tr class="separator:ga3c885cc5d2f09e6d18834f67d91f168d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -185,6 +193,8 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea14e0474fadfa5fbf90a24f1ab886738e">SimdTensorData8u</a>
 , <br />
 &#160;&#160;<a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3">SimdTensorData16b</a>
+, <br />
+&#160;&#160;<a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea7ed67a7c00a27ef9587f707bb00bbe51">SimdTensorData16f</a>
 <br />
  }</td></tr>
 <tr class="separator:ga8dda9c4fd0e5293434c8fcb91e9cd71e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -283,6 +293,14 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168daafff18988d5f1147546b6aad163da6af" name="gga3c885cc5d2f09e6d18834f67d91f168daafff18988d5f1147546b6aad163da6af"></a>SimdSynetCompatibility16bfSoft&#160;</td><td class="fielddoc"><p >Use BFloat16 (Brain Floating Point) format always (in mode of software emulation if hardware support does not exist). </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dab8cdaced392f529ace512b52b7c3d34c" name="gga3c885cc5d2f09e6d18834f67d91f168dab8cdaced392f529ace512b52b7c3d34c"></a>SimdSynetCompatibility16bfMask&#160;</td><td class="fielddoc"><p >Bit mask of options of BFloat16 (Brain Floating Point) format. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da41a55d8599b3ee17e3bea976a0affbc2" name="gga3c885cc5d2f09e6d18834f67d91f168da41a55d8599b3ee17e3bea976a0affbc2"></a>SimdSynetCompatibility16fpAvoid&#160;</td><td class="fielddoc"><p >Not use 16-bit floating point (Half Precision) format. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da6e004d5c8a8eaf2979a57e74562d5cc2" name="gga3c885cc5d2f09e6d18834f67d91f168da6e004d5c8a8eaf2979a57e74562d5cc2"></a>SimdSynetCompatibility16fpHard&#160;</td><td class="fielddoc"><p >Use 16-bit floating point (Half Precision) format only if hardware support exists. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dad78d9a21db3b02a8c1ca2e410bf3e7b0" name="gga3c885cc5d2f09e6d18834f67d91f168dad78d9a21db3b02a8c1ca2e410bf3e7b0"></a>SimdSynetCompatibility16fpSoft&#160;</td><td class="fielddoc"><p >Use 16-bit floating point (Half Precision) format always (in mode of software emulation if hardware support does not exist). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168daa55825ac3b2f147801605373ea78f5b3" name="gga3c885cc5d2f09e6d18834f67d91f168daa55825ac3b2f147801605373ea78f5b3"></a>SimdSynetCompatibility16fpMask&#160;</td><td class="fielddoc"><p >Bit mask of options of 16-bit floating point (Half Precision) format. </p>
 </td></tr>
 </table>
 
@@ -404,7 +422,7 @@ Enumerations</h2></td></tr>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71eacc3586049464c536b545a33c0def5e21" name="gga8dda9c4fd0e5293434c8fcb91e9cd71eacc3586049464c536b545a33c0def5e21"></a>SimdTensorDataUnknown&#160;</td><td class="fielddoc"><p >Unknown tensor data type. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be"></a>SimdTensorData32f&#160;</td><td class="fielddoc"><p >32-bit float point. </p>
+<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be"></a>SimdTensorData32f&#160;</td><td class="fielddoc"><p >32-bit floating point (Single Precision). </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71eaa46e663f39e7ce78d28c8541da8cb4d9" name="gga8dda9c4fd0e5293434c8fcb91e9cd71eaa46e663f39e7ce78d28c8541da8cb4d9"></a>SimdTensorData32i&#160;</td><td class="fielddoc"><p >32-bit signed integer. </p>
 </td></tr>
@@ -413,6 +431,8 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea14e0474fadfa5fbf90a24f1ab886738e" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea14e0474fadfa5fbf90a24f1ab886738e"></a>SimdTensorData8u&#160;</td><td class="fielddoc"><p >8-bit unsigned integer. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3"></a>SimdTensorData16b&#160;</td><td class="fielddoc"><p >16-bit BFloat16 (Brain Floating Point). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea7ed67a7c00a27ef9587f707bb00bbe51" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea7ed67a7c00a27ef9587f707bb00bbe51"></a>SimdTensorData16f&#160;</td><td class="fielddoc"><p >16-bit floating point (Half Precision). </p>
 </td></tr>
 </table>
 

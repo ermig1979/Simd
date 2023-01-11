@@ -439,6 +439,10 @@ typedef enum
     SimdSynetCompatibility16bfHard = 16, /*!< Use BFloat16 (Brain Floating Point) format only if hardware support exists. */
     SimdSynetCompatibility16bfSoft = 32, /*!< Use BFloat16 (Brain Floating Point) format always (in mode of software emulation if hardware support does not exist). */
     SimdSynetCompatibility16bfMask = 48, /*!< Bit mask of options of BFloat16 (Brain Floating Point) format. */
+    SimdSynetCompatibility16fpAvoid = 0, /*!< Not use 16-bit floating point (Half Precision) format. */
+    SimdSynetCompatibility16fpHard = 64, /*!< Use 16-bit floating point (Half Precision) format only if hardware support exists. */
+    SimdSynetCompatibility16fpSoft = 128, /*!< Use 16-bit floating point (Half Precision) format always (in mode of software emulation if hardware support does not exist). */
+    SimdSynetCompatibility16fpMask = 192, /*!< Bit mask of options of 16-bit floating point (Half Precision) format. */
 } SimdSynetCompatibilityType;
 
 /*! @ingroup synet_types
@@ -501,11 +505,12 @@ typedef enum
 typedef enum
 {
     SimdTensorDataUnknown = -1, /*!< Unknown tensor data type. */
-    SimdTensorData32f, /*!< 32-bit float point. */
+    SimdTensorData32f, /*!< 32-bit floating point (Single Precision). */
     SimdTensorData32i, /*!< 32-bit signed integer. */
     SimdTensorData8i, /*!< 8-bit signed integer. */
     SimdTensorData8u, /*!< 8-bit unsigned integer. */
     SimdTensorData16b, /*!< 16-bit BFloat16 (Brain Floating Point). */
+    SimdTensorData16f, /*!< 16-bit floating point (Half Precision). */
 } SimdTensorDataType;
 
 /*! @ingroup transform
@@ -7394,6 +7399,44 @@ extern "C"
     SIMD_API void SimdSynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
 
+    /*! @ingroup synet_permute
+
+        \fn void* SimdSynetPermuteInit(const size_t * shape, const size_t* order, size_t count, SimdTensorDataType type);
+
+        \short Initilizes permute algorithm.
+
+        \param [in] shape - a pointer to shape of input tensor.
+        \param [in] order - a pointer to order of dimensions in output tensor.
+        \param [in] count - a count of dimensions of input / output tensor.
+        \param [in] type - an input / output tensor type
+        \return a pointer to permute context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetPermuteInternalBufferSize, and ::SimdSynetPermuteForward.
+    */
+    SIMD_API void* SimdSynetPermuteInit(const size_t * shape, const size_t* order, size_t count, SimdTensorDataType type);
+
+    /*! @ingroup synet_permute
+
+        \fn size_t SimdSynetPermuteInternalBufferSize(const void* context);
+
+        \short Gets size of internal buffer used inside permute algorithm.
+
+        \param [in] context - a pointer to permute context. It must be created by function ::SimdSynetPermuteInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside permute algorithm.
+    */
+    SIMD_API size_t SimdSynetPermuteInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_permute
+
+        \fn void SimdSynetPermuteForward(void* context, const uint8_t* src, uint8_t* dst);
+
+        \short Performs forward propagation of permute algorithm.
+
+        \param [in] context - a pointer to permute context. It must be created by function ::SimdSynetPermuteInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input image.
+        \param [out] dst - a pointer to output image.
+    */
+    SIMD_API void SimdSynetPermuteForward(void* context, const uint8_t* src, uint8_t* dst);
+
     /*! @ingroup synet_pooling
 
         \fn void SimdSynetPoolingAverage(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
@@ -7791,10 +7834,12 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. 
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] format - an unspecified hardware optimized 5D-tensor format of (input/output) image or 2D-convolution filter. It can be ::SimdTensorFormatNchwXc or ::SimdTensorFormatOyxiXo.
         \return specified hardware optimized 5D-tensor format. 
     */
-    SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format);
+    SIMD_API SIMD_DEPRECATED SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format);
 
     /*! @ingroup synet_activation
 
@@ -7849,10 +7894,12 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
+        \warning This functionality is deprecated and can be removed in the future.
+
         \param [in] format - a tensor format.
         \return alignment requred for current tensor format.
     */
-    SIMD_API size_t SimdSynetTensorAlignment(SimdTensorFormatType format);
+    SIMD_API SIMD_DEPRECATED size_t SimdSynetTensorAlignment(SimdTensorFormatType format);
 
     /*! @ingroup synet_other
 
