@@ -77,6 +77,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTransform.h" />
@@ -180,6 +181,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution32fBf16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetNormalize.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseTexture.cpp" />

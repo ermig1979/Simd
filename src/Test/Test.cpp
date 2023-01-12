@@ -400,6 +400,8 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetNormalizeLayerForward);
 
+    TEST_ADD_GROUP_A0(SynetPermute);
+
     TEST_ADD_GROUP_A0(SynetPoolingAverage);
     TEST_ADD_GROUP_A0(SynetPoolingMax32f);
     TEST_ADD_GROUP_A0(SynetPoolingMax8u);

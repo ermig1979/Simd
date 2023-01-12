@@ -74,6 +74,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetInnerProduct32f.h"
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution8i.h"
+#include "Simd/SimdSynetPermute.h"
 #include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdWarpAffine.h"
 
@@ -6358,6 +6359,41 @@ SIMD_API void SimdSynetNormalizeLayerForward(const float* src, size_t batch, siz
     const static SimdSynetNormalizeLayerForwardPtr simdSynetNormalizeLayerForward = SIMD_FUNC3(SynetNormalizeLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForward(src, batch, channels, spatial, scale, eps, acrossSpatial, format, buf, dst);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void* SimdSynetPermuteInit(const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void* (*SimdSynetPermuteInitPtr) (const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
+    const static SimdSynetPermuteInitPtr simdSynetPermuteInit = SIMD_FUNC0(SynetPermuteInit);
+
+    return simdSynetPermuteInit(shape, order, count, type);
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetPermuteInternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return ((Base::SynetPermute*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetPermuteForward(void* context, const uint8_t* src, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    ((Base::SynetPermute*)context)->Forward(src, dst);
 #else
     assert(0);
 #endif

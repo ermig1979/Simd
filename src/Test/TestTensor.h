@@ -31,6 +31,16 @@ namespace Test
     typedef std::vector<size_t> Shape;
     typedef std::vector<size_t> Index;
 
+    //-------------------------------------------------------------------------------------------------
+
+    template<class T> SimdTensorDataType DataType();
+
+    template<> SIMD_INLINE SimdTensorDataType DataType<float>() { return SimdTensorData32f; };
+    template<> SIMD_INLINE SimdTensorDataType DataType<uint16_t>() { return SimdTensorData16f; };
+    template<> SIMD_INLINE SimdTensorDataType DataType<uint8_t>() { return SimdTensorData8u; };
+
+    //-------------------------------------------------------------------------------------------------
+
     template<class T> class Tensor
     {
     public:
@@ -92,6 +102,11 @@ namespace Test
             _format = tensor._format;
             _size = tensor._size;
             _data = tensor._data;
+        }
+
+        static SIMD_INLINE SimdTensorDataType DataType()
+        {
+            return Test::DataType<Type>();
         }
 
         SIMD_INLINE SimdTensorFormatType Format() const
@@ -334,6 +349,7 @@ namespace Test
 
     typedef Tensor<float> Tensor32f;
     typedef Tensor<uint8_t> Tensor8u;
+    typedef Tensor<uint16_t> Tensor16u;
 
     //-------------------------------------------------------------------------
 
@@ -519,6 +535,21 @@ namespace Test
         case SimdTensorFormatOyxi4o: return "Oyxi4o";
         case SimdTensorFormatOyxi8o: return "Oyxi8o";
         case SimdTensorFormatOyxi16o: return "Oyxi16o";
+        default: assert(0); return "Assert";
+        }
+    }
+
+    inline String ToString(SimdTensorDataType data)
+    {
+        switch (data)
+        {
+        case SimdTensorDataUnknown: return "Unknown";
+        case SimdTensorData32f: return "32f";
+        case SimdTensorData32i: return "32i";
+        case SimdTensorData8i: return "8i";
+        case SimdTensorData8u: return "8u";
+        case SimdTensorData16b: return "16b";
+        case SimdTensorData16f: return "16f";
         default: assert(0); return "Assert";
         }
     }
