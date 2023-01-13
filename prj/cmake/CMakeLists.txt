@@ -153,3 +153,12 @@ elseif((CMAKE_SYSTEM_PROCESSOR MATCHES "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUA
 else()
     message(FATAL_ERROR "Unknown value of CMAKE_SYSTEM_PROCESSOR!")
 endif()
+
+file(GLOB_RECURSE SIMD_LIB_HPP ${SIMD_ROOT}/src/Simd/Simd*.hpp)
+set_target_properties(Simd PROPERTIES PUBLIC_HEADER "${SIMD_ROOT}/src/Simd/SimdLib.h;${SIMD_LIB_HPP}")
+install(TARGETS Simd EXPORT simdtargets LIBRARY DESTINATION "lib" PUBLIC_HEADER DESTINATION "include/Simd")
+install(EXPORT simdtargets DESTINATION share/simd)
+
+add_custom_target("uninstall")
+add_custom_command(TARGET "uninstall" POST_BUILD COMMENT "Uninstall Simd Library..."
+	COMMAND cat install_manifest.txt | sudo xargs rm -v && cat install_manifest.txt | xargs -L1 dirname | grep '/[Ss]imd' | uniq | sudo xargs rmdir -v)
