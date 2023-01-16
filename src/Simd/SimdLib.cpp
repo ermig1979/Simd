@@ -6369,7 +6369,7 @@ SIMD_API void* SimdSynetPermuteInit(const size_t* shape, const size_t* order, si
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetPermuteInitPtr) (const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
-    const static SimdSynetPermuteInitPtr simdSynetPermuteInit = SIMD_FUNC0(SynetPermuteInit);
+    const static SimdSynetPermuteInitPtr simdSynetPermuteInit = SIMD_FUNC1(SynetPermuteInit, SIMD_SSE41_FUNC);
 
     return simdSynetPermuteInit(shape, order, count, type);
 #else

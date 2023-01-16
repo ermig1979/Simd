@@ -161,4 +161,5 @@ install(EXPORT simdtargets DESTINATION share/simd)
 
 add_custom_target("uninstall")
 add_custom_command(TARGET "uninstall" POST_BUILD COMMENT "Uninstall Simd Library..."
-	COMMAND cat install_manifest.txt | sudo xargs rm -v && cat install_manifest.txt | xargs -L1 dirname | grep '/[Ss]imd' | uniq | sudo xargs rmdir -v)
+	COMMAND cat install_manifest.txt | sudo xargs rm -v
+	COMMAND cat install_manifest.txt | xargs -L1 dirname | grep '/[Ss]imd' | uniq | sudo xargs rmdir -v)

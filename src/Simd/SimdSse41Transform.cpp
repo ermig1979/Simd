@@ -354,10 +354,10 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width4; col += 4)
-                    TransformImageTranspose_4x4x4(src + col * 4, srcStride,  dst + col * dstStride, dstStride);
+                    TransformImageTranspose_4x4x4(src + col * 4, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 4; ++i)
-                        Base::CopyPixel<4>(src + col * 4 + i*srcStride, dst + col * dstStride + i*4);
+                        Base::CopyPixel<4>(src + col * 4 + i * srcStride, dst + col * dstStride + i * 4);
                 src += 4*srcStride;
                 dst += 16;
             }

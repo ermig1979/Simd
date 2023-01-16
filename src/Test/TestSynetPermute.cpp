@@ -134,10 +134,10 @@ namespace Test
 
         result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Base::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Sse41::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
-//#endif 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Sse41::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
+#endif 
 
         return result;
     }

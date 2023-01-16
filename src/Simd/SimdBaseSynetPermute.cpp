@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetPermute.h"
-#include "Simd/SimdCopyPixel.h"
 
 namespace Simd
 {
@@ -37,6 +36,13 @@ namespace Simd
             for (size_t i = 0; i < shape.size(); ++i)
                 out[order[i]] = buf[i];
             return out;
+        }
+
+        SIMD_INLINE void EraseBatch(Shape &order)
+        {
+            order.erase(order.begin());
+            for (size_t j = 0; j < order.size(); ++j)
+                order[j]--;
         }
 
         SIMD_INLINE Shape CompactOrder(Shape order)
@@ -192,7 +198,7 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
                 if (i == 0 || _dstOrder[i] != _dstOrder[i - 1] + 1)
                     count++;
-            if (count != _count)
+            if (count != _count/* && p.align > 1*/)
             {
                 _count = count;
                 Shape dstShape = _dstShape;
@@ -200,6 +206,21 @@ namespace Simd
                 _srcShape = CompactShape(dstShape, _srcOrder);
                 _dstOrder = CompactOrder(_dstOrder);
                 _srcOrder = CompactOrder(_srcOrder);
+            }
+            if (_dstOrder[0] == 0/* && p.align > 1*/)
+            {
+                _batch = _dstShape[0];
+                _stride = Stride(_dstShape, _dstOrder)[0] * p.PixelSize();
+                _srcShape.erase(_srcShape.begin());
+                _dstShape.erase(_dstShape.begin());
+                EraseBatch(_srcOrder);
+                EraseBatch(_dstOrder);
+                _count--;
+            }
+            else
+            {
+                _batch = 1;
+                _stride = 0;
             }
             _srcStride = Stride(_srcShape, _srcOrder);
             _dstStride = Stride(_dstShape, _dstOrder);
@@ -211,14 +232,19 @@ namespace Simd
 
         void SynetPermute::Forward(const uint8_t* src, uint8_t* dst)
         {
-            _permute(src, _dstShape, _srcStride, dst);
+            for (size_t b = 0; b < _batch; ++b)
+            {
+                _permute(src, _dstShape, _srcStride, dst);
+                src += _stride;
+                dst += _stride;
+            }
         }
 
         //-------------------------------------------------------------------------------------------------
 
         void* SynetPermuteInit(const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type)
         {
-            PermuteParam param(shape, order, count, type);
+            PermuteParam param(shape, order, count, type, 1);
             if (!param.Valid())
                 return NULL;
             return new SynetPermute(param);

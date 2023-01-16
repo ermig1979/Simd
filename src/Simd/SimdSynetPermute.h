@@ -40,18 +40,19 @@ namespace Simd
         {
             static const size_t CountMax = 5;
             Shape shape, order;
-            size_t count;
+            size_t count, align;
             SimdTensorDataType type;
 
-            PermuteParam(const size_t* s, const size_t* o, size_t c, SimdTensorDataType t)
+            SIMD_INLINE PermuteParam(const size_t* s, const size_t* o, size_t c, SimdTensorDataType t, size_t a)
                 : shape(s, s + Simd::Min(c, CountMax))
                 , order(o, o + Simd::Min(c, CountMax))
                 , count(c)
                 , type(t) 
+                , align(a)
             {
             }
 
-            bool Valid() const
+            SIMD_INLINE bool Valid() const
             {
                 if (count < 2 || count > CountMax)
                     return false;
@@ -64,6 +65,21 @@ namespace Simd
                         permute++;
                 }
                 return permute > 1;
+            }
+
+            SIMD_INLINE size_t PixelSize() const
+            {
+                switch (type)
+                {
+                case SimdTensorDataUnknown: return 0;
+                case SimdTensorData32f: return 4;
+                case SimdTensorData32i: return 4;
+                case SimdTensorData8i: return 1;
+                case SimdTensorData8u: return 1;
+                case SimdTensorData16b: return 2;
+                case SimdTensorData16f: return 2;
+                default: assert(0); return 0;
+                }
             }
         };
 
@@ -87,7 +103,7 @@ namespace Simd
 
             PermuteParam _param;
             Array32i _index;
-            size_t _count, _outer, _inner;
+            size_t _batch, _stride, _count;
             Shape _srcShape, _srcOrder, _srcStride;
             Shape _dstShape, _dstOrder, _dstStride;
             PermutePtr _permute;
@@ -97,6 +113,21 @@ namespace Simd
 
         void * SynetPermuteInit(const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
     }
+
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
+    {
+        class SynetPermute : public Base::SynetPermute
+        {
+        public:
+            SynetPermute(const Base::PermuteParam& param);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetPermuteInit(const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
+    }
+#endif
 }
 
 #endif
