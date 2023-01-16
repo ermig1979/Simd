@@ -143,6 +143,21 @@ namespace Simd
         void* SynetPermuteInit(const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
     }
 #endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
+    {
+        class SynetPermute : public Avx2::SynetPermute
+        {
+        public:
+            SynetPermute(const Base::PermuteParam& param);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetPermuteInit(const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
+    }
+#endif
 }
 
 #endif

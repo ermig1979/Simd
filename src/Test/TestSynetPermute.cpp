@@ -121,8 +121,8 @@ namespace Test
         bool result = true;
 
         result = result && SynetPermuteAutoTest(Shp(333, 444), Shp(1, 0), f1, f2);
-        result = result && SynetPermuteAutoTest(Shp(33, 44, 55), Shp(0, 2, 1), f1, f2);
-        result = result && SynetPermuteAutoTest(Shp(11, 22, 33, 44), Shp(0, 3, 1, 2), f1, f2);
+        result = result && SynetPermuteAutoTest(Shp(33, 66, 99), Shp(0, 2, 1), f1, f2);
+        result = result && SynetPermuteAutoTest(Shp(11, 22, 33, 99), Shp(0, 3, 1, 2), f1, f2);
         result = result && SynetPermuteAutoTest(Shp(11, 22, 33, 44, 5), Shp(0, 3, 1, 2, 4), f1, f2);
 
         return result;
@@ -142,6 +142,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Avx2::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Avx512bw::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 #endif 
 
         return result;

@@ -355,6 +355,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWarpAffine.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPermute.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">
