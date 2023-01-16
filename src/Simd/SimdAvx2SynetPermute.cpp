@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
-    namespace Sse41
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
     {
         template<class T> void Permute2(const uint8_t* src, const Base::Shape& shape, const Base::Shape& stride, uint8_t* dst)
         {
@@ -39,7 +39,7 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         SynetPermute::SynetPermute(const Base::PermuteParam& param)
-            : Base::SynetPermute(param)
+            : Sse41::SynetPermute(param)
         {
             if (_count == 2)
             {            

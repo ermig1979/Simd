@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -137,6 +137,11 @@ namespace Test
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
             result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Sse41::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Avx2::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 #endif 
 
         return result;
