@@ -513,6 +513,11 @@ SIMD_API void SimdAlphaBlending2x(const uint8_t* src0, size_t src0Stride, const 
         Sse41::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
+    else
+#endif
         Base::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
 }
 

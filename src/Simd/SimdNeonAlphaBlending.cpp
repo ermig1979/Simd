@@ -154,6 +154,143 @@ namespace Simd
                 AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
         }
 
+        //-----------------------------------------------------------------------------------------
+
+        template <bool align> SIMD_INLINE void AlphaBlending2x(const uint8_t* src0, uint8x16_t alpha0, const uint8_t* src1, uint8x16_t alpha1, uint8_t* dst)
+        {
+            uint8x16_t _src = Load<align>(src0);
+            uint8x16_t _dst = Load<align>(dst);
+            uint8x16_t ff_alpha = vsubq_u8(K8_FF, alpha0);
+            uint8x8_t lo = AlphaBlending<0>(_src, _dst, alpha0, ff_alpha);
+            uint8x8_t hi = AlphaBlending<1>(_src, _dst, alpha0, ff_alpha);
+            _src = Load<align>(src1);
+            _dst = vcombine_u8(lo, hi);
+            ff_alpha = vsubq_u8(K8_FF, alpha1);
+            lo = AlphaBlending<0>(_src, _dst, alpha1, ff_alpha);
+            hi = AlphaBlending<1>(_src, _dst, alpha1, ff_alpha);
+            Store<align>(dst, vcombine_u8(lo, hi));
+        }
+
+        template <bool align, size_t channelCount> struct AlphaBlender2x
+        {
+            void operator()(const uint8_t* src0, uint8x16_t alpha0, const uint8_t* src1, uint8x16_t alpha1, uint8_t* dst);
+        };
+
+        template <bool align> struct AlphaBlender2x<align, 1>
+        {
+            SIMD_INLINE void operator()(const uint8_t* src0, uint8x16_t alpha0, const uint8_t* src1, uint8x16_t alpha1, uint8_t* dst)
+            {
+                AlphaBlending2x<align>(src0, alpha0, src1, alpha1, dst);
+            }
+        };
+
+        template <bool align> struct AlphaBlender2x<align, 2>
+        {
+            SIMD_INLINE void operator()(const uint8_t* src0, uint8x16_t alpha0, const uint8_t* src1, uint8x16_t alpha1, uint8_t* dst)
+            {
+                uint8x16x2_t _alpha0 = vzipq_u8(alpha0, alpha0);
+                uint8x16x2_t _alpha1 = vzipq_u8(alpha1, alpha1);
+                AlphaBlending2x<align>(src0 + 0, _alpha0.val[0], src1 + 0, _alpha1.val[0], dst + 0);
+                AlphaBlending2x<align>(src0 + A, _alpha0.val[1], src1 + A, _alpha1.val[1], dst + A);
+            }
+        };
+
+        template <bool align> struct AlphaBlender2x<align, 3>
+        {
+            SIMD_INLINE void operator()(const uint8_t* src0, uint8x16_t alpha0, const uint8_t* src1, uint8x16_t alpha1, uint8_t* dst)
+            {
+                uint8x16x3_t _alpha0;
+                _alpha0.val[0] = alpha0;
+                _alpha0.val[1] = alpha0;
+                _alpha0.val[2] = alpha0;
+                Store3<align>((uint8_t*)&_alpha0, _alpha0);
+                uint8x16x3_t _alpha1;
+                _alpha1.val[0] = alpha1;
+                _alpha1.val[1] = alpha1;
+                _alpha1.val[2] = alpha1;
+                Store3<align>((uint8_t*)&_alpha1, _alpha1);
+                AlphaBlending2x<align>(src0 + 0 * A, _alpha0.val[0], src1 + 0 * A, _alpha1.val[0], dst + 0 * A);
+                AlphaBlending2x<align>(src0 + 1 * A, _alpha0.val[1], src1 + 1 * A, _alpha1.val[1], dst + 1 * A);
+                AlphaBlending2x<align>(src0 + 2 * A, _alpha0.val[2], src1 + 2 * A, _alpha1.val[2], dst + 2 * A);
+            }
+        };
+
+        template <bool align> struct AlphaBlender2x<align, 4>
+        {
+            SIMD_INLINE void operator()(const uint8_t* src0, uint8x16_t alpha0, const uint8_t* src1, uint8x16_t alpha1, uint8_t* dst)
+            {
+                uint8x16x2_t _alpha0 = vzipq_u8(alpha0, alpha0);
+                uint8x16x2_t _alpha1 = vzipq_u8(alpha1, alpha1);
+                AlphaBlender2x<align, 2>()(src0 + A * 0, _alpha0.val[0], src1 + A * 0, _alpha1.val[0], dst + A * 0);
+                AlphaBlender2x<align, 2>()(src0 + A * 2, _alpha0.val[1], src1 + A * 2, _alpha1.val[1], dst + A * 2);
+            }
+        };
+
+        template <bool align, size_t channelCount> void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            size_t alignedWidth = AlignLo(width, A);
+            uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+            size_t step = channelCount * A;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += step)
+                {
+                    uint8x16_t _alpha0 = Load<align>(alpha0 + col);
+                    uint8x16_t _alpha1 = Load<align>(alpha1 + col);
+                    AlphaBlender2x<align, channelCount>()(src0 + offset, _alpha0, src1 + offset, _alpha1, dst + offset);
+                }
+                if (alignedWidth != width)
+                {
+                    size_t col = width - A, offset = col * channelCount;
+                    uint8x16_t _alpha0 = vandq_u8(Load<false>(alpha0 + col), tailMask);
+                    uint8x16_t _alpha1 = vandq_u8(Load<false>(alpha1 + col), tailMask);
+                    AlphaBlender2x<false, channelCount>()(src0 + offset, _alpha0, src1 + offset, _alpha1, dst + offset);
+                }
+                src0 += src0Stride;
+                alpha0 += alpha0Stride;
+                src1 += src1Stride;
+                alpha1 += alpha1Stride;
+                dst += dstStride;
+            }
+        }
+
+        template <bool align> void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
+            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(src0) && Aligned(src0Stride));
+                assert(Aligned(alpha0) && Aligned(alpha0Stride));
+                assert(Aligned(src1) && Aligned(src1Stride));
+                assert(Aligned(alpha1) && Aligned(alpha1Stride));
+                assert(Aligned(dst) && Aligned(dstStride));
+            }
+
+            switch (channelCount)
+            {
+            case 1: AlphaBlending2x<align, 1>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            case 2: AlphaBlending2x<align, 2>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            case 3: AlphaBlending2x<align, 3>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            case 4: AlphaBlending2x<align, 4>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
+            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
+        {
+            if (Aligned(src0) && Aligned(src0Stride) && Aligned(alpha0) && Aligned(alpha0Stride) &&
+                Aligned(src1) && Aligned(src1Stride) && Aligned(alpha1) && Aligned(alpha1Stride) && Aligned(dst) && Aligned(dstStride))
+                AlphaBlending2x<true>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
+            else
+                AlphaBlending2x<false>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
+        }
+
         //-----------------------------------------------------------------------
 
         template <bool align> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height,
