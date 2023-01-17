@@ -97,6 +97,81 @@ namespace Simd
                 Yuva420pToBgra<false>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T, bool align> SIMD_INLINE void YuvToBgra(const uint8x16_t& y, const uint8x16_t& u, const uint8x16_t& v, const uint8x16_t& a, uint8_t* bgra)
+        {
+            uint8x16x4_t _bgra;
+            YuvToBgr<T>(y, u, v, *(uint8x16x3_t*)&_bgra);
+            _bgra.val[3] = a;
+            Store4<align>(bgra, _bgra);
+        }
+
+        template <bool align, class T> void Yuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t bodyWidth = AlignLo(width, A);
+            size_t tail = width - bodyWidth;
+            for (size_t row = 0; row < height; row += 1)
+            {
+                for (size_t col = 0; col < bodyWidth; col += A)
+                {
+                    uint8x16_t _y = Load<align>(y + col);
+                    uint8x16_t _u = Load<align>(u + col);
+                    uint8x16_t _v = Load<align>(v + col);
+                    uint8x16_t _a = Load<align>(a + col);
+                    YuvToBgra<T, align>(_y, _u, _v, _a, bgra + col * 4);
+                }
+                if (tail)
+                {
+                    size_t col = width - A;
+                    uint8x16_t _y = Load<false>(y + col);
+                    uint8x16_t _u = Load<false>(u + col);
+                    uint8x16_t _v = Load<false>(v + col);
+                    uint8x16_t _a = Load<false>(a + col);
+                    YuvToBgra<T, false>(_y, _u, _v, _a, bgra + col * 4);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                a += aStride;
+                bgra += bgraStride;
+            }
+        }
+
+        template <bool align> void Yuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuva444pToBgraV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt709: Yuva444pToBgraV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt2020: Yuva444pToBgraV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvTrect871: Yuva444pToBgraV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void Yuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && 
+                Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride))
+                Yuva444pToBgraV2<true>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
+            else
+                Yuva444pToBgraV2<false>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <bool align> SIMD_INLINE void Yuv422pToBgra(const uint8_t * y, const uint8x16x2_t & u, const uint8x16x2_t & v, const uint8x16_t & alpha, uint8_t * bgra)
         {
             YuvToBgra<align>(Load<align>(y + 0), u.val[0], v.val[0], alpha, bgra + 0);
@@ -253,14 +328,6 @@ namespace Simd
         }
 
         //-----------------------------------------------------------------------------------------
-
-        template <class T, bool align> SIMD_INLINE void YuvToBgra(const uint8x16_t& y, const uint8x16_t& u, const uint8x16_t& v, const uint8x16_t& a, uint8_t* bgra)
-        {
-            uint8x16x4_t _bgra;
-            YuvToBgr<T>(y, u, v, *(uint8x16x3_t*)&_bgra);
-            _bgra.val[3] = a;
-            Store4<align>(bgra, _bgra);
-        }
 
         template <class T, bool align> SIMD_INLINE void Yuva422pToBgra(const uint8_t* y, const uint8x16x2_t& u, const uint8x16x2_t& v, const uint8x16_t& a, uint8_t* bgra)
         {
