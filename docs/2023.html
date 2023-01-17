@@ -52,7 +52,7 @@
  <li>SimdTensorData16f (16-bit floating point) tensor type.</li>
  <li>The mark of function SimdSynetSpecifyTensorFormat as deprecated.</li>
  <li>The mark of function SimdSynetTensorAlignment as deprecated.</li>
- <li>Base implementation, SSE4.1, AVX2, AVX-512BW optimizations of SynetPermute engine.</li>
+ <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON optimizations of SynetPermute engine.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -61,6 +61,10 @@
  <li>MSVS-2022 compiler warnings in file SimdSse41RecursiveBilateralFilter.cpp.</li>
  <li>MSVS-2015 compiler error in file SimdAvx2RecursiveBilateralFilter.cpp.</li>
  <li>Error in method MergConvParam32f::Valid.</li>
+</ul>
+<h5>Improving</h5>
+<ul>
+ <li>NEON optimizations of function TransformImage.</li>
 </ul>
 
 <h4>Test framework</h4>

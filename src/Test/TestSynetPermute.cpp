@@ -147,6 +147,11 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Avx512bw::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Neon::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 #endif 
 
         return result;

@@ -585,7 +585,7 @@ namespace Simd
             _mm512_storeu_si512(dst - 3 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 3 * A), K8_MIRROR_1)));
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         const __m512i K16_MIRROR_2 = SIMD_MM512_SETR_EPI16(
             0x1f, 0x1e, 0x1d, 0x1c, 0x1b, 0x1a, 0x19, 0x18, 0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11, 0x10,
@@ -606,7 +606,7 @@ namespace Simd
             _mm512_storeu_si512(dst - 3 * A, _mm512_permutexvar_epi16(K16_MIRROR_2, _mm512_loadu_si512(src + 3 * A)));
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         const __m512i K32_MIRROR_3_1U = SIMD_MM512_SETR_EPI32(0x0, 0x1, 0x2, 0x0, 0x3, 0x4, 0x5, 0x0, 0x6, 0x7, 0x8, 0x0, 0x9, 0xa, 0xb, 0x0);
         const __m512i K8_MIRROR_3_1R = SIMD_MM512_SETR_EPI8(
@@ -687,7 +687,7 @@ namespace Simd
             _mm512_storeu_si512(dst - 2 * A, d2);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         const __m512i K32_MIRROR_4 = SIMD_MM512_SETR_EPI32(0xf, 0xe, 0xd, 0xc, 0xb, 0xa, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0);
 
@@ -706,7 +706,7 @@ namespace Simd
             _mm512_storeu_si512(dst - 3 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_si512(src + 3 * A)));
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         const __m512i K16_TRANSPOSE_1x64x16 = SIMD_MM512_SETR_EPI16(
             0x00, 0x08, 0x10, 0x18, 0x01, 0x09, 0x11, 0x19, 0x02, 0x0a, 0x12, 0x1a, 0x03, 0x0b, 0x13, 0x1b,
@@ -819,7 +819,7 @@ namespace Simd
             _mm512_storeu_si512(dst + 0xf * dstStride, af);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         const __m512i K16_TRANSPOSE_2x32x8 = SIMD_MM512_SETR_EPI16(
             0x00, 0x08, 0x10, 0x18, 0x01, 0x09, 0x11, 0x19, 0x02, 0x0a, 0x12, 0x1a, 0x03, 0x0b, 0x13, 0x1b,
@@ -991,7 +991,7 @@ namespace Simd
             _mm512_storeu_si512(dst + 0xf * dstStride, af);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         const __m512i K32_3x16x16_I_0 = SIMD_MM512_SETR_EPI32(0x00, 0x01, 0x02, 0x00, 0x03, 0x04, 0x05, 0x00, 0x10, 0x11, 0x12, 0x00, 0x13, 0x14, 0x15, 0x00);
         const __m512i K32_3x16x16_I_1 = SIMD_MM512_SETR_EPI32(0x06, 0x07, 0x08, 0x00, 0x09, 0x0a, 0x0b, 0x00, 0x16, 0x17, 0x18, 0x10, 0x19, 0x1a, 0x1b, 0x00);
@@ -1169,7 +1169,7 @@ namespace Simd
             _mm512_mask_storeu_epi32(dst + 0x3 * dstStride, 0xFFF, a3);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void TransformImageTranspose_4x4x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
@@ -1405,12 +1405,154 @@ namespace Simd
             _mm512_storeu_si512(dst + 0xf * dstStride, af);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         struct ImageTransforms : public Avx2::ImageTransforms
         {
             ImageTransforms();
         };
+    }
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        SIMD_INLINE void TransformImageTranspose_1x8x16(const uint8_t* src, ptrdiff_t srcStride, uint8_t* dst, ptrdiff_t dstStride)
+        {
+            uint8x16x2_t a0, a1, a2, a3, b0, b1, b2, b3;
+            a0.val[0] = Load<false>(src + 0 * srcStride);
+            a0.val[1] = Load<false>(src + 1 * srcStride);
+            a1.val[0] = Load<false>(src + 2 * srcStride);
+            a1.val[1] = Load<false>(src + 3 * srcStride);
+            a2.val[0] = Load<false>(src + 4 * srcStride);
+            a2.val[1] = Load<false>(src + 5 * srcStride);
+            a3.val[0] = Load<false>(src + 6 * srcStride);
+            a3.val[1] = Load<false>(src + 7 * srcStride);
+            b0 = vzipq_u8(a0.val[0], a2.val[0]);
+            b1 = vzipq_u8(a0.val[1], a2.val[1]);
+            b2 = vzipq_u8(a1.val[0], a3.val[0]);
+            b3 = vzipq_u8(a1.val[1], a3.val[1]);
+            a0 = vzipq_u8(b0.val[0], b2.val[0]);
+            a1 = vzipq_u8(b0.val[1], b2.val[1]);
+            a2 = vzipq_u8(b1.val[0], b3.val[0]);
+            a3 = vzipq_u8(b1.val[1], b3.val[1]);
+            b0 = vzipq_u8(a0.val[0], a2.val[0]);
+            b1 = vzipq_u8(a0.val[1], a2.val[1]);
+            b2 = vzipq_u8(a1.val[0], a3.val[0]);
+            b3 = vzipq_u8(a1.val[1], a3.val[1]);
+            Store<false>(dst + 0x0 * dstStride, Half<0>(b0.val[0]));
+            Store<false>(dst + 0x1 * dstStride, Half<1>(b0.val[0]));
+            Store<false>(dst + 0x2 * dstStride, Half<0>(b0.val[1]));
+            Store<false>(dst + 0x3 * dstStride, Half<1>(b0.val[1]));
+            Store<false>(dst + 0x4 * dstStride, Half<0>(b1.val[0]));
+            Store<false>(dst + 0x5 * dstStride, Half<1>(b1.val[0]));
+            Store<false>(dst + 0x6 * dstStride, Half<0>(b1.val[1]));
+            Store<false>(dst + 0x7 * dstStride, Half<1>(b1.val[1]));
+            Store<false>(dst + 0x8 * dstStride, Half<0>(b2.val[0]));
+            Store<false>(dst + 0x9 * dstStride, Half<1>(b2.val[0]));
+            Store<false>(dst + 0xA * dstStride, Half<0>(b2.val[1]));
+            Store<false>(dst + 0xB * dstStride, Half<1>(b2.val[1]));
+            Store<false>(dst + 0xC * dstStride, Half<0>(b3.val[0]));
+            Store<false>(dst + 0xD * dstStride, Half<1>(b3.val[0]));
+            Store<false>(dst + 0xE * dstStride, Half<0>(b3.val[1]));
+            Store<false>(dst + 0xF * dstStride, Half<1>(b3.val[1]));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void TransformImageTranspose_2x8x8(const uint8_t* src, ptrdiff_t srcStride, uint8_t* dst, ptrdiff_t dstStride)
+        {
+            uint16x8x2_t a0, a1, a2, a3, b0, b1, b2, b3;
+            a0.val[0] = (uint16x8_t)Load<false>(src + 0 * srcStride);
+            a0.val[1] = (uint16x8_t)Load<false>(src + 1 * srcStride);
+            a1.val[0] = (uint16x8_t)Load<false>(src + 2 * srcStride);
+            a1.val[1] = (uint16x8_t)Load<false>(src + 3 * srcStride);
+            a2.val[0] = (uint16x8_t)Load<false>(src + 4 * srcStride);
+            a2.val[1] = (uint16x8_t)Load<false>(src + 5 * srcStride);
+            a3.val[0] = (uint16x8_t)Load<false>(src + 6 * srcStride);
+            a3.val[1] = (uint16x8_t)Load<false>(src + 7 * srcStride);
+            b0 = vzipq_u16(a0.val[0], a2.val[0]);
+            b1 = vzipq_u16(a0.val[1], a2.val[1]);
+            b2 = vzipq_u16(a1.val[0], a3.val[0]);
+            b3 = vzipq_u16(a1.val[1], a3.val[1]);
+            a0 = vzipq_u16(b0.val[0], b2.val[0]);
+            a1 = vzipq_u16(b0.val[1], b2.val[1]);
+            a2 = vzipq_u16(b1.val[0], b3.val[0]);
+            a3 = vzipq_u16(b1.val[1], b3.val[1]);
+            b0 = vzipq_u16(a0.val[0], a2.val[0]);
+            b1 = vzipq_u16(a0.val[1], a2.val[1]);
+            b2 = vzipq_u16(a1.val[0], a3.val[0]);
+            b3 = vzipq_u16(a1.val[1], a3.val[1]);
+            Store<false>(dst + 0 * dstStride, (uint8x16_t)b0.val[0]);
+            Store<false>(dst + 1 * dstStride, (uint8x16_t)b0.val[1]);
+            Store<false>(dst + 2 * dstStride, (uint8x16_t)b1.val[0]);
+            Store<false>(dst + 3 * dstStride, (uint8x16_t)b1.val[1]);
+            Store<false>(dst + 4 * dstStride, (uint8x16_t)b2.val[0]);
+            Store<false>(dst + 5 * dstStride, (uint8x16_t)b2.val[1]);
+            Store<false>(dst + 6 * dstStride, (uint8x16_t)b3.val[0]);
+            Store<false>(dst + 7 * dstStride, (uint8x16_t)b3.val[1]);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        union Type3x4x4
+        {
+            uint8x8x4_t d4;
+            uint8x16x2_t q2;
+        };
+
+        const uint8x8_t K8_ROT0_000 = SIMD_VEC_SETR_PI8(0, 1, 2, 16, 17, 18, 32, 32);
+        const uint8x8_t K8_ROT0_001 = SIMD_VEC_SETR_PI8(32, 32, 32, 32, 32, 32, 0, 1);
+        const uint8x8_t K8_ROT0_011 = SIMD_VEC_SETR_PI8(2, 16, 17, 18, 32, 32, 32, 32);
+        const uint8x8_t K8_ROT0_020 = SIMD_VEC_SETR_PI8(3, 4, 5, 19, 20, 21, 32, 32);
+        const uint8x8_t K8_ROT0_021 = SIMD_VEC_SETR_PI8(32, 32, 32, 32, 32, 32, 3, 4);
+        const uint8x8_t K8_ROT0_031 = SIMD_VEC_SETR_PI8(5, 19, 20, 21, 32, 32, 32, 32);
+        const uint8x8_t K8_ROT0_100 = SIMD_VEC_SETR_PI8(6, 7, 8, 22, 23, 24, 32, 32);
+        const uint8x8_t K8_ROT0_101 = SIMD_VEC_SETR_PI8(32, 32, 32, 32, 32, 32, 6, 7);
+        const uint8x8_t K8_ROT0_111 = SIMD_VEC_SETR_PI8(8, 22, 23, 24, 32, 32, 32, 32);
+        const uint8x8_t K8_ROT0_120 = SIMD_VEC_SETR_PI8(9, 10, 11, 25, 26, 27, 32, 32);
+        const uint8x8_t K8_ROT0_121 = SIMD_VEC_SETR_PI8(32, 32, 32, 32, 32, 32, 9, 10);
+        const uint8x8_t K8_ROT0_131 = SIMD_VEC_SETR_PI8(11, 25, 26, 27, 32, 32, 32, 32);
+
+        SIMD_INLINE void TransformImageTranspose_3x4x4(const uint8_t* src, ptrdiff_t srcStride, uint8_t* dst, ptrdiff_t dstStride)
+        {
+            Type3x4x4 a0, a1, b0, b1;
+            a0.q2.val[0] = Load<false>(src + 0 * srcStride);
+            a0.q2.val[1] = Load<false>(src + 1 * srcStride);
+            a1.q2.val[0] = Load<false>(src + 2 * srcStride);
+            a1.q2.val[1] = Load<false>(src + 3 * srcStride);
+            b0.d4.val[0] = vtbx4_u8(vtbl4_u8(a0.d4, K8_ROT0_000), a1.d4, K8_ROT0_001);
+            b0.d4.val[1] = vtbl4_u8(a1.d4, K8_ROT0_011);
+            b0.d4.val[2] = vtbx4_u8(vtbl4_u8(a0.d4, K8_ROT0_020), a1.d4, K8_ROT0_021);
+            b0.d4.val[3] = vtbl4_u8(a1.d4, K8_ROT0_031);
+            b1.d4.val[0] = vtbx4_u8(vtbl4_u8(a0.d4, K8_ROT0_100), a1.d4, K8_ROT0_101);
+            b1.d4.val[1] = vtbl4_u8(a1.d4, K8_ROT0_111);
+            b1.d4.val[2] = vtbx4_u8(vtbl4_u8(a0.d4, K8_ROT0_120), a1.d4, K8_ROT0_121);
+            b1.d4.val[3] = vtbl4_u8(a1.d4, K8_ROT0_131);
+            Store<false>(dst + 0 * dstStride, b0.q2.val[0]);
+            Store<false>(dst + 1 * dstStride, b0.q2.val[1]);
+            Store<false>(dst + 2 * dstStride, b1.q2.val[0]);
+            Store<false>(dst + 3 * dstStride, b1.q2.val[1]);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void TransformImageTranspose_4x4x4(const uint8_t* src, ptrdiff_t srcStride, uint8_t* dst, ptrdiff_t dstStride)
+        {
+            uint32x4x2_t a0, a1, b0, b1;
+            a0.val[0] = (uint32x4_t)Load<false>(src + 0 * srcStride);
+            a0.val[1] = (uint32x4_t)Load<false>(src + 1 * srcStride);
+            a1.val[0] = (uint32x4_t)Load<false>(src + 2 * srcStride);
+            a1.val[1] = (uint32x4_t)Load<false>(src + 3 * srcStride);
+            b0 = vzipq_u32(a0.val[0], a1.val[0]);
+            b1 = vzipq_u32(a0.val[1], a1.val[1]);
+            a0 = vzipq_u32(b0.val[0], b1.val[0]);
+            a1 = vzipq_u32(b0.val[1], b1.val[1]);
+            Store<false>(dst + 0 * dstStride, (uint8x16_t)a0.val[0]);
+            Store<false>(dst + 1 * dstStride, (uint8x16_t)a0.val[1]);
+            Store<false>(dst + 2 * dstStride, (uint8x16_t)a1.val[0]);
+            Store<false>(dst + 3 * dstStride, (uint8x16_t)a1.val[1]);
+        }
     }
 #endif
 }
