@@ -1417,6 +1417,59 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
+        template<size_t N> SIMD_INLINE void TransformImageMirror8(const uint8_t* src, uint8_t* dst)
+        {
+            dst += (HA - 1) * N;
+            for (size_t i = 0; i < HA; ++i)
+                Base::CopyPixel<N>(src + i * N, dst - i * N);
+        }
+
+        const uint8x8_t K8_TURN = SIMD_VEC_SETR_PI8(7, 6, 5, 4, 3, 2, 1, 0);
+
+        template<> SIMD_INLINE void TransformImageMirror8<1>(const uint8_t * src, uint8_t * dst)
+        {
+            uint8x8_t v = LoadHalf<false>(src);
+            v = vtbl1_u8(v, K8_TURN);
+            Store<false>(dst, v);
+        }
+
+        template<> SIMD_INLINE void TransformImageMirror8<2>(const uint8_t * src, uint8_t * dst)
+        {
+            uint8x8x2_t v = LoadHalf2<false>(src);
+            v.val[0] = vtbl1_u8(v.val[0], K8_TURN);
+            v.val[1] = vtbl1_u8(v.val[1], K8_TURN);
+            Store2<false>(dst, v);
+        }
+
+        template<> SIMD_INLINE void TransformImageMirror8<3>(const uint8_t* src, uint8_t* dst)
+        {
+            uint8x8x3_t v = LoadHalf3<false>(src);
+            v.val[0] = vtbl1_u8(v.val[0], K8_TURN);
+            v.val[1] = vtbl1_u8(v.val[1], K8_TURN);
+            v.val[2] = vtbl1_u8(v.val[2], K8_TURN);
+            Store3<false>(dst, v);
+        }
+
+        template<> SIMD_INLINE void TransformImageMirror8<4>(const uint8_t * src, uint8_t * dst)
+        {
+            uint8x8x4_t v = LoadHalf4<false>(src);
+            v.val[0] = vtbl1_u8(v.val[0], K8_TURN);
+            v.val[1] = vtbl1_u8(v.val[1], K8_TURN);
+            v.val[2] = vtbl1_u8(v.val[2], K8_TURN);
+            v.val[3] = vtbl1_u8(v.val[3], K8_TURN);
+            Store4<false>(dst, v);
+        }
+
+        template<size_t N> SIMD_INLINE void TransformImageMirror32(const uint8_t* src, uint8_t* dst)
+        {
+            TransformImageMirror8<N>(src + 0 * N * HA, dst - 0 * N * HA);
+            TransformImageMirror8<N>(src + 1 * N * HA, dst - 1 * N * HA);
+            TransformImageMirror8<N>(src + 2 * N * HA, dst - 2 * N * HA);
+            TransformImageMirror8<N>(src + 3 * N * HA, dst - 3 * N * HA);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void TransformImageTranspose_1x8x16(const uint8_t* src, ptrdiff_t srcStride, uint8_t* dst, ptrdiff_t dstStride)
         {
             uint8x16x2_t a0, a1, a2, a3, b0, b1, b2, b3;
@@ -1553,6 +1606,13 @@ namespace Simd
             Store<false>(dst + 2 * dstStride, (uint8x16_t)a1.val[0]);
             Store<false>(dst + 3 * dstStride, (uint8x16_t)a1.val[1]);
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        struct ImageTransforms : public Base::ImageTransforms
+        {
+            ImageTransforms();
+        };
     }
 #endif
 }
