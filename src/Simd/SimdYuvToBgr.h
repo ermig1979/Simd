@@ -209,7 +209,7 @@ namespace Simd
             bgra[3] = alpha;
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<class T> SIMD_INLINE int BgrToY(int blue, int green, int red)
         {
@@ -303,6 +303,74 @@ namespace Simd
             __m128i lo = YuvToBlue16<T>(UnpackY<T, 0>(y), UnpackUV<T, 0>(u));
             __m128i hi = YuvToBlue16<T>(UnpackY<T, 1>(y), UnpackUV<T, 1>(u));
             return _mm_packus_epi16(lo, hi);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<class T> SIMD_INLINE __m128i BgrToY32(__m128i b16_r16, __m128i g16_1)
+        {
+            static const __m128i BY_RY = SIMD_MM_SET2_EPI16(T::B_2_Y, T::R_2_Y);
+            static const __m128i GY_RT = SIMD_MM_SET2_EPI16(T::G_2_Y, T::B_ROUND);
+            return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(b16_r16, BY_RY), _mm_madd_epi16(g16_1, GY_RT)), T::B_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m128i BgrToY16(__m128i b16, __m128i g16, __m128i r16)
+        {
+            static const __m128i Y_LO = SIMD_MM_SET1_EPI16(T::Y_LO);
+            return SaturateI16ToU8(_mm_add_epi16(Y_LO, _mm_packs_epi32(
+                BgrToY32<T>(UnpackU16<0>(b16, r16), UnpackU16<0>(g16, K16_0001)),
+                BgrToY32<T>(UnpackU16<1>(b16, r16), UnpackU16<1>(g16, K16_0001)))));
+        }
+
+        template<class T> SIMD_INLINE __m128i BgrToY8(__m128i b8, __m128i g8, __m128i r8)
+        {
+            return _mm_packus_epi16(
+                BgrToY16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
+                BgrToY16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
+        }
+
+        template<class T> SIMD_INLINE __m128i BgrToU32(__m128i b16_r16, __m128i g16_1)
+        {
+            static const __m128i BU_RU = SIMD_MM_SET2_EPI16(T::B_2_U, T::R_2_U);
+            static const __m128i GU_RT = SIMD_MM_SET2_EPI16(T::G_2_U, T::B_ROUND);
+            return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(b16_r16, BU_RU), _mm_madd_epi16(g16_1, GU_RT)), T::B_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m128i BgrToU16(__m128i b16, __m128i g16, __m128i r16)
+        {
+            static const __m128i UV_Z = SIMD_MM_SET1_EPI16(T::UV_Z);
+            return SaturateI16ToU8(_mm_add_epi16(UV_Z, _mm_packs_epi32(
+                BgrToU32<T>(UnpackU16<0>(b16, r16), UnpackU16<0>(g16, K16_0001)),
+                BgrToU32<T>(UnpackU16<1>(b16, r16), UnpackU16<1>(g16, K16_0001)))));
+        }
+
+        template<class T> SIMD_INLINE __m128i BgrToU8(__m128i b8, __m128i g8, __m128i r8)
+        {
+            return _mm_packus_epi16(
+                BgrToU16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
+                BgrToU16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
+        }
+
+        template<class T> SIMD_INLINE __m128i BgrToV32(__m128i b16_r16, __m128i g16_1)
+        {
+            static const __m128i BV_RV = SIMD_MM_SET2_EPI16(T::B_2_V, T::R_2_V);
+            static const __m128i GV_RT = SIMD_MM_SET2_EPI16(T::G_2_V, T::B_ROUND);
+            return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(b16_r16, BV_RV), _mm_madd_epi16(g16_1, GV_RT)), T::B_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m128i BgrToV16(__m128i b16, __m128i g16, __m128i r16)
+        {
+            static const __m128i UV_Z = SIMD_MM_SET1_EPI16(T::UV_Z);
+            return SaturateI16ToU8(_mm_add_epi16(UV_Z, _mm_packs_epi32(
+                BgrToV32<T>(UnpackU16<0>(b16, r16), UnpackU16<0>(g16, K16_0001)),
+                BgrToV32<T>(UnpackU16<1>(b16, r16), UnpackU16<1>(g16, K16_0001)))));
+        }
+
+        template<class T> SIMD_INLINE __m128i BgrToV8(__m128i b8, __m128i g8, __m128i r8)
+        {
+            return _mm_packus_epi16(
+                BgrToV16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
+                BgrToV16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
         }
     }
 #endif
