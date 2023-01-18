@@ -758,7 +758,7 @@ namespace Test
 #define FUNC_GB(function) \
     FuncGB(function, std::string(#function))
 
-    bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float sigma, float epsilon, FuncGB f1, FuncGB f2)
+    bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float sigma, FuncGB f1, FuncGB f2)
     {
         bool result = true;
 
@@ -771,6 +771,8 @@ namespace Test
 
         View dst1(src.width, src.height, src.format, NULL, TEST_ALIGN(width));
         View dst2(src.width, src.height, src.format, NULL, TEST_ALIGN(width));
+
+        const float epsilon = 0.001f;
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -793,9 +795,8 @@ namespace Test
     {
         bool result = true;
 
-        const float epsilon = 0.001f;
-        result = result && GaussianBlurAutoTest(W, H, channels, sigma, epsilon, f1, f2);
-        result = result && GaussianBlurAutoTest(W + O, H - O, channels, epsilon, sigma, f1, f2);
+        result = result && GaussianBlurAutoTest(W, H, channels, sigma, f1, f2);
+        result = result && GaussianBlurAutoTest(W + O, H - O, channels, sigma, f1, f2);
 
         return result;
     }
@@ -804,7 +805,7 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && GaussianBlurAutoTest(12, 8, 1, 5.0f, 0.001f, f1, f2);
+        //result = result && GaussianBlurAutoTest(12, 8, 1, 5.0f, f1, f2);
 
         for (int channels = 1; channels <= 4; channels++)
         {

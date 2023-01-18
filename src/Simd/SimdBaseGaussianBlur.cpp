@@ -44,7 +44,7 @@ namespace Simd
             width > 0 &&
             channels > 0 && channels <= 4 &&
             sigma >= 0.000001f &&
-            epsilon >= 0.000001f &&
+            epsilon >= 0.000001f && epsilon <= 1.0f &&
             align >= sizeof(float);
     }
 
