@@ -26,6 +26,7 @@
 
 #include "Simd/SimdDefs.h"
 
+#if defined(SIMD_AMX_EMULATE)  
 namespace Simd
 {
     struct TileConf
@@ -64,7 +65,7 @@ namespace Simd
 
     const size_t TileRegCount = 8;
 
-#ifdef SIMD_AVX512BW_ENABLE    
+#ifdef SIMD_AVX512BW_ENABLE  
     namespace Avx512bw
     {
         void TileLoadConfig(const TileConf* tileConf);
@@ -98,15 +99,7 @@ namespace Simd
         void TileMatMulFp16(Tile1024* dst, const Tile1024& a, const Tile1024& b);
     }
 #endif
-
-#ifdef SIMD_AMX_ENABLE    
-    namespace Amx
-    {
-    }
-#endif
 }
-
-#if defined(SIMD_AMX_EMULATE)
 
 #ifdef _tile_loadconfig
 #undef _tile_loadconfig

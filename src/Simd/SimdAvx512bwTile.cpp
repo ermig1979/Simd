@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512BW_ENABLE    
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)    
     namespace Avx512bw
     {
         TileConf g_tileConf;
