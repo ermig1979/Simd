@@ -449,6 +449,11 @@ namespace Simd
 
         void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
         {
+            if (size < F)
+            {
+                Sse41::SynetInnerProductLayerForward(src, weight, bias, count, size, dst);
+                return;
+            }
             float _bias[4] = { 0, 0, 0, 0 };
             size_t count4 = AlignLo(count, 4);
             size_t i = 0;
