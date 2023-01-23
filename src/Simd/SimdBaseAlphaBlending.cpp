@@ -23,6 +23,7 @@
 */
 
 #include "Simd/SimdAlphaBlending.h"
+#include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
@@ -148,7 +149,57 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T> SIMD_INLINE void AlphaBlendingBgraToYuv420p(const uint8_t* bgra0, size_t bgraStride, uint8_t* y0, size_t yStride, uint8_t* u, uint8_t* v)
+        {
+            const uint8_t* bgra1 = bgra0 + bgraStride;
+            uint8_t* y1 = y0 + yStride;
+
+            y0[0] = AlphaBlending(BgrToY<T>(bgra0[0], bgra0[1], bgra0[2]), y0[0], bgra0[3]);
+            y0[1] = AlphaBlending(BgrToY<T>(bgra0[4], bgra0[5], bgra0[6]), y0[1], bgra0[7]);
+            y1[0] = AlphaBlending(BgrToY<T>(bgra1[0], bgra1[1], bgra1[2]), y1[0], bgra1[3]);
+            y1[1] = AlphaBlending(BgrToY<T>(bgra1[4], bgra1[5], bgra1[6]), y1[1], bgra1[7]);
+
+            int b = Average(bgra0[0], bgra0[4], bgra1[0], bgra1[4]);
+            int g = Average(bgra0[1], bgra0[5], bgra1[1], bgra1[5]);
+            int r = Average(bgra0[2], bgra0[6], bgra1[2], bgra1[6]);
+            int a = Average(bgra0[3], bgra0[7], bgra1[3], bgra1[7]);
+            u[0] = AlphaBlending(BgrToU<T>(b, g, r), u[0], a);
+            v[0] = AlphaBlending(BgrToV<T>(b, g, r), v[0], a);
+        }
+
+        template <class T> void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
+
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < width; colY += 2, colUV++, colBgra += 8)
+                    AlphaBlendingBgraToYuv420p<T>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV);
+                bgra += 2 * bgraStride;
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+            }
+        }
+
+        void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: AlphaBlendingBgraToYuv420p<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: AlphaBlendingBgraToYuv420p<Base::Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: AlphaBlendingBgraToYuv420p<Base::Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: AlphaBlendingBgraToYuv420p<Base::Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <size_t channelCount> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t alpha, uint8_t* dst, size_t dstStride)
         {

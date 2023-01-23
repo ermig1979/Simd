@@ -311,6 +311,34 @@ namespace Simd
 
     /*! @ingroup drawing
 
+        \fn void AlphaBlendingBgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601);
+
+        \short Performs alpha blending of BGRA image to YUV420P.
+
+        This function is used for image drawing.
+        The input BGRA and output Y images must have the same width and height.
+        The output U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function is a C++ wrapper for function ::SimdAlphaBlendingBgraToYuv420p.
+
+        \param [in] bgra - a foreground BGRA-32 image.
+        \param [in, out] y - Y-component of background YUV420P image.
+        \param [in, out] u - U-component of background YUV420P image.
+        \param [in, out] v - V-component of background YUV420P image.
+        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+    */
+    template<template<class> class A> SIMD_INLINE void AlphaBlendingBgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
+    {
+        assert(y.width == 2 * u.width && y.height == 2 * u.height && y.format == u.format);
+        assert(y.width == 2 * v.width && y.height == 2 * v.height && y.format == v.format);
+        assert(y.width == bgra.width && y.height == bgra.height);
+        assert(bgra.format == View<A>::Bgra32 && y.format == View<A>::Gray8 && u.format == View<A>::Gray8 && v.format == View<A>::Gray8);
+
+        SimdAlphaBlendingBgraToYuv420p(bgra.data, bgra.stride, bgra.width, bgra.height, y.data, y.stride, u.data, u.stride, v.data, v.stride, yuvType);
+    }
+
+    /*! @ingroup drawing
+
         \fn void AlphaBlending(const View<A>& src, uint8_t alpha, View<A>& dst)
 
         \short Performs alpha blending operation.

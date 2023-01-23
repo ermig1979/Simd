@@ -68,6 +68,9 @@ namespace Simd
             const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
             size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
 
+        void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
+
         void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride);
 

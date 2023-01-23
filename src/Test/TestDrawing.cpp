@@ -224,6 +224,88 @@ namespace Test
 
     namespace
     {
+        struct FuncABBY
+        {
+            typedef void(*FuncPtr)(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+                uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
+            FuncPtr func;
+            String description;
+
+            FuncABBY(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& bgra, View * y, View * u, View * v, int i, SimdYuvType yuvType) const
+            {
+                Simd::Copy(y[0], y[i]);
+                Simd::Copy(u[0], u[i]);
+                Simd::Copy(v[0], v[i]);
+                TEST_PERFORMANCE_TEST(description);
+                func(bgra.data, bgra.stride, bgra.width, bgra.height, y[i].data, y[i].stride, u[i].data, u[i].stride, v[i].data, v[i].stride, yuvType);
+            }
+        };
+    }
+
+#define FUNC_ABBY(func) FuncABBY(func, #func)
+
+    bool AlphaBlendingBgraToYuv420pAutoTest(int width, int height, SimdYuvType yuvType, const FuncABBY& f1, const FuncABBY& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
+
+        View bgra(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+
+        View y[3], u[3], v[3];
+        for (int i = 0; i < 3; ++i)
+        {
+            y[i].Recreate(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+            u[i].Recreate(width / 2, height / 2, View::Gray8, NULL, TEST_ALIGN(width));
+            v[i].Recreate(width / 2, height / 2, View::Gray8, NULL, TEST_ALIGN(width));
+        }
+
+        FillRandom(bgra);
+        FillRandom(y[0]);
+        FillRandom(u[0]);
+        FillRandom(v[0]);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bgra, y, u, v, 1, yuvType));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bgra, y, u, v, 2, yuvType));
+
+        result = result && Compare(y[1], y[2], 0, true, 64, 0, "y");
+        result = result && Compare(u[1], u[2], 0, true, 64, 0, "u");
+        result = result && Compare(v[1], v[2], 0, true, 64, 0, "v");
+
+        return result;
+    }
+
+    bool AlphaBlendingBgraToYuv420pAutoTest(const FuncABBY& f1, const FuncABBY& f2)
+    {
+        bool result = true;
+
+        result = result && AlphaBlendingBgraToYuv420pAutoTest(W, H, SimdYuvBt601, f1, f2);
+        result = result && AlphaBlendingBgraToYuv420pAutoTest(W + E, H - E, SimdYuvBt709, f1, f2);
+
+        return result;
+    }
+
+    bool AlphaBlendingBgraToYuv420pAutoTest()
+    {
+        bool result = true;
+
+        result = result && AlphaBlendingBgraToYuv420pAutoTest(FUNC_ABBY(Simd::Base::AlphaBlendingBgraToYuv420p), FUNC_ABBY(SimdAlphaBlendingBgraToYuv420p));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable && W >= Simd::Sse41::DA)
+//            result = result && AlphaBlendingBgraToYuv420pAutoTest(FUNC_ABBY(Simd::Sse41::AlphaBlendingBgraToYuv420p), FUNC_ABBY(SimdAlphaBlendingBgraToYuv420p));
+//#endif 
+
+        return result;
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncABU
         {
             typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride);

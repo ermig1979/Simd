@@ -1119,6 +1119,33 @@ extern "C"
 
     /*! @ingroup drawing
 
+        \fn void SimdAlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
+
+        \short Performs alpha blending of BGRA image to YUV420P.
+
+        This function is used for image drawing.
+        The input BGRA and output Y images must have the same width and height.
+        The output U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function has a C++ wrapper Simd::AlphaBlendingBgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
+
+        \param [in] bgra - a pointer to pixels data of foreground BGRA-32 image.
+        \param [in] bgraStride - a row size of the foreground BGRA-32 image.
+        \param [in] width - an image width. It must be even.
+        \param [in] height - an image height. It must be even.
+        \param [in, out] y - a pointer to pixels data of Y-component of background YUV420P image.
+        \param [in] yStride - a row size of Y-component.
+        \param [in, out] u - a pointer to pixels data of U-component of background YUV420P image.
+        \param [in] uStride - a row size of U-component.
+        \param [in, out] v - a pointer to pixels data of V-component of background YUV420P image.
+        \param [in] vStride - a row size of V-component.
+        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+    */
+    SIMD_API void SimdAlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, 
+        uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
+
+    /*! @ingroup drawing
+
         \fn void SimdAlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride);
 
         \short Performs uniform alpha blending operation.
@@ -1732,7 +1759,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -1801,7 +1828,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, 
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
@@ -1982,7 +2009,7 @@ extern "C"
         \short Converts 24-bit BGR image to YUV420P.
 
         The input BGR and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have the same width and height (half size relative to Y component).
 
         \note This function has a C++ wrapper Simd::BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v).
 
@@ -2006,7 +2033,7 @@ extern "C"
         \short Converts 24-bit BGR image to YUV422P.
 
         The input BGR and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The output U and V images must have the same width and height (their width is equal to half width of Y component).
 
         \note This function has a C++ wrapper Simd::BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v).
 

@@ -56,6 +56,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9">SimdAlphaBlending2x</a> (const uint8_t *src0, size_t src0Stride, const uint8_t *alpha0, size_t alpha0Stride, const uint8_t *src1, size_t src1Stride, const uint8_t *alpha1, size_t alpha1Stride, size_t width, size_t height, size_t channelCount, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs double alpha blending operation.  <a href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9">More...</a><br /></td></tr>
 <tr class="separator:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac766d3d07d13efab36a347b595424db1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gac766d3d07d13efab36a347b595424db1">SimdAlphaBlendingBgraToYuv420p</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
+<tr class="memdesc:gac766d3d07d13efab36a347b595424db1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs alpha blending of BGRA image to YUV420P.  <a href="group__drawing.html#gac766d3d07d13efab36a347b595424db1">More...</a><br /></td></tr>
+<tr class="separator:gac766d3d07d13efab36a347b595424db1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac93b9719fbb80c729042c6cf8a737970"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gac93b9719fbb80c729042c6cf8a737970">SimdAlphaBlendingUniform</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:gac93b9719fbb80c729042c6cf8a737970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs uniform alpha blending operation.  <a href="group__drawing.html#gac93b9719fbb80c729042c6cf8a737970">More...</a><br /></td></tr>
 <tr class="separator:gac93b9719fbb80c729042c6cf8a737970"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -76,6 +79,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga96b177f21682b935bd7db059c9638988"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga96b177f21682b935bd7db059c9638988">AlphaBlending2x</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src0, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;alpha0, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src1, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;alpha1, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:ga96b177f21682b935bd7db059c9638988"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs double alpha blending operation.  <a href="group__drawing.html#ga96b177f21682b935bd7db059c9638988">More...</a><br /></td></tr>
 <tr class="separator:ga96b177f21682b935bd7db059c9638988"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadcba495fb909153866dc329a2c63a7ee"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:gadcba495fb909153866dc329a2c63a7ee"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#gadcba495fb909153866dc329a2c63a7ee">AlphaBlendingBgraToYuv420p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>)</td></tr>
+<tr class="memdesc:gadcba495fb909153866dc329a2c63a7ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs alpha blending of BGRA image to YUV420P.  <a href="group__drawing.html#gadcba495fb909153866dc329a2c63a7ee">More...</a><br /></td></tr>
+<tr class="separator:gadcba495fb909153866dc329a2c63a7ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9ef2c822405d741c6d0bb93316729980"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9ef2c822405d741c6d0bb93316729980"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga9ef2c822405d741c6d0bb93316729980">AlphaBlending</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint8_t alpha, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:ga9ef2c822405d741c6d0bb93316729980"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs alpha blending operation.  <a href="group__drawing.html#ga9ef2c822405d741c6d0bb93316729980">More...</a><br /></td></tr>
@@ -299,6 +306,108 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count for foreground and background images (1 &lt;= channelCount &lt;= 4). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of background image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the background image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gac766d3d07d13efab36a347b595424db1" name="gac766d3d07d13efab36a347b595424db1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac766d3d07d13efab36a347b595424db1">&#9670;&nbsp;</a></span>SimdAlphaBlendingBgraToYuv420p()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdAlphaBlendingBgraToYuv420p </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>bgra</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bgraStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>yStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>uStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>vStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td>
+          <td class="paramname"><em>yuvType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs alpha blending of BGRA image to YUV420P. </p>
+<p >This function is used for image drawing. The input BGRA and output Y images must have the same width and height. The output U and V images must have the same width and height (half size relative to Y component).</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__drawing.html#gadcba495fb909153866dc329a2c63a7ee" title="Performs alpha blending of BGRA image to YUV420P.">Simd::AlphaBlendingBgraToYuv420p</a>(const View&amp; bgra, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of foreground BGRA-32 image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the foreground BGRA-32 image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. It must be even. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. It must be even. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">y</td><td>- a pointer to pixels data of Y-component of background YUV420P image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of Y-component. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">u</td><td>- a pointer to pixels data of U-component of background YUV420P image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of U-component. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">v</td><td>- a pointer to pixels data of V-component of background YUV420P image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of V-component. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of output YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). </td></tr>
   </table>
   </dd>
 </dl>
@@ -734,6 +843,66 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">src1</td><td>- the second foreground image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha1</td><td>- the second image with alpha channel. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a background image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gadcba495fb909153866dc329a2c63a7ee" name="gadcba495fb909153866dc329a2c63a7ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gadcba495fb909153866dc329a2c63a7ee">&#9670;&nbsp;</a></span>AlphaBlendingBgraToYuv420p()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AlphaBlendingBgraToYuv420p </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>bgra</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td>
+          <td class="paramname"><em>yuvType</em> = <code><a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs alpha blending of BGRA image to YUV420P. </p>
+<p >This function is used for image drawing. The input BGRA and output Y images must have the same width and height. The output U and V images must have the same width and height (half size relative to Y component).</p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#gac766d3d07d13efab36a347b595424db1" title="Performs alpha blending of BGRA image to YUV420P.">SimdAlphaBlendingBgraToYuv420p</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a foreground BGRA-32 image. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">y</td><td>- Y-component of background YUV420P image. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">u</td><td>- U-component of background YUV420P image. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">v</td><td>- V-component of background YUV420P image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of output YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). By default it is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. </td></tr>
   </table>
   </dd>
 </dl>
