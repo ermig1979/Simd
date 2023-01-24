@@ -525,7 +525,12 @@ SIMD_API void SimdAlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStr
     uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
 {
     SIMD_EMPTY();
-    Base::AlphaBlendingBgraToYuv420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::AlphaBlendingBgraToYuv420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+    else
+#endif
+        Base::AlphaBlendingBgraToYuv420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
 }
 
 SIMD_API void SimdAlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)

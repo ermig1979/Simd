@@ -29,11 +29,6 @@ namespace Simd
 {
     namespace Base
     {
-        SIMD_INLINE int AlphaBlending(int src, int dst, int alpha)
-        {
-            return DivideBy255(src*alpha + dst*(0xFF - alpha));
-        }
-
         template <size_t channelCount> void AlphaBlending(const uint8_t * src, int alpha, uint8_t * dst);
 
         template <> SIMD_INLINE void AlphaBlending<1>(const uint8_t * src, int alpha, uint8_t * dst)

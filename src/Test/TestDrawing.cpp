@@ -294,10 +294,10 @@ namespace Test
 
         result = result && AlphaBlendingBgraToYuv420pAutoTest(FUNC_ABBY(Simd::Base::AlphaBlendingBgraToYuv420p), FUNC_ABBY(SimdAlphaBlendingBgraToYuv420p));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && W >= Simd::Sse41::DA)
-//            result = result && AlphaBlendingBgraToYuv420pAutoTest(FUNC_ABBY(Simd::Sse41::AlphaBlendingBgraToYuv420p), FUNC_ABBY(SimdAlphaBlendingBgraToYuv420p));
-//#endif 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AlphaBlendingBgraToYuv420pAutoTest(FUNC_ABBY(Simd::Sse41::AlphaBlendingBgraToYuv420p), FUNC_ABBY(SimdAlphaBlendingBgraToYuv420p));
+#endif 
 
         return result;
     }

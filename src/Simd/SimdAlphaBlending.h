@@ -75,6 +75,11 @@ namespace Simd
             dst[2] = RestrictRange(int(src[2] * alpha));
             dst[3] = RestrictRange(int(src[3] * alpha));
         }
+
+        SIMD_INLINE int AlphaBlending(int src, int dst, int alpha)
+        {
+            return DivideBy255(src * alpha + dst * (0xFF - alpha));
+        }
     }
 
 #ifdef SIMD_SSE41_ENABLE

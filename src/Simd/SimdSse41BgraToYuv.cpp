@@ -31,16 +31,6 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        const __m128i K8_SHUFFLE_BGRA_TO_B0R0 = SIMD_MM_SETR_EPI8(0x0, -1, 0x2, -1, 0x4, -1, 0x6, -1, 0x8, -1, 0xA, -1, 0xC, -1, 0xE, -1);
-        const __m128i K8_SHUFFLE_BGRA_TO_G000 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
-
-        template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m128i * bgra, __m128i & b16_r16, __m128i & g16_1)
-        {
-            __m128i _bgra = Load<align>(bgra);
-            b16_r16 = _mm_shuffle_epi8(_bgra, K8_SHUFFLE_BGRA_TO_B0R0);
-            g16_1 = _mm_or_si128(_mm_shuffle_epi8(_bgra, K8_SHUFFLE_BGRA_TO_G000), K32_00010000);
-        }
-
         template <bool align> SIMD_INLINE __m128i LoadAndConvertY16(const __m128i * bgra, __m128i & b16_r16, __m128i & g16_1)
         {
             __m128i _b16_r16[2], _g16_1[2];
@@ -253,14 +243,6 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
-
-        template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m128i * bgra, __m128i & b16_r16, __m128i & g16_1, __m128i & a32)
-        {
-            __m128i _bgra = Load<align>(bgra);
-            b16_r16 = _mm_shuffle_epi8(_bgra, K8_SHUFFLE_BGRA_TO_B0R0);
-            g16_1 = _mm_or_si128(_mm_shuffle_epi8(_bgra, K8_SHUFFLE_BGRA_TO_G000), K32_00010000);
-            a32 = _mm_and_si128(_mm_srli_si128(_bgra, 3), K32_000000FF);
-        }
 
         template <bool align> SIMD_INLINE void LoadAndConvertYA16(const __m128i * bgra, __m128i & b16_r16, __m128i & g16_1, __m128i & y16, __m128i & a16)
         {

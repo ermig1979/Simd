@@ -24,6 +24,7 @@
 #include "Simd/SimdAlphaBlending.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdUnpack.h"
+#include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
@@ -247,6 +248,93 @@ namespace Simd
         }
 
         //-----------------------------------------------------------------------------------------
+
+        template <class T, int part, bool tail> SIMD_INLINE __m128i LoadAndBgrToY16(const __m128i* bgra, const __m128i& y8, const __m128i & m8,  __m128i& b16_r16, __m128i& g16_1, __m128i& a16)
+        {
+            static const __m128i Y_LO = SIMD_MM_SET1_EPI16(T::Y_LO);
+
+            __m128i _b16_r16[2], _g16_1[2], a32[2];
+            LoadPreparedBgra16<false>(bgra + 0, _b16_r16[0], _g16_1[0], a32[0]);
+            LoadPreparedBgra16<false>(bgra + 1, _b16_r16[1], _g16_1[1], a32[1]);
+            b16_r16 = _mm_hadd_epi32(_b16_r16[0], _b16_r16[1]);
+            g16_1 = _mm_hadd_epi32(_g16_1[0], _g16_1[1]);
+            a16 = _mm_packs_epi32(a32[0], a32[1]);
+            if (tail)
+                a16 = _mm_and_si128(UnpackU8<part>(m8), a16);
+            __m128i y16 = SaturateI16ToU8(_mm_add_epi16(Y_LO, _mm_packs_epi32(BgrToY32<T>(_b16_r16[0], _g16_1[0]), BgrToY32<T>(_b16_r16[1], _g16_1[1]))));
+            return AlphaBlending16i(y16, UnpackU8<part>(y8), a16);
+        }
+
+        template <class T, bool tail> SIMD_INLINE void AlphaBlendingBgraToYuv420p(const uint8_t* bgra0, size_t bgraStride, uint8_t* y0, size_t yStride, uint8_t* u, uint8_t* v, __m128i mask = K_INV_ZERO)
+        {
+            static const __m128i UV_Z = SIMD_MM_SET1_EPI16(T::UV_Z);
+            const uint8_t* bgra1 = bgra0 + bgraStride;
+            uint8_t* y1 = y0 + yStride;
+
+            __m128i b16_r16[2][2], g16_1[2][2], a16[2][2];
+            __m128i _y0 = Load<false>((__m128i*)y0);
+            __m128i y00 = LoadAndBgrToY16<T, 0, tail>((__m128i*)bgra0 + 0, _y0, mask, b16_r16[0][0], g16_1[0][0], a16[0][0]);
+            __m128i y01 = LoadAndBgrToY16<T, 1, tail>((__m128i*)bgra0 + 2, _y0, mask, b16_r16[0][1], g16_1[0][1], a16[0][1]);
+            Store<false>((__m128i*)y0, _mm_packus_epi16(y00, y01));
+
+            __m128i _y1 = Load<false>((__m128i*)y1);
+            __m128i y10 = LoadAndBgrToY16<T, 0, tail>((__m128i*)bgra1 + 0, _y1, mask, b16_r16[1][0], g16_1[1][0], a16[1][0]);
+            __m128i y11 = LoadAndBgrToY16<T, 1, tail>((__m128i*)bgra1 + 2, _y1, mask, b16_r16[1][1], g16_1[1][1], a16[1][1]);
+            Store<false>((__m128i*)y1, _mm_packus_epi16(y10, y11));
+
+            b16_r16[0][0] = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(b16_r16[0][0], b16_r16[1][0]), K16_0002), 2);
+            b16_r16[0][1] = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(b16_r16[0][1], b16_r16[1][1]), K16_0002), 2);
+            g16_1[0][0] = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(g16_1[0][0], g16_1[1][0]), K16_0002), 2);
+            g16_1[0][1] = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(g16_1[0][1], g16_1[1][1]), K16_0002), 2);
+            a16[0][0] = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_hadd_epi16(a16[0][0], a16[0][1]), _mm_hadd_epi16(a16[1][0], a16[1][1])), K16_0002), 2);
+
+            __m128i u16 = SaturateI16ToU8(_mm_add_epi16(UV_Z, _mm_packs_epi32(BgrToU32<T>(b16_r16[0][0], g16_1[0][0]), BgrToU32<T>(b16_r16[0][1], g16_1[0][1]))));
+            u16 = AlphaBlending16i(u16, UnpackU8<0>(LoadHalf((__m128i*)u)), a16[0][0]);
+            StoreHalf<false>((__m128i*)u, _mm_packus_epi16(u16, K_ZERO));
+
+            __m128i v16 = SaturateI16ToU8(_mm_add_epi16(UV_Z, _mm_packs_epi32(BgrToV32<T>(b16_r16[0][0], g16_1[0][0]), BgrToV32<T>(b16_r16[0][1], g16_1[0][1]))));
+            v16 = AlphaBlending16i(v16, UnpackU8<0>(LoadHalf((__m128i*)v)), a16[0][0]);
+            StoreHalf<false>((__m128i*)v, _mm_packus_epi16(v16, K_ZERO));
+        }
+
+        template <class T> void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
+
+            size_t widthA = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + widthA);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colY = 0, colUV = 0, colBgra = 0; colY < widthA; colY += A, colUV += HA, colBgra += QA)
+                    AlphaBlendingBgraToYuv420p<T, false>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV);
+                if (widthA != width)
+                {
+                    size_t colY = width - A, colUV = colY / 2, colBgra = colY * 4;
+                    AlphaBlendingBgraToYuv420p<T, true>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV, tailMask);
+                }
+                bgra += 2 * bgraStride;
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+            }
+        }
+
+        void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: AlphaBlendingBgraToYuv420p<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: AlphaBlendingBgraToYuv420p<Base::Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: AlphaBlendingBgraToYuv420p<Base::Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: AlphaBlendingBgraToYuv420p<Base::Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)

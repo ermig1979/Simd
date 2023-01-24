@@ -372,6 +372,27 @@ namespace Simd
                 BgrToV16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
                 BgrToV16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m128i* bgra, __m128i& b16_r16, __m128i& g16_1)
+        {
+            static const __m128i BGRA_TO_B0R0 = SIMD_MM_SETR_EPI8(0x0, -1, 0x2, -1, 0x4, -1, 0x6, -1, 0x8, -1, 0xA, -1, 0xC, -1, 0xE, -1);
+            static const __m128i BGRA_TO_G000 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
+            __m128i _bgra = Load<align>(bgra);
+            b16_r16 = _mm_shuffle_epi8(_bgra, BGRA_TO_B0R0);
+            g16_1 = _mm_or_si128(_mm_shuffle_epi8(_bgra, BGRA_TO_G000), K32_00010000);
+        }
+
+        template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m128i* bgra, __m128i& b16_r16, __m128i& g16_1, __m128i& a32)
+        {
+            static const __m128i BGRA_TO_B0R0 = SIMD_MM_SETR_EPI8(0x0, -1, 0x2, -1, 0x4, -1, 0x6, -1, 0x8, -1, 0xA, -1, 0xC, -1, 0xE, -1);
+            static const __m128i BGRA_TO_G000 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
+            __m128i _bgra = Load<align>(bgra);
+            b16_r16 = _mm_shuffle_epi8(_bgra, BGRA_TO_B0R0);
+            g16_1 = _mm_or_si128(_mm_shuffle_epi8(_bgra, BGRA_TO_G000), K32_00010000);
+            a32 = _mm_and_si128(_mm_srli_si128(_bgra, 3), K32_000000FF);
+        }
     }
 #endif
 
