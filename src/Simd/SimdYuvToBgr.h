@@ -473,6 +473,91 @@ namespace Simd
             __m256i hi = YuvToBlue16<T>(UnpackY<T, 1>(y), UnpackUV<T, 1>(u));
             return _mm256_packus_epi16(lo, hi);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<class T> SIMD_INLINE __m256i BgrToY32(__m256i b16_r16, __m256i g16_1)
+        {
+            static const __m256i BY_RY = SIMD_MM256_SET2_EPI16(T::B_2_Y, T::R_2_Y);
+            static const __m256i GY_RT = SIMD_MM256_SET2_EPI16(T::G_2_Y, T::B_ROUND);
+            return _mm256_srai_epi32(_mm256_add_epi32(_mm256_madd_epi16(b16_r16, BY_RY), _mm256_madd_epi16(g16_1, GY_RT)), T::B_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m256i BgrToY16(__m256i b16, __m256i g16, __m256i r16)
+        {
+            static const __m256i Y_LO = SIMD_MM256_SET1_EPI16(T::Y_LO);
+            return SaturateI16ToU8(_mm256_add_epi16(Y_LO, _mm256_packs_epi32(
+                BgrToY32<T>(UnpackU16<0>(b16, r16), UnpackU16<0>(g16, K16_0001)),
+                BgrToY32<T>(UnpackU16<1>(b16, r16), UnpackU16<1>(g16, K16_0001)))));
+        }
+
+        template<class T> SIMD_INLINE __m256i BgrToY8(__m256i b8, __m256i g8, __m256i r8)
+        {
+            return _mm256_packus_epi16(
+                BgrToY16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
+                BgrToY16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
+        }
+
+        template<class T> SIMD_INLINE __m256i BgrToU32(__m256i b16_r16, __m256i g16_1)
+        {
+            static const __m256i BU_RU = SIMD_MM256_SET2_EPI16(T::B_2_U, T::R_2_U);
+            static const __m256i GU_RT = SIMD_MM256_SET2_EPI16(T::G_2_U, T::B_ROUND);
+            return _mm256_srai_epi32(_mm256_add_epi32(_mm256_madd_epi16(b16_r16, BU_RU), _mm256_madd_epi16(g16_1, GU_RT)), T::B_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m256i BgrToU16(__m256i b16, __m256i g16, __m256i r16)
+        {
+            static const __m256i UV_Z = SIMD_MM256_SET1_EPI16(T::UV_Z);
+            return SaturateI16ToU8(_mm256_add_epi16(UV_Z, _mm256_packs_epi32(
+                BgrToU32<T>(UnpackU16<0>(b16, r16), UnpackU16<0>(g16, K16_0001)),
+                BgrToU32<T>(UnpackU16<1>(b16, r16), UnpackU16<1>(g16, K16_0001)))));
+        }
+
+        template<class T> SIMD_INLINE __m256i BgrToU8(__m256i b8, __m256i g8, __m256i r8)
+        {
+            return _mm256_packus_epi16(
+                BgrToU16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
+                BgrToU16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
+        }
+
+        template<class T> SIMD_INLINE __m256i BgrToV32(__m256i b16_r16, __m256i g16_1)
+        {
+            static const __m256i BV_RV = SIMD_MM256_SET2_EPI16(T::B_2_V, T::R_2_V);
+            static const __m256i GV_RT = SIMD_MM256_SET2_EPI16(T::G_2_V, T::B_ROUND);
+            return _mm256_srai_epi32(_mm256_add_epi32(_mm256_madd_epi16(b16_r16, BV_RV), _mm256_madd_epi16(g16_1, GV_RT)), T::B_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m256i BgrToV16(__m256i b16, __m256i g16, __m256i r16)
+        {
+            static const __m256i UV_Z = SIMD_MM256_SET1_EPI16(T::UV_Z);
+            return SaturateI16ToU8(_mm256_add_epi16(UV_Z, _mm256_packs_epi32(
+                BgrToV32<T>(UnpackU16<0>(b16, r16), UnpackU16<0>(g16, K16_0001)),
+                BgrToV32<T>(UnpackU16<1>(b16, r16), UnpackU16<1>(g16, K16_0001)))));
+        }
+
+        template<class T> SIMD_INLINE __m256i BgrToV8(__m256i b8, __m256i g8, __m256i r8)
+        {
+            return _mm256_packus_epi16(
+                BgrToV16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
+                BgrToV16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m256i* bgra, __m256i& b16_r16, __m256i& g16_1)
+        {
+            __m256i _bgra = Load<align>(bgra);
+            b16_r16 = _mm256_and_si256(_bgra, K16_00FF);
+            g16_1 = _mm256_or_si256(_mm256_and_si256(_mm256_srli_si256(_bgra, 1), K32_000000FF), K32_00010000);
+        }
+
+        template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m256i* bgra, __m256i& b16_r16, __m256i& g16_1, __m256i& a32)
+        {
+            __m256i _bgra = Load<align>(bgra);
+            b16_r16 = _mm256_and_si256(_bgra, K16_00FF);
+            g16_1 = _mm256_or_si256(_mm256_and_si256(_mm256_srli_si256(_bgra, 1), K32_000000FF), K32_00010000);
+            a32 = _mm256_and_si256(_mm256_srli_si256(_bgra, 3), K32_000000FF);
+        }
     }
 #endif
 

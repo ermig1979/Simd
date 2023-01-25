@@ -24,19 +24,13 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m256i * bgra, __m256i & b16_r16, __m256i & g16_1)
-        {
-            __m256i _bgra = Load<align>(bgra);
-            b16_r16 = _mm256_and_si256(_bgra, K16_00FF);
-            g16_1 = _mm256_or_si256(_mm256_and_si256(_mm256_srli_si256(_bgra, 1), K32_000000FF), K32_00010000);
-        }
-
         template <bool align> SIMD_INLINE __m256i LoadAndConvertY16(const __m256i * bgra, __m256i & b16_r16, __m256i & g16_1)
         {
             __m256i _b16_r16[2], _g16_1[2];
@@ -242,14 +236,6 @@ namespace Simd
                 BgraToYuv444p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
                 BgraToYuv444p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-        }
-
-        template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m256i * bgra, __m256i & b16_r16, __m256i & g16_1, __m256i & a32)
-        {
-            __m256i _bgra = Load<align>(bgra);
-            b16_r16 = _mm256_and_si256(_bgra, K16_00FF);
-            g16_1 = _mm256_or_si256(_mm256_and_si256(_mm256_srli_si256(_bgra, 1), K32_000000FF), K32_00010000);
-            a32 = _mm256_and_si256(_mm256_srli_si256(_bgra, 3), K32_000000FF);
         }
 
         template <bool align> SIMD_INLINE void LoadAndConvertYA16(const __m256i * bgra, __m256i & b16_r16, __m256i & g16_1, __m256i & y16, __m256i & a16)

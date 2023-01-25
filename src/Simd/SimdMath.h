@@ -702,9 +702,14 @@ namespace Simd
             return _mm256_cvtepi8_epi16(_mm256_extractf128_si256(a, part));
         }
 
+        SIMD_INLINE __m256i PermutedHadd16i(__m256i a, __m256i b)
+        {
+            return _mm256_permute4x64_epi64(_mm256_hadd_epi16(a, b), 0xD8);
+        }
+
         SIMD_INLINE __m256i PermutedHadd32i(__m256i a, __m256i b)
         {
-            return _mm256_hadd_epi32(_mm256_permute2f128_si256(a, b, 0x20), _mm256_permute2f128_si256(a, b, 0x31));
+            return _mm256_permute4x64_epi64(_mm256_hadd_epi32(a, b), 0xD8);
         }
     }
 #endif// SIMD_AVX2_ENABLE

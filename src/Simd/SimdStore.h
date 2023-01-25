@@ -203,6 +203,11 @@ namespace Simd
             Sse41::Store<align>(p1, _mm256_extractf128_si256(a, 1));
         }
 
+        template <bool align, int part> SIMD_INLINE void StoreHalf(__m128i* p, __m256i a)
+        {
+            Sse41::Store<align>(p, _mm256_extractf128_si256(a, part));
+        }
+
         template <bool align> SIMD_INLINE void StoreMasked(__m256i * p, __m256i value, __m256i mask)
         {
             __m256i old = Load<align>(p);

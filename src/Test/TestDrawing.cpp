@@ -299,6 +299,11 @@ namespace Test
             result = result && AlphaBlendingBgraToYuv420pAutoTest(FUNC_ABBY(Simd::Sse41::AlphaBlendingBgraToYuv420p), FUNC_ABBY(SimdAlphaBlendingBgraToYuv420p));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+            result = result && AlphaBlendingBgraToYuv420pAutoTest(FUNC_ABBY(Simd::Avx2::AlphaBlendingBgraToYuv420p), FUNC_ABBY(SimdAlphaBlendingBgraToYuv420p));
+#endif 
+
         return result;
     }
 
