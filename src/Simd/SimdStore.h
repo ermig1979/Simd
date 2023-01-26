@@ -404,6 +404,11 @@ namespace Simd
             return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(lo, hi));
         }
 
+        SIMD_INLINE __m512i PackI32ToI16(__m512i lo, __m512i hi = K_ZERO)
+        {
+            return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packs_epi32(lo, hi));
+        }
+
         SIMD_INLINE __m512i PackU32ToI16(__m512i lo, __m512i hi = K_ZERO)
         {
             return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(lo, hi));

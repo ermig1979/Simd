@@ -397,6 +397,18 @@ namespace Simd
             return Load<align, mask>((uint32_t*)p, m);
         }
 
+        template <bool mask> SIMD_INLINE __m256i LoadHalf(const uint8_t* p, __mmask32 m);
+
+        template <> SIMD_INLINE __m256i LoadHalf<true>(const uint8_t* p, __mmask32 m)
+        {
+            return _mm256_maskz_loadu_epi8(m, p);
+        }
+
+        template <> SIMD_INLINE __m256i LoadHalf<false>(const uint8_t* p, __mmask32 m)
+        {
+            return _mm256_loadu_si256((__m256i*)p);
+        }
+
         template <size_t step> SIMD_INLINE __m512i LoadBeforeFirst(const uint8_t * p)
         {
             __mmask64 m = __mmask64(-1) << step;

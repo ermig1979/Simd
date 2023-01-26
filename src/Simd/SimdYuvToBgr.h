@@ -654,6 +654,91 @@ namespace Simd
             Store<align, mask>(bgra + 2 * A, UnpackU16<0>(bg1, ra1), tails[2]);
             Store<align, mask>(bgra + 3 * A, UnpackU16<1>(bg1, ra1), tails[3]);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<class T> SIMD_INLINE __m512i BgrToY32(__m512i b16_r16, __m512i g16_1)
+        {
+            static const __m512i BY_RY = SIMD_MM512_SET2_EPI16(T::B_2_Y, T::R_2_Y);
+            static const __m512i GY_RT = SIMD_MM512_SET2_EPI16(T::G_2_Y, T::B_ROUND);
+            return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(b16_r16, BY_RY), _mm512_madd_epi16(g16_1, GY_RT)), T::B_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m512i BgrToY16(__m512i b16, __m512i g16, __m512i r16)
+        {
+            static const __m512i Y_LO = SIMD_MM512_SET1_EPI16(T::Y_LO);
+            return SaturateI16ToU8(_mm512_add_epi16(Y_LO, _mm512_packs_epi32(
+                BgrToY32<T>(UnpackU16<0>(b16, r16), UnpackU16<0>(g16, K16_0001)),
+                BgrToY32<T>(UnpackU16<1>(b16, r16), UnpackU16<1>(g16, K16_0001)))));
+        }
+
+        template<class T> SIMD_INLINE __m512i BgrToY8(__m512i b8, __m512i g8, __m512i r8)
+        {
+            return _mm512_packus_epi16(
+                BgrToY16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
+                BgrToY16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
+        }
+
+        template<class T> SIMD_INLINE __m512i BgrToU32(__m512i b16_r16, __m512i g16_1)
+        {
+            static const __m512i BU_RU = SIMD_MM512_SET2_EPI16(T::B_2_U, T::R_2_U);
+            static const __m512i GU_RT = SIMD_MM512_SET2_EPI16(T::G_2_U, T::B_ROUND);
+            return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(b16_r16, BU_RU), _mm512_madd_epi16(g16_1, GU_RT)), T::B_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m512i BgrToU16(__m512i b16, __m512i g16, __m512i r16)
+        {
+            static const __m512i UV_Z = SIMD_MM512_SET1_EPI16(T::UV_Z);
+            return SaturateI16ToU8(_mm512_add_epi16(UV_Z, _mm512_packs_epi32(
+                BgrToU32<T>(UnpackU16<0>(b16, r16), UnpackU16<0>(g16, K16_0001)),
+                BgrToU32<T>(UnpackU16<1>(b16, r16), UnpackU16<1>(g16, K16_0001)))));
+        }
+
+        template<class T> SIMD_INLINE __m512i BgrToU8(__m512i b8, __m512i g8, __m512i r8)
+        {
+            return _mm512_packus_epi16(
+                BgrToU16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
+                BgrToU16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
+        }
+
+        template<class T> SIMD_INLINE __m512i BgrToV32(__m512i b16_r16, __m512i g16_1)
+        {
+            static const __m512i BV_RV = SIMD_MM512_SET2_EPI16(T::B_2_V, T::R_2_V);
+            static const __m512i GV_RT = SIMD_MM512_SET2_EPI16(T::G_2_V, T::B_ROUND);
+            return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(b16_r16, BV_RV), _mm512_madd_epi16(g16_1, GV_RT)), T::B_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m512i BgrToV16(__m512i b16, __m512i g16, __m512i r16)
+        {
+            static const __m512i UV_Z = SIMD_MM512_SET1_EPI16(T::UV_Z);
+            return SaturateI16ToU8(_mm512_add_epi16(UV_Z, _mm512_packs_epi32(
+                BgrToV32<T>(UnpackU16<0>(b16, r16), UnpackU16<0>(g16, K16_0001)),
+                BgrToV32<T>(UnpackU16<1>(b16, r16), UnpackU16<1>(g16, K16_0001)))));
+        }
+
+        template<class T> SIMD_INLINE __m512i BgrToV8(__m512i b8, __m512i g8, __m512i r8)
+        {
+            return _mm512_packus_epi16(
+                BgrToV16<T>(UnpackU8<0>(b8), UnpackU8<0>(g8), UnpackU8<0>(r8)),
+                BgrToV16<T>(UnpackU8<1>(b8), UnpackU8<1>(g8), UnpackU8<1>(r8)));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <bool align, bool mask> SIMD_INLINE void LoadPreparedBgra16(const uint8_t* bgra, __m512i& b16_r16, __m512i& g16_1, const __mmask64* tails)
+        {
+            __m512i _bgra = Load<align, mask>(bgra, tails[0]);
+            b16_r16 = _mm512_and_si512(_bgra, K16_00FF);
+            g16_1 = _mm512_or_si512(_mm512_shuffle_epi8(_bgra, K8_SUFFLE_BGRA_TO_G000), K32_00010000);
+        }
+
+        template <bool align, bool mask> SIMD_INLINE void LoadPreparedBgra16(const uint8_t* bgra, __m512i& b16_r16, __m512i& g16_1, __m512i& a32, const __mmask64* tails)
+        {
+            __m512i _bgra = Load<align, mask>(bgra, tails[0]);
+            b16_r16 = _mm512_and_si512(_bgra, K16_00FF);
+            g16_1 = _mm512_or_si512(_mm512_shuffle_epi8(_bgra, K8_SUFFLE_BGRA_TO_G000), K32_00010000);
+            a32 = _mm512_shuffle_epi8(_bgra, K8_SUFFLE_BGRA_TO_A000);
+        }
     }
 #endif
 

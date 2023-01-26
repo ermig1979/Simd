@@ -24,19 +24,13 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template <bool align, bool mask> SIMD_INLINE void LoadPreparedBgra16(const uint8_t * bgra, __m512i & b16_r16, __m512i & g16_1, const __mmask64 * ms)
-        {
-            __m512i _bgra = Load<align, mask>(bgra, ms[0]);
-            b16_r16 = _mm512_and_si512(_bgra, K16_00FF);
-            g16_1 = _mm512_or_si512(_mm512_shuffle_epi8(_bgra, K8_SUFFLE_BGRA_TO_G000), K32_00010000);
-        }
-
         template <bool align, bool mask> SIMD_INLINE __m512i LoadAndConvertBgraToY16(const uint8_t * bgra, __m512i & b16_r16, __m512i & g16_1, const __mmask64 * ms)
         {
             __m512i _b16_r16[2], _g16_1[2];
@@ -256,15 +250,6 @@ namespace Simd
                 BgraToYuv444p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
                 BgraToYuv444p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-        }
-
-
-        template <bool align, bool mask> SIMD_INLINE void LoadPreparedBgra16(const uint8_t * bgra, __m512i & b16_r16, __m512i & g16_1, __m512i & a32, const __mmask64 * tails)
-        {
-            __m512i _bgra = Load<align, mask>(bgra, tails[0]);
-            b16_r16 = _mm512_and_si512(_bgra, K16_00FF);
-            g16_1 = _mm512_or_si512(_mm512_shuffle_epi8(_bgra, K8_SUFFLE_BGRA_TO_G000), K32_00010000);
-            a32 = _mm512_shuffle_epi8(_bgra, K8_SUFFLE_BGRA_TO_A000);
         }
 
         template <bool align, bool mask> SIMD_INLINE void LoadAndConvertYA16(const uint8_t * bgra, __m512i & b16_r16, __m512i & g16_1, __m512i & y16, __m512i & a16, const __mmask64 * tails)

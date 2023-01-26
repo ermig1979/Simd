@@ -28,6 +28,7 @@
 #include "Simd/SimdAlphaBlending.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdUnpack.h"
+#include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
@@ -151,7 +152,94 @@ namespace Simd
                 AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T, int part, bool tail> SIMD_INLINE __m512i LoadAndBgrToY16(const uint8_t* bgra, const __m512i& y8, __m512i& b16_r16, __m512i& g16_1, __m512i& a16, const __mmask64 * tails)
+        {
+            static const __m512i Y_LO = SIMD_MM512_SET1_EPI16(T::Y_LO);
+
+            __m512i _b16_r16[2], _g16_1[2], a32[2];
+            LoadPreparedBgra16<false, tail>(bgra + 0 * A, _b16_r16[0], _g16_1[0], a32[0], tails + 0);
+            LoadPreparedBgra16<false, tail>(bgra + 1 * A, _b16_r16[1], _g16_1[1], a32[1], tails + 1);
+            b16_r16 = Hadd32(_b16_r16[0], _b16_r16[1]);
+            g16_1 = Hadd32(_g16_1[0], _g16_1[1]);
+            a16 = PackI32ToI16(a32[0], a32[1]);
+            __m512i y16 = SaturateI16ToU8(_mm512_add_epi16(Y_LO, PackI32ToI16(BgrToY32<T>(_b16_r16[0], _g16_1[0]), BgrToY32<T>(_b16_r16[1], _g16_1[1]))));
+            return AlphaBlending16i(y16, UnpackU8<part>(y8), a16);
+        }
+
+        template <class T, bool tail> SIMD_INLINE void AlphaBlendingBgraToYuv420p(const uint8_t* bgra0, size_t bgraStride, uint8_t* y0, size_t yStride, uint8_t* u, uint8_t* v, const __mmask64* tails)
+        {
+            static const __m512i UV_Z = SIMD_MM512_SET1_EPI16(T::UV_Z);
+            const uint8_t* bgra1 = bgra0 + bgraStride;
+            uint8_t* y1 = y0 + yStride;
+
+            __m512i b16_r16[2][2], g16_1[2][2], a16[2][2];
+            __m512i _y0 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<false, tail>(y0, tails[4]));
+            __m512i y00 = LoadAndBgrToY16<T, 0, tail>(bgra0 + 0 * A, _y0, b16_r16[0][0], g16_1[0][0], a16[0][0], tails + 0);
+            __m512i y01 = LoadAndBgrToY16<T, 1, tail>(bgra0 + 2 * A, _y0, b16_r16[0][1], g16_1[0][1], a16[0][1], tails + 2);
+            Store<false, tail>(y0, PackI16ToU8(y00, y01), tails[4]);
+
+            __m512i _y1 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<false, tail>(y1, tails[4]));
+            __m512i y10 = LoadAndBgrToY16<T, 0, tail>(bgra1 + 0 * A, _y1, b16_r16[1][0], g16_1[1][0], a16[1][0], tails + 0);
+            __m512i y11 = LoadAndBgrToY16<T, 1, tail>(bgra1 + 2 * A, _y1, b16_r16[1][1], g16_1[1][1], a16[1][1], tails + 2);
+            Store<false, tail>(y1, PackI16ToU8(y10, y11), tails[4]);
+
+            b16_r16[0][0] = _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(b16_r16[0][0], b16_r16[1][0]), K16_0002), 2);
+            b16_r16[0][1] = _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(b16_r16[0][1], b16_r16[1][1]), K16_0002), 2);
+            g16_1[0][0] = _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(g16_1[0][0], g16_1[1][0]), K16_0002), 2);
+            g16_1[0][1] = _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(g16_1[0][1], g16_1[1][1]), K16_0002), 2);
+            a16[0][0] = _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(Hadd16(a16[0][0], a16[0][1]), Hadd16(a16[1][0], a16[1][1])), K16_0002), 2);
+
+            __m512i u16 = SaturateI16ToU8(_mm512_add_epi16(UV_Z, PackI32ToI16(BgrToU32<T>(b16_r16[0][0], g16_1[0][0]), BgrToU32<T>(b16_r16[0][1], g16_1[0][1]))));
+            u16 = AlphaBlending16i(u16, _mm512_cvtepu8_epi16(LoadHalf<tail>(u, (__mmask32)tails[5])), a16[0][0]);
+            Store<false, tail>(u, _mm512_castsi512_si256(PackI16ToU8(u16, K_ZERO)), (__mmask32)tails[5]);
+
+            __m512i v16 = SaturateI16ToU8(_mm512_add_epi16(UV_Z, PackI32ToI16(BgrToV32<T>(b16_r16[0][0], g16_1[0][0]), BgrToV32<T>(b16_r16[0][1], g16_1[0][1]))));
+            v16 = AlphaBlending16i(v16, _mm512_cvtepu8_epi16(LoadHalf<tail>(v, (__mmask32)tails[5])), a16[0][0]);
+            Store<false, tail>(v, _mm512_castsi512_si256(PackI16ToU8(v16, K_ZERO)), (__mmask32)tails[5]);
+        }
+
+        template <class T> void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
+
+            size_t widthA = AlignLo(width, A), tail = width - widthA;
+            __mmask64 tails[6];
+            for (size_t i = 0; i < 4; ++i)
+                tails[i] = TailMask64(tail * 4 - A * i);
+            tails[4] = TailMask64(tail);
+            tails[5] = TailMask32(tail / 2);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                size_t colY = 0, colUV = 0, colBgra = 0;
+                for (; colY < widthA; colY += A, colUV += HA, colBgra += QA)
+                    AlphaBlendingBgraToYuv420p<T, false>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV, tails);
+                if (widthA != width)
+                    AlphaBlendingBgraToYuv420p<T, true>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV, tails);
+                bgra += 2 * bgraStride;
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+            }
+        }
+
+        void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: AlphaBlendingBgraToYuv420p<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: AlphaBlendingBgraToYuv420p<Base::Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: AlphaBlendingBgraToYuv420p<Base::Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: AlphaBlendingBgraToYuv420p<Base::Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)
