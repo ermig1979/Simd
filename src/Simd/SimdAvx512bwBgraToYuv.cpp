@@ -131,6 +131,8 @@ namespace Simd
                 BgraToYuv420p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void Average16(__m512i a[2][2])
         {
             a[0][0] = _mm512_srli_epi16(_mm512_add_epi16(a[0][0], K16_0001), 1);
@@ -195,6 +197,8 @@ namespace Simd
                 BgraToYuv422p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE __m512i ConvertY16(__m512i b16_r16[2], __m512i g16_1[2])
         {
             return Saturate16iTo8u(_mm512_add_epi16(K16_Y_ADJUST, _mm512_packs_epi32(BgrToY32(b16_r16[0], g16_1[0]), BgrToY32(b16_r16[1], g16_1[1]))));
@@ -251,6 +255,8 @@ namespace Simd
             else
                 BgraToYuv444p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align, bool mask> SIMD_INLINE void LoadAndConvertYA16(const uint8_t * bgra, __m512i & b16_r16, __m512i & g16_1, __m512i & y16, __m512i & a16, const __mmask64 * tails)
         {
@@ -344,6 +350,78 @@ namespace Simd
             else
                 BgraToYuva420p<false>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T> SIMD_INLINE __m512i BgrToY16(__m512i b16_r16[2], __m512i g16_1[2])
+        {
+            static const __m512i Y_LO = SIMD_MM512_SET1_EPI16(T::Y_LO);
+            return SaturateI16ToU8(_mm512_add_epi16(Y_LO, PackI32ToI16(BgrToY32<T>(b16_r16[0], g16_1[0]), BgrToY32<T>(b16_r16[1], g16_1[1]))));
+        }
+
+        template <class T> SIMD_INLINE __m512i BgrToU16(__m512i b16_r16[2], __m512i g16_1[2])
+        {
+            static const __m512i UV_Z = SIMD_MM512_SET1_EPI16(T::UV_Z);
+            return SaturateI16ToU8(_mm512_add_epi16(UV_Z, PackI32ToI16(BgrToU32<T>(b16_r16[0], g16_1[0]), BgrToU32<T>(b16_r16[1], g16_1[1]))));
+        }
+
+        template <class T> SIMD_INLINE __m512i BgrToV16(__m512i b16_r16[2], __m512i g16_1[2])
+        {
+            static const __m512i UV_Z = SIMD_MM512_SET1_EPI16(T::UV_Z);
+            return SaturateI16ToU8(_mm512_add_epi16(UV_Z, PackI32ToI16(BgrToV32<T>(b16_r16[0], g16_1[0]), BgrToV32<T>(b16_r16[1], g16_1[1]))));
+        }
+
+        template <class T, bool tail> SIMD_INLINE void BgraToYuv444pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v, const __mmask64* tails)
+        {
+            __m512i _b16_r16[2][2], _g16_1[2][2];
+            LoadPreparedBgra16<false, tail>(bgra + 0 * A, _b16_r16[0][0], _g16_1[0][0], tails + 0);
+            LoadPreparedBgra16<false, tail>(bgra + 1 * A, _b16_r16[0][1], _g16_1[0][1], tails + 1);
+            LoadPreparedBgra16<false, tail>(bgra + 2 * A, _b16_r16[1][0], _g16_1[1][0], tails + 2);
+            LoadPreparedBgra16<false, tail>(bgra + 3 * A, _b16_r16[1][1], _g16_1[1][1], tails + 3);
+
+            Store<false, tail>(y, PackI16ToU8(BgrToY16<T>(_b16_r16[0], _g16_1[0]), BgrToY16<T>(_b16_r16[1], _g16_1[1])), tails[4]);
+            Store<false, tail>(u, PackI16ToU8(BgrToU16<T>(_b16_r16[0], _g16_1[0]), BgrToU16<T>(_b16_r16[1], _g16_1[1])), tails[4]);
+            Store<false, tail>(v, PackI16ToU8(BgrToV16<T>(_b16_r16[0], _g16_1[0]), BgrToV16<T>(_b16_r16[1], _g16_1[1])), tails[4]);
+        }
+
+        template <class T> void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert(width >= A);
+
+            size_t widthA = AlignLo(width, A);
+            size_t tail = width - widthA;
+            __mmask64 tails[5];
+            for (size_t i = 0; i < 4; ++i)
+                tails[i] = TailMask64(tail * 4 - A * i);
+            tails[4] = TailMask64(tail);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BgraToYuv444pV2<T, false>(bgra + col * 4, y + col, u + col, v + col, tails);
+                if (tail)
+                    BgraToYuv444pV2<T, true>(bgra + col * 4, y + col, u + col, v + col, tails);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgraToYuv444pV2<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgraToYuv444pV2<Base::Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgraToYuv444pV2<Base::Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgraToYuv444pV2<Base::Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 }
