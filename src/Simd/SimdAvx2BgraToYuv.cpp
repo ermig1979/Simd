@@ -343,6 +343,57 @@ namespace Simd
             return SaturateI16ToU8(_mm256_add_epi16(UV_Z, PackI32ToI16(BgrToV32<T>(b16_r16[0], g16_1[0]), BgrToV32<T>(b16_r16[1], g16_1[1]))));
         }
 
+        template <class T> SIMD_INLINE void BgraToYuv444pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v)
+        {
+            __m256i _b16_r16[2][2], _g16_1[2][2];
+            LoadPreparedBgra16<false>((__m256i*)bgra + 0, _b16_r16[0][0], _g16_1[0][0]);
+            LoadPreparedBgra16<false>((__m256i*)bgra + 1, _b16_r16[0][1], _g16_1[0][1]);
+            LoadPreparedBgra16<false>((__m256i*)bgra + 2, _b16_r16[1][0], _g16_1[1][0]);
+            LoadPreparedBgra16<false>((__m256i*)bgra + 3, _b16_r16[1][1], _g16_1[1][1]);
+
+            Store<false>((__m256i*)y, PackI16ToU8(BgrToY16<T>(_b16_r16[0], _g16_1[0]), BgrToY16<T>(_b16_r16[1], _g16_1[1])));
+            Store<false>((__m256i*)u, PackI16ToU8(BgrToU16<T>(_b16_r16[0], _g16_1[0]), BgrToU16<T>(_b16_r16[1], _g16_1[1])));
+            Store<false>((__m256i*)v, PackI16ToU8(BgrToV16<T>(_b16_r16[0], _g16_1[0]), BgrToV16<T>(_b16_r16[1], _g16_1[1])));
+        }
+
+        template <class T> void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert(width >= A);
+
+            size_t widthA = AlignLo(width, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < widthA; col += A)
+                    BgraToYuv444pV2<T>(bgra + col * 4, y + col, u + col, v + col);
+                if (width != widthA)
+                {
+                    size_t col = width - A;
+                    BgraToYuv444pV2<T>(bgra + col * 4, y + col, u + col, v + col);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgraToYuv444pV2<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgraToYuv444pV2<Base::Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgraToYuv444pV2<Base::Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgraToYuv444pV2<Base::Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <class T> SIMD_INLINE __m256i LoadAndBgrToY16(const __m256i* bgra, __m256i& b16_r16, __m256i& g16_1)
         {
             static const __m256i Y_LO = SIMD_MM256_SET1_EPI16(T::Y_LO);
