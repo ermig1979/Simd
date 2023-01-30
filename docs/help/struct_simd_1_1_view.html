@@ -222,8 +222,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5741a1f89a39e5245f9f397bef1a6d67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade83cabe12a8795da5a69e818bae00f9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#ade83cabe12a8795da5a69e818bae00f9">Owner</a> () const</td></tr>
 <tr class="separator:ade83cabe12a8795da5a69e818bae00f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe3cc0c72b2388fea48ad1ba73b934a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#afe3cc0c72b2388fea48ad1ba73b934a9">Capture</a> ()</td></tr>
-<tr class="separator:afe3cc0c72b2388fea48ad1ba73b934a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab36363b5ff0fedd7c3efe1b408f6a36b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#ab36363b5ff0fedd7c3efe1b408f6a36b">Capture</a> (bool copy=true)</td></tr>
+<tr class="separator:ab36363b5ff0fedd7c3efe1b408f6a36b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -1842,18 +1842,28 @@ int main()
 
 </div>
 </div>
-<a id="afe3cc0c72b2388fea48ad1ba73b934a9" name="afe3cc0c72b2388fea48ad1ba73b934a9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afe3cc0c72b2388fea48ad1ba73b934a9">&#9670;&nbsp;</a></span>Capture()</h2>
+<a id="ab36363b5ff0fedd7c3efe1b408f6a36b" name="ab36363b5ff0fedd7c3efe1b408f6a36b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab36363b5ff0fedd7c3efe1b408f6a36b">&#9670;&nbsp;</a></span>Capture()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">SIMD_INLINE void Capture</td>
+          <td class="memname">SIMD_INLINE void Capture </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>copy</em> = <code>true</code></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Captures image (copies to internal buffer) if this <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> is not owner of current image. </p>
+<p >Captures image (sets to be the view as owner of current image) if this <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> is not owner of current image.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">copy</td><td>- a flag to make a copy to internal buffer. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

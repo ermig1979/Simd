@@ -730,7 +730,7 @@ namespace Simd
             return a.Swap();
         }
 
-        static uint8_t png__compute_y(int r, int g, int b)
+        SIMD_INLINE uint8_t PngComputeY8(int r, int g, int b)
         {
             return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
         }
@@ -755,17 +755,14 @@ namespace Simd
 #define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(int i=x-1; i >= 0; --i, src += a, dest += b)
                 switch (PNG__COMBO(img_n, req_comp))
                 {
-                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 255; } break;
                     PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
                     PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 255; } break;
                     PNG__CASE(2, 1) { dest[0] = src[0]; } break;
                     PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
                     PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
                     PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 255; } break;
-                    PNG__CASE(3, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
-                    PNG__CASE(3, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = 255; } break;
-                    PNG__CASE(4, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
-                    PNG__CASE(4, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = src[3]; } break;
+                    PNG__CASE(3, 1) { dest[0] = PngComputeY8(src[0], src[1], src[2]); } break;
+                    PNG__CASE(4, 1) { dest[0] = PngComputeY8(src[0], src[1], src[2]); } break;
                     PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
                 default: assert(0); return PngError("unsupported", "Unsupported format conversion");
                 }
@@ -774,43 +771,46 @@ namespace Simd
             return a.Swap();
         }
 
-        static uint16_t png__compute_y_16(int r, int g, int b)
+        SIMD_INLINE uint8_t PngComputeY16(int r, int g, int b)
         {
-            return (uint16_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
+            return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 16);
+        }
+
+        SIMD_INLINE uint8_t PngCvt16(int v)
+        {
+            return (uint8_t)(v >> 8);
         }
 
         static int ConvertFormat16(Png& a, int img_n, int req_comp, unsigned int x, unsigned int y)
         {
             SIMD_PERF_FUNC();
 
-            if (req_comp == img_n)
-                return 1;
             assert(req_comp >= 1 && req_comp <= 4);
 
-            a.buf1.Resize(req_comp * x * y * 2);
+            a.buf1.Resize(req_comp * x * y);
             if (a.buf1.Empty())
                 return PngError("outofmem", "Out of memory");
 
             for (int j = 0; j < (int)y; ++j)
             {
                 uint16_t* src = (uint16_t*)a.buf0.data + j * x * img_n;
-                uint16_t* dest = (uint16_t*)a.buf1.data + j * x * req_comp;
+                uint8_t* dest = a.buf1.data + j * x * req_comp;
 
 #define PNG__COMBO(a,b)  ((a)*8+(b))
 #define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(int i=x-1; i >= 0; --i, src += a, dest += b)
                 switch (PNG__COMBO(img_n, req_comp)) {
-                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 0xffff; } break;
-                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 0xffff; } break;
-                    PNG__CASE(2, 1) { dest[0] = src[0]; } break;
-                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
-                    PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 0xffff; } break;
-                    PNG__CASE(3, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
-                    PNG__CASE(3, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = 0xffff; } break;
-                    PNG__CASE(4, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
-                    PNG__CASE(4, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = src[3]; } break;
-                    PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
+                    PNG__CASE(1, 1) { dest[0] = PngCvt16(src[0]); } break;
+                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = PngCvt16(src[0]); } break;
+                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = PngCvt16(src[0]); dest[3] = 0xff; } break;
+                    PNG__CASE(2, 1) { dest[0] = PngCvt16(src[0]); } break;
+                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = PngCvt16(src[0]); } break;
+                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = PngCvt16(src[0]); dest[3] = PngCvt16(src[1]); } break;
+                    PNG__CASE(3, 3) { dest[0] = PngCvt16(src[0]); dest[1] = PngCvt16(src[1]); dest[2] = PngCvt16(src[2]); } break;
+                    PNG__CASE(3, 4) { dest[0] = PngCvt16(src[0]); dest[1] = PngCvt16(src[1]); dest[2] = PngCvt16(src[2]); dest[3] = 0xff; } break;
+                    PNG__CASE(3, 1) { dest[0] = PngComputeY16(src[0], src[1], src[2]); } break;
+                    PNG__CASE(4, 1) { dest[0] = PngComputeY16(src[0], src[1], src[2]); } break;
+                    PNG__CASE(4, 3) { dest[0] = PngCvt16(src[0]); dest[1] = PngCvt16(src[1]); dest[2] = PngCvt16(src[2]); } break;
+                    PNG__CASE(4, 4) { dest[0] = PngCvt16(src[0]); dest[1] = PngCvt16(src[1]); dest[2] = PngCvt16(src[2]); dest[3] = PngCvt16(src[3]); } break;
                 default: assert(0); return PngError("unsupported", "Unsupported format conversion");
                 }
 #undef PNG__CASE
@@ -893,7 +893,7 @@ namespace Simd
 
             if (!(p.depth <= 8 || p.depth == 16))
                 return false;
-            if (req_comp && req_comp != p.img_out_n)
+            if (req_comp && (req_comp != p.img_out_n || p.depth == 16))
             {
                 int res;
                 if (p.depth <= 8)
@@ -903,16 +903,6 @@ namespace Simd
                 p.img_out_n = req_comp;
                 if (res == 0)
                     return false;
-            }
-            if (p.depth == 16)
-            {
-                size_t size = p.width * p.height * req_comp;
-                p.buf1.Resize(size);
-                const uint16_t* src = (uint16_t*)p.buf0.data;
-                uint8_t* dst = p.buf1.data;
-                for (size_t i = 0; i < size; ++i)
-                    dst[i] = uint8_t(src[i] >> 8);
-                p.buf0.Swap(p.buf1);
             }
             if (p.buf0.data)
             {

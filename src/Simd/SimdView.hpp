@@ -592,9 +592,11 @@ namespace Simd
         bool Owner() const;
 
         /*!
-            Captures image (copies to internal buffer) if this View is not owner of current image.
+            Captures image (sets to be the view as owner of current image) if this View is not owner of current image.
+
+            \param [in] copy - a flag to make a copy to internal buffer.
         */
-        void Capture();
+        void Capture(bool copy = true);
 
     private:
         bool _owner;
@@ -1326,15 +1328,20 @@ namespace Simd
         return _owner;
     }
 
-    template <template<class> class A> SIMD_INLINE void View<A>::Capture()
+    template <template<class> class A> SIMD_INLINE void View<A>::Capture(bool copy)
     {
         if (data && _owner == false)
         {
-            View<A> copy(width, height, format);
-            size_t size = width * PixelSize();
-            for (size_t row = 0; row < height; ++row)
-                memcpy(copy.data + copy.stride * row, data + stride * row, size);
-            Swap(copy);
+            if (copy)
+            {
+                View<A> buffer(width, height, format);
+                size_t size = width * PixelSize();
+                for (size_t row = 0; row < height; ++row)
+                    memcpy(buffer.data + buffer.stride * row, data + stride * row, size);
+                Swap(buffer);
+            }
+            else
+                _owner = true;
         }
     }
 

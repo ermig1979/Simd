@@ -101,6 +101,14 @@ namespace Simd
         {
             return data == NULL;
         }
+
+        SIMD_INLINE T * Release()
+        {
+            uint8_t* released = data;
+            data = NULL;
+            size = 0;
+            return released;
+        }
     };
 
     typedef Array<int8_t> Array8i;
