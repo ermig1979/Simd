@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
+#if defined( SIMD_AVX2_ENABLE)   
     namespace Avx2
     {
         template <bool align, size_t channelCount> struct AlphaBlender
