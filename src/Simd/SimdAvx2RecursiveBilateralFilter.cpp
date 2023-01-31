@@ -428,12 +428,21 @@ namespace Simd
                         0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
                         0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
                     val = _mm256_shuffle_epi8(val, SHFL);
+#if defined(SIMD_X64_ENABLE)
                     __m128i val0 = _mm256_extractf128_si256(val, 0);
                     *(uint64_t*)(dst) = _mm_extract_epi64(val0, 0), dst += stride;
                     *(uint64_t*)(dst) = _mm_extract_epi64(val0, 1), dst += stride;
                     __m128i val1 = _mm256_extractf128_si256(val, 1);
                     *(uint64_t*)(dst) = _mm_extract_epi64(val1, 0), dst += stride;
                     *(uint64_t*)(dst) = _mm_extract_epi64(val1, 1), dst += stride;
+#else
+                    SIMD_ALIGNED(32) int64_t buf[4];
+                    _mm256_store_si256((__m256i*)buf, val);
+                    *(uint64_t*)(dst) = buf[0], dst += stride;
+                    *(uint64_t*)(dst) = buf[1], dst += stride;
+                    *(uint64_t*)(dst) = buf[2], dst += stride;
+                    *(uint64_t*)(dst) = buf[3], dst += stride;
+#endif
                 }
 
                 template<int dir, bool nofma> static void Run4x(const uint8_t* src, size_t srcStride, size_t width,
@@ -544,7 +553,11 @@ namespace Simd
                 static SIMD_INLINE __m256i Load2x3(const uint8_t* src0, const uint8_t* src1)
                 {
                     uint64_t lo = *(uint32_t*)src0, hi = *(uint32_t*)src1, val = lo | (hi << 32);
+#ifdef SIMD_X86_ENABLE
+                    return _mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)&val));
+#else
                     return _mm256_cvtepu8_epi32(_mm_cvtsi64_si128(val));
+#endif
                 }
 
                 template<int dir> static SIMD_INLINE __m256i Load2x12(const uint8_t* src0, const uint8_t* src4)
@@ -580,12 +593,23 @@ namespace Simd
                     val = _mm256_shuffle_epi8(val, SHFL);
                     if (dir == -1)
                         dst0 -= 9, dst4 -= 9, val = _mm256_avg_epu8(val, Avx2::Load<false>((__m128i*)dst0, (__m128i*)dst4));
+#if defined(SIMD_X64_ENABLE)
                     __m128i val0 = _mm256_extractf128_si256(val, 0);
                     ((uint64_t*)dst0)[0] = _mm_extract_epi64(val0, 0);
                     ((uint32_t*)dst0)[2] = _mm_extract_epi32(val0, 2);
                     __m128i val1 = _mm256_extractf128_si256(val, 1);
                     ((uint64_t*)dst4)[0] = _mm_extract_epi64(val1, 0);
                     ((uint32_t*)dst4)[2] = _mm_extract_epi32(val1, 2);
+#else
+                    SIMD_ALIGNED(32) uint32_t buf[8];
+                    _mm256_store_si256((__m256i*)buf, val);
+                    ((uint64_t*)dst0)[0] = buf[0];
+                    ((uint64_t*)dst0)[1] = buf[1];
+                    ((uint64_t*)dst0)[2] = buf[2];
+                    ((uint64_t*)dst4)[0] = buf[4];
+                    ((uint64_t*)dst4)[1] = buf[5];
+                    ((uint64_t*)dst4)[2] = buf[6];
+#endif
                 }
 
                 template<int dir, bool nofma> static void Run4x(const uint8_t* src, size_t srcStride, size_t width,
@@ -700,7 +724,11 @@ namespace Simd
                 static SIMD_INLINE __m256i Load2x4(const uint8_t* src0, const uint8_t* src1)
                 {
                     uint64_t lo = *(uint32_t*)src0, hi = *(uint32_t*)src1, val = lo | (hi << 32);
+#ifdef SIMD_X86_ENABLE
+                    return _mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*) & val));
+#else
                     return _mm256_cvtepu8_epi32(_mm_cvtsi64_si128(val));
+#endif
                 }
 
                 template<int dir> static SIMD_INLINE __m256i Load2x16(const uint8_t* src0, const uint8_t* src4)
