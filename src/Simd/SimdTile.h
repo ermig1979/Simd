@@ -26,7 +26,6 @@
 
 #include "Simd/SimdDefs.h"
 
-#if defined(SIMD_AMX_EMULATE)  
 namespace Simd
 {
     struct TileConf
@@ -39,35 +38,45 @@ namespace Simd
 
         SIMD_INLINE TileConf(uint8_t paletteId = 1, uint8_t startRow = 0)
         {
-            memset(this, 0, sizeof(TileConf));
+            uint64_t* dst = (uint64_t * )this;
+            for (size_t i = 0; i < 8; ++i)
+                dst[i] = 0;
             this->paletteId = paletteId;
             this->startRow = startRow;
         }
     };
+}
 
-    union SIMD_ALIGNED(64) TileReg
-    {
-        int8_t i8[16][64];
-        uint8_t u8[16][64];
-        int16_t i16[16][32];
-        uint16_t u16[16][32];
-        int32_t i32[16][16];
-        uint32_t u32[16][16];
-        float f32[16][16];
-    };
+//-------------------------------------------------------------------------------------------------
 
-    struct Tile1024
-    {
-        uint16_t row;
-        uint16_t col;
-        TileReg tile;
-    };
-
-    const size_t TileRegCount = 8;
-
+#if defined(SIMD_AMX_EMULATE)  
+namespace Simd
+{
 #ifdef SIMD_AVX512BW_ENABLE  
     namespace Avx512bw
     {
+        union SIMD_ALIGNED(64) TileReg
+        {
+            int8_t i8[16][64];
+            uint8_t u8[16][64];
+            int16_t i16[16][32];
+            uint16_t u16[16][32];
+            int32_t i32[16][16];
+            uint32_t u32[16][16];
+            float f32[16][16];
+        };
+
+        struct Tile1024
+        {
+            uint16_t row;
+            uint16_t col;
+            TileReg tile;
+        };
+
+        const size_t TileRegCount = 8;
+
+        //-------------------------------------------------------------------------------------------------
+
         void TileLoadConfig(const TileConf* tileConf);
 
         void TileStoreConfig(TileConf* tileConf);
