@@ -105,8 +105,8 @@ namespace Simd
         SIMD_INLINE T * Release()
         {
             uint8_t* released = data;
-            data = NULL;
-            size = 0;
+            *(T**)&data = NULL;
+            *(size_t*)&size = 0;
             return released;
         }
     };

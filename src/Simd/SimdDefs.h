@@ -127,7 +127,7 @@
 #define SIMD_AVX512BF16_ENABLE
 #endif
 
-#if !defined(SIMD_AMXBF16_DISABLE) && _MSC_VER >= 1933
+#if !defined(SIMD_AMXBF16_DISABLE) && _MSC_VER >= 1933 && defined(_M_X64)
 #define SIMD_AMXBF16_ENABLE
 #endif
 
