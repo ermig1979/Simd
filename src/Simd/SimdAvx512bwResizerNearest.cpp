@@ -63,12 +63,12 @@ namespace Simd
                     int srcIndex = _ix[dstIndex] / (int)pixelSize;
                     int dst = dstIndex * (int)pixelSize - _ix32x2[block].dst;
                     int src = srcIndex * (int)pixelSize - _ix32x2[block].src;
-                    if (src >= A - pixelSize || dst >= A - pixelSize)
+                    if (src >= int(A - pixelSize) || dst >= int(A - pixelSize))
                     {
                         block++;
                         _ix32x2[block].src = srcIndex * (int)pixelSize;
                         _ix32x2[block].dst = dstIndex * (int)pixelSize;
-                        if (_ix32x2[block].dst > dstRowSize - A)
+                        if (_ix32x2[block].dst > int(dstRowSize - A))
                         {
                             _tail32x2[_tails] = TailMask32((dstRowSize - _ix32x2[block].dst) / 2);
                             _tails++;
