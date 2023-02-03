@@ -31,32 +31,38 @@ namespace Simd
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx512bw
     {
-        using AlgParam = SynetConvolution32fNhwcDirect::AlgParam;
-
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const float* src0, const ConvParam32f& p,
-            size_t kernelH, size_t kernelW, size_t srcC, const float* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[2], int first)
+            size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first)
         {
             __m512 d00, d01, s0, w0, w1;
-            size_t dW = DF * (p.kernelX - kernelW) * srcC, dY = p.srcW * p.srcC, dX = p.srcC;
+            size_t srcH = p.srcH, srcW = p.srcW, dilY = p.dilationY, dilX = p.dilationX;
+            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dW = srcC * DF;
+            size_t sy = dy * p.strideY - p.padY, sx = dx * p.strideX - p.padX;
+            size_t kY = p.kernelY * p.dilationY, kX = p.kernelX * p.dilationX;
+            const float* weight1 = weight0 + F;
             if (tails[1])
             {
                 if (first)
                     d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
                 else
                     d00 = _mm512_loadu_ps(dst + 0), d01 = _mm512_maskz_loadu_ps(tails[1], dst + F);
-                for (size_t ky = 0; ky < kernelH; ++ky)
+                for (size_t ky = 0; ky < kY; ky += dilY)
                 {
-                    for (size_t kx = 0; kx < kernelW; ++kx)
+                    size_t beg = (sy + ky) * dY + sx * dX;
+                    for (size_t kx = 0; kx < kX; kx += dilX)
                     {
-                        for (size_t offs = ky * dY + kx * dX, end = offs + srcC; offs < end; ++offs)
+                        if (sy + ky < srcH && sx + kx < srcW)
                         {
-                            w0 = _mm512_loadu_ps(weight + 0);
-                            w1 = _mm512_loadu_ps(weight + F);
-                            s0 = _mm512_set1_ps(src0[offs]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
-                            weight += DF;
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += DF)
+                            {
+                                w0 = _mm512_loadu_ps(weight0 + offw);
+                                w1 = _mm512_loadu_ps(weight1 + offw);
+                                s0 = _mm512_set1_ps(src0[offs]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
+                            }
                         }
+                        weight0 += dW, weight1 += dW;
                     }
-                    weight += dW;
                 }
                 Save2<term, type>(dst, d00, d01, bias, params, tails);
             }
@@ -66,28 +72,36 @@ namespace Simd
                     d00 = _mm512_setzero_ps();
                 else
                     d00 = _mm512_maskz_loadu_ps(tails[0], dst + 0);
-                for (size_t ky = 0; ky < kernelH; ++ky)
+                for (size_t ky = 0; ky < kY; ky += dilY)
                 {
-                    for (size_t kx = 0; kx < kernelW; ++kx)
+                    size_t beg = (sy + ky) * dY + sx * dX;
+                    for (size_t kx = 0; kx < kX; kx += dilX)
                     {
-                        for (size_t offs = ky * dY + kx * dX, end = offs + srcC; offs < end; ++offs)
+                        if (sy + ky < srcH && sx + kx < srcW)
                         {
-                            w0 = _mm512_loadu_ps(weight + 0);
-                            s0 = _mm512_set1_ps(src0[offs]), d00 = _mm512_fmadd_ps(s0, w0, d00);
-                            weight += DF;
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += DF)
+                            {
+                                w0 = _mm512_loadu_ps(weight0 + offw);
+                                s0 = _mm512_set1_ps(src0[offs]), d00 = _mm512_fmadd_ps(s0, w0, d00);
+                            }
                         }
+                        weight0 += dW;
                     }
-                    weight += dW;
                 }
                 Save1<term, type>(dst, d00, bias, params, tails);
             }
         }
 
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect_2xM(const float* src0, const ConvParam32f& p,
-            size_t kernelH, size_t kernelW, size_t srcC, const float* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[2], int first)
+            size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first)
         {
             __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1, dc0, dc1, dd0, dd1, s0, w0, w1;
-            size_t dS = p.srcC * p.strideX, dW = DF * (p.kernelX - kernelW) * srcC, dY = p.srcW * p.srcC, dX = p.srcC, dD = p.dstC;
+            size_t srcH = p.srcH, srcW = p.srcW, dilY = p.dilationY, dilX = p.dilationX;
+            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dW = srcC * DF, dWz = p.kernelX * srcC * DF, dD = p.dstC;
+            size_t sy = dy * p.strideY - p.padY, sx = dx * p.strideX - p.padX;
+            size_t kY = p.kernelY * p.dilationY, kX = p.kernelX * p.dilationX;
+            const float* weight1 = weight0 + F;
             const float* src1 = src0 + 1 * dS;
             const float* src2 = src0 + 2 * dS;
             const float* src3 = src0 + 3 * dS;
@@ -130,66 +144,80 @@ namespace Simd
                     if (M > 0xc) dc0 = _mm512_loadu_ps(dst + 0xc * dD + 0), dc1 = _mm512_maskz_loadu_ps(tails[1], dst + 0xc * dD + F);
                     if (M > 0xd) dd0 = _mm512_loadu_ps(dst + 0xd * dD + 0), dd1 = _mm512_maskz_loadu_ps(tails[1], dst + 0xd * dD + F);
                 }
-                if (kernelH * kernelW * srcC * 2 * F * sizeof(float) > PREFETCH_SIZE)
+                if (p.kernelY * p.kernelX * srcC * F * sizeof(float) > PREFETCH_SIZE)
                 {
-                    for (size_t ky = 0; ky < kernelH; ++ky)
+                    for (size_t ky = 0; ky < kY; ky += dilY)
                     {
-                        for (size_t kx = 0; kx < kernelW; ++kx)
+                        if (sy + ky < srcH)
                         {
-                            for (size_t off0 = ky * dY + kx * dX, off7 = off0 + 7 * dS, end0 = off0 + srcC; off0 < end0; ++off0, ++off7)
+                            size_t beg = (sy + ky) * dY + sx * dX;
+                            for (size_t kx = 0; kx < kX; kx += dilX)
                             {
-                                PrefetchL1(weight + 0);
-                                PrefetchL1(weight + F);
-                                w0 = _mm512_loadu_ps(weight + 0);
-                                w1 = _mm512_loadu_ps(weight + F);
-                                if (M > 0x0) s0 = _mm512_set1_ps(src0[off0]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
-                                if (M > 0x1) s0 = _mm512_set1_ps(src1[off0]), d10 = _mm512_fmadd_ps(s0, w0, d10), d11 = _mm512_fmadd_ps(s0, w1, d11);
-                                if (M > 0x2) s0 = _mm512_set1_ps(src2[off0]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
-                                if (M > 0x3) s0 = _mm512_set1_ps(src3[off0]), d30 = _mm512_fmadd_ps(s0, w0, d30), d31 = _mm512_fmadd_ps(s0, w1, d31);
-                                if (M > 0x4) s0 = _mm512_set1_ps(src4[off0]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
-                                if (M > 0x5) s0 = _mm512_set1_ps(src5[off0]), d50 = _mm512_fmadd_ps(s0, w0, d50), d51 = _mm512_fmadd_ps(s0, w1, d51);
-                                if (M > 0x6) s0 = _mm512_set1_ps(src6[off0]), d60 = _mm512_fmadd_ps(s0, w0, d60), d61 = _mm512_fmadd_ps(s0, w1, d61);
-                                if (M > 0x7) s0 = _mm512_set1_ps(src0[off7]), d70 = _mm512_fmadd_ps(s0, w0, d70), d71 = _mm512_fmadd_ps(s0, w1, d71);
-                                if (M > 0x8) s0 = _mm512_set1_ps(src1[off7]), d80 = _mm512_fmadd_ps(s0, w0, d80), d81 = _mm512_fmadd_ps(s0, w1, d81);
-                                if (M > 0x9) s0 = _mm512_set1_ps(src2[off7]), d90 = _mm512_fmadd_ps(s0, w0, d90), d91 = _mm512_fmadd_ps(s0, w1, d91);
-                                if (M > 0xa) s0 = _mm512_set1_ps(src3[off7]), da0 = _mm512_fmadd_ps(s0, w0, da0), da1 = _mm512_fmadd_ps(s0, w1, da1);
-                                if (M > 0xb) s0 = _mm512_set1_ps(src4[off7]), db0 = _mm512_fmadd_ps(s0, w0, db0), db1 = _mm512_fmadd_ps(s0, w1, db1);
-                                if (M > 0xc) s0 = _mm512_set1_ps(src5[off7]), dc0 = _mm512_fmadd_ps(s0, w0, dc0), dc1 = _mm512_fmadd_ps(s0, w1, dc1);
-                                if (M > 0xd) s0 = _mm512_set1_ps(src6[off7]), dd0 = _mm512_fmadd_ps(s0, w0, dd0), dd1 = _mm512_fmadd_ps(s0, w1, dd1);
-                                weight += DF;
+                                assert(sx + kx < srcW&& sx + kx + M <= srcW);
+                                size_t off0 = beg + kx * dX, end = off0 + srcC, off7 = off0 + 7 * dS, offw = 0;
+                                for (; off0 < end; ++off0, ++off7, offw += DF)
+                                {
+                                    PrefetchL1(weight0 + offw);
+                                    PrefetchL1(weight1 + offw);
+                                    w0 = _mm512_loadu_ps(weight0 + offw);
+                                    w1 = _mm512_loadu_ps(weight1 + offw);
+                                    if (M > 0x0) s0 = _mm512_set1_ps(src0[off0]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
+                                    if (M > 0x1) s0 = _mm512_set1_ps(src1[off0]), d10 = _mm512_fmadd_ps(s0, w0, d10), d11 = _mm512_fmadd_ps(s0, w1, d11);
+                                    if (M > 0x2) s0 = _mm512_set1_ps(src2[off0]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
+                                    if (M > 0x3) s0 = _mm512_set1_ps(src3[off0]), d30 = _mm512_fmadd_ps(s0, w0, d30), d31 = _mm512_fmadd_ps(s0, w1, d31);
+                                    if (M > 0x4) s0 = _mm512_set1_ps(src4[off0]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
+                                    if (M > 0x5) s0 = _mm512_set1_ps(src5[off0]), d50 = _mm512_fmadd_ps(s0, w0, d50), d51 = _mm512_fmadd_ps(s0, w1, d51);
+                                    if (M > 0x6) s0 = _mm512_set1_ps(src6[off0]), d60 = _mm512_fmadd_ps(s0, w0, d60), d61 = _mm512_fmadd_ps(s0, w1, d61);
+                                    if (M > 0x7) s0 = _mm512_set1_ps(src0[off7]), d70 = _mm512_fmadd_ps(s0, w0, d70), d71 = _mm512_fmadd_ps(s0, w1, d71);
+                                    if (M > 0x8) s0 = _mm512_set1_ps(src1[off7]), d80 = _mm512_fmadd_ps(s0, w0, d80), d81 = _mm512_fmadd_ps(s0, w1, d81);
+                                    if (M > 0x9) s0 = _mm512_set1_ps(src2[off7]), d90 = _mm512_fmadd_ps(s0, w0, d90), d91 = _mm512_fmadd_ps(s0, w1, d91);
+                                    if (M > 0xa) s0 = _mm512_set1_ps(src3[off7]), da0 = _mm512_fmadd_ps(s0, w0, da0), da1 = _mm512_fmadd_ps(s0, w1, da1);
+                                    if (M > 0xb) s0 = _mm512_set1_ps(src4[off7]), db0 = _mm512_fmadd_ps(s0, w0, db0), db1 = _mm512_fmadd_ps(s0, w1, db1);
+                                    if (M > 0xc) s0 = _mm512_set1_ps(src5[off7]), dc0 = _mm512_fmadd_ps(s0, w0, dc0), dc1 = _mm512_fmadd_ps(s0, w1, dc1);
+                                    if (M > 0xd) s0 = _mm512_set1_ps(src6[off7]), dd0 = _mm512_fmadd_ps(s0, w0, dd0), dd1 = _mm512_fmadd_ps(s0, w1, dd1);
+                                }
+                                weight0 += dW, weight1 += dW;
                             }
                         }
-                        weight += dW;
+                        else
+                            weight0 += dWz, weight1 += dWz;
                     }
                 }
                 else
                 {
-                    for (size_t ky = 0; ky < kernelH; ++ky)
+                    for (size_t ky = 0; ky < kY; ky += dilY)
                     {
-                        for (size_t kx = 0; kx < kernelW; ++kx)
+                        if (sy + ky < srcH)
                         {
-                            for (size_t off0 = ky * dY + kx * dX, off7 = off0 + 7 * dS, end0 = off0 + srcC; off0 < end0; ++off0, ++off7)
+                            size_t beg = (sy + ky) * dY + sx * dX;
+                            for (size_t kx = 0; kx < kX; kx += dilX)
                             {
-                                w0 = _mm512_loadu_ps(weight + 0);
-                                w1 = _mm512_loadu_ps(weight + F);
-                                if (M > 0x0) s0 = _mm512_set1_ps(src0[off0]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
-                                if (M > 0x1) s0 = _mm512_set1_ps(src1[off0]), d10 = _mm512_fmadd_ps(s0, w0, d10), d11 = _mm512_fmadd_ps(s0, w1, d11);
-                                if (M > 0x2) s0 = _mm512_set1_ps(src2[off0]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
-                                if (M > 0x3) s0 = _mm512_set1_ps(src3[off0]), d30 = _mm512_fmadd_ps(s0, w0, d30), d31 = _mm512_fmadd_ps(s0, w1, d31);
-                                if (M > 0x4) s0 = _mm512_set1_ps(src4[off0]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
-                                if (M > 0x5) s0 = _mm512_set1_ps(src5[off0]), d50 = _mm512_fmadd_ps(s0, w0, d50), d51 = _mm512_fmadd_ps(s0, w1, d51);
-                                if (M > 0x6) s0 = _mm512_set1_ps(src6[off0]), d60 = _mm512_fmadd_ps(s0, w0, d60), d61 = _mm512_fmadd_ps(s0, w1, d61);
-                                if (M > 0x7) s0 = _mm512_set1_ps(src0[off7]), d70 = _mm512_fmadd_ps(s0, w0, d70), d71 = _mm512_fmadd_ps(s0, w1, d71);
-                                if (M > 0x8) s0 = _mm512_set1_ps(src1[off7]), d80 = _mm512_fmadd_ps(s0, w0, d80), d81 = _mm512_fmadd_ps(s0, w1, d81);
-                                if (M > 0x9) s0 = _mm512_set1_ps(src2[off7]), d90 = _mm512_fmadd_ps(s0, w0, d90), d91 = _mm512_fmadd_ps(s0, w1, d91);
-                                if (M > 0xa) s0 = _mm512_set1_ps(src3[off7]), da0 = _mm512_fmadd_ps(s0, w0, da0), da1 = _mm512_fmadd_ps(s0, w1, da1);
-                                if (M > 0xb) s0 = _mm512_set1_ps(src4[off7]), db0 = _mm512_fmadd_ps(s0, w0, db0), db1 = _mm512_fmadd_ps(s0, w1, db1);
-                                if (M > 0xc) s0 = _mm512_set1_ps(src5[off7]), dc0 = _mm512_fmadd_ps(s0, w0, dc0), dc1 = _mm512_fmadd_ps(s0, w1, dc1);
-                                if (M > 0xd) s0 = _mm512_set1_ps(src6[off7]), dd0 = _mm512_fmadd_ps(s0, w0, dd0), dd1 = _mm512_fmadd_ps(s0, w1, dd1);
-                                weight += DF;
+                                assert(sx + kx < srcW&& sx + kx + M <= srcW);
+                                size_t off0 = beg + kx * dX, end = off0 + srcC, off7 = off0 + 7 * dS, offw = 0;
+                                for (; off0 < end; ++off0, ++off7, offw += DF)
+                                {
+                                    w0 = _mm512_loadu_ps(weight0 + offw);
+                                    w1 = _mm512_loadu_ps(weight1 + offw);
+                                    if (M > 0x0) s0 = _mm512_set1_ps(src0[off0]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
+                                    if (M > 0x1) s0 = _mm512_set1_ps(src1[off0]), d10 = _mm512_fmadd_ps(s0, w0, d10), d11 = _mm512_fmadd_ps(s0, w1, d11);
+                                    if (M > 0x2) s0 = _mm512_set1_ps(src2[off0]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
+                                    if (M > 0x3) s0 = _mm512_set1_ps(src3[off0]), d30 = _mm512_fmadd_ps(s0, w0, d30), d31 = _mm512_fmadd_ps(s0, w1, d31);
+                                    if (M > 0x4) s0 = _mm512_set1_ps(src4[off0]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
+                                    if (M > 0x5) s0 = _mm512_set1_ps(src5[off0]), d50 = _mm512_fmadd_ps(s0, w0, d50), d51 = _mm512_fmadd_ps(s0, w1, d51);
+                                    if (M > 0x6) s0 = _mm512_set1_ps(src6[off0]), d60 = _mm512_fmadd_ps(s0, w0, d60), d61 = _mm512_fmadd_ps(s0, w1, d61);
+                                    if (M > 0x7) s0 = _mm512_set1_ps(src0[off7]), d70 = _mm512_fmadd_ps(s0, w0, d70), d71 = _mm512_fmadd_ps(s0, w1, d71);
+                                    if (M > 0x8) s0 = _mm512_set1_ps(src1[off7]), d80 = _mm512_fmadd_ps(s0, w0, d80), d81 = _mm512_fmadd_ps(s0, w1, d81);
+                                    if (M > 0x9) s0 = _mm512_set1_ps(src2[off7]), d90 = _mm512_fmadd_ps(s0, w0, d90), d91 = _mm512_fmadd_ps(s0, w1, d91);
+                                    if (M > 0xa) s0 = _mm512_set1_ps(src3[off7]), da0 = _mm512_fmadd_ps(s0, w0, da0), da1 = _mm512_fmadd_ps(s0, w1, da1);
+                                    if (M > 0xb) s0 = _mm512_set1_ps(src4[off7]), db0 = _mm512_fmadd_ps(s0, w0, db0), db1 = _mm512_fmadd_ps(s0, w1, db1);
+                                    if (M > 0xc) s0 = _mm512_set1_ps(src5[off7]), dc0 = _mm512_fmadd_ps(s0, w0, dc0), dc1 = _mm512_fmadd_ps(s0, w1, dc1);
+                                    if (M > 0xd) s0 = _mm512_set1_ps(src6[off7]), dd0 = _mm512_fmadd_ps(s0, w0, dd0), dd1 = _mm512_fmadd_ps(s0, w1, dd1);
+                                }
+                                weight0 += dW, weight1 += dW;
                             }
                         }
-                        weight += dW;
+                        else
+                            weight0 += dWz, weight1 += dWz;
                     }
                 }
                 if (M > 0x0) Save2<term, type>(dst, d00, d01, bias, params, tails), dst += dD;
@@ -243,31 +271,38 @@ namespace Simd
                     if (M > 0xc) dc0 = _mm512_maskz_loadu_ps(tails[0], dst + 0xc * dD + 0);
                     if (M > 0xd) dd0 = _mm512_maskz_loadu_ps(tails[0], dst + 0xd * dD + 0);
                 }
-                for (size_t ky = 0; ky < kernelH; ++ky)
+                for (size_t ky = 0; ky < kY; ky += dilY)
                 {
-                    for (size_t kx = 0; kx < kernelW; ++kx)
+                    if (sy + ky < srcH)
                     {
-                        for (size_t off0 = ky * dY + kx * dX, off7 = off0 + 7 * dS, end0 = off0 + srcC; off0 < end0; ++off0, ++off7)
+                        size_t beg = (sy + ky) * dY + sx * dX;
+                        for (size_t kx = 0; kx < kX; kx += dilX)
                         {
-                            w0 = _mm512_loadu_ps(weight + 0);
-                            if (M > 0x0) s0 = _mm512_set1_ps(src0[off0]), d00 = _mm512_fmadd_ps(s0, w0, d00);
-                            if (M > 0x1) s0 = _mm512_set1_ps(src1[off0]), d10 = _mm512_fmadd_ps(s0, w0, d10);
-                            if (M > 0x2) s0 = _mm512_set1_ps(src2[off0]), d20 = _mm512_fmadd_ps(s0, w0, d20);
-                            if (M > 0x3) s0 = _mm512_set1_ps(src3[off0]), d30 = _mm512_fmadd_ps(s0, w0, d30);
-                            if (M > 0x4) s0 = _mm512_set1_ps(src4[off0]), d40 = _mm512_fmadd_ps(s0, w0, d40);
-                            if (M > 0x5) s0 = _mm512_set1_ps(src5[off0]), d50 = _mm512_fmadd_ps(s0, w0, d50);
-                            if (M > 0x6) s0 = _mm512_set1_ps(src6[off0]), d60 = _mm512_fmadd_ps(s0, w0, d60);
-                            if (M > 0x7) s0 = _mm512_set1_ps(src0[off7]), d70 = _mm512_fmadd_ps(s0, w0, d70);
-                            if (M > 0x8) s0 = _mm512_set1_ps(src1[off7]), d80 = _mm512_fmadd_ps(s0, w0, d80);
-                            if (M > 0x9) s0 = _mm512_set1_ps(src2[off7]), d90 = _mm512_fmadd_ps(s0, w0, d90);
-                            if (M > 0xa) s0 = _mm512_set1_ps(src3[off7]), da0 = _mm512_fmadd_ps(s0, w0, da0);
-                            if (M > 0xb) s0 = _mm512_set1_ps(src4[off7]), db0 = _mm512_fmadd_ps(s0, w0, db0);
-                            if (M > 0xc) s0 = _mm512_set1_ps(src5[off7]), dc0 = _mm512_fmadd_ps(s0, w0, dc0);
-                            if (M > 0xd) s0 = _mm512_set1_ps(src6[off7]), dd0 = _mm512_fmadd_ps(s0, w0, dd0);
-                            weight += DF;
+                            assert(sx + kx < srcW&& sx + kx + M <= srcW);
+                            size_t off0 = beg + kx * dX, end = off0 + srcC, off7 = off0 + 7 * dS, offw = 0;
+                            for (; off0 < end; ++off0, ++off7, offw += DF)
+                            {
+                                w0 = _mm512_loadu_ps(weight0 + offw);
+                                if (M > 0x0) s0 = _mm512_set1_ps(src0[off0]), d00 = _mm512_fmadd_ps(s0, w0, d00);
+                                if (M > 0x1) s0 = _mm512_set1_ps(src1[off0]), d10 = _mm512_fmadd_ps(s0, w0, d10);
+                                if (M > 0x2) s0 = _mm512_set1_ps(src2[off0]), d20 = _mm512_fmadd_ps(s0, w0, d20);
+                                if (M > 0x3) s0 = _mm512_set1_ps(src3[off0]), d30 = _mm512_fmadd_ps(s0, w0, d30);
+                                if (M > 0x4) s0 = _mm512_set1_ps(src4[off0]), d40 = _mm512_fmadd_ps(s0, w0, d40);
+                                if (M > 0x5) s0 = _mm512_set1_ps(src5[off0]), d50 = _mm512_fmadd_ps(s0, w0, d50);
+                                if (M > 0x6) s0 = _mm512_set1_ps(src6[off0]), d60 = _mm512_fmadd_ps(s0, w0, d60);
+                                if (M > 0x7) s0 = _mm512_set1_ps(src0[off7]), d70 = _mm512_fmadd_ps(s0, w0, d70);
+                                if (M > 0x8) s0 = _mm512_set1_ps(src1[off7]), d80 = _mm512_fmadd_ps(s0, w0, d80);
+                                if (M > 0x9) s0 = _mm512_set1_ps(src2[off7]), d90 = _mm512_fmadd_ps(s0, w0, d90);
+                                if (M > 0xa) s0 = _mm512_set1_ps(src3[off7]), da0 = _mm512_fmadd_ps(s0, w0, da0);
+                                if (M > 0xb) s0 = _mm512_set1_ps(src4[off7]), db0 = _mm512_fmadd_ps(s0, w0, db0);
+                                if (M > 0xc) s0 = _mm512_set1_ps(src5[off7]), dc0 = _mm512_fmadd_ps(s0, w0, dc0);
+                                if (M > 0xd) s0 = _mm512_set1_ps(src6[off7]), dd0 = _mm512_fmadd_ps(s0, w0, dd0);
+                            }
+                            weight0 += dW;
                         }
                     }
-                    weight += dW;
+                    else
+                        weight0 += dWz;
                 }
                 if (M > 0x0) Save1<term, type>(dst, d00, bias, params, tails), dst += dD;
                 if (M > 0x1) Save1<term, type>(dst, d10, bias, params, tails), dst += dD;
@@ -286,9 +321,9 @@ namespace Simd
             }
         }
 
-        typedef void(*ConvolutionNhwcDirect_2xM_Ptr)(const float* src0, const ConvParam32f& p, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first);
+        typedef void(*ConvolutionNhwcDirect_NxM_Ptr)(const float* src0, const ConvParam32f& p, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first);
 
-        template<TermType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect_2xM_Ptr GetConvolutionNhwcDirect_2xM(size_t M)
+        template<TermType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect_NxM_Ptr GetConvolutionNhwcDirect_2xM(size_t M)
         {
             switch (M)
             {
@@ -315,16 +350,13 @@ namespace Simd
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float* src, const ConvParam32f& p,
             size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst, int first)
         {
-            size_t noseH = p.padY, noseW = p.padX;
-            size_t bodyH = p.srcH - p.kernelY + 1 + noseH, bodyW = p.srcW - p.kernelX + 1 + noseW;
-            size_t n = 14;
-            size_t bodyWn = bodyW < noseW ? 0 : AlignLoAny(bodyW - noseW, n * p.strideX) + noseW;
-            size_t m = (DivHi(bodyW, p.strideX) - DivHi(noseW, p.strideX)) % n;
-            size_t tailH = bodyH + p.padH, tailW = bodyW + p.padW;
+            size_t noseH = p.NoseH(), noseW = p.NoseW(), bodyH = p.BodyH(), bodyW = p.BodyW();
+            size_t n = 14, bodyWn = AlignLoAny(bodyW - noseW, n) + noseW, m = bodyW - bodyWn;
+            ConvolutionNhwcDirect_NxM_Ptr convolutionNhwcDirect_2x1 = ConvolutionNhwcDirect_2x1<term, type>;
+            ConvolutionNhwcDirect_NxM_Ptr convolutionNhwcDirect_2xN = GetConvolutionNhwcDirect_2xM<term, type>(n);
+            ConvolutionNhwcDirect_NxM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<term, type>(m);
+            size_t tailH = p.dstH, tailW = p.dstW;
             size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
-            ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2x1 = ConvolutionNhwcDirect_2x1<term, type>;
-            ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xN = GetConvolutionNhwcDirect_2xM<term, type>(n);
-            ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<term, type>(m);
 
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -335,58 +367,27 @@ namespace Simd
 
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
-                size_t tail = Simd::Min(DF, dstC - dc);
-                __mmask16 tails[2] = { TailMask16(tail), TailMask16(tail - F) };
-                _bias[0] = _mm512_loadu_ps(bias + dc + 0);
-                _bias[1] = _mm512_loadu_ps(bias + dc + F);
+                size_t dC = Simd::Min(DF, dstC - dc);
+                __mmask16 tails[2] = { TailMask16(dC), TailMask16(dC - F) };
+                if (dC > 0 * F) _bias[0] = _mm512_loadu_ps(bias + dc + 0 * F);
+                if (dC > 1 * F) _bias[1] = _mm512_loadu_ps(bias + dc + 1 * F);
                 if (type == ::SimdConvolutionActivationPrelu)
                 {
-                    _params[0] = _mm512_loadu_ps(params + dc + 0);
-                    _params[1] = _mm512_loadu_ps(params + dc + F);
+                    if (dC > 0 * F) _params[0] = _mm512_loadu_ps(params + dc + 0 * F);
+                    if (dC > 1 * F) _params[1] = _mm512_loadu_ps(params + dc + 1 * F);
                 }
                 float* d = dst + dc + yBeg * p.dstW * p.dstC;
-                size_t dy = yBeg, sy = dy * p.strideY;
-                for (; sy < noseH && dy < yEnd; sy += p.strideY, dy++)
+                for (size_t dy = yBeg; dy < yEnd; dy++)
                 {
-                    size_t sx = 0;
-                    const float* s = src;
-                    const float* w = weight + (p.padY - sy) * p.kernelX * srcC * DF;
-                    for (; sx < noseW; sx += p.strideX, d += p.dstC)
-                        convolutionNhwcDirect_2x1(s, p, kY + sy, kX + sx, srcC, w + (noseW - sx) * srcC * DF, _bias, _params, d, tails, first);
-                    for (; sx < bodyWn; sx += n * p.strideX, d += n * p.dstC)
-                        convolutionNhwcDirect_2xN(s + (sx - noseW) * p.srcC, p, kY + sy, p.kernelX, srcC, w, _bias, _params, d, tails, first);
-                    for (; sx < bodyW; sx += m * p.strideX, d += m * p.dstC)
-                        convolutionNhwcDirect_2xM(s + (sx - noseW) * p.srcC, p, kY + sy, p.kernelX, srcC, w, _bias, _params, d, tails, first);
-                    for (; sx < tailW; sx += p.strideX, d += p.dstC)
-                        convolutionNhwcDirect_2x1(s + (sx - noseW) * p.srcC, p, kY + sy, kW - sx, srcC, w, _bias, _params, d, tails, first);
-                }
-                for (; sy < bodyH && dy < yEnd; sy += p.strideY, dy++)
-                {
-                    size_t sx = 0;
-                    const float* s = src + (sy - noseH) * p.srcW * p.srcC;
-                    const float* w = weight;
-                    for (; sx < noseW; sx += p.strideX, d += p.dstC)
-                        convolutionNhwcDirect_2x1(s, p, p.kernelY, kX + sx, srcC, w + (noseW - sx) * srcC * DF, _bias, _params, d, tails, first);
-                    for (; sx < bodyWn; sx += n * p.strideX, d += n * p.dstC)
-                        convolutionNhwcDirect_2xN(s + (sx - noseW) * p.srcC, p, p.kernelY, p.kernelX, srcC, w, _bias, _params, d, tails, first);
-                    for (; sx < bodyW; sx += m * p.strideX, d += m * p.dstC)
-                        convolutionNhwcDirect_2xM(s + (sx - noseW) * p.srcC, p, p.kernelY, p.kernelX, srcC, w, _bias, _params, d, tails, first);
-                    for (; sx < tailW; sx += p.strideX, d += p.dstC)
-                        convolutionNhwcDirect_2x1(s + (sx - noseW) * p.srcC, p, p.kernelY, kW - sx, srcC, w, _bias, _params, d, tails, first);
-                }
-                for (; sy < tailH && dy < yEnd; sy += p.strideY, dy++)
-                {
-                    size_t sx = 0;
-                    const float* s = src + (sy - noseH) * p.srcW * p.srcC;
-                    const float* w = weight;
-                    for (; sx < noseW; sx += p.strideX, d += p.dstC)
-                        convolutionNhwcDirect_2x1(s, p, kH - sy, kX + sx, srcC, w + (noseW - sx) * srcC * DF, _bias, _params, d, tails, first);
-                    for (; sx < bodyWn; sx += n * p.strideX, d += n * p.dstC)
-                        convolutionNhwcDirect_2xN(s + (sx - noseW) * p.srcC, p, kH - sy, p.kernelX, srcC, w, _bias, _params, d, tails, first);
-                    for (; sx < bodyW; sx += m * p.strideX, d += m * p.dstC)
-                        convolutionNhwcDirect_2xM(s + (sx - noseW) * p.srcC, p, kH - sy, p.kernelX, srcC, w, _bias, _params, d, tails, first);
-                    for (; sx < tailW; sx += p.strideX, d += p.dstC)
-                        convolutionNhwcDirect_2x1(s + (sx - noseW) * p.srcC, p, kH - sy, kW - sx, srcC, w, _bias, _params, d, tails, first);
+                    size_t dx = 0;
+                    for (; dx < noseW; dx++, d += p.dstC)
+                        convolutionNhwcDirect_2x1(src, p, dy, dx, srcC, weight, _bias, _params, d, tails, first);
+                    for (; dx < bodyWn; dx += n, d += p.dstC * n)
+                        convolutionNhwcDirect_2xN(src, p, dy, dx, srcC, weight, _bias, _params, d, tails, first);
+                    for (; dx < bodyW; dx += m, d += p.dstC * m)
+                        convolutionNhwcDirect_2xM(src, p, dy, dx, srcC, weight, _bias, _params, d, tails, first);
+                    for (; dx < tailW; dx++, d += p.dstC)
+                        convolutionNhwcDirect_2x1(src, p, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                 }
                 weight += p.kernelY * p.kernelX * srcC * DF;
             }
