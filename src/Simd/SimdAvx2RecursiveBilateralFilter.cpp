@@ -202,7 +202,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, int dir, bool nofma> void HorRowRun(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* diff, uint8_t* dst)
+            template<int channels, int dir, bool nofma> void HorRowRun(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* diff, uint8_t* dst)
             {
                 if (dir == -1) diff += width - 2;
                 float factor = 1.0f, colors[channels];
@@ -879,7 +879,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, RbfDiffType type, bool nofma> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<int channels, RbfDiffType type, bool nofma> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t last = (p.width - 1) * channels, y = 0, height4 = AlignLo(p.height, 4), height8 = AlignLo(p.height, 8);
                 uint8_t* diff = (uint8_t*)buf;
@@ -911,7 +911,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels, int dir> void VerEdge(const uint8_t* src, size_t width, float* factor, float* colors, uint8_t* dst)
+            template<int channels, int dir> void VerEdge(const uint8_t* src, size_t width, float* factor, float* colors, uint8_t* dst)
             {
                 __m256 _1 = _mm256_set1_ps(1.0f);
                 size_t widthF = AlignLo(width, F), x = 0;
@@ -938,7 +938,7 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
-            template<size_t channels> struct VerMain
+            template<int channels> struct VerMain
             {
                 template<int dir, bool nofma> static void Run(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
                     const float* ranges, float* factor, float* colors, uint8_t* dst)

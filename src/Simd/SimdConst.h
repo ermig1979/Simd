@@ -584,7 +584,7 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AMXBF16_ENABLE    
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))  
     namespace AmxBf16
     {
 #if defined(SIMD_AMX_EMULATE)

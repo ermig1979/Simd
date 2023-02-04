@@ -500,7 +500,7 @@ namespace Simd
             Term8iDepthwise<term>::template Save<type>(dst, sum, norm, bias, params, scale, shift, upper, offset);
         }
     }
-#endif//SIMD_SSE41_ENABLE
+#endif
 
 #if defined(SIMD_AVX2_ENABLE) 
     namespace Avx2
@@ -686,7 +686,7 @@ namespace Simd
             Term8iDepthwise<term>::template Save<type, nofma>(dst, sum, norm, bias, params, scale, shift, upper, offset);
         }
     }
-#endif//SIMD_AVX2_ENABLE
+#endif
 
 #if defined(SIMD_AVX512BW_ENABLE)  
     namespace Avx512bw
@@ -806,9 +806,9 @@ namespace Simd
             Term8iDepthwise<term>::template Save<type, nofma>(dst, sum, norm, bias, params, scale, shift, upper, offset, tail);
         }
     }
-#endif//SIMD_AVX512BW_ENABLE
+#endif
 
-#if defined(SIMD_AMXBF16_ENABLE)  
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)) 
     namespace AmxBf16
     {
         template <Term8iType term> struct Term8i
@@ -857,7 +857,7 @@ namespace Simd
             Term8i<term>::template Apply<type, 1, nofma>(dst, src, norm, bias, params, scale, shift, upper, tail);
         }
     }
-#endif //SIMD_AMX_ENABLE
+#endif
 
 #if defined(SIMD_NEON_ENABLE)
     namespace Neon

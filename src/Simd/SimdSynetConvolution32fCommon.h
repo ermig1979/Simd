@@ -787,7 +787,7 @@ namespace Simd
     }
 #endif
 
-#if defined(SIMD_AMXBF16_ENABLE)  
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)) 
     namespace AmxBf16
     {
         template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(const float* src, float* dst, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
