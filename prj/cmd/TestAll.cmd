@@ -14,14 +14,12 @@ if "%HOURS:~0,1%" == " " set HOURS=0%HOURS:~1,1%
 SET MINUTES=%time:~3,2%
 set ROOT=..\..\
 
-if not errorlevel 1 ( call :TEST 2013 v120 Win32 )
-if not errorlevel 1 ( call :TEST 2013 v120 x64 )
-if not errorlevel 1 ( call :TEST 2015 v140 Win32 )
-if not errorlevel 1 ( call :TEST 2015 v140 x64 )
-if not errorlevel 1 ( call :TEST 2017 v141 Win32 )
-if not errorlevel 1 ( call :TEST 2017 v141 x64 )
-if not errorlevel 1 ( call :TEST 2019 v142 Win32 )
-if not errorlevel 1 ( call :TEST 2019 v142 x64 )
+if not errorlevel 1 ( call :TEST 2022 v143 Debug Win32 )
+if not errorlevel 1 ( call :TEST 2022 v143 Debug x64 )
+if not errorlevel 1 ( call :TEST 2022 v143 Release Win32 )
+if not errorlevel 1 ( call :TEST 2022 v143 Release x64 )
+
+
 
 pause
 goto :eof
@@ -29,15 +27,16 @@ goto :eof
 :TEST
 set VERSION=%1
 set TOOLSET=%2
-set PLATFORM=%3
+set CONFIGURATION=%3
+set PLATFORM=%4
 
-set BIN=%ROOT%\bin\%TOOLSET%\%PLATFORM%\Release\Test.exe
+set BIN=%ROOT%\bin\%TOOLSET%\%PLATFORM%\%CONFIGURATION%\Test.exe
 set LOG=%ROOT%test\%YEARS%_%MONTHS%_%DAYS%\%PREFIX%_vs%VERSION%_%PLATFORM%_%YEARS%_%MONTHS%_%DAYS%__%HOURS%_%MINUTES%.txt
 
 if NOT EXIST "%BIN%" (
-	echo File '%BIN%' is not exist! You have to compile it with using of Visual Studio %VERSION% {%PLATFORM%/Release}!
+	echo File '%BIN%' is not exist! You have to compile it with using of Visual Studio %VERSION% {%PLATFORM%/%CONFIGURATION%}!
 ) else (
-	echo Start test of Visual Studio %VERSION% {%TOOLSET%\%PLATFORM%\Release}:
+	echo Start test of Visual Studio %VERSION% {%TOOLSET%\%PLATFORM%\%CONFIGURATION%}:
 	%BIN% -m=a -tt=1 -wt=1 -r=%ROOT% -fi=%FILTER_INCLUDE% -ot=%LOG% 
 	if errorlevel 1 ( exit /b 1 ) 
 )
