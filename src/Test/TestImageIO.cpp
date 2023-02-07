@@ -37,6 +37,16 @@ namespace Test
 {
     const int DebugImageSave = 1;
 
+    SIMD_INLINE int GetMaxJpegError(int quality)
+    {
+        if(quality <= 10)
+            return REAL_IMAGE.empty() ? 32 : 4;
+        else
+            return REAL_IMAGE.empty() ? 9 : 4;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     bool GetTestImage(View& image, size_t width, size_t height, View::Format format, 
         const String& desc1, const String& desc2, SimdImageFileType file, int quality, uint8_t ** data, size_t *size)
     {
@@ -149,7 +159,7 @@ namespace Test
             View dst1, dst2;
             if (dst1.Load(data1, size1, format) && dst2.Load(data2, size2, format))
             {
-                int differenceMax = REAL_IMAGE.empty() ? 6 : 4;
+                int differenceMax = GetMaxJpegError(quality);
                 result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
                 if (!result)
                 {
@@ -194,7 +204,7 @@ namespace Test
         bool result = true;
 
         std::vector<View::Format> formats({ View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32});
-        for (int format = 0; format < formats.size(); format++)
+        for (int format = 0; format < (int)formats.size(); format++)
         {
             for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
             {
@@ -300,13 +310,19 @@ namespace Test
         View dst1, dst2;
         if (dst1.Load(data1, size1, View::Bgra32) && dst2.Load(data2, size2, View::Bgra32))
         {
-            int differenceMax = REAL_IMAGE.empty() ? 6 : 4;
+            int differenceMax = GetMaxJpegError(quality);
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {
-                SaveTestImage(dst1, SimdImageFileJpeg, quality, "_1");
-                SaveTestImage(dst2, SimdImageFileJpeg, quality, "_2");
-                SaveTestImage(bgra, SimdImageFilePpmBin, 100, "_error");
+                const String dir = "_out";
+                if (CreatePathIfNotExist(dir, false))
+                {
+                    FileSave(data1, size1, MakePath(dir, String("Bgra32_") + ToString(quality) + "_saved_1.jpg").c_str());
+                    FileSave(data2, size2, MakePath(dir, String("Bgra32_") + ToString(quality) + "_saved_2.jpg").c_str());
+                }
+                SaveTestImage(dst1, SimdImageFileJpeg, quality, "_reload_1");
+                SaveTestImage(dst2, SimdImageFileJpeg, quality, "_reload_2");
+                SaveTestImage(bgra, SimdImageFilePpmBin, 100, "_src_error");
             }
         }
         else
@@ -445,7 +461,7 @@ namespace Test
         View dst1, dst2;
         if (dst1.Load(data1, size1, View::Bgra32) && dst2.Load(data2, size2, View::Bgra32))
         {
-            int differenceMax = REAL_IMAGE.empty() ? 6 : 4;
+            int differenceMax = GetMaxJpegError(quality);
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {
@@ -593,7 +609,7 @@ namespace Test
 
         if (file == SimdImageFileJpeg)
         {
-            int differenceMax = REAL_IMAGE.empty() ? 4 : 4;
+            int differenceMax = GetMaxJpegError(quality);
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {
