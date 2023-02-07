@@ -279,8 +279,8 @@ namespace Test
         bool result = true;
 
         const float e = EPS;
-        SimdSynetCompatibilityType cP = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaAvoid);
-        SimdSynetCompatibilityType cN = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaAvoid);
+        SimdSynetCompatibilityType cP = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaUse);
+        SimdSynetCompatibilityType cN = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaUse);
 
         result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(2, 3, 90007, s, d, f, cN, 1, 1), f1, f2);
         result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 255, 10005, s, d, f, cP, 1, 0), f1, f2);

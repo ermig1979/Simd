@@ -258,7 +258,7 @@ namespace Test
     {
         bool result = true;
 
-        SimdSynetCompatibilityType fma = SimdSynetCompatibilityFmaAvoid;
+        SimdSynetCompatibilityType fma = SimdSynetCompatibilityFmaUse;
         SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | fma);
         SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | fma);
         SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | fma);
