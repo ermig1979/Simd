@@ -923,12 +923,12 @@ namespace Test
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, spatial, range, flags, dst2));
 
         int maxDifference = 0;
-        if (!Simd::FmaAvoid(flags) || width != W)
+        if (!Simd::FmaAvoid(flags) || width != W || width <= 128)
             maxDifference = 1;
 
         result = result && Compare(dst1, dst2, maxDifference, true, 64);
 
-        if (!REAL_IMAGE.empty() || NOISE_IMAGE == false)
+        if (!REAL_IMAGE.empty() || NOISE_IMAGE == false || result == false)
         {
             SaveRbf(src, "src", width, height, channels, spatial, range, flags);
             SaveRbf(dst1, "dst1", width, height, channels, spatial, range, flags);

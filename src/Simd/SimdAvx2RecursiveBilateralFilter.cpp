@@ -603,12 +603,12 @@ namespace Simd
 #else
                     SIMD_ALIGNED(32) uint32_t buf[8];
                     _mm256_store_si256((__m256i*)buf, val);
-                    ((uint64_t*)dst0)[0] = buf[0];
-                    ((uint64_t*)dst0)[1] = buf[1];
-                    ((uint64_t*)dst0)[2] = buf[2];
-                    ((uint64_t*)dst4)[0] = buf[4];
-                    ((uint64_t*)dst4)[1] = buf[5];
-                    ((uint64_t*)dst4)[2] = buf[6];
+                    ((uint32_t*)dst0)[0] = buf[0];
+                    ((uint32_t*)dst0)[1] = buf[1];
+                    ((uint32_t*)dst0)[2] = buf[2];
+                    ((uint32_t*)dst4)[0] = buf[4];
+                    ((uint32_t*)dst4)[1] = buf[5];
+                    ((uint32_t*)dst4)[2] = buf[6];
 #endif
                 }
 
