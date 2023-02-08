@@ -180,42 +180,42 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
-        SIMD_INLINE void Log(const uint8x16_t & value, const std::string & name)
+        SIMD_INLINE void Log8u(const uint8x16_t & value, const std::string & name)
         {
             uint8_t buffer[16];
             vst1q_u8(buffer, value);
             Simd::Log(buffer, 16, name);
         }
 
-        SIMD_INLINE void Log(const uint16x8_t & value, const std::string & name)
+        SIMD_INLINE void Log16u(const uint16x8_t & value, const std::string & name)
         {
             uint16_t buffer[8];
             vst1q_u16(buffer, value);
             Simd::Log(buffer, 8, name);
         }
 
-        SIMD_INLINE void Log(const int16x8_t & value, const std::string & name)
+        SIMD_INLINE void Log16i(const int16x8_t & value, const std::string & name)
         {
             int16_t buffer[8];
             vst1q_s16(buffer, value);
             Simd::Log(buffer, 8, name);
         }
 
-        SIMD_INLINE void Log(const uint32x4_t & value, const std::string & name)
+        SIMD_INLINE void Log32u(const uint32x4_t & value, const std::string & name)
         {
             uint32_t buffer[4];
             vst1q_u32(buffer, value);
             Simd::Log(buffer, 4, name);
         }
 
-        SIMD_INLINE void Log(const int32x4_t & value, const std::string & name)
+        SIMD_INLINE void Log32i(const int32x4_t & value, const std::string & name)
         {
             int32_t buffer[4];
             vst1q_s32(buffer, value);
             Simd::Log(buffer, 4, name);
         }
 
-        SIMD_INLINE void Log(const float32x4_t & value, const std::string & name)
+        SIMD_INLINE void Log32f(const float32x4_t & value, const std::string & name)
         {
             float buffer[4];
             vst1q_f32(buffer, value);
