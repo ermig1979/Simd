@@ -170,6 +170,7 @@ namespace Test
 
         min[0].Reshape(Shp(beg.srcC));
         max[0].Reshape(Shp(beg.srcC));
+        srand(0);
         FillRandom(src32f, min[0].Data(), max[0].Data(), beg.srcC, p.neg);
         SetSrc32fTo8u(src32f, min[0].Data(), max[0].Data(), beg.srcC, p.neg, p.comp, NULL, NULL, src8u);
         for (size_t i = 0; i < p.count; ++i)

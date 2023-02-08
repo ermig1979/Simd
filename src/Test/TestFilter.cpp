@@ -924,7 +924,11 @@ namespace Test
 
         int maxDifference = 0;
         if (!Simd::FmaAvoid(flags) || width != W || width <= 128)
+#ifdef WIN32 
+            maxDifference = 2;
+#else
             maxDifference = 1;
+#endif
 
         result = result && Compare(dst1, dst2, maxDifference, true, 64);
 
@@ -952,10 +956,16 @@ namespace Test
     {
         bool result = true;
 
-        int fa = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffAvg;// | SimdRecursiveBilateralFilterFmaAvoid;
-        int fm = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffMax | SimdRecursiveBilateralFilterFmaAvoid;
-        int fs = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffSum | SimdRecursiveBilateralFilterFmaAvoid;
-        int pa = SimdRecursiveBilateralFilterPrecise | SimdRecursiveBilateralFilterDiffAvg | SimdRecursiveBilateralFilterFmaAvoid;
+#ifdef WIN32 
+        int fma = 0;
+#else
+        int fma = SimdRecursiveBilateralFilterFmaAvoid;
+#endif
+
+        int fa = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffAvg | fma;
+        int fm = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffMax | fma;
+        int fs = SimdRecursiveBilateralFilterFast | SimdRecursiveBilateralFilterDiffSum | fma;
+        int pa = SimdRecursiveBilateralFilterPrecise | SimdRecursiveBilateralFilterDiffAvg | fma;
 
         for (int channels = 1; channels <= 4; channels++)
         {

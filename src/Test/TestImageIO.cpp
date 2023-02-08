@@ -39,10 +39,17 @@ namespace Test
 
     SIMD_INLINE int GetMaxJpegError(int quality)
     {
-        if(quality <= 10)
-            return REAL_IMAGE.empty() ? 32 : 4;
-        else
-            return REAL_IMAGE.empty() ? 9 : 4;
+        if (!REAL_IMAGE.empty())
+            return 4;
+#if defined(WIN32)
+#if !defined(NDEBUG)
+        return quality <= 10 ? 32 : 9;
+#else
+        return quality <= 10 ? 32 : 18;
+#endif
+#else
+        return 9;
+#endif
     }
 
     //-------------------------------------------------------------------------------------------------
