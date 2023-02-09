@@ -721,8 +721,8 @@ namespace Simd
             return vmaxq_f32(vmaxq_f32(Load<align>(src), Load<align>(src + stride)), Load<align>(src + 2 * stride));
         }
 
-        const uint8x8_t K8_TBL_BITS_LO = SIMD_VEC_SETR_EPI16(0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B);
-        const uint8x8_t K8_TBL_BITS_HI = SIMD_VEC_SETR_EPI16(0x04, 0x05, 0x06, 0x07, 0x0C, 0x0D, 0x0E, 0x0F);
+        const uint8x8_t K8_TBL_BITS_LO = SIMD_VEC_SETR_PI8(0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B);
+        const uint8x8_t K8_TBL_BITS_HI = SIMD_VEC_SETR_PI8(0x04, 0x05, 0x06, 0x07, 0x0C, 0x0D, 0x0E, 0x0F);
 
         SIMD_INLINE float32x4_t CombineFor2x2(const float32x4_t & lo, const float32x4_t & hi)
         {

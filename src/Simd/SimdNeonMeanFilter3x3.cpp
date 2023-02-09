@@ -66,7 +66,7 @@ namespace Simd
             Store<align>(b + HA, SumCol<1>(a));
         }
 
-        const uint16x4_t K16_DIVISION_BY_9_FACTOR = SIMD_VEC_SET1_EPI32(Base::DIVISION_BY_9_FACTOR);
+        const uint16x4_t K16_DIVISION_BY_9_FACTOR = SIMD_VEC_SET1_PI16(Base::DIVISION_BY_9_FACTOR);
 
         SIMD_INLINE uint16x8_t DivBy9(uint16x8_t value)
         {

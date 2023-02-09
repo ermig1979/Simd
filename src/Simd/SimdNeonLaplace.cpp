@@ -31,7 +31,7 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        const uint8x8_t K8X8_08 = SIMD_VEC_SET1_EPI16(0x0008);
+        const uint8x8_t K8X8_08 = SIMD_VEC_SET1_PI8(0x08);
 
         template<int part> SIMD_INLINE int16x8_t Laplace(uint8x16_t a[3][3])
         {
