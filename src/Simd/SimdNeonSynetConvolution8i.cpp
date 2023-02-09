@@ -73,13 +73,6 @@ namespace Simd
             i32 = vaddq_s32(i32, sum);
         }
 
-        inline void pdpbusd(int32x4_t& sum, uint8x16_t input, int8x16_t weight)
-        {
-            for (size_t i = 0; i < 4; ++i)
-                for (size_t j = 0; j < 4; ++j)
-                    sum[i] += int32_t(input[i * 4 + j]) * int32_t(weight[i * 4 + j]);
-        }
-
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const uint8_t* src0,
             const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0, const float32x4_t* norm, 
             const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst, int first)
