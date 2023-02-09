@@ -99,13 +99,13 @@ namespace Simd
                 PackResult32i(src + size - A, dst + size - A);
         }
 
-        SIMD_INLINE int ResultCount(const uint32x4_t & result)
+        SIMD_INLINE int ResultCount32(const uint32x4_t & result)
         {
             uint32x4_t a = (uint32x4_t)vpaddlq_u32(result);
             return vgetq_lane_u32(a, 0) + vgetq_lane_u32(a, 2);
         }
 
-        SIMD_INLINE int ResultCount(const uint16x8_t & result)
+        SIMD_INLINE int ResultCount16(const uint16x8_t & result)
         {
             uint32x4_t a = (uint32x4_t)vpaddlq_u32(vpaddlq_u16(result));
             return vgetq_lane_u32(a, 0) + vgetq_lane_u32(a, 2);
@@ -201,7 +201,7 @@ namespace Simd
                     }
                 }
                 result = vandq_u32(vcleq_f32(vdupq_n_f32(stage.threshold), stageSum), result);
-                int resultCount = ResultCount(result);
+                int resultCount = ResultCount32(result);
                 if (resultCount == 0)
                 {
                     return;
@@ -244,7 +244,7 @@ namespace Simd
                 for (; col < alignedWidth; col += F)
                 {
                     uint32x4_t result = vld1q_u32(buffer.m + col);
-                    if (ResultCount(result) == 0)
+                    if (ResultCount32(result) == 0)
                         continue;
                     float32x4_t norm = Norm32fp(hid, pq_offset + col);
                     Detect32f(hid, p_offset + col, norm, result);
@@ -254,7 +254,7 @@ namespace Simd
                 {
                     col = evenWidth - F;
                     uint32x4_t result = vld1q_u32(buffer.m + col);
-                    if (ResultCount(result) != 0)
+                    if (ResultCount32(result) != 0)
                     {
                         float32x4_t norm = Norm32fp(hid, pq_offset + col);
                         Detect32f(hid, p_offset + col, norm, result);
@@ -302,7 +302,7 @@ namespace Simd
                 for (; col < alignedWidth; col += HA)
                 {
                     uint32x4_t result = (uint32x4_t)vld1q_u16(buffer.m + col);
-                    if (ResultCount(result) == 0)
+                    if (ResultCount32(result) == 0)
                         continue;
                     float32x4_t norm = Norm32fi(hid, pq_offset + col);
                     Detect32f(hid, p_offset + col / 2, norm, result);
@@ -312,7 +312,7 @@ namespace Simd
                 {
                     col = evenWidth - HA;
                     uint32x4_t result = (uint32x4_t)vld1q_u16(buffer.m + col);
-                    if (ResultCount(result) != 0)
+                    if (ResultCount32(result) != 0)
                     {
                         float32x4_t norm = Norm32fi(hid, pq_offset + col);
                         Detect32f(hid, p_offset + col / 2, norm, result);
@@ -427,7 +427,7 @@ namespace Simd
                     leafOffset += 2;
                 }
                 result = vandq_u32(vcleq_f32(vdupq_n_f32(stage.threshold), sum), result);
-                int resultCount = ResultCount(result);
+                int resultCount = ResultCount32(result);
                 if (resultCount == 0)
                     return;
                 else if (resultCount == 1)
@@ -465,7 +465,7 @@ namespace Simd
                 for (; col < alignedWidth; col += 4)
                 {
                     uint32x4_t result = vld1q_u32(buffer.m + col);
-                    if (ResultCount(result) == 0)
+                    if (ResultCount32(result) == 0)
                         continue;
                     Detect(hid, offset + col, result);
                     vst1q_u32(buffer.d + col, result);
@@ -474,7 +474,7 @@ namespace Simd
                 {
                     col = evenWidth - 4;
                     uint32x4_t result = vld1q_u32(buffer.m + col);
-                    if (ResultCount(result) != 0)
+                    if (ResultCount32(result) != 0)
                     {
                         Detect(hid, offset + col, result);
                         vst1q_u32(buffer.d + col, result);
@@ -519,7 +519,7 @@ namespace Simd
                 for (; col < alignedWidth; col += HA)
                 {
                     uint32x4_t result = (uint32x4_t)vld1q_u16(buffer.m + col);
-                    if (ResultCount(result) == 0)
+                    if (ResultCount32(result) == 0)
                         continue;
                     Detect(hid, offset + col / 2, result);
                     vst1q_u16(buffer.d + col, (uint16x8_t)result);
@@ -528,7 +528,7 @@ namespace Simd
                 {
                     col = evenWidth - HA;
                     uint32x4_t result = (uint32x4_t)vld1q_u16(buffer.m + col);
-                    if (ResultCount(result) != 0)
+                    if (ResultCount32(result) != 0)
                     {
                         Detect(hid, offset + col / 2, result);
                         vst1q_u16(buffer.d + col, (uint16x8_t)result);
@@ -639,7 +639,7 @@ namespace Simd
                     leafOffset += 2;
                 }
                 result = vandq_u16(vcleq_s16(vdupq_n_s16(stage.threshold), sum), result);
-                int resultCount = ResultCount(result);
+                int resultCount = ResultCount16(result);
                 if (resultCount == 0)
                     return;
                 else if (resultCount == 1)
@@ -675,7 +675,7 @@ namespace Simd
                 for (; col < alignedWidth; col += HA)
                 {
                     uint16x8_t result = vld1q_u16(buffer.m + col);
-                    if (ResultCount(result) == 0)
+                    if (ResultCount16(result) == 0)
                         continue;
                     Detect(hid, offset + col, result);
                     vst1q_u16(buffer.d + col, result);
@@ -684,7 +684,7 @@ namespace Simd
                 {
                     col = evenWidth - HA;
                     uint16x8_t result = vld1q_u16(buffer.m + col);
-                    if (ResultCount(result) != 0)
+                    if (ResultCount16(result) != 0)
                     {
                         Detect(hid, offset + col, result);
                         vst1q_u16(buffer.d + col, result);
@@ -728,7 +728,7 @@ namespace Simd
                 for (; col < alignedWidth; col += A)
                 {
                     uint16x8_t result = vandq_u16((uint16x8_t)vld1q_u8(m + col), K16_0001);
-                    if (ResultCount(result) == 0)
+                    if (ResultCount16(result) == 0)
                         continue;
                     Detect(hid, offset + col / 2, result);
                     vst1q_u8(d + col, (uint8x16_t)result);
@@ -737,7 +737,7 @@ namespace Simd
                 {
                     col = evenWidth - A;
                     uint16x8_t result = vandq_u16((uint16x8_t)vld1q_u8(m + col), K16_0001);
-                    if (ResultCount(result) != 0)
+                    if (ResultCount16(result) != 0)
                     {
                         Detect(hid, offset + col / 2, result);
                         vst1q_u8(d + col, (uint8x16_t)result);

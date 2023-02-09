@@ -118,7 +118,7 @@ namespace Simd
             };
         }
 
-        template <bool align> SIMD_INLINE void HogDirectionHistograms(const float32x4_t & dx, const float32x4_t & dy, Buffer & buffer, size_t col)
+        template <bool align> SIMD_INLINE void HogDirectionHistograms32(const float32x4_t & dx, const float32x4_t & dy, Buffer & buffer, size_t col)
         {
             float32x4_t bestDot = vdupq_n_f32(0);
             int32x4_t bestIndex = vdupq_n_s32(0);
@@ -138,10 +138,10 @@ namespace Simd
             Store<align>(buffer.value + col, Sqrt<SIMD_NEON_RCP_ITER>(vaddq_f32(vmulq_f32(dx, dx), vmulq_f32(dy, dy))));
         }
 
-        template <bool align> SIMD_INLINE void HogDirectionHistograms(const int16x8_t & dx, const int16x8_t & dy, Buffer & buffer, size_t col)
+        template <bool align> SIMD_INLINE void HogDirectionHistograms16(const int16x8_t & dx, const int16x8_t & dy, Buffer & buffer, size_t col)
         {
-            HogDirectionHistograms<align>(Int16ToFloat<0>(dx), Int16ToFloat<0>(dy), buffer, col + 0);
-            HogDirectionHistograms<align>(Int16ToFloat<1>(dx), Int16ToFloat<1>(dy), buffer, col + 4);
+            HogDirectionHistograms32<align>(Int16ToFloat<0>(dx), Int16ToFloat<0>(dy), buffer, col + 0);
+            HogDirectionHistograms32<align>(Int16ToFloat<1>(dx), Int16ToFloat<1>(dy), buffer, col + 4);
         }
 
         template <bool align> SIMD_INLINE void HogDirectionHistograms(const uint8_t * src, size_t stride, Buffer & buffer, size_t col)
@@ -151,8 +151,8 @@ namespace Simd
             uint8x16_t l = Load<false>(s - 1);
             uint8x16_t r = Load<false>(s + 1);
             uint8x16_t b = Load<false>(s + stride);
-            HogDirectionHistograms<align>(Sub<0>(r, l), Sub<0>(b, t), buffer, col + 0);
-            HogDirectionHistograms<align>(Sub<1>(r, l), Sub<1>(b, t), buffer, col + 8);
+            HogDirectionHistograms16<align>(Sub<0>(r, l), Sub<0>(b, t), buffer, col + 0);
+            HogDirectionHistograms16<align>(Sub<1>(r, l), Sub<1>(b, t), buffer, col + 8);
         }
 
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
@@ -226,7 +226,7 @@ namespace Simd
                 _norm.Resize((_sx + 2)*(_sy + 2));
             }
 
-            template <bool align> SIMD_INLINE void GetHistogram(const float32x4_t & dx, const float32x4_t & dy, size_t col)
+            template <bool align> SIMD_INLINE void GetHistogram32(const float32x4_t & dx, const float32x4_t & dy, size_t col)
             {
                 float32x4_t _0 = vdupq_n_f32(0);
                 float32x4_t bestDot = _0;
@@ -253,10 +253,10 @@ namespace Simd
                 Store<align>(_value.data + col, Sqrt<SIMD_NEON_RCP_ITER>(vmlaq_f32(vmulq_f32(adx, adx), ady, ady)));
             }
 
-            template <bool align> SIMD_INLINE void GetHistogram(const int16x8_t & dx, const int16x8_t & dy, size_t col)
+            template <bool align> SIMD_INLINE void GetHistogram16(const int16x8_t & dx, const int16x8_t & dy, size_t col)
             {
-                GetHistogram<align>(Int16ToFloat<0>(dx), Int16ToFloat<0>(dy), col + 0);
-                GetHistogram<align>(Int16ToFloat<1>(dx), Int16ToFloat<1>(dy), col + 4);
+                GetHistogram32<align>(Int16ToFloat<0>(dx), Int16ToFloat<0>(dy), col + 0);
+                GetHistogram32<align>(Int16ToFloat<1>(dx), Int16ToFloat<1>(dy), col + 4);
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const uint8_t * src, size_t stride, size_t col)
@@ -266,8 +266,8 @@ namespace Simd
                 uint8x16_t l = Load<false>(s - 1);
                 uint8x16_t r = Load<false>(s + 1);
                 uint8x16_t b = Load<false>(s + stride);
-                GetHistogram<align>(Sub<0>(r, l), Sub<0>(b, t), col + 0);
-                GetHistogram<align>(Sub<1>(r, l), Sub<1>(b, t), col + 8);
+                GetHistogram16<align>(Sub<0>(r, l), Sub<0>(b, t), col + 0);
+                GetHistogram16<align>(Sub<1>(r, l), Sub<1>(b, t), col + 8);
             }
 
             void AddRowToBuffer(const uint8_t * src, size_t stride, size_t row, size_t width, size_t aligned)

@@ -145,18 +145,18 @@ namespace Simd
             AbsDifferenceSums3<align>(current, background + stride, sums + 6);
         }
 
-        template <bool align> void AbsDifferenceSums3Masked(uint8x16_t current, const uint8_t * background, uint8x16_t mask, uint32x4_t sums[3])
+        template <bool align> void AbsDifferenceSums3Masked32(uint8x16_t current, const uint8_t * background, uint8x16_t mask, uint32x4_t sums[3])
         {
             sums[0] = vaddq_u32(sums[0], vpaddlq_u16(vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<align>(background - 1))))));
             sums[1] = vaddq_u32(sums[1], vpaddlq_u16(vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<false>(background))))));
             sums[2] = vaddq_u32(sums[2], vpaddlq_u16(vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<false>(background + 1))))));
         }
 
-        template <bool align> void AbsDifferenceSums3x3Masked(uint8x16_t current, const uint8_t * background, size_t stride, uint8x16_t mask, uint32x4_t sums[9])
+        template <bool align> void AbsDifferenceSums3x3Masked32(uint8x16_t current, const uint8_t * background, size_t stride, uint8x16_t mask, uint32x4_t sums[9])
         {
-            AbsDifferenceSums3Masked<align>(current, background - stride, mask, sums + 0);
-            AbsDifferenceSums3Masked<align>(current, background, mask, sums + 3);
-            AbsDifferenceSums3Masked<align>(current, background + stride, mask, sums + 6);
+            AbsDifferenceSums3Masked32<align>(current, background - stride, mask, sums + 0);
+            AbsDifferenceSums3Masked32<align>(current, background, mask, sums + 3);
+            AbsDifferenceSums3Masked32<align>(current, background + stride, mask, sums + 6);
         }
 
         template <bool align> void AbsDifferenceSums3x3(const uint8_t * current, size_t currentStride,
@@ -205,7 +205,7 @@ namespace Simd
                 if (alignedWidth != width)
                 {
                     const uint8x16_t _current = vandq_u8(tailMask, Load<false>(current + width - A));
-                    AbsDifferenceSums3x3Masked<false>(_current, background + width - A, backgroundStride, tailMask, rowSums);
+                    AbsDifferenceSums3x3Masked32<false>(_current, background + width - A, backgroundStride, tailMask, rowSums);
                 }
 
                 for (size_t i = 0; i < 9; ++i)
@@ -228,18 +228,18 @@ namespace Simd
                 AbsDifferenceSums3x3<false>(current, currentStride, background, backgroundStride, width, height, sums);
         }
 
-        template <bool align> void AbsDifferenceSums3Masked(uint8x16_t current, const uint8_t * background, uint8x16_t mask, uint16x8_t sums[3])
+        template <bool align> void AbsDifferenceSums3Masked16(uint8x16_t current, const uint8_t * background, uint8x16_t mask, uint16x8_t sums[3])
         {
             sums[0] = vaddq_u16(sums[0], vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<align>(background - 1)))));
             sums[1] = vaddq_u16(sums[1], vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<false>(background)))));
             sums[2] = vaddq_u16(sums[2], vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<false>(background + 1)))));
         }
 
-        template <bool align> void AbsDifferenceSums3x3Masked(uint8x16_t current, const uint8_t * background, size_t stride, uint8x16_t mask, uint16x8_t sums[9])
+        template <bool align> void AbsDifferenceSums3x3Masked16(uint8x16_t current, const uint8_t * background, size_t stride, uint8x16_t mask, uint16x8_t sums[9])
         {
-            AbsDifferenceSums3Masked<align>(current, background - stride, mask, sums + 0);
-            AbsDifferenceSums3Masked<align>(current, background, mask, sums + 3);
-            AbsDifferenceSums3Masked<align>(current, background + stride, mask, sums + 6);
+            AbsDifferenceSums3Masked16<align>(current, background - stride, mask, sums + 0);
+            AbsDifferenceSums3Masked16<align>(current, background, mask, sums + 3);
+            AbsDifferenceSums3Masked16<align>(current, background + stride, mask, sums + 6);
         }
 
         template <bool align> void AbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
@@ -282,7 +282,7 @@ namespace Simd
                     {
                         const uint8x16_t _mask = vceqq_u8(Load<false>(mask + col), _index);
                         const uint8x16_t _current = vandq_u8(Load<false>(current + col), _mask);
-                        AbsDifferenceSums3x3Masked<align>(_current, background + col, backgroundStride, _mask, blockSums);
+                        AbsDifferenceSums3x3Masked16<align>(_current, background + col, backgroundStride, _mask, blockSums);
                     }
 
                     for (size_t i = 0; i < 9; ++i)
@@ -294,7 +294,7 @@ namespace Simd
                     size_t col = width - A;
                     const uint8x16_t _mask = vandq_u8(tailMask, vceqq_u8(Load<false>(mask + col), _index));
                     const uint8x16_t _current = vandq_u8(_mask, Load<false>(current + col));
-                    AbsDifferenceSums3x3Masked<false>(_current, background + col, backgroundStride, _mask, rowSums);
+                    AbsDifferenceSums3x3Masked32<false>(_current, background + col, backgroundStride, _mask, rowSums);
                 }
 
                 for (size_t i = 0; i < 9; ++i)
