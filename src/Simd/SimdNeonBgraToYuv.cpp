@@ -43,16 +43,16 @@ namespace Simd
             uint8_t * y1 = y0 + yStride;
 
             uint8x16x4_t bgra00 = Load4<align>(bgra0);
-            Store<align>(y0 + 0, BgrToY(bgra00.val[0], bgra00.val[1], bgra00.val[2]));
+            Store<align>(y0 + 0, BgrToY8(bgra00.val[0], bgra00.val[1], bgra00.val[2]));
 
             uint8x16x4_t bgra01 = Load4<align>(bgra0 + QA);
-            Store<align>(y0 + A, BgrToY(bgra01.val[0], bgra01.val[1], bgra01.val[2]));
+            Store<align>(y0 + A, BgrToY8(bgra01.val[0], bgra01.val[1], bgra01.val[2]));
 
             uint8x16x4_t bgra10 = Load4<align>(bgra1);
-            Store<align>(y1 + 0, BgrToY(bgra10.val[0], bgra10.val[1], bgra10.val[2]));
+            Store<align>(y1 + 0, BgrToY8(bgra10.val[0], bgra10.val[1], bgra10.val[2]));
 
             uint8x16x4_t bgra11 = Load4<align>(bgra1 + QA);
-            Store<align>(y1 + A, BgrToY(bgra11.val[0], bgra11.val[1], bgra11.val[2]));
+            Store<align>(y1 + A, BgrToY8(bgra11.val[0], bgra11.val[1], bgra11.val[2]));
 
             uint16x8_t b0 = Average(bgra00.val[0], bgra10.val[0]);
             uint16x8_t g0 = Average(bgra00.val[1], bgra10.val[1]);
@@ -62,8 +62,8 @@ namespace Simd
             uint16x8_t g1 = Average(bgra01.val[1], bgra11.val[1]);
             uint16x8_t r1 = Average(bgra01.val[2], bgra11.val[2]);
 
-            Store<align>(u, PackSaturatedI16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
-            Store<align>(v, PackSaturatedI16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
+            Store<align>(u, PackSaturatedI16(BgrToU16(b0, g0, r0), BgrToU16(b1, g1, r1)));
+            Store<align>(v, PackSaturatedI16(BgrToV16(b0, g0, r0), BgrToV16(b1, g1, r1)));
         }
 
         template <bool align> void BgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
@@ -112,21 +112,21 @@ namespace Simd
         template <bool align> SIMD_INLINE void BgraToYuv422p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v)
         {
             uint8x16x4_t bgra0 = Load4<align>(bgra);
-            Store<align>(y + 0, BgrToY(bgra0.val[0], bgra0.val[1], bgra0.val[2]));
+            Store<align>(y + 0, BgrToY8(bgra0.val[0], bgra0.val[1], bgra0.val[2]));
 
             uint16x8_t b0 = Average(bgra0.val[0]);
             uint16x8_t g0 = Average(bgra0.val[1]);
             uint16x8_t r0 = Average(bgra0.val[2]);
 
             uint8x16x4_t bgra1 = Load4<align>(bgra + QA);
-            Store<align>(y + A, BgrToY(bgra1.val[0], bgra1.val[1], bgra1.val[2]));
+            Store<align>(y + A, BgrToY8(bgra1.val[0], bgra1.val[1], bgra1.val[2]));
 
             uint16x8_t b1 = Average(bgra1.val[0]);
             uint16x8_t g1 = Average(bgra1.val[1]);
             uint16x8_t r1 = Average(bgra1.val[2]);
 
-            Store<align>(u, PackSaturatedI16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
-            Store<align>(v, PackSaturatedI16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
+            Store<align>(u, PackSaturatedI16(BgrToU16(b0, g0, r0), BgrToU16(b1, g1, r1)));
+            Store<align>(v, PackSaturatedI16(BgrToV16(b0, g0, r0), BgrToV16(b1, g1, r1)));
         }
 
         template <bool align> void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
@@ -170,9 +170,9 @@ namespace Simd
         template <bool align> SIMD_INLINE void BgraToYuv444p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v)
         {
             uint8x16x4_t _bgra = Load4<align>(bgra);
-            Store<align>(y, BgrToY(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
-            Store<align>(u, BgrToU(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
-            Store<align>(v, BgrToV(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
+            Store<align>(y, BgrToY8(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
+            Store<align>(u, BgrToU8(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
+            Store<align>(v, BgrToV8(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
         }
 
         template <bool align> void BgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
@@ -219,19 +219,19 @@ namespace Simd
             uint8_t * a1 = a0 + aStride;
 
             uint8x16x4_t bgra00 = Load4<align>(bgra0);
-            Store<align>(y0 + 0, BgrToY(bgra00.val[0], bgra00.val[1], bgra00.val[2]));
+            Store<align>(y0 + 0, BgrToY8(bgra00.val[0], bgra00.val[1], bgra00.val[2]));
             Store<align>(a0 + 0, bgra00.val[3]);
 
             uint8x16x4_t bgra01 = Load4<align>(bgra0 + QA);
-            Store<align>(y0 + A, BgrToY(bgra01.val[0], bgra01.val[1], bgra01.val[2]));
+            Store<align>(y0 + A, BgrToY8(bgra01.val[0], bgra01.val[1], bgra01.val[2]));
             Store<align>(a0 + A, bgra01.val[3]);
 
             uint8x16x4_t bgra10 = Load4<align>(bgra1);
-            Store<align>(y1 + 0, BgrToY(bgra10.val[0], bgra10.val[1], bgra10.val[2]));
+            Store<align>(y1 + 0, BgrToY8(bgra10.val[0], bgra10.val[1], bgra10.val[2]));
             Store<align>(a1 + 0, bgra10.val[3]);
 
             uint8x16x4_t bgra11 = Load4<align>(bgra1 + QA);
-            Store<align>(y1 + A, BgrToY(bgra11.val[0], bgra11.val[1], bgra11.val[2]));
+            Store<align>(y1 + A, BgrToY8(bgra11.val[0], bgra11.val[1], bgra11.val[2]));
             Store<align>(a1 + A, bgra11.val[3]);
 
             uint16x8_t b0 = Average(bgra00.val[0], bgra10.val[0]);
@@ -242,8 +242,8 @@ namespace Simd
             uint16x8_t g1 = Average(bgra01.val[1], bgra11.val[1]);
             uint16x8_t r1 = Average(bgra01.val[2], bgra11.val[2]);
 
-            Store<align>(u, PackSaturatedI16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
-            Store<align>(v, PackSaturatedI16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
+            Store<align>(u, PackSaturatedI16(BgrToU16(b0, g0, r0), BgrToU16(b1, g1, r1)));
+            Store<align>(v, PackSaturatedI16(BgrToV16(b0, g0, r0), BgrToV16(b1, g1, r1)));
         }
 
         template <bool align> void BgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * y, size_t yStride,

@@ -46,16 +46,16 @@ namespace Simd
             uint8_t * y1 = y0 + yStride;
 
             uint8x16x3_t bgr00 = Load3<align>(bgr0);
-            Store<align>(y0 + 0, BgrToY(bgr00.val[0], bgr00.val[1], bgr00.val[2]));
+            Store<align>(y0 + 0, BgrToY8(bgr00.val[0], bgr00.val[1], bgr00.val[2]));
 
             uint8x16x3_t bgr01 = Load3<align>(bgr0 + A3);
-            Store<align>(y0 + A, BgrToY(bgr01.val[0], bgr01.val[1], bgr01.val[2]));
+            Store<align>(y0 + A, BgrToY8(bgr01.val[0], bgr01.val[1], bgr01.val[2]));
 
             uint8x16x3_t bgr10 = Load3<align>(bgr1);
-            Store<align>(y1 + 0, BgrToY(bgr10.val[0], bgr10.val[1], bgr10.val[2]));
+            Store<align>(y1 + 0, BgrToY8(bgr10.val[0], bgr10.val[1], bgr10.val[2]));
 
             uint8x16x3_t bgr11 = Load3<align>(bgr1 + A3);
-            Store<align>(y1 + A, BgrToY(bgr11.val[0], bgr11.val[1], bgr11.val[2]));
+            Store<align>(y1 + A, BgrToY8(bgr11.val[0], bgr11.val[1], bgr11.val[2]));
 
             uint16x8_t b0 = Average(bgr00.val[0], bgr10.val[0]);
             uint16x8_t g0 = Average(bgr00.val[1], bgr10.val[1]);
@@ -65,8 +65,8 @@ namespace Simd
             uint16x8_t g1 = Average(bgr01.val[1], bgr11.val[1]);
             uint16x8_t r1 = Average(bgr01.val[2], bgr11.val[2]);
 
-            Store<align>(u, PackSaturatedI16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
-            Store<align>(v, PackSaturatedI16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
+            Store<align>(u, PackSaturatedI16(BgrToU16(b0, g0, r0), BgrToU16(b1, g1, r1)));
+            Store<align>(v, PackSaturatedI16(BgrToV16(b0, g0, r0), BgrToV16(b1, g1, r1)));
         }
 
         template <bool align> void BgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
@@ -114,21 +114,21 @@ namespace Simd
         template <bool align> SIMD_INLINE void BgrToYuv422p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v)
         {
             uint8x16x3_t bgr0 = Load3<align>(bgr);
-            Store<align>(y + 0, BgrToY(bgr0.val[0], bgr0.val[1], bgr0.val[2]));
+            Store<align>(y + 0, BgrToY8(bgr0.val[0], bgr0.val[1], bgr0.val[2]));
 
             uint16x8_t b0 = Average(bgr0.val[0]);
             uint16x8_t g0 = Average(bgr0.val[1]);
             uint16x8_t r0 = Average(bgr0.val[2]);
 
             uint8x16x3_t bgr1 = Load3<align>(bgr + A3);
-            Store<align>(y + A, BgrToY(bgr1.val[0], bgr1.val[1], bgr1.val[2]));
+            Store<align>(y + A, BgrToY8(bgr1.val[0], bgr1.val[1], bgr1.val[2]));
 
             uint16x8_t b1 = Average(bgr1.val[0]);
             uint16x8_t g1 = Average(bgr1.val[1]);
             uint16x8_t r1 = Average(bgr1.val[2]);
 
-            Store<align>(u, PackSaturatedI16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
-            Store<align>(v, PackSaturatedI16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
+            Store<align>(u, PackSaturatedI16(BgrToU16(b0, g0, r0), BgrToU16(b1, g1, r1)));
+            Store<align>(v, PackSaturatedI16(BgrToV16(b0, g0, r0), BgrToV16(b1, g1, r1)));
         }
 
         template <bool align> void BgrToYuv422p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
@@ -172,9 +172,9 @@ namespace Simd
         template <bool align> SIMD_INLINE void BgrToYuv444p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v)
         {
             uint8x16x3_t _bgr = Load3<align>(bgr);
-            Store<align>(y, BgrToY(_bgr.val[0], _bgr.val[1], _bgr.val[2]));
-            Store<align>(u, BgrToU(_bgr.val[0], _bgr.val[1], _bgr.val[2]));
-            Store<align>(v, BgrToV(_bgr.val[0], _bgr.val[1], _bgr.val[2]));
+            Store<align>(y, BgrToY8(_bgr.val[0], _bgr.val[1], _bgr.val[2]));
+            Store<align>(u, BgrToU8(_bgr.val[0], _bgr.val[1], _bgr.val[2]));
+            Store<align>(v, BgrToV8(_bgr.val[0], _bgr.val[1], _bgr.val[2]));
         }
 
         template <bool align> void BgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,

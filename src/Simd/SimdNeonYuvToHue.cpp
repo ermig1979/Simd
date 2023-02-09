@@ -44,11 +44,11 @@ namespace Simd
             return PackI32(lo, hi);
         }
 
-        SIMD_INLINE int16x8_t YuvToHue(const int16x8_t & y, const int16x8_t & u, const int16x8_t & v, const float32x4_t & KF_255_DIV_6)
+        SIMD_INLINE int16x8_t YuvToHue16(const int16x8_t & y, const int16x8_t & u, const int16x8_t & v, const float32x4_t & KF_255_DIV_6)
         {
-            int16x8_t red = SaturateByU8(YuvToRed(y, v));
-            int16x8_t blue = SaturateByU8(YuvToBlue(y, u));
-            int16x8_t green = SaturateByU8(YuvToGreen(y, u, v));
+            int16x8_t red = SaturateByU8(YuvToRed16(y, v));
+            int16x8_t blue = SaturateByU8(YuvToBlue16(y, u));
+            int16x8_t green = SaturateByU8(YuvToGreen16(y, u, v));
             int16x8_t max = vmaxq_s16(blue, vmaxq_s16(green, red));
             int16x8_t min = vminq_s16(blue, vminq_s16(green, red));
             int16x8_t range = vsubq_s16(max, min);
@@ -68,8 +68,8 @@ namespace Simd
 
         SIMD_INLINE uint8x16_t YuvToHue(const uint8x16_t & y, const uint8x16_t & u, const uint8x16_t & v, const float32x4_t & KF_255_DIV_6)
         {
-            uint16x8_t lo = (uint16x8_t)YuvToHue(AdjustY<0>(y), AdjustUV<0>(u), AdjustUV<0>(v), KF_255_DIV_6);
-            uint16x8_t hi = (uint16x8_t)YuvToHue(AdjustY<1>(y), AdjustUV<1>(u), AdjustUV<1>(v), KF_255_DIV_6);
+            uint16x8_t lo = (uint16x8_t)YuvToHue16(AdjustY<0>(y), AdjustUV<0>(u), AdjustUV<0>(v), KF_255_DIV_6);
+            uint16x8_t hi = (uint16x8_t)YuvToHue16(AdjustY<1>(y), AdjustUV<1>(u), AdjustUV<1>(v), KF_255_DIV_6);
             return PackU16(lo, hi);
         }
 
