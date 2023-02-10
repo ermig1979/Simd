@@ -469,7 +469,7 @@ namespace Simd
         template <class T>  void BgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
             uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
         {
-            assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
+            assert((width % 2 == 0) && (height % 2 == 0));
 
             size_t widthDA = AlignLo(width, DA);
             size_t tail = width - widthDA;
