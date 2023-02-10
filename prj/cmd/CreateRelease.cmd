@@ -55,6 +55,8 @@ erase %TMP_DIR%\prj\vs2022\.vs\* /q /s /f
 rmdir %TMP_DIR%\prj\vs2022\.vs /q /s
 erase %TMP_DIR%\prj\vs2022\_out\* /q /s /f
 rmdir %TMP_DIR%\prj\vs2022\_out /q /s
+erase %TMP_DIR%\prj\cmd\_out\* /q /s /f
+rmdir %TMP_DIR%\prj\cmd\_out /q /s
 erase %TMP_DIR%\docs\*.tmp /q /s /f
 
 echo Create ZIP archive:
