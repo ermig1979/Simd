@@ -135,6 +135,10 @@
 #define SIMD_MASKZ_LOAD_ERROR
 #endif
 
+#if _MSC_VER < 1924
+#define SIMD_AVX512_FLOOR_CEIL_ABSENT
+#endif
+
 #endif//defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
 #if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)

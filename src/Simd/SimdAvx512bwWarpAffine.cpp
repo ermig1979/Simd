@@ -36,6 +36,7 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
+#if !defined(SIMD_AVX512_FLOOR_CEIL_ABSENT)
         template<int N> SIMD_INLINE void FillBorder(uint8_t* dst, int count, const __m512i& bv, const uint8_t* bs)
         {
             int i = 0, size = count * N, size64 = (int)AlignLo(size, 64);
@@ -804,6 +805,20 @@ namespace Simd
             else
                 return NULL;
         }
+#else
+        void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border)
+        {
+            WarpAffParam param(srcW, srcH, srcS, dstW, dstH, dstS, channels, mat, flags, border, A);
+            if (!param.Valid())
+                return NULL;
+            if (param.IsNearest())
+                return new Avx2::WarpAffineNearest(param);
+            else if (param.IsByteBilinear())
+                return new Avx2::WarpAffineByteBilinear(param);
+            else
+                return NULL;
+        }
+#endif
     }
 #endif
 }
