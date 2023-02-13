@@ -45,14 +45,14 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool nofma> __m128 Fmadd(__m128 a, __m128 b, __m128 c, __m128 d);
+        template<bool nofma> __m128 Fmadd(__m128 a, __m128 b, __m128 c, const __m128 & d);
 
-        template <> SIMD_INLINE __m128 Fmadd<false>(__m128 a, __m128 b, __m128 c, __m128 d)
+        template <> SIMD_INLINE __m128 Fmadd<false>(__m128 a, __m128 b, __m128 c, const __m128 & d)
         {
             return _mm_fmadd_ps(a, b, _mm_mul_ps(c, d));
         }
 
-        template <> SIMD_INLINE __m128 Fmadd<true>(__m128 a, __m128 b, __m128 c, __m128 d)
+        template <> SIMD_INLINE __m128 Fmadd<true>(__m128 a, __m128 b, __m128 c, const __m128 & d)
         {
             return _mm_add_ps(_mm_or_ps(_mm_mul_ps(a, b), _mm_setzero_ps()), _mm_or_ps(_mm_mul_ps(c, d), _mm_setzero_ps()));
         }
@@ -73,14 +73,14 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool nofma> __m256 Fmadd(__m256 a, __m256 b, __m256 c, __m256 d);
+        template<bool nofma> __m256 Fmadd(__m256 a, __m256 b, __m256 c, const __m256 &  d);
 
-        template <> SIMD_INLINE __m256 Fmadd<false>(__m256 a, __m256 b, __m256 c, __m256 d)
+        template <> SIMD_INLINE __m256 Fmadd<false>(__m256 a, __m256 b, __m256 c, const __m256 & d)
         {
             return _mm256_fmadd_ps(a, b, _mm256_mul_ps(c, d));
         }
 
-        template <> SIMD_INLINE __m256 Fmadd<true>(__m256 a, __m256 b, __m256 c, __m256 d)
+        template <> SIMD_INLINE __m256 Fmadd<true>(__m256 a, __m256 b, __m256 c, const __m256 & d)
         {
             return _mm256_add_ps(_mm256_or_ps(_mm256_mul_ps(a, b), _mm256_setzero_ps()), _mm256_or_ps(_mm256_mul_ps(c, d), _mm256_setzero_ps()));
         }
