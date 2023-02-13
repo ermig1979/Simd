@@ -66,7 +66,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SIMD_INLINE __m128i NearestOffset(__m128 x, __m128 y, const __m128* m, __m128i w, __m128i h, __m128i n, __m128i s)
+        SIMD_INLINE __m128i NearestOffset(__m128 x, __m128 y, const __m128* m, __m128i w, const __m128i & h, const __m128i & n, const __m128i & s)
         {
             __m128 dx = _mm_add_ps(_mm_add_ps(_mm_mul_ps(x, m[0]), _mm_mul_ps(y, m[1])), m[2]);
             __m128 dy = _mm_add_ps(_mm_add_ps(_mm_mul_ps(x, m[3]), _mm_mul_ps(y, m[4])), m[5]);
@@ -218,7 +218,7 @@ namespace Simd
 
         const __m128i K32_WA_FRACTION_RANGE = SIMD_MM_SET1_EPI32(Base::WA_FRACTION_RANGE);
 
-        SIMD_INLINE void ByteBilinearPrepMain4(__m128 x, __m128 y, const __m128* m, __m128i n, __m128i s, uint32_t* offs, uint8_t* fx, uint16_t* fy)
+        SIMD_INLINE void ByteBilinearPrepMain4(__m128 x, __m128 y, const __m128* m, __m128i n, const __m128i & s, uint32_t* offs, uint8_t* fx, uint16_t* fy)
         {
             __m128 dx = _mm_add_ps(_mm_add_ps(_mm_mul_ps(x, m[0]), _mm_mul_ps(y, m[1])), m[2]);
             __m128 dy = _mm_add_ps(_mm_add_ps(_mm_mul_ps(x, m[3]), _mm_mul_ps(y, m[4])), m[5]);
