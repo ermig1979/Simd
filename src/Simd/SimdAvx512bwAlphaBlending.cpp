@@ -175,12 +175,12 @@ namespace Simd
             uint8_t* y1 = y0 + yStride;
 
             __m512i b16_r16[2][2], g16_1[2][2], a16[2][2];
-            __m512i _y0 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<false, tail>(y0, tails[4]));
+            __m512i _y0 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<false, tail>(y0, tails[4])));
             __m512i y00 = LoadAndBgrToY16<T, 0, tail>(bgra0 + 0 * A, _y0, b16_r16[0][0], g16_1[0][0], a16[0][0], tails + 0);
             __m512i y01 = LoadAndBgrToY16<T, 1, tail>(bgra0 + 2 * A, _y0, b16_r16[0][1], g16_1[0][1], a16[0][1], tails + 2);
             Store<false, tail>(y0, PackI16ToU8(y00, y01), tails[4]);
 
-            __m512i _y1 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<false, tail>(y1, tails[4]));
+            __m512i _y1 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<false, tail>(y1, tails[4])));
             __m512i y10 = LoadAndBgrToY16<T, 0, tail>(bgra1 + 0 * A, _y1, b16_r16[1][0], g16_1[1][0], a16[1][0], tails + 0);
             __m512i y11 = LoadAndBgrToY16<T, 1, tail>(bgra1 + 2 * A, _y1, b16_r16[1][1], g16_1[1][1], a16[1][1], tails + 2);
             Store<false, tail>(y1, PackI16ToU8(y10, y11), tails[4]);
