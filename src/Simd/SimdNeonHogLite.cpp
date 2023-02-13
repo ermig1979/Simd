@@ -653,7 +653,7 @@ namespace Simd
                 InitIndexWeight(srcWidth, dstWidth, featureSize, _ix, _kx);
                 InitIndexWeight(srcHeight, dstHeight, srcStride, _iy, _ky);
 
-                if (Aligned(src) && Aligned(dst))
+                if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
                     Resize<true>(src, srcStride, featureSize, dst, dstStride, dstWidth, dstHeight);
                 else
                     Resize<false>(src, srcStride, featureSize, dst, dstStride, dstWidth, dstHeight);

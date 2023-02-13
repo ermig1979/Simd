@@ -195,8 +195,8 @@ namespace Simd
             if (partialAlignedSize != size)
             {
                 __m256 mask = RightNotZero32f(size - partialAlignedSize);
-                __m256 a0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(a + size - F))));
-                __m256 b0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(b + size - F))));
+                __m256 a0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse41::Load<false>((__m128i*)(a + size - F))));
+                __m256 b0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse41::Load<false>((__m128i*)(b + size - F))));
                 _aa[0] = _mm256_fmadd_ps(a0, a0, _aa[0]);
                 _ab[0] = _mm256_fmadd_ps(a0, b0, _ab[0]);
                 _bb[0] = _mm256_fmadd_ps(b0, b0, _bb[0]);
