@@ -21,10 +21,10 @@ jobs:
       run: lscpu
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TEST_FLAGS="-mavx2 -mavx512bw" --parallel2
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TEST_FLAGS="-mavx2 -mavx512bw"
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel2
 
     - name: Test
       working-directory: ${{github.workspace}}/build
@@ -47,8 +47,8 @@ jobs:
       run: sudo apt-get -y install g++-arm-linux-gnueabihf
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="arm-linux-gnueabihf-g++" -DSIMD_TARGET="arm" --parallel2
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="arm-linux-gnueabihf-g++" -DSIMD_TARGET="arm"
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel2
 
