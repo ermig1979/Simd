@@ -586,7 +586,7 @@ namespace Test
                 else if (arg.find("-tt=") == 0)
                 {
 #if defined(NDEBUG)
-                    testThreads = FromString<size_t>(arg.substr(4, arg.size() - 4));
+                    testThreads = Simd::Min(FromString<size_t>(arg.substr(4, arg.size() - 4)), (size_t)std::thread::hardware_concurrency());
 #endif
                 }
                 else if (arg.find("-tr=") == 0)
@@ -686,15 +686,16 @@ namespace Test
     {
         if (options.testThreads > 0)
         {
-            TEST_LOG_SS(Info, "Test threads count = " << options.testThreads);
-
             Test::Log::s_log.SetLevel(Test::Log::Error);
 
-            Test::TaskPtrs tasks;
-            size_t n = options.testThreads;
+            size_t testThreads = Simd::Min(options.testThreads, groups.size());
             size_t total = groups.size();
-            size_t block = Simd::DivHi(total, n);
-            for (size_t i = 0; i < n; ++i)
+            size_t block = Simd::DivHi(total, testThreads);
+            testThreads = Simd::Min(testThreads, Simd::DivHi(total, block));
+
+            TEST_LOG_SS(Info, "Test threads count = " << testThreads);
+            Test::TaskPtrs tasks;
+            for (size_t i = 0; i < testThreads; ++i)
             {
                 size_t beg = i * block;
                 size_t end = std::min(total, beg + block);
@@ -702,14 +703,18 @@ namespace Test
             }
 
             std::cout << std::endl;
-            double progress;
+            double progress, previous = -1.0;
             do
             {
                 progress = 0;
                 for (size_t i = 0; i < tasks.size(); ++i)
                     progress += tasks[i]->Progress();
                 progress /= double(tasks.size());
-                std::cout << "\rTest progress: " << std::fixed << std::setprecision(1) << progress*100.0 << "%" << std::flush;
+                if (progress > previous)
+                {
+                    std::cout << "\rTest progress: " << std::fixed << std::setprecision(1) << progress * 100.0 << "%" << std::flush;
+                    previous = progress;
+                }
                 Test::Sleep(40);
             } while (progress < 1.0 && !Test::Task::s_stopped);
             std::cout << std::endl << std::endl;

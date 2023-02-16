@@ -24,11 +24,11 @@ jobs:
       run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TEST_FLAGS="-mavx2"
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel2
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ./Test -m=a -tt=2 -ot=log_${{matrix.build_type}}.txt
+      run: ./Test -m=a -tt=$(nproc) -ot=log_${{matrix.build_type}}.txt
 
   build_arm_cross:
     runs-on: ubuntu-latest
@@ -50,7 +50,7 @@ jobs:
       run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="arm-linux-gnueabihf-g++" -DSIMD_TARGET="arm"
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel2
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
 
   build_aarch64_cross:
     runs-on: ubuntu-latest
@@ -72,7 +72,7 @@ jobs:
       run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="aarch64-linux-gnu-g++" -DSIMD_TARGET="aarch64"
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel2
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
 
   build_ppc64_cross:
     runs-on: ubuntu-latest
@@ -94,4 +94,4 @@ jobs:
       run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="powerpc-linux-gnu-g++" -DSIMD_TARGET="ppc64"
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel2
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)

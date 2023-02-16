@@ -180,7 +180,7 @@ Where next parameters were used:
 In this case different implementations of each functions will be compared between themselves 
 (for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
 Also it can be `-m=s` (running of special tests).
-* `-tt=1` - a number of test threads.
+* `-tt=1` - a number of test threads. Use -1 to set maximum parallelization.
 * `-fi=Sobel` - an include filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
 If you miss this parameter then full testing will be performed.
 You can use several filters - function name has to satisfy at least one of them.
@@ -198,7 +198,7 @@ Also you can use parameters:
 * `-oh=log.html` - a file name with test report (in HTML file format).	
 * `-s=sample.avi` a video source (See `Simd::Motion` test).
 * `-o=output.avi` an annotated video output (See `Simd::Motion` test).
-* `-wt=1` a thread number used to parallelize algorithms.
+* `-wt=1` a thread number used to parallelize algorithms. Use -1 to set maximum parallelization.
 * `-fe=Abs` an exclude filter to exclude some tests.
 * `-mt=100` a minimal test execution time (in milliseconds).
 * `-lc=1` to litter CPU cache between test runs.
