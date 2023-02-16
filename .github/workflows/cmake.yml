@@ -73,3 +73,25 @@ jobs:
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel2
+
+  build_ppc64_cross:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: sudo apt-get -y install g++-powerpc-linux-gnu
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="powerpc-linux-gnu-g++" -DSIMD_TARGET="ppc64"
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel2
