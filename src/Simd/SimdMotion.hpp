@@ -1071,7 +1071,7 @@ namespace Simd
                 else
                 {
                     Simd::Fill(model.roiMask, Motion::Model::EMPTY);
-                    DrawFilledPolygon(model.roiMask[0], model.roi, Motion::Model::ROI);
+                    DrawFilledPolygon(model.roiMask[0], model.roi, (uint8_t)Motion::Model::ROI);
                 }
                 Simd::Build(model.roiMask, SimdReduce4x4);
 
