@@ -93,6 +93,10 @@ namespace Simd
                 }
             }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsequenced"
+#endif
             template<int channels, RbfDiffType type> void HorFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t size = p.width * channels, cLast = size - 1, fLast = p.width - 1;
@@ -127,6 +131,9 @@ namespace Simd
                     dst += dstStride;
                 }
             }
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
             template<int channels> void VerSetEdge(const uint8_t* src, size_t width, float* factor, float* colors)
             {

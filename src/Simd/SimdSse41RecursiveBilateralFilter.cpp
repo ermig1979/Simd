@@ -313,6 +313,10 @@ namespace Simd
 
             //-----------------------------------------------------------------------------------------
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsequenced"
+#endif
             template<int channels, RbfDiffType type> void HorFilter(const RbfParam& p, float * buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 //SIMD_PERF_FUNC();
@@ -348,6 +352,9 @@ namespace Simd
                     dst += dstStride;
                 }
             }
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
             //-----------------------------------------------------------------------------------------
 
