@@ -28,10 +28,15 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ./prj/vs2022
 
+    - name: Get ThreadCount
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./prj/cmd/GetThreadCount.cmd
+      shell: cmd
+
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /m /p:Configuration=${{matrix.build_type}} /p:Platform=${{matrix.platform}} -maxCpuCount:%NUMBER_OF_PROCESSORS% ./prj/vs2022/Simd.sln
+      run: msbuild /m /p:Configuration=${{matrix.build_type}} /p:Platform=${{matrix.platform}} -maxCpuCount:%ThreadCount% ./prj/vs2022/Simd.sln
       
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: bin/v143/${{matrix.platform}}/${{matrix.build_type}}/Test.exe -m=a -tt=%NUMBER_OF_PROCESSORS% -ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt
+      run: bin/v143/${{matrix.platform}}/${{matrix.build_type}}/Test.exe -m=a -tt=%ThreadCount% -ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt
