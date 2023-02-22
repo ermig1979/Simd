@@ -27,6 +27,7 @@ jobs:
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ./prj/vs2022
+      shell: cmd
 
     - name: Get ThreadCount
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -36,7 +37,9 @@ jobs:
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: msbuild /m /p:Configuration=${{matrix.build_type}} /p:Platform=${{matrix.platform}} -maxCpuCount:%ThreadCount% ./prj/vs2022/Simd.sln
-      
+      shell: cmd
+     
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: bin/v143/${{matrix.platform}}/${{matrix.build_type}}/Test.exe -m=a -tt=%ThreadCount% -ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt
+      shell: cmd
