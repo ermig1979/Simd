@@ -24,7 +24,7 @@ set PLATFORM=%2
 
 echo. & echo Start build "%CONFIGURATION%|%PLATFORM%":
 
-devenv ..\vs2022\Simd.sln /Build "%CONFIGURATION%|%PLATFORM%"
+msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% -maxCpuCount:%NUMBER_OF_PROCESSORS% ..\vs2022\Simd.sln
 
 if errorlevel 1 ( exit /b 1 ) 
 
