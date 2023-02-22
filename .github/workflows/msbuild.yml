@@ -28,9 +28,8 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ./prj/vs2022
 
-    - name: Set NUMBER_OF_PROCESSORS
-      run: |
-          echo "::set-env name=NUMBER_OF_PROCESSORS::1"
+    - name: Enviroment
+      run: gci env:* | sort-object name
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
