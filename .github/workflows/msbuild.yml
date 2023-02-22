@@ -33,8 +33,8 @@ jobs:
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /m /p:Configuration=${{matrix.build_type}} /p:Platform=${{matrix.platform}} -maxCpuCount:${{env.NUMBER_OF_PROCESSORS}} ./prj/vs2022/Simd.sln
+      run: msbuild /m /p:Configuration=${{matrix.build_type}} /p:Platform=${{matrix.platform}} -maxCpuCount:2 ./prj/vs2022/Simd.sln
      
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: bin/v143/${{matrix.platform}}/${{matrix.build_type}}/Test.exe -m=a -tt=${{env.NUMBER_OF_PROCESSORS}} -ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt
+      run: bin/v143/${{matrix.platform}}/${{matrix.build_type}}/Test.exe -m=a -tt=2 -ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt
