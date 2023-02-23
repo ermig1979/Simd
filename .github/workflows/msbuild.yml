@@ -37,4 +37,4 @@ jobs:
      
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: bin/v143/${{matrix.platform}}/${{matrix.build_type}}/Test.exe -m=a -tt=2
+      run: bin/v143/${{matrix.platform}}/${{matrix.build_type}}/Test.exe "-r=." -m=a -tt=2 "-ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt"
