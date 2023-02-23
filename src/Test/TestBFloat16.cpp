@@ -102,7 +102,7 @@ namespace Test
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx512bw::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
 
-#ifdef SIMD_AVX512BF16_ENABLE
+#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
         if (Simd::Avx512bf16::Enable)
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx512bf16::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
