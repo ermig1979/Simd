@@ -28,6 +28,11 @@
 #include "Test/TestLog.h"
 #include "Test/TestString.h"
 
+#if defined(_MSC_VER)
+#define NOMINMAX
+#include <windows.h>
+#endif
+
 namespace Test
 {
     typedef bool(*AutoTestPtr)();
@@ -513,7 +518,7 @@ namespace Test
                 _progress = double(i) / double(_groups.size());
                 const Group & group = _groups[i];
                 TEST_LOG_SS(Info, group.name << "AutoTest is started :");
-                bool result = group.autoTest();
+                bool result = RunGroup(group);
                 if (result)
                 {
                     TEST_LOG_SS(Info, group.name << "AutoTest is finished successfully." << std::endl);
@@ -526,6 +531,23 @@ namespace Test
                 }
             }
             _progress = 1.0;
+        }
+
+    private:
+        static bool RunGroup(const Group & group)
+        {
+#if defined(_MSC_VER)
+            __try
+            {
+                return group.autoTest();
+            }
+            __except (EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
+#else
+            return group.autoTest();
+#endif
         }
     };
     volatile bool Task::s_stopped = false;
@@ -585,9 +607,7 @@ namespace Test
                 }
                 else if (arg.find("-tt=") == 0)
                 {
-#if defined(NDEBUG)
                     testThreads = Simd::Min(FromString<size_t>(arg.substr(4, arg.size() - 4)), (size_t)std::thread::hardware_concurrency());
-#endif
                 }
                 else if (arg.find("-tr=") == 0)
                 {
