@@ -114,6 +114,14 @@ namespace Simd
             _mm512_storeu_ps(buffer, value);
             Simd::Log<float>(buffer, F, name);
         }
+
+        template<class T> SIMD_INLINE void Log(const __m512i& value, const std::string& name)
+        {
+            const size_t n = sizeof(__m512i) / sizeof(T);
+            T buffer[n];
+            _mm512_storeu_si512((__m512i*)buffer, value);
+            Simd::Log<T>(buffer, n, name);
+        }
     }
 #endif
 

@@ -28,6 +28,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdLog.h"
 
 #include "Simd/SimdPoint.hpp"
 
@@ -119,7 +120,7 @@ namespace Simd
             {
                 __mmask16 mask = TailMask16(count - count16);
                 __m512i _offs = _mm512_maskz_loadu_epi32(mask, offset + i);
-                __m512i _dst = _mm512_mask_i32gather_epi32(_offs, mask, _offs, src, 1);
+                __m512i _dst = _mm512_mask_i32gather_epi32(_mm512_setzero_si512(), mask, _offs, src, 1);
                 _dst = _mm512_permutexvar_epi32(PERMUTE, _mm512_shuffle_epi8(_dst, SHUFFLE));
                 _mm_mask_storeu_epi8(dst, mask, _mm512_castsi512_si128(_dst));
             }
@@ -145,7 +146,7 @@ namespace Simd
             {
                 __mmask16 mask = TailMask16(count - count16);
                 __m512i _offs = _mm512_maskz_loadu_epi32(mask, offset + i);
-                __m512i _dst = _mm512_mask_i32gather_epi32(_offs, mask, _offs, src, 1);
+                __m512i _dst = _mm512_mask_i32gather_epi32(_mm512_setzero_si512(), mask, _offs, src, 1);
                 _dst = _mm512_permutexvar_epi64(PERMUTE, _mm512_shuffle_epi8(_dst, SHUFFLE));
                 _mm256_mask_storeu_epi16(dst, mask, _mm512_castsi512_si256(_dst));
             }
@@ -172,7 +173,7 @@ namespace Simd
                 __mmask16 srcMask = TailMask16(count - count16);
                 __mmask64 dstMask = TailMask64((count - count16) * 3);
                 __m512i _offs = _mm512_maskz_loadu_epi32(srcMask, offset + i);
-                __m512i _dst = _mm512_mask_i32gather_epi32(_offs, srcMask, _offs, src, 1);
+                __m512i _dst = _mm512_mask_i32gather_epi32(_mm512_setzero_si512(), srcMask, _offs, src, 1);
                 _dst = _mm512_permutexvar_epi32(PERMUTE, _mm512_shuffle_epi8(_dst, SHUFFLE));
                 _mm512_mask_storeu_epi8(dst, dstMask, _dst);
             }
@@ -191,7 +192,7 @@ namespace Simd
             {
                 __mmask16 mask = TailMask16(count - count16);
                 __m512i _offs = _mm512_maskz_loadu_epi32(mask, offset + i);
-                __m512i _dst = _mm512_mask_i32gather_epi32(_offs, mask, _offs, src, 1);
+                __m512i _dst = _mm512_mask_i32gather_epi32(_mm512_setzero_si512(), mask, _offs, src, 1);
                 _mm512_mask_storeu_epi32(dst, mask, _dst);
             }
         }
@@ -432,9 +433,9 @@ namespace Simd
             {
                 __mmask16 mask = __mmask16(-1) >> (16 + count16 - count);
                 __m512i _offs = _mm512_maskz_loadu_epi32(mask, offset + i);
-                __m512i _dst0 = _mm512_shuffle_epi8(_mm512_mask_i32gather_epi32(_offs, mask, _offs, src0, 1), SHUFFLE);
+                __m512i _dst0 = _mm512_shuffle_epi8(_mm512_mask_i32gather_epi32(_mm512_setzero_si512(), mask, _offs, src0, 1), SHUFFLE);
                 _mm256_mask_storeu_epi16(dst0, mask, _mm512_castsi512_si256(_mm512_permutexvar_epi64(PERMUTE, _dst0)));
-                __m512i _dst1 = _mm512_shuffle_epi8(_mm512_mask_i32gather_epi32(_offs, mask, _offs, src1, 1), SHUFFLE);
+                __m512i _dst1 = _mm512_shuffle_epi8(_mm512_mask_i32gather_epi32(_mm512_setzero_si512(), mask, _offs, src1, 1), SHUFFLE);
                 _mm256_mask_storeu_epi16(dst1, mask, _mm512_castsi512_si256(_mm512_permutexvar_epi64(PERMUTE, _dst1)));
             }
         }
@@ -452,8 +453,8 @@ namespace Simd
             {
                 __mmask16 mask = __mmask16(-1) >> (16 + count16 - count);
                 __m512i _offs = _mm512_maskz_loadu_epi32(mask, offset + i);
-                _mm512_mask_storeu_epi32(dst0, mask, _mm512_mask_i32gather_epi32(_offs, mask, _offs, src0, 1));
-                _mm512_mask_storeu_epi32(dst1, mask, _mm512_mask_i32gather_epi32(_offs, mask, _offs, src1, 1));
+                _mm512_mask_storeu_epi32(dst0, mask, _mm512_mask_i32gather_epi32(_mm512_setzero_si512(), mask, _offs, src0, 1));
+                _mm512_mask_storeu_epi32(dst1, mask, _mm512_mask_i32gather_epi32(_mm512_setzero_si512(), mask, _offs, src1, 1));
             }
         }
 
@@ -470,8 +471,8 @@ namespace Simd
             {
                 __mmask8 mask = __mmask8(-1) >> (8 + count8 - count);
                 __m256i _offs = _mm256_maskz_loadu_epi32(mask, offset + i);
-                _mm512_mask_storeu_epi64(dst0, mask, _mm512_mask_i32gather_epi64(K_ZERO, mask, _offs, src0, 1));
-                _mm512_mask_storeu_epi64(dst1, mask, _mm512_mask_i32gather_epi64(K_ZERO, mask, _offs, src1, 1));
+                _mm512_mask_storeu_epi64(dst0, mask, _mm512_mask_i32gather_epi64(_mm512_setzero_si512(), mask, _offs, src0, 1));
+                _mm512_mask_storeu_epi64(dst1, mask, _mm512_mask_i32gather_epi64(_mm512_setzero_si512(), mask, _offs, src1, 1));
             }
         }
 

@@ -205,8 +205,8 @@ namespace Test
         bool result = true;
 
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
-        std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear};
-        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent};
+        std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear };
+        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
         for (size_t c = 0; c < channel.size(); ++c)
         {
             for (size_t i = 0; i < interp.size(); ++i)
