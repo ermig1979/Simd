@@ -28,8 +28,8 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ./prj/vs2022
 
-    - name: Enviroment
-      run: gci env:* | sort-object name
+    - name: Host properties
+      run: wmic cpu get /format:value
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
