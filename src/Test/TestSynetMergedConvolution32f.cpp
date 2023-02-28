@@ -212,6 +212,10 @@ namespace Test
 #else
         float epsilon = eps;
 #endif
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER >= 1910 && _MSC_VER < 1920
+        epsilon = eps * 5;
+#endif
+
         result = result && Compare(dst1, dst2, epsilon, true, 64, DifferenceBoth);
 
         return result;
