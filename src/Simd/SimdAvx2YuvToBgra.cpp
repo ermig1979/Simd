@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdYuvToBgr.h"
+#include "Simd/SimdSse41.h"
 
 namespace Simd
 {
@@ -82,6 +83,9 @@ namespace Simd
         void Yuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType)
         {
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
+            Sse41::Yuva444pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
+#else
             switch (yuvType)
             {
             case SimdYuvBt601: Yuva444pToBgraV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
@@ -91,6 +95,7 @@ namespace Simd
             default:
                 assert(0);
             }
+#endif
         }
 
         //-----------------------------------------------------------------------------------------
@@ -418,11 +423,15 @@ namespace Simd
         void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
         {
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
+            Sse41::Yuv444pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+#else
             if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
                 && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
                 Yuv444pToBgraV2<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
             else
                 Yuv444pToBgraV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+#endif
         }
 
         //-----------------------------------------------------------------------------------------
@@ -492,11 +501,15 @@ namespace Simd
         void Yuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
         {
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
+            Sse41::Yuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+#else
             if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
                 && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
                 Yuv420pToBgraV2<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
             else
                 Yuv420pToBgraV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+#endif
         }
     }
 #endif// SIMD_AVX2_ENABLE

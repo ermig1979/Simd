@@ -63,8 +63,8 @@
  <li>Wrong assert in AVX-512BW optimization of function BgraToYuv420pV2.</li>
  <li>MSVS-2017 compiler errors in AVX-512BW optimizations of function AlphaBlendingBgraToYuv420p.</li>
  <li>MSVS-2017 compiler errors in AVX-512BW optimizations of WarpAffine engine.</li>
- <li>MSVS-2015 compiler errors in file SimdFmadd.h (x86).</li>
- <li>MSVS-2015 compiler errors in SSE4.1 and AVX2 optimizations of WarpAffine engine (x86).</li>
+ <li>MSVS-2015 compiler errors in file SimdFmadd.h (Win32).</li>
+ <li>MSVS-2015 compiler errors in SSE4.1 and AVX2 optimizations of WarpAffine engine (Win32).</li>
  <li>Crash in AVX2 optimizations of function CosineDistance16f.</li>
  <li>Crash in SSE4.1, AVX2, AVX-512BW, NEON optimizations of function HogLiteResizeFeatures.</li>
  <li>Clang compiler warnings in file SimdBaseRecursiveBilateralFilter.cpp.</li>
@@ -72,6 +72,11 @@
  <li>Clang linker error in method Motion::Detector::GenerateSearchRegionScanlines.</li>
  <li>Crashes in AVX-512BW optimizations of WarpAffine engine (MSVS-2022, Release).</li>
  <li>Internal compiler error in file SimdAvx512bwSynetConvolution32f.cpp (MSVS-2017, Release).</li>
+ <li>Error in SSE4.1, AVX2 optimizations of function BgraToYuv444pV2 (MSVS-2015, Release, Win32).</li>
+ <li>Error in SSE4.1, AVX2 optimizations of function BgraToYuv420pV2 (MSVS-2015, Release, Win32).</li>
+ <li>Error in AVX2 optimizations of function Yuva444pToBgraV2 (MSVS-2015, Release, Win32).</li>
+ <li>Error in AVX2 optimizations of function Yuv444pToBgraV2 (MSVS-2015, Release, Win32).</li>
+ <li>Error in AVX2 optimizations of function Yuv420pToBgraV2 (MSVS-2015, Release, Win32).</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -90,8 +95,8 @@
  <li>Error in test SynetMergedConvolution8iForwardAutoTest.</li>
  <li>Error in function MakeAutoTests (multithreaded environment).</li>
  <li>Error in test Float32ToBFloat16AutoTest.</li>
- <li>Error in test SynetConvert32fTo8uAutoTest (MSVS-2017, Release, x86).</li>
- <li>Error in test SynetMergedConvolution32fForwardAutoTest (MSVS-2017, Release, x86).</li>
+ <li>Error in test SynetConvert32fTo8uAutoTest (MSVS-2017, Release, Win32).</li>
+ <li>Error in test SynetMergedConvolution32fForwardAutoTest (MSVS-2017, Release, Win32).</li>
 </ul>
 
 <h4>Infrastructure</h4>

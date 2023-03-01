@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdYuvToBgr.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -387,6 +388,9 @@ namespace Simd
         void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
         {
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
+            Base::BgraToYuv444pV2(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+#else
             switch (yuvType)
             {
             case SimdYuvBt601: BgraToYuv444pV2<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
@@ -396,6 +400,7 @@ namespace Simd
             default:
                 assert(0);
             }
+#endif
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -467,6 +472,9 @@ namespace Simd
         void BgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
             uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
         {
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
+            Base::BgraToYuv420pV2(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+#else
             switch (yuvType)
             {
             case SimdYuvBt601: BgraToYuv420pV2<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
@@ -476,6 +484,7 @@ namespace Simd
             default:
                 assert(0);
             }
+#endif
         }
     }
 #endif
