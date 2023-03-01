@@ -28,6 +28,7 @@
 #include "Simd/SimdAlphaBlending.h"
 #include "Simd/SimdUnpack.h"
 #include "Simd/SimdYuvToBgr.h"
+#include "Simd/SimdSse41.h"
 
 namespace Simd
 {
@@ -332,6 +333,9 @@ namespace Simd
         void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
         {
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
+            Sse41::AlphaBlendingBgraToYuv420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+#else
             switch (yuvType)
             {
             case SimdYuvBt601: AlphaBlendingBgraToYuv420p<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
@@ -341,6 +345,7 @@ namespace Simd
             default:
                 assert(0);
             }
+#endif
         }
 
         //-------------------------------------------------------------------------------------------------

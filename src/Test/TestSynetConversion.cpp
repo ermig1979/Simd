@@ -82,7 +82,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, shift, dst2, comp));
 
-#if (defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)) && !(defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER >= 1910 && _MSC_VER < 1920)
+#if (defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)) && !(defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER >= 1900 && _MSC_VER < 1920)
         int differenceMax = (Simd::Base::FmaAvoid(comp) ? 0 : 1);
 #else
         int differenceMax = 1;

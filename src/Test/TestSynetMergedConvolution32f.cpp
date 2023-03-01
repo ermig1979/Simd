@@ -212,7 +212,7 @@ namespace Test
 #else
         float epsilon = eps;
 #endif
-#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER >= 1910 && _MSC_VER < 1920
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER >= 1900 && _MSC_VER < 1920
         epsilon = eps * 5;
 #endif
 
