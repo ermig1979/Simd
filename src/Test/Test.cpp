@@ -43,10 +43,12 @@ namespace Test
         String name;
         AutoTestPtr autoTest;
         SpecialTestPtr specialTest;
+        double time;
         Group(const String & n, const AutoTestPtr & a, const SpecialTestPtr & s)
             : name(n)
             , autoTest(a)
             , specialTest(s)
+            , time(0.0)
         {
         }
     };
@@ -484,14 +486,16 @@ namespace Test
 
     class Task
     {
-        Groups _groups;
+        Group * _groups;
+        size_t _size;
         std::thread _thread;
         volatile double _progress;
     public:
         static volatile bool s_stopped;
 
-        Task(Groups::const_iterator begin, Groups::const_iterator end, bool start)
-            : _groups(begin, end)
+        Task(Group * groups, size_t size, bool start)
+            : _groups(groups)
+            , _size(size)
             , _progress(0)
         {
             if (start)
@@ -513,15 +517,17 @@ namespace Test
 
         void Run()
         {
-            for (size_t i = 0; i < _groups.size() && !s_stopped; ++i)
+            for (size_t i = 0; i < _size && !s_stopped; ++i)
             {
-                _progress = double(i) / double(_groups.size());
-                const Group & group = _groups[i];
+                _progress = double(i) / double(_size);
+                Group & group = _groups[i];
                 TEST_LOG_SS(Info, group.name << "AutoTest is started :");
+                group.time = GetTime();
                 bool result = RunGroup(group);
+                group.time = GetTime() - group.time;
                 if (result)
                 {
-                    TEST_LOG_SS(Info, group.name << "AutoTest is finished successfully." << std::endl);
+                    TEST_LOG_SS(Info, group.name << "AutoTest is finished successfully in " << ToString(group.time, 1, false) << " s." << std::endl);
                 }
                 else
                 {
@@ -573,7 +579,7 @@ namespace Test
 
         String text, html;
 
-        size_t testThreads, workThreads, testRepeats;
+        size_t testThreads, workThreads, testRepeats, testStatistics;
 
         bool printAlign, printInternal;
 
@@ -583,6 +589,7 @@ namespace Test
             , testThreads(0)
             , testRepeats(1)
             , workThreads(1)
+            , testStatistics(0)
             , printAlign(false)
             , printInternal(true)
         {
@@ -612,6 +619,10 @@ namespace Test
                 else if (arg.find("-tr=") == 0)
                 {
                     testRepeats = FromString<size_t>(arg.substr(4, arg.size() - 4));
+                }
+                else if (arg.find("-ts=") == 0)
+                {
+                    testStatistics = FromString<int>(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-fi=") == 0)
                 {
@@ -702,7 +713,7 @@ namespace Test
         }
     };
 
-    int MakeAutoTests(const Groups & groups, const Options & options)
+    int MakeAutoTests(Groups & groups, const Options & options)
     {
         if (options.testThreads > 0)
         {
@@ -719,7 +730,7 @@ namespace Test
             {
                 size_t beg = i * block;
                 size_t end = std::min(total, beg + block);
-                tasks.push_back(Test::TaskPtr(new Test::Task(groups.begin() + beg, groups.begin() + end, true)));
+                tasks.push_back(Test::TaskPtr(new Test::Task(groups.data() + beg, end - beg, true)));
             }
 
             std::cout << std::endl;
@@ -743,7 +754,7 @@ namespace Test
         }
         else
         {
-            Test::Task task(groups.begin(), groups.end(), false);
+            Test::Task task(groups.data(), groups.size(), false);
             task.Run();
         }
 
@@ -760,15 +771,28 @@ namespace Test
         if (!options.html.empty())
             Test::PerformanceMeasurerStorage::s_storage.HtmlReport(options.html, options.printAlign);
 #endif
+
+        if (options.testStatistics)
+        {
+            std::sort(groups.begin(), groups.end(), [](const Group& a, const Group& b) { return a.time > b.time; });
+            for (size_t i = 0; i < groups.size(); ++i)
+            {
+                if(groups[i].time >= options.testStatistics)
+                    TEST_LOG_SS(Info, "Test " << groups[i].name << " elapsed " << ToString(groups[i].time, 1, false) << " s.");
+            }
+        }
+
         return 0;
     }
 
-    int MakeSpecialTests(const Groups & groups, const Options & options)
+    int MakeSpecialTests(Groups & groups, const Options & options)
     {
-        for (const Test::Group & group : groups)
+        for (Test::Group & group : groups)
         {
             TEST_LOG_SS(Info, group.name << "SpecialTest is started :");
+            group.time = GetTime();
             bool result = group.specialTest();
+            group.time = GetTime() - group.time;
             TEST_LOG_SS(Info, group.name << "SpecialTest is finished " << (result ? "successfully." : "with errors!") << std::endl);
             if (!result)
             {
@@ -821,6 +845,7 @@ namespace Test
         std::cout << "    -ri=city.jpg  a name of real image used in some tests." << std::endl << std::endl;
         std::cout << "                  The image have to be placed in ./data/image directory." << std::endl << std::endl;
         std::cout << "    -tr=2         a number of test execution repeats." << std::endl;
+        std::cout << "    -ts=1         to print statistics of time of tests execution." << std::endl;
         return 0;
     }
 

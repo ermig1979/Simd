@@ -204,4 +204,5 @@ Also you can use parameters:
 * `-lc=1` to litter CPU cache between test runs.
 * `-ri=city.jpg` a name of real image used in some tests. The image have to be placed in `./data/image` directory.
 * `-tr=2` a number of test execution repeats.
+* `-ts=1` to print statistics of time of tests execution.
 

@@ -37,7 +37,7 @@ jobs:
      
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: bin/v143/${{matrix.platform}}/${{matrix.build_type}}/Test.exe "-r=." -m=a -tt=2 "-ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt"
+      run: bin/v143/${{matrix.platform}}/${{matrix.build_type}}/Test.exe "-r=." -m=a -tt=2 "-ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt" -ts=10
 
   build_and_test_vs2019:
     runs-on: windows-latest
@@ -66,7 +66,7 @@ jobs:
      
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: bin/v142/${{matrix.platform}}/${{matrix.build_type}}/Test.exe "-r=." -m=a -tt=2 "-ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt"
+      run: bin/v142/${{matrix.platform}}/${{matrix.build_type}}/Test.exe "-r=." -m=a -tt=2 "-ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt" -ts=10
 
   build_and_test_vs2017:
     runs-on: windows-2019
@@ -101,7 +101,7 @@ jobs:
      
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: bin/v141/${{matrix.platform}}/${{matrix.build_type}}/Test.exe "-r=." -m=a -tt=2 "-ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt"
+      run: bin/v141/${{matrix.platform}}/${{matrix.build_type}}/Test.exe "-r=." -m=a -tt=2 "-ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt" -ts=10
 
 
   build_and_test_vs2015:
@@ -137,4 +137,4 @@ jobs:
      
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: bin/v140/${{matrix.platform}}/${{matrix.build_type}}/Test.exe "-r=." -m=a -tt=2 "-ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt"
+      run: bin/v140/${{matrix.platform}}/${{matrix.build_type}}/Test.exe "-r=." -m=a -tt=2 "-ot=log_${{matrix.platform}}_${{matrix.build_type}}.txt" -ts=10

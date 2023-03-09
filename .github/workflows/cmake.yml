@@ -28,7 +28,7 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt"
+      run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
 
   build_arm_cross:
     runs-on: ubuntu-latest
@@ -120,4 +120,4 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt"
+      run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
