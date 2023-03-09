@@ -110,6 +110,8 @@ namespace Test
         return result;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncHS
@@ -192,6 +194,8 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     struct FuncS
     {
@@ -304,302 +308,30 @@ namespace Test
         return result;
     }
 
+    //-------------------------------------------------------------------------------------------------
+ 
 //#define TEST_COS_DIST_LONG_TEST
 
     typedef std::vector<uint16_t*> F16Ptrs;
 
-    struct FuncCDA
+    SIMD_INLINE void InitRandomF16(View& f16, size_t width, size_t height, float lo = -1.0f, float hi = 1.0f, int gap = 0, F16Ptrs *f16p = NULL)
     {
-        typedef void(*FuncPtr)(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances);
-
-        FuncPtr func;
-        String desc;
-
-        FuncCDA(const FuncPtr & f, const String & d) : func(f), desc(d) {}
-
-        void Update(size_t M, size_t N, size_t K)
+        View f32(width, height, View::Float, NULL, 1);
+        FillRandom32f(f32, lo, hi);
+        f16.Recreate(width + gap, height, View::Int16, NULL, 1);
+        if (f16p)
+            f16p->resize(height);
+        for (size_t r = 0; r < height; r++)
         {
-            desc = desc + "[" + ToString(M) + "-" + ToString(N) + "-" + ToString(K) + "]";
+            uint16_t* dst = f16.Row<uint16_t>(r) + Random(gap);
+            ::SimdFloat32ToFloat16(f32.Row<float>(r), width, dst);
+            if(f16p)
+                f16p->at(r) = dst;
         }
-
-        void Call(size_t K, const F16Ptrs & A, const F16Ptrs & B, Tensor32f & D) const
-        {
-            TEST_PERFORMANCE_TEST(desc);
-            func(A.size(), B.size(), K, A.data(), B.data(), D.Data());
-        }
-    };
-
-#define FUNC_CDA(function) FuncCDA(function, #function)
-
-    bool CosineDistancesMxNa16fAutoTest(size_t M, size_t N, size_t K, float eps, FuncCDA f1, FuncCDA f2)
-    {
-        bool result = true;
-
-        f1.Update(M, N, K);
-        f2.Update(M, N, K);
-
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
-
-        const int gap = 1024;
-        View Af(K, M, View::Float, NULL, TEST_ALIGN(K));
-        FillRandom32f(Af, -1.0, 1.0);
-        View Ai(K + gap, M, View::Int16, NULL, TEST_ALIGN(K));
-        F16Ptrs A(M);
-        for (size_t i = 0; i < M; i++)
-        {
-            A[i] = Ai.Row<uint16_t>(i) + Random(gap);
-            ::SimdFloat32ToFloat16(Af.Row<float>(i), K, A[i]);
-        }
-
-        View Bf(K, N, View::Float, NULL, TEST_ALIGN(K));
-        FillRandom32f(Bf, -1.0, 1.0);
-        View Bi(K + gap, N, View::Int16, NULL, TEST_ALIGN(K));
-        F16Ptrs B(N);
-        for (size_t j = 0; j < N; j++)
-        {
-            B[j] = Bi.Row<uint16_t>(j) + Random(gap);
-            ::SimdFloat32ToFloat16(Bf.Row<float>(j), K, B[j]);
-        }
-
-        Tensor32f D1({ M, N, });
-        Tensor32f D2({ M, N, });
-
-        TEST_ALIGN(SIMD_ALIGN);
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(K, A, B, D1));
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(K, A, B, D2));
-
-        result = Compare(D1, D2, eps, true, 32, DifferenceAbsolute);
-
-        return result;
+        TEST_ALIGN(width);
     }
 
-    bool CosineDistancesMxNa16fAutoTest(float eps, const FuncCDA & f1, const FuncCDA & f2)
-    {
-        bool result = true;
-
-        result = result && CosineDistancesMxNa16fAutoTest(128, 1024, 1024, eps, f1, f2);
-        result = result && CosineDistancesMxNa16fAutoTest(1024, 128, 1024, eps, f1, f2);
-        result = result && CosineDistancesMxNa16fAutoTest(1024, 129, 1024, eps, f1, f2);
-        result = result && CosineDistancesMxNa16fAutoTest(1023, 128, 1024, eps, f1, f2);
-        result = result && CosineDistancesMxNa16fAutoTest(1023, 129, 1023, eps, f1, f2);
-
-#if !defined(SIMD_NEON_ENABLE) && defined(TEST_COS_DIST_LONG_TEST)
-        result = result && CosineDistancesMxNa16fAutoTest(10*1024, 128, 1024, eps, f1, f2);
-        result = result && CosineDistancesMxNa16fAutoTest(1024, 10*128, 1024, eps, f1, f2);
-#endif
-
-        return result;
-    }
-
-    bool CosineDistancesMxNa16fAutoTest()
-    {
-        bool result = true;
-
-        result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Base::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
-            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx2::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
-#endif
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
-            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx512bw::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
-#endif
-
-#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
-        if (Simd::Neon::Enable)
-            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Neon::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
-#endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    struct FuncVNP
-    {
-        typedef void(*FuncPtr)(size_t N, size_t K, const uint16_t* A, float* norms);
-
-        FuncPtr func;
-        String desc;
-
-        FuncVNP(const FuncPtr& f, const String& d) : func(f), desc(d) {}
-
-        void Update(size_t N, size_t K)
-        {
-            desc = desc + "[" + ToString(N) + "-" + ToString(K) + "]";
-        }
-
-        void Call(const View& A, Tensor32f& norms) const
-        {
-            TEST_PERFORMANCE_TEST(desc);
-            func(A.height, A.width, (uint16_t*)A.data, norms.Data());
-        }
-    };
-
-#define FUNC_VNP(function) FuncVNP(function, #function)
-
-    bool VectorNormNp16fAutoTest(size_t N, size_t K, float eps, FuncVNP f1, FuncVNP f2)
-    {
-        bool result = true;
-
-        f1.Update(N, K);
-        f2.Update(N, K);
-
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
-
-        View Af(K, N, View::Float, NULL, TEST_ALIGN(K));
-        FillRandom32f(Af, -1.0, 1.0);
-        View Ai(K, N, View::Int16, NULL, TEST_ALIGN(K));
-        SimdFloat32ToFloat16(Af.Row<float>(0), K * N, Ai.Row<uint16_t>(0));
-
-        Tensor32f norms1({ N });
-        Tensor32f norms2({ N });
-
-        TEST_ALIGN(SIMD_ALIGN);
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(Ai, norms1));
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(Ai, norms2));
-
-        result = Compare(norms1, norms2, eps, true, 32, DifferenceAbsolute);
-
-        return result;
-    }
-
-    bool VectorNormNp16fAutoTest(float eps, const FuncVNP& f1, const FuncVNP& f2)
-    {
-        bool result = true;
-
-        result = result && VectorNormNp16fAutoTest(1, 1024, eps, f1, f2);
-        result = result && VectorNormNp16fAutoTest(128, 512, eps, f1, f2);
-        result = result && VectorNormNp16fAutoTest(129, 513, eps, f1, f2);
-
-        return result;
-    }
-
-    bool VectorNormNp16fAutoTest()
-    {
-        bool result = true;
-
-        result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Base::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
-            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Avx2::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
-#endif
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
-            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Avx512bw::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
-#endif
-
-#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
-        if (Simd::Neon::Enable)
-            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Neon::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
-#endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    struct FuncVNA
-    {
-        typedef void(*FuncPtr)(size_t N, size_t K, const uint16_t* const* A, float* norms);
-
-        FuncPtr func;
-        String desc;
-
-        FuncVNA(const FuncPtr& f, const String& d) : func(f), desc(d) {}
-
-        void Update(size_t N, size_t K)
-        {
-            desc = desc + "[" + ToString(N) + "-" + ToString(K) + "]";
-        }
-
-        void Call(size_t K, const F16Ptrs& A, Tensor32f& norms) const
-        {
-            TEST_PERFORMANCE_TEST(desc);
-            func(A.size(), K, A.data(), norms.Data());
-        }
-    };
-
-#define FUNC_VNA(function) FuncVNA(function, #function)
-
-    bool VectorNormNa16fAutoTest(size_t N, size_t K, float eps, FuncVNA f1, FuncVNA f2)
-    {
-        bool result = true;
-
-        f1.Update(N, K);
-        f2.Update(N, K);
-
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
-
-        const int scattering = 1;
-        View Af(K, N, View::Float, NULL, TEST_ALIGN(K));
-        FillRandom32f(Af, -1.0, 1.0);
-        View Ai(K * scattering, N, View::Int16, NULL, TEST_ALIGN(K));
-        F16Ptrs A(N);
-        for (size_t i = 0; i < N; i++)
-        {
-            ::SimdFloat32ToFloat16(Af.Row<float>(i), K, Ai.Row<uint16_t>(i));
-            A[i] = Ai.Row<uint16_t>(i);
-        }
-
-        Tensor32f norms1({ N, });
-        Tensor32f norms2({ N, });
-
-        TEST_ALIGN(SIMD_ALIGN);
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(K, A, norms1));
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(K, A, norms2));
-
-        result = Compare(norms1, norms2, eps, true, 32, DifferenceAbsolute);
-
-        return result;
-    }
-
-    bool VectorNormNa16fAutoTest(float eps, const FuncVNA& f1, const FuncVNA& f2)
-    {
-        bool result = true;
-
-        result = result && VectorNormNa16fAutoTest(1, 1024, eps, f1, f2);
-        result = result && VectorNormNa16fAutoTest(128, 512, eps, f1, f2);
-        result = result && VectorNormNa16fAutoTest(129, 513, eps, f1, f2);
-
-        return result;
-    }
-
-    bool VectorNormNa16fAutoTest()
-    {
-        bool result = true;
-
-        result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Base::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
-            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Avx2::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
-#endif
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
-            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Avx512bw::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
-#endif
-
-#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
-        if (Simd::Neon::Enable)
-            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Neon::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
-#endif
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     struct FuncCDP
     {
@@ -633,15 +365,9 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
 
-        View Af(K, M, View::Float, NULL, TEST_ALIGN(K));
-        FillRandom32f(Af, -1.0, 1.0);
-        View Ai(K, M, View::Int16, NULL, TEST_ALIGN(K));
-        ::SimdFloat32ToFloat16((float*)Af.data, K * M, (uint16_t*)Ai.data);
-
-        View Bf(K, N, View::Float, NULL, TEST_ALIGN(K));
-        FillRandom32f(Bf, -1.0, 1.0);
-        View Bi(K, N, View::Int16, NULL, TEST_ALIGN(K));
-        ::SimdFloat32ToFloat16((float*)Bf.data, K * N, (uint16_t*)Bi.data);
+        View Ai, Bi;
+        InitRandomF16(Ai, K, M, -1.0f, 1.0f, 0, NULL);
+        InitRandomF16(Bi, K, N, -1.0f, 1.0f, 0, NULL);
 
         Tensor32f D1({ M, N, });
         Tensor32f D2({ M, N, });
@@ -699,7 +425,275 @@ namespace Test
         return result;
     }
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    struct FuncCDA
+    {
+        typedef void(*FuncPtr)(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances);
+
+        FuncPtr func;
+        String desc;
+
+        FuncCDA(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+        void Update(size_t M, size_t N, size_t K)
+        {
+            desc = desc + "[" + ToString(M) + "-" + ToString(N) + "-" + ToString(K) + "]";
+        }
+
+        void Call(size_t K, const F16Ptrs & A, const F16Ptrs & B, Tensor32f & D) const
+        {
+            TEST_PERFORMANCE_TEST(desc);
+            func(A.size(), B.size(), K, A.data(), B.data(), D.Data());
+        }
+    };
+
+#define FUNC_CDA(function) FuncCDA(function, #function)
+
+    bool CosineDistancesMxNa16fAutoTest(size_t M, size_t N, size_t K, float eps, FuncCDA f1, FuncCDA f2)
+    {
+        bool result = true;
+
+        f1.Update(M, N, K);
+        f2.Update(M, N, K);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        View Ai, Bi;
+        F16Ptrs A, B;
+        InitRandomF16(Ai, K, M, -1.0f, 1.0f, 1024, &A);
+        InitRandomF16(Bi, K, N, -1.0f, 1.0f, 1024, &B);
+
+        Tensor32f D1({ M, N, });
+        Tensor32f D2({ M, N, });
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(K, A, B, D1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(K, A, B, D2));
+
+        result = Compare(D1, D2, eps, true, 32, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool CosineDistancesMxNa16fAutoTest(float eps, const FuncCDA & f1, const FuncCDA & f2)
+    {
+        bool result = true;
+
+        result = result && CosineDistancesMxNa16fAutoTest(128, 1024, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNa16fAutoTest(1024, 128, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNa16fAutoTest(1024, 129, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNa16fAutoTest(1023, 128, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNa16fAutoTest(1023, 129, 1023, eps, f1, f2);
+
+#if !defined(SIMD_NEON_ENABLE) && defined(TEST_COS_DIST_LONG_TEST)
+        result = result && CosineDistancesMxNa16fAutoTest(10*1024, 128, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNa16fAutoTest(1024, 10*128, 1024, eps, f1, f2);
+#endif
+
+        return result;
+    }
+
+    bool CosineDistancesMxNa16fAutoTest()
+    {
+        bool result = true;
+
+        result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Base::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx2::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx512bw::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+#endif
+
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Neon::Enable)
+            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Neon::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    struct FuncVNP
+    {
+        typedef void(*FuncPtr)(size_t N, size_t K, const uint16_t* A, float* norms);
+
+        FuncPtr func;
+        String desc;
+
+        FuncVNP(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+        void Update(size_t N, size_t K)
+        {
+            desc = desc + "[" + ToString(N) + "-" + ToString(K) + "]";
+        }
+
+        void Call(const View& A, Tensor32f& norms) const
+        {
+            TEST_PERFORMANCE_TEST(desc);
+            func(A.height, A.width, (uint16_t*)A.data, norms.Data());
+        }
+    };
+
+#define FUNC_VNP(function) FuncVNP(function, #function)
+
+    bool VectorNormNp16fAutoTest(size_t N, size_t K, float eps, FuncVNP f1, FuncVNP f2)
+    {
+        bool result = true;
+
+        f1.Update(N, K);
+        f2.Update(N, K);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        View Ai;
+        InitRandomF16(Ai, K, N, -1.0f, 1.0f, 0, NULL);
+
+        Tensor32f norms1({ N });
+        Tensor32f norms2({ N });
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(Ai, norms1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(Ai, norms2));
+
+        result = Compare(norms1, norms2, eps, true, 32, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool VectorNormNp16fAutoTest(float eps, const FuncVNP& f1, const FuncVNP& f2)
+    {
+        bool result = true;
+
+        result = result && VectorNormNp16fAutoTest(1, 1024, eps, f1, f2);
+        result = result && VectorNormNp16fAutoTest(128, 512, eps, f1, f2);
+        result = result && VectorNormNp16fAutoTest(129, 513, eps, f1, f2);
+
+        return result;
+    }
+
+    bool VectorNormNp16fAutoTest()
+    {
+        bool result = true;
+
+        result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Base::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Avx2::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Avx512bw::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
+#endif
+
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Neon::Enable)
+            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Neon::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    struct FuncVNA
+    {
+        typedef void(*FuncPtr)(size_t N, size_t K, const uint16_t* const* A, float* norms);
+
+        FuncPtr func;
+        String desc;
+
+        FuncVNA(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+        void Update(size_t N, size_t K)
+        {
+            desc = desc + "[" + ToString(N) + "-" + ToString(K) + "]";
+        }
+
+        void Call(size_t K, const F16Ptrs& A, Tensor32f& norms) const
+        {
+            TEST_PERFORMANCE_TEST(desc);
+            func(A.size(), K, A.data(), norms.Data());
+        }
+    };
+
+#define FUNC_VNA(function) FuncVNA(function, #function)
+
+    bool VectorNormNa16fAutoTest(size_t N, size_t K, float eps, FuncVNA f1, FuncVNA f2)
+    {
+        bool result = true;
+
+        f1.Update(N, K);
+        f2.Update(N, K);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        View Ai;
+        F16Ptrs A;
+        InitRandomF16(Ai, K, N, -1.0f, 1.0f, 1024, &A);
+
+        Tensor32f norms1({ N, });
+        Tensor32f norms2({ N, });
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(K, A, norms1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(K, A, norms2));
+
+        result = Compare(norms1, norms2, eps, true, 32, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool VectorNormNa16fAutoTest(float eps, const FuncVNA& f1, const FuncVNA& f2)
+    {
+        bool result = true;
+
+        result = result && VectorNormNa16fAutoTest(1, 1024, eps, f1, f2);
+        result = result && VectorNormNa16fAutoTest(128, 512, eps, f1, f2);
+        result = result && VectorNormNa16fAutoTest(129, 513, eps, f1, f2);
+
+        return result;
+    }
+
+    bool VectorNormNa16fAutoTest()
+    {
+        bool result = true;
+
+        result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Base::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Avx2::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Avx512bw::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
+#endif
+
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Neon::Enable)
+            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Neon::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
 
     bool CosineDistancesMxNp16fSpecialTest()
     {
