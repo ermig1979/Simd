@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -242,23 +242,12 @@ namespace Simd
             }
         }
 
-        template<int N> void SynetLrnLayerCrossChannelsNchwXc(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst)
-        {
-            assert(0);
-        }
-
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format)
         {
             if (format == SimdTensorFormatNchw)
                 SynetLrnLayerCrossChannelsNchw(src, half, channels, spatial, k, dst);
             else if (format == SimdTensorFormatNhwc)
                 SynetLrnLayerCrossChannelsNhwc(src, half, channels, spatial, k, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetLrnLayerCrossChannelsNchwXc<4>(src, half, channels, spatial, k, dst);
-            else if (format == SimdTensorFormatNchw8c)
-                SynetLrnLayerCrossChannelsNchwXc<8>(src, half, channels, spatial, k, dst);
-            else if (format == SimdTensorFormatNchw16c)
-                SynetLrnLayerCrossChannelsNchwXc<16>(src, half, channels, spatial, k, dst);
             else
                 assert(0);
         }

@@ -6418,10 +6418,10 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)).
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is eqial to channels.
         \param [in] channels - a number of channels in the image tensor.
         \param [in] spatial - a spatial size of image tensor.
-        \param [in, out] dst - a pointer to cumulative 32-bit image tensor. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
+        \param [in, out] dst - a pointer to cumulative 32-bit image tensor. The size of the array is equal to channels * spatial.
         \param [in] format - a format of image tensor.
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
@@ -7205,12 +7205,12 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 32-bit float array with input image tensor. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
+        \param [in] src - a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * spatial.
         \param [in] half - a local normalization half size.
         \param [in] channels - a number of channels in the (input/output) image tensor
         \param [in] spatial - a spatial size of (input/output) image tensor.
         \param [in] k - a pointer to the 32-bit float array with 3 coefficients (see algorithm details). 
-        \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
+        \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * spatial.
         \param [in] format - a format of (input/output) image tensor.
     */
     SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);

@@ -148,7 +148,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -180,9 +180,6 @@ namespace Test
     {
         bool result = true;
 
-        if (format >= SimdTensorFormatNchw4c)
-            return result;
-
         f1.Update(format);
         f2.Update(format);
 
@@ -206,17 +203,14 @@ namespace Test
         return result;
     }
 
-    bool SynetLrnLayerCrossChannelsAutoTest(int mask, const FuncLLCC & f1, const FuncLLCC & f2)
+    bool SynetLrnLayerCrossChannelsAutoTest(const FuncLLCC & f1, const FuncLLCC & f2)
     {
         bool result = true;
 
-        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNchw16c && result; format = (SimdTensorFormatType)((int)format + 1))
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNhwc && result; format = (SimdTensorFormatType)((int)format + 1))
         {
-            if (SimdSynetTensorAlignment(format)&mask)
-            {
-                result = result && SynetLrnLayerCrossChannelsAutoTest(2, H, W, format, f1, f2);
-                result = result && SynetLrnLayerCrossChannelsAutoTest(2, H - O, W + O, format, f1, f2);
-            }
+            result = result && SynetLrnLayerCrossChannelsAutoTest(2, H, W, format, f1, f2);
+            result = result && SynetLrnLayerCrossChannelsAutoTest(2, H - O, W + O, format, f1, f2);
         }
 
         return result;
@@ -226,32 +220,32 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_ANY, FUNC_LLCC(Simd::Base::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+        result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Base::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_128, FUNC_LLCC(Simd::Sse41::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Sse41::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_256, FUNC_LLCC(Simd::Avx2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Avx2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_512, FUNC_LLCC(Simd::Avx512bw::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Avx512bw::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_128, FUNC_LLCC(Simd::Neon::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Neon::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -361,7 +355,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -457,7 +451,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     SIMD_INLINE String ToString(SimdSynetUnaryOperation32fType type)
     {

@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -785,7 +785,7 @@ namespace Simd
                     SynetLrnLayerCrossChannelsNhwc2h<false>(src, half, channels, spatial, k, dst);
             }
             else
-                SynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, SimdTensorFormatNhwc);
+                Avx2::SynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, SimdTensorFormatNhwc);
         }
 
         void SynetLrnLayerCrossChannels(const float* src, size_t half, size_t channels, size_t spatial, const float* k, float* dst, SimdTensorFormatType format)
@@ -795,7 +795,7 @@ namespace Simd
             else if (format == SimdTensorFormatNhwc)
                 SynetLrnLayerCrossChannelsNhwc(src, half, channels, spatial, k, dst);
             else
-                Base::SynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, format);
+                assert(0);
         }
 
         //-------------------------------------------------------------------------------------------------

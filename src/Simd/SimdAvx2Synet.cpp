@@ -584,7 +584,7 @@ namespace Simd
             else if (format == SimdTensorFormatNhwc)
                 SynetLrnLayerCrossChannelsNhwc(src, half, channels, spatial, k, dst);
             else
-                Base::SynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, format);
+                assert(0);
         }
 
         //-------------------------------------------------------------------------------------------------
