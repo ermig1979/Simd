@@ -35,133 +35,6 @@ namespace Simd
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE) 
     namespace Neon
     {
-        template <bool align> SIMD_INLINE void SynetAddBias(const float * bias, float * dst)
-        {
-            Store<align>(dst, vaddq_f32(Load<align>(dst), Load<align>(bias)));
-        }
-
-        template <bool align> SIMD_INLINE void SynetAddBias(float32x4_t bias, float * dst)
-        {
-            Store<align>(dst, vaddq_f32(Load<align>(dst), bias));
-        }
-
-        template <bool align> void SynetAddBiasNchw(const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (align)
-                assert(Aligned(spatial, F) && Aligned(dst));
-
-            size_t aligned = AlignLo(spatial, QF);
-            size_t partial = AlignLo(spatial, F);
-            for (size_t c = 0; c < channels; ++c)
-            {
-                size_t s = 0;
-                if (partial)
-                {
-                    float32x4_t _bias = vdupq_n_f32(bias[c]);
-                    for (; s < aligned; s += QF)
-                    {
-                        SynetAddBias<align>(_bias, dst + s + F * 0);
-                        SynetAddBias<align>(_bias, dst + s + F * 1);
-                        SynetAddBias<align>(_bias, dst + s + F * 2);
-                        SynetAddBias<align>(_bias, dst + s + F * 3);
-                    }
-                    for (; s < partial; s += F)
-                        SynetAddBias<align>(_bias, dst + s);
-                }
-                for (; s < spatial; ++s)
-                    dst[s] += bias[c];
-                dst += spatial;
-            }
-        }
-
-        SIMD_INLINE void SynetAddBiasNchw(const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (Aligned(spatial, F) && Aligned(dst))
-                SynetAddBiasNchw<true>(bias, channels, spatial, dst);
-            else
-                SynetAddBiasNchw<false>(bias, channels, spatial, dst);
-        }
-
-        template <bool align> void SynetAddBiasNhwc(const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (align)
-                assert(Aligned(channels, F) && Aligned(bias) && Aligned(dst));
-
-            size_t aligned = AlignLo(channels, QF);
-            size_t partial = AlignLo(channels, F);
-            for (size_t s = 0; s < spatial; ++s)
-            {
-                size_t c = 0;
-                if (partial)
-                {
-                    for (; c < aligned; c += QF)
-                    {
-                        SynetAddBias<align>(bias + c + F * 0, dst + c + F * 0);
-                        SynetAddBias<align>(bias + c + F * 1, dst + c + F * 1);
-                        SynetAddBias<align>(bias + c + F * 2, dst + c + F * 2);
-                        SynetAddBias<align>(bias + c + F * 3, dst + c + F * 3);
-                    }
-                    for (; c < partial; c += F)
-                        SynetAddBias<align>(bias + c, dst + c);
-                }
-                for (; c < channels; ++c)
-                    dst[c] += bias[c];
-                dst += channels;
-            }
-        }
-
-        SIMD_INLINE void SynetAddBiasNhwc(const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (Aligned(bias) && Aligned(channels, F) && Aligned(dst))
-                SynetAddBiasNhwc<true>(bias, channels, spatial, dst);
-            else
-                SynetAddBiasNhwc<false>(bias, channels, spatial, dst);
-        }
-
-        template <bool align> void SynetAddBiasNchw4c(const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (align)
-                assert(Aligned(dst));
-
-            size_t spatial4 = AlignLo(spatial, 4);
-            for (size_t c = 0; c < channels; c += F)
-            {
-                float32x4_t _bias = Load<false>(bias + c);
-                size_t s = 0;
-                for (; s < spatial4; s += 4, dst += 4 * F)
-                {
-                    SynetAddBias<align>(_bias, dst + 0 * F);
-                    SynetAddBias<align>(_bias, dst + 1 * F);
-                    SynetAddBias<align>(_bias, dst + 2 * F);
-                    SynetAddBias<align>(_bias, dst + 3 * F);
-                }
-                for (; s < spatial; ++s, dst += F)
-                    SynetAddBias<align>(_bias, dst);
-            }
-        }
-
-        SIMD_INLINE void SynetAddBiasNchw4c(const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (Aligned(dst))
-                SynetAddBiasNchw4c<true>(bias, channels, spatial, dst);
-            else
-                SynetAddBiasNchw4c<false>(bias, channels, spatial, dst);
-        }
-
-        void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
-        {
-            if (Base::NchwCompatible(channels, spatial, format))
-                SynetAddBiasNchw(bias, channels, spatial, dst);
-            else if (Base::NhwcCompatible(channels, spatial, format))
-                SynetAddBiasNhwc(bias, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetAddBiasNchw4c(bias, channels, spatial, dst);
-            else
-                Base::SynetAddBias(bias, channels, spatial, dst, format);
-        }
-
-        //---------------------------------------------------------------------
-
         template <SimdSynetEltwiseOperationType type> float32x4_t SynetEltwiseLayerForward(float32x4_t src0, float32x4_t src1);
 
         template <> SIMD_INLINE float32x4_t SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(float32x4_t src0, float32x4_t src1)
@@ -314,7 +187,7 @@ namespace Simd
                 SynetEltwiseLayerForward<false>(src, weight, count, size, type, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void SynetInnerProductLayerForward(const float * src, const float * weight, size_t offset, float32x4_t & sum)
         {
@@ -411,7 +284,7 @@ namespace Simd
                 SynetInnerProductLayerForward<false>(src, weight, bias, count, size, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<int shift> SIMD_INLINE float32x4_t LoadAtEdge(const float * src)
         {
@@ -550,7 +423,7 @@ namespace Simd
                 Base::SynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, format);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align, bool nofma> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, float * dst, size_t offset)
         {
@@ -860,7 +733,7 @@ namespace Simd
                 Base::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type)
         {
@@ -946,7 +819,7 @@ namespace Simd
                 assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
         {
@@ -1038,7 +911,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<SimdSynetUnaryOperation32fType type> float32x4_t SynetUnaryOperation32f(float32x4_t value);
 

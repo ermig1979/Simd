@@ -122,6 +122,7 @@
     <ClCompile Include="..\..\src\Test\TestSvm.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynet.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetActivation.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetAdd.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetConvolution8i.cpp" />

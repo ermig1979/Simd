@@ -89,6 +89,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSvm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetActivation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNchw.cpp" />
