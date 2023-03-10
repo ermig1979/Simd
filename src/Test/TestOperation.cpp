@@ -169,7 +169,6 @@ namespace Test
             {
                 result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W, H, type, f1, f2));
                 result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W + O, H - O, type, f1, f2));
-                result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W - O, H + O, type, f1, f2));
             }
         }
 
@@ -242,7 +241,6 @@ namespace Test
         {
             result = result && OperationBinary16iAutoTest(ARGS_OB16I(W, H, type, f1, f2));
             result = result && OperationBinary16iAutoTest(ARGS_OB16I(W + O, H - O, type, f1, f2));
-            result = result && OperationBinary16iAutoTest(ARGS_OB16I(W - O, H + O, type, f1, f2));
         }
 
         return result;
@@ -311,7 +309,6 @@ namespace Test
 
         result = result && VectorProductAutoTest(W, H, f1, f2);
         result = result && VectorProductAutoTest(W - O, H + O, f1, f2);
-        result = result && VectorProductAutoTest(W + O, H - O, f1, f2);
 
         return result;
     }

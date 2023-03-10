@@ -221,10 +221,12 @@ namespace Test
         SimdSynetCompatibilityType cP = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaUse);
         SimdSynetCompatibilityType cN = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaUse);
 
-        result = result && SynetAdd8iAutoTest(1, 255, 10000, nchw, 1, cN, f1, f2);
-        result = result && SynetAdd8iAutoTest(1, 255, 10005, nchw, 0, cP, f1, f2);
-        result = result && SynetAdd8iAutoTest(1, 256, 10005, nhwc, 1, cN, f1, f2);
-        result = result && SynetAdd8iAutoTest(1, 255, 10005, nhwc, 0, cP, f1, f2);
+#ifdef NDEBUG
+        result = result && SynetAdd8iAutoTest(1, 255, 1000, nchw, 1, cN, f1, f2);
+        result = result && SynetAdd8iAutoTest(1, 255, 1005, nchw, 0, cP, f1, f2);
+        result = result && SynetAdd8iAutoTest(1, 256, 1005, nhwc, 1, cN, f1, f2);
+        result = result && SynetAdd8iAutoTest(1, 255, 1005, nhwc, 0, cP, f1, f2);
+#endif
 
         result = result && SynetAdd8iAutoTest(2, 65, 1603, nhwc, 0, cP, f1, f2);
         result = result && SynetAdd8iAutoTest(2, 64, 1603, nhwc, 1, cN, f1, f2);

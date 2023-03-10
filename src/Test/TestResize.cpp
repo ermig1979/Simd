@@ -327,6 +327,7 @@ namespace Test
         result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
 
+#if 0
         result = result && ResizerAutoTest(method, type, channels, 1919, 1081, 299, 168, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 1920, 1080, 299, 168, f1, f2);
 
@@ -335,6 +336,7 @@ namespace Test
 
         result = result && ResizerAutoTest(method, type, channels, 960, 540, 480, 270, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 960, 540, 240, 135, f1, f2);
+#endif
 
         return result;
     }

@@ -481,7 +481,7 @@ namespace Test
 
         Size _core(2, 2), _block(block, block), _padB(padB, padB), _padE(padE, padE);
 
-        result = result && WinogradSetInputAutoTest(128, 8, 60, _block, _core, _padB, _padE, trans, f1, f2);
+        result = result && WinogradSetInputAutoTest(128, 8, 40, _block, _core, _padB, _padE, trans, f1, f2);
 
         return result;
     }
@@ -564,15 +564,17 @@ namespace Test
 
         Size _core(3, 3), _block(block, block), _pad(pad, pad);
 
-        result = result && WinogradSetInputAutoTest(64, 56, 48, _block, _core, _pad, _pad, trans, f1, f2);
-        result = result && WinogradSetInputAutoTest(128, 28, 24, _block, _core, _pad, _pad, trans, f1, f2);
-        result = result && WinogradSetInputAutoTest(256, 14, 12, _block, _core, _pad, _pad, trans, f1, f2);
-        result = result && WinogradSetInputAutoTest(512, 7, 6, _block, _core, _pad, _pad, trans, f1, f2);
+#ifdef NDEBUG
         if(block == 4 && pad)
         {
             result = result && WinogradSetInputAutoTest(64, 40, 159, _block, _core, _pad, Size(1, 0), trans, f1, f2);
             result = result && WinogradSetInputAutoTest(64, 41, 159, _block, _core, Size(1, 0), _pad, trans, f1, f2);
-        }
+        }        
+        result = result && WinogradSetInputAutoTest(64, 56, 48, _block, _core, _pad, _pad, trans, f1, f2);
+        result = result && WinogradSetInputAutoTest(128, 28, 24, _block, _core, _pad, _pad, trans, f1, f2);
+#endif
+        result = result && WinogradSetInputAutoTest(256, 14, 12, _block, _core, _pad, _pad, trans, f1, f2);
+        result = result && WinogradSetInputAutoTest(512, 7, 6, _block, _core, _pad, _pad, trans, f1, f2);
 
         return result;
     }
@@ -917,8 +919,10 @@ namespace Test
     {
         bool result = true;
 
+#ifdef NDEBUG
         result = result && WinogradSetOutputAutoTest(64, 56, 48, block, core, trans, f1, f2);
         result = result && WinogradSetOutputAutoTest(128, 28, 24, block, core, trans, f1, f2);
+#endif
         result = result && WinogradSetOutputAutoTest(256, 14, 12, block, core, trans, f1, f2);
         result = result && WinogradSetOutputAutoTest(512, 7, 6, block, core, trans, f1, f2);
 

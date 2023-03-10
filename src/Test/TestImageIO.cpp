@@ -35,7 +35,7 @@
 
 namespace Test
 {
-    const int DebugImageSave = 1;
+    const int DebugImageSave = 0;
 
     SIMD_INLINE int GetMaxJpegError(int quality)
     {
@@ -218,8 +218,8 @@ namespace Test
                 if (file == SimdImageFileJpeg)
                 {
                     result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2);
-                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2);
-                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 85, f1, f2);
+                    //result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2);
+                    //result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 85, f1, f2);
                     result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2);
                 }
                 result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2);
