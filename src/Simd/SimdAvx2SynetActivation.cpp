@@ -67,7 +67,7 @@ namespace Simd
                 SynetElu32f<false>(src, size, alpha, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetMish32f(const float* src, __m256 threshold, float* dst, size_t offset)
         {
@@ -104,7 +104,7 @@ namespace Simd
                 SynetMish32f<false>(src, size, threshold, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetSigmoid32f(const float* src, const Avx2::Exp& exp, float* dst, size_t offset)
         {
@@ -141,7 +141,7 @@ namespace Simd
                 SynetSigmoid32f<false>(src, size, slope, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetSoftplus32f(const float* src, __m256 beta, __m256 threshold, float* dst, size_t offset)
         {
@@ -176,7 +176,7 @@ namespace Simd
                 SynetSoftplus32f<false>(src, size, beta, threshold, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetSwish32f(const float* src, const Avx2::Exp& exp, float* dst, size_t offset)
         {
@@ -213,7 +213,7 @@ namespace Simd
                 SynetSwish32f<false>(src, size, slope, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetTanh32f(const float* src, const Avx2::Exp& exp, float* dst, size_t offset)
         {

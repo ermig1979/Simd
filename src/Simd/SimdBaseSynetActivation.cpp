@@ -46,7 +46,7 @@ namespace Simd
                 dst[i] = SynetElu32f(src[i], _alpha);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
         {
@@ -65,7 +65,7 @@ namespace Simd
                 dst[i] = SynetHardSigmoid32f(src[i], _scale, _shift);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst)
         {
@@ -84,7 +84,7 @@ namespace Simd
                 dst[i] = SynetHswish32f(src[i], _shift, _scale);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
         {
@@ -102,7 +102,7 @@ namespace Simd
                 dst[i] = SynetMish32f(src[i], _threshold);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetPreluLayerForwardNchw(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
         {
@@ -146,38 +146,17 @@ namespace Simd
             }
         }
 
-        template<int N> void SynetPreluLayerForwardNchwXc(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
-        {
-            for (size_t c = 0; c < channels; c += N)
-            {
-                for (size_t s = 0; s < spatial; ++s)
-                {
-                    for (size_t i = 0; i < N; ++i)
-                        dst[i] = SynetRelu32f(src[i], slope[i]);
-                    src += N;
-                    dst += N;
-                }
-                slope += N;
-            }
-        }
-
         void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetPreluLayerForwardNchw(src, slope, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetPreluLayerForwardNhwc(src, slope, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetPreluLayerForwardNchwXc<4>(src, slope, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw8c)
-                SynetPreluLayerForwardNchwXc<8>(src, slope, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw16c)
-                SynetPreluLayerForwardNchwXc<16>(src, slope, channels, spatial, dst);
             else
                 assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
         {
@@ -195,7 +174,7 @@ namespace Simd
                 dst[i] = SynetRelu32f(src[i], _slope);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {
@@ -214,7 +193,7 @@ namespace Simd
                 dst[i] = Simd::RestrictRange(src[i], min, max);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
         {
@@ -232,7 +211,7 @@ namespace Simd
                 dst[i] = SynetSigmoid32f(src[i], _slope);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
         {
@@ -250,7 +229,7 @@ namespace Simd
                 dst[i] = SynetSwish32f(src[i], _slope);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetSoftplus32f(const float* src, size_t size, const float * beta, const float * threshold, float* dst)
         {
@@ -269,7 +248,7 @@ namespace Simd
                 dst[i] = SynetSoftplus32f(src[i], _beta, _threshold);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
         {

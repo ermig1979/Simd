@@ -67,7 +67,7 @@ namespace Simd
                 SynetElu32f<false>(src, size, alpha, dst);
         }
 
-        //-------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetHardSigmoid32f(const float* src, float32x4_t scale, float32x4_t shift, float* dst, size_t offset)
         {
@@ -104,7 +104,7 @@ namespace Simd
                 SynetHardSigmoid32f<false>(src, size, scale, shift, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetHswish32f(const float * src, float32x4_t shift, float32x4_t scale, float * dst, size_t offset)
         {
@@ -141,7 +141,7 @@ namespace Simd
                 SynetHswish32f<false>(src, size, shift, scale, dst);
         }
 
-        //-------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetMish32f(const float* src, float32x4_t threshold, float* dst, size_t offset)
         {
@@ -176,7 +176,7 @@ namespace Simd
                 SynetMish32f<false>(src, size, threshold, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float* src, const float* slope, float32x4_t _0, float* dst, size_t offset)
         {
@@ -265,53 +265,17 @@ namespace Simd
                 SynetPreluLayerForwardNhwc<false>(src, slope, channels, spatial, dst);
         }
 
-        template <bool align> void SynetPreluLayerForwardNchw4c(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            size_t spatialF = spatial * F;
-            size_t spatial4F = AlignLo(spatial, 4) * F;
-            float32x4_t _0 = vdupq_n_f32(0.0f);
-            for (size_t c = 0; c < channels; c += F)
-            {
-                float32x4_t _slope = Load<false>(slope + c);
-                size_t s = 0;
-                for (; s < spatial4F; s += 4 * F)
-                {
-                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 0);
-                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 1);
-                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 2);
-                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 3);
-                }
-                for (; s < spatialF; s += F)
-                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s);
-                src += spatialF;
-                dst += spatialF;
-            }
-        }
-
-        SIMD_INLINE void SynetPreluLayerForwardNchw4c(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                SynetPreluLayerForwardNchw4c<true>(src, slope, channels, spatial, dst);
-            else
-                SynetPreluLayerForwardNchw4c<false>(src, slope, channels, spatial, dst);
-        }
-
         void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetPreluLayerForwardNchw(src, slope, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetPreluLayerForwardNhwc(src, slope, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetPreluLayerForwardNchw4c(src, slope, channels, spatial, dst);
             else
-                Base::SynetPreluLayerForward(src, slope, channels, spatial, dst, format);
+                assert(0);
         }
 
-        //-------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetRelu32f(const float* src, float32x4_t slope, float32x4_t zero, float* dst, size_t offset)
         {
@@ -348,7 +312,7 @@ namespace Simd
                 SynetRelu32f<false>(src, size, slope, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {
@@ -383,7 +347,7 @@ namespace Simd
                 SynetRestrictRange32f<false>(src, size, lower, upper, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetSigmoid32f(const float* src, const Neon::Exp& exp, float* dst, size_t offset)
         {
@@ -420,7 +384,7 @@ namespace Simd
                 SynetSigmoid32f<false>(src, size, slope, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetSoftplus32f(const float* src, float32x4_t beta, float32x4_t threshold, float* dst, size_t offset)
         {
@@ -455,7 +419,7 @@ namespace Simd
                 SynetSoftplus32f<false>(src, size, beta, threshold, dst);
         }
 
-        //-------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetSwish32f(const float* src, float32x4_t slope, float* dst, size_t offset)
         {
@@ -490,7 +454,7 @@ namespace Simd
                 SynetSwish32f<false>(src, size, slope, dst);
         }
         
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetTanh32f(const float* src, const Neon::Exp& exp, float* dst, size_t offset)
         {

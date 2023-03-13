@@ -375,11 +375,11 @@ Functions</h2></td></tr>
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size.">SimdAlign</a> (channels, <a class="el" href="group__synet__other.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format.">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 32-bit float array with slope coefficients. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size.">SimdAlign</a> (channels, <a class="el" href="group__synet__other.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format.">SimdSynetTensorAlignment</a> (format). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 32-bit float array with slope coefficients. The size of the array is equal to channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size.">SimdAlign</a> (channels, <a class="el" href="group__synet__other.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format.">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * spatial. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
   </table>
   </dd>
