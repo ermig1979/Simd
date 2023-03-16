@@ -648,69 +648,13 @@ namespace Simd
             }
         }
 
-        template <bool align, bool nofma> void SynetScaleLayerForwardNchw4c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            size_t spatialF = spatial * F;
-            size_t spatial4F = AlignLo(spatial, 4)*F;
-            if (bias)
-            {
-                for (size_t c = 0; c < channels; c += F)
-                {
-                    float32x4_t _scale = Load<false>(scale + c);
-                    float32x4_t _bias = Load<false>(bias + c);
-                    size_t s = 0;
-                    for (; s < spatial4F; s += 4 * F)
-                    {
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s + F * 0);
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s + F * 1);
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s + F * 2);
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s + F * 3);
-                    }
-                    for (; s < spatialF; s += F)
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s);
-                    src += spatialF;
-                    dst += spatialF;
-                }
-            }
-            else
-            {
-                for (size_t c = 0; c < channels; c += F)
-                {
-                    float32x4_t _scale = Load<false>(scale + c);
-                    size_t s = 0;
-                    for (; s < spatial4F; s += 4 * F)
-                    {
-                        SynetScaleLayerForward<align>(src, _scale, dst, s + F * 0);
-                        SynetScaleLayerForward<align>(src, _scale, dst, s + F * 1);
-                        SynetScaleLayerForward<align>(src, _scale, dst, s + F * 2);
-                        SynetScaleLayerForward<align>(src, _scale, dst, s + F * 3);
-                    }
-                    for (; s < spatialF; s += F)
-                        SynetScaleLayerForward<align>(src, _scale, dst, s);
-                    src += spatialF;
-                    dst += spatialF;
-                }
-            }
-        }
-
-        template<bool nofma> void SynetScaleLayerForwardNchw4c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                SynetScaleLayerForwardNchw4c<true, nofma>(src, scale, bias, channels, spatial, dst);
-            else
-                SynetScaleLayerForwardNchw4c<false, nofma>(src, scale, bias, channels, spatial, dst);
-        }
-
         void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
         {
             size_t spatial = height * width;
             bool nofma = Base::FmaAvoid(compatibility);
             if (Base::NchwCompatible(channels, spatial, format))
             {
-                if(nofma)
+                if (nofma)
                     SynetScaleLayerForwardNchw<true>(src, scale, bias, channels, spatial, dst);
                 else
                     SynetScaleLayerForwardNchw<false>(src, scale, bias, channels, spatial, dst);
@@ -722,15 +666,8 @@ namespace Simd
                 else
                     SynetScaleLayerForwardNhwc<false>(src, scale, bias, channels, spatial, dst);
             }
-            else if (format == SimdTensorFormatNchw4c)
-            {
-                if (nofma)
-                    SynetScaleLayerForwardNchw4c<true>(src, scale, bias, channels, spatial, dst);
-                else
-                    SynetScaleLayerForwardNchw4c<false>(src, scale, bias, channels, spatial, dst);
-            }
             else
-                Base::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
+                assert(0);
         }
 
         //-------------------------------------------------------------------------------------------------

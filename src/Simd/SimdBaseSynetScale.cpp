@@ -115,39 +115,6 @@ namespace Simd
             }
         }
 
-        template<int N> void SynetScaleLayerForwardNchwXc(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (bias)
-            {
-                for (size_t c = 0; c < channels; c += N)
-                {
-                    for (size_t s = 0; s < spatial; ++s)
-                    {
-                        for (size_t i = 0; i < N; ++i)
-                            dst[i] = src[i]*scale[i] + bias[i];
-                        src += N;
-                        dst += N;
-                    }
-                    scale += N;
-                    bias += N;
-                }
-            }
-            else
-            {
-                for (size_t c = 0; c < channels; c += N)
-                {
-                    for (size_t s = 0; s < spatial; ++s)
-                    {
-                        for (size_t i = 0; i < N; ++i)
-                            dst[i] = src[i] * scale[i];
-                        src += N;
-                        dst += N;
-                    }
-                    scale += N;
-                }
-            }
-        }
-
         void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
         {
             size_t spatial = height * width;
@@ -155,17 +122,11 @@ namespace Simd
                 SynetScaleLayerForwardNchw(src, scale, bias, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetScaleLayerForwardNhwc(src, scale, bias, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetScaleLayerForwardNchwXc<4>(src, scale, bias, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw8c)
-                SynetScaleLayerForwardNchwXc<8>(src, scale, bias, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw16c)
-                SynetScaleLayerForwardNchwXc<16>(src, scale, bias, channels, spatial, dst);
             else
                 assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SynetScale8i::SynetScale8i(const Scale8iParam& p)
             : _param(p)

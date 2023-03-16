@@ -345,72 +345,6 @@ namespace Simd
             }
         }
 
-        template <bool align, bool nofma> void SynetScaleLayerForwardNchw8c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            size_t spatialF = spatial * F;
-            size_t spatial4F = AlignLo(spatial, 4)*F;
-            if (bias)
-            {
-                for (size_t c = 0; c < channels; c += F)
-                {
-                    __m256 _scale = Load<false>(scale + c);
-                    __m256 _bias = Load<false>(bias + c);
-                    size_t s = 0;
-                    for (; s < spatial4F; s += 4 * F)
-                    {
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s + F * 0);
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s + F * 1);
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s + F * 2);
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s + F * 3);
-                    }
-                    for (; s < spatialF; s += F)
-                        SynetScaleLayerForward<align, nofma>(src, _scale, _bias, dst, s);
-                    src += spatialF;
-                    dst += spatialF;
-                }
-            }
-            else
-            {
-                for (size_t c = 0; c < channels; c += F)
-                {
-                    __m256 _scale = Load<false>(scale + c);
-                    size_t s = 0;
-                    for (; s < spatial4F; s += 4 * F)
-                    {
-                        SynetScaleLayerForward<align>(src, _scale, dst, s + F * 0);
-                        SynetScaleLayerForward<align>(src, _scale, dst, s + F * 1);
-                        SynetScaleLayerForward<align>(src, _scale, dst, s + F * 2);
-                        SynetScaleLayerForward<align>(src, _scale, dst, s + F * 3);
-                    }
-                    for (; s < spatialF; s += F)
-                        SynetScaleLayerForward<align>(src, _scale, dst, s);
-                    src += spatialF;
-                    dst += spatialF;
-                }
-            }
-        }
-
-        SIMD_INLINE void SynetScaleLayerForwardNchw8c(const float* src, const float* scale, const float* bias, size_t channels, size_t spatial, float* dst, SimdSynetCompatibilityType compatibility)
-        {
-            if (Base::FmaAvoid(compatibility))
-            {
-                if (Aligned(src) && Aligned(dst))
-                    SynetScaleLayerForwardNchw8c<true, true>(src, scale, bias, channels, spatial, dst);
-                else
-                    SynetScaleLayerForwardNchw8c<false, true>(src, scale, bias, channels, spatial, dst);
-            }
-            else
-            {
-                if (Aligned(src) && Aligned(dst))
-                    SynetScaleLayerForwardNchw8c<true, false>(src, scale, bias, channels, spatial, dst);
-                else
-                    SynetScaleLayerForwardNchw8c<false, false>(src, scale, bias, channels, spatial, dst);
-            }
-        }
-
         void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
         {
             size_t spatial = height * width;
@@ -418,22 +352,18 @@ namespace Simd
                 SynetScaleLayerForwardNchw(src, scale, bias, channels, width, height, dst, compatibility);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetScaleLayerForwardNhwc(src, scale, bias, channels, height, width, dst, compatibility);
-            else if (format == SimdTensorFormatNchw4c)
-                Sse41::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
-            else if (format == SimdTensorFormatNchw8c)
-                SynetScaleLayerForwardNchw8c(src, scale, bias, channels, spatial, dst, compatibility);
             else
-                Base::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
+                assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SynetScale8i::SynetScale8i(const Base::Scale8iParam& p)
             : Sse41::SynetScale8i(p)
         {
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<int part> SIMD_INLINE __m256 Cvt8uTo32f(__m128i src)
         {
@@ -607,7 +537,7 @@ namespace Simd
                 Sse41::SynetScale8i::Scale(src, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool nofma> SIMD_INLINE void ScaleNchwDF(const uint8_t* src, __m256 scale, __m256 shift, float* dst, size_t offset)
         {
@@ -769,7 +699,7 @@ namespace Simd
                 Sse41::SynetScale8i::Scale(src, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align, bool nofma> SIMD_INLINE void ScaleNchwDF(const float* src, __m256 scale, __m256 shift, __m256i upper, uint8_t* dst, size_t offset)
         {
@@ -944,7 +874,7 @@ namespace Simd
                 Sse41::SynetScale8i::Scale(src, dst);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetScale8i::Scale(const float* src, float* dst)
         {
@@ -960,7 +890,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void* SynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
         {

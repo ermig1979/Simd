@@ -93,26 +93,24 @@ namespace Test
         return result;
     }
 
-    bool SynetScaleLayerForwardAutoTest(int mask, const FuncScLF & f1, const FuncScLF & f2)
+    bool SynetScaleLayerForwardAutoTest(const FuncScLF & f1, const FuncScLF & f2)
     {
         bool result = true;
 
         //result = result && SynetScaleLayerForwardAutoTest(16, 24, 24, SimdTensorFormatNhwc, 1, 0, f1, f2);
 
-        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNchw16c && result; format = (SimdTensorFormatType)((int)format + 1))
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNhwc && result; format = (SimdTensorFormatType)((int)format + 1))
         {
-            if (SimdSynetTensorAlignment(format)&mask)
+            for (int hasBias = 0; hasBias <= 1; ++hasBias)
             {
-                for (int hasBias = 0; hasBias <= 1; ++hasBias)
+                for (int comp = 0; comp <= 2; ++comp)
                 {
-                    for (int comp = 0; comp <= 2; ++comp)
-                    {
-                        result = result && SynetScaleLayerForwardAutoTest(C, (int)sqrt(H), (int)sqrt(W), format, hasBias, comp, f1, f2);
-                        result = result && SynetScaleLayerForwardAutoTest(C - O, (int)sqrt(H) + O/2, (int)sqrt(W) + O/2, format, hasBias, comp, f1, f2);
-                    }
+                    result = result && SynetScaleLayerForwardAutoTest(C, (int)sqrt(H), (int)sqrt(W), format, hasBias, comp, f1, f2);
+                    result = result && SynetScaleLayerForwardAutoTest(C - O, (int)sqrt(H) + O/2, (int)sqrt(W) + O/2, format, hasBias, comp, f1, f2);
                 }
             }
-        }
+        } 
+
         //result = result && SynetScaleLayerForwardAutoTest(3, W*W, SimdTensorFormatNhwc, true, f1, f2);
 
         return result;
@@ -122,31 +120,31 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetScaleLayerForwardAutoTest(TFM_ANY, FUNC_SCLF(Simd::Base::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
+        result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Base::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
-            result = result && SynetScaleLayerForwardAutoTest(TFM_128, FUNC_SCLF(Simd::Sse41::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Sse41::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && SynetScaleLayerForwardAutoTest(TFM_256, FUNC_SCLF(Simd::Avx::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Avx::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && SynetScaleLayerForwardAutoTest(TFM_256, FUNC_SCLF(Simd::Avx2::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Avx2::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
-            result = result && SynetScaleLayerForwardAutoTest(TFM_512, FUNC_SCLF(Simd::Avx512bw::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Avx512bw::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetScaleLayerForwardAutoTest(TFM_128, FUNC_SCLF(Simd::Neon::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Neon::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif 
 
         return result;
