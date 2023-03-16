@@ -71,39 +71,17 @@ namespace Simd
             }
         }
 
-        template<int N> void SynetFusedLayerForward0NchwXc(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
-        {
-            for (size_t c = 0; c < channels; c += N)
-            {
-                for (size_t s = 0; s < spatial; ++s)
-                {
-                    for (size_t i = 0; i < N; ++i)
-                        dst[i] = SynetFusedLayerForward0(src[i] + bias[i], scale[i]);
-                    src += N;
-                    dst += N;
-                }
-                bias += N;
-                scale += N;
-            }
-        }
-
         void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetFusedLayerForward0Nchw(src, bias, scale, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward0Nhwc(src, bias, scale, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetFusedLayerForward0NchwXc<4>(src, bias, scale, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw8c)
-                SynetFusedLayerForward0NchwXc<8>(src, bias, scale, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw16c)
-                SynetFusedLayerForward0NchwXc<16>(src, bias, scale, channels, spatial, dst);
             else
                 assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetFusedLayerForward1Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst)
         {
@@ -181,7 +159,7 @@ namespace Simd
                 assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetFusedLayerForward2Nchw(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst)
         {
@@ -260,7 +238,7 @@ namespace Simd
                 assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetFusedLayerForward3Nchw(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
         {
@@ -336,7 +314,7 @@ namespace Simd
                 assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetFusedLayerForward4Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst0)
         {
@@ -436,7 +414,7 @@ namespace Simd
                 assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetFusedLayerForward8Nchw(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
         {
@@ -513,7 +491,7 @@ namespace Simd
                 assert(0);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void SynetFusedLayerForward9Nchw(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
         {

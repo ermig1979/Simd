@@ -85,17 +85,14 @@ namespace Test
         return result;
     }
 
-    bool SynetFusedLayerForward0AutoTest(int mask, const FuncFLF0 & f1, const FuncFLF0 & f2)
+    bool SynetFusedLayerForward0AutoTest(const FuncFLF0 & f1, const FuncFLF0 & f2)
     {
         bool result = true;
 
-        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNchw16c && result; format = (SimdTensorFormatType)((int)format + 1))
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNhwc && result; format = (SimdTensorFormatType)((int)format + 1))
         {
-            if (SimdSynetTensorAlignment(format)&mask)
-            {
-                result = result && SynetFusedLayerForward0AutoTest(H, W, format, f1, f2);
-                result = result && SynetFusedLayerForward0AutoTest(H - O, W + O, format, f1, f2);
-            }
+            result = result && SynetFusedLayerForward0AutoTest(H, W, format, f1, f2);
+            result = result && SynetFusedLayerForward0AutoTest(H - O, W + O, format, f1, f2);
         }
 
         return result;
@@ -105,30 +102,32 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetFusedLayerForward0AutoTest(TFM_ANY, FUNC_FLF0(Simd::Base::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+        result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Base::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
-            result = result && SynetFusedLayerForward0AutoTest(TFM_128, FUNC_FLF0(Simd::Sse41::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Sse41::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward0AutoTest(TFM_256, FUNC_FLF0(Simd::Avx::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Avx::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
-            result = result && SynetFusedLayerForward0AutoTest(TFM_512, FUNC_FLF0(Simd::Avx512bw::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Avx512bw::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetFusedLayerForward0AutoTest(TFM_128, FUNC_FLF0(Simd::Neon::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Neon::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
 #endif
 
         return result;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -232,6 +231,8 @@ namespace Test
         return result;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncFLF2
@@ -334,6 +335,8 @@ namespace Test
         return result;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncFLF3
@@ -434,6 +437,8 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -538,6 +543,8 @@ namespace Test
         return result;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncFLF8
@@ -638,6 +645,8 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
