@@ -352,34 +352,12 @@ namespace Simd
             }
         }
 
-        template<int N> void SynetFusedLayerForward8NchwXc(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
-        {
-            for (size_t c = 0; c < channels; c += N)
-            {
-                for (size_t s = 0; s < spatial; ++s)
-                {
-                    for (size_t i = 0; i < N; ++i)
-                        dst[i] = SynetFusedLayerForward8(src0[i], src1[i], src2[i]);
-                    src0 += N;
-                    src1 += N;
-                    dst += N;
-                }
-                src2 += N;
-            }
-        }
-
         void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetFusedLayerForward8Nchw(src0, src1, src2, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward8Nhwc(src0, src1, src2, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetFusedLayerForward8NchwXc<4>(src0, src1, src2, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw8c)
-                SynetFusedLayerForward8NchwXc<8>(src0, src1, src2, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw16c)
-                SynetFusedLayerForward8NchwXc<16>(src0, src1, src2, channels, spatial, dst);
             else
                 assert(0);
         }

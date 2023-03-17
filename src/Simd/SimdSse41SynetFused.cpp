@@ -650,50 +650,14 @@ namespace Simd
                 SynetFusedLayerForward8Nhwc<false>(src0, src1, src2, channels, spatial, dst);
         }
 
-        template <bool align> void SynetFusedLayerForward8Nchw4c(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
-        {
-            if (align)
-                assert(Aligned(src0) && Aligned(src1) && Aligned(dst));
-
-            size_t spatialF = spatial * F;
-            size_t spatial4F = AlignLo(spatial, 4)*F;
-            for (size_t c = 0; c < channels; c += F)
-            {
-                __m128 _src2 = Load<false>(src2 + c);
-                size_t s = 0;
-                for (; s < spatial4F; s += 4 * F)
-                {
-                    SynetFusedLayerForward8<align>(src0, src1, _src2, dst, s + F * 0);
-                    SynetFusedLayerForward8<align>(src0, src1, _src2, dst, s + F * 1);
-                    SynetFusedLayerForward8<align>(src0, src1, _src2, dst, s + F * 2);
-                    SynetFusedLayerForward8<align>(src0, src1, _src2, dst, s + F * 3);
-                }
-                for (; s < spatialF; s += F)
-                    SynetFusedLayerForward8<align>(src0, src1, _src2, dst, s);
-                src0 += spatialF;
-                src1 += spatialF;
-                dst += spatialF;
-            }
-        }
-
-        SIMD_INLINE void SynetFusedLayerForward8Nchw4c(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
-        {
-            if (Aligned(src0) && Aligned(src1) && Aligned(dst))
-                SynetFusedLayerForward8Nchw4c<true>(src0, src1, src2, channels, spatial, dst);
-            else
-                SynetFusedLayerForward8Nchw4c<false>(src0, src1, src2, channels, spatial, dst);
-        }
-
         void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetFusedLayerForward8Nchw(src0, src1, src2, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward8Nhwc(src0, src1, src2, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetFusedLayerForward8Nchw4c(src0, src1, src2, channels, spatial, dst);
             else
-                Base::SynetFusedLayerForward8(src0, src1, src2, channels, spatial, dst, format);
+                assert(0);
         }
 
         //-------------------------------------------------------------------------------------------------
