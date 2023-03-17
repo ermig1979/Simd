@@ -382,7 +382,6 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetConvert8uTo32f);
     TEST_ADD_GROUP_A0(SynetSetInput);
     TEST_ADD_GROUP_A0(SynetReorderImage);
-    TEST_ADD_GROUP_A0(SynetReorderFilter);
 
     TEST_ADD_GROUP_A0(SynetConvolution8iForward);
 

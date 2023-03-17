@@ -7614,26 +7614,6 @@ extern "C"
     */
     SIMD_API SIMD_DEPRECATED void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
 
-    /*! @ingroup synet_conversion
-
-        \fn void SimdSynetReorderFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
-
-        \short Converts 2d-convolution filter weight between different formats of 4D-tensor.
-
-        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o is not supported.
-
-        \warning This functionality is deprecated and can be removed in the future.
-
-        \param [in] output - a number of output channels in filter.
-        \param [in] input - a number of intput channels in filter.
-        \param [in] kernel - a size (width*height) of filter kernel.
-        \param [in] src - a pointer to input filter data.
-        \param [in] srcFormat - a format of input filter. It can be ::SimdTensorFormatOiyx, ::SimdTensorFormatYxio, ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o.
-        \param [out] dst - a pointer to output filter data.
-        \param [in] dstFormat - a format of output filter. It can be SimdTensorFormatOiyx, ::SimdTensorFormatYxio, ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o.
-    */
-    SIMD_API SIMD_DEPRECATED void SimdSynetReorderFilter(size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
-
     /*! @ingroup synet_activation
 
         \fn void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);

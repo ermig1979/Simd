@@ -141,7 +141,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     typedef FuncCvt<uint8_t, float> FuncCvt8uTo32f;
 
@@ -220,7 +220,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -332,7 +332,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -440,54 +440,6 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && SynetReorderImageAutoTest(TFM_128, FUNC_RT(Simd::Neon::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
-#endif
-
-        return result;
-    }
-
-    bool SynetReorderFilterAutoTest(int mask, const FuncRT & f1, const FuncRT & f2)
-    {
-        bool result = true;
-
-        for (SimdTensorFormatType src = SimdTensorFormatOiyx; src <= SimdTensorFormatOyxi16o && result; src = (SimdTensorFormatType)((int)src + 1))
-        {
-            for (SimdTensorFormatType dst = SimdTensorFormatOiyx; dst <= SimdTensorFormatOyxi16o && result; dst = (SimdTensorFormatType)((int)dst + 1))
-            {
-                if (src == dst || (src >= SimdTensorFormatOyxi4o && dst >= SimdTensorFormatOyxi4o) ||
-                    ((SimdSynetTensorAlignment(src)&mask) == 0) || ((SimdSynetTensorAlignment(dst)&mask) == 0))
-                    continue;
-                result = result && SynetReorderTensorAutoTest(W * 9 / 30 + 0, W * 7 / 30 + 0, 3, 3, src, dst, f1, f2);
-                result = result && SynetReorderTensorAutoTest(W * 9 / 10 - 1, W * 7 / 10 + 1, 1, 1, src, dst, f1, f2);
-            }
-        }
-
-        return result;
-    }
-
-    bool SynetReorderFilterAutoTest()
-    {
-        bool result = true;
-
-        result = result && SynetReorderFilterAutoTest(TFM_ANY, FUNC_RT(Simd::Base::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
-
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
-            result = result && SynetReorderFilterAutoTest(TFM_128, FUNC_RT(Simd::Sse41::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
-#endif 
-        
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetReorderFilterAutoTest(TFM_256, FUNC_RT(Simd::Avx::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
-#endif 
-        
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
-            result = result && SynetReorderFilterAutoTest(TFM_512, FUNC_RT(Simd::Avx512bw::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
-#endif 
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
-            result = result && SynetReorderFilterAutoTest(TFM_128, FUNC_RT(Simd::Neon::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
 #endif
 
         return result;

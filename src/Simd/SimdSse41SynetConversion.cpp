@@ -172,7 +172,7 @@ namespace Simd
                 assert(0);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void SynetConvert8uTo32f(const uint8_t* src, const float* scale, const float* shift, float* dst)
         {
@@ -272,7 +272,7 @@ namespace Simd
                 assert(0);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         const __m128i K16_BLUE_RED = SIMD_MM_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);
         const __m128i K16_GREEN_ROUND = SIMD_MM_SET2_EPI16(Base::GREEN_TO_GRAY_WEIGHT, Base::BGR_TO_GRAY_ROUND_TERM);
@@ -596,7 +596,7 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<bool align> void SynetReorderImage_Chw_Hwc(size_t channels, size_t spatial, const float* src, float* dst)
         {
@@ -826,274 +826,6 @@ namespace Simd
             }
             else
                 Base::SynetReorderImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        template<bool align> void SynetReorderFilter_Oiyx_Yxio(size_t output, size_t input, size_t kernel, const float* src, float* dst)
-        {
-            if (kernel == 1)
-            {
-                SynetReorderImage_Chw_Hwc<align>(output, input, src, dst);
-                return;
-            }
-            size_t output4 = AlignLo(output, 4);
-            size_t kernel4 = AlignLo(kernel, 4);
-            size_t ik = input * kernel, oi = output * input;
-            for (size_t i = 0; i < input; ++i, src += kernel, dst += output)
-            {
-                const float* ps = src;
-                float* pd = dst;
-                size_t k = 0;
-                for (; k < kernel4; k += 4, ps += 4, pd += 4 * oi)
-                {
-                    size_t o = 0;
-                    for (; o < output4; o += 4)
-                        Transpose4x4<align>(ps + o * ik, ik, pd + o, oi);
-                    for (; o < output; ++o)
-                    {
-                        pd[0 * oi + o] = ps[o * ik + 0];
-                        pd[1 * oi + o] = ps[o * ik + 1];
-                        pd[2 * oi + o] = ps[o * ik + 2];
-                        pd[3 * oi + o] = ps[o * ik + 3];
-                    }
-                }
-                for (; k < kernel; ++k, ps += 1, pd += oi)
-                    for (size_t o = 0; o < output; ++o)
-                        pd[o] = ps[o * ik];
-            }
-        }
-
-        template<bool align> void SynetReorderFilter_Oiyx_Oyxi4o(size_t output, size_t input, size_t kernel, const float* src, float* dst)
-        {
-            if (kernel == 1)
-            {
-                SynetReorderImage_Chw_Chw4c<align>(output, input, src, dst);
-                return;
-            }
-            size_t outputF = AlignLo(output, F);
-            size_t kernelF = AlignLo(kernel, F);
-            size_t tail = output - outputF;
-            size_t ik = input * kernel;
-            size_t stride = input * F;
-            for (size_t o = 0; o < outputF; o += F)
-            {
-                for (size_t i = 0; i < input; ++i)
-                {
-                    const float* ps = src + o * ik + i * kernel;
-                    float* pd = dst + o * ik + i * F;
-                    size_t k = 0;
-                    for (; k < kernelF; k += F, ps += F, pd += F * stride)
-                        Transpose4x4<align>(ps, ik, pd, stride);
-                    for (; k < kernel; ++k, ps += 1, pd += stride)
-                        for (size_t j = 0; j < F; ++j)
-                            pd[j] = ps[j * ik];
-                }
-            }
-            if (tail)
-            {
-                for (size_t i = 0; i < input; ++i)
-                {
-                    const float* ps = src + outputF * ik + i * kernel;
-                    float* pd = dst + outputF * ik + i * F;
-                    for (size_t k = 0; k < kernel; ++k, ps += 1, pd += stride)
-                    {
-                        size_t j = 0;
-                        for (; j < tail; ++j)
-                            pd[j] = ps[j * ik];
-                        for (; j < F; ++j)
-                            pd[j] = 0;
-                    }
-                }
-            }
-        }
-
-        template<bool align> void SynetReorderFilter_Yxio_Oiyx(size_t output, size_t input, size_t kernel, const float* src, float* dst)
-        {
-            if (kernel == 1)
-            {
-                SynetReorderImage_Chw_Hwc<align>(input, output, src, dst);
-                return;
-            }
-            SynetReorderFilter_Oiyx_Yxio<align>(kernel, input, output, src, dst);
-        }
-
-        template<bool align> void SynetReorderFilter_Yxio_Oyxi4o(size_t output, size_t input, size_t kernel, const float* src, float* dst)
-        {
-            size_t outputF = AlignLo(output, F);
-            size_t outputF4 = AlignLo(output, F * 4);
-            size_t ki = kernel * input;
-            size_t stride = ki * F;
-            size_t ki4 = AlignLo(ki, 4);
-            size_t o = 0;
-            for (; o < outputF4; o += 4 * F, src += 4 * F)
-            {
-                const float* ps = src;
-                float* pd = dst;
-                size_t i = 0;
-                for (; i < ki4; i += 4, pd += 4 * F, ps += 4 * output)
-                    Transpose4x4xF<align>(ps, output, pd, stride);
-                for (; i < ki; ++i, pd += F, ps += output)
-                {
-                    Copy<align>(ps + 0 * F, pd + 0 * stride);
-                    Copy<align>(ps + 1 * F, pd + 1 * stride);
-                    Copy<align>(ps + 2 * F, pd + 2 * stride);
-                    Copy<align>(ps + 3 * F, pd + 3 * stride);
-                }
-                dst += 4 * stride;
-            }
-            for (; o < outputF; o += F, src += F)
-            {
-                const float* ps = src;
-                float* pd = dst;
-                size_t i = 0;
-                for (; i < ki; ++i, pd += F, ps += output)
-                    Copy<align>(ps, pd);
-                dst += stride;
-            }
-            if (outputF < output)
-            {
-                size_t tail = output - outputF;
-                for (size_t k = 0; k < kernel; ++k)
-                {
-                    for (size_t i = 0; i < input; ++i, src += output)
-                    {
-                        size_t j = 0;
-                        for (; j < tail; ++j)
-                            *(dst++) = src[j];
-                        for (; j < F; ++j)
-                            *(dst++) = 0;
-                    }
-                }
-            }
-        }
-
-        template<bool align> void SynetReorderFilter_Oyxi4o_Oiyx(size_t output, size_t input, size_t kernel, const float* src, float* dst)
-        {
-            if (kernel == 1)
-            {
-                SynetReorderImage_Chw4c_Chw<align>(output, input, src, dst);
-                return;
-            }
-            size_t outputF = AlignLo(output, F);
-            size_t tail = output - outputF;
-            size_t kernelF = AlignLo(kernel, F);
-            size_t ik = input * kernel;
-            size_t stride = F * input;
-            size_t o = 0;
-            for (; o < outputF; o += F, src += F * ik)
-            {
-                const float* ps = src;
-                float* pd = dst;
-                for (size_t i = 0; i < input; ++i, ps += F)
-                {
-                    size_t k = 0;
-                    for (; k < kernelF; k += F, pd += F)
-                        Transpose4x4<align>(ps + k * stride, stride, pd, ik);
-                    for (; k < kernel; ++k, pd++)
-                    {
-                        pd[0 * ik] = ps[k * stride + 0];
-                        pd[1 * ik] = ps[k * stride + 1];
-                        pd[2 * ik] = ps[k * stride + 2];
-                        pd[3 * ik] = ps[k * stride + 3];
-                    }
-                }
-                dst += F * ik;
-            }
-            if (tail)
-            {
-                for (size_t j = 0; j < tail; ++j)
-                {
-                    const float* ps = src + j;
-                    for (size_t i = 0; i < input; ++i, ps += F)
-                        for (size_t k = 0; k < kernel; ++k)
-                            *(dst++) = ps[k * stride];
-                }
-            }
-        }
-
-        template<bool align> void SynetReorderFilter_Oyxi4o_Yxio(size_t output, size_t input, size_t kernel, const float* src, float* dst)
-        {
-            size_t outputF = AlignLo(output, F);
-            size_t outputF4 = AlignLo(output, 4 * F);
-            size_t tail = output - outputF;
-            size_t ki = kernel * input;
-            size_t ki4 = AlignLo(ki, 4);
-            size_t stride = ki * F;
-            size_t i = 0;
-            for (; i < ki4; i += 4, src += 4 * F)
-            {
-                const float* ps = src;
-                float* pd = dst;
-                size_t o = 0;
-                for (; o < outputF4; o += 4 * F, ps += 4 * stride, pd += 4 * F)
-                    Transpose4x4xF<align>(ps, stride, pd, output);
-                for (; o < outputF; o += F, ps += stride, pd += F)
-                {
-                    Copy<align>(ps + 0 * F, pd + 0 * output);
-                    Copy<align>(ps + 1 * F, pd + 1 * output);
-                    Copy<align>(ps + 2 * F, pd + 2 * output);
-                    Copy<align>(ps + 3 * F, pd + 3 * output);
-                }
-                if (tail)
-                {
-                    for (size_t j = 0; j < tail; ++j)
-                    {
-                        pd[j + 0 * output] = ps[j + 0 * F];
-                        pd[j + 1 * output] = ps[j + 1 * F];
-                        pd[j + 2 * output] = ps[j + 2 * F];
-                        pd[j + 3 * output] = ps[j + 3 * F];
-                    }
-                }
-                dst += 4 * output;
-            }
-            for (; i < ki; ++i, src += F)
-            {
-                const float* ps = src;
-                for (size_t o = 0; o < outputF; o += F, ps += stride, dst += F)
-                    Copy<align>(ps, dst);
-                if (tail)
-                {
-                    for (size_t j = 0; j < tail; ++j)
-                        *(dst++) = ps[j];
-                }
-            }
-        }
-
-        typedef void(*SynetFilterConverterPtr)(size_t output, size_t input, size_t kernel, const float* src, float* dst);
-        SynetFilterConverterPtr GetFilterConverter(SimdTensorFormatType src, SimdTensorFormatType dst)
-        {
-            if (src == SimdTensorFormatOiyx)
-            {
-                if (dst == SimdTensorFormatYxio)
-                    return SynetReorderFilter_Oiyx_Yxio<false>;
-                if (dst == SimdTensorFormatOyxi4o)
-                    return SynetReorderFilter_Oiyx_Oyxi4o<false>;
-            }
-            if (src == SimdTensorFormatYxio)
-            {
-                if (dst == SimdTensorFormatOiyx)
-                    return SynetReorderFilter_Yxio_Oiyx<false>;
-                if (dst == SimdTensorFormatOyxi4o)
-                    return SynetReorderFilter_Yxio_Oyxi4o<false>;
-            }
-            if (src == SimdTensorFormatOyxi4o)
-            {
-                if (dst == SimdTensorFormatOiyx)
-                    return SynetReorderFilter_Oyxi4o_Oiyx<false>;
-                if (dst == SimdTensorFormatYxio)
-                    return SynetReorderFilter_Oyxi4o_Yxio<false>;
-            }
-            return NULL;
-        }
-
-        void SynetReorderFilter(size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat)
-        {
-            SynetFilterConverterPtr filterConverter = GetFilterConverter(srcFormat, dstFormat);
-            if (filterConverter)
-                filterConverter(output, input, kernel, src, dst);
-            else
-                Base::SynetReorderFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
         }
     }
 #endif
