@@ -7010,15 +7010,15 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src0 - a pointer to the first input 32-bit float array. The size of the array is ::SimdAlign (channels0, ::SimdSynetTensorAlignment (format)) * spatial.
-        \param [in] src1 - a pointer to the second input 32-bit float array. The size of the array is ::SimdAlign (channels1, ::SimdSynetTensorAlignment (format)) * spatial.
-        \param [in] scale - a pointer to the 32-bit float array with scale coefficients. The size of the array is ::SimdAlign (channels0 + channels1, ::SimdSynetTensorAlignment (format)).
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is ::SimdAlign (channels0 + channels1, ::SimdSynetTensorAlignment (format)).
+        \param [in] src0 - a pointer to the first input 32-bit float array. The size of the array is equal to channels0 * spatial.
+        \param [in] src1 - a pointer to the second input 32-bit float array. The size of the array is equal to channels1 * spatial.
+        \param [in] scale - a pointer to the 32-bit float array with scale coefficients. The size of the array is equal to channels0 + channels1.
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is equal to channels0 + channels1.
         \param [in] channels0 - a number of channels in the first input image tensor.
         \param [in] channels1 - a number of channels in the second input image tensor.
         \param [in] spatial - a spatial size of (input/output) image tensor.
-        \param [out] dst0 - a pointer to the first output 32-bit float array. The size of the array is ::SimdAlign (channels0 + channels1, ::SimdSynetTensorAlignment (format)) * spatial.
-        \param [out] dst1 - a pointer to the second output 32-bit float array. The size of the array is ::SimdAlign (channels0 + channels1, ::SimdSynetTensorAlignment (format)) * spatial. The pointer can be NULL.
+        \param [out] dst0 - a pointer to the first output 32-bit float array. The size of the array is equal to (channels0 + channels1) * spatial.
+        \param [out] dst1 - a pointer to the second output 32-bit float array. The size of the array is equal to (channels0 + channels1) * spatial. The pointer can be NULL.
         \param [in] format - a format of (input/output) image tensor.
     */
     SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format);

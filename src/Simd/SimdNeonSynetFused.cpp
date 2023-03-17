@@ -900,111 +900,14 @@ namespace Simd
                 SynetFusedLayerForward9Nhwc<false>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
         }
 
-        template <bool align> void SynetFusedLayerForward9Nchw4cA(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
-        {
-            if (align)
-                assert(Aligned(src0) && Aligned(src1) && Aligned(dst0) && Aligned(dst1));
-            const float * scale1 = scale0 + channels0;
-            const float * bias1 = bias0 + channels0;
-            size_t spatialF = spatial * F;
-            size_t spatial4F = AlignLo(spatial, 4)*F;
-            if (dst1)
-            {
-                for (size_t c = 0; c < channels0; c += F)
-                {
-                    float32x4_t _scale0 = Load<false>(scale0 + c);
-                    float32x4_t _bias0 = Load<false>(bias0 + c);
-                    size_t s = 0;
-                    for (; s < spatial4F; s += 4 * F)
-                    {
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + F * 0);
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + F * 1);
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + F * 2);
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + F * 3);
-                    }
-                    for (; s < spatialF; s += F)
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s);
-                    src0 += spatialF;
-                    dst0 += spatialF;
-                    dst1 += spatialF;
-                }
-                for (size_t c = 0; c < channels1; c += F)
-                {
-                    float32x4_t _scale1 = Load<false>(scale1 + c);
-                    float32x4_t _bias1 = Load<false>(bias1 + c);
-                    size_t s = 0;
-                    for (; s < spatial4F; s += 4 * F)
-                    {
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + F * 0);
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + F * 1);
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + F * 2);
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + F * 3);
-                    }
-                    for (; s < spatialF; s += F)
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s);
-                    src1 += spatialF;
-                    dst0 += spatialF;
-                    dst1 += spatialF;
-                }
-            }
-            else
-            {
-                for (size_t c = 0; c < channels0; c += F)
-                {
-                    float32x4_t _scale0 = Load<false>(scale0 + c);
-                    float32x4_t _bias0 = Load<false>(bias0 + c);
-                    size_t s = 0;
-                    for (; s < spatial4F; s += 4 * F)
-                    {
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + F * 0);
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + F * 1);
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + F * 2);
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + F * 3);
-                    }
-                    for (; s < spatialF; s += F)
-                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s);
-                    src0 += spatialF;
-                    dst0 += spatialF;
-                }
-                for (size_t c = 0; c < channels1; c += F)
-                {
-                    float32x4_t _scale1 = Load<false>(scale1 + c);
-                    float32x4_t _bias1 = Load<false>(bias1 + c);
-                    size_t s = 0;
-                    for (; s < spatial4F; s += 4 * F)
-                    {
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + F * 0);
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + F * 1);
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + F * 2);
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + F * 3);
-                    }
-                    for (; s < spatialF; s += F)
-                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s);
-                    src1 += spatialF;
-                    dst0 += spatialF;
-                }
-            }
-        }
-
-        SIMD_INLINE void SynetFusedLayerForward9Nchw4cA(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
-        {
-            assert(Aligned(channels0, F));
-            if (Aligned(src0) && Aligned(src1) && Aligned(dst0) && Aligned(dst1))
-                SynetFusedLayerForward9Nchw4cA<true>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
-            else
-                SynetFusedLayerForward9Nchw4cA<false>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
-        }
-
         void SynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels0 + channels1, spatial, format))
                 SynetFusedLayerForward9Nchw(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
             else if (Base::NhwcCompatible(channels0 + channels1, spatial, format))
                 SynetFusedLayerForward9Nhwc(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
-            else if (format == SimdTensorFormatNchw4c && Aligned(channels0, F))
-                SynetFusedLayerForward9Nchw4cA(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
             else
-                Base::SynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
+                assert(0);
         }
     }
 #endif// SIMD_NEON_ENABLE

@@ -515,94 +515,12 @@ namespace Simd
             }
         }
 
-        template<int N> void SynetFusedLayerForward9NchwXcA(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
-        {
-            assert(Aligned(channels0, N));
-            const float * scale1 = scale0 + channels0;
-            const float * bias1 = bias0 + channels0;
-            if (dst1)
-            {
-                for (size_t c = 0; c < channels0; c += N)
-                {
-                    for (size_t s = 0; s < spatial; ++s)
-                    {
-                        for (size_t i = 0; i < N; ++i)
-                            dst0[i] = SynetFusedLayerForward9(src0[i], scale0[i], bias0[i]), dst1[i] = src0[i];
-                        src0 += N;
-                        dst0 += N;
-                        dst1 += N;
-                    }
-                    scale0 += N;
-                    bias0 += N;
-                }
-                for (size_t c = 0; c < channels1; c += N)
-                {
-                    for (size_t s = 0; s < spatial; ++s)
-                    {
-                        for (size_t i = 0; i < N; ++i)
-                            dst0[i] = SynetFusedLayerForward9(src1[i], scale1[i], bias1[i]), dst1[i] = src1[i];
-                        src1 += N;
-                        dst0 += N;
-                        dst1 += N;
-                    }
-                    scale1 += N;
-                    bias1 += N;
-                }
-            }
-            else
-            {
-                for (size_t c = 0; c < channels0; c += N)
-                {
-                    for (size_t s = 0; s < spatial; ++s)
-                    {
-                        for (size_t i = 0; i < N; ++i)
-                            dst0[i] = SynetFusedLayerForward9(src0[i], scale0[i], bias0[i]);
-                        src0 += N;
-                        dst0 += N;
-                    }
-                    scale0 += N;
-                    bias0 += N;
-                }
-                for (size_t c = 0; c < channels1; c += N)
-                {
-                    for (size_t s = 0; s < spatial; ++s)
-                    {
-                        for (size_t i = 0; i < N; ++i)
-                            dst0[i] = SynetFusedLayerForward9(src1[i], scale1[i], bias1[i]);
-                        src1 += N;
-                        dst0 += N;
-                    }
-                    scale1 += N;
-                    bias1 += N;
-                }
-            }
-        }
-
-        template<int N> void SynetFusedLayerForward9NchwXcU(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
-        {
-            assert(0);
-        }
-
-        template<int N> void SynetFusedLayerForward9NchwXc(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
-        {
-            if (Aligned(channels0, N))
-                SynetFusedLayerForward9NchwXcA<N>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
-            else
-                SynetFusedLayerForward9NchwXcU<N>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
-        }
-
         void SynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels0 + channels1, spatial, format))
                 SynetFusedLayerForward9Nchw(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
             else if (Base::NhwcCompatible(channels0 + channels1, spatial, format))
                 SynetFusedLayerForward9Nhwc(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetFusedLayerForward9NchwXc<4>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
-            else if (format == SimdTensorFormatNchw8c)
-                SynetFusedLayerForward9NchwXc<8>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
-            else if (format == SimdTensorFormatNchw16c)
-                SynetFusedLayerForward9NchwXc<16>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
             else
                 assert(0);
         }
