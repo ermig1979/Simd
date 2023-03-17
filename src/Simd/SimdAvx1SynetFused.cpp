@@ -336,53 +336,14 @@ namespace Simd
                 SynetFusedLayerForward2Nhwc<false>(src, scale, bias, channels, spatial, slope, dst);
         }
 
-        template <bool align> void SynetFusedLayerForward2Nchw8c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            __m256 _slope = _mm256_set1_ps(slope[0]);
-            size_t spatialF = spatial * F;
-            size_t spatial4F = AlignLo(spatial, 4)*F;
-            for (size_t c = 0; c < channels; c += F)
-            {
-                __m256 _scale = Load<false>(scale + c);
-                __m256 _bias = Load<false>(bias + c);
-                size_t s = 0;
-                for (; s < spatial4F; s += 4 * F)
-                {
-                    SynetFusedLayerForward2<align>(src, _scale, _bias, _slope, dst, s + F * 0);
-                    SynetFusedLayerForward2<align>(src, _scale, _bias, _slope, dst, s + F * 1);
-                    SynetFusedLayerForward2<align>(src, _scale, _bias, _slope, dst, s + F * 2);
-                    SynetFusedLayerForward2<align>(src, _scale, _bias, _slope, dst, s + F * 3);
-                }
-                for (; s < spatialF; s += F)
-                    SynetFusedLayerForward2<align>(src, _scale, _bias, _slope, dst, s);
-                src += spatialF;
-                dst += spatialF;
-            }
-        }
-
-        SIMD_INLINE void SynetFusedLayerForward2Nchw8c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                SynetFusedLayerForward2Nchw8c<true>(src, scale, bias, channels, spatial, slope, dst);
-            else
-                SynetFusedLayerForward2Nchw8c<false>(src, scale, bias, channels, spatial, slope, dst);
-        }
-
         void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetFusedLayerForward2Nchw(src, scale, bias, channels, spatial, slope, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward2Nhwc(src, scale, bias, channels, spatial, slope, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                Sse41::SynetFusedLayerForward2(src, scale, bias, channels, spatial, slope, dst, format);
-            else if (format == SimdTensorFormatNchw8c)
-                SynetFusedLayerForward2Nchw8c(src, scale, bias, channels, spatial, slope, dst);
             else
-                Base::SynetFusedLayerForward2(src, scale, bias, channels, spatial, slope, dst, format);
+                assert(0);
         }
 
         //-------------------------------------------------------------------------------------------------
