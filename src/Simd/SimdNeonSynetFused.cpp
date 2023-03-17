@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -448,51 +448,14 @@ namespace Simd
                 SynetFusedLayerForward3Nhwc<false>(src, bias, scale, channels, spatial, dst);
         }
 
-        template <bool align> void SynetFusedLayerForward3Nchw4c(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            size_t spatialF = spatial * F;
-            size_t spatial4F = AlignLo(spatial, 4)*F;
-            float32x4_t _0 = vdupq_n_f32(0.0f);
-            for (size_t c = 0; c < channels; c += F)
-            {
-                float32x4_t _bias = Load<false>(bias + c);
-                float32x4_t _scale = Load<false>(scale + c);
-                size_t s = 0;
-                for (; s < spatial4F; s += 4 * F)
-                {
-                    SynetFusedLayerForward3<align>(src, _bias, _scale, _0, dst, s + F * 0);
-                    SynetFusedLayerForward3<align>(src, _bias, _scale, _0, dst, s + F * 1);
-                    SynetFusedLayerForward3<align>(src, _bias, _scale, _0, dst, s + F * 2);
-                    SynetFusedLayerForward3<align>(src, _bias, _scale, _0, dst, s + F * 3);
-                }
-                for (; s < spatialF; s += F)
-                    SynetFusedLayerForward3<align>(src, _bias, _scale, _0, dst, s);
-                src += spatialF;
-                dst += spatialF;
-            }
-        }
-
-        SIMD_INLINE void SynetFusedLayerForward3Nchw4c(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                SynetFusedLayerForward3Nchw4c<true>(src, bias, scale, channels, spatial, dst);
-            else
-                SynetFusedLayerForward3Nchw4c<false>(src, bias, scale, channels, spatial, dst);
-        }
-
         void SynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetFusedLayerForward3Nchw(src, bias, scale, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward3Nhwc(src, bias, scale, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetFusedLayerForward3Nchw4c(src, bias, scale, channels, spatial, dst);
             else
-                Base::SynetFusedLayerForward3(src, bias, scale, channels, spatial, dst, format);
+                assert(0);
         }
 
         //-------------------------------------------------------------------------------------------------

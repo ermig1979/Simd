@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -236,34 +236,12 @@ namespace Simd
             }
         }
 
-        template<int N> void SynetFusedLayerForward3NchwXc(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
-        {
-            for (size_t c = 0; c < channels; c += N)
-            {
-                for (size_t s = 0; s < spatial; ++s)
-                {
-                    for (size_t i = 0; i < N; ++i)
-                        dst[i] = SynetFusedLayerForward3(src[i] + bias[i], scale[i]);
-                    src += N;
-                    dst += N;
-                }
-                bias += N;
-                scale += N;
-            }
-        }
-
         void SynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetFusedLayerForward3Nchw(src, bias, scale, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward3Nhwc(src, bias, scale, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw4c)
-                SynetFusedLayerForward3NchwXc<4>(src, bias, scale, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw8c)
-                SynetFusedLayerForward3NchwXc<8>(src, bias, scale, channels, spatial, dst);
-            else if (format == SimdTensorFormatNchw16c)
-                SynetFusedLayerForward3NchwXc<16>(src, bias, scale, channels, spatial, dst);
             else
                 assert(0);
         }
