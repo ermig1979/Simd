@@ -186,17 +186,14 @@ namespace Test
         return result;
     }
 
-    bool SynetFusedLayerForward1AutoTest(int mask, const FuncFLF1 & f1, const FuncFLF1 & f2)
+    bool SynetFusedLayerForward1AutoTest(const FuncFLF1 & f1, const FuncFLF1 & f2)
     {
         bool result = true;
 
-        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNchw16c && result; format = (SimdTensorFormatType)((int)format + 1))
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNhwc && result; format = (SimdTensorFormatType)((int)format + 1))
         {
-            if (SimdSynetTensorAlignment(format)&mask)
-            {
-                result = result && SynetFusedLayerForward1AutoTest(H, W, format, f1, f2);
-                result = result && SynetFusedLayerForward1AutoTest(H - O, W + O, format, f1, f2);
-            }
+            result = result && SynetFusedLayerForward1AutoTest(H, W, format, f1, f2);
+            result = result && SynetFusedLayerForward1AutoTest(H - O, W + O, format, f1, f2);
         }
 
         return result;
@@ -206,26 +203,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetFusedLayerForward1AutoTest(TFM_ANY, FUNC_FLF1(Simd::Base::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+        result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Base::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
-            result = result && SynetFusedLayerForward1AutoTest(TFM_128, FUNC_FLF1(Simd::Sse41::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+            result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Sse41::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward1AutoTest(TFM_256, FUNC_FLF1(Simd::Avx::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+            result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Avx::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
-            result = result && SynetFusedLayerForward1AutoTest(TFM_512, FUNC_FLF1(Simd::Avx512bw::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+            result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Avx512bw::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetFusedLayerForward1AutoTest(TFM_128, FUNC_FLF1(Simd::Neon::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+            result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Neon::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
 #endif
 
         return result;
