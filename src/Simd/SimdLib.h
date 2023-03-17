@@ -7594,26 +7594,6 @@ extern "C"
     */
     SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
 
-    /*! @ingroup synet_conversion
-
-        \fn void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
-
-        \short Converts (input/output) image between different formats of 4D-tensor.
-
-        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c is not supported.
-
-        \warning This functionality is deprecated and can be removed in the future.
-
-        \param [in] batch - a batch (number of images in the batch).
-        \param [in] channels - a number of image channels.
-        \param [in] spatial - a spatial size (height*width) of image.
-        \param [in] src - a pointer to input image data.
-        \param [in] srcFormat - a format of input image. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc, ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c.
-        \param [out] dst - a pointer to output image data.
-        \param [in] dstFormat - a format of output image. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc, ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c.
-    */
-    SIMD_API SIMD_DEPRECATED void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
-
     /*! @ingroup synet_activation
 
         \fn void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);

@@ -180,30 +180,6 @@ namespace Simd
             return DivideBy16<compensation>(s0[x0] + 2 * s0[x1] + s0[x2] + (s1[x0] + 2 * s1[x1] + s1[x2]) * 2 + s2[x0] + 2 * s2[x1] + s2[x2]);
         }
 
-        SIMD_INLINE void Reorder16bit(const uint8_t * src, uint8_t * dst)
-        {
-            uint16_t value = *(uint16_t*)src;
-            *(uint16_t*)dst = value >> 8 | value << 8;
-        }
-
-        SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst)
-        {
-            uint32_t value = *(uint32_t*)src;
-            *(uint32_t*)dst =
-                (value & 0x000000FF) << 24 | (value & 0x0000FF00) << 8 |
-                (value & 0x00FF0000) >> 8 | (value & 0xFF000000) >> 24;
-        }
-
-        SIMD_INLINE void Reorder64bit(const uint8_t * src, uint8_t * dst)
-        {
-            uint64_t value = *(uint64_t*)src;
-            *(uint64_t*)dst =
-                (value & 0x00000000000000FF) << 56 | (value & 0x000000000000FF00) << 40 |
-                (value & 0x0000000000FF0000) << 24 | (value & 0x00000000FF000000) << 8 |
-                (value & 0x000000FF00000000) >> 8 | (value & 0x0000FF0000000000) >> 24 |
-                (value & 0x00FF000000000000) >> 40 | (value & 0xFF00000000000000) >> 56;
-        }
-
         SIMD_INLINE float RoughSigmoid(float value) // maximal absolute error 0.002294
         {
             float x = ::fabs(value);

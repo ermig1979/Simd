@@ -56,9 +56,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8399df0823f04dcc4aa4850af07c39af"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga8399df0823f04dcc4aa4850af07c39af">SimdSynetConvert8uTo32f</a> (const uint8_t *src, size_t batch, size_t channels, size_t height, size_t width, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, const float *scale, const float *shift, float *dst, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
 <tr class="memdesc:ga8399df0823f04dcc4aa4850af07c39af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit unsigned integer image to 32-bit float point image.  <a href="group__synet__conversion.html#ga8399df0823f04dcc4aa4850af07c39af">More...</a><br /></td></tr>
 <tr class="separator:ga8399df0823f04dcc4aa4850af07c39af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7d3c13d93a7aedd0ba96b881cdf0506c"><td class="memItemLeft" align="right" valign="top">SIMD_API SIMD_DEPRECATED void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga7d3c13d93a7aedd0ba96b881cdf0506c">SimdSynetReorderImage</a> (size_t batch, size_t channels, size_t spatial, const float *src, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> srcFormat, float *dst, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> dstFormat)</td></tr>
-<tr class="memdesc:ga7d3c13d93a7aedd0ba96b881cdf0506c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts (input/output) image between different formats of 4D-tensor.  <a href="group__synet__conversion.html#ga7d3c13d93a7aedd0ba96b881cdf0506c">More...</a><br /></td></tr>
-<tr class="separator:ga7d3c13d93a7aedd0ba96b881cdf0506c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga579496daf24d20e8370e0cccfe45f94c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga579496daf24d20e8370e0cccfe45f94c">SimdSynetSetInput</a> (const uint8_t *src, size_t width, size_t height, size_t stride, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> srcFormat, const float *lower, const float *upper, float *dst, size_t channels, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> dstFormat)</td></tr>
 <tr class="memdesc:ga579496daf24d20e8370e0cccfe45f94c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__synet__conversion.html#ga579496daf24d20e8370e0cccfe45f94c">More...</a><br /></td></tr>
 <tr class="separator:ga579496daf24d20e8370e0cccfe45f94c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -252,80 +249,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a pointer to the 32-bit float array with shift coefficients. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the array with 32-bit float output image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of calculation compatibility. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga7d3c13d93a7aedd0ba96b881cdf0506c" name="ga7d3c13d93a7aedd0ba96b881cdf0506c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga7d3c13d93a7aedd0ba96b881cdf0506c">&#9670;&nbsp;</a></span>SimdSynetReorderImage()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdSynetReorderImage </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>batch</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>channels</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>spatial</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
-          <td class="paramname"><em>srcFormat</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
-          <td class="paramname"><em>dstFormat</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Converts (input/output) image between different formats of 4D-tensor. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa">SimdTensorFormatNchw4c</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2">SimdTensorFormatNchw8c</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34">SimdTensorFormatNchw16c</a> is not supported.</dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>This functionality is deprecated and can be removed in the future.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch (number of images in the batch). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of image channels. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size (height*width) of image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input image data. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcFormat</td><td>- a format of input image. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa">SimdTensorFormatNchw4c</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2">SimdTensorFormatNchw8c</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34">SimdTensorFormatNchw16c</a>. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output image data. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstFormat</td><td>- a format of output image. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa">SimdTensorFormatNchw4c</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2">SimdTensorFormatNchw8c</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34">SimdTensorFormatNchw16c</a>. </td></tr>
   </table>
   </dd>
 </dl>

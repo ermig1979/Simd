@@ -543,8 +543,6 @@ namespace Simd
         void SynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
             const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
 
-        void SynetReorderImage(size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
-
         void SynetFusedLayerForward0(const float* src, const float* bias, const float* scale, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
 
         void SynetFusedLayerForward1(const float* src, const float* bias0, const float* scale1, const float* bias1, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
