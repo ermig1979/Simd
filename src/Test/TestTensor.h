@@ -527,14 +527,6 @@ namespace Test
         case SimdTensorFormatUnknown: return "Unknown";
         case SimdTensorFormatNchw: return "Nchw";
         case SimdTensorFormatNhwc: return "Nhwc";
-        case SimdTensorFormatNchw4c: return "Nchw4c";
-        case SimdTensorFormatNchw8c: return "Nchw8c";
-        case SimdTensorFormatNchw16c: return "Nchw16c";
-        case SimdTensorFormatOiyx: return "Oiyx";
-        case SimdTensorFormatYxio: return "Yxio";
-        case SimdTensorFormatOyxi4o: return "Oyxi4o";
-        case SimdTensorFormatOyxi8o: return "Oyxi8o";
-        case SimdTensorFormatOyxi16o: return "Oyxi16o";
         default: assert(0); return "Assert";
         }
     }
@@ -554,20 +546,12 @@ namespace Test
         }
     }
 
-    inline Shape ToShape(size_t batchOrOutput, size_t channelsOrInput, size_t height, size_t width, SimdTensorFormatType format)
+    inline Shape ToShape(size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format)
     {
         switch (format)
         {
-        case SimdTensorFormatNchw: return Shp(batchOrOutput, channelsOrInput, height, width);
-        case SimdTensorFormatNhwc: return Shp(batchOrOutput, height, width, channelsOrInput);
-        case SimdTensorFormatNchw4c: return Shp(batchOrOutput, (channelsOrInput + 3) / 4, height, width, 4);
-        case SimdTensorFormatNchw8c: return Shp(batchOrOutput, (channelsOrInput + 7) / 8, height, width, 8);
-        case SimdTensorFormatNchw16c: return Shp(batchOrOutput, (channelsOrInput + 15) / 16, height, width, 16);
-        case SimdTensorFormatOiyx: return Shp(batchOrOutput, channelsOrInput, height, width);
-        case SimdTensorFormatYxio: return Shp(height, width, channelsOrInput, batchOrOutput);
-        case SimdTensorFormatOyxi4o: return Shp((batchOrOutput + 3) / 4, height, width, channelsOrInput, 4);
-        case SimdTensorFormatOyxi8o: return Shp((batchOrOutput + 7) / 8, height, width, channelsOrInput, 8);
-        case SimdTensorFormatOyxi16o: return Shp((batchOrOutput + 15) / 16, height, width, channelsOrInput, 16);
+        case SimdTensorFormatNchw: return Shp(batch, channels, height, width);
+        case SimdTensorFormatNhwc: return Shp(batch, height, width, channels);
         default: assert(0); return Shape(0);
         }
     }
@@ -578,9 +562,6 @@ namespace Test
         {
         case SimdTensorFormatNchw: return Shp(channels, height, width);
         case SimdTensorFormatNhwc: return Shp(height, width, channels);
-        case SimdTensorFormatNchw4c: return Shp((channels + 3) / 4, height, width, 4);
-        case SimdTensorFormatNchw8c: return Shp((channels + 7) / 8, height, width, 8);
-        case SimdTensorFormatNchw16c: return Shp((channels + 15) / 16, height, width, 16);
         default: assert(0); return Shape(0);
         }
     }
@@ -591,9 +572,6 @@ namespace Test
         {
         case SimdTensorFormatNchw: return Shp(channels, spatial);
         case SimdTensorFormatNhwc: return Shp(spatial, channels);
-        case SimdTensorFormatNchw4c: return Shp((channels + 3) / 4, spatial, 4);
-        case SimdTensorFormatNchw8c: return Shp((channels + 7) / 8, spatial, 8);
-        case SimdTensorFormatNchw16c: return Shp((channels + 15) / 16, spatial, 16);
         default: assert(0); return Shape(0);
         }
     }
@@ -605,13 +583,8 @@ namespace Test
 
     inline Shape ToShape(size_t channels, SimdTensorFormatType format)
     {
-        return ToShape(SimdAlign(channels, SimdSynetTensorAlignment(format)));
+        return Shp(channels);
     }
-
-    const int TFM_ANY = (SIMD_ALIGN == 64 ? 29 : (SIMD_ALIGN == 32 ? 13 : (SIMD_ALIGN == 16 ? 5 : 1)));
-    const int TFM_128 = 5;
-    const int TFM_256 = 9;
-    const int TFM_512 = 17;
 }
 
 #endif// __TestTensor_h__

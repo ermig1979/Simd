@@ -71,12 +71,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga16ad436edc5feea4bcd1d65dc88c5595"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga16ad436edc5feea4bcd1d65dc88c5595">SimdSynetSoftmaxLayerForward</a> (const float *src, size_t outer, size_t count, size_t inner, float *dst)</td></tr>
 <tr class="memdesc:ga16ad436edc5feea4bcd1d65dc88c5595"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SoftmaxLayer.  <a href="group__synet__other.html#ga16ad436edc5feea4bcd1d65dc88c5595">More...</a><br /></td></tr>
 <tr class="separator:ga16ad436edc5feea4bcd1d65dc88c5595"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab95d774d938e40eea3aef69288073f8e"><td class="memItemLeft" align="right" valign="top">SIMD_API SIMD_DEPRECATED <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#gab95d774d938e40eea3aef69288073f8e">SimdSynetSpecifyTensorFormat</a> (<a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:gab95d774d938e40eea3aef69288073f8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies hardware optimized tensor format of 5D-tensor for (input/output) image or 2D-convolution filter.  <a href="group__synet__other.html#gab95d774d938e40eea3aef69288073f8e">More...</a><br /></td></tr>
-<tr class="separator:gab95d774d938e40eea3aef69288073f8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2fcc0ee0376a986bd32423815a689ea7"><td class="memItemLeft" align="right" valign="top">SIMD_API SIMD_DEPRECATED size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga2fcc0ee0376a986bd32423815a689ea7">SimdSynetTensorAlignment</a> (<a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:ga2fcc0ee0376a986bd32423815a689ea7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets alignment requred for current tensor format.  <a href="group__synet__other.html#ga2fcc0ee0376a986bd32423815a689ea7">More...</a><br /></td></tr>
-<tr class="separator:ga2fcc0ee0376a986bd32423815a689ea7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga427974bd012f6f3ff00245fd0328a96b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga427974bd012f6f3ff00245fd0328a96b">SimdSynetUnaryOperation32fLayerForward</a> (const float *src, size_t size, <a class="el" href="group__synet__types.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a> type, float *dst)</td></tr>
 <tr class="memdesc:ga427974bd012f6f3ff00245fd0328a96b"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of UnaryOperationLayer.  <a href="group__synet__other.html#ga427974bd012f6f3ff00245fd0328a96b">More...</a><br /></td></tr>
 <tr class="separator:ga427974bd012f6f3ff00245fd0328a96b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -692,64 +686,6 @@ for(i = 0; i &lt; count; ++i)
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="gab95d774d938e40eea3aef69288073f8e" name="gab95d774d938e40eea3aef69288073f8e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gab95d774d938e40eea3aef69288073f8e">&#9670;&nbsp;</a></span>SimdSynetSpecifyTensorFormat()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> SimdSynetSpecifyTensorFormat </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
-          <td class="paramname"><em>format</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Specifies hardware optimized tensor format of 5D-tensor for (input/output) image or 2D-convolution filter. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>This functionality is deprecated and can be removed in the future.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- an unspecified hardware optimized 5D-tensor format of (input/output) image or 2D-convolution filter. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa92a98f7f739514edee5945c95e1e507b">SimdTensorFormatNchwXc</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa818e3a4fda901a60801586491a06d114">SimdTensorFormatOyxiXo</a>. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>specified hardware optimized 5D-tensor format. </dd></dl>
-
-</div>
-</div>
-<a id="ga2fcc0ee0376a986bd32423815a689ea7" name="ga2fcc0ee0376a986bd32423815a689ea7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga2fcc0ee0376a986bd32423815a689ea7">&#9670;&nbsp;</a></span>SimdSynetTensorAlignment()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">size_t SimdSynetTensorAlignment </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
-          <td class="paramname"><em>format</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Gets alignment requred for current tensor format. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>This functionality is deprecated and can be removed in the future.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a tensor format. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>alignment requred for current tensor format. </dd></dl>
 
 </div>
 </div>

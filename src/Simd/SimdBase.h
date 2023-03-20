@@ -638,8 +638,6 @@ namespace Simd
 
         void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
 
-        void SynetReorderImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
-
         void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
         void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
@@ -655,14 +653,10 @@ namespace Simd
 
         void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
 
-        SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format);
-
         void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst);
 
         void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst);
         
-        size_t SynetTensorAlignment(SimdTensorFormatType format);
-
         void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 
         void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,

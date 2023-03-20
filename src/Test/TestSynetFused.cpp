@@ -461,9 +461,6 @@ namespace Test
     {
         bool result = true;
 
-        if (SimdAlign(channels, SimdSynetTensorAlignment(format)) != channels)
-            return result;
-
         f1.Update(format);
         f2.Update(format);
 
@@ -662,9 +659,6 @@ namespace Test
     bool SynetFusedLayerForward9AutoTest(size_t channels0, size_t channels1, size_t spatial, SimdTensorFormatType format, SimdBool copy, FuncFLF9 f1, FuncFLF9 f2)
     {
         bool result = true;
-
-        if (SimdAlign(channels0, SimdSynetTensorAlignment(format)) != channels0)
-            return result;
 
         f1.Update(format, copy);
         f2.Update(format, copy);

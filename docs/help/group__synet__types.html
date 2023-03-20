@@ -158,26 +158,6 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>
 , <br />
 &#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa">SimdTensorFormatNchw4c</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2">SimdTensorFormatNchw8c</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34">SimdTensorFormatNchw16c</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa92a98f7f739514edee5945c95e1e507b">SimdTensorFormatNchwXc</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa8380c38cb33e95d18861dc452ad46766">SimdTensorFormatOiyx</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faed14951cd9c6aef2009e00d1cb8165d4">SimdTensorFormatYxio</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa8fd57f893baf7db63f8acb7a1a7f87e9">SimdTensorFormatOyxi4o</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa080ee616acededfbb3149139e937fe5e">SimdTensorFormatOyxi8o</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fab5c6d40ff7d57cb7c141c938193ee909">SimdTensorFormatOyxi16o</a>
-, <br />
-&#160;&#160;<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa818e3a4fda901a60801586491a06d114">SimdTensorFormatOyxiXo</a>
 <br />
  }</td></tr>
 <tr class="separator:ga9d571aa9489cf536d4df8eef93aebc6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -382,26 +362,6 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c" name="gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c"></a>SimdTensorFormatNchw&#160;</td><td class="fielddoc"><p >NCHW (N - batch, C - channels, H - height, W - width) 4D-tensor format of (input/output) image. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd" name="gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd"></a>SimdTensorFormatNhwc&#160;</td><td class="fielddoc"><p >NHWC (N - batch, H - height, W - width, C - channels) 4D-tensor format of (input/output) image. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa" name="gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa"></a>SimdTensorFormatNchw4c&#160;</td><td class="fielddoc"><p >NCHW4c (N - batch, C - (channels + 3) / 4, H - height, W - width, 4c - channels gropped by 4) special 5D-tensor format of (input/output) image optimized for SSE and NEON. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2" name="gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2"></a>SimdTensorFormatNchw8c&#160;</td><td class="fielddoc"><p >NCHW8c (N - batch, C - (channels + 7) / 8, H - height, W - width, 8c - channels gropped by 8) special 5D-tensor format of (input/output) image optimized for AVX and AVX2. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34" name="gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34"></a>SimdTensorFormatNchw16c&#160;</td><td class="fielddoc"><p >NCHW16c (N - batch, C - (channels + 15) / 16, H - height, W - width, 16c - channels gropped by 16) special 5D-tensor format of (input/output) image optimized for AVX-512. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fa92a98f7f739514edee5945c95e1e507b" name="gga9d571aa9489cf536d4df8eef93aebc6fa92a98f7f739514edee5945c95e1e507b"></a>SimdTensorFormatNchwXc&#160;</td><td class="fielddoc"><p >Unspecified hardware optimized 5D-tensor format of (input/output) image. Specific format (<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa">SimdTensorFormatNchw4c</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2">SimdTensorFormatNchw8c</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34">SimdTensorFormatNchw16c</a>) is determinated by function <a class="el" href="group__synet__other.html#gab95d774d938e40eea3aef69288073f8e" title="Specifies hardware optimized tensor format of 5D-tensor for (input/output) image or 2D-convolution fi...">SimdSynetSpecifyTensorFormat</a>. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fa8380c38cb33e95d18861dc452ad46766" name="gga9d571aa9489cf536d4df8eef93aebc6fa8380c38cb33e95d18861dc452ad46766"></a>SimdTensorFormatOiyx&#160;</td><td class="fielddoc"><p >OIYX (O - output channels, I - input channels, Y - kernel height, X - kernel width) 4D-tensor format of 2D-convolution filter. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6faed14951cd9c6aef2009e00d1cb8165d4" name="gga9d571aa9489cf536d4df8eef93aebc6faed14951cd9c6aef2009e00d1cb8165d4"></a>SimdTensorFormatYxio&#160;</td><td class="fielddoc"><p >YXIO (Y - kernel height, X - kernel width, I - input channels, O - output channels) 4D-tensor format of 2D-convolution filter. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fa8fd57f893baf7db63f8acb7a1a7f87e9" name="gga9d571aa9489cf536d4df8eef93aebc6fa8fd57f893baf7db63f8acb7a1a7f87e9"></a>SimdTensorFormatOyxi4o&#160;</td><td class="fielddoc"><p >OYXI4o (O - (output channels + 3)/4, Y - kernel height, X - kernel width, I - input channels, 4o - output channels gropped by 4) special 5D-tensor format of 2D-convolution filter optimized for SSE and NEON. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fa080ee616acededfbb3149139e937fe5e" name="gga9d571aa9489cf536d4df8eef93aebc6fa080ee616acededfbb3149139e937fe5e"></a>SimdTensorFormatOyxi8o&#160;</td><td class="fielddoc"><p >OYXI8o (O - (output channels + 7)/8, Y - kernel height, X - kernel width, I - input channels, 8o - output channels gropped by 8) special 5D-tensor format of 2D-convolution filter optimized for AVX and AVX2. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fab5c6d40ff7d57cb7c141c938193ee909" name="gga9d571aa9489cf536d4df8eef93aebc6fab5c6d40ff7d57cb7c141c938193ee909"></a>SimdTensorFormatOyxi16o&#160;</td><td class="fielddoc"><p >OYXI16o (O - (output channels + 15)/16, Y - kernel height, X - kernel width, I - input channels, 16o - output channels gropped by 16) special 5D-tensor format of 2D-convolution filter optimized for AVX-512. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fa818e3a4fda901a60801586491a06d114" name="gga9d571aa9489cf536d4df8eef93aebc6fa818e3a4fda901a60801586491a06d114"></a>SimdTensorFormatOyxiXo&#160;</td><td class="fielddoc"><p >Unspecified hardware optimized 5D-tensor format of 2D-convolution filter. Specific format (<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa8fd57f893baf7db63f8acb7a1a7f87e9">SimdTensorFormatOyxi4o</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa080ee616acededfbb3149139e937fe5e">SimdTensorFormatOyxi8o</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fab5c6d40ff7d57cb7c141c938193ee909">SimdTensorFormatOyxi16o</a>) is determinated by function <a class="el" href="group__synet__other.html#gab95d774d938e40eea3aef69288073f8e" title="Specifies hardware optimized tensor format of 5D-tensor for (input/output) image or 2D-convolution fi...">SimdSynetSpecifyTensorFormat</a>. </p>
 </td></tr>
 </table>
 

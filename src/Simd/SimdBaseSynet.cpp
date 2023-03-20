@@ -32,52 +32,6 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format)
-        {
-            const size_t alignment = Alignment();
-            if (format == SimdTensorFormatNchwXc)
-            {
-                switch (alignment)
-                {
-                case 16: return SimdTensorFormatNchw4c;
-                case 32: return SimdTensorFormatNchw8c;
-                case 64: return SimdTensorFormatNchw16c;
-                }
-            }
-            if (format == SimdTensorFormatOyxiXo)
-            {
-                switch (alignment)
-                {
-                case 16: return SimdTensorFormatOyxi4o;
-                case 32: return SimdTensorFormatOyxi8o;
-                case 64: return SimdTensorFormatOyxi16o;
-                }
-            }
-            return SimdTensorFormatUnknown;
-        }
-
-        size_t SynetTensorAlignment(SimdTensorFormatType format)
-        {
-            switch (format)
-            {
-            case SimdTensorFormatNchw: return 1;
-            case SimdTensorFormatNhwc: return 1;
-            case SimdTensorFormatNchw4c: return 4;
-            case SimdTensorFormatNchw8c: return 8;
-            case SimdTensorFormatNchw16c: return 16;
-            case SimdTensorFormatOiyx: return 1;
-            case SimdTensorFormatYxio: return 1;
-            case SimdTensorFormatOyxi4o: return 4;
-            case SimdTensorFormatOyxi8o: return 8;
-            case SimdTensorFormatOyxi16o: return 16;
-            default: 
-                assert(0); 
-                return 0;
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         template <SimdSynetEltwiseOperationType type> void SynetEltwiseLayerForward(float const * const * src, size_t count, size_t size, float * dst)
         {
             size_t aligned = Simd::AlignLo(size, 4);

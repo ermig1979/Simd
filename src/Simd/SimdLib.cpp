@@ -6683,17 +6683,6 @@ SIMD_API void SimdSynetSoftplus32f(const float* src, size_t size, const float* b
 #endif
 }
 
-SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return Base::SynetSpecifyTensorFormat(format);
-#else
-    assert(0);
-    return SimdTensorFormatUnknown;
-#endif
-}
-
 SIMD_API void SimdSynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
 {
     SIMD_EMPTY();
@@ -6717,18 +6706,6 @@ SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope
     simdSynetTanh32f(src, size, slope, dst);
 #else
     assert(0);
-#endif
-}
-
-
-SIMD_API size_t SimdSynetTensorAlignment(SimdTensorFormatType format)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return Base::SynetTensorAlignment(format);
-#else
-    assert(0);
-    return 0;
 #endif
 }
 
