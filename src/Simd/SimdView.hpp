@@ -1233,6 +1233,7 @@ namespace Simd
         case Int32:     return CV_32SC1;
         case Float:     return CV_32FC1;
         case Double:    return CV_64FC1;
+        case Hsv24:     return CV_8UC3;
         default: assert(0); return 0;
         }
     }
