@@ -421,6 +421,62 @@ namespace Simd
             return _mm_packus_epi16(LoadAndBgrToY16<T>(bgra + 0, b16_r16[0], g16_1[0]), LoadAndBgrToY16<T>(bgra + 2, b16_r16[1], g16_1[1]));
         }
 
+        template <class T> SIMD_INLINE void BgraToYuv422pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v)
+        {
+            __m128i _b16_r16[2][2], _g16_1[2][2];
+            Store<false>((__m128i*)y + 0, LoadAndBgrToY8<T>((__m128i*)bgra + 0, _b16_r16[0], _g16_1[0]));
+            Store<false>((__m128i*)y + 1, LoadAndBgrToY8<T>((__m128i*)bgra + 4, _b16_r16[1], _g16_1[1]));
+
+            Average16(_b16_r16);
+            Average16(_g16_1);
+
+            Store<false>((__m128i*)u, _mm_packus_epi16(BgrToU16<T>(_b16_r16[0], _g16_1[0]), BgrToU16<T>(_b16_r16[1], _g16_1[1])));
+            Store<false>((__m128i*)v, _mm_packus_epi16(BgrToV16<T>(_b16_r16[0], _g16_1[0]), BgrToV16<T>(_b16_r16[1], _g16_1[1])));
+        }
+
+        template <class T>  void BgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert((width % 2 == 0) && (width >= DA));
+
+            size_t widthDA = AlignLo(width, DA);
+            const size_t A8 = A * 8;
+            for (size_t row = 0; row < height; row += 1)
+            {
+                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < widthDA; colY += DA, colUV += A, colBgra += A8)
+                    BgraToYuv422pV2<T>(bgra + colBgra, y + colY, u + colUV, v + colUV);
+                if (width != widthDA)
+                {
+                    size_t colY = width - DA;
+                    BgraToYuv422pV2<T>(bgra + colY * 4, y + colY, u + colY / 2, v + colY / 2);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void BgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
+            Base::BgraToYuv422pV2(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+#else
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgraToYuv422pV2<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgraToYuv422pV2<Base::Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgraToYuv422pV2<Base::Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgraToYuv422pV2<Base::Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+#endif
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <class T> SIMD_INLINE void BgraToYuv420pV2(const uint8_t* bgra0, size_t bgraStride, uint8_t* y0, size_t yStride, uint8_t* u, uint8_t* v)
         {
             const uint8_t* bgra1 = bgra0 + bgraStride;
