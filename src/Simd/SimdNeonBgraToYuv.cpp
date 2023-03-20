@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdYuvToBgr.h"
 
 #include "Simd/SimdLog.h"
 
@@ -104,6 +105,8 @@ namespace Simd
                 BgraToYuv420p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE uint16x8_t Average(uint8x16_t value)
         {
             return vshrq_n_u16(vpadalq_u8(K16_0001, value), 1);
@@ -167,6 +170,8 @@ namespace Simd
                 BgraToYuv422p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template <bool align> SIMD_INLINE void BgraToYuv444p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v)
         {
             uint8x16x4_t _bgra = Load4<align>(bgra);
@@ -211,6 +216,8 @@ namespace Simd
             else
                 BgraToYuv444p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void BgraToYuva420p(const uint8_t * bgra0, size_t bgraStride, uint8_t * y0, size_t yStride, uint8_t * u, uint8_t * v, uint8_t * a0, size_t aStride)
         {
@@ -283,6 +290,67 @@ namespace Simd
                 BgraToYuva420p<true>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
             else
                 BgraToYuva420p<false>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T, bool align> SIMD_INLINE void BgraToYuv444pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v)
+        {
+            uint8x16x4_t _bgra = Load4<align>(bgra);
+            Store<align>(y, BgrToY8<T>(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
+            Store<align>(u, BgrToU8<T>(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
+            Store<align>(v, BgrToV8<T>(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
+        }
+
+        template <class T, bool align> void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t widthA = AlignLo(width, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < widthA; col += A)
+                    BgraToYuv444pV2<T, align>(bgra + col * 4, y + col, u + col, v + col);
+                if (width != widthA)
+                {
+                    size_t col = width - A;
+                    BgraToYuv444pV2<T, false>(bgra + col * 4, y + col, u + col, v + col);
+                }
+                bgra += bgraStride;
+                y += yStride;
+                u += uStride;
+                v += vStride;
+            }
+        }
+
+        template <bool align> void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgraToYuv444pV2<Base::Bt601, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgraToYuv444pV2<Base::Bt709, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgraToYuv444pV2<Base::Bt2020, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgraToYuv444pV2<Base::Trect871, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                BgraToYuv444pV2<true>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+            else
+                BgraToYuv444pV2<false>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
         }
     }
 #endif// SIMD_NEON_ENABLE

@@ -28,6 +28,7 @@
 #include "Simd/SimdSet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdUnpack.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
@@ -814,6 +815,77 @@ namespace Simd
             bgr.val[0] = PackSaturatedI16(YuvToBlue<T>(yLo, uLo), YuvToBlue<T>(yHi, uHi));
             bgr.val[1] = PackSaturatedI16(YuvToGreen<T>(yLo, uLo, vLo), YuvToGreen<T>(yHi, uHi, vHi));
             bgr.val[2] = PackSaturatedI16(YuvToRed<T>(yLo, vLo), YuvToRed<T>(yHi, vHi));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T, int part> SIMD_INLINE int32x4_t BgrToY32(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+        {
+            static const int16x4_t BY = SIMD_VEC_SET1_PI16(T::B_2_Y);
+            static const int16x4_t GY = SIMD_VEC_SET1_PI16(T::G_2_Y);
+            static const int16x4_t RY = SIMD_VEC_SET1_PI16(T::R_2_Y);
+            static const int32x4_t RT = SIMD_VEC_SET1_EPI32(T::B_ROUND);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(RT, vreinterpret_s16_u16(Half<part>(blue)), BY),
+                vreinterpret_s16_u16(Half<part>(green)), GY), vreinterpret_s16_u16(Half<part>(red)), RY), T::B_SHIFT);
+        }
+
+        template <class T> SIMD_INLINE int16x8_t BgrToY16(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+        {
+            static const int16x8_t Y_LO = SIMD_VEC_SET1_EPI16(T::Y_LO);
+            return vaddq_s16(Y_LO, PackI32(BgrToY32<T, 0>(blue, green, red), BgrToY32<T, 1>(blue, green, red)));
+        }
+
+        template <class T> SIMD_INLINE uint8x16_t BgrToY8(uint8x16_t blue, uint8x16_t green, uint8x16_t red)
+        {
+            return PackSaturatedI16(
+                BgrToY16<T>(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
+                BgrToY16<T>(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
+        }
+
+        template <class T, int part> SIMD_INLINE int32x4_t BgrToU32(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+        {
+            static const int16x4_t BU = SIMD_VEC_SET1_PI16(T::B_2_U);
+            static const int16x4_t GU = SIMD_VEC_SET1_PI16(T::G_2_U);
+            static const int16x4_t RU = SIMD_VEC_SET1_PI16(T::R_2_U);
+            static const int32x4_t RT = SIMD_VEC_SET1_EPI32(T::B_ROUND);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(RT, vreinterpret_s16_u16(Half<part>(blue)), BU),
+                vreinterpret_s16_u16(Half<part>(green)), GU), vreinterpret_s16_u16(Half<part>(red)), RU), T::B_SHIFT);
+        }
+
+        template <class T> SIMD_INLINE int16x8_t BgrToU16(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+        {
+            static const int16x8_t UV_Z = SIMD_VEC_SET1_EPI16(T::UV_Z);
+            return vaddq_s16(UV_Z, PackI32(BgrToU32<T, 0>(blue, green, red), BgrToU32<T, 1>(blue, green, red)));
+        }
+
+        template <class T> SIMD_INLINE uint8x16_t BgrToU8(uint8x16_t blue, uint8x16_t green, uint8x16_t red)
+        {
+            return PackSaturatedI16(
+                BgrToU16<T>(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
+                BgrToU16<T>(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
+        }
+
+        template <class T, int part> SIMD_INLINE int32x4_t BgrToV32(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+        {
+            static const int16x4_t BV = SIMD_VEC_SET1_PI16(T::B_2_V);
+            static const int16x4_t GV = SIMD_VEC_SET1_PI16(T::G_2_V);
+            static const int16x4_t RV = SIMD_VEC_SET1_PI16(T::R_2_V);
+            static const int32x4_t RT = SIMD_VEC_SET1_EPI32(T::B_ROUND);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(RT, vreinterpret_s16_u16(Half<part>(blue)), BV),
+                vreinterpret_s16_u16(Half<part>(green)), GV), vreinterpret_s16_u16(Half<part>(red)), RV), T::B_SHIFT);
+        }
+
+        template <class T> SIMD_INLINE int16x8_t BgrToV16(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+        {
+            static const int16x8_t UV_Z = SIMD_VEC_SET1_EPI16(T::UV_Z);
+            return vaddq_s16(UV_Z, PackI32(BgrToV32<T, 0>(blue, green, red), BgrToV32<T, 1>(blue, green, red)));
+        }
+
+        template <class T> SIMD_INLINE uint8x16_t BgrToV8(uint8x16_t blue, uint8x16_t green, uint8x16_t red)
+        {
+            return PackSaturatedI16(
+                BgrToV16<T>(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
+                BgrToV16<T>(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
         }
     }
 #endif
