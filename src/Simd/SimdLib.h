@@ -1873,6 +1873,32 @@ extern "C"
     SIMD_API void SimdBgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, 
         uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride);
 
+    /*! @ingroup bgra_conversion
+
+        \fn void SimdBgraToYuva420pV2(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride, SimdYuvType yuvType);
+
+        \short Converts 32-bit BGRA image to YUVA420P.
+
+        The input BGRA and output Y and A images must have the same width and height.
+        The input U and V images must have the same width and height (half size relative to Y component).
+
+        \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
+        \param [in] bgraStride - a row size of the BGRA image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
+        \param [out] a - a pointer to pixels data of output 8-bit image with alpha plane.
+        \param [in] aStride - a row size of the a image.
+        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+    */
+    SIMD_API void SimdBgraToYuva420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+        uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, uint8_t* a, size_t aStride, SimdYuvType yuvType);
+
     /*! @ingroup bgr_conversion
 
         \fn void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);

@@ -117,6 +117,7 @@ namespace Test
     TEST_ADD_GROUP_A0(BgrToYuv444p);
     TEST_ADD_GROUP_A0(Uyvy422ToYuv420p);
     TEST_ADD_GROUP_A0(BgraToYuva420p);
+    TEST_ADD_GROUP_A0(BgraToYuva420pV2);
 
     TEST_ADD_GROUP_A0(BackgroundGrowRangeSlow);
     TEST_ADD_GROUP_A0(BackgroundGrowRangeFast);
