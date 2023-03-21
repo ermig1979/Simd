@@ -294,6 +294,79 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template <class T, bool align> SIMD_INLINE void BgraToYuv422pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v)
+        {
+            uint8x16x4_t bgra0 = Load4<align>(bgra + 0 * A);
+            Store<align>(y + 0, BgrToY8<T>(bgra0.val[0], bgra0.val[1], bgra0.val[2]));
+
+            uint16x8_t b0 = Average(bgra0.val[0]);
+            uint16x8_t g0 = Average(bgra0.val[1]);
+            uint16x8_t r0 = Average(bgra0.val[2]);
+
+            uint8x16x4_t bgra1 = Load4<align>(bgra + 4 * A);
+            Store<align>(y + A, BgrToY8<T>(bgra1.val[0], bgra1.val[1], bgra1.val[2]));
+
+            uint16x8_t b1 = Average(bgra1.val[0]);
+            uint16x8_t g1 = Average(bgra1.val[1]);
+            uint16x8_t r1 = Average(bgra1.val[2]);
+
+            Store<align>(u, PackSaturatedI16(BgrToU16<T>(b0, g0, r0), BgrToU16<T>(b1, g1, r1)));
+            Store<align>(v, PackSaturatedI16(BgrToV16<T>(b0, g0, r0), BgrToV16<T>(b1, g1, r1)));
+        }
+
+        template <class T, bool align> void BgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert((width % 2 == 0) && (width >= DA));
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t widthDA = AlignLo(width, DA);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t colUV = 0, colY = 0; colY < widthDA; colY += DA, colUV += A)
+                    BgraToYuv422pV2<T, align>(bgra + colY * 4, y + colY, u + colUV, v + colUV);
+                if (width != widthDA)
+                {
+                    size_t col = width - DA;
+                    BgraToYuv422pV2<T, false>(bgra + col * 4, y + col, u + col / 2, v + col/ 2);
+                }
+                bgra += bgraStride;
+                y += yStride;
+                u += uStride;
+                v += vStride;
+            }
+        }
+
+        template <bool align> void BgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgraToYuv422pV2<Base::Bt601, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgraToYuv422pV2<Base::Bt709, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgraToYuv422pV2<Base::Bt2020, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgraToYuv422pV2<Base::Trect871, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void BgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                BgraToYuv422pV2<true>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+            else
+                BgraToYuv422pV2<false>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <class T, bool align> SIMD_INLINE void BgraToYuv444pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v)
         {
             uint8x16x4_t _bgra = Load4<align>(bgra);
