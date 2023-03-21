@@ -7361,7 +7361,7 @@ extern "C"
 
         \fn void* SimdSynetPermuteInit(const size_t * shape, const size_t* order, size_t count, SimdTensorDataType type);
 
-        \short Initilizes permute algorithm.
+        \short Initializes permute algorithm.
 
         \param [in] shape - a pointer to shape of input tensor.
         \param [in] order - a pointer to order of dimensions in output tensor.
