@@ -28,47 +28,57 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
-    namespace Sse41
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
     {
-        void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst)
+        template <bool align> void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst)
         {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
             size_t size8 = Simd::AlignLo(size, 8);
             size_t size4 = Simd::AlignLo(size, 4);
             size_t i = 0;
             for (; i < size8; i += 8)
             {
-                __m128i d0 = Float32ToBFloat16(_mm_loadu_ps(src + i + 0));
-                __m128i d1 = Float32ToBFloat16(_mm_loadu_ps(src + i + 4));
-                _mm_storeu_si128((__m128i*)(dst + i), _mm_packus_epi32(d0, d1));
+                uint32x4_t d0 = Float32ToBFloat16(Load<align>(src + i + 0));
+                uint32x4_t d1 = Float32ToBFloat16(Load<align>(src + i + 4));
+                Store<align>(dst + i, PackU32(d0, d1));
             }
             for (; i < size4; i += 4)
             {
-                __m128i d0 = Float32ToBFloat16(_mm_loadu_ps(src + i + 0));
-                _mm_storel_epi64((__m128i*)(dst + i), _mm_packus_epi32(d0, K_ZERO));
+                uint32x4_t d0 = Float32ToBFloat16(Load<align>(src + i + 0));
+                Store<align>(dst + i, vmovn_u32(d0));
             }
             for (; i < size; ++i)
                 dst[i] = Base::Float32ToBFloat16(src[i]);
+        }
+
+        void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                Float32ToBFloat16<true>(src, size, dst);
+            else
+                Float32ToBFloat16<false>(src, size, dst);
         }
 
         //-------------------------------------------------------------------------------------------------
 
         void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)
         {
-            size_t size8 = Simd::AlignLo(size, 8);
-            size_t size4 = Simd::AlignLo(size, 4);
+            //size_t size8 = Simd::AlignLo(size, 8);
+            //size_t size4 = Simd::AlignLo(size, 4);
             size_t i = 0;
-            for (; i < size8; i += 8)
-            {
-                __m128i s = _mm_loadu_si128((__m128i*)(src + i));
-                _mm_storeu_ps(dst + i + 0, BFloat16ToFloat32(UnpackU16<0>(s)));
-                _mm_storeu_ps(dst + i + 4, BFloat16ToFloat32(UnpackU16<1>(s)));
-            }
-            for (; i < size4; i += 4)
-            {
-                __m128i s = _mm_loadl_epi64((__m128i*)(src + i));
-                _mm_storeu_ps(dst + i + 0, BFloat16ToFloat32(UnpackU16<0>(s)));
-            }
+            //for (; i < size8; i += 8)
+            //{
+            //    __m128i s = _mm_loadu_si128((__m128i*)(src + i));
+            //    _mm_storeu_ps(dst + i + 0, BFloat16ToFloat32(UnpackU16<0>(s)));
+            //    _mm_storeu_ps(dst + i + 4, BFloat16ToFloat32(UnpackU16<1>(s)));
+            //}
+            //for (; i < size4; i += 4)
+            //{
+            //    __m128i s = _mm_loadl_epi64((__m128i*)(src + i));
+            //    _mm_storeu_ps(dst + i + 0, BFloat16ToFloat32(UnpackU16<0>(s)));
+            //}
             for (; i < size; ++i)
                 dst[i] = Base::BFloat16ToFloat32(src[i]);
         }

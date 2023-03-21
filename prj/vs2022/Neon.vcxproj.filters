@@ -292,6 +292,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBFloat16.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Neon">
@@ -495,6 +498,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdReorder.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBFloat16.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
