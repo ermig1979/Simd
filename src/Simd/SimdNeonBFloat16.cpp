@@ -63,24 +63,34 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)
+        template <bool align> void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)
         {
-            //size_t size8 = Simd::AlignLo(size, 8);
-            //size_t size4 = Simd::AlignLo(size, 4);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            size_t size8 = Simd::AlignLo(size, 8);
+            size_t size4 = Simd::AlignLo(size, 4);
             size_t i = 0;
-            //for (; i < size8; i += 8)
-            //{
-            //    __m128i s = _mm_loadu_si128((__m128i*)(src + i));
-            //    _mm_storeu_ps(dst + i + 0, BFloat16ToFloat32(UnpackU16<0>(s)));
-            //    _mm_storeu_ps(dst + i + 4, BFloat16ToFloat32(UnpackU16<1>(s)));
-            //}
-            //for (; i < size4; i += 4)
-            //{
-            //    __m128i s = _mm_loadl_epi64((__m128i*)(src + i));
-            //    _mm_storeu_ps(dst + i + 0, BFloat16ToFloat32(UnpackU16<0>(s)));
-            //}
+            for (; i < size8; i += 8)
+            {
+                uint16x8_t s = Load<align>(src + i);
+                Store<align>(dst + i + 0, BFloat16ToFloat32(UnpackU16<0>(s)));
+                Store<align>(dst + i + 4, BFloat16ToFloat32(UnpackU16<1>(s)));
+            }
+            for (; i < size4; i += 4)
+            {
+                uint16x4_t s = LoadHalf<align>(src + i);
+                Store<align>(dst + i, BFloat16ToFloat32(vmovl_u16(s)));
+            }
             for (; i < size; ++i)
                 dst[i] = Base::BFloat16ToFloat32(src[i]);
+        }
+
+        void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                BFloat16ToFloat32<true>(src, size, dst);
+            else
+                BFloat16ToFloat32<false>(src, size, dst);
         }
     }
 #endif

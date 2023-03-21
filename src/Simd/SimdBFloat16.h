@@ -160,10 +160,10 @@ namespace Simd
             return vshrq_n_u32(vaddq_u32(vreinterpretq_u32_f32(value), Bf16::ROUND), Base::Bf16::SHIFT);
         }
 
-        //SIMD_INLINE __m128 BFloat16ToFloat32(__m128i value)
-        //{
-        //    return _mm_castsi128_ps(_mm_slli_epi32(value, Base::Bf16::SHIFT));
-        //}
+        SIMD_INLINE float32x4_t BFloat16ToFloat32(uint32x4_t value)
+        {
+            return vreinterpretq_f32_u32(vshlq_n_u32(value, Base::Bf16::SHIFT));
+        }
     }
 #endif 
 }

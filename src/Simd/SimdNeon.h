@@ -228,6 +228,8 @@ namespace Simd
 
         void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst);
 
+        void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst);
+
 #ifdef SIMD_NEON_FP16_ENABLE
         void Float32ToFloat16(const float * src, size_t size, uint16_t * dst);
 
