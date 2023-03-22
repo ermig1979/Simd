@@ -674,11 +674,11 @@ namespace Test
             result = result && BgraToYuvaV2AutoTest(2, 2, FUNC_YUVA2(Simd::Sse41::BgraToYuva420pV2), FUNC_YUVA2(SimdBgraToYuva420pV2));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && W >= Simd::Avx2::DA)
-//            result = result && BgraToYuvaV2AutoTest(2, 2, FUNC_YUVA2(Simd::Avx2::BgraToYuva420pV2), FUNC_YUVA2(SimdBgraToYuva420pV2));
-//#endif
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::DA)
+            result = result && BgraToYuvaV2AutoTest(2, 2, FUNC_YUVA2(Simd::Avx2::BgraToYuva420pV2), FUNC_YUVA2(SimdBgraToYuva420pV2));
+#endif
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable)
 //            result = result && BgraToYuvaV2AutoTest(2, 2, FUNC_YUVA2(Simd::Avx512bw::BgraToYuva420pV2), FUNC_YUVA2(SimdBgraToYuva420pV2));
