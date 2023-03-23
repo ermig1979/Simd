@@ -438,11 +438,54 @@ namespace Test
         return "Simd Library Performance Report:";
     }
 
-    static String TestInfo()
+    static String TestInfo(size_t threads)
     {
         std::stringstream info;
-        info << "Test execution time: " + GetCurrentDateTimeString();
-        info << ". Simd Library version: " << SimdVersion() << ".";
+        info << "Execution time: " + GetCurrentDateTimeString();
+        info << ". Test threads: " << threads;
+        info << ". Simd version: " << SimdVersion() << ".";
+#if defined(__linux__)
+        String cpu = "Unknown", mem = "Unknown";
+        ::FILE* c = ::popen("lscpu | grep 'Model name:' | sed -r 's/Model name:\\s{1,}//g'", "r");
+        if (c)
+        {
+            char buf[PATH_MAX];
+            while (::fgets(buf, PATH_MAX, c));
+            cpu = buf;
+            cpu = cpu.substr(0, cpu.find('\n'));
+            ::pclose(c);
+        }
+        ::FILE* m = ::popen("grep MemTotal /proc/meminfo | awk '{printf \"%.1f\", $2 / 1024 / 1024 }'", "r");
+        if (m)
+        {
+            char buf[PATH_MAX];
+            while (::fgets(buf, PATH_MAX, m));
+            mem = buf;
+            mem = mem.substr(0, mem.find('\n'));
+            ::pclose(m);
+        }
+        info << std::endl;
+        info << "CPU: " << cpu;
+        info << "; Sockets: " << SimdCpuInfo(SimdCpuInfoSockets);
+        info << ", Cores: " << SimdCpuInfo(SimdCpuInfoCores);
+        info << ", Threads: " << SimdCpuInfo(SimdCpuInfoThreads);
+        info << "; Cache L1D: " << SimdCpuInfo(SimdCpuInfoCacheL1) / 1024 << " KB";
+        info << ", L2: " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024 << " KB";
+        info << ", L3: " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024 / 1024 << " MB";
+        info << ", RAM: " << mem << " GB";
+        info << "; SIMD:";
+        info << (SimdCpuInfo(SimdCpuInfoAmx) ? " AMX" : "");
+        info << (SimdCpuInfo(SimdCpuInfoAvx512bf16) ? " AVX-512BF16" : "");
+        info << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? " AVX-512VNNI" : "");
+        info << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? " AVX-512BW AVX-512F" : "");
+        info << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA" : "");
+        info << (SimdCpuInfo(SimdCpuInfoAvx) ? " AVX" : "");
+        info << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3 SSE2 SSE" : "");
+        info << (SimdCpuInfo(SimdCpuInfoVmx) ? " Altivec" : "");
+        info << (SimdCpuInfo(SimdCpuInfoVsx) ? " VSX" : "");
+        info << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
+        info << ".";
+#endif
         return info.str();
     }
 
@@ -452,7 +495,7 @@ namespace Test
 
         report << std::endl << std::endl << TestTitle() << std::endl << std::endl;
 
-        report << TestInfo() << std::endl << std::endl;
+        report << TestInfo(_map.size()) << std::endl << std::endl;
 
         if (raw)
         {
@@ -478,7 +521,7 @@ namespace Test
 
         file << TestTitle() << std::endl << std::endl;
 
-        file << TestInfo() << std::endl << std::endl;
+        file << TestInfo(_map.size()) << std::endl << std::endl;
 
         file << GenerateTable(align)->GenerateText();
 
@@ -502,7 +545,7 @@ namespace Test
 
         html.WriteValue("h1", Html::Attr("id", "home"), TestTitle(), true);
 
-        html.WriteValue("h4", Html::Attr(), TestInfo(), true);
+        html.WriteValue("h4", Html::Attr(), TestInfo(_map.size()), true);
 
         html.WriteText(GenerateTable(align)->GenerateHtml(html.Indent()), false, false);
 
