@@ -1382,6 +1382,11 @@ SIMD_API void SimdBgraToYuva420pV2(const uint8_t* bgra, size_t bgraStride, size_
         Sse41::BgraToYuva420pV2(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride, yuvType);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::DA)
+        Neon::BgraToYuva420pV2(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride, yuvType);
+    else
+#endif
         Base::BgraToYuva420pV2(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride, yuvType);
 }
 
