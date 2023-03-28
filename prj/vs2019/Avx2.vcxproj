@@ -110,6 +110,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetSoftmax.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Transform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2UyvyToBgr.cpp" />
