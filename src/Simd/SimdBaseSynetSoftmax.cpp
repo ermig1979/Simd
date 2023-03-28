@@ -54,7 +54,7 @@ namespace Simd
                 {
                     for (size_t o = 0; o < outer; ++o)
                     {
-                        float max = Simd::Max(Simd::Max(src[0], src[1]), src[1]);
+                        float max = Simd::Max(Simd::Max(src[0], src[1]), src[2]);
                         float exp0 = ::exp(src[0] - max);
                         float exp1 = ::exp(src[1] - max);
                         float exp2 = ::exp(src[2] - max);

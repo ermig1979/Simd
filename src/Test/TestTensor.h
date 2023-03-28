@@ -412,7 +412,7 @@ namespace Test
             case DifferenceBoth: error = absolute > differenceMax && relative > differenceMax; break;
             case DifferenceAny: error = absolute > differenceMax || relative > differenceMax; break;
             }
-            if (error)
+            if (error || _a != _a || _b != _b)
             {
                 errorCount++;
                 if (printError)
