@@ -186,6 +186,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetSoftmax.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseThread.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseTransform.cpp" />

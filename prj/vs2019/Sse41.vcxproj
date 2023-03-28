@@ -119,6 +119,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetSoftmax.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Transform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToBgr.cpp" />

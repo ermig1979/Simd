@@ -311,69 +311,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
-        {
-            if (inner == 1 && count == 2)
-            {
-                for (size_t o = 0; o < outer; ++o)
-                {
-                    float max = Simd::Max(src[0], src[1]);
-                    float exp0 = ::exp(src[0] - max);
-                    float exp1 = ::exp(src[1] - max);
-                    float sum = exp0 + exp1;
-                    dst[0] = exp0 / sum;
-                    dst[1] = exp1 / sum;
-                    src += 2;
-                    dst += 2;
-                }
-            }
-            else
-            {
-                Array32f tmp(inner * 2);
-                const float * s;
-                float * max = tmp.data, *sum = tmp.data + inner, *d;
-                for (size_t o = 0; o < outer; ++o)
-                {
-                    for (size_t i = 0; i < inner; ++i)
-                        max[i] = src[i];
-                    s = src + inner;
-                    for (size_t c = 1; c < count; ++c)
-                    {
-                        for (size_t i = 0; i < inner; ++i)
-                            max[i] = Simd::Max(max[i], s[i]);
-                        s += inner;
-                    }
-
-                    s = src;
-                    d = dst;
-                    for (size_t i = 0; i < inner; ++i)
-                        sum[i] = 0;
-                    for (size_t c = 0; c < count; ++c)
-                    {
-                        for (size_t i = 0; i < inner; ++i)
-                        {
-                            d[i] = ::exp(s[i] - max[i]);
-                            sum[i] += d[i];
-                        }
-                        s += inner;
-                        d += inner;
-                    }
-
-                    d = dst;
-                    for (size_t c = 0; c < count; ++c)
-                    {
-                        for (size_t i = 0; i < inner; ++i)
-                            d[i] /= sum[i];
-                        d += inner;
-                    }
-                    src += count * inner;
-                    dst += count * inner;
-                }
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         template<SimdSynetUnaryOperation32fType type> void SynetUnaryOperation32fLayerForward(const float* src, size_t size, float* dst)
         {
             size_t size4 = AlignLo(size, 4);

@@ -135,6 +135,7 @@
     <ClCompile Include="..\..\src\Test\TestSynetPermute.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetScale.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetSoftmax.cpp" />
     <ClCompile Include="..\..\src\Test\TestTable.cpp" />
     <ClCompile Include="..\..\src\Test\TestTexture.cpp" />
     <ClCompile Include="..\..\src\Test\TestTransform.cpp" />
