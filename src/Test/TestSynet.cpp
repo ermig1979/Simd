@@ -419,8 +419,8 @@ namespace Test
 
         Tensor32f src({ size });
         float lo = -10.0, hi = 10.0f;
-        if (type == SimdSynetUnaryOperation32fLog)
-            lo = 0.000000001f;
+        if (type == SimdSynetUnaryOperation32fLog || type == SimdSynetUnaryOperation32fRsqrt || type == SimdSynetUnaryOperation32fSqrt)
+            lo = 0.000001f;
         FillRandom(src.Data(), src.Size(), lo, hi);
 
         Tensor32f dst1({ size });
