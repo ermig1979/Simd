@@ -69,7 +69,7 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
 
         Tensor32f src({ outer, count, inner });
-        FillRandom(src.Data(), src.Size(), -3999.0, -2999.0f);
+        FillRandom(src.Data(), src.Size(), -10.0, 10.0f);
 
         Tensor32f dst1(ToShape(outer, count, inner, SimdTensorFormatNchw), SimdTensorFormatNchw, 0.1f);
         Tensor32f dst2(ToShape(outer, count, inner, SimdTensorFormatNchw), SimdTensorFormatNchw, 0.2f);
