@@ -232,7 +232,7 @@ namespace Simd
             Exp exp;
             for (; o < outerF; o += F)
             {
-                __m256 _max = _mm256_setzero_ps();
+                __m256 _max = _mm256_set1_ps(-FLT_MAX);
                 for (c = 0; c < countF; c += F)
                     LoadTansp8x8(src + c, count, buf.data + c * F, _max);
                 if (c < count)

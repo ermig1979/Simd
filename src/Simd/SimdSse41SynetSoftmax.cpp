@@ -161,7 +161,7 @@ namespace Simd
             Exp exp;
             for (; o < outerF; o += F)
             {
-                __m128 _max = _mm_setzero_ps();
+                __m128 _max = _mm_set1_ps(-FLT_MAX);
                 for (c = 0; c < countF; c += F)
                     LoadTansp4x4(src + c, count, buf.data + c * F, _max);
                 if (c < count)
