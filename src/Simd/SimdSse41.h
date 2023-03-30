@@ -517,7 +517,7 @@ namespace Simd
 
         void SynetSoftmaxLayerForward(const float* src, size_t outer, size_t size, size_t inner, float* dst);
 
-        void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
+        void SynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 
         void SynetElu32f(const float* src, size_t size, const float* alpha, float* dst);
 

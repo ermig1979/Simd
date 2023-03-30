@@ -111,6 +111,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetSoftmax.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetUnaryOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Transform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2UyvyToBgr.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="..\..\src\Simd\SimdDeinterleave.h" />
     <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdErf.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />

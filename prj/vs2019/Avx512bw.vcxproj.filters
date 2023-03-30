@@ -364,6 +364,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetSoftmax.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetUnaryOperation.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">
@@ -606,6 +609,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdErf.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

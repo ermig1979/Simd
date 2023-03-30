@@ -457,12 +457,14 @@ typedef enum
 } SimdSynetEltwiseOperationType;
 
 /*! @ingroup synet_types
-    Describes operation type used in function ::SimdSynetUnaryOperation32fLayerForward.
+    Describes operation type used in function ::SimdSynetUnaryOperation32f.
 */
 typedef enum
 {
     /*! Gets absolute value for every point of input tensor. */
     SimdSynetUnaryOperation32fAbs,
+    /*! Gets erf (error function) for every point of input tensor. */
+    SimdSynetUnaryOperation32fErf,
     /*! Gets exponent for every point of input tensor. */
     SimdSynetUnaryOperation32fExp,
     /*! Gets logarithm for every point of input tensor. */
@@ -7899,7 +7901,7 @@ extern "C"
 
     /*! @ingroup synet_other
 
-        \fn void SimdSynetUnaryOperation32fLayerForward(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
+        \fn void SimdSynetUnaryOperation32f(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 
         \short This function is used for forward propagation of UnaryOperationLayer.
 
@@ -7910,7 +7912,7 @@ extern "C"
         \param [in] type - an unary operation type (see ::SimdSynetUnaryOperation32fType).
         \param [out] dst - a pointer to the output 32-bit float array.
     */
-    SIMD_API void SimdSynetUnaryOperation32fLayerForward(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float * dst);
+    SIMD_API void SimdSynetUnaryOperation32f(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float * dst);
 
     /*! @ingroup texture_estimation
 

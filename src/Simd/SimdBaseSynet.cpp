@@ -308,40 +308,6 @@ namespace Simd
             }
 
         }
-
-        //-------------------------------------------------------------------------------------------------
-
-        template<SimdSynetUnaryOperation32fType type> void SynetUnaryOperation32fLayerForward(const float* src, size_t size, float* dst)
-        {
-            size_t size4 = AlignLo(size, 4);
-            size_t i = 0;
-            for (; i < size4; i += 4)
-            {
-                dst[i + 0] = SynetUnaryOperation32f<type>(src[i + 0]);
-                dst[i + 1] = SynetUnaryOperation32f<type>(src[i + 1]);
-                dst[i + 2] = SynetUnaryOperation32f<type>(src[i + 2]);
-                dst[i + 3] = SynetUnaryOperation32f<type>(src[i + 3]);
-            }
-            for (; i < size; ++i)
-                dst[i] = SynetUnaryOperation32f<type>(src[i]);
-        }
-
-        void SynetUnaryOperation32fLayerForward(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float * dst)
-        {
-            switch (type)
-            {
-            case SimdSynetUnaryOperation32fAbs: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fAbs>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fExp: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fExp>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fLog: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fLog>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fNeg: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fNeg>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fRsqrt: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fRsqrt>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fSqrt: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fSqrt>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fTanh: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fTanh>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fZero: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fZero>(src, size, dst); break;
-            default:
-                assert(0);
-            }
-        }
     }
 #endif
 }

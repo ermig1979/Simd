@@ -269,6 +269,11 @@ namespace Simd
             return value > 0 ? value : -value;
         }
 
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf>(float value)
+        {
+            return ::erf(value);
+        }
+
         template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp>(float value)
         {
             return ::exp(value);

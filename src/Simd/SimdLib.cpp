@@ -6773,14 +6773,14 @@ SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope
 #endif
 }
 
-SIMD_API void SimdSynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
+SIMD_API void SimdSynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void(*SimdSynetUnaryOperation32fLayerForwardPtr) (const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
-    const static SimdSynetUnaryOperation32fLayerForwardPtr simdSynetUnaryOperation32fLayerForward = SIMD_FUNC4(SynetUnaryOperation32fLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    typedef void(*SimdSynetUnaryOperation32fPtr) (const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
+    const static SimdSynetUnaryOperation32fPtr simdSynetUnaryOperation32f = SIMD_FUNC4(SynetUnaryOperation32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
-    simdSynetUnaryOperation32fLayerForward(src, size, type, dst);
+    simdSynetUnaryOperation32f(src, size, type, dst);
 #else
     assert(0);
 #endif

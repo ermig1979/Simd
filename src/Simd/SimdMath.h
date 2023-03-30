@@ -237,6 +237,16 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+        SIMD_INLINE __m128 Abs(__m128 value)
+        {
+            return _mm_andnot_ps(_mm_set1_ps(-0.0f), value);
+        }
+
+        SIMD_INLINE __m128 Neg(__m128 value)
+        {
+            return _mm_sub_ps(_mm_setzero_ps(), value);
+        }
+
         SIMD_INLINE __m128 Square(__m128 value)
         {
             return _mm_mul_ps(value, value);

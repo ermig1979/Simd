@@ -365,7 +365,6 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetEltwiseLayerForward);
     TEST_ADD_GROUP_A0(SynetLrnLayerCrossChannels);
     TEST_ADD_GROUP_A0(SynetShuffleLayerForward);
-    TEST_ADD_GROUP_A0(SynetUnaryOperation32fLayerForward);
 
     TEST_ADD_GROUP_A0(SynetElu32f);
     TEST_ADD_GROUP_A0(SynetHardSigmoid32f);
@@ -417,6 +416,8 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetScale8iForward);
 
     TEST_ADD_GROUP_A0(SynetSoftmaxLayerForward);
+
+    TEST_ADD_GROUP_A0(SynetUnaryOperation32f);
 #endif
 
     TEST_ADD_GROUP_A0(TextureBoostedSaturatedGradient);
