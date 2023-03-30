@@ -76,6 +76,47 @@ namespace Simd
             return _mm_or_ps(_mm_and_ps(_m0, x), r);
         }
     }
-#endif //SIMD_SSE41_ENABLE 
+#endif
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        namespace Detail
+        {
+            SIMD_INLINE __m256 Poly4(__m256 x, float a, float b, float c, float d, float e)
+            {
+                __m256 p = _mm256_set1_ps(e);
+                p = _mm256_fmadd_ps(x, p, _mm256_set1_ps(d));
+                p = _mm256_fmadd_ps(x, p, _mm256_set1_ps(c));
+                p = _mm256_fmadd_ps(x, p, _mm256_set1_ps(b));
+                p = _mm256_fmadd_ps(x, p, _mm256_set1_ps(a));
+                return p;
+            }
+
+            SIMD_INLINE __m256 ExpNegSqr(__m256 x)
+            {
+                x = _mm256_mul_ps(_mm256_set1_ps(-1.44269504f), _mm256_mul_ps(x, x));
+                __m256i ipart = _mm256_cvtps_epi32(_mm256_sub_ps(x, _mm256_set1_ps(0.5f)));
+                __m256 fpart = _mm256_sub_ps(x, _mm256_cvtepi32_ps(ipart));
+                __m256 expipart = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_add_epi32(ipart, _mm256_set1_epi32(127)), 23));
+                __m256 expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
+                return _mm256_mul_ps(expipart, expfpart);
+            }
+        }
+
+        SIMD_INLINE __m256 Erf(__m256 x)
+        {
+            const __m256 _max = _mm256_set1_ps(9);
+            const __m256 _m0 = _mm256_set1_ps(-0.0f);
+            const __m256 _1 = _mm256_set1_ps(1.0f);
+            __m256 a, p, q, r;
+            a = _mm256_min_ps(_mm256_andnot_ps(_m0, x), _max);
+            q = _mm256_div_ps(_1, _mm256_fmadd_ps(_mm256_set1_ps(0.3275911f), a, _1));
+            p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
+            r = _mm256_fnmadd_ps(_mm256_mul_ps(p, q), Detail::ExpNegSqr(a), _1);
+            return _mm256_or_ps(_mm256_and_ps(_m0, x), r);
+        }
+    }
+#endif 
 }
 #endif//__SimdErf_h__

@@ -124,7 +124,7 @@ namespace Simd
         void SynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
         {
             if (type == SimdSynetUnaryOperation32fErf)
-                return Sse41::SynetUnaryOperation32f(src, size, type, dst);
+                return Avx2::SynetUnaryOperation32f(src, size, type, dst);
             if (Aligned(src) && Aligned(dst))
                 SynetUnaryOperation32f<true>(src, size, type, dst);
             else
