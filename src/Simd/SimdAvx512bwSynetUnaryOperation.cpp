@@ -32,6 +32,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdPow.h"
+#include "Simd/SimdErf.h"
 #include "Simd/SimdInterleave.h"
 #include "Simd/SimdDeinterleave.h"
 
@@ -45,6 +46,11 @@ namespace Simd
         template<> SIMD_INLINE __m512 SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs>(__m512 value)
         {
             return AndNot(_mm512_set1_ps(-0.0f), value);
+        }
+
+        template<> SIMD_INLINE __m512 SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf>(__m512 value)
+        {
+            return Erf(value);
         }
 
         template<> SIMD_INLINE __m512 SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp>(__m512 value)
@@ -108,7 +114,7 @@ namespace Simd
             switch (type)
             {
             case SimdSynetUnaryOperation32fAbs: SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs, align>(src, size, dst); break;
-                //case SimdSynetUnaryOperation32fErf: SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fErf: SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fExp: SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fLog: SynetUnaryOperation32f<SimdSynetUnaryOperation32fLog, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fNeg: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNeg, align>(src, size, dst); break;
@@ -123,8 +129,6 @@ namespace Simd
 
         void SynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
         {
-            if (type == SimdSynetUnaryOperation32fErf)
-                return Avx2::SynetUnaryOperation32f(src, size, type, dst);
             if (Aligned(src) && Aligned(dst))
                 SynetUnaryOperation32f<true>(src, size, type, dst);
             else

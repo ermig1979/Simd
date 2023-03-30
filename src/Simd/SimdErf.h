@@ -118,5 +118,46 @@ namespace Simd
         }
     }
 #endif 
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        namespace Detail
+        {
+            SIMD_INLINE __m512 Poly4(__m512 x, float a, float b, float c, float d, float e)
+            {
+                __m512 p = _mm512_set1_ps(e);
+                p = _mm512_fmadd_ps(x, p, _mm512_set1_ps(d));
+                p = _mm512_fmadd_ps(x, p, _mm512_set1_ps(c));
+                p = _mm512_fmadd_ps(x, p, _mm512_set1_ps(b));
+                p = _mm512_fmadd_ps(x, p, _mm512_set1_ps(a));
+                return p;
+            }
+
+            SIMD_INLINE __m512 ExpNegSqr(__m512 x)
+            {
+                x = _mm512_mul_ps(_mm512_set1_ps(-1.44269504f), _mm512_mul_ps(x, x));
+                __m512i ipart = _mm512_cvtps_epi32(_mm512_sub_ps(x, _mm512_set1_ps(0.5f)));
+                __m512 fpart = _mm512_sub_ps(x, _mm512_cvtepi32_ps(ipart));
+                __m512 expipart = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_add_epi32(ipart, _mm512_set1_epi32(127)), 23));
+                __m512 expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
+                return _mm512_mul_ps(expipart, expfpart);
+            }
+        }
+
+        SIMD_INLINE __m512 Erf(__m512 x)
+        {
+            const __m512 _max = _mm512_set1_ps(9);
+            const __m512 _m0 = _mm512_set1_ps(-0.0f);
+            const __m512 _1 = _mm512_set1_ps(1.0f);
+            __m512 a, p, q, r;
+            a = _mm512_min_ps(_mm512_andnot_ps(_m0, x), _max);
+            q = _mm512_div_ps(_1, _mm512_fmadd_ps(_mm512_set1_ps(0.3275911f), a, _1));
+            p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
+            r = _mm512_fnmadd_ps(_mm512_mul_ps(p, q), Detail::ExpNegSqr(a), _1);
+            return _mm512_or_ps(_mm512_and_ps(_m0, x), r);
+        }
+    }
+#endif 
 }
 #endif//__SimdErf_h__
