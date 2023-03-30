@@ -33,7 +33,12 @@ namespace Simd
     {
         SIMD_INLINE float Erf(float value)
         {
-            return ::erff(value);
+            return ::erf(value);
+        }
+
+        SIMD_INLINE float Gelu(float value)
+        {
+            return value * (::erf(value * float(M_SQRT1_2)) + 1.0f) * 0.5f;
         }
     }
 

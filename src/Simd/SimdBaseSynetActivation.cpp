@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdArray.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdErf.h"
 #include "Simd/SimdSynet.h"
 
 namespace Simd
@@ -44,6 +45,23 @@ namespace Simd
             }
             for (; i < size; ++i)
                 dst[i] = SynetElu32f(src[i], _alpha);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetGelu32f(const float* src, size_t size, float* dst)
+        {
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = Gelu(src[i + 0]);
+                dst[i + 1] = Gelu(src[i + 1]);
+                dst[i + 2] = Gelu(src[i + 2]);
+                dst[i + 3] = Gelu(src[i + 3]);
+            }
+            for (; i < size; ++i)
+                dst[i] = Gelu(src[i]);
         }
 
         //-------------------------------------------------------------------------------------------------

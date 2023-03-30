@@ -53,6 +53,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaee4f654aee53a18b5506e71f6790f39f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#gaee4f654aee53a18b5506e71f6790f39f">SimdSynetElu32f</a> (const float *src, size_t size, const float *alpha, float *dst)</td></tr>
 <tr class="memdesc:gaee4f654aee53a18b5506e71f6790f39f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates ELU activation function for 32-bit float array.  <a href="group__synet__activation.html#gaee4f654aee53a18b5506e71f6790f39f">More...</a><br /></td></tr>
 <tr class="separator:gaee4f654aee53a18b5506e71f6790f39f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga74601e69f660d5d7bfc8a0e19509b1f1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga74601e69f660d5d7bfc8a0e19509b1f1">SimdSynetGelu32f</a> (const float *src, size_t size, float *dst)</td></tr>
+<tr class="memdesc:ga74601e69f660d5d7bfc8a0e19509b1f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of GeluLayer.  <a href="group__synet__activation.html#ga74601e69f660d5d7bfc8a0e19509b1f1">More...</a><br /></td></tr>
+<tr class="separator:ga74601e69f660d5d7bfc8a0e19509b1f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9f63fbc70cb4746624d9f4f9c91dfbf9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga9f63fbc70cb4746624d9f4f9c91dfbf9">SimdSynetHardSigmoid32f</a> (const float *src, size_t size, const float *scale, const float *shift, float *dst)</td></tr>
 <tr class="memdesc:ga9f63fbc70cb4746624d9f4f9c91dfbf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates HardSigmoid activation function (<a href="https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html">https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html</a>) for 32-bit float array.  <a href="group__synet__activation.html#ga9f63fbc70cb4746624d9f4f9c91dfbf9">More...</a><br /></td></tr>
 <tr class="separator:ga9f63fbc70cb4746624d9f4f9c91dfbf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -135,6 +138,53 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a pointer to alpha parameter. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga74601e69f660d5d7bfc8a0e19509b1f1" name="ga74601e69f660d5d7bfc8a0e19509b1f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga74601e69f660d5d7bfc8a0e19509b1f1">&#9670;&nbsp;</a></span>SimdSynetGelu32f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetGelu32f </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of GeluLayer. </p>
+<p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
+    dst[i] = src[i] * (1 + erf(src[i]/sqrt(2))) / 2;
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float array. </td></tr>
   </table>
   </dd>
 </dl>

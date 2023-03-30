@@ -367,6 +367,7 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetShuffleLayerForward);
 
     TEST_ADD_GROUP_A0(SynetElu32f);
+    TEST_ADD_GROUP_A0(SynetGelu32f);
     TEST_ADD_GROUP_A0(SynetHardSigmoid32f);
     TEST_ADD_GROUP_A0(SynetHswish32f);
     TEST_ADD_GROUP_A0(SynetMish32f);

@@ -7066,6 +7066,26 @@ extern "C"
 
     /*! @ingroup synet_activation
 
+        \fn void SimdSynetGelu32f(const float* src, size_t size, float* dst);
+
+        \short This function is used for forward propagation of GeluLayer.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = src[i] * (1 + erf(src[i]/sqrt(2))) / 2;
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [out] dst - a pointer to output 32-bit float array.
+    */
+    SIMD_API void SimdSynetGelu32f(const float* src, size_t size, float* dst);
+
+    /*! @ingroup synet_activation
+
         \fn void SimdSynetHardSigmoid32f(const float * src, size_t size, const float * scale, const float * shift, float * dst);
 
         \short Calculates HardSigmoid activation function (https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html) for 32-bit float array.

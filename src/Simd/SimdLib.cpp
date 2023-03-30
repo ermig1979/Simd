@@ -6207,6 +6207,19 @@ SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1
 #endif
 }
 
+SIMD_API void SimdSynetGelu32f(const float* src, size_t size, float* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetGelu32fPtr) (const float* src, size_t size, float* dst);
+    const static SimdSynetGelu32fPtr simdSynetGelu32f = SIMD_FUNC0(SynetGelu32f);// , SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetGelu32f(src, size, dst);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
 {
     SIMD_EMPTY();

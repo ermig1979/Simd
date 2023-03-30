@@ -113,7 +113,92 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncGelu32f
+        {
+            typedef void(*FuncPtr)(const float* src, size_t size, float* dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncGelu32f(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Call(const Tensor32f& src, Tensor32f& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), src.Size(), dst.Data());
+            }
+        };
+    }
+
+#define FUNC_GELU32F(func) FuncGelu32f(func, #func)
+
+    bool SynetGelu32fAutoTest(size_t size, const FuncGelu32f& f1, const FuncGelu32f& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << size << "].");
+
+        Tensor32f src(ToShape(size));
+        Tensor32f dst1(ToShape(size));
+        Tensor32f dst2(ToShape(size));
+
+        FillRandom(src, -10.0, 10.0);
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetGelu32fAutoTest(const FuncGelu32f& f1, const FuncGelu32f& f2)
+    {
+        bool result = true;
+
+        result = result && SynetGelu32fAutoTest(W * H, f1, f2);
+        result = result && SynetGelu32fAutoTest(W * H - O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetGelu32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Base::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable)
+//            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Sse41::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Avx2::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
+//#endif 
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && SynetGelu32fAutoTest(FUNC_ELU32F(Simd::Avx512bw::SynetGelu32f), FUNC_ELU32F(SimdSynetGelu32f));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Neon::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
+//#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -200,7 +285,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -287,7 +372,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -373,7 +458,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -470,7 +555,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -553,7 +638,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -637,7 +722,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -720,7 +805,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -803,7 +888,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -887,7 +972,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
