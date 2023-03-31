@@ -175,16 +175,16 @@ namespace Test
 
         result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Base::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Sse41::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
-//#endif 
-//
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable)
-//            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Avx2::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Sse41::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Avx2::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
+#endif 
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable)
 //            result = result && SynetGelu32fAutoTest(FUNC_ELU32F(Simd::Avx512bw::SynetGelu32f), FUNC_ELU32F(SimdSynetGelu32f));

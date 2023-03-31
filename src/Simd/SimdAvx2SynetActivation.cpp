@@ -26,6 +26,7 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdErf.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSynet.h"
 
@@ -65,6 +66,42 @@ namespace Simd
                 SynetElu32f<true>(src, size, alpha, dst);
             else
                 SynetElu32f<false>(src, size, alpha, dst);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<bool align> SIMD_INLINE void SynetGelu32f(const float* src, float* dst, size_t offset)
+        {
+            Avx::Store<align>(dst + offset, Gelu(Avx::Load<align>(src + offset)));
+        }
+
+        template<bool align> void SynetGelu32f(const float* src, size_t size, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetGelu32f<align>(src, dst, i + 0 * F);
+                SynetGelu32f<align>(src, dst, i + 1 * F);
+                SynetGelu32f<align>(src, dst, i + 2 * F);
+                SynetGelu32f<align>(src, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetGelu32f<align>(src, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::Gelu(src[i]);
+        }
+
+        void SynetGelu32f(const float* src, size_t size, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetGelu32f<true>(src, size, dst);
+            else
+                SynetGelu32f<false>(src, size, dst);
         }
 
         //-------------------------------------------------------------------------------------------------
