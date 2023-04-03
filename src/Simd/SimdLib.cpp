@@ -6212,7 +6212,7 @@ SIMD_API void SimdSynetGelu32f(const float* src, size_t size, float* dst)
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetGelu32fPtr) (const float* src, size_t size, float* dst);
-    const static SimdSynetGelu32fPtr simdSynetGelu32f = SIMD_FUNC2(SynetGelu32f, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetGelu32fPtr simdSynetGelu32f = SIMD_FUNC3(SynetGelu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
 
     simdSynetGelu32f(src, size, dst);
 #else

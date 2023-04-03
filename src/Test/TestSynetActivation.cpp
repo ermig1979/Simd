@@ -185,11 +185,11 @@ namespace Test
             result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Avx2::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && SynetGelu32fAutoTest(FUNC_ELU32F(Simd::Avx512bw::SynetGelu32f), FUNC_ELU32F(SimdSynetGelu32f));
-//#endif 
-//
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Avx512bw::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
+#endif 
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
 //            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Neon::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));

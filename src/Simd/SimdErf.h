@@ -128,7 +128,6 @@ namespace Simd
             return _mm256_or_ps(_mm256_and_ps(_m0, x), r);
         }
 
-
         SIMD_INLINE __m256 Gelu(__m256 x)
         {
             __m256 e = Erf(_mm256_mul_ps(x, _mm256_set1_ps(float(M_SQRT1_2))));
@@ -174,6 +173,12 @@ namespace Simd
             p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
             r = _mm512_fnmadd_ps(_mm512_mul_ps(p, q), Detail::ExpNegSqr(a), _1);
             return _mm512_or_ps(_mm512_and_ps(_m0, x), r);
+        }
+
+        SIMD_INLINE __m512 Gelu(__m512 x)
+        {
+            __m512 e = Erf(_mm512_mul_ps(x, _mm512_set1_ps(float(M_SQRT1_2))));
+            return _mm512_mul_ps(_mm512_mul_ps(x, _mm512_set1_ps(0.5f)), _mm512_add_ps(e, _mm512_set1_ps(1.0f)));
         }
     }
 #endif 
