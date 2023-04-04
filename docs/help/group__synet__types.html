@@ -82,6 +82,8 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="group__synet__types.html#ggac0134d6cef9d64de8b89171e79ef4568a828c49769d0f202d776344238e5bd3d3">SimdConvolutionActivationHardSigmoid</a>
 , <br />
 &#160;&#160;<a class="el" href="group__synet__types.html#ggac0134d6cef9d64de8b89171e79ef4568ae38e0996ce89fe8143a6b4de2b212398">SimdConvolutionActivationSwish</a>
+, <br />
+&#160;&#160;<a class="el" href="group__synet__types.html#ggac0134d6cef9d64de8b89171e79ef4568a86f99147cb2402c904f2bfde8515c21b">SimdConvolutionActivationGelu</a>
 <br />
  }</td></tr>
 <tr class="separator:gac0134d6cef9d64de8b89171e79ef4568"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -232,6 +234,8 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a828c49769d0f202d776344238e5bd3d3" name="ggac0134d6cef9d64de8b89171e79ef4568a828c49769d0f202d776344238e5bd3d3"></a>SimdConvolutionActivationHardSigmoid&#160;</td><td class="fielddoc"><p >HardSigmoid (<a href="https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html">https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html</a>) activation function. It has two parameters: scale (params[0]) and shift (params[1]). </p><pre class="fragment">dst[i] = Max(0, Min(src[i] * scale + shift, 1));
 </pre> </td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568ae38e0996ce89fe8143a6b4de2b212398" name="ggac0134d6cef9d64de8b89171e79ef4568ae38e0996ce89fe8143a6b4de2b212398"></a>SimdConvolutionActivationSwish&#160;</td><td class="fielddoc"><p >Swish (<a href="https://en.wikipedia.org/wiki/Swish_function">https://en.wikipedia.org/wiki/Swish_function</a>) activation function. It has one parameter: slope (params[0]). </p><pre class="fragment">dst[i] = src[i]/(1 + Exp(-slope*src[i]));
+</pre> </td></tr>
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a86f99147cb2402c904f2bfde8515c21b" name="ggac0134d6cef9d64de8b89171e79ef4568a86f99147cb2402c904f2bfde8515c21b"></a>SimdConvolutionActivationGelu&#160;</td><td class="fielddoc"><p >GELU (<a href="https://en.wikipedia.org/wiki/Activation_function">https://en.wikipedia.org/wiki/Activation_function</a>) activation function. </p><pre class="fragment">dst[i] = src[i] * (1 + erf(src[i]/sqrt(2))) / 2;
 </pre> </td></tr>
 </table>
 

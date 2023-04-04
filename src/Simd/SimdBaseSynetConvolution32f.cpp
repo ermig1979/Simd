@@ -296,6 +296,32 @@ namespace Simd
                 else
                     SynetSwish32f(dst, size * count, &slope, dst);
             }
+            else if (activation == ::SimdConvolutionActivationGelu)
+            {
+                if (bias)
+                {
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            for (size_t i = 0; i < count; ++i)
+                                dst[i] = Gelu(dst[i] + bias[i]);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                                dst[j] = Gelu(dst[j] + bias[i]);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetGelu32f(dst, size * count, dst);
+            }
             else
                 assert(0);
         }
@@ -1214,6 +1240,7 @@ namespace Simd
             case ::SimdConvolutionActivationMish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationMish>;
             case ::SimdConvolutionActivationHardSigmoid: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHardSigmoid>;
             case ::SimdConvolutionActivationSwish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationSwish>;
+            case ::SimdConvolutionActivationGelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationGelu>;
             default:
                 assert(0);
                 return NULL;
@@ -1485,6 +1512,8 @@ namespace Simd
                     break;
                 case SimdConvolutionActivationSwish:
                     _rParams.data[0] = params[0];
+                    break;
+                case SimdConvolutionActivationGelu:
                     break;
                 default:
                     assert(0);

@@ -28,6 +28,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdErf.h"
 
 namespace Simd
 {
@@ -90,6 +91,11 @@ namespace Simd
         template<> SIMD_INLINE float Activate<SimdConvolutionActivationSwish>(float value, const float* params, size_t offset)
         {
             return SynetSwish32f(value, params[0]);
+        }
+
+        template<> SIMD_INLINE float Activate<SimdConvolutionActivationGelu>(float value, const float* params, size_t offset)
+        {
+            return Gelu(value);
         }
 
         template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
@@ -185,6 +191,11 @@ namespace Simd
             return Swish(value, _mm_set1_ps(params[0]));
         }
 
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationGelu>(__m128 value, const float* params, size_t offset)
+        {
+            return Gelu(value);
+        }
+
         //---------------------------------------------------------------------
 
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m128 Activate(__m128 value, const __m128 * params, size_t index);
@@ -237,6 +248,11 @@ namespace Simd
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationSwish>(__m128 value, const __m128* params, size_t index)
         {
             return Swish(value, params[0]);
+        }
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationGelu>(__m128 value, const __m128* params, size_t index)
+        {
+            return Gelu(value);
         }
 
         //---------------------------------------------------------------------

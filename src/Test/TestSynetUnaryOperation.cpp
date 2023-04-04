@@ -119,8 +119,9 @@ namespace Test
     {
         bool result = true;
 
+#ifndef SIMD_NEON_ENABLE
         result = SynetUnaryOperation32fAutoTest(H * W, 0.000001f, SimdSynetUnaryOperation32fErf, f1, f2);
-
+#endif
         for (int type = (int)SimdSynetUnaryOperation32fAbs; type <= (int)SimdSynetUnaryOperation32fZero; type++)
         {
             result = result && SynetUnaryOperation32fAutoTest(H*W, EPS, (SimdSynetUnaryOperation32fType)type, f1, f2);

@@ -182,5 +182,51 @@ namespace Simd
         }
     }
 #endif 
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        namespace Detail
+        {
+            SIMD_INLINE float32x4_t Poly4(float32x4_t x, float a, float b, float c, float d, float e)
+            {
+                float32x4_t p = vdupq_n_f32(e);
+                p = vmlaq_f32(vdupq_n_f32(d), x, p);
+                p = vmlaq_f32(vdupq_n_f32(c), x, p);
+                p = vmlaq_f32(vdupq_n_f32(b), x, p);
+                p = vmlaq_f32(vdupq_n_f32(a), x, p);
+                return p;
+            }
+
+            SIMD_INLINE float32x4_t ExpNegSqr(float32x4_t x)
+            {
+                x = vmulq_f32(vdupq_n_f32(-1.44269504f), vmulq_f32(x, x));
+                int32x4_t ipart = vcvtq_s32_f32(vsubq_f32(x, vdupq_n_f32(0.5f)));
+                float32x4_t fpart = vsubq_f32(x, vcvtq_f32_s32(ipart));
+                float32x4_t expipart = vreinterpretq_f32_s32(vshlq_n_s32(vaddq_s32(ipart, vdupq_n_s32(127)), 23));
+                float32x4_t expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
+                return vmulq_f32(expipart, expfpart);
+            }
+        }
+
+        template<int iter> SIMD_INLINE float32x4_t Erf(float32x4_t x)
+        {
+            const float32x4_t _max = vdupq_n_f32(9);
+            const float32x4_t _1 = vdupq_n_f32(1.0f);
+            float32x4_t a, p, q, r;
+            a = vminq_f32(vabsq_f32(x), _max);
+            q = Div<iter>(_1, vaddq_f32(vmulq_f32(vdupq_n_f32(0.3275911f), a), _1));
+            p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
+            r = vsubq_f32(_1, vmulq_f32(vmulq_f32(p, q), Detail::ExpNegSqr(a)));
+            return Or(And(vdupq_n_f32(-0.0f), x), r);
+        }
+
+        template<int iter> SIMD_INLINE float32x4_t Gelu(float32x4_t x)
+        {
+            float32x4_t e = Erf<iter>(vmulq_f32(x, vdupq_n_f32(float(M_SQRT1_2))));
+            return vmulq_f32(vmulq_f32(x, vdupq_n_f32(0.5f)), vaddq_f32(e, vdupq_n_f32(1.0f)));
+        }
+    }
+#endif
 }
 #endif//__SimdErf_h__

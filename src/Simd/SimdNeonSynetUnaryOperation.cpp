@@ -29,6 +29,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdErf.h"
 
 namespace Simd
 {
@@ -40,6 +41,11 @@ namespace Simd
         template<> SIMD_INLINE float32x4_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs>(float32x4_t value)
         {
             return vabsq_f32(value);
+        }
+
+        template<> SIMD_INLINE float32x4_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf>(float32x4_t value)
+        {
+            return Erf<1>(value);
         }
 
         template<> SIMD_INLINE float32x4_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp>(float32x4_t value)
@@ -100,6 +106,7 @@ namespace Simd
             switch (type)
             {
             case SimdSynetUnaryOperation32fAbs: SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fErf: SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fExp: SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fLog: SynetUnaryOperation32f<SimdSynetUnaryOperation32fLog, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fNeg: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNeg, align>(src, size, dst); break;
@@ -114,8 +121,6 @@ namespace Simd
 
         void SynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
         {
-            if (type == SimdSynetUnaryOperation32fErf)
-                return Base::SynetUnaryOperation32f(src, size, type, dst);
             if (Aligned(src) && Aligned(dst))
                 SynetUnaryOperation32f<true>(src, size, type, dst);
             else

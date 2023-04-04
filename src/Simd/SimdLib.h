@@ -211,6 +211,13 @@ typedef enum
         \endverbatim
     */
     SimdConvolutionActivationSwish,
+    /*!
+        GELU (https://en.wikipedia.org/wiki/Activation_function) activation function.
+        \verbatim
+        dst[i] = src[i] * (1 + erf(src[i]/sqrt(2))) / 2;
+        \endverbatim
+    */
+    SimdConvolutionActivationGelu,
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types
@@ -3257,26 +3264,6 @@ extern "C"
         \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
     */
     SIMD_API void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms);
-
-    /*! @ingroup float16
-
-        \fn void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
-
-        \short Calculates mutual cosine distance of two arrays of 16-bit float arrays.
-
-        Algorithm description:
-        \verbatim
-        distances[i, j] = 1 - Sum(A[i*K + k]*B[j*K + k])/Sqrt(Sum(A[i*K + k]*A[i*K + k])*Sum(B[j*K + k]*B[j*K + k]));
-        \endverbatim
-
-        \param [in] M - a number of A arrays.
-        \param [in] N - a number of B arrays.
-        \param [in] K - a size of A and B arrays.
-        \param [in] A - a pointer to 16-bit float arrays.
-        \param [in] B - a pointer to 16-bit float arrays.
-        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
-    */
-    SIMD_API void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
 
     /*! @ingroup other_conversion
 
