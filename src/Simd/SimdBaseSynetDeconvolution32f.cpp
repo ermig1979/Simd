@@ -409,6 +409,8 @@ namespace Simd
                 case SimdConvolutionActivationSwish:
                     _rParams.data[0] = params[0];
                     break;
+                case SimdConvolutionActivationGelu:
+                    break;
                 default:
                     assert(0);
                 }

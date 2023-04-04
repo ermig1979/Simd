@@ -162,7 +162,8 @@ namespace Test
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationMish, ::SimdTrue, f1, f2);
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHardSigmoid, ::SimdTrue, f1, f2);
-        result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationSwish, ::SimdTrue, f1, f2);
+        //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationSwish, ::SimdTrue, f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationGelu, ::SimdTrue, f1, f2);
 
         return result;
     }

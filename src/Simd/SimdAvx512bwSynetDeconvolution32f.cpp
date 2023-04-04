@@ -348,6 +348,7 @@ namespace Simd
                 case SimdConvolutionActivationMish: _deconvolution = DeconvolutionNhwcDirect2x2<SimdConvolutionActivationMish>; break;
                 case SimdConvolutionActivationHardSigmoid: _deconvolution = DeconvolutionNhwcDirect2x2<SimdConvolutionActivationHardSigmoid>; break;
                 case SimdConvolutionActivationSwish: _deconvolution = DeconvolutionNhwcDirect2x2<SimdConvolutionActivationSwish>; break;
+                case SimdConvolutionActivationGelu: _deconvolution = DeconvolutionNhwcDirect2x2<SimdConvolutionActivationGelu>; break;
                 default: assert(0);
                 }
                 SetAlgParam(F, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
