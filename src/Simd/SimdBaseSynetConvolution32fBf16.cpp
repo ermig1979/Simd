@@ -287,9 +287,9 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            if (p.dstC <= a.macroD)
-                return Base::AlgCacheL2() / 4;
-            else
+            //if (p.dstC <= a.macroD)
+            //    return Base::AlgCacheL2() / 4;
+            //else
             {
                 if (a.mode)
                     return a.batch * AlignHi(p.srcC, 2) * p.dstW * p.dstH * p.kernelY * p.kernelX / 2;
@@ -409,6 +409,8 @@ namespace Simd
                 break;
             case SimdConvolutionActivationSwish:
                 _params.data[0] = params[0];
+                break;
+            case SimdConvolutionActivationGelu:
                 break;
             default:
                 assert(0);

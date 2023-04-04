@@ -232,6 +232,8 @@ namespace Simd
         case SimdConvolutionActivationSwish:
             _params[0] = params[0];
             break;
+        case SimdConvolutionActivationGelu:
+            break;
         default:
             assert(0);
         }
@@ -379,6 +381,9 @@ namespace Simd
                 break;
             case SimdConvolutionActivationSwish:
                 SynetSwish32f(dst32f, _merge * _sizeD, _params.data, dst32f);
+                break;
+            case SimdConvolutionActivationGelu:
+                SynetGelu32f(dst32f, _merge * _sizeD, dst32f);
                 break;
             default:
                 assert(0);
