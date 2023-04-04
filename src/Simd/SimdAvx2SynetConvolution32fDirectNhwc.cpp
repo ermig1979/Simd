@@ -988,6 +988,7 @@ namespace Simd
                 case ::SimdConvolutionActivationMish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationMish>(p); break;
                 case ::SimdConvolutionActivationHardSigmoid: func = GetConvolutionBiasActivation<::SimdConvolutionActivationHardSigmoid>(p); break;
                 case ::SimdConvolutionActivationSwish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationSwish>(p); break;
+                case ::SimdConvolutionActivationGelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationGelu>(p); break;
                 }
             }
             return func ? func : Avx::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();

@@ -292,6 +292,11 @@ namespace Simd
             return Swish(value, params[0]);
         }
 
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationGelu>(__m512 value, const __m512* params)
+        {
+            return Gelu(value);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type>
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, 
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -443,6 +448,7 @@ namespace Simd
             case ::SimdConvolutionActivationMish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationMish>;
             case ::SimdConvolutionActivationHardSigmoid: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHardSigmoid>;
             case ::SimdConvolutionActivationSwish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationSwish>;
+            case ::SimdConvolutionActivationGelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationGelu>;
             default:
                 assert(0);
                 return NULL;

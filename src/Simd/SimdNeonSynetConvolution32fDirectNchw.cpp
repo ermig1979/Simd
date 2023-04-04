@@ -28,6 +28,7 @@
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdErf.h"
 
 namespace Simd
 {
@@ -189,6 +190,11 @@ namespace Simd
             return Neon::Swish<1>(value, params[0]);
         }
 
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationGelu>(float32x4_t value, const float32x4_t* params)
+        {
+            return Neon::Gelu<1>(value);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type>
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight,
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -338,6 +344,7 @@ namespace Simd
             case ::SimdConvolutionActivationMish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationMish>;
             case ::SimdConvolutionActivationHardSigmoid: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHardSigmoid>;
             case ::SimdConvolutionActivationSwish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationSwish>;
+            case ::SimdConvolutionActivationGelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationGelu>;
             default:
                 assert(0);
                 return NULL;
