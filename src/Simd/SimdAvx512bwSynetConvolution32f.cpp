@@ -25,6 +25,7 @@
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdErf.h"
 
 namespace Simd
 {
@@ -534,6 +535,53 @@ namespace Simd
                 }
                 else
                     SynetSwish32f(dst, size * count, &slope, dst);
+            }
+            else if (activation == ::SimdConvolutionActivationGelu)
+            {
+                if (bias)
+                {
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m512 _dst = _mm512_loadu_ps(dst + i);
+                                __m512 _bias = _mm512_loadu_ps(bias + i);
+                                _mm512_storeu_ps(dst + i, Gelu(_mm512_add_ps(_dst, _bias)));
+                            }
+                            if (i < count)
+                            {
+                                __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
+                                __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
+                                _mm512_mask_storeu_ps(dst + i, tail, Gelu(_mm512_add_ps(_dst, _bias)));
+                            }
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m512 _bias = _mm512_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
+                                _mm512_storeu_ps(dst + j, Gelu(value));
+                            }
+                            if (j < size)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
+                                _mm512_mask_storeu_ps(dst + j, tail, Gelu(value));
+                            }
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetGelu32f(dst, size * count, dst);
             }
             else
                 assert(0);

@@ -28,6 +28,7 @@
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdErf.h"
 
 namespace Simd
 {
@@ -420,6 +421,45 @@ namespace Simd
                 }
                 else
                     Neon::SynetSwish32f(dst, size * count, &threshold, dst);
+            }
+            else if (activation == ::SimdConvolutionActivationGelu)
+            {
+                if (bias)
+                {
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, Neon::Gelu<1>(value));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::Gelu(dst[i] + bias[i]);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float32x4_t _bias = vdupq_n_f32(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, Neon::Gelu<1>(value));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::Gelu(dst[j] + bias[i]);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    Neon::SynetGelu32f(dst, size * count, dst);
             }
             else
                 assert(0);

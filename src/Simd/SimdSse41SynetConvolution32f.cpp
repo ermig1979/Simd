@@ -25,6 +25,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdErf.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
@@ -418,6 +419,45 @@ namespace Simd
                 }
                 else
                     SynetSwish32f(dst, count * size, &slope, dst);
+            }
+            else if (activation == ::SimdConvolutionActivationGelu)
+            {
+                if (bias)
+                {
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m128 value = _mm_add_ps(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, Gelu(value));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::Gelu(dst[i] + bias[i]);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m128 _bias = _mm_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m128 value = _mm_add_ps(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, Gelu(value));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::Gelu(dst[j] + bias[i]);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetGelu32f(dst, count * size, dst);
             }
             else
             {
