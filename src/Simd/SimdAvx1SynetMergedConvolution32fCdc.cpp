@@ -1480,7 +1480,8 @@ namespace Simd
 			for (size_t i = 0; i < count; ++i)
 				if (convs[i].activation == SimdConvolutionActivationElu ||
 					convs[i].activation == SimdConvolutionActivationMish ||
-					convs[i].activation == SimdConvolutionActivationSwish)
+					convs[i].activation == SimdConvolutionActivationSwish ||
+					convs[i].activation == SimdConvolutionActivationGelu)
 					return Sse41::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
 			MergConvParam32f param(batch, convs, count, add, compatibility);
 			if (!param.Valid())

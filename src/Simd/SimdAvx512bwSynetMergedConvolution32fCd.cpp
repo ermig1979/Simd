@@ -516,6 +516,7 @@ namespace Simd
             case SimdConvolutionActivationMish: Cd::Set<SimdConvolutionActivationMish>(p, t, i, c); break;
             case SimdConvolutionActivationHardSigmoid: Cd::Set<SimdConvolutionActivationHardSigmoid>(p, t, i, c); break;
             case SimdConvolutionActivationSwish: Cd::Set<SimdConvolutionActivationSwish>(p, t, i, c); break;
+            case SimdConvolutionActivationGelu: Cd::Set<SimdConvolutionActivationGelu>(p, t, i, c); break;
             default: assert(0);
             }
         }
