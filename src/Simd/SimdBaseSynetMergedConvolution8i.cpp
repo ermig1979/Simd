@@ -90,6 +90,7 @@ namespace Simd
             case SimdConvolutionActivationMish: _depthwise = DepthwiseConvolution<SimdConvolutionActivationMish>; break;
             case SimdConvolutionActivationHardSigmoid: _depthwise = DepthwiseConvolution<SimdConvolutionActivationHardSigmoid>; break;
             case SimdConvolutionActivationSwish: _depthwise = DepthwiseConvolution<SimdConvolutionActivationSwish>; break;
+            case SimdConvolutionActivationGelu: _depthwise = DepthwiseConvolution<SimdConvolutionActivationGelu>; break;
             default: assert(0);
             }
 
@@ -210,6 +211,8 @@ namespace Simd
                     break;
                 case SimdConvolutionActivationSwish:
                     _params[i][0] = params[i][0];
+                    break;
+                case SimdConvolutionActivationGelu:
                     break;
                 default:
                     assert(0);
@@ -478,6 +481,9 @@ namespace Simd
                 break;
             case SimdConvolutionActivationSwish:
                 SynetSwish32f(dst, sizeD, params, dst);
+                break;
+            case SimdConvolutionActivationGelu:
+                SynetGelu32f(dst, sizeD, dst);
                 break;
             default:
                 assert(0);

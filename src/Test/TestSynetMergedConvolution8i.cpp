@@ -272,7 +272,8 @@ namespace Test
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationHswish, a1 = SimdConvolutionActivationIdentity, a2 = SimdConvolutionActivationPrelu;
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationMish, a1 = SimdConvolutionActivationMish, a2 = SimdConvolutionActivationMish;
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationHardSigmoid, a1 = SimdConvolutionActivationHardSigmoid, a2 = SimdConvolutionActivationHardSigmoid;
-        const SimdConvolutionActivationType a0 = SimdConvolutionActivationSwish, a1 = SimdConvolutionActivationSwish, a2 = SimdConvolutionActivationSwish;
+        //const SimdConvolutionActivationType a0 = SimdConvolutionActivationSwish, a1 = SimdConvolutionActivationSwish, a2 = SimdConvolutionActivationSwish;
+        const SimdConvolutionActivationType a0 = SimdConvolutionActivationGelu, a1 = SimdConvolutionActivationGelu, a2 = SimdConvolutionActivationGelu;
 #if defined(NDEBUG)
 #if 0
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 20), u8, u8, 1, n), f1, f2);
