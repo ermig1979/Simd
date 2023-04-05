@@ -27,7 +27,7 @@
 #include "Simd/SimdDefs.h"
 #include "Simd/SimdExp.h"
 
-#define SIMD_ERF_VER 2
+#define SIMD_ERF_VER 1
 
 namespace Simd
 {
