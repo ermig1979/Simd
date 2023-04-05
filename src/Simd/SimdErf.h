@@ -27,6 +27,8 @@
 #include "Simd/SimdDefs.h"
 #include "Simd/SimdExp.h"
 
+#define SIMD_ERF_VER 2
+
 namespace Simd
 {
     namespace Base
@@ -73,18 +75,52 @@ namespace Simd
             const __m128 _max = _mm_set1_ps(9);
             const __m128 _m0 = _mm_set1_ps(-0.0f);
             const __m128 _1 = _mm_set1_ps(1.0f);
-            __m128 a, p, q, r;
-            a = _mm_min_ps(_mm_andnot_ps(_m0, x), _max);
-            q = _mm_div_ps(_1, _mm_add_ps(_mm_mul_ps(_mm_set1_ps(0.3275911f), a), _1));
-            p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
-            r = _mm_sub_ps(_1, _mm_mul_ps(_mm_mul_ps(p, q), Detail::ExpNegSqr(a)));
+            __m128 a = _mm_min_ps(_mm_andnot_ps(_m0, x), _max);
+#if SIMD_ERF_VER == 2
+            const __m128 a1 = _mm_set1_ps(0.278393f);
+            const __m128 a2 = _mm_set1_ps(0.230389f);
+            const __m128 a3 = _mm_set1_ps(0.000972f);
+            const __m128 a4 = _mm_set1_ps(0.078108f);
+            __m128 p = a4;
+            p = _mm_add_ps(_mm_mul_ps(a, p), a3);
+            p = _mm_add_ps(_mm_mul_ps(a, p), a2);
+            p = _mm_add_ps(_mm_mul_ps(a, p), a1);
+            p = _mm_add_ps(_mm_mul_ps(a, p), _1);
+            p = _mm_mul_ps(p, p);
+            p = _mm_mul_ps(p, p);
+            __m128 r = _mm_sub_ps(_1, _mm_rcp_ps(p));
+#elif SIMD_ERF_VER == 1
+            const __m128 a1 = _mm_set1_ps(0.0705230784f);
+            const __m128 a2 = _mm_set1_ps(0.0422820123f);
+            const __m128 a3 = _mm_set1_ps(0.0092705272f); 
+            const __m128 a4 = _mm_set1_ps(0.0001520143f);
+            const __m128 a5 = _mm_set1_ps(0.0002765672f);
+            const __m128 a6 = _mm_set1_ps(0.0000430638f);
+            __m128 p = a6;
+            p = _mm_add_ps(_mm_mul_ps(a, p), a5);
+            p = _mm_add_ps(_mm_mul_ps(a, p), a4);
+            p = _mm_add_ps(_mm_mul_ps(a, p), a3);
+            p = _mm_add_ps(_mm_mul_ps(a, p), a2);
+            p = _mm_add_ps(_mm_mul_ps(a, p), a1);
+            p = _mm_add_ps(_mm_mul_ps(a, p), _1);
+            p = _mm_mul_ps(p, p);
+            p = _mm_mul_ps(p, p);
+            p = _mm_mul_ps(p, p);
+            p = _mm_mul_ps(p, p);
+            __m128 r = _mm_sub_ps(_1, _mm_div_ps(_1, p));
+#else
+            __m128 q = _mm_div_ps(_1, _mm_add_ps(_mm_mul_ps(_mm_set1_ps(0.3275911f), a), _1));
+            __m128 p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
+            __m128 r = _mm_sub_ps(_1, _mm_mul_ps(_mm_mul_ps(p, q), Detail::ExpNegSqr(a)));
+#endif
             return _mm_or_ps(_mm_and_ps(_m0, x), r);
         }
 
         SIMD_INLINE __m128 Gelu(__m128 x)
         {
-            __m128 e = Erf(_mm_mul_ps(x, _mm_set1_ps(float(M_SQRT1_2))));
-            return _mm_mul_ps(_mm_mul_ps(x, _mm_set1_ps(0.5f)), _mm_add_ps(e, _mm_set1_ps(1.0f)));
+            const __m128 sqrt1_2 = _mm_set1_ps(float(M_SQRT1_2));
+            __m128 t = _mm_mul_ps(x, sqrt1_2);
+            return _mm_mul_ps(_mm_mul_ps(t, sqrt1_2), _mm_add_ps(Erf(t), _mm_set1_ps(1.0f)));
         }
     }
 #endif
@@ -120,18 +156,52 @@ namespace Simd
             const __m256 _max = _mm256_set1_ps(9);
             const __m256 _m0 = _mm256_set1_ps(-0.0f);
             const __m256 _1 = _mm256_set1_ps(1.0f);
-            __m256 a, p, q, r;
-            a = _mm256_min_ps(_mm256_andnot_ps(_m0, x), _max);
-            q = _mm256_div_ps(_1, _mm256_fmadd_ps(_mm256_set1_ps(0.3275911f), a, _1));
-            p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
-            r = _mm256_fnmadd_ps(_mm256_mul_ps(p, q), Detail::ExpNegSqr(a), _1);
+            __m256 a = _mm256_min_ps(_mm256_andnot_ps(_m0, x), _max);
+#if SIMD_ERF_VER == 2
+            const __m256 a1 = _mm256_set1_ps(0.278393f);
+            const __m256 a2 = _mm256_set1_ps(0.230389f);
+            const __m256 a3 = _mm256_set1_ps(0.000972f);
+            const __m256 a4 = _mm256_set1_ps(0.078108f);
+            __m256 p = a4;
+            p = _mm256_fmadd_ps(a, p, a3);
+            p = _mm256_fmadd_ps(a, p, a2);
+            p = _mm256_fmadd_ps(a, p, a1);
+            p = _mm256_fmadd_ps(a, p, _1);
+            p = _mm256_mul_ps(p, p);
+            p = _mm256_mul_ps(p, p);
+            __m256 r = _mm256_sub_ps(_1, _mm256_rcp_ps(p));
+#elif SIMD_ERF_VER == 1
+            const __m256 a1 = _mm256_set1_ps(0.0705230784f);
+            const __m256 a2 = _mm256_set1_ps(0.0422820123f);
+            const __m256 a3 = _mm256_set1_ps(0.0092705272f);
+            const __m256 a4 = _mm256_set1_ps(0.0001520143f);
+            const __m256 a5 = _mm256_set1_ps(0.0002765672f);
+            const __m256 a6 = _mm256_set1_ps(0.0000430638f);
+            __m256 p = a6;
+            p = _mm256_fmadd_ps(a, p, a5);
+            p = _mm256_fmadd_ps(a, p, a4);
+            p = _mm256_fmadd_ps(a, p, a3);
+            p = _mm256_fmadd_ps(a, p, a2);
+            p = _mm256_fmadd_ps(a, p, a1);
+            p = _mm256_fmadd_ps(a, p, _1);
+            p = _mm256_mul_ps(p, p);
+            p = _mm256_mul_ps(p, p);
+            p = _mm256_mul_ps(p, p);
+            p = _mm256_mul_ps(p, p);
+            __m256 r = _mm256_sub_ps(_1, _mm256_div_ps(_1, p));
+#else
+            __m256 q = _mm256_div_ps(_1, _mm256_fmadd_ps(_mm256_set1_ps(0.3275911f), a, _1));
+            __m256 p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
+            __m256 r = _mm256_fnmadd_ps(_mm256_mul_ps(p, q), Detail::ExpNegSqr(a), _1);
+#endif
             return _mm256_or_ps(_mm256_and_ps(_m0, x), r);
         }
 
         SIMD_INLINE __m256 Gelu(__m256 x)
         {
-            __m256 e = Erf(_mm256_mul_ps(x, _mm256_set1_ps(float(M_SQRT1_2))));
-            return _mm256_mul_ps(_mm256_mul_ps(x, _mm256_set1_ps(0.5f)), _mm256_add_ps(e, _mm256_set1_ps(1.0f)));
+            const __m256 sqrt1_2 = _mm256_set1_ps(float(M_SQRT1_2));
+            __m256 t = _mm256_mul_ps(x, sqrt1_2);
+            return _mm256_mul_ps(_mm256_mul_ps(t, sqrt1_2), _mm256_add_ps(Erf(t), _mm256_set1_ps(1.0f)));
         }
     }
 #endif 
@@ -167,18 +237,52 @@ namespace Simd
             const __m512 _max = _mm512_set1_ps(9);
             const __m512 _m0 = _mm512_set1_ps(-0.0f);
             const __m512 _1 = _mm512_set1_ps(1.0f);
-            __m512 a, p, q, r;
-            a = _mm512_min_ps(_mm512_andnot_ps(_m0, x), _max);
-            q = _mm512_div_ps(_1, _mm512_fmadd_ps(_mm512_set1_ps(0.3275911f), a, _1));
-            p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
-            r = _mm512_fnmadd_ps(_mm512_mul_ps(p, q), Detail::ExpNegSqr(a), _1);
+            __m512 a = _mm512_min_ps(_mm512_andnot_ps(_m0, x), _max);
+#if SIMD_ERF_VER == 2
+            const __m512 a1 = _mm512_set1_ps(0.278393f);
+            const __m512 a2 = _mm512_set1_ps(0.230389f);
+            const __m512 a3 = _mm512_set1_ps(0.000972f);
+            const __m512 a4 = _mm512_set1_ps(0.078108f);
+            __m512 p = a4;
+            p = _mm512_fmadd_ps(a, p, a3);
+            p = _mm512_fmadd_ps(a, p, a2);
+            p = _mm512_fmadd_ps(a, p, a1);
+            p = _mm512_fmadd_ps(a, p, _1);
+            p = _mm512_mul_ps(p, p);
+            p = _mm512_mul_ps(p, p);
+            __m512 r = _mm512_sub_ps(_1, _mm512_rcp14_ps(p));
+#elif SIMD_ERF_VER == 1
+            const __m512 a1 = _mm512_set1_ps(0.0705230784f);
+            const __m512 a2 = _mm512_set1_ps(0.0422820123f);
+            const __m512 a3 = _mm512_set1_ps(0.0092705272f);
+            const __m512 a4 = _mm512_set1_ps(0.0001520143f);
+            const __m512 a5 = _mm512_set1_ps(0.0002765672f);
+            const __m512 a6 = _mm512_set1_ps(0.0000430638f);
+            __m512 p = a6;
+            p = _mm512_fmadd_ps(a, p, a5);
+            p = _mm512_fmadd_ps(a, p, a4);
+            p = _mm512_fmadd_ps(a, p, a3);
+            p = _mm512_fmadd_ps(a, p, a2);
+            p = _mm512_fmadd_ps(a, p, a1);
+            p = _mm512_fmadd_ps(a, p, _1);
+            p = _mm512_mul_ps(p, p);
+            p = _mm512_mul_ps(p, p);
+            p = _mm512_mul_ps(p, p);
+            p = _mm512_mul_ps(p, p);
+            __m512 r = _mm512_sub_ps(_1, _mm512_div_ps(_1, p));
+#else
+            __m512 q = _mm512_div_ps(_1, _mm512_fmadd_ps(_mm512_set1_ps(0.3275911f), a, _1));
+            __m512 p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
+            __m512 r = _mm512_fnmadd_ps(_mm512_mul_ps(p, q), Detail::ExpNegSqr(a), _1);
+#endif
             return _mm512_or_ps(_mm512_and_ps(_m0, x), r);
         }
 
         SIMD_INLINE __m512 Gelu(__m512 x)
         {
-            __m512 e = Erf(_mm512_mul_ps(x, _mm512_set1_ps(float(M_SQRT1_2))));
-            return _mm512_mul_ps(_mm512_mul_ps(x, _mm512_set1_ps(0.5f)), _mm512_add_ps(e, _mm512_set1_ps(1.0f)));
+            const __m512 sqrt1_2 = _mm512_set1_ps(float(M_SQRT1_2));
+            __m512 t = _mm512_mul_ps(x, sqrt1_2);
+            return _mm512_mul_ps(_mm512_mul_ps(t, sqrt1_2), _mm512_add_ps(Erf(t), _mm512_set1_ps(1.0f)));
         }
     }
 #endif 
@@ -213,18 +317,52 @@ namespace Simd
         {
             const float32x4_t _max = vdupq_n_f32(9);
             const float32x4_t _1 = vdupq_n_f32(1.0f);
-            float32x4_t a, p, q, r;
-            a = vminq_f32(vabsq_f32(x), _max);
-            q = Div<iter>(_1, vaddq_f32(vmulq_f32(vdupq_n_f32(0.3275911f), a), _1));
-            p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
-            r = vsubq_f32(_1, vmulq_f32(vmulq_f32(p, q), Detail::ExpNegSqr(a)));
+            float32x4_t a = vminq_f32(vabsq_f32(x), _max);
+#if SIMD_ERF_VER == 2
+            const float32x4_t a1 = vdupq_n_f32(0.278393f);
+            const float32x4_t a2 = vdupq_n_f32(0.230389f);
+            const float32x4_t a3 = vdupq_n_f32(0.000972f);
+            const float32x4_t a4 = vdupq_n_f32(0.078108f);
+            float32x4_t p = a4;
+            p = vmlaq_f32(a3, a, p);
+            p = vmlaq_f32(a2, a, p);
+            p = vmlaq_f32(a1, a, p);
+            p = vmlaq_f32(_1, a, p);
+            p = vmulq_f32(p, p);
+            p = vmulq_f32(p, p);
+            float32x4_t r = vsubq_f32(_1, Reciprocal<1>(p));
+#elif SIMD_ERF_VER == 1
+            const float32x4_t a1 = vdupq_n_f32(0.0705230784f);
+            const float32x4_t a2 = vdupq_n_f32(0.0422820123f);
+            const float32x4_t a3 = vdupq_n_f32(0.0092705272f);
+            const float32x4_t a4 = vdupq_n_f32(0.0001520143f);
+            const float32x4_t a5 = vdupq_n_f32(0.0002765672f);
+            const float32x4_t a6 = vdupq_n_f32(0.0000430638f);
+            float32x4_t p = a6;
+            p = vmlaq_f32(a5, a, p);
+            p = vmlaq_f32(a4, a, p);
+            p = vmlaq_f32(a3, a, p);
+            p = vmlaq_f32(a2, a, p);
+            p = vmlaq_f32(a1, a, p);
+            p = vmlaq_f32(_1, a, p);
+            p = vmulq_f32(p, p);
+            p = vmulq_f32(p, p);
+            p = vmulq_f32(p, p);
+            p = vmulq_f32(p, p);
+            float32x4_t r = vsubq_f32(_1, Reciprocal<1>(p));
+#else
+            float32x4_t q = Reciprocal<1>(vaddq_f32(vmulq_f32(vdupq_n_f32(0.3275911f), a), _1));
+            float32x4_t p = Detail::Poly4(q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
+            float32x4_t r = vsubq_f32(_1, vmulq_f32(vmulq_f32(p, q), Detail::ExpNegSqr(a)));
+#endif
             return Or(And(vdupq_n_f32(-0.0f), x), r);
         }
 
         template<int iter> SIMD_INLINE float32x4_t Gelu(float32x4_t x)
         {
-            float32x4_t e = Erf<iter>(vmulq_f32(x, vdupq_n_f32(float(M_SQRT1_2))));
-            return vmulq_f32(vmulq_f32(x, vdupq_n_f32(0.5f)), vaddq_f32(e, vdupq_n_f32(1.0f)));
+            const float32x4_t sqrt1_2 = vdupq_n_f32(float(M_SQRT1_2));
+            float32x4_t t = vmulq_f32(x, sqrt1_2);
+            return vmulq_f32(vmulq_f32(t, sqrt1_2), vaddq_f32(Erf<iter>(t), vdupq_n_f32(1.0f)));
         }
     }
 #endif
