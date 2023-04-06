@@ -1451,7 +1451,8 @@ namespace Simd
 			for (size_t i = 0; i < _param.count; ++i)
 				if (p.conv[i].activation == SimdConvolutionActivationElu ||
 					p.conv[i].activation == SimdConvolutionActivationMish ||
-					p.conv[i].activation == SimdConvolutionActivationSwish)
+					p.conv[i].activation == SimdConvolutionActivationSwish ||
+					p.conv[i].activation == SimdConvolutionActivationGelu)
 					return;
 			for (size_t i = 0; i < _param.count; ++i)
 				Set(p, i, i, _convolution);
