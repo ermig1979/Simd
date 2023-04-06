@@ -43,17 +43,15 @@ struct Example
 typedef std::vector<Example> Examples;
 Examples g_examples;
 
-#ifdef SIMD_OPENCV_ENABLE
-#define USE_ADD_OPENCV_EXAMPLE(name) \
+#define USE_ADD_EXAMPLE(name) \
     int Use##name(int argc, char * argv[]); \
     bool Use##name##Add(){ g_examples.push_back(Example(#name, Use##name)); return true; } \
     bool Use##name##Added = Use##name##Add();
-#else
-#define USE_ADD_OPENCV_EXAMPLE(name)
-#endif
 
-USE_ADD_OPENCV_EXAMPLE(FaceDetection);
-USE_ADD_OPENCV_EXAMPLE(MotionDetector);
+#ifdef SIMD_OPENCV_ENABLE
+USE_ADD_EXAMPLE(FaceDetection);
+USE_ADD_EXAMPLE(MotionDetector);
+#endif
 
 void Print()
 {

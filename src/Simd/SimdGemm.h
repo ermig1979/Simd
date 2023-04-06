@@ -66,12 +66,19 @@ namespace Simd
             _macroN = Simd::RestrictRange(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), _microN, AlignHiAny(_N, _microN));
             if (_N * _M * _K < 256 * 256 * 256 * 2)
                 _threadNumber = 1;
-            _pA.resize(_threadNumber);
-            _pB.resize(_threadNumber);
-            for (size_t t = 0; t < _threadNumber; ++t) 
+            if (_N * _K * sizeof(T) < L1)
+                _packB = NULL;
+            if (_packA)
             {
-                _pA[t].Resize(_macroM * _macroK);
-                _pB[t].Resize(_macroN * _macroK);
+                _pA.resize(_threadNumber);
+                for (size_t t = 0; t < _threadNumber; ++t)
+                    _pA[t].Resize(_macroM * _macroK);
+            }
+            if (_packB)
+            {
+                _pB.resize(_threadNumber);
+                for (size_t t = 0; t < _threadNumber; ++t)
+                    _pB[t].Resize(_macroN * _macroK);
             }
             size_t NF = AlignLo(_N, F);
             if (tailMask)
@@ -88,10 +95,15 @@ namespace Simd
 
         void Run(const T * alpha, const T * A, size_t lda, const T * B, size_t ldb, const T * beta, T * C, size_t ldc)
         {
-            Simd::Parallel(0, _N, [&](size_t thread, size_t begin, size_t end)
+            if(_threadNumber == 1)
+                ThreadKernel(_N, *alpha, A, lda, B, ldb, *beta, C, ldc, 0);
+            else
             {
-                ThreadKernel(end - begin, *alpha, A, lda, B + begin, ldb, *beta, C + begin, ldc, thread);
-            }, _threadNumber, _microN);
+                Simd::Parallel(0, _N, [&](size_t thread, size_t begin, size_t end)
+                {
+                    ThreadKernel(end - begin, *alpha, A, lda, B + begin, ldb, *beta, C + begin, ldc, thread);
+                }, _threadNumber, _microN);
+            }
         }
 
     private:
@@ -109,7 +121,7 @@ namespace Simd
                         size_t macroM = Simd::Min(_M, i + _macroM) - i;
                         if (k == 0)
                             _scaleC(macroM, macroN, beta, C + i * ldc + j, ldc);
-                        MacroKernel(macroM, macroN, macroK, alpha, A + i * lda + k, lda, B + k * ldb + j, ldb, beta, C + i * ldc + j, ldc, i == 0, thread);
+                        MacroKernel(macroM, macroN, macroK, alpha, A + i * lda + k, lda, B + k * ldb + j, ldb, beta, C + i * ldc + j, ldc, i == 0 && _packB, thread);
                     }
                 }
             }
@@ -117,6 +129,7 @@ namespace Simd
 
         void MacroKernel(size_t M, size_t N, size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T beta, T * C, size_t ldc, bool packB, size_t thread)
         {
+            size_t kldb = _packB ? _microN : ldb;
             size_t klda = lda;
             if (_packA)
             {
@@ -130,25 +143,25 @@ namespace Simd
             size_t j = 0;
             for (; j < NA; j += _microN)
             {
-                T * pB = _pB[thread].data + j * _macroK;
+                T * pB = _packB ? _pB[thread].data + j * _macroK : (T*)B + j;
                 if (packB)
                     _packB(B + j, ldb, K, _microN, _microN, pB);
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMM(K, alpha, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _main);
+                    _kernelMM(K, alpha, A + i * lda, klda, pB, F, kldb, C + i * ldc + j, ldc, _main);
                 if (i < M)
-                    _kernelTM(M - i, K, alpha, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _main);
+                    _kernelTM(M - i, K, alpha, A + i * lda, klda, pB, F, kldb, C + i * ldc + j, ldc, _main);
             }
             if (j < N)
             {
-                T * pB = _pB[thread].data + j * _macroK;
+                T* pB = _packB ? _pB[thread].data + j * _macroK : (T*)B + j;
                 if (packB)
                     _packB(B + j, ldb, K, N - j, _microN, pB);
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMT(K, alpha, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _tail);
+                    _kernelMT(K, alpha, A + i * lda, klda, pB, F, kldb, C + i * ldc + j, ldc, _tail);
                 if (i < M)
-                    _kernelTT(M - i, K, alpha, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _tail);
+                    _kernelTT(M - i, K, alpha, A + i * lda, klda, pB, F, kldb, C + i * ldc + j, ldc, _tail);
             }
         }
 
@@ -197,10 +210,15 @@ namespace Simd
 
         void Run(const T * alpha, const T * A, size_t lda, const T * B, size_t ldb, const T * beta, T * C, size_t ldc)
         {
-            Simd::Parallel(0, _N, [&](size_t thread, size_t begin, size_t end)
+            if (_threadNumber == 1)
+                ThreadKernel(_N, *alpha, A, lda, B, ldb, *beta, C, ldc, 0);
+            else
             {
-                ThreadKernel(end - begin, *alpha, A, lda, B + begin*ldb, ldb, *beta, C + begin, ldc, thread);
-            }, _threadNumber, _microN);
+                Simd::Parallel(0, _N, [&](size_t thread, size_t begin, size_t end)
+                {
+                    ThreadKernel(end - begin, *alpha, A, lda, B + begin * ldb, ldb, *beta, C + begin, ldc, thread);
+                }, _threadNumber, _microN);
+            }
         }
 
     private:

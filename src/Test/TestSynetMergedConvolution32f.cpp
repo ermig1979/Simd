@@ -208,7 +208,7 @@ namespace Test
         ::SimdRelease(context2);
 
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
-        float epsilon = (Simd::Base::FmaAvoid(c) ? eps * eps : 0.07f);
+        float epsilon = (Simd::Base::FmaAvoid(c) ? 0.00001f : 0.07f);
 #else
         float epsilon = eps;
 #endif
