@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2020 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,8 @@ namespace Simd
 #ifdef SIMD_FUTURE_DISABLE
         function(0, begin, end);
 #else
-        threadNumber = std::min<size_t>(threadNumber, std::thread::hardware_concurrency());
+        static const size_t threadNumberMax = std::thread::hardware_concurrency();
+        threadNumber = std::min<size_t>(threadNumber, threadNumberMax);
         if (threadNumber <= 1 || size_t(blockAlign*1.5) >= (end - begin))
             function(0, begin, end);
         else

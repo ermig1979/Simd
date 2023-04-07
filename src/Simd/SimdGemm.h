@@ -95,15 +95,10 @@ namespace Simd
 
         void Run(const T * alpha, const T * A, size_t lda, const T * B, size_t ldb, const T * beta, T * C, size_t ldc)
         {
-            if(_threadNumber == 1)
-                ThreadKernel(_N, *alpha, A, lda, B, ldb, *beta, C, ldc, 0);
-            else
+            Simd::Parallel(0, _N, [&](size_t thread, size_t begin, size_t end)
             {
-                Simd::Parallel(0, _N, [&](size_t thread, size_t begin, size_t end)
-                {
-                    ThreadKernel(end - begin, *alpha, A, lda, B + begin, ldb, *beta, C + begin, ldc, thread);
-                }, _threadNumber, _microN);
-            }
+                ThreadKernel(end - begin, *alpha, A, lda, B + begin, ldb, *beta, C + begin, ldc, thread);
+            }, _threadNumber, _microN);
         }
 
     private:
@@ -210,15 +205,10 @@ namespace Simd
 
         void Run(const T * alpha, const T * A, size_t lda, const T * B, size_t ldb, const T * beta, T * C, size_t ldc)
         {
-            if (_threadNumber == 1)
-                ThreadKernel(_N, *alpha, A, lda, B, ldb, *beta, C, ldc, 0);
-            else
+            Simd::Parallel(0, _N, [&](size_t thread, size_t begin, size_t end)
             {
-                Simd::Parallel(0, _N, [&](size_t thread, size_t begin, size_t end)
-                {
-                    ThreadKernel(end - begin, *alpha, A, lda, B + begin * ldb, ldb, *beta, C + begin, ldc, thread);
-                }, _threadNumber, _microN);
-            }
+                ThreadKernel(end - begin, *alpha, A, lda, B + begin * ldb, ldb, *beta, C + begin, ldc, thread);
+            }, _threadNumber, _microN);
         }
 
     private:
