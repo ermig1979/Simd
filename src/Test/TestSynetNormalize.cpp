@@ -173,7 +173,7 @@ namespace Test
         f1.Update(batch, channels, spatial, format);
         f2.Update(batch, channels, spatial, format);
 
-        const float eps = 0.0f;
+        const float eps = 0.000001f;
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << batch << ", " << channels << ", " << spatial << "].");
 
         Tensor32f src(ToShape(batch, channels, 1, spatial, format));
@@ -221,11 +221,11 @@ namespace Test
 
         result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Base::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sse41::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sse41::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx2::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
