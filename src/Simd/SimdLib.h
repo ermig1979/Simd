@@ -7439,9 +7439,9 @@ extern "C"
     */
     SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
 
-    /*! @ingroup synet_other
+    /*! @ingroup synet_normalize
 
-        \fn void void SimdSynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
+        \fn void SimdSynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
 
         \short Performs forward propagation of NormalizeLayer.
 
@@ -7473,6 +7473,49 @@ extern "C"
     */
     SIMD_API void SimdSynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
+
+    /*! @ingroup synet_normalize
+
+        \fn void SimdSynetNormalizeLayerForwardV2(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
+
+        \short Performs forward propagation of NormalizeLayer (Version 2).
+
+        Algorithm's details:
+        \verbatim
+        for(b = 0; b < batch; ++b)
+            for(s = 0; s < spatial; ++s)
+            {
+                sum = 0;
+                for c = 0; c < channels; ++c)
+                    sum += src[b, s, c];
+                mean = sum / channels;
+                for (c = 0; c < channels; ++c)
+                    dst[b, s, c] = src[b, s, c] - mean;
+
+                sqsum = 0;
+                for (c = 0; c < channels; ++c)
+                    sqsum += Square(dst[b, s, c]);
+                norm = 1 / Sqrt(sqsum / channels + eps);
+                for (c = 0; c < channels; ++c)
+                    dst[b, s, c] = dst[b, s, c] * norm * scale[c] + shift[c];
+            }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float tensor.
+        \param [in] batch - a batch size of input and output tensor.
+        \param [in] channels - a number of channels in input and output tensor.
+        \param [in] spatial - a spatial size (height*width) of input and output tensor.
+        \param [in] scale - an array with scale parameters. The size of the array is equal to channels.
+        \param [in] shift - an array with shift parameters. The size of the array is equal to channels.
+        \param [in] eps - a pointer to epsilon parameter. It is used to prevent division by zero.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
+        \param [out] buf - a pointer to external temporary buffer. The size of the buffer must be equal to spatial. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output 32-bit float tensor.
+    */
+    SIMD_API void SimdSynetNormalizeLayerForwardV2(const float* src, size_t batch, size_t channels, size_t spatial, 
+        const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
 
     /*! @ingroup synet_permute
 

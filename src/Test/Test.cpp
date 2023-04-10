@@ -406,6 +406,7 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetMergedConvolution32fForward);
 
     TEST_ADD_GROUP_A0(SynetNormalizeLayerForward);
+    TEST_ADD_GROUP_A0(SynetNormalizeLayerForwardV2);
 
     TEST_ADD_GROUP_A0(SynetPermute);
 

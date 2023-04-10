@@ -62,9 +62,6 @@ Functions</h2></td></tr>
 <tr class="memitem:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#gafe109c39f05fcaf7d856b068b8e45f1e">SimdSynetLrnLayerCrossChannels</a> (const float *src, size_t half, size_t channels, size_t spatial, const float *k, float *dst, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of LrnLayer (cross channels normalization).  <a href="group__synet__other.html#gafe109c39f05fcaf7d856b068b8e45f1e">More...</a><br /></td></tr>
 <tr class="separator:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga120d849a61f58fc3742e09a79fe65528"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga120d849a61f58fc3742e09a79fe65528">SimdSynetNormalizeLayerForward</a> (const float *src, size_t batch, size_t channels, size_t spatial, const float *scale, const float *eps, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> acrossSpatial, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, float *buf, float *dst)</td></tr>
-<tr class="memdesc:ga120d849a61f58fc3742e09a79fe65528"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of NormalizeLayer.  <a href="group__synet__other.html#ga120d849a61f58fc3742e09a79fe65528">More...</a><br /></td></tr>
-<tr class="separator:ga120d849a61f58fc3742e09a79fe65528"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga77a432773d73095b275c5cf974ae0d76"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga77a432773d73095b275c5cf974ae0d76">SimdSynetShuffleLayerForward</a> (const float *src0, const float *src1, size_t channels0, size_t channels1, size_t spatial, float *dst0, float *dst1, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, int type)</td></tr>
 <tr class="memdesc:ga77a432773d73095b275c5cf974ae0d76"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ShuffleLayer.  <a href="group__synet__other.html#ga77a432773d73095b275c5cf974ae0d76">More...</a><br /></td></tr>
 <tr class="separator:ga77a432773d73095b275c5cf974ae0d76"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -434,109 +431,6 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">k</td><td>- a pointer to the 32-bit float array with 3 coefficients (see algorithm details). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * spatial. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga120d849a61f58fc3742e09a79fe65528" name="ga120d849a61f58fc3742e09a79fe65528"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga120d849a61f58fc3742e09a79fe65528">&#9670;&nbsp;</a></span>SimdSynetNormalizeLayerForward()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void void SimdSynetNormalizeLayerForward </td>
-          <td>(</td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>batch</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>channels</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>spatial</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>scale</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>eps</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
-          <td class="paramname"><em>acrossSpatial</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
-          <td class="paramname"><em>format</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>buf</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs forward propagation of NormalizeLayer. </p>
-<p >Algorithm's details (NHWC format, acrossSpatial is false): </p><pre class="fragment">for(b = 0; b &lt; batch; ++b)
-    for(s = 0; s &lt; spatial; ++s)
-    {
-        sum = 0;
-        for(c = 0; c &lt; channels; ++c)
-            sum += Square(src[b, s, c]);
-        for(c = 0; c &lt; channels; ++c)
-            dst[b, s, c] = src[b, s, c] * scale[c] / Sqrt(sum + eps);
-    }
-</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size of input and output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in input and output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size (height*width) of input and output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- an array with scale parameters. The size of the array is equal to channels. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">eps</td><td>- a pointer to epsilon parameter. It is used to prevent division by zero. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">acrossSpatial</td><td>- a flag of whole image normalization. Otherwise the normalization is performed across channels. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size of the buffer must be equal to spatial. Can be NULL (it causes usage of internal buffer). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float tensor. </td></tr>
   </table>
   </dd>
 </dl>

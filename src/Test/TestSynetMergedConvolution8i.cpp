@@ -268,11 +268,11 @@ namespace Test
         SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | fma);
         SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | fma);
         SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | fma);
-        const SimdConvolutionActivationType a0 = SimdConvolutionActivationPrelu, a1 = SimdConvolutionActivationHswish, a2 = SimdConvolutionActivationIdentity;
+        //const SimdConvolutionActivationType a0 = SimdConvolutionActivationPrelu, a1 = SimdConvolutionActivationHswish, a2 = SimdConvolutionActivationIdentity;
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationHswish, a1 = SimdConvolutionActivationIdentity, a2 = SimdConvolutionActivationPrelu;
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationMish, a1 = SimdConvolutionActivationMish, a2 = SimdConvolutionActivationMish;
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationHardSigmoid, a1 = SimdConvolutionActivationHardSigmoid, a2 = SimdConvolutionActivationHardSigmoid;
-        //const SimdConvolutionActivationType a0 = SimdConvolutionActivationSwish, a1 = SimdConvolutionActivationSwish, a2 = SimdConvolutionActivationSwish;
+        const SimdConvolutionActivationType a0 = SimdConvolutionActivationSwish, a1 = SimdConvolutionActivationSwish, a2 = SimdConvolutionActivationSwish;
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationGelu, a1 = SimdConvolutionActivationGelu, a2 = SimdConvolutionActivationGelu;
 #if defined(NDEBUG)
 #if 0
