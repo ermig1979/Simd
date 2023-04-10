@@ -181,7 +181,7 @@ namespace Simd
             {
                 for (size_t b = 0; b < batch; ++b)
                 {
-                    for (size_t i = 0; i < spatial; ++i)
+                    for (size_t s = 0; s < spatial; ++s)
                     {
                         float sum = 0;
                         for (size_t c = 0; c < channels; ++c)

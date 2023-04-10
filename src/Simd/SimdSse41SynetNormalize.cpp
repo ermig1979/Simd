@@ -302,23 +302,36 @@ namespace Simd
         void NormalizeNhwcV2(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, float eps, float* dst)
         {
             float k = 1.0f / float(channels);
+            size_t channelsF = AlignLo(channels, F), c;
             for (size_t b = 0; b < batch; ++b)
             {
-                for (size_t i = 0; i < spatial; ++i)
+                for (size_t s = 0; s < spatial; ++s)
                 {
-                    float sum = 0;
-                    for (size_t c = 0; c < channels; ++c)
+                    __m128 _sum = _mm_setzero_ps();
+                    for (c = 0; c < channelsF; c += F)
+                        _sum = _mm_add_ps(_mm_loadu_ps(src + c), _sum);
+                    float sum = ExtractSum(_sum);
+                    for (; c < channels; ++c)
                         sum += src[c];
-                    float mean = sum * k;
-                    for (size_t c = 0; c < channels; ++c)
-                        dst[c] = src[c] - mean;
+                    __m128 mean = _mm_set1_ps(sum * k);
+                    for (c = 0; c < channelsF; c += F)
+                        _mm_storeu_ps(dst + c, _mm_sub_ps(_mm_loadu_ps(src + c), mean));
+                    for (; c < channels; ++c)
+                        _mm_store_ss(dst + c, _mm_sub_ss(_mm_load_ss(src + c), mean));
 
-                    float sqsum = 0;
-                    for (size_t c = 0; c < channels; ++c)
+                    __m128 _sqsum = _mm_setzero_ps();
+                    for (c = 0; c < channelsF; c += F)
+                        _sqsum = _mm_add_ps(Square(_mm_loadu_ps(dst + c)), _sqsum);
+                    float sqsum = ExtractSum(_sqsum);
+                    for (; c < channels; ++c)
                         sqsum += Simd::Square(dst[c]);
-                    float norm = 1.0f / ::sqrt(sqsum * k + eps);
-                    for (size_t c = 0; c < channels; ++c)
-                        dst[c] = dst[c] * norm * scale[c] + shift[c];
+                    __m128 norm = _mm_set1_ps(1.0f / ::sqrt(sqsum * k + eps));
+
+                    __m128 _k = _mm_set1_ps(1.0f / ::sqrt(sum + eps));
+                    for (c = 0; c < channelsF; c += F)
+                        _mm_storeu_ps(dst + c, _mm_add_ps(_mm_mul_ps(_mm_mul_ps(_mm_loadu_ps(dst + c), norm), _mm_loadu_ps(scale + c)), _mm_loadu_ps(shift + c)));
+                    for (; c < channels; ++c)
+                        _mm_store_ss(dst + c, _mm_add_ss(_mm_mul_ss(_mm_mul_ss(_mm_load_ss(dst + c), norm), _mm_load_ss(scale + c)), _mm_load_ss(shift + c)));
 
                     dst += channels;
                     src += channels;
