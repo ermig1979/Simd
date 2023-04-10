@@ -326,8 +326,6 @@ namespace Simd
                     for (; c < channels; ++c)
                         sqsum += Simd::Square(dst[c]);
                     __m128 norm = _mm_set1_ps(1.0f / ::sqrt(sqsum * k + eps));
-
-                    __m128 _k = _mm_set1_ps(1.0f / ::sqrt(sum + eps));
                     for (c = 0; c < channelsF; c += F)
                         _mm_storeu_ps(dst + c, _mm_add_ps(_mm_mul_ps(_mm_mul_ps(_mm_loadu_ps(dst + c), norm), _mm_loadu_ps(scale + c)), _mm_loadu_ps(shift + c)));
                     for (; c < channels; ++c)
