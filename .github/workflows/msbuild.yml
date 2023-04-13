@@ -26,7 +26,7 @@ jobs:
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ./prj/vs2022
+      run: nuget restore ./prj/vs2022 -Project2ProjectTimeOut 300
 
     - name: Host properties
       run: wmic cpu get /format:value
@@ -55,7 +55,7 @@ jobs:
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ./prj/vs2019
+      run: nuget restore ./prj/vs2019 -Project2ProjectTimeOut 300
 
     - name: Host properties
       run: wmic cpu get /format:value
@@ -84,7 +84,7 @@ jobs:
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ./prj/vs2017
+      run: nuget restore ./prj/vs2017 -Project2ProjectTimeOut 300
 
     - name: Install Windows 8.1 SDK
       shell: powershell
@@ -120,7 +120,7 @@ jobs:
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ./prj/vs2015
+      run: nuget restore ./prj/vs2015 -Project2ProjectTimeOut 300
 
     - name: Install Windows 8.1 SDK
       shell: powershell
