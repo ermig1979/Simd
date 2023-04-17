@@ -181,7 +181,7 @@ namespace Simd
             const size_t main = _matcher->main;
             const size_t fast = _matcher->fast;
 
-            HashPtr hash(HashPtr(new Hash(tag, Square(main), Square(fast))));
+            HashPtr hash(HashPtr(new Hash(tag, main * main, fast * fast)));
 
             View gray;
             if (view.format == View::Gray8)
@@ -195,7 +195,7 @@ namespace Simd
             Simd::ResizeBilinear(gray, View(main, main, main, View::Gray8, hash->main).Ref());
 
             size_t step = main / fast;
-            size_t area = Simd::Square(step);
+            size_t area = step * step;
 
             for (size_t fast_y = 0; fast_y < fast; ++fast_y)
             {
@@ -263,8 +263,9 @@ namespace Simd
                 , _size(0)
                 , _threshold(threshold)
             {
-                _fastMax = uint64_t(Square(threshold*UINT8_MAX)*_fastSize);
-                _mainMax = uint64_t(Square(threshold*UINT8_MAX)*_mainSize);
+                size_t side = size_t(threshold * UINT8_MAX);
+                _fastMax = uint64_t(side * side * _fastSize);
+                _mainMax = uint64_t(side * side * _mainSize);
             }
 
             size_t Size() const { return _size; }
