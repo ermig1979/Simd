@@ -242,9 +242,9 @@ namespace Simd
         /*!
             Skips searching of the image in ImageMatcher.
 
-            \param [in] hash - a smart pointer to hash of the image.
+            \param [in] hash - a pointer to hash of the image.
         */
-        void Skip(const HashPtr & hash)
+        void Skip(const Hash * hash)
         {
             hash->skip = true;
         }
