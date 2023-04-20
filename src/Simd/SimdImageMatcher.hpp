@@ -192,7 +192,7 @@ namespace Simd
                 Simd::Convert(view, gray);
             }
 
-            Simd::ResizeBilinear(gray, View(main, main, main, View::Gray8, hash->main).Ref());
+            Simd::Resize(gray, View(main, main, main, View::Gray8, hash->main).Ref(), SimdResizeMethodArea);
 
             size_t step = main / fast;
             size_t area = step * step;
