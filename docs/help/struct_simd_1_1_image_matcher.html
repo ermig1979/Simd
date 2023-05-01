@@ -97,8 +97,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:adceb82495ae6f02380aa5ae23985962f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa22c41c34d8fd6a9ea92f5cdf1f5f6c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_image_matcher.html#aa22c41c34d8fd6a9ea92f5cdf1f5f6c7">Add</a> (const <a class="el" href="struct_simd_1_1_image_matcher.html#a5599bdfcbf9380556d3b3f14ff5aba72">HashPtr</a> &amp;hash)</td></tr>
 <tr class="separator:aa22c41c34d8fd6a9ea92f5cdf1f5f6c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87ec5c7a012c645e0e57ff617a757c07"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_image_matcher.html#a87ec5c7a012c645e0e57ff617a757c07">Skip</a> (const <a class="el" href="struct_simd_1_1_image_matcher.html#a5599bdfcbf9380556d3b3f14ff5aba72">HashPtr</a> &amp;hash)</td></tr>
-<tr class="separator:a87ec5c7a012c645e0e57ff617a757c07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ff7a56b7ad5c63ba228dd92a76422b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_image_matcher.html#a2ff7a56b7ad5c63ba228dd92a76422b5">Skip</a> (const <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html">Hash</a> *hash)</td></tr>
+<tr class="separator:a2ff7a56b7ad5c63ba228dd92a76422b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class Tag, template&lt; class &gt; class Allocator&gt;<br />
@@ -383,8 +383,8 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
 
 </div>
 </div>
-<a id="a87ec5c7a012c645e0e57ff617a757c07" name="a87ec5c7a012c645e0e57ff617a757c07"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a87ec5c7a012c645e0e57ff617a757c07">&#9670;&nbsp;</a></span>Skip()</h2>
+<a id="a2ff7a56b7ad5c63ba228dd92a76422b5" name="a2ff7a56b7ad5c63ba228dd92a76422b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ff7a56b7ad5c63ba228dd92a76422b5">&#9670;&nbsp;</a></span>Skip()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -392,7 +392,7 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         <tr>
           <td class="memname">void Skip </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_simd_1_1_image_matcher.html#a5599bdfcbf9380556d3b3f14ff5aba72">HashPtr</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html">Hash</a> *&#160;</td>
           <td class="paramname"><em>hash</em></td><td>)</td>
           <td></td>
         </tr>
@@ -401,7 +401,7 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
 <p >Skips searching of the image in <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>- a smart pointer to hash of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>- a pointer to hash of the image. </td></tr>
   </table>
   </dd>
 </dl>
