@@ -241,4 +241,115 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncDICD
+        {
+            typedef void* (*FuncPtr)(size_t size, size_t depth);
+
+            FuncPtr func;
+            String desc;
+
+            FuncDICD(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(size_t s, size_t d)
+            {
+                std::stringstream ss;
+                ss << desc << "[CosineDistance-" << s << "-" << d << "]";
+                desc = ss.str();
+            }
+
+            void Call(const void* context, const View& a, const View& b, float & d) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                SimdDescrIntCosineDistance(context, a.data, b.data, &d);
+            }
+        };
+    }
+
+#define FUNC_DICD(function) FuncDICD(function, #function)
+
+    bool DescrIntCosineDistanceAutoTest(size_t size, size_t depth, FuncDICD f1, FuncDICD f2)
+    {
+        bool result = true;
+
+        f1.Update(size, depth);
+        f2.Update(size, depth);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
+
+        void* context1 = f1.func(size, depth);
+        void* context2 = f2.func(size, depth);
+
+        View oA(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View oB(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        FillRandom32f(oA, -17.0, 13.0);
+        FillRandom32f(oB, -15.0, 17.0);
+
+        View a(SimdDescrIntEncodedSize(context2), 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View b(SimdDescrIntEncodedSize(context2), 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
+        SimdDescrIntEncode(context2, (float*)oA.data, a.data);
+        SimdDescrIntEncode(context2, (float*)oB.data, b.data);
+
+        float d1 = 1.0f, d2 = 2.0f, d3 = 3.0f;
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, a, b, d1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, a, b, d2));
+
+
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
+
+        result = Compare(d1, d2, EPS*EPS, true, DifferenceRelative, "d1 & d2");
+
+        ::SimdCosineDistance32f((float*)oA.data, (float*)oB.data, size, &d3);
+        result = Compare(d2, d3, EPS, true, DifferenceRelative, "d2 & d3");
+
+        return result;
+    }
+
+    bool DescrIntCosineDistanceAutoTest(const FuncDICD& f1, const FuncDICD& f2)
+    {
+        bool result = true;
+
+        for (size_t depth = 8; depth <= 8; depth++)
+        {
+            result = result && DescrIntCosineDistanceAutoTest(256, depth, f1, f2);
+            result = result && DescrIntCosineDistanceAutoTest(512, depth, f1, f2);
+            result = result && DescrIntCosineDistanceAutoTest(992, depth, f1, f2);
+        }
+
+        return result;
+    }
+
+    bool DescrIntCosineDistanceAutoTest()
+    {
+        bool result = true;
+
+        result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Base::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+
+        //#ifdef SIMD_SSE41_ENABLE
+        //        if (Simd::Sse41::Enable)
+        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Sse41::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX2_ENABLE
+        //        if (Simd::Avx2::Enable)
+        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Avx2::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX512BW_ENABLE
+        //        if (Simd::Avx512bw::Enable)
+        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Avx512bw::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+        //#endif 
+        //
+        //#ifdef SIMD_NEON_ENABLE
+        //        if (Simd::Neon::Enable)
+        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Neon::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+        //#endif 
+
+        return result;
+    }
 }

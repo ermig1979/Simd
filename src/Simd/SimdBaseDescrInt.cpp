@@ -51,6 +51,20 @@ namespace Simd
                 dst[i] = src[i] * scale + shift;
         }
 
+        static void CosineDistance8(const uint8_t* a, float aScale, float aShift, const uint8_t* b, float bScale, float bShift, size_t size, float* distance)
+        {
+            float aa = 0, ab = 0, bb = 0;
+            for (size_t i = 0; i < size; ++i)
+            {
+                float _a = a[i] * aScale + aShift;
+                float _b = b[i] * bScale + bShift;
+                aa += _a * _a;
+                ab += _a * _b;
+                bb += _b * _b;
+            }
+            *distance = 1.0f - ab / ::sqrt(aa * bb);
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         bool DescrInt::Valid(size_t size, size_t depth)
@@ -74,6 +88,7 @@ namespace Simd
             {
                 _encode = Encode8; 
                 _decode = Decode8;
+                _cosineDistance = CosineDistance8;
                 break;
             }
             default:
@@ -99,7 +114,7 @@ namespace Simd
 
         void DescrInt::CosineDistance(const uint8_t* a, const uint8_t* b, float* distance) const
         {
-
+            _cosineDistance(a + 8, ((float*)a)[0], ((float*)a)[1], b + 8, ((float*)b)[0], ((float*)b)[1], _size, distance);
         }
 
         void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const

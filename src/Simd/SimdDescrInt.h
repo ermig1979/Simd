@@ -60,10 +60,12 @@ namespace Simd
             typedef void (*MinMaxPtr)(const float* src, size_t size, float &min, float &max);
             typedef void (*EncodePtr)(const float* src, float scale, float min, size_t size, uint8_t* dst);
             typedef void (*DecodePtr)(const uint8_t * src, float scale, float shift, size_t size, float* dst);
+            typedef void (*CosineDistancePtr)(const uint8_t* a, float aScale, float aShift, const uint8_t* b, float bScale, float bShift, size_t size, float* distance);
 
             MinMaxPtr _minMax;
             EncodePtr _encode;
             DecodePtr _decode;
+            CosineDistancePtr _cosineDistance;
             size_t _size, _depth, _encSize;
         };
 
