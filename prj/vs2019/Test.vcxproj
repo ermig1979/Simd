@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\src\Test\TestCopy.cpp" />
     <ClCompile Include="..\..\src\Test\TestCrc32.cpp" />
     <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDescrInt.cpp" />
     <ClCompile Include="..\..\src\Test\TestDetection.cpp" />
     <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />

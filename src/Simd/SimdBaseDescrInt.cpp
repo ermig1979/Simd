@@ -28,17 +28,6 @@ namespace Simd
 {
     namespace Base
     {
-        bool DescrIntValid(size_t size, size_t depth)
-        {
-            if (depth < 8 || depth > 8)
-                return false;
-            if (size == 0)
-                return false;
-            return true;
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         static void MinMax(const float* src, size_t size, float& min, float& max)
         {
             min = FLT_MAX;
@@ -56,7 +45,22 @@ namespace Simd
                 dst[i] = Round((src[i] - min) * scale);
         }
 
+        static void Decode8(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        {
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = src[i] * scale + shift;
+        }
+
         //-------------------------------------------------------------------------------------------------
+
+        bool DescrInt::Valid(size_t size, size_t depth)
+        {
+            if (depth < 8 || depth > 8)
+                return false;
+            if (size == 0 || size % 8 != 0)
+                return false;
+            return true;
+        }
 
         DescrInt::DescrInt(size_t size, size_t depth)
             : _size(size)
@@ -66,7 +70,12 @@ namespace Simd
             _minMax = MinMax;
             switch (depth)
             {
-            case 8: _encode = Encode8; break;
+            case 8: 
+            {
+                _encode = Encode8; 
+                _decode = Decode8;
+                break;
+            }
             default:
                 assert(0);
             }
@@ -85,7 +94,7 @@ namespace Simd
 
         void DescrInt::Decode(const uint8_t* src, float* dst) const
         {
-
+            _decode(src + 8, ((float*)src)[0], ((float*)src)[1], _size, dst);
         }
 
         void DescrInt::CosineDistance(const uint8_t* a, const uint8_t* b, float* distance) const
@@ -117,7 +126,7 @@ namespace Simd
 
         void* DescrIntInit(size_t size, size_t depth)
         {
-            if(!Base::DescrIntValid(size, depth))
+            if(!Base::DescrInt::Valid(size, depth))
                 return NULL;
             return new Base::DescrInt(size, depth);
         }

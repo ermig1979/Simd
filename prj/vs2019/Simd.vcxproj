@@ -41,10 +41,12 @@
     <ClInclude Include="..\..\src\Simd\SimdCopyPixel.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDescrInt.h" />
     <ClInclude Include="..\..\src\Simd\SimdDetection.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdDrawing.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdEmpty.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdErf.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />

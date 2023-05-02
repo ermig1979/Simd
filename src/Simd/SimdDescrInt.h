@@ -39,6 +39,8 @@ namespace Simd
         class DescrInt : Deletable
         {
         public:
+            static bool Valid(size_t size, size_t depth);
+
             DescrInt(size_t size, size_t depth);
 
             size_t DecodedSize() const { return _size; }
@@ -57,9 +59,11 @@ namespace Simd
         protected:
             typedef void (*MinMaxPtr)(const float* src, size_t size, float &min, float &max);
             typedef void (*EncodePtr)(const float* src, float scale, float min, size_t size, uint8_t* dst);
+            typedef void (*DecodePtr)(const uint8_t * src, float scale, float shift, size_t size, float* dst);
 
             MinMaxPtr _minMax;
             EncodePtr _encode;
+            DecodePtr _decode;
             size_t _size, _depth, _encSize;
         };
 

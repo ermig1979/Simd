@@ -66,11 +66,11 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
 
-        View src(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        FillRandom32f(src, -17.0, 13.0);
-
         void* context1 = f1.func(size, depth);
         void* context2 = f2.func(size, depth);
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        FillRandom32f(src, -17.0, 13.0);
 
         View dst1(SimdDescrIntEncodedSize(context1), 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst2(SimdDescrIntEncodedSize(context2), 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
@@ -98,6 +98,7 @@ namespace Test
         {
             result = result && DescrIntEncodeAutoTest(256, depth, f1, f2);
             result = result && DescrIntEncodeAutoTest(512, depth, f1, f2);
+            result = result && DescrIntEncodeAutoTest(992, depth, f1, f2);
         }
 
         return result;
@@ -128,6 +129,115 @@ namespace Test
 //        if (Simd::Neon::Enable)
 //            result = result && DescrIntEncodeAutoTest(FUNC_DIE(Simd::Neon::DescrIntInit), FUNC_DIE(SimdDescrIntInit));
 //#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncDID
+        {
+            typedef void* (*FuncPtr)(size_t size, size_t depth);
+
+            FuncPtr func;
+            String desc;
+
+            FuncDID(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(size_t s, size_t d)
+            {
+                std::stringstream ss;
+                ss << desc << "[Decode-" << s << "-" << d << "]";
+                desc = ss.str();
+            }
+
+            void Call(const void* context, const View& src, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                SimdDescrIntDecode(context, src.data, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_DID(function) FuncDID(function, #function)
+
+    bool DescrIntDecodeAutoTest(size_t size, size_t depth, FuncDID f1, FuncDID f2)
+    {
+        bool result = true;
+
+        f1.Update(size, depth);
+        f2.Update(size, depth);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
+
+        void* context1 = f1.func(size, depth);
+        void* context2 = f2.func(size, depth);
+
+        View orig(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        FillRandom32f(orig, -17.0, 13.0);
+
+        View src(SimdDescrIntEncodedSize(context2), 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
+        SimdDescrIntEncode(context2, (float*)orig.data, src.data);
+
+        View dst1(SimdDescrIntDecodedSize(context1), 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(SimdDescrIntDecodedSize(context2), 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom(dst1, 1.0f, 1.0f);
+        FillRandom(dst2, 2.0f, 2.0f);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, dst2));
+
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
+
+        result = result && Compare(dst1, dst2, EPS*EPS, true, 64);
+
+        return result;
+    }
+
+    bool DescrIntDecodeAutoTest(const FuncDID& f1, const FuncDID& f2)
+    {
+        bool result = true;
+
+        for (size_t depth = 8; depth <= 8; depth++)
+        {
+            result = result && DescrIntDecodeAutoTest(256, depth, f1, f2);
+            result = result && DescrIntDecodeAutoTest(512, depth, f1, f2);
+            result = result && DescrIntDecodeAutoTest(992, depth, f1, f2);
+        }
+
+        return result;
+    }
+
+    bool DescrIntDecodeAutoTest()
+    {
+        bool result = true;
+
+        result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Base::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+
+        //#ifdef SIMD_SSE41_ENABLE
+        //        if (Simd::Sse41::Enable)
+        //            result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Sse41::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX2_ENABLE
+        //        if (Simd::Avx2::Enable)
+        //            result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Avx2::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX512BW_ENABLE
+        //        if (Simd::Avx512bw::Enable)
+        //            result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Avx512bw::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+        //#endif 
+        //
+        //#ifdef SIMD_NEON_ENABLE
+        //        if (Simd::Neon::Enable)
+        //            result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Neon::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+        //#endif 
 
         return result;
     }
