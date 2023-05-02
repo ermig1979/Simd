@@ -36,8 +36,10 @@
     <ClInclude Include="..\..\src\Simd\SimdCopyPixel.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDescrInt.h" />
     <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdErf.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdFloat16.h" />
@@ -119,6 +121,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseCrc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseDeinterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseDescrInt.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseEdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp" />

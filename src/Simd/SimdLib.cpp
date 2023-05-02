@@ -63,6 +63,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdPerformance.h"
 #include "Simd/SimdEmpty.h"
 
+#include "Simd/SimdDescrInt.h"
 #include "Simd/SimdGaussianBlur.h"
 #include "Simd/SimdImageLoad.h"
 #include "Simd/SimdImageSave.h"
@@ -1915,6 +1916,69 @@ SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width,
 {
     SIMD_EMPTY();
     Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
+}
+
+SIMD_API void* SimdDescrIntInit(size_t size, size_t depth)
+{
+    SIMD_EMPTY();
+    typedef void* (*SimdDescrIntInitPtr) (size_t size, size_t depth);
+    const static SimdDescrIntInitPtr simdDescrIntInit = SIMD_FUNC0(DescrIntInit);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    return simdDescrIntInit(size, depth);
+}
+
+SIMD_API size_t SimdDescrIntEncodedSize(const void* context)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->EncodedSize();
+}
+
+SIMD_API size_t SimdDescrIntDecodedSize(const void* context)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->DecodedSize();
+}
+
+SIMD_API void SimdDescrIntEncode(const void* context, const float* src, uint8_t* dst)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->Encode(src, dst);
+}
+
+SIMD_API void SimdDescrIntDecode(const void* context, const uint8_t* src, float* dst)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->Decode(src, dst);
+}
+
+SIMD_API void SimdDescrIntCosineDistance(const void* context, const uint8_t* a, const uint8_t* b, float* distance)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->CosineDistance(a, b, distance);
+}
+
+SIMD_API void SimdDescrIntCosineDistancesMxNa(const void* context, size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->CosineDistancesMxNa(M, N, A, B, distances);
+}
+
+SIMD_API void SimdDescrIntCosineDistancesMxNp(const void* context, size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->CosineDistancesMxNp(M, N, A, B, distances);
+}
+
+SIMD_API void SimdDescrIntVectorNormNa(const void* context, size_t N, const uint8_t* const* A, float* norms)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->VectorNormNa(N, A, norms);
+}
+
+SIMD_API void SimdDescrIntVectorNormNp(const void* context, size_t N, const uint8_t* A, float* norms)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->VectorNormNp(N, A, norms);
 }
 
 SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,

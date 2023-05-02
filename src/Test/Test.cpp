@@ -161,6 +161,8 @@ namespace Test
     TEST_ADD_GROUP_A0(Crc32);
     TEST_ADD_GROUP_A0(Crc32c);
 
+    TEST_ADD_GROUP_A0(DescrIntEncode);
+
     TEST_ADD_GROUP_A0(DeinterleaveUv);
     TEST_ADD_GROUP_A0(DeinterleaveBgr);
     TEST_ADD_GROUP_A0(DeinterleaveBgra);

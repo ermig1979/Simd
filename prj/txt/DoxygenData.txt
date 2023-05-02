@@ -680,3 +680,8 @@
     @defgroup warp_affine Affine Warp
     \short Functions for Affine Warp of images.
 */
+
+/*! @ingroup functions
+    @defgroup descrint Integer Descriptor
+    \short Functions for conversion and comparison of Integer Descriptor.
+*/
