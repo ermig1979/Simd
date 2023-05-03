@@ -173,7 +173,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 8; depth <= 8; depth++)
+        for (size_t depth = 7; depth <= 8; depth++)
         {
             result = result && DescrIntEncodeAutoTest(256, depth, f1, f2);
             result = result && DescrIntEncodeAutoTest(512, depth, f1, f2);
@@ -254,7 +254,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 8; depth <= 8; depth++)
+        for (size_t depth = 7; depth <= 8; depth++)
         {
             result = result && DescrIntDecodeAutoTest(256, depth, f1, f2);
             result = result && DescrIntDecodeAutoTest(512, depth, f1, f2);
@@ -336,7 +336,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 8; depth <= 8; depth++)
+        for (size_t depth = 7; depth <= 8; depth++)
         {
             result = result && DescrIntCosineDistanceAutoTest(256, depth, f1, f2);
             result = result && DescrIntCosineDistanceAutoTest(512, depth, f1, f2);
@@ -411,7 +411,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 8; depth <= 8; depth++)
+        for (size_t depth = 7; depth <= 8; depth++)
         {
             result = result && DescrIntCosineDistancesMxNaAutoTest(256, 256, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(128, 128, 512, depth, f1, f2);
@@ -484,7 +484,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 8; depth <= 8; depth++)
+        for (size_t depth = 7; depth <= 8; depth++)
         {
             result = result && DescrIntCosineDistancesMxNpAutoTest(256, 256, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNpAutoTest(128, 128, 512, depth, f1, f2);
@@ -558,7 +558,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 8; depth <= 8; depth++)
+        for (size_t depth = 7; depth <= 8; depth++)
         {
             result = result && DescrIntVectorNormAutoTest(256, depth, f1, f2);
             result = result && DescrIntVectorNormAutoTest(512, depth, f1, f2);
@@ -632,7 +632,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 8; depth <= 8; depth++)
+        for (size_t depth = 7; depth <= 8; depth++)
         {
             result = result && DescrIntVectorNormsNaAutoTest(256, 256, depth, f1, f2);
             result = result && DescrIntVectorNormsNaAutoTest(128, 512, depth, f1, f2);
@@ -704,7 +704,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 8; depth <= 8; depth++)
+        for (size_t depth = 7; depth <= 8; depth++)
         {
             result = result && DescrIntVectorNormsNpAutoTest(256, 256, depth, f1, f2);
             result = result && DescrIntVectorNormsNpAutoTest(128, 512, depth, f1, f2);

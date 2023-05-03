@@ -66,6 +66,7 @@ namespace Simd
             CosineDistancePtr _cosineDistance;
             VectorNormPtr _vectorNorm;
             size_t _size, _depth, _encSize;
+            float _range;
         };
 
         //-------------------------------------------------------------------------------------------------

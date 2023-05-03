@@ -2469,7 +2469,7 @@ extern "C"
         This function used for NV12 to YUV420P conversion.
 
         \param [in] size - an original 32-bit float descriptor size. It be multiple of 8.
-        \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 8.
+        \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 7, 8.
         \return a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function ::SimdRelease.
                 This pointer is used in functions ::SimdDescrIntEncodedSize, ::SimdDescrIntDecodedSize, ::SimdDescrIntEncode, ::SimdDescrIntDecode, 
                 ::SimdDescrIntCosineDistance, ::SimdDescrIntCosineDistancesMxNa, ::SimdDescrIntCosineDistancesMxNp, 
