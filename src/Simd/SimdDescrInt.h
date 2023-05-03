@@ -50,8 +50,8 @@ namespace Simd
             virtual void CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const;
 
             virtual void VectorNorm(const uint8_t* a, float* norm) const;
-            virtual void VectorNormNa(size_t N, const uint8_t* const* A, float* norms) const;
-            virtual void VectorNormNp(size_t N, const uint8_t* A, float* norms) const;
+            virtual void VectorNormsNa(size_t N, const uint8_t* const* A, float* norms) const;
+            virtual void VectorNormsNp(size_t N, const uint8_t* A, float* norms) const;
 
         protected:
             typedef void (*MinMaxPtr)(const float* src, size_t size, float &min, float &max);

@@ -2472,7 +2472,8 @@ extern "C"
         \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 8.
         \return a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function ::SimdRelease.
                 This pointer is used in functions ::SimdDescrIntEncodedSize, ::SimdDescrIntDecodedSize, ::SimdDescrIntEncode, ::SimdDescrIntDecode, 
-                ::SimdDescrIntCosineDistance, ::SimdDescrIntCosineDistancesMxNa, ::SimdDescrIntCosineDistancesMxNp, ::SimdDescrIntVectorNormNa, ::SimdDescrIntVectorNormNp.
+                ::SimdDescrIntCosineDistance, ::SimdDescrIntCosineDistancesMxNa, ::SimdDescrIntCosineDistancesMxNp, 
+                ::SimdDescrIntVectorNorm, ::SimdDescrIntVectorNormsNa, ::SimdDescrIntVectorNormsNp.
     */
     SIMD_API void * SimdDescrIntInit(size_t size, size_t depth);
 
@@ -2588,7 +2589,7 @@ extern "C"
 
     /*! @ingroup descrint
 
-        \fn void SimdDescrIntVectorNormNa(const void* context, size_t N, const uint8_t* const* A, float* norms);
+        \fn void SimdDescrIntVectorNormsNa(const void* context, size_t N, const uint8_t* const* A, float* norms);
 
         \short Calculates vector norms for array of integer descriptor arrays.
 
@@ -2599,11 +2600,11 @@ extern "C"
         \param [in] A - a pointer to array with pointers to integer descriptors.
         \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
     */
-    SIMD_API void SimdDescrIntVectorNormNa(const void* context, size_t N, const uint8_t* const* A, float* norms);
+    SIMD_API void SimdDescrIntVectorNormsNa(const void* context, size_t N, const uint8_t* const* A, float* norms);
 
     /*! @ingroup descrint
 
-        \fn void SimdDescrIntVectorNormNp(const void* context, size_t N, const uint8_t* A, float* norms);
+        \fn void SimdDescrIntVectorNormsNp(const void* context, size_t N, const uint8_t* A, float* norms);
 
         \short Calculates vector norms for array of integer descriptors.
 
@@ -2614,7 +2615,7 @@ extern "C"
         \param [in] A - a pointer to array with integer descriptors.
         \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
     */
-    SIMD_API void SimdDescrIntVectorNormNp(const void* context, size_t N, const uint8_t* A, float* norms);
+    SIMD_API void SimdDescrIntVectorNormsNp(const void* context, size_t N, const uint8_t* A, float* norms);
 
     /*! @ingroup deinterleave_conversion
 

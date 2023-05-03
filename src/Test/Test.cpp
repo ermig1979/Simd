@@ -167,6 +167,7 @@ namespace Test
     TEST_ADD_GROUP_A0(DescrIntCosineDistancesMxNa);
     TEST_ADD_GROUP_A0(DescrIntCosineDistancesMxNp);
     TEST_ADD_GROUP_A0(DescrIntVectorNorm);
+    TEST_ADD_GROUP_A0(DescrIntVectorNormsNp);
 
     TEST_ADD_GROUP_A0(DeinterleaveUv);
     TEST_ADD_GROUP_A0(DeinterleaveBgr);
