@@ -119,6 +119,12 @@ namespace Test
                 SimdDescrIntVectorNorm(context, s.data, &n);
             }
 
+            void VectorNormsNa(const void* context, const U8Ptrs& s, Tensor32f& d) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                SimdDescrIntVectorNormsNa(context, s.size(), s.data(), d.Data());
+            }
+
             void VectorNormsNp(const void* context, const View& s, Tensor32f& d) const
             {
                 TEST_PERFORMANCE_TEST(desc);
@@ -587,6 +593,79 @@ namespace Test
         //        if (Simd::Neon::Enable)
         //            result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
         //#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool DescrIntVectorNormsNaAutoTest(size_t N, size_t size, size_t depth, FuncDI f1, FuncDI f2)
+    {
+        bool result = true;
+
+        f1.Update("VectorNormsNa", N, size, depth);
+        f2.Update("VectorNormsNa", N, size, depth);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
+
+        void* context1 = f1.func(size, depth);
+        void* context2 = f2.func(size, depth);
+
+        View ai;
+        U8Ptrs a;
+        InitEncoded(context2, ai, N, -17.0, 13.0, 1024, &a);
+
+        Tensor32f d1({ N, });
+        Tensor32f d2({ N, });
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.VectorNormsNa(context1, a, d1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.VectorNormsNa(context2, a, d2));
+
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
+
+        result = Compare(d1, d2, EPS * EPS, true, 32, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool DescrIntVectorNormsNaAutoTest(const FuncDI& f1, const FuncDI& f2)
+    {
+        bool result = true;
+
+        for (size_t depth = 8; depth <= 8; depth++)
+        {
+            result = result && DescrIntVectorNormsNaAutoTest(256, 256, depth, f1, f2);
+            result = result && DescrIntVectorNormsNaAutoTest(128, 512, depth, f1, f2);
+        }
+
+        return result;
+    }
+
+    bool DescrIntVectorNormsNaAutoTest()
+    {
+        bool result = true;
+
+        result = result && DescrIntVectorNormsNaAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+
+        //#ifdef SIMD_SSE41_ENABLE
+        //        if (Simd::Sse41::Enable)
+        //            result = result && DescrIntVectorNormsNaAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif
+        //
+        //#ifdef SIMD_AVX2_ENABLE
+        //        if (Simd::Avx2::Enable)
+        //            result = result && DescrIntVectorNormsNaAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif
+        //
+        //#ifdef SIMD_AVX512BW_ENABLE
+        //        if (Simd::Avx512bw::Enable)
+        //            result = result && DescrIntVectorNormsNaAutoTest(FUNC_DI(Simd::Avx512bw::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif
+        //
+        //#if defined(SIMD_NEON_ENABLE)
+        //        if (Simd::Neon::Enable)
+        //            result = result && DescrIntVectorNormsNaAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif
 
         return result;
     }

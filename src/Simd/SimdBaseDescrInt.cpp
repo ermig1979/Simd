@@ -162,7 +162,11 @@ namespace Simd
 
         void DescrInt::VectorNormsNa(size_t N, const uint8_t* const* A, float* norms) const
         {
-
+            for (size_t i = 0; i < N; ++i)
+            {
+                const uint8_t* a = A[i];
+                _vectorNorm(a + 8, ((float*)a)[0], ((float*)a)[1], _size, norms++);
+            }
         }
 
         void DescrInt::VectorNormsNp(size_t N, const uint8_t* A, float* norms) const
