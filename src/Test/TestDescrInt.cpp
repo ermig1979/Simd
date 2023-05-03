@@ -31,38 +31,58 @@ namespace Test
 {
     namespace
     {
-        struct FuncDIE
+        struct FuncDI
         {
-            typedef void*(*FuncPtr)(size_t size, size_t depth);
+            typedef void* (*FuncPtr)(size_t size, size_t depth);
 
             FuncPtr func;
             String desc;
 
-            FuncDIE(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+            FuncDI(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
-            void Update(size_t s, size_t d)
+            void Update(const String& n, size_t s, size_t d)
             {
                 std::stringstream ss;
-                ss << desc << "[Encode-" << s << "-" << d << "]";
+                ss << desc << "[" << n << "-" << s << "-" << d << "]";
                 desc = ss.str();
             }
 
-            void Call(const void* context, const View & src, View & dst) const
+            void Encode(const void* context, const View& src, View& dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
                 SimdDescrIntEncode(context, (const float*)src.data, dst.data);
             }
+
+            void Decode(const void* context, const View& src, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                SimdDescrIntDecode(context, src.data, (float*)dst.data);
+            }
+
+            void CosineDistance(const void* context, const View& a, const View& b, float& d) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                SimdDescrIntCosineDistance(context, a.data, b.data, &d);
+            }
+
+            void VectorNorm(const void* context, const View& s, float& n) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                SimdDescrIntVectorNorm(context, s.data, &n);
+            }
         };
     }
 
-#define FUNC_DIE(function) FuncDIE(function, #function)
+#define FUNC_DI(function) FuncDI(function, #function)
 
-    bool DescrIntEncodeAutoTest(size_t size, size_t depth, FuncDIE f1, FuncDIE f2)
+    //-------------------------------------------------------------------------------------------------
+
+    bool DescrIntEncodeAutoTest(size_t size, size_t depth, FuncDI f1, FuncDI f2)
     {
         bool result = true;
 
-        f1.Update(size, depth);
-        f2.Update(size, depth);
+        f1.Update("Encode", size, depth);
+        f2.Update("Encode", size, depth);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
 
@@ -78,9 +98,8 @@ namespace Test
         FillRandom(dst1, 1, 1);
         FillRandom(dst2, 2, 2);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, dst1));
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Encode(context1, src, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Encode(context2, src, dst2));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
@@ -90,7 +109,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntEncodeAutoTest(const FuncDIE& f1, const FuncDIE& f2)
+    bool DescrIntEncodeAutoTest(const FuncDI& f1, const FuncDI& f2)
     {
         bool result = true;
 
@@ -98,7 +117,7 @@ namespace Test
         {
             result = result && DescrIntEncodeAutoTest(256, depth, f1, f2);
             result = result && DescrIntEncodeAutoTest(512, depth, f1, f2);
-            result = result && DescrIntEncodeAutoTest(992, depth, f1, f2);
+            result = result && DescrIntEncodeAutoTest(1024, depth, f1, f2);
         }
 
         return result;
@@ -108,26 +127,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DescrIntEncodeAutoTest(FUNC_DIE(Simd::Base::DescrIntInit), FUNC_DIE(SimdDescrIntInit));
+        result = result && DescrIntEncodeAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
 //#ifdef SIMD_SSE41_ENABLE
 //        if (Simd::Sse41::Enable)
-//            result = result && DescrIntEncodeAutoTest(FUNC_DIE(Simd::Sse41::DescrIntInit), FUNC_DIE(SimdDescrIntInit));
+//            result = result && DescrIntEncodeAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 //#endif 
 //
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
-//            result = result && DescrIntEncodeAutoTest(FUNC_DIE(Simd::Avx2::DescrIntInit), FUNC_DIE(SimdDescrIntInit));
+//            result = result && DescrIntEncodeAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 //#endif 
 //
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable)
-//            result = result && DescrIntEncodeAutoTest(FUNC_DIE(Simd::Avx512bw::DescrIntInit), FUNC_DIE(SimdDescrIntInit));
+//            result = result && DescrIntEncodeAutoTest(FUNC_DI(Simd::Avx512bw::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 //#endif 
 //
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
-//            result = result && DescrIntEncodeAutoTest(FUNC_DIE(Simd::Neon::DescrIntInit), FUNC_DIE(SimdDescrIntInit));
+//            result = result && DescrIntEncodeAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 //#endif 
 
         return result;
@@ -135,40 +154,12 @@ namespace Test
 
     //-------------------------------------------------------------------------------------------------
 
-    namespace
-    {
-        struct FuncDID
-        {
-            typedef void* (*FuncPtr)(size_t size, size_t depth);
-
-            FuncPtr func;
-            String desc;
-
-            FuncDID(const FuncPtr& f, const String& d) : func(f), desc(d) {}
-
-            void Update(size_t s, size_t d)
-            {
-                std::stringstream ss;
-                ss << desc << "[Decode-" << s << "-" << d << "]";
-                desc = ss.str();
-            }
-
-            void Call(const void* context, const View& src, View& dst) const
-            {
-                TEST_PERFORMANCE_TEST(desc);
-                SimdDescrIntDecode(context, src.data, (float*)dst.data);
-            }
-        };
-    }
-
-#define FUNC_DID(function) FuncDID(function, #function)
-
-    bool DescrIntDecodeAutoTest(size_t size, size_t depth, FuncDID f1, FuncDID f2)
+    bool DescrIntDecodeAutoTest(size_t size, size_t depth, FuncDI f1, FuncDI f2)
     {
         bool result = true;
 
-        f1.Update(size, depth);
-        f2.Update(size, depth);
+        f1.Update("Decode", size, depth);
+        f2.Update("Decode", size, depth);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
 
@@ -184,12 +175,12 @@ namespace Test
         View dst1(SimdDescrIntDecodedSize(context1), 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst2(SimdDescrIntDecodedSize(context2), 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
-        FillRandom(dst1, 1.0f, 1.0f);
-        FillRandom(dst2, 2.0f, 2.0f);
+        FillRandom32f(dst1, 1.0f, 1.0f);
+        FillRandom32f(dst2, 2.0f, 2.0f);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Decode(context1, src, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Decode(context2, src, dst2));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
@@ -199,7 +190,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntDecodeAutoTest(const FuncDID& f1, const FuncDID& f2)
+    bool DescrIntDecodeAutoTest(const FuncDI& f1, const FuncDI& f2)
     {
         bool result = true;
 
@@ -207,7 +198,7 @@ namespace Test
         {
             result = result && DescrIntDecodeAutoTest(256, depth, f1, f2);
             result = result && DescrIntDecodeAutoTest(512, depth, f1, f2);
-            result = result && DescrIntDecodeAutoTest(992, depth, f1, f2);
+            result = result && DescrIntDecodeAutoTest(1024, depth, f1, f2);
         }
 
         return result;
@@ -217,26 +208,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Base::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+        result = result && DescrIntDecodeAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
         //#ifdef SIMD_SSE41_ENABLE
         //        if (Simd::Sse41::Enable)
-        //            result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Sse41::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+        //            result = result && DescrIntDecodeAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
         //#endif 
         //
         //#ifdef SIMD_AVX2_ENABLE
         //        if (Simd::Avx2::Enable)
-        //            result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Avx2::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+        //            result = result && DescrIntDecodeAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
         //#endif 
         //
         //#ifdef SIMD_AVX512BW_ENABLE
         //        if (Simd::Avx512bw::Enable)
-        //            result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Avx512bw::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+        //            result = result && DescrIntDecodeAutoTest(FUNC_DI(Simd::Avx512bw::DescrIntInit), FUNC_DI(SimdDescrIntInit));
         //#endif 
         //
         //#ifdef SIMD_NEON_ENABLE
         //        if (Simd::Neon::Enable)
-        //            result = result && DescrIntDecodeAutoTest(FUNC_DID(Simd::Neon::DescrIntInit), FUNC_DID(SimdDescrIntInit));
+        //            result = result && DescrIntDecodeAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
         //#endif 
 
         return result;
@@ -244,40 +235,12 @@ namespace Test
 
     //-------------------------------------------------------------------------------------------------
 
-    namespace
-    {
-        struct FuncDICD
-        {
-            typedef void* (*FuncPtr)(size_t size, size_t depth);
-
-            FuncPtr func;
-            String desc;
-
-            FuncDICD(const FuncPtr& f, const String& d) : func(f), desc(d) {}
-
-            void Update(size_t s, size_t d)
-            {
-                std::stringstream ss;
-                ss << desc << "[CosineDistance-" << s << "-" << d << "]";
-                desc = ss.str();
-            }
-
-            void Call(const void* context, const View& a, const View& b, float & d) const
-            {
-                TEST_PERFORMANCE_TEST(desc);
-                SimdDescrIntCosineDistance(context, a.data, b.data, &d);
-            }
-        };
-    }
-
-#define FUNC_DICD(function) FuncDICD(function, #function)
-
-    bool DescrIntCosineDistanceAutoTest(size_t size, size_t depth, FuncDICD f1, FuncDICD f2)
+    bool DescrIntCosineDistanceAutoTest(size_t size, size_t depth, FuncDI f1, FuncDI f2)
     {
         bool result = true;
 
-        f1.Update(size, depth);
-        f2.Update(size, depth);
+        f1.Update("CosineDistance", size, depth);
+        f2.Update("CosineDistance", size, depth);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
 
@@ -295,9 +258,8 @@ namespace Test
         SimdDescrIntEncode(context2, (float*)oB.data, b.data);
 
         float d1 = 1.0f, d2 = 2.0f, d3 = 3.0f;
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, a, b, d1));
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, a, b, d2));
-
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.CosineDistance(context1, a, b, d1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.CosineDistance(context2, a, b, d2));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
@@ -310,7 +272,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntCosineDistanceAutoTest(const FuncDICD& f1, const FuncDICD& f2)
+    bool DescrIntCosineDistanceAutoTest(const FuncDI& f1, const FuncDI& f2)
     {
         bool result = true;
 
@@ -318,7 +280,7 @@ namespace Test
         {
             result = result && DescrIntCosineDistanceAutoTest(256, depth, f1, f2);
             result = result && DescrIntCosineDistanceAutoTest(512, depth, f1, f2);
-            result = result && DescrIntCosineDistanceAutoTest(992, depth, f1, f2);
+            result = result && DescrIntCosineDistanceAutoTest(1024, depth, f1, f2);
         }
 
         return result;
@@ -328,26 +290,101 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Base::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+        result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
         //#ifdef SIMD_SSE41_ENABLE
         //        if (Simd::Sse41::Enable)
-        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Sse41::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
         //#endif 
         //
         //#ifdef SIMD_AVX2_ENABLE
         //        if (Simd::Avx2::Enable)
-        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Avx2::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
         //#endif 
         //
         //#ifdef SIMD_AVX512BW_ENABLE
         //        if (Simd::Avx512bw::Enable)
-        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Avx512bw::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Avx512bw::DescrIntInit), FUNC_DI(SimdDescrIntInit));
         //#endif 
         //
         //#ifdef SIMD_NEON_ENABLE
         //        if (Simd::Neon::Enable)
-        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DICD(Simd::Neon::DescrIntInit), FUNC_DICD(SimdDescrIntInit));
+        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool DescrIntVectorNormAutoTest(size_t size, size_t depth, FuncDI f1, FuncDI f2)
+    {
+        bool result = true;
+
+        f1.Update("VectorNorm", size, depth);
+        f2.Update("VectorNorm", size, depth);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
+
+        void* context1 = f1.func(size, depth);
+        void* context2 = f2.func(size, depth);
+
+        View oA(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        FillRandom32f(oA, -17.0, 13.0);
+
+        View a(SimdDescrIntEncodedSize(context2), 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
+        SimdDescrIntEncode(context2, (float*)oA.data, a.data);
+
+        float n1 = 1.0f, n2 = 2.0f;
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.VectorNorm(context1, a, n1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.VectorNorm(context2, a, n2));
+
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
+
+        result = Compare(n1, n2, EPS * EPS, true, DifferenceRelative, "n1 & n2");
+
+        return result;
+    }
+
+    bool DescrIntVectorNormAutoTest(const FuncDI& f1, const FuncDI& f2)
+    {
+        bool result = true;
+
+        for (size_t depth = 8; depth <= 8; depth++)
+        {
+            result = result && DescrIntVectorNormAutoTest(256, depth, f1, f2);
+            result = result && DescrIntVectorNormAutoTest(512, depth, f1, f2);
+            result = result && DescrIntVectorNormAutoTest(1024, depth, f1, f2);
+        }
+
+        return result;
+    }
+
+    bool DescrIntVectorNormAutoTest()
+    {
+        bool result = true;
+
+        result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+
+        //#ifdef SIMD_SSE41_ENABLE
+        //        if (Simd::Sse41::Enable)
+        //            result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX2_ENABLE
+        //        if (Simd::Avx2::Enable)
+        //            result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX512BW_ENABLE
+        //        if (Simd::Avx512bw::Enable)
+        //            result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Avx512bw::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif 
+        //
+        //#ifdef SIMD_NEON_ENABLE
+        //        if (Simd::Neon::Enable)
+        //            result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
         //#endif 
 
         return result;

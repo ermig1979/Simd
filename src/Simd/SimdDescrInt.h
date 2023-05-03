@@ -32,10 +32,6 @@ namespace Simd
 {
     namespace Base
     {
-        bool DescrIntValid(size_t size, size_t depth);
-
-        //-------------------------------------------------------------------------------------------------
-
         class DescrInt : Deletable
         {
         public:
@@ -53,6 +49,7 @@ namespace Simd
             virtual void CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const;
             virtual void CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const;
 
+            virtual void VectorNorm(const uint8_t* a, float* norm) const;
             virtual void VectorNormNa(size_t N, const uint8_t* const* A, float* norms) const;
             virtual void VectorNormNp(size_t N, const uint8_t* A, float* norms) const;
 
@@ -61,11 +58,13 @@ namespace Simd
             typedef void (*EncodePtr)(const float* src, float scale, float min, size_t size, uint8_t* dst);
             typedef void (*DecodePtr)(const uint8_t * src, float scale, float shift, size_t size, float* dst);
             typedef void (*CosineDistancePtr)(const uint8_t* a, float aScale, float aShift, const uint8_t* b, float bScale, float bShift, size_t size, float* distance);
+            typedef void (*VectorNormPtr)(const uint8_t* src, float scale, float shift, size_t size, float* norm);
 
             MinMaxPtr _minMax;
             EncodePtr _encode;
             DecodePtr _decode;
             CosineDistancePtr _cosineDistance;
+            VectorNormPtr _vectorNorm;
             size_t _size, _depth, _encSize;
         };
 

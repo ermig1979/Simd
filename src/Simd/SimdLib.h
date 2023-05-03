@@ -2573,6 +2573,21 @@ extern "C"
 
     /*! @ingroup descrint
 
+        \fn void SimdDescrIntVectorNorm(const void* context, const uint8_t* a, float* norm);
+
+        \short Calculates vector norm for integer descriptor.
+
+        \note Integer descriptor can be recieved by function ::SimdDescrIntEncode. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+
+        \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
+        \param [in] a - a pointer to integer descriptor.
+        \param [out] norm - a pointer to result 32-bit float norm.
+    */
+    SIMD_API void SimdDescrIntVectorNorm(const void* context, const uint8_t* a, float* norm);
+
+
+    /*! @ingroup descrint
+
         \fn void SimdDescrIntVectorNormNa(const void* context, size_t N, const uint8_t* const* A, float* norms);
 
         \short Calculates vector norms for array of integer descriptor arrays.

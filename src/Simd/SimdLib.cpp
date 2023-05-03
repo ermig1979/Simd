@@ -1969,6 +1969,12 @@ SIMD_API void SimdDescrIntCosineDistancesMxNp(const void* context, size_t M, siz
     return ((Base::DescrInt*)context)->CosineDistancesMxNp(M, N, A, B, distances);
 }
 
+SIMD_API void SimdDescrIntVectorNorm(const void* context, const uint8_t* a, float* norm)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->VectorNorm(a, norm);
+}
+
 SIMD_API void SimdDescrIntVectorNormNa(const void* context, size_t N, const uint8_t* const* A, float* norms)
 {
     SIMD_EMPTY();

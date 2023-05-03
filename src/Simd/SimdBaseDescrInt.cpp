@@ -65,6 +65,17 @@ namespace Simd
             *distance = 1.0f - ab / ::sqrt(aa * bb);
         }
 
+        static void VectorNorm8(const uint8_t* src, float scale, float shift, size_t size, float* norm)
+        {
+            float sqsum = 0;
+            for (size_t i = 0; i < size; ++i)
+            {
+                float val = src[i] * scale + shift;
+                sqsum += val * val;
+            }
+            *norm = ::sqrt(sqsum);
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         bool DescrInt::Valid(size_t size, size_t depth)
@@ -89,6 +100,7 @@ namespace Simd
                 _encode = Encode8; 
                 _decode = Decode8;
                 _cosineDistance = CosineDistance8;
+                _vectorNorm = VectorNorm8;
                 break;
             }
             default:
@@ -125,6 +137,11 @@ namespace Simd
         void DescrInt::CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const
         {
 
+        }
+
+        void DescrInt::VectorNorm(const uint8_t* a, float* norm) const
+        {
+            _vectorNorm(a + 8, ((float*)a)[0], ((float*)a)[1], _size, norm);
         }
 
         void DescrInt::VectorNormNa(size_t N, const uint8_t* const* A, float* norms) const
