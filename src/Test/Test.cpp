@@ -164,6 +164,7 @@ namespace Test
     TEST_ADD_GROUP_A0(DescrIntEncode);
     TEST_ADD_GROUP_A0(DescrIntDecode);
     TEST_ADD_GROUP_A0(DescrIntCosineDistance);
+    TEST_ADD_GROUP_A0(DescrIntCosineDistancesMxNp);
     TEST_ADD_GROUP_A0(DescrIntVectorNorm);
 
     TEST_ADD_GROUP_A0(DeinterleaveUv);
