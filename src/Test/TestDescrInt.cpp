@@ -30,6 +30,27 @@
 
 namespace Test
 {
+    typedef std::vector<uint8_t*> U8Ptrs;
+
+    static void InitEncoded(const void* c, View& u8, size_t h, float lo, float hi, int gap = 0, U8Ptrs* u8p = NULL)
+    {
+        View f32(SimdDescrIntDecodedSize(c), h, View::Float, NULL, 1);
+        FillRandom32f(f32, lo, hi);
+        u8.Recreate(SimdDescrIntEncodedSize(c) + gap, h, View::Gray8, NULL, 1);
+        if (u8p)
+            u8p->resize(h);
+        for (size_t r = 0; r < h; r++)
+        {
+            uint8_t* dst = u8.Row<uint8_t>(r) + Random(gap);
+            ::SimdDescrIntEncode(c, f32.Row<float>(r), dst);
+            if (u8p)
+                u8p->at(r) = dst;
+        }
+        TEST_ALIGN(SimdDescrIntDecodedSize(c));
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncDI
@@ -73,6 +94,12 @@ namespace Test
                 SimdDescrIntCosineDistance(context, a.data, b.data, &d);
             }
 
+            void CosineDistancesMxNa(const void* context, const U8Ptrs& a, const U8Ptrs& b, Tensor32f& d) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                SimdDescrIntCosineDistancesMxNa(context, a.size(), b.size(), a.data(), b.data(), d.Data());
+            }
+
             void CosineDistancesMxNp(const void* context, const View& a, const View& b, Tensor32f & d) const
             {
                 TEST_PERFORMANCE_TEST(desc);
@@ -88,27 +115,6 @@ namespace Test
     }
 
 #define FUNC_DI(function) FuncDI(function, #function)
-
-    //-------------------------------------------------------------------------------------------------
-
-    typedef std::vector<uint8_t*> U8Ptrs;
-
-    static void InitEncoded(const void *c, View& u8, size_t h, float lo, float hi, int gap = 0, U8Ptrs* u8p = NULL)
-    {
-        View f32(SimdDescrIntDecodedSize(c), h, View::Float, NULL, 1);
-        FillRandom32f(f32, lo, hi);
-        u8.Recreate(SimdDescrIntEncodedSize(c) + gap, h, View::Gray8, NULL, 1);
-        if (u8p)
-            u8p->resize(h);
-        for (size_t r = 0; r < h; r++)
-        {
-            uint8_t* dst = u8.Row<uint8_t>(r) + Random(gap);
-            ::SimdDescrIntEncode(c, f32.Row<float>(r), dst);
-            if (u8p)
-                u8p->at(r) = dst;
-        }
-        TEST_ALIGN(SimdDescrIntDecodedSize(c));
-    }
 
     //-------------------------------------------------------------------------------------------------
 
@@ -352,12 +358,86 @@ namespace Test
 
     //-------------------------------------------------------------------------------------------------
 
+    bool DescrIntCosineDistancesMxNaAutoTest(size_t M, size_t N, size_t size, size_t depth, FuncDI f1, FuncDI f2)
+    {
+        bool result = true;
+
+        f1.Update("CosineDistancesMxNa", M, N, size, depth);
+        f2.Update("CosineDistancesMxNa", M, N, size, depth);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
+
+        void* context1 = f1.func(size, depth);
+        void* context2 = f2.func(size, depth);
+
+        View ai, bi;
+        U8Ptrs a, b;
+        InitEncoded(context2, ai, M, -17.0, 13.0, 1024, &a);
+        InitEncoded(context2, bi, N, -15.0, 17.0, 1024, &b);
+
+        Tensor32f d1({ M, N, });
+        Tensor32f d2({ M, N, });
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.CosineDistancesMxNa(context1, a, b, d1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.CosineDistancesMxNa(context2, a, b, d2));
+
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
+
+        result = Compare(d1, d2, EPS * EPS, true, 32, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool DescrIntCosineDistancesMxNaAutoTest(const FuncDI& f1, const FuncDI& f2)
+    {
+        bool result = true;
+
+        for (size_t depth = 8; depth <= 8; depth++)
+        {
+            result = result && DescrIntCosineDistancesMxNaAutoTest(256, 256, 256, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNaAutoTest(128, 128, 512, depth, f1, f2);
+        }
+
+        return result;
+    }
+
+    bool DescrIntCosineDistancesMxNaAutoTest()
+    {
+        bool result = true;
+
+        result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+
+        //#ifdef SIMD_SSE41_ENABLE
+        //        if (Simd::Sse41::Enable)
+        //            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif
+        //
+        //#ifdef SIMD_AVX2_ENABLE
+        //        if (Simd::Avx2::Enable)
+        //            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif
+        //
+        //#ifdef SIMD_AVX512BW_ENABLE
+        //        if (Simd::Avx512bw::Enable)
+        //            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Avx512bw::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif
+        //
+        //#if defined(SIMD_NEON_ENABLE)
+        //        if (Simd::Neon::Enable)
+        //            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        //#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     bool DescrIntCosineDistancesMxNpAutoTest(size_t M, size_t N, size_t size, size_t depth, FuncDI f1, FuncDI f2)
     {
         bool result = true;
 
-        f1.Update("CosineDistanceMxNp", M, N, size, depth);
-        f2.Update("CosineDistanceMxNp", M, N, size, depth);
+        f1.Update("CosineDistancesMxNp", M, N, size, depth);
+        f2.Update("CosineDistancesMxNp", M, N, size, depth);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
 

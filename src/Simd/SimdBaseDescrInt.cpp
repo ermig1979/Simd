@@ -131,7 +131,15 @@ namespace Simd
 
         void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
         {
-
+            for (size_t i = 0; i < M; ++i)
+            {
+                const uint8_t* a = A[i];
+                for (size_t j = 0; j < N; ++j)
+                {
+                    const uint8_t* b = B[j];
+                    _cosineDistance(a + 8, ((float*)a)[0], ((float*)a)[1], b + 8, ((float*)b)[0], ((float*)b)[1], _size, distances++);
+                }
+            }
         }
 
         void DescrInt::CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const
