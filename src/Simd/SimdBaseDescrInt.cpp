@@ -41,6 +41,23 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void Encode6(const float* src, float scale, float min, size_t size, uint8_t* dst)
+        {
+            assert(size % 4 == 0);
+            for (size_t i = 0; i < size; i += 4)
+            {
+                uint32_t v0 = Round((src[0] - min) * scale);
+                uint32_t v1 = Round((src[1] - min) * scale);
+                uint32_t v2 = Round((src[2] - min) * scale);
+                uint32_t v3 = Round((src[3] - min) * scale);
+                dst[0] = v0 | v1 << 6;
+                dst[1] = v1 >> 2 | v2 << 4;
+                dst[2] = v2 >> 4 | v3 << 2;
+                src += 4;
+                dst += 3;
+            }
+        }
+
         static void Encode7(const float* src, float scale, float min, size_t size, uint8_t* dst)
         {
             assert(size % 8 == 0);
@@ -73,6 +90,21 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
+
+        static void Decode6(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        {
+            assert(size % 4 == 0);
+            for (size_t i = 0; i < size; i += 4)
+            {
+                uint32_t val = *(uint32_t*)(src + 0);
+                dst[0] = (val & 0x3F) * scale + shift;
+                dst[1] = ((val >> 6) & 0x3F) * scale + shift;
+                dst[2] = ((val >> 12) & 0x3F) * scale + shift;
+                dst[3] = ((val >> 18) & 0x3F) * scale + shift;
+                src += 3;
+                dst += 4;
+            }
+        }
 
         static void Decode7(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
@@ -107,6 +139,24 @@ namespace Simd
             aa += a * a; 
             ab += a * b;
             bb += b * b;
+        }
+
+        static void CosineDistance6(const uint8_t* a, float aScale, float aShift, const uint8_t* b, float bScale, float bShift, size_t size, float* distance)
+        {
+            assert(size % 4 == 0);
+            float aa = 0, ab = 0, bb = 0;
+            for (size_t i = 0; i < size; i += 4)
+            {
+                uint32_t a0 = *(uint32_t*)(a + 0);
+                uint32_t b0 = *(uint32_t*)(b + 0);
+                Add((a0 & 0x3F) * aScale + aShift, (b0 & 0x3F) * bScale + bShift, aa, ab, bb);
+                Add(((a0 >> 6) & 0x3F) * aScale + aShift, ((b0 >> 6) & 0x3F) * bScale + bShift, aa, ab, bb);
+                Add(((a0 >> 12) & 0x3F) * aScale + aShift, ((b0 >> 12) & 0x3F) * bScale + bShift, aa, ab, bb);
+                Add(((a0 >> 18) & 0x3F) * aScale + aShift, ((b0 >> 18) & 0x3F) * bScale + bShift, aa, ab, bb);
+                a += 3;
+                b += 3;
+            }
+            *distance = 1.0f - ab / ::sqrt(aa * bb);
         }
 
         static void CosineDistance7(const uint8_t* a, float aScale, float aShift, const uint8_t* b, float bScale, float bShift, size_t size, float* distance)
@@ -147,6 +197,22 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void VectorNorm6(const uint8_t* src, float scale, float shift, size_t size, float* norm)
+        {
+            assert(size % 4 == 0);
+            float sqsum = 0;
+            for (size_t i = 0; i < size; i += 4)
+            {
+                uint32_t val = *(uint32_t*)(src + 0);
+                sqsum += Simd::Square((val & 0x3F) * scale + shift);
+                sqsum += Simd::Square(((val >> 6) & 0x3F) * scale + shift);
+                sqsum += Simd::Square(((val >> 12) & 0x3F) * scale + shift);
+                sqsum += Simd::Square(((val >> 18) & 0x3F) * scale + shift);
+                src += 3;
+            }
+            *norm = ::sqrt(sqsum);
+        }
+
         static void VectorNorm7(const uint8_t* src, float scale, float shift, size_t size, float* norm)
         {
             assert(size % 8 == 0);
@@ -183,7 +249,7 @@ namespace Simd
 
         bool DescrInt::Valid(size_t size, size_t depth)
         {
-            if (depth < 7 || depth > 8)
+            if (depth < 6 || depth > 8)
                 return false;
             if (size == 0 || size % 8 != 0)
                 return false;
@@ -199,6 +265,14 @@ namespace Simd
             _minMax = MinMax;
             switch (depth)
             {
+            case 6:
+            {
+                _encode = Encode6;
+                _decode = Decode6;
+                _cosineDistance = CosineDistance6;
+                _vectorNorm = VectorNorm6;
+                break;
+            }
             case 7:
             {
                 _encode = Encode7;
