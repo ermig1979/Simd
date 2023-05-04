@@ -370,6 +370,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetUnaryOperation.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrInt.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
@@ -606,6 +609,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdErf.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDescrInt.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

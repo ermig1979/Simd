@@ -32,7 +32,7 @@ namespace Simd
 {
     namespace Base
     {
-        class DescrInt : Deletable
+        class DescrInt : public Deletable
         {
         public:
             static bool Valid(size_t size, size_t depth);
@@ -77,6 +77,15 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+        class DescrInt : public Base::DescrInt
+        {
+        public:
+            DescrInt(size_t size, size_t depth);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* DescrIntInit(size_t size, size_t depth);
     }
 #endif
 

@@ -1922,7 +1922,7 @@ SIMD_API void* SimdDescrIntInit(size_t size, size_t depth)
 {
     SIMD_EMPTY();
     typedef void* (*SimdDescrIntInitPtr) (size_t size, size_t depth);
-    const static SimdDescrIntInitPtr simdDescrIntInit = SIMD_FUNC0(DescrIntInit);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdDescrIntInitPtr simdDescrIntInit = SIMD_FUNC1(DescrIntInit, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_NEON_FUNC);
 
     return simdDescrIntInit(size, depth);
 }
