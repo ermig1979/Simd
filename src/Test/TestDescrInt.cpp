@@ -152,11 +152,12 @@ namespace Test
         View src(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         FillRandom32f(src, -17.0, 13.0);
 
-        View dst1(SimdDescrIntEncodedSize(context1), 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(SimdDescrIntEncodedSize(context2), 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
+        size_t encSize = SimdDescrIntEncodedSize(context1);
+        View dst1(encSize, 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(encSize, 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
 
-        FillRandom(dst1, 1, 1);
-        FillRandom(dst2, 2, 2);
+        Fill(dst1, 1);
+        Fill(dst2, 2);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Encode(context1, src, dst1));
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Encode(context2, src, dst2));
@@ -270,11 +271,11 @@ namespace Test
 
         result = result && DescrIntDecodeAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
-        //#ifdef SIMD_SSE41_ENABLE
-        //        if (Simd::Sse41::Enable)
-        //            result = result && DescrIntDecodeAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-        //#endif 
-        //
+        #ifdef SIMD_SSE41_ENABLE
+                if (Simd::Sse41::Enable)
+                    result = result && DescrIntDecodeAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+        #endif 
+        
         //#ifdef SIMD_AVX2_ENABLE
         //        if (Simd::Avx2::Enable)
         //            result = result && DescrIntDecodeAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));

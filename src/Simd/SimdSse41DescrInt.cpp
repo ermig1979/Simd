@@ -77,12 +77,6 @@ namespace Simd
             size_t i = 0, main = size - 8;
             __m128 _scale = _mm_set1_ps(scale);
             __m128 _min = _mm_set1_ps(min);
-            //for (size_t main16 = AlignLo(main, 16); i < main16; i += 16, src += 16, dst += 14)
-            //{
-            //    __m128i d0 = Encode7(src + 0, _scale, _min);
-            //    __m128i d1 = Encode7(src + 8, _scale, _min);
-            //    _mm_storeu_si128((__m128i*)dst, _mm_or_si128(d0, _mm_slli_si128(d1, 7)));
-            //}
             for (; i < main; i += 8, src += 8, dst += 6)
                 _mm_storel_epi64((__m128i*)dst, Encode6(src, _scale, _min));
             for (; i < size; i += 8, src += 8, dst += 6)
@@ -110,12 +104,6 @@ namespace Simd
             size_t i = 0, main = size - 8;
             __m128 _scale = _mm_set1_ps(scale);
             __m128 _min = _mm_set1_ps(min);
-            //for (size_t main16 = AlignLo(main, 16); i < main16; i += 16, src += 16, dst += 14)
-            //{
-            //    __m128i d0 = Encode7(src + 0, _scale, _min);
-            //    __m128i d1 = Encode7(src + 8, _scale, _min);
-            //    _mm_storeu_si128((__m128i*)dst, _mm_or_si128(d0, _mm_slli_si128(d1, 7)));
-            //}
             for (; i < main; i += 8, src += 8, dst += 7)
                 _mm_storel_epi64((__m128i*)dst, Encode7(src, _scale, _min));
             for (; i < size; i += 8, src += 8, dst += 7)
@@ -152,6 +140,25 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void Decode8(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        {
+            __m128 _scale = _mm_set1_ps(scale);
+            __m128 _shift = _mm_set1_ps(shift);
+            size_t i = 0, sizeF = AlignLo(size, F);
+            for (; i < sizeF; i += F)
+            {
+                __m128 _src = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_loadu_si32(src + i)));
+                _mm_storeu_ps(dst + i, _mm_add_ps(_mm_mul_ps(_src, _scale), _shift));
+            }
+            for (; i < size; i += 1)
+            {
+                __m128 _src = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_loadu_si32(src + i)));
+                _mm_store_ss(dst + i, _mm_add_ss(_mm_mul_ss(_src, _scale), _shift));
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         DescrInt::DescrInt(size_t size, size_t depth)
             : Base::DescrInt(size, depth)
         {
@@ -177,7 +184,7 @@ namespace Simd
             case 8:
             {
                 _encode = Encode8;
-            //    _decode = Decode8;
+                _decode = Decode8;
             //    _cosineDistance = CosineDistance8;
             //    _vectorNorm = VectorNorm8;
                 break;
