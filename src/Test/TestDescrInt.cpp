@@ -156,8 +156,8 @@ namespace Test
         View dst1(encSize, 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst2(encSize, 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
 
-        Fill(dst1, 1);
-        Fill(dst2, 2);
+        Fill(dst1, 0);
+        Fill(dst2, 0);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Encode(context1, src, dst1));
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Encode(context2, src, dst2));
