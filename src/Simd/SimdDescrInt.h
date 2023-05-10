@@ -42,29 +42,27 @@ namespace Simd
             size_t DecodedSize() const { return _size; }
             size_t EncodedSize() const { return _encSize; }
 
-            virtual void Encode(const float* src, uint8_t* dst) const;
-            virtual void Decode(const uint8_t* src, float* dst) const;
+            void Encode(const float* src, uint8_t* dst) const;
+            void Decode(const uint8_t* src, float* dst) const;
 
-            virtual void CosineDistance(const uint8_t* a, const uint8_t* b, float* distance) const;
+            void CosineDistance(const uint8_t* a, const uint8_t* b, float* distance) const;
             virtual void CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const;
             virtual void CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const;
 
-            virtual void VectorNorm(const uint8_t* a, float* norm) const;
+            void VectorNorm(const uint8_t* a, float* norm) const;
             virtual void VectorNormsNa(size_t N, const uint8_t* const* A, float* norms) const;
             virtual void VectorNormsNp(size_t N, const uint8_t* A, float* norms) const;
 
         protected:
             typedef void (*MinMaxPtr)(const float* src, size_t size, float &min, float &max);
-            typedef void (*EncodePtr)(const float* src, float scale, float min, size_t size, uint8_t* dst);
+            typedef void (*EncodePtr)(const float* src, float scale, float min, size_t size, int32_t &sum, int32_t& sqsum, uint8_t* dst);
             typedef void (*DecodePtr)(const uint8_t * src, float scale, float shift, size_t size, float* dst);
-            typedef void (*CosineDistancePtr)(const uint8_t* a, float aScale, float aShift, const uint8_t* b, float bScale, float bShift, size_t size, float* distance);
-            typedef void (*VectorNormPtr)(const uint8_t* src, float scale, float shift, size_t size, float* norm);
+            typedef int32_t (*CorrelationPtr)(const uint8_t* a, const uint8_t* b, size_t size);
 
             MinMaxPtr _minMax;
             EncodePtr _encode;
             DecodePtr _decode;
-            CosineDistancePtr _cosineDistance;
-            VectorNormPtr _vectorNorm;
+            CorrelationPtr _correlation;
             size_t _size, _depth, _encSize;
             float _range;
         };

@@ -61,82 +61,100 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static SIMD_INLINE __m128i Encode6(const float* src, __m128 scale, __m128 min)
+        SIMD_INLINE __m128i Encode(const float* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
+        {
+            __m128i value = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_loadu_ps(src), min), scale));
+            sum = _mm_add_epi32(value, sum);
+            sqsum = _mm_add_epi32(_mm_madd_epi16(value, value), sqsum);
+            return value;
+        }
+
+        static SIMD_INLINE __m128i Encode6(const float* src, __m128 scale, __m128 min, __m128i & sum, __m128i & sqsum)
         {
             static const __m128i SHIFT = SIMD_MM_SETR_EPI16(256, 64, 16, 4, 256, 64, 16, 4);
             static const __m128i SHFL0 = SIMD_MM_SETR_EPI8(0x1, 0x3, 0x5, 0x9, 0xB, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
             static const __m128i SHFL1 = SIMD_MM_SETR_EPI8(0x2, 0x4, 0x6, 0xA, 0xC, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-            __m128i i0 = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_loadu_ps(src + 0), min), scale));
-            __m128i i4 = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_loadu_ps(src + 4), min), scale));
+            __m128i i0 = Encode(src + 0, scale, min, sum, sqsum);
+            __m128i i4 = Encode(src + 4, scale, min, sum, sqsum);
             __m128i s0 = _mm_mullo_epi16(_mm_packus_epi32(i0, i4), SHIFT);
             return _mm_or_si128(_mm_shuffle_epi8(s0, SHFL0), _mm_shuffle_epi8(s0, SHFL1));
         }
 
-        static void Encode6(const float* src, float scale, float min, size_t size, uint8_t* dst)
+        static void Encode6(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
             assert(size % 8 == 0);
             size_t i = 0, main = size - 8;
             __m128 _scale = _mm_set1_ps(scale);
             __m128 _min = _mm_set1_ps(min);
+            __m128i _sum = _mm_setzero_si128();
+            __m128i _sqsum = _mm_setzero_si128();
             for (; i < main; i += 8, src += 8, dst += 6)
-                _mm_storel_epi64((__m128i*)dst, Encode6(src, _scale, _min));
+                _mm_storel_epi64((__m128i*)dst, Encode6(src, _scale, _min, _sum, _sqsum));
             for (; i < size; i += 8, src += 8, dst += 6)
             {
-                __m128i d0 = Encode6(src, _scale, _min);
+                __m128i d0 = Encode6(src, _scale, _min, _sum, _sqsum);
                 *(uint32_t*)(dst + 0) = _mm_extract_epi32(d0, 0);
                 *(uint16_t*)(dst + 4) = _mm_extract_epi16(d0, 2);
             }
+            sum = ExtractInt32Sum(_sum);
+            sqsum = ExtractInt32Sum(_sqsum);
         }
 
-        static SIMD_INLINE __m128i Encode7(const float* src, __m128 scale, __m128 min)
+        static SIMD_INLINE __m128i Encode7(const float* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
         {
             static const __m128i SHIFT = SIMD_MM_SETR_EPI16(256, 128, 64, 32, 16, 8, 4, 2);
             static const __m128i SHFL0 = SIMD_MM_SETR_EPI8(0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1);
             static const __m128i SHFL1 = SIMD_MM_SETR_EPI8(0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-            __m128i i0 = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_loadu_ps(src + 0), min), scale));
-            __m128i i4 = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_loadu_ps(src + 4), min), scale));
+            __m128i i0 = Encode(src + 0, scale, min, sum, sqsum);
+            __m128i i4 = Encode(src + 4, scale, min, sum, sqsum);
             __m128i s0 = _mm_mullo_epi16(_mm_packus_epi32(i0, i4), SHIFT);
             return _mm_or_si128(_mm_shuffle_epi8(s0, SHFL0), _mm_shuffle_epi8(s0, SHFL1));
         }
 
-        static void Encode7(const float* src, float scale, float min, size_t size, uint8_t* dst)
+        static void Encode7(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
             assert(size % 8 == 0);
             size_t i = 0, main = size - 8;
             __m128 _scale = _mm_set1_ps(scale);
             __m128 _min = _mm_set1_ps(min);
+            __m128i _sum = _mm_setzero_si128();
+            __m128i _sqsum = _mm_setzero_si128();
             for (; i < main; i += 8, src += 8, dst += 7)
-                _mm_storel_epi64((__m128i*)dst, Encode7(src, _scale, _min));
+                _mm_storel_epi64((__m128i*)dst, Encode7(src, _scale, _min, _sum, _sqsum));
             for (; i < size; i += 8, src += 8, dst += 7)
             {
-                __m128i d0 = Encode7(src, _scale, _min);
+                __m128i d0 = Encode7(src, _scale, _min, _sum, _sqsum);
                 *(uint32_t*)(dst + 0) = _mm_extract_epi32(d0, 0);
                 *(uint16_t*)(dst + 4) = _mm_extract_epi16(d0, 2);
                 *(uint8_t*)(dst + 6) = _mm_extract_epi8(d0, 6);
             }
+            sum = ExtractInt32Sum(_sum);
+            sqsum = ExtractInt32Sum(_sqsum);
         }
 
-        static void Encode8(const float* src, float scale, float min, size_t size, uint8_t* dst)
+        static void Encode8(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            size_t sizeA = AlignLo(size, A), sizeF = AlignLo(size, F), i = 0;
+            assert(size % 8 == 0);
+            size_t sizeA = AlignLo(size, A), i = 0;
             __m128 _scale = _mm_set1_ps(scale);
             __m128 _min = _mm_set1_ps(min);
+            __m128i _sum = _mm_setzero_si128();
+            __m128i _sqsum = _mm_setzero_si128();
             for (; i < sizeA; i += A)
             {
-                __m128i d0 = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_loadu_ps(src + i + F * 0), _min), _scale));
-                __m128i d1 = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_loadu_ps(src + i + F * 1), _min), _scale));
-                __m128i d2 = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_loadu_ps(src + i + F * 2), _min), _scale));
-                __m128i d3 = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_loadu_ps(src + i + F * 3), _min), _scale));
+                __m128i d0 = Encode(src + i + 0 * F, _scale, _min, _sum, _sqsum);
+                __m128i d1 = Encode(src + i + 1 * F, _scale, _min, _sum, _sqsum);
+                __m128i d2 = Encode(src + i + 2 * F, _scale, _min, _sum, _sqsum);
+                __m128i d3 = Encode(src + i + 3 * F, _scale, _min, _sum, _sqsum);
                 _mm_storeu_si128((__m128i*)(dst + i), _mm_packus_epi16(_mm_packus_epi32(d0, d1), _mm_packus_epi32(d2, d3)));
             }
-            for (; i < sizeF; i += F)
+            for (; i < size; i += F)
             {
-                __m128 _src = _mm_loadu_ps(src + i);
-                __m128i _dst = _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_src, _min), _scale));
-                _mm_storeu_si32((uint32_t*)(dst + i), _mm_packus_epi16(_mm_packus_epi32(_dst, _mm_setzero_si128()), _mm_setzero_si128()));
+                __m128i d0 = Encode(src + i, _scale, _min, _sum, _sqsum);
+                _mm_storeu_si32((uint32_t*)(dst + i), _mm_packus_epi16(_mm_packus_epi32(d0, _mm_setzero_si128()), _mm_setzero_si128()));
             }
-            for (; i < size; i += 1)
-                dst[i] = _mm_cvtss_si32(_mm_mul_ss(_mm_sub_ss(_mm_load_ss(src + i), _min), _scale));
+            sum = ExtractInt32Sum(_sum);
+            sqsum = ExtractInt32Sum(_sqsum);
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -144,24 +162,6 @@ namespace Simd
         static void Decode6(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
             assert(size % 8 == 0);
-#if 1
-            static const __m128i SHFL0 = SIMD_MM_SETR_EPI8(0x0, 0x0, -1, -1, 0x0, 0x1, -1, -1, 0x1, 0x2, -1, -1, 0x2, 0x3, -1, -1);
-            static const __m128i SHFL1 = SIMD_MM_SETR_EPI8(0x3, 0x3, -1, -1, 0x3, 0x4, -1, -1, 0x4, 0x5, -1, -1, 0x5, 0x5, -1, -1);
-            static const __m128i MUL = SIMD_MM_SETR_EPI16(256, 0, 1024, 0, 4096, 0, 16384, 0);
-            static const __m128i MASK = SIMD_MM_SET1_EPI16(0x3F);
-            __m128 _scale = _mm_set1_ps(scale);
-            __m128 _shift = _mm_set1_ps(shift);
-            for (size_t i = 0; i < size; i += 8)
-            {
-                __m128i _src = _mm_loadl_epi64((__m128i*)src);
-                __m128i s0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_src, SHFL0), MUL), MASK);
-                _mm_storeu_ps(dst + 0, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(s0), _scale), _shift));
-                __m128i s1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_src, SHFL1), MUL), MASK);
-                _mm_storeu_ps(dst + 4, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(s1), _scale), _shift));
-                src += 6;
-                dst += 8;
-            }
-#else
             static const __m128i SHFL = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
             static const __m128i MUL = SIMD_MM_SETR_EPI16(256, 1024, 4096, 16384, 256, 1024, 4096, 16384);
             static const __m128i MASK = SIMD_MM_SET1_EPI16(0x3F);
@@ -176,31 +176,11 @@ namespace Simd
                 src += 6;
                 dst += 8;
             }
-#endif
         }
 
         static void Decode7(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
             assert(size % 8 == 0);
-#if 1
-            static const __m128i SHFL0 = SIMD_MM_SETR_EPI8(0x0, 0x0, -1, -1, 0x0, 0x1, -1, -1, 0x1, 0x2, -1, -1, 0x2, 0x3, -1, -1);
-            static const __m128i SHFL1 = SIMD_MM_SETR_EPI8(0x3, 0x4, -1, -1, 0x4, 0x5, -1, -1, 0x5, 0x6, -1, -1, 0x6, 0x6, -1, -1);
-            static const __m128i MUL0 = SIMD_MM_SETR_EPI16(256, 0, 512, 0, 1024, 0, 2048, 0);
-            static const __m128i MUL1 = SIMD_MM_SETR_EPI16(4096, 0, 8192, 0, 16384, 0, 32768, 0);
-            static const __m128i MASK = SIMD_MM_SET1_EPI16(0x7F);
-            __m128 _scale = _mm_set1_ps(scale);
-            __m128 _shift = _mm_set1_ps(shift);
-            for (size_t i = 0; i < size; i += 8)
-            {
-                __m128i _src = _mm_loadl_epi64((__m128i*)src);
-                __m128i s0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_src, SHFL0), MUL0), MASK);
-                _mm_storeu_ps(dst + 0, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(s0), _scale), _shift));
-                __m128i s1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_src, SHFL1), MUL1), MASK);
-                _mm_storeu_ps(dst + 4, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(s1), _scale), _shift));
-                src += 7;
-                dst += 8;
-            }
-#else
             static const __m128i SHFL = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6);
             static const __m128i MUL = SIMD_MM_SETR_EPI16(256, 512, 1024, 2048, 4096, 8192, 16384, 32768);
             static const __m128i MASK = SIMD_MM_SET1_EPI16(0x7F);
@@ -215,7 +195,6 @@ namespace Simd
                 src += 7;
                 dst += 8;
             }
-#endif
         }
 
         static void Decode8(const uint8_t* src, float scale, float shift, size_t size, float* dst)
@@ -237,6 +216,60 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static int32_t Correlation6(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0);
+            static const __m128i SHFL = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
+            static const __m128i MUL = SIMD_MM_SETR_EPI16(256, 1024, 4096, 16384, 256, 1024, 4096, 16384);
+            static const __m128i MASK = SIMD_MM_SET1_EPI16(0x3F);
+            __m128i _ab = _mm_setzero_si128();            
+            for (size_t i = 0; i < size; i += 8, a += 6, b += 6)
+            {
+                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), SHFL), MUL), MASK);
+                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), SHFL), MUL), MASK);
+                _ab = _mm_add_epi32(_mm_madd_epi16(_a, _b), _ab);
+            }
+            return ExtractInt32Sum(_ab);
+        }
+
+        static int32_t Correlation7(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0);
+            static const __m128i SHFL = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6);
+            static const __m128i MUL = SIMD_MM_SETR_EPI16(256, 512, 1024, 2048, 4096, 8192, 16384, 32768);
+            static const __m128i MASK = SIMD_MM_SET1_EPI16(0x7F);
+            __m128i _ab = _mm_setzero_si128();
+            for (size_t i = 0; i < size; i += 8, a += 7, b += 7)
+            {
+                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), SHFL), MUL), MASK);
+                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), SHFL), MUL), MASK);
+                _ab = _mm_add_epi32(_mm_madd_epi16(_a, _b), _ab);
+            }
+            return ExtractInt32Sum(_ab);
+        }
+
+        static int32_t Correlation8(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            size_t i = 0, sizeA = AlignLo(size, A);
+            __m128i _ab = _mm_setzero_si128();
+            for (; i < sizeA; i += A)
+            {
+                __m128i _a = _mm_loadu_si128((__m128i*)(a + i));
+                __m128i _b = _mm_loadu_si128((__m128i*)(b + i));
+                _ab = _mm_add_epi32(_mm_madd_epi16(UnpackU8<0>(_a), UnpackU8<0>(_b)), _ab);
+                _ab = _mm_add_epi32(_mm_madd_epi16(UnpackU8<1>(_a), UnpackU8<1>(_b)), _ab);
+            }
+            for (; i < size; i += 8)
+            {
+                __m128i _a = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(a + i)));
+                __m128i _b = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(b + i)));
+                _ab = _mm_add_epi32(_mm_madd_epi16(_a, _b), _ab);
+            }
+            return ExtractInt32Sum(_ab);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         DescrInt::DescrInt(size_t size, size_t depth)
             : Base::DescrInt(size, depth)
         {
@@ -247,24 +280,21 @@ namespace Simd
             {
                 _encode = Encode6;
                 _decode = Decode6;
-            //    _cosineDistance = CosineDistance6;
-            //    _vectorNorm = VectorNorm6;
+                _correlation = Correlation6;
                 break;
             }
             case 7:
             {
                 _encode = Encode7;
                 _decode = Decode7;
-            //    _cosineDistance = CosineDistance7;
-            //    _vectorNorm = VectorNorm7;
+                _correlation = Correlation7;
                 break;
             }
             case 8:
             {
                 _encode = Encode8;
                 _decode = Decode8;
-            //    _cosineDistance = CosineDistance8;
-            //    _vectorNorm = VectorNorm8;
+                _correlation = Correlation8;
                 break;
             }
             default:

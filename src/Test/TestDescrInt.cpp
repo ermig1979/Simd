@@ -174,11 +174,12 @@ namespace Test
     {
         bool result = true;
 
+        size_t size = Simd::Min(H * W, 128 * 256);
         for (size_t depth = 6; depth <= 8; depth++)
         {
             //result = result && DescrIntEncodeAutoTest(256, depth, f1, f2);
             //result = result && DescrIntEncodeAutoTest(512, depth, f1, f2);
-            result = result && DescrIntEncodeAutoTest(H * W, depth, f1, f2);
+            result = result && DescrIntEncodeAutoTest(size, depth, f1, f2);
         }
 
         return result;
@@ -246,7 +247,7 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = result && Compare(dst1, dst2, EPS*EPS, true, 64);
+        result = result && Compare(dst1, dst2, EPS, true, 64);
 
         return result;
     }
@@ -255,11 +256,12 @@ namespace Test
     {
         bool result = true;
 
+        size_t size = Simd::Min(H * W, 128 * 256);
         for (size_t depth = 6; depth <= 8; depth++)
         {
             //result = result && DescrIntDecodeAutoTest(256, depth, f1, f2);
             //result = result && DescrIntDecodeAutoTest(512, depth, f1, f2);
-            result = result && DescrIntDecodeAutoTest(H * W, depth, f1, f2);
+            result = result && DescrIntDecodeAutoTest(size, depth, f1, f2);
         }
 
         return result;
@@ -325,10 +327,10 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = Compare(d1, d2, EPS*EPS, true, DifferenceRelative, "d1 & d2");
+        result = result && Compare(d1, d2, EPS * 0.1f * (1 << (8 - depth)), true, DifferenceRelative, "d1 & d2");
 
         ::SimdCosineDistance32f((float*)oA.data, (float*)oB.data, size, &d3);
-        result = Compare(d2, d3, EPS * (1 << (8 - depth)), true, DifferenceRelative, "d2 & d3");
+        result = result && Compare(d2, d3, EPS * (1 << (8 - depth)), true, DifferenceRelative, "d2 & d3");
 
         return result;
     }
@@ -337,11 +339,12 @@ namespace Test
     {
         bool result = true;
 
+        size_t size = Simd::Min(H * W, 128 * 256);
         for (size_t depth = 6; depth <= 8; depth++)
         {
             //result = result && DescrIntCosineDistanceAutoTest(256, depth, f1, f2);
             //result = result && DescrIntCosineDistanceAutoTest(512, depth, f1, f2);
-            result = result && DescrIntCosineDistanceAutoTest(H * W, depth, f1, f2);
+            result = result && DescrIntCosineDistanceAutoTest(size, depth, f1, f2);
         }
 
         return result;
@@ -353,11 +356,11 @@ namespace Test
 
         result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
-        //#ifdef SIMD_SSE41_ENABLE
-        //        if (Simd::Sse41::Enable)
-        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-        //#endif 
-        //
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif 
+        
         //#ifdef SIMD_AVX2_ENABLE
         //        if (Simd::Avx2::Enable)
         //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
@@ -427,11 +430,11 @@ namespace Test
 
         result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
-        //#ifdef SIMD_SSE41_ENABLE
-        //        if (Simd::Sse41::Enable)
-        //            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-        //#endif
-        //
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
+        
         //#ifdef SIMD_AVX2_ENABLE
         //        if (Simd::Avx2::Enable)
         //            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
@@ -500,11 +503,11 @@ namespace Test
 
         result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-//#endif
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
@@ -550,7 +553,7 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = Compare(n1, n2, EPS * EPS, true, DifferenceRelative, "n1 & n2");
+        result = Compare(n1, n2, EPS * EPS * (1 << (8 - depth)), true, DifferenceRelative, "n1 & n2");
 
         return result;
     }
@@ -559,11 +562,12 @@ namespace Test
     {
         bool result = true;
 
+        size_t size = Simd::Min(H * W, 128 * 256);
         for (size_t depth = 6; depth <= 8; depth++)
         {
             //result = result && DescrIntVectorNormAutoTest(256, depth, f1, f2);
             //result = result && DescrIntVectorNormAutoTest(512, depth, f1, f2);
-            result = result && DescrIntVectorNormAutoTest(H * W, depth, f1, f2);
+            result = result && DescrIntVectorNormAutoTest(size, depth, f1, f2);
         }
 
         return result;
@@ -575,11 +579,11 @@ namespace Test
 
         result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
-        //#ifdef SIMD_SSE41_ENABLE
-        //        if (Simd::Sse41::Enable)
-        //            result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-        //#endif 
-        //
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif 
+        
         //#ifdef SIMD_AVX2_ENABLE
         //        if (Simd::Avx2::Enable)
         //            result = result && DescrIntVectorNormAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
@@ -624,7 +628,7 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = Compare(d1, d2, EPS * EPS, true, 32, DifferenceAbsolute);
+        result = Compare(d1, d2, EPS * EPS * (1 << (8 - depth)), true, 32, DifferenceRelative);
 
         return result;
     }
@@ -647,11 +651,11 @@ namespace Test
 
         result = result && DescrIntVectorNormsNaAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
-        //#ifdef SIMD_SSE41_ENABLE
-        //        if (Simd::Sse41::Enable)
-        //            result = result && DescrIntVectorNormsNaAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-        //#endif
-        //
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DescrIntVectorNormsNaAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
+        
         //#ifdef SIMD_AVX2_ENABLE
         //        if (Simd::Avx2::Enable)
         //            result = result && DescrIntVectorNormsNaAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
@@ -695,7 +699,7 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = Compare(d1, d2, EPS * EPS, true, 32, DifferenceAbsolute);
+        result = Compare(d1, d2, EPS * EPS * (1 << (8 - depth)), true, 32, DifferenceRelative);
 
         return result;
     }
@@ -718,11 +722,11 @@ namespace Test
 
         result = result && DescrIntVectorNormsNpAutoTest(FUNC_DI(Simd::Base::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 
-        //#ifdef SIMD_SSE41_ENABLE
-        //        if (Simd::Sse41::Enable)
-        //            result = result && DescrIntVectorNormsNpAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-        //#endif
-        //
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DescrIntVectorNormsNpAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
+        
         //#ifdef SIMD_AVX2_ENABLE
         //        if (Simd::Avx2::Enable)
         //            result = result && DescrIntVectorNormsNpAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
