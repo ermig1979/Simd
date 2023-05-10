@@ -219,14 +219,27 @@ namespace Simd
         static int32_t Correlation6(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
-            static const __m128i SHFL = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
+            static const __m128i SHFL0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
+            static const __m128i SHFL1 = SIMD_MM_SETR_EPI8(0x6, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xB);
             static const __m128i MUL = SIMD_MM_SETR_EPI16(256, 1024, 4096, 16384, 256, 1024, 4096, 16384);
             static const __m128i MASK = SIMD_MM_SET1_EPI16(0x3F);
-            __m128i _ab = _mm_setzero_si128();            
-            for (size_t i = 0; i < size; i += 8, a += 6, b += 6)
+            __m128i _ab = _mm_setzero_si128();  
+            size_t i = 0, sizeA = AlignLo(size, A);
+            for (; i < sizeA; i += A, a += 12, b += 12)
             {
-                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), SHFL), MUL), MASK);
-                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), SHFL), MUL), MASK);
+                __m128i _a = _mm_loadu_si128((__m128i*)a);
+                __m128i _b = _mm_loadu_si128((__m128i*)b);
+                __m128i a0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, SHFL0), MUL), MASK);
+                __m128i b0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, SHFL0), MUL), MASK);
+                _ab = _mm_add_epi32(_mm_madd_epi16(a0, b0), _ab);
+                __m128i a1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, SHFL1), MUL), MASK);
+                __m128i b1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, SHFL1), MUL), MASK);
+                _ab = _mm_add_epi32(_mm_madd_epi16(a1, b1), _ab);
+            }
+            for (; i < size; i += 8, a += 6, b += 6)
+            {
+                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), SHFL0), MUL), MASK);
+                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), SHFL0), MUL), MASK);
                 _ab = _mm_add_epi32(_mm_madd_epi16(_a, _b), _ab);
             }
             return ExtractInt32Sum(_ab);
@@ -235,14 +248,27 @@ namespace Simd
         static int32_t Correlation7(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
-            static const __m128i SHFL = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6);
+            static const __m128i SHFL0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6);
+            static const __m128i SHFL1 = SIMD_MM_SETR_EPI8(0x7, 0x7, 0x7, 0x8, 0x8, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xC, 0xC, 0xD, 0xD, 0xD);
             static const __m128i MUL = SIMD_MM_SETR_EPI16(256, 512, 1024, 2048, 4096, 8192, 16384, 32768);
             static const __m128i MASK = SIMD_MM_SET1_EPI16(0x7F);
             __m128i _ab = _mm_setzero_si128();
-            for (size_t i = 0; i < size; i += 8, a += 7, b += 7)
+            size_t i = 0, sizeA = AlignLo(size, A);
+            for (; i < sizeA; i += A, a += 14, b += 14)
             {
-                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), SHFL), MUL), MASK);
-                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), SHFL), MUL), MASK);
+                __m128i _a = _mm_loadu_si128((__m128i*)a);
+                __m128i _b = _mm_loadu_si128((__m128i*)b);
+                __m128i a0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, SHFL0), MUL), MASK);
+                __m128i b0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, SHFL0), MUL), MASK);
+                _ab = _mm_add_epi32(_mm_madd_epi16(a0, b0), _ab);
+                __m128i a1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, SHFL1), MUL), MASK);
+                __m128i b1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, SHFL1), MUL), MASK);
+                _ab = _mm_add_epi32(_mm_madd_epi16(a1, b1), _ab);
+            }
+            for (; i < size; i += 8, a += 7, b += 7)
+            {
+                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), SHFL0), MUL), MASK);
+                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), SHFL0), MUL), MASK);
                 _ab = _mm_add_epi32(_mm_madd_epi16(_a, _b), _ab);
             }
             return ExtractInt32Sum(_ab);
