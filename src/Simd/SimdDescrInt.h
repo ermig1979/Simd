@@ -99,6 +99,15 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
+        class DescrInt : public Sse41::DescrInt
+        {
+        public:
+            DescrInt(size_t size, size_t depth);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* DescrIntInit(size_t size, size_t depth);
     }
 #endif
 

@@ -31,6 +31,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Conditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Deinterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrInt.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Detection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2EdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp" />
