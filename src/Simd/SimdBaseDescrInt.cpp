@@ -23,6 +23,7 @@
 */
 
 #include "Simd/SimdDescrInt.h"
+#include "Simd/SimdDescrIntCommon.h"
 
 namespace Simd
 {
@@ -145,12 +146,14 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static SIMD_INLINE int32_t Mul(int32_t a, int32_t b)
+        template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
+
+        SIMD_INLINE int32_t Mul(int32_t a, int32_t b)
         {
             return a * b;
         }
 
-        static int32_t Correlation6(const uint8_t* a, const uint8_t* b, size_t size)
+        template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 4 == 0);
             int32_t ab = 0;
@@ -168,7 +171,7 @@ namespace Simd
             return ab;
         }
 
-        static int32_t Correlation7(const uint8_t* a, const uint8_t* b, size_t size)
+        template<> int32_t Correlation<7>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
             int32_t ab = 0;
@@ -192,12 +195,18 @@ namespace Simd
             return ab;
         }
 
-        static int32_t Correlation8(const uint8_t* a, const uint8_t* b, size_t size)
+        template<> int32_t Correlation<8>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             int32_t ab = 0;
             for (size_t i = 0; i < size; ++i)
                 ab += a[i] * b[i];
             return ab;
+        }
+
+        template<int bits> void CosineDistance(const uint8_t* a, const uint8_t* b, size_t size, float* distance)
+        {
+            float abSum = (float)Correlation<bits>(a + 16, b + 16, size);
+            Base::DecodeCosineDistance(a, b, abSum, float(size), distance);
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -224,21 +233,21 @@ namespace Simd
             {
                 _encode = Encode6;
                 _decode = Decode6;
-                _correlation = Correlation6;
+                _cosineDistance = Base::CosineDistance<6>;
                 break;
             }
             case 7:
             {
                 _encode = Encode7;
                 _decode = Decode7;
-                _correlation = Correlation7;
+                _cosineDistance = Base::CosineDistance<7>;
                 break;
             }
             case 8: 
             {
                 _encode = Encode8; 
                 _decode = Decode8;
-                _correlation = Correlation8;
+                _cosineDistance = Base::CosineDistance<8>;
                 break;
             }
             default:
@@ -254,7 +263,10 @@ namespace Simd
             float scale = _range / (max - min);
             ((float*)dst)[0] = 1.0f / scale;
             ((float*)dst)[1] = min;
-            _encode(src, scale, min, _size, ((int32_t*)dst)[2], ((int32_t*)dst)[3], dst + 16);
+            int sum, sqsum;
+            _encode(src, scale, min, _size, sum, sqsum, dst + 16);
+            ((float*)dst)[2] = (float)sum;
+            ((float*)dst)[3] = (float)sqsum;
         }
 
         void DescrInt::Decode(const uint8_t* src, float* dst) const
@@ -264,19 +276,7 @@ namespace Simd
 
         void DescrInt::CosineDistance(const uint8_t* a, const uint8_t* b, float* distance) const
         {
-            float aScale = ((float*)a)[0];
-            float aShift = ((float*)a)[1];
-            int32_t aSum = ((int32_t*)a)[2];
-            int32_t aaSum = ((int32_t*)a)[3];
-            float bScale = ((float*)b)[0];
-            float bShift = ((float*)b)[1];
-            int32_t bSum = ((int32_t*)b)[2];
-            int32_t bbSum = ((int32_t*)b)[3];
-            int abSum = _correlation(a + 16, b + 16, _size);
-            float aa = float(aaSum) * aScale * aScale + float(aSum) * aScale * aShift * 2.0f + float(_size) * aShift * aShift;
-            float ab = float(abSum) * aScale * bScale + float(aSum) * aScale * bShift + float(bSum) * bScale * aShift + float(_size) * aShift * bShift;
-            float bb = float(bbSum) * bScale * bScale + float(bSum) * bScale * bShift * 2.0f + float(_size) * bShift * bShift;
-            *distance = 1.0f - ab / ::sqrt(aa * bb);
+            _cosineDistance(a, b, _size, distance);
         }
 
         void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
@@ -287,7 +287,7 @@ namespace Simd
                 for (size_t j = 0; j < N; ++j)
                 {
                     const uint8_t* b = B[j];
-                    CosineDistance(a, b, distances++);
+                    _cosineDistance(a, b, _size, distances++);
                 }
             }
         }
@@ -300,7 +300,7 @@ namespace Simd
                 for (size_t j = 0; j < N; ++j)
                 {
                     const uint8_t* b = B + j * _encSize;
-                    CosineDistance(a, b, distances++);
+                    _cosineDistance(a, b, _size, distances++);
                 }
             }
         }
@@ -309,9 +309,9 @@ namespace Simd
         {
             float scale = ((float*)a)[0];
             float shift = ((float*)a)[1];
-            int32_t sum = ((int32_t*)a)[2];
-            int32_t sqsum = ((int32_t*)a)[3];
-            *norm = sqrt(float(sqsum) * scale * scale + float(sum) * scale * shift * 2.0f + float(_size) * shift * shift);
+            float sum = ((float*)a)[2];
+            float sqsum = ((float*)a)[3];
+            *norm = sqrt(sqsum * scale * scale + sum * scale * shift * 2.0f + float(_size) * shift * shift);
         }
 
         void DescrInt::VectorNormsNa(size_t N, const uint8_t* const* A, float* norms) const

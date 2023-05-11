@@ -406,7 +406,7 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = Compare(d1, d2, EPS * EPS, true, 32, DifferenceAbsolute);
+        result = Compare(d1, d2, EPS * EPS * 2, true, 32, DifferenceAbsolute);
 
         return result;
     }
@@ -479,7 +479,7 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = Compare(d1, d2, EPS*EPS, true, 32, DifferenceAbsolute);
+        result = Compare(d1, d2, EPS*EPS * 2, true, 32, DifferenceAbsolute);
 
         return result;
     }

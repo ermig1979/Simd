@@ -78,6 +78,11 @@ namespace Simd
         {
             return _mm_hadd_ps(_mm_hadd_ps(a[0], a[1]), _mm_hadd_ps(a[2], a[3]));
         }
+
+        SIMD_INLINE __m128i Extract4Sums(const __m128i& a0, const __m128i& a1, const __m128i& a2, const __m128i& a3)
+        {
+            return _mm_hadd_epi32(_mm_hadd_epi32(a0, a1), _mm_hadd_epi32(a2, a3));
+        }
     }
 #endif//SIMD_SSE41_ENABLE
 

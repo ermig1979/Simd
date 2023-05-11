@@ -27,6 +27,8 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdUnpack.h"
 #include "Simd/SimdDescrInt.h"
+#include "Simd/SimdDescrIntCommon.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -216,65 +218,69 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static int32_t Correlation6(const uint8_t* a, const uint8_t* b, size_t size)
+        const __m128i C6_SHFL0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
+        const __m128i C6_SHFL1 = SIMD_MM_SETR_EPI8(0x6, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xB);
+        const __m128i C6_MUL = SIMD_MM_SETR_EPI16(256, 1024, 4096, 16384, 256, 1024, 4096, 16384);
+        const __m128i C6_MASK = SIMD_MM_SET1_EPI16(0x3F);
+
+        const __m128i C7_SHFL0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6);
+        const __m128i C7_SHFL1 = SIMD_MM_SETR_EPI8(0x7, 0x7, 0x7, 0x8, 0x8, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xC, 0xC, 0xD, 0xD, 0xD);
+        const __m128i C7_MUL = SIMD_MM_SETR_EPI16(256, 512, 1024, 2048, 4096, 8192, 16384, 32768);
+        const __m128i C7_MASK = SIMD_MM_SET1_EPI16(0x7F);
+
+        template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
+
+        template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
-            static const __m128i SHFL0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
-            static const __m128i SHFL1 = SIMD_MM_SETR_EPI8(0x6, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xB);
-            static const __m128i MUL = SIMD_MM_SETR_EPI16(256, 1024, 4096, 16384, 256, 1024, 4096, 16384);
-            static const __m128i MASK = SIMD_MM_SET1_EPI16(0x3F);
             __m128i _ab = _mm_setzero_si128();  
             size_t i = 0, sizeA = AlignLo(size, A);
             for (; i < sizeA; i += A, a += 12, b += 12)
             {
                 __m128i _a = _mm_loadu_si128((__m128i*)a);
                 __m128i _b = _mm_loadu_si128((__m128i*)b);
-                __m128i a0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, SHFL0), MUL), MASK);
-                __m128i b0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, SHFL0), MUL), MASK);
+                __m128i a0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, C6_SHFL0), C6_MUL), C6_MASK);
+                __m128i b0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, C6_SHFL0), C6_MUL), C6_MASK);
                 _ab = _mm_add_epi32(_mm_madd_epi16(a0, b0), _ab);
-                __m128i a1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, SHFL1), MUL), MASK);
-                __m128i b1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, SHFL1), MUL), MASK);
+                __m128i a1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, C6_SHFL1), C6_MUL), C6_MASK);
+                __m128i b1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, C6_SHFL1), C6_MUL), C6_MASK);
                 _ab = _mm_add_epi32(_mm_madd_epi16(a1, b1), _ab);
             }
             for (; i < size; i += 8, a += 6, b += 6)
             {
-                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), SHFL0), MUL), MASK);
-                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), SHFL0), MUL), MASK);
+                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), C6_SHFL0), C6_MUL), C6_MASK);
+                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), C6_SHFL0), C6_MUL), C6_MASK);
                 _ab = _mm_add_epi32(_mm_madd_epi16(_a, _b), _ab);
             }
             return ExtractInt32Sum(_ab);
         }
 
-        static int32_t Correlation7(const uint8_t* a, const uint8_t* b, size_t size)
+        template<> int32_t Correlation<7>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
-            static const __m128i SHFL0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6);
-            static const __m128i SHFL1 = SIMD_MM_SETR_EPI8(0x7, 0x7, 0x7, 0x8, 0x8, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xC, 0xC, 0xD, 0xD, 0xD);
-            static const __m128i MUL = SIMD_MM_SETR_EPI16(256, 512, 1024, 2048, 4096, 8192, 16384, 32768);
-            static const __m128i MASK = SIMD_MM_SET1_EPI16(0x7F);
             __m128i _ab = _mm_setzero_si128();
             size_t i = 0, sizeA = AlignLo(size, A);
             for (; i < sizeA; i += A, a += 14, b += 14)
             {
                 __m128i _a = _mm_loadu_si128((__m128i*)a);
                 __m128i _b = _mm_loadu_si128((__m128i*)b);
-                __m128i a0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, SHFL0), MUL), MASK);
-                __m128i b0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, SHFL0), MUL), MASK);
+                __m128i a0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, C7_SHFL0), C7_MUL), C7_MASK);
+                __m128i b0 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, C7_SHFL0), C7_MUL), C7_MASK);
                 _ab = _mm_add_epi32(_mm_madd_epi16(a0, b0), _ab);
-                __m128i a1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, SHFL1), MUL), MASK);
-                __m128i b1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, SHFL1), MUL), MASK);
+                __m128i a1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_a, C7_SHFL1), C7_MUL), C7_MASK);
+                __m128i b1 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_b, C7_SHFL1), C7_MUL), C7_MASK);
                 _ab = _mm_add_epi32(_mm_madd_epi16(a1, b1), _ab);
             }
             for (; i < size; i += 8, a += 7, b += 7)
             {
-                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), SHFL0), MUL), MASK);
-                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), SHFL0), MUL), MASK);
+                __m128i _a = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), C7_SHFL0), C7_MUL), C7_MASK);
+                __m128i _b = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), C7_SHFL0), C7_MUL), C7_MASK);
                 _ab = _mm_add_epi32(_mm_madd_epi16(_a, _b), _ab);
             }
             return ExtractInt32Sum(_ab);
         }
 
-        static int32_t Correlation8(const uint8_t* a, const uint8_t* b, size_t size)
+        template<> int32_t Correlation<8>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             size_t i = 0, sizeA = AlignLo(size, A);
             __m128i _ab = _mm_setzero_si128();
@@ -294,37 +300,208 @@ namespace Simd
             return ExtractInt32Sum(_ab);
         }
 
+        template<int bits> void CosineDistance(const uint8_t* a, const uint8_t* b, size_t size, float* distance)
+        {
+            int abSum = Correlation<bits>(a + 16, b + 16, size);
+            Base::DecodeCosineDistance(a, b, abSum, (int32_t)size, distance);
+        }
+
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<int bits> void MicroCosineDistances2x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+
+        template<> void MicroCosineDistances2x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            __m128i a00, a01, a10, a11, b00, b01;
+            __m128i ab00 = _mm_setzero_si128();
+            __m128i ab01 = _mm_setzero_si128();
+            __m128i ab02 = _mm_setzero_si128();
+            __m128i ab03 = _mm_setzero_si128();
+            __m128i ab10 = _mm_setzero_si128();
+            __m128i ab11 = _mm_setzero_si128();
+            __m128i ab12 = _mm_setzero_si128();
+            __m128i ab13 = _mm_setzero_si128();
+            for (; i < size16; i += 16, o += 16)
+            {
+                a01 = _mm_loadu_si128((__m128i*)(A[0] + o));
+                a00 = UnpackU8<0>(a01);
+                a01 = UnpackU8<1>(a01);
+                a11 = _mm_loadu_si128((__m128i*)(A[1] + o));
+                a10 = UnpackU8<0>(a11);
+                a11 = UnpackU8<1>(a11);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[0] + o));
+                b00 = UnpackU8<0>(b01);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+                ab10 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab10);
+                b00 = UnpackU8<1>(b01);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab00);
+                ab10 = _mm_add_epi32(_mm_madd_epi16(a11, b00), ab10);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[1] + o));
+                b00 = UnpackU8<0>(b01);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+                ab11 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab11);
+                b00 = UnpackU8<1>(b01);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab01);
+                ab11 = _mm_add_epi32(_mm_madd_epi16(a11, b00), ab11);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[2] + o));
+                b00 = UnpackU8<0>(b01);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+                ab12 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab12);
+                b00 = UnpackU8<1>(b01);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab02);
+                ab12 = _mm_add_epi32(_mm_madd_epi16(a11, b00), ab12);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[3] + o));
+                b00 = UnpackU8<0>(b01);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+                ab13 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab13);
+                b00 = UnpackU8<1>(b01);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab03);
+                ab13 = _mm_add_epi32(_mm_madd_epi16(a11, b00), ab13);
+            }
+            for (; i < size; i += 8, o += 8)
+            {
+                a00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(A[0] + o)));
+                a10 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(A[1] + o)));
+
+                b00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(B[0] + o)));
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+                ab10 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab10);
+
+                b00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(B[1] + o)));
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+                ab11 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab11);
+
+                b00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(B[2] + o)));
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+                ab12 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab12);
+
+                b00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(B[3] + o)));
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+                ab13 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab13);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 ab1 = _mm_cvtepi32_ps(Extract4Sums(ab10, ab11, ab12, ab13));
+            __m128 _size = _mm_set1_ps(float(size));
+            DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+            DecodeCosineDistances(A[1], B, ab1, _size, distances + 1 * stride);
+        }
+
+        template<int bits> void MacroCosineDistances(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t M2 = AlignLoAny(M, 2);
+            size_t N4 = AlignLo(N, 4);
+            size_t i = 0;
+            for (; i < M2; i += 2)
+            {
+                size_t j = 0;
+                for (; j < N4; j += 4)
+                    MicroCosineDistances2x4<bits>(A + i, B + j, size, distances + j, stride);
+                for (; j < N; j += 1)
+                {
+                    CosineDistance<bits>(A[i + 0], B[j], size, distances + j + 0 * stride);
+                    CosineDistance<bits>(A[i + 1], B[j], size, distances + j + 1 * stride);
+                }
+                distances += 2 * stride;
+            }
+            for (; i < M; i++)
+            {
+                size_t j = 0;
+                for (; j < N; j += 1)
+                    CosineDistance<bits>(A[i], B[j], size, distances + j);
+                distances += 1 * stride;
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         DescrInt::DescrInt(size_t size, size_t depth)
             : Base::DescrInt(size, depth)
         {
             _minMax = MinMax;
+            _microM = 2;
+            _microN = 4;
             switch (depth)
             {
             case 6:
             {
                 _encode = Encode6;
                 _decode = Decode6;
-                _correlation = Correlation6;
+                _cosineDistance = Sse41::CosineDistance<6>;
                 break;
             }
             case 7:
             {
                 _encode = Encode7;
                 _decode = Decode7;
-                _correlation = Correlation7;
+                _cosineDistance = Sse41::CosineDistance<7>;
                 break;
             }
             case 8:
             {
                 _encode = Encode8;
                 _decode = Decode8;
-                _correlation = Correlation8;
+                _cosineDistance = Sse41::CosineDistance<8>;
+                _macroCosineDistances = Sse41::MacroCosineDistances<8>;
                 break;
             }
             default:
                 assert(0);
+            }
+        }
+
+        void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
+        {
+            if (_depth != 8)
+            {
+                Base::DescrInt::CosineDistancesMxNa(M, N, A, B, distances);
+                return;
+            }
+            const size_t L2 = Base::AlgCacheL2();
+            size_t mN = AlignLoAny(L2 / _encSize, _microN);
+            size_t mM = AlignLoAny(L2 / _encSize, _microM);
+            for (size_t i = 0; i < M; i += mM)
+            {
+                size_t dM = Simd::Min(M, i + mM) - i;
+                for (size_t j = 0; j < N; j += mN)
+                {
+                    size_t dN = Simd::Min(N, j + mN) - j;
+                    _macroCosineDistances(dM, dN, A + i, B + j, _size, distances + i * N + j, N);
+                }
+            }
+        }
+
+        void DescrInt::CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const
+        {
+            if (_depth != 8)
+            {
+                Base::DescrInt::CosineDistancesMxNp(M, N, A, B, distances);
+                return;
+            }
+            const size_t L2 = Base::AlgCacheL2();
+            size_t mN = AlignLoAny(L2 / _encSize, _microN);
+            size_t mM = AlignLoAny(L2 / _encSize, _microM);
+            Array8ucp ap(mM), bp(N);
+            for (size_t i = 0; i < M; i += mM)
+            {
+                size_t dM = Simd::Min(M, i + mM) - i;
+                for (size_t k = 0; k < dM; ++k)
+                    ap[k] = A + k * _encSize;
+                for (size_t j = 0; j < N; j += mN)
+                {
+                    size_t dN = Simd::Min(N, j + mN) - j;
+                    if (i == 0)
+                    {
+                        for (size_t k = j, n = j + dN; k < n; ++k)
+                            bp[k] = B + k * _encSize;
+                    }
+                    _macroCosineDistances(dM, dN, ap.data, bp.data + j, _size, distances + i * N + j, N);
+                }
             }
         }
 

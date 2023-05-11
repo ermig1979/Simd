@@ -614,5 +614,8 @@
     <ClInclude Include="..\..\src\Simd\SimdDescrInt.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
