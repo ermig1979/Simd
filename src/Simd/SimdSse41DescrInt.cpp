@@ -311,6 +311,86 @@ namespace Simd
 
         template<int bits> void MicroCosineDistances2x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
 
+        template<> void MicroCosineDistances2x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, o = 16;
+            __m128i a00, a10, b00;
+            __m128i ab00 = _mm_setzero_si128();
+            __m128i ab01 = _mm_setzero_si128();
+            __m128i ab02 = _mm_setzero_si128();
+            __m128i ab03 = _mm_setzero_si128();
+            __m128i ab10 = _mm_setzero_si128();
+            __m128i ab11 = _mm_setzero_si128();
+            __m128i ab12 = _mm_setzero_si128();
+            __m128i ab13 = _mm_setzero_si128();
+            for (; i < size; i += 8, o += 6)
+            {
+                a00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(A[0] + o)), C6_SHFL0), C6_MUL), C6_MASK);
+                a10 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(A[1] + o)), C6_SHFL0), C6_MUL), C6_MASK);
+
+                b00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[0] + o)), C6_SHFL0), C6_MUL), C6_MASK);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+                ab10 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab10);
+
+                b00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[1] + o)), C6_SHFL0), C6_MUL), C6_MASK);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+                ab11 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab11);
+
+                b00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[2] + o)), C6_SHFL0), C6_MUL), C6_MASK);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+                ab12 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab12);
+
+                b00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[3] + o)), C6_SHFL0), C6_MUL), C6_MASK);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+                ab13 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab13);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 ab1 = _mm_cvtepi32_ps(Extract4Sums(ab10, ab11, ab12, ab13));
+            __m128 _size = _mm_set1_ps(float(size));
+            DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+            DecodeCosineDistances(A[1], B, ab1, _size, distances + 1 * stride);
+        }
+
+        template<> void MicroCosineDistances2x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, o = 16;
+            __m128i a00, a10, b00;
+            __m128i ab00 = _mm_setzero_si128();
+            __m128i ab01 = _mm_setzero_si128();
+            __m128i ab02 = _mm_setzero_si128();
+            __m128i ab03 = _mm_setzero_si128();
+            __m128i ab10 = _mm_setzero_si128();
+            __m128i ab11 = _mm_setzero_si128();
+            __m128i ab12 = _mm_setzero_si128();
+            __m128i ab13 = _mm_setzero_si128();
+            for (; i < size; i += 8, o += 7)
+            {
+                a00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(A[0] + o)), C7_SHFL0), C7_MUL), C7_MASK);
+                a10 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(A[1] + o)), C7_SHFL0), C7_MUL), C7_MASK);
+
+                b00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[0] + o)), C7_SHFL0), C7_MUL), C7_MASK);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+                ab10 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab10);
+
+                b00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[1] + o)), C7_SHFL0), C7_MUL), C7_MASK);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+                ab11 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab11);
+
+                b00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[2] + o)), C7_SHFL0), C7_MUL), C7_MASK);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+                ab12 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab12);
+
+                b00 = _mm_and_si128(_mm_mulhi_epu16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[3] + o)), C7_SHFL0), C7_MUL), C7_MASK);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+                ab13 = _mm_add_epi32(_mm_madd_epi16(a10, b00), ab13);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 ab1 = _mm_cvtepi32_ps(Extract4Sums(ab10, ab11, ab12, ab13));
+            __m128 _size = _mm_set1_ps(float(size));
+            DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+            DecodeCosineDistances(A[1], B, ab1, _size, distances + 1 * stride);
+        }
+
         template<> void MicroCosineDistances2x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
@@ -433,6 +513,7 @@ namespace Simd
                 _encode = Encode6;
                 _decode = Decode6;
                 _cosineDistance = Sse41::CosineDistance<6>;
+                _macroCosineDistances = Sse41::MacroCosineDistances<6>;
                 break;
             }
             case 7:
@@ -440,6 +521,7 @@ namespace Simd
                 _encode = Encode7;
                 _decode = Decode7;
                 _cosineDistance = Sse41::CosineDistance<7>;
+                _macroCosineDistances = Sse41::MacroCosineDistances<7>;
                 break;
             }
             case 8:
@@ -457,11 +539,6 @@ namespace Simd
 
         void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
         {
-            if (_depth != 8)
-            {
-                Base::DescrInt::CosineDistancesMxNa(M, N, A, B, distances);
-                return;
-            }
             const size_t L2 = Base::AlgCacheL2();
             size_t mN = AlignLoAny(L2 / _encSize, _microN);
             size_t mM = AlignLoAny(L2 / _encSize, _microM);
@@ -478,11 +555,6 @@ namespace Simd
 
         void DescrInt::CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const
         {
-            if (_depth != 8)
-            {
-                Base::DescrInt::CosineDistancesMxNp(M, N, A, B, distances);
-                return;
-            }
             const size_t L2 = Base::AlgCacheL2();
             size_t mN = AlignLoAny(L2 / _encSize, _microN);
             size_t mM = AlignLoAny(L2 / _encSize, _microM);
