@@ -290,7 +290,6 @@ namespace Simd
             Base::DecodeCosineDistance(a, b, abSum, (float)size, distance);
         }
 
-
         //-------------------------------------------------------------------------------------------------
 
         template<int bits> void MicroCosineDistances2x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);

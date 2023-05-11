@@ -156,8 +156,8 @@ namespace Test
         View dst1(encSize, 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst2(encSize, 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
 
-        Fill(dst1, 0);
-        Fill(dst2, 0);
+        Fill(dst1, 1);
+        Fill(dst2, 2);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Encode(context1, src, dst1));
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Encode(context2, src, dst2));
@@ -361,10 +361,10 @@ namespace Test
             result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Sse41::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif 
         
-        //#ifdef SIMD_AVX2_ENABLE
-        //        if (Simd::Avx2::Enable)
-        //            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-        //#endif 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Avx2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif 
         //
         //#ifdef SIMD_AVX512BW_ENABLE
         //        if (Simd::Avx512bw::Enable)

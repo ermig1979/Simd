@@ -286,6 +286,75 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
+
+        template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0);
+            __m256i _ab = _mm256_setzero_si256();
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16, a += 12, b += 12)
+            {
+                __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)a)), C6_SHFL), C6_MULLO), 10);
+                __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)b)), C6_SHFL), C6_MULLO), 10);
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
+            }
+            for (; i < size; i += 8, a += 6, b += 6)
+            {
+                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), Sse41::C6_SHFL0), Sse41::C6_MULLO), 10);
+                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), Sse41::C6_SHFL0), Sse41::C6_MULLO), 10);
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_mm256_broadcastsi128_si256(_a), _mm256_broadcastsi128_si256(_b)), _ab);
+            }
+            return ExtractSum<uint32_t>(_ab);
+        }
+
+        template<> int32_t Correlation<7>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0);
+            __m256i _ab = _mm256_setzero_si256();
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16, a += 14, b += 14)
+            {
+                __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)a)), C7_SHFL), C7_MULLO), 9);
+                __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)b)), C7_SHFL), C7_MULLO), 9);
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
+            }
+            for (; i < size; i += 8, a += 7, b += 7)
+            {
+                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), Sse41::C7_SHFL0), Sse41::C7_MULLO), 9);
+                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), Sse41::C7_SHFL0), Sse41::C7_MULLO), 9);
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_mm256_broadcastsi128_si256(_a), _mm256_broadcastsi128_si256(_b)), _ab);
+            }
+            return ExtractSum<uint32_t>(_ab);
+        }
+
+        template<> int32_t Correlation<8>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            size_t i = 0, size16 = AlignLo(size, 16);
+            __m256i _ab = _mm256_setzero_si256();
+            for (; i < size16; i += 16)
+            {
+                __m256i _a = _mm256_cvtepu8_epi16(_mm_loadu_si128((__m128i*)(a + i)));
+                __m256i _b = _mm256_cvtepu8_epi16(_mm_loadu_si128((__m128i*)(b + i)));
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
+            }
+            for (; i < size; i += 8)
+            {
+                __m256i _a = _mm256_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(a + i)));
+                __m256i _b = _mm256_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(b + i)));
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
+            }
+            return ExtractSum<uint32_t>(_ab);
+        }
+
+        template<int bits> void CosineDistance(const uint8_t* a, const uint8_t* b, size_t size, float* distance)
+        {
+            float abSum = (float)Correlation<bits>(a + 16, b + 16, size);
+            Base::DecodeCosineDistance(a, b, abSum, (float)size, distance);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         DescrInt::DescrInt(size_t size, size_t depth)
             : Sse41::DescrInt(size, depth)
         {
@@ -298,7 +367,7 @@ namespace Simd
             {
                 _encode = Encode6;
                 _decode = Decode6;
-            //    _cosineDistance = Sse41::CosineDistance<6>;
+                _cosineDistance = Avx2::CosineDistance<6>;
             //    _macroCosineDistances = Sse41::MacroCosineDistances<6>;
                 break;
             }
@@ -306,7 +375,7 @@ namespace Simd
             {
                 _encode = Encode7;
                 _decode = Decode7;
-            //    _cosineDistance = Sse41::CosineDistance<7>;
+                _cosineDistance = Avx2::CosineDistance<7>;
             //    _macroCosineDistances = Sse41::MacroCosineDistances<7>;
                 break;
             }
@@ -314,7 +383,7 @@ namespace Simd
             {
                 _encode = Encode8;
                 _decode = Decode8;
-            //    _cosineDistance = Sse41::CosineDistance<8>;
+                _cosineDistance = Avx2::CosineDistance<8>;
             //    _macroCosineDistances = Sse41::MacroCosineDistances<8>;
                 break;
             }
