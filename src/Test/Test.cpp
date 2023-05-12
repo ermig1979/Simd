@@ -763,7 +763,8 @@ namespace Test
             } while (progress < 1.0 && !Test::Task::s_stopped);
             std::cout << std::endl << std::endl;
 
-            Test::Log::s_log.SetLevel(Test::Log::Info);
+            if (!Test::Task::s_stopped)
+                Test::Log::s_log.SetLevel(Test::Log::Info);
         }
         else
         {
