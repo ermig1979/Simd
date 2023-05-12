@@ -238,7 +238,7 @@ namespace Simd
                 w0 = _mm256_and_ps(tail, _mm256_loadu_ps(W3 + k + 0 * F));
                 d30 = _mm256_fmadd_ps(s0, w0, d30);
             }
-            _mm_storeu_ps(D, _mm_add_ps(Extract4Sums(d00, d10, d20, d30), _mm_loadu_ps(B)));
+            _mm_storeu_ps(D, _mm_add_ps(Avx::Extract4Sums(d00, d10, d20, d30), _mm_loadu_ps(B)));
         }
 
         void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)

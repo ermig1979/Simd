@@ -537,6 +537,185 @@ namespace Simd
             DecodeCosineDistances(A[1], B, ab1, _size, distances + 1 * stride);
         }
 
+        template<int bits> void MicroCosineDistances1x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+
+        template<> void MicroCosineDistances1x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            __m128i a00, a01, b00, b01;
+            __m128i ab00 = _mm_setzero_si128();
+            __m128i ab01 = _mm_setzero_si128();
+            __m128i ab02 = _mm_setzero_si128();
+            __m128i ab03 = _mm_setzero_si128();
+            for (; i < size16; i += 16, o += 12)
+            {
+                a01 = _mm_loadu_si128((__m128i*)(A[0] + o));
+                a00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(a01, C6_SHFL0), C6_MULLO), 10);
+                a01 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(a01, 6), C6_SHFL0), C6_MULLO), 10);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[0] + o));
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(b01, C6_SHFL0), C6_MULLO), 10);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(b01, 6), C6_SHFL0), C6_MULLO), 10);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab00);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[1] + o));
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(b01, C6_SHFL0), C6_MULLO), 10);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(b01, 6), C6_SHFL0), C6_MULLO), 10);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab01);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[2] + o));
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(b01, C6_SHFL0), C6_MULLO), 10);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(b01, 6), C6_SHFL0), C6_MULLO), 10);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab02);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[3] + o));
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(b01, C6_SHFL0), C6_MULLO), 10);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(b01, 6), C6_SHFL0), C6_MULLO), 10);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab03);
+            }
+            for (; i < size; i += 8, o += 6)
+            {
+                a00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(A[0] + o)), C6_SHFL0), C6_MULLO), 10);
+
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[0] + o)), C6_SHFL0), C6_MULLO), 10);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[1] + o)), C6_SHFL0), C6_MULLO), 10);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[2] + o)), C6_SHFL0), C6_MULLO), 10);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[3] + o)), C6_SHFL0), C6_MULLO), 10);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 _size = _mm_set1_ps(float(size));
+            DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+        }
+
+        template<> void MicroCosineDistances1x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            __m128i a00, a01, b00, b01;
+            __m128i ab00 = _mm_setzero_si128();
+            __m128i ab01 = _mm_setzero_si128();
+            __m128i ab02 = _mm_setzero_si128();
+            __m128i ab03 = _mm_setzero_si128();
+            for (; i < size16; i += 16, o += 14)
+            {
+                a01 = _mm_loadu_si128((__m128i*)(A[0] + o));
+                a00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(a01, C7_SHFL0), C7_MULLO), 9);
+                a01 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(a01, 7), C7_SHFL0), C7_MULLO), 9);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[0] + o));
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(b01, C7_SHFL0), C7_MULLO), 9);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(b01, 7), C7_SHFL0), C7_MULLO), 9);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab00);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[1] + o));
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(b01, C7_SHFL0), C7_MULLO), 9);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(b01, 7), C7_SHFL0), C7_MULLO), 9);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab01);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[2] + o));
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(b01, C7_SHFL0), C7_MULLO), 9);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(b01, 7), C7_SHFL0), C7_MULLO), 9);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab02);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[3] + o));
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(b01, C7_SHFL0), C7_MULLO), 9);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_srli_si128(b01, 7), C7_SHFL0), C7_MULLO), 9);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab03);
+            }
+            for (; i < size; i += 8, o += 7)
+            {
+                a00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(A[0] + o)), C7_SHFL0), C7_MULLO), 9);
+
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[0] + o)), C7_SHFL0), C7_MULLO), 9);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[1] + o)), C7_SHFL0), C7_MULLO), 9);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[2] + o)), C7_SHFL0), C7_MULLO), 9);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+
+                b00 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)(B[3] + o)), C7_SHFL0), C7_MULLO), 9);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 _size = _mm_set1_ps(float(size));
+            DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+        }
+
+        template<> void MicroCosineDistances1x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            __m128i a00, a01, b00, b01;
+            __m128i ab00 = _mm_setzero_si128();
+            __m128i ab01 = _mm_setzero_si128();
+            __m128i ab02 = _mm_setzero_si128();
+            __m128i ab03 = _mm_setzero_si128();
+            for (; i < size16; i += 16, o += 16)
+            {
+                a01 = _mm_loadu_si128((__m128i*)(A[0] + o));
+                a00 = UnpackU8<0>(a01);
+                a01 = UnpackU8<1>(a01);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[0] + o));
+                b00 = UnpackU8<0>(b01);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+                b00 = UnpackU8<1>(b01);
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab00);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[1] + o));
+                b00 = UnpackU8<0>(b01);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+                b00 = UnpackU8<1>(b01);
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab01);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[2] + o));
+                b00 = UnpackU8<0>(b01);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+                b00 = UnpackU8<1>(b01);
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab02);
+
+                b01 = _mm_loadu_si128((__m128i*)(B[3] + o));
+                b00 = UnpackU8<0>(b01);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+                b00 = UnpackU8<1>(b01);
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a01, b00), ab03);
+            }
+            for (; i < size; i += 8, o += 8)
+            {
+                a00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(A[0] + o)));
+
+                b00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(B[0] + o)));
+                ab00 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab00);
+
+                b00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(B[1] + o)));
+                ab01 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab01);
+
+                b00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(B[2] + o)));
+                ab02 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab02);
+
+                b00 = _mm_cvtepu8_epi16(_mm_loadl_epi64((__m128i*)(B[3] + o)));
+                ab03 = _mm_add_epi32(_mm_madd_epi16(a00, b00), ab03);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 _size = _mm_set1_ps(float(size));
+            DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+        }
+
         template<int bits> void MacroCosineDistances(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t M2 = AlignLoAny(M, 2);
@@ -557,6 +736,8 @@ namespace Simd
             for (; i < M; i++)
             {
                 size_t j = 0;
+                for (; j < N4; j += 4)
+                    MicroCosineDistances1x4<bits>(A + i, B + j, size, distances + j, stride);
                 for (; j < N; j += 1)
                     CosineDistance<bits>(A[i], B[j], size, distances + j);
                 distances += 1 * stride;

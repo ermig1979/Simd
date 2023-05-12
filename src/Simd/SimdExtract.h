@@ -169,6 +169,12 @@ namespace Simd
             return buffer[index];
 #endif
         }
+
+        SIMD_INLINE __m128i Extract4Sums(const __m256i& a0, const __m256i& a1, const __m256i& a2, const __m256i& a3)
+        {
+            __m256i b = _mm256_hadd_epi32(_mm256_hadd_epi32(a0, a1), _mm256_hadd_epi32(a2, a3));
+            return _mm_add_epi32(_mm256_castsi256_si128(b), _mm256_extracti128_si256(b, 1));
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 
