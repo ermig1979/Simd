@@ -37,26 +37,20 @@ namespace Simd
     {
         static void MinMax(const float* src, size_t size, float& min, float& max)
         {
-            size_t sizeF = AlignLo(size, F);
+            assert(size % 8 == 0);
             __m128 _min = _mm_set1_ps(FLT_MAX);
             __m128 _max = _mm_set1_ps(-FLT_MAX);
             size_t i = 0;
-            for (; i < sizeF; i += F)
+            for (; i < size; i += 4)
             {
                 __m128 _src = _mm_loadu_ps(src + i);
                 _min = _mm_min_ps(_src, _min);
                 _max = _mm_max_ps(_src, _max);
             }
-            for (; i < size; i += 1)
-            {
-                __m128 _src = _mm_load_ss(src + i);
-                _min = _mm_min_ss(_src, _min);
-                _max = _mm_max_ss(_src, _max);
-            }
-            _min = _mm_min_ps(_min, Shuffle32f<0x22>(_min));
-            _max = _mm_max_ps(_max, Shuffle32f<0x22>(_max));
-            _min = _mm_min_ss(_min, Shuffle32f<0x11>(_min));
-            _max = _mm_max_ss(_max, Shuffle32f<0x11>(_max));
+            _min = _mm_min_ps(_min, Shuffle32f<0x0E>(_min));
+            _max = _mm_max_ps(_max, Shuffle32f<0x0E>(_max));
+            _min = _mm_min_ss(_min, Shuffle32f<0x01>(_min));
+            _max = _mm_max_ss(_max, Shuffle32f<0x01>(_max));
             _mm_store_ss(&min, _min);
             _mm_store_ss(&max, _max);
         }
