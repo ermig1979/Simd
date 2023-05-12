@@ -147,7 +147,7 @@ namespace Simd
             for (; i < size; i += F)
             {
                 __m128i d0 = Encode(src + i, _scale, _min, _sum, _sqsum);
-                _mm_storeu_si32((uint32_t*)(dst + i), _mm_packus_epi16(_mm_packus_epi32(d0, _mm_setzero_si128()), _mm_setzero_si128()));
+                *(uint32_t*)(dst + i) = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packus_epi32(d0, _mm_setzero_si128()), _mm_setzero_si128()));
             }
             sum = ExtractInt32Sum(_sum);
             sqsum = ExtractInt32Sum(_sqsum);
@@ -189,18 +189,14 @@ namespace Simd
 
         static void Decode8(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
+            assert(size % 8 == 0);
             __m128 _scale = _mm_set1_ps(scale);
             __m128 _shift = _mm_set1_ps(shift);
-            size_t i = 0, sizeF = AlignLo(size, F);
-            for (; i < sizeF; i += F)
+            size_t i = 0;
+            for (; i < size; i += 4)
             {
-                __m128 _src = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_loadu_si32(src + i)));
+                __m128 _src = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(uint32_t*)(src + i))));
                 _mm_storeu_ps(dst + i, _mm_add_ps(_mm_mul_ps(_src, _scale), _shift));
-            }
-            for (; i < size; i += 1)
-            {
-                __m128 _src = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_loadu_si32(src + i)));
-                _mm_store_ss(dst + i, _mm_add_ss(_mm_mul_ss(_src, _scale), _shift));
             }
         }
 
