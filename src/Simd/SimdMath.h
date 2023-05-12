@@ -479,6 +479,20 @@ namespace Simd
         {
             return _mm_testz_si128(value, K_INV_ZERO);
         }
+
+        SIMD_INLINE void MaxVal32f(__m128 src, float& dst)
+        {
+            src = _mm_max_ps(src, Shuffle32f<0x0E>(src));
+            src = _mm_max_ss(src, Shuffle32f<0x01>(src));
+            _mm_store_ss(&dst, src);
+        }
+
+        SIMD_INLINE void MinVal32f(__m128 src, float& dst)
+        {
+            src = _mm_min_ps(src, Shuffle32f<0x0E>(src));
+            src = _mm_min_ss(src, Shuffle32f<0x01>(src));
+            _mm_store_ss(&dst, src);
+        }
     }
 #endif// SIMD_SSE41_ENABLE
 
@@ -548,6 +562,16 @@ namespace Simd
         template <> SIMD_INLINE __m256 Masked<true>(const __m256 & value, const __m256 & mask)
         {
             return _mm256_and_ps(value, mask);
+        }
+
+        SIMD_INLINE void MaxVal32f(__m256 src, float& dst)
+        {
+            Sse41::MaxVal32f(_mm_max_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
+        }
+
+        SIMD_INLINE void MinVal32f(__m256 src, float& dst)
+        {
+            Sse41::MinVal32f(_mm_min_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
         }
     }
 #endif//SIMD_AVX_ENABLE
@@ -1035,6 +1059,16 @@ namespace Simd
         template <int part> SIMD_INLINE __m512i Cvt8iTo16i(__m512i a)
         {
             return _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, part));
+        }
+
+        SIMD_INLINE void MaxVal32f(__m512 src, float& dst)
+        {
+            Avx::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
+        }
+
+        SIMD_INLINE void MinVal32f(__m512 src, float& dst)
+        {
+            Avx::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
         }
     }
 #endif //SIMD_AVX512BW_ENABLE

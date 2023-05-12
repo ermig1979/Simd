@@ -33,6 +33,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDeinterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrInt.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDetection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwEdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFill.cpp" />
@@ -153,6 +154,8 @@
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
     <ClInclude Include="..\..\src\Simd\SimdDeinterleave.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDescrInt.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdErf.h" />

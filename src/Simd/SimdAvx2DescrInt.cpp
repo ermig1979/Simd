@@ -38,23 +38,17 @@ namespace Simd
         static void MinMax(const float* src, size_t size, float& min, float& max)
         {
             assert(size % 8 == 0);
-            __m256 _min256 = _mm256_set1_ps(FLT_MAX);
-            __m256 _max256 = _mm256_set1_ps(-FLT_MAX);
+            __m256 _min = _mm256_set1_ps(FLT_MAX);
+            __m256 _max = _mm256_set1_ps(-FLT_MAX);
             size_t i = 0;
             for (; i < size; i += 8)
             {
                 __m256 _src = _mm256_loadu_ps(src + i);
-                _min256 = _mm256_min_ps(_src, _min256);
-                _max256 = _mm256_max_ps(_src, _max256);
+                _min = _mm256_min_ps(_src, _min);
+                _max = _mm256_max_ps(_src, _max);
             }
-            __m128 _min = _mm_min_ps(_mm256_castps256_ps128(_min256), _mm256_extractf128_ps(_min256, 1));
-            __m128 _max = _mm_max_ps(_mm256_castps256_ps128(_max256), _mm256_extractf128_ps(_max256, 1));
-            _min = _mm_min_ps(_min, Sse41::Shuffle32f<0x0E>(_min));
-            _max = _mm_max_ps(_max, Sse41::Shuffle32f<0x0E>(_max));
-            _min = _mm_min_ss(_min, Sse41::Shuffle32f<0x01>(_min));
-            _max = _mm_max_ss(_max, Sse41::Shuffle32f<0x01>(_max));
-            _mm_store_ss(&min, _min);
-            _mm_store_ss(&max, _max);
+            MinVal32f(_min, min);
+            MaxVal32f(_max, max);
         }
 
         //-------------------------------------------------------------------------------------------------

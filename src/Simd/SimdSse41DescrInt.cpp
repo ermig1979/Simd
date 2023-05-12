@@ -47,12 +47,8 @@ namespace Simd
                 _min = _mm_min_ps(_src, _min);
                 _max = _mm_max_ps(_src, _max);
             }
-            _min = _mm_min_ps(_min, Shuffle32f<0x0E>(_min));
-            _max = _mm_max_ps(_max, Shuffle32f<0x0E>(_max));
-            _min = _mm_min_ss(_min, Shuffle32f<0x01>(_min));
-            _max = _mm_max_ss(_max, Shuffle32f<0x01>(_max));
-            _mm_store_ss(&min, _min);
-            _mm_store_ss(&max, _max);
+            MinVal32f(_min, min);
+            MaxVal32f(_max, max);
         }
 
         //-------------------------------------------------------------------------------------------------

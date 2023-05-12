@@ -114,6 +114,15 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
+        class DescrInt : public Avx2::DescrInt
+        {
+        public:
+            DescrInt(size_t size, size_t depth);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* DescrIntInit(size_t size, size_t depth);
     }
 #endif
 }
