@@ -165,7 +165,9 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
+#if defined(SIMD_X64_ENABLE)
         result = result && Compare(dst1, dst2, 0, true, 64);
+#endif
 
         return result;
     }
