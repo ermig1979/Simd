@@ -260,13 +260,19 @@ namespace Simd
             float min, max;
             _minMax(src, _size, min, max);
             max = min + Simd::Max(max - min, SIMD_DESCR_INT_EPS);
-            float scale = _range / (max - min);
-            ((float*)dst)[0] = 1.0f / scale;
+            float scale = _range / (max - min), invScale = 1.0f / scale;
+            ((float*)dst)[0] = invScale;
             ((float*)dst)[1] = min;
             int sum, sqsum;
             _encode(src, scale, min, _size, sum, sqsum, dst + 16);
+#if SIMD_DESCR_INT_VER  == 1
+            ((float*)dst)[2] = float(sum) * invScale + 0.5f * float(_size) * min;
+            ((float*)dst)[3] = ::sqrt(float(sqsum) * invScale * invScale + 2.0f * sum * invScale * min  + float(_size) * min * min);
+
+#else
             ((float*)dst)[2] = (float)sum;
             ((float*)dst)[3] = (float)sqsum;
+#endif
         }
 
         void DescrInt::Decode(const uint8_t* src, float* dst) const
@@ -307,11 +313,15 @@ namespace Simd
 
         void DescrInt::VectorNorm(const uint8_t* a, float* norm) const
         {
+#if SIMD_DESCR_INT_VER  == 1
+            *norm = ((float*)a)[3];
+#else
             float scale = ((float*)a)[0];
             float shift = ((float*)a)[1];
             float sum = ((float*)a)[2];
             float sqsum = ((float*)a)[3];
             *norm = sqrt(sqsum * scale * scale + sum * scale * shift * 2.0f + float(_size) * shift * shift);
+#endif
         }
 
         void DescrInt::VectorNormsNa(size_t N, const uint8_t* const* A, float* norms) const

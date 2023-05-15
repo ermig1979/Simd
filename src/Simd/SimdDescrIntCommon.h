@@ -32,6 +32,18 @@ namespace Simd
     {
         SIMD_INLINE void DecodeCosineDistance(const uint8_t* a, const uint8_t* b, float abSum, float size, float* distance)
         {
+#if SIMD_DESCR_INT_VER  == 1
+            float aScale = ((float*)a)[0];
+            float aShift = ((float*)a)[1];
+            float aMean = ((float*)a)[2];
+            float aNorm = ((float*)a)[3];
+            float bScale = ((float*)b)[0];
+            float bShift = ((float*)b)[1];
+            float bMean = ((float*)b)[2];
+            float bNorm = ((float*)b)[3];
+            float ab = abSum * aScale * bScale + aMean * bShift + bMean * aShift;
+            distance[0] = 1.0f - ab / (aNorm * bNorm);
+#else
             float aScale = ((float*)a)[0];
             float aShift = ((float*)a)[1];
             float aSum = ((float*)a)[2];
@@ -44,6 +56,7 @@ namespace Simd
             float ab = abSum * aScale * bScale + aSum * aScale * bShift + bSum * bScale * aShift + size * aShift * bShift;
             float bb = bbSum * bScale * bScale + bSum * bScale * bShift * 2.0f + size * bShift * bShift;
             distance[0] = 1.0f - ab / ::sqrt(aa * bb);
+#endif
         }
     }
 
@@ -62,6 +75,32 @@ namespace Simd
 
         SIMD_INLINE void DecodeCosineDistances(const uint8_t* a, const uint8_t* const* B, __m128 abSum, __m128 size, float* distances)
         {
+#if SIMD_DESCR_INT_VER  == 1
+            __m128 aScale, aShift, aMean, aNorm, bScale, bShift, bMean, bNorm;
+            bScale = _mm_loadu_ps((float*)B[0]);
+            bShift = _mm_loadu_ps((float*)B[1]);
+            bMean = _mm_loadu_ps((float*)B[2]);
+            bNorm = _mm_loadu_ps((float*)B[3]);
+            aScale = _mm_unpacklo_ps(bScale, bMean);
+            aShift = _mm_unpacklo_ps(bShift, bNorm);
+            aMean = _mm_unpackhi_ps(bScale, bMean);
+            aNorm = _mm_unpackhi_ps(bShift, bNorm);
+            bScale = _mm_unpacklo_ps(aScale, aShift);
+            bShift = _mm_unpackhi_ps(aScale, aShift);
+            bMean = _mm_unpacklo_ps(aMean, aNorm);
+            bNorm = _mm_unpackhi_ps(aMean, aNorm);
+
+            aScale = _mm_set1_ps(((float*)a)[0]);
+            aShift = _mm_set1_ps(((float*)a)[1]);
+            aMean = _mm_set1_ps(((float*)a)[2]);
+            aNorm = _mm_set1_ps(((float*)a)[3]);
+
+            __m128 ab = _mm_mul_ps(abSum, _mm_mul_ps(aScale, bScale));
+            ab = _mm_add_ps(_mm_mul_ps(aMean, bShift), ab);
+            ab = _mm_add_ps(_mm_mul_ps(bMean, aShift), ab);
+
+            _mm_storeu_ps(distances, _mm_sub_ps(_mm_set1_ps(1.0), _mm_div_ps(ab, _mm_mul_ps(aNorm, bNorm))));
+#else
             __m128 aScale, aShift, aSum, aaSum, bScale, bShift, bSum, bbSum;
             bScale = _mm_loadu_ps((float*)B[0]);
             bShift = _mm_loadu_ps((float*)B[1]);
@@ -96,6 +135,7 @@ namespace Simd
             bb = _mm_add_ps(_mm_mul_ps(size, _mm_mul_ps(bShift, bShift)), bb);
 
             _mm_storeu_ps(distances, _mm_sub_ps(_mm_set1_ps(1.0), _mm_div_ps(ab, _mm_sqrt_ps(_mm_mul_ps(bb, aa)))));
+#endif
         }
     }
 #endif

@@ -27,6 +27,7 @@
 #include "Simd/SimdMemory.h"
 
 #define SIMD_DESCR_INT_EPS 0.000001f
+#define SIMD_DESCR_INT_VER 1
 
 namespace Simd
 {

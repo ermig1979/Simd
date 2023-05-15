@@ -494,7 +494,7 @@ namespace Test
         {
             result = result && DescrIntCosineDistancesMxNpAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNpAutoTest(128, 128, 512, depth, f1, f2);
-            //result = result && DescrIntCosineDistancesMxNpAutoTest(64, 128, 1024, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNpAutoTest(64, 128, 10240, depth, f1, f2);
         }
 
         return result;

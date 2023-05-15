@@ -242,15 +242,6 @@ namespace Simd
             __m512 _scale = _mm512_set1_ps(scale);
             __m512 _shift = _mm512_set1_ps(shift);
             size_t i = 0, size16 = AlignLo(size, 16), size32 = AlignLo(size, 32);
-            //for (; i < size32; i += 32)
-            //{
-            //    __m512i s6 = _mm512_permutexvar_epi32(C6_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(0x00FFFFFF, src)));
-            //    __m512i s16 = _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(s6, C6_SHFL), C6_MULLO), 10);
-            //    _mm512_storeu_ps(dst + 0 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(_mm512_extracti32x8_epi32(s16, 0))), _scale, _shift));
-            //    _mm512_storeu_ps(dst + 1 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(_mm512_extracti32x8_epi32(s16, 1))), _scale, _shift));
-            //    src += 24;
-            //    dst += 32;
-            //}
             for (; i < size16; i += 16)
             {
                 __m256i s6 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
@@ -275,15 +266,6 @@ namespace Simd
             __m512 _scale = _mm512_set1_ps(scale);
             __m512 _shift = _mm512_set1_ps(shift);
             size_t i = 0, size16 = AlignLo(size, 16), size32 = AlignLo(size, 32);
-            //for (; i < size32; i += 32)
-            //{
-            //    __m512i s7 = _mm512_permutexvar_epi32(C7_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(0x0FFFFFFF, src)));
-            //    __m512i s16 = _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(s7, C7_SHFL), C7_MULLO), 9);
-            //    _mm512_storeu_ps(dst + 0 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(_mm512_extracti32x8_epi32(s16, 0))), _scale, _shift));
-            //    _mm512_storeu_ps(dst + 1 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(_mm512_extracti32x8_epi32(s16, 1))), _scale, _shift));
-            //    src += 28;
-            //    dst += 32;
-            //}
             for (; i < size16; i += 16)
             {
                 __m256i s6 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
