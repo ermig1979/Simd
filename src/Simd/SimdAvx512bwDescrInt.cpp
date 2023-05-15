@@ -330,6 +330,89 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
+
+        SIMD_INLINE __m512i Load6(const uint8_t* ptr, __mmask32 mask = 0x00FFFFFF)
+        {
+            return _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(C6_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(mask, ptr))), C6_SHFL), C6_MULLO), 10);
+        }
+
+        template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0);
+            __m512i _ab = _mm512_setzero_si512();
+            size_t i = 0, size32 = AlignLo(size, 32);
+            for (; i < size32; i += 32, a += 24, b += 24)
+            {
+                __m512i _a = Load6(a);
+                __m512i _b = Load6(b);
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
+            }
+            if (i < size)
+            {
+                __mmask32 mask = TailMask32((size - i) / 8 * 6);
+                __m512i _a = Load6(a, mask);
+                __m512i _b = Load6(b, mask);
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
+            }
+            return ExtractSum<uint32_t>(_ab);
+        }
+
+        SIMD_INLINE __m512i Load7(const uint8_t* ptr, __mmask32 mask = 0x0FFFFFFF)
+        {
+            return _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(C7_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(mask, ptr))), C7_SHFL), C7_MULLO), 9);
+        }
+
+        template<> int32_t Correlation<7>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0);
+            __m512i _ab = _mm512_setzero_si512();
+            size_t i = 0, size32 = AlignLo(size, 32);
+            for (; i < size32; i += 32, a += 28, b += 28)
+            {
+                __m512i _a = Load7(a);
+                __m512i _b = Load7(b);
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
+            }
+            if (i < size)
+            {
+                __mmask32 mask = TailMask32((size - i) / 8 * 7);
+                __m512i _a = Load7(a, mask);
+                __m512i _b = Load7(b, mask);
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
+            }
+            return ExtractSum<uint32_t>(_ab);
+        }
+
+        template<> int32_t Correlation<8>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0);
+            size_t i = 0, size32 = AlignLo(size, 32);
+            __m512i _ab = _mm512_setzero_si512();
+            for (; i < size32; i += 32)
+            {
+                __m512i _a = _mm512_cvtepu8_epi16(_mm256_loadu_si256((__m256i*)(a + i)));
+                __m512i _b = _mm512_cvtepu8_epi16(_mm256_loadu_si256((__m256i*)(b + i)));
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
+            }
+            if ( i < size)
+            {
+                __mmask32 mask = TailMask32(size - i);
+                __m512i _a = _mm512_cvtepu8_epi16(_mm256_maskz_loadu_epi8(mask, a + i));
+                __m512i _b = _mm512_cvtepu8_epi16(_mm256_maskz_loadu_epi8(mask, b + i));
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
+            }
+            return ExtractSum<uint32_t>(_ab);
+        }
+
+        template<int bits> void CosineDistance(const uint8_t* a, const uint8_t* b, size_t size, float* distance)
+        {
+            float abSum = (float)Correlation<bits>(a + 16, b + 16, size);
+            Base::DecodeCosineDistance(a, b, abSum, (float)size, distance);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         DescrInt::DescrInt(size_t size, size_t depth)
             : Avx2::DescrInt(size, depth)
         {
@@ -340,24 +423,24 @@ namespace Simd
             {
                 _encode = Encode6;
                 _decode = Decode6;
-            //    _cosineDistance = Avx2::CosineDistance<6>;
-            //    _macroCosineDistances = Avx2::MacroCosineDistances<6>;
+                _cosineDistance = Avx512bw::CosineDistance<6>;
+            //    _macroCosineDistances = Avx512bw::MacroCosineDistances<6>;
                 break;
             }
             case 7:
             {
                 _encode = Encode7;
                 _decode = Decode7;
-            //    _cosineDistance = Avx2::CosineDistance<7>;
-            //    _macroCosineDistances = Avx2::MacroCosineDistances<7>;
+                _cosineDistance = Avx512bw::CosineDistance<7>;
+            //    _macroCosineDistances = Avx512bw::MacroCosineDistances<7>;
                 break;
             }
             case 8:
             {
                 _encode = Encode8;
                 _decode = Decode8;
-            //    _cosineDistance = Avx2::CosineDistance<8>;
-            //    _macroCosineDistances = Avx2::MacroCosineDistances<8>;
+                _cosineDistance = Avx512bw::CosineDistance<8>;
+                //_macroCosineDistances = Avx512bw::MacroCosineDistances<8>;
                 break;
             }
             default:
