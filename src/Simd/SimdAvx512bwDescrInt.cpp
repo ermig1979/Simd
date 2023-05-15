@@ -211,6 +211,125 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+
+        const __m512i C6_PERM = SIMD_MM512_SETR_EPI32(
+            0x0, 0x1, 0x0, 0x0, 0x1, 0x2, 0x0, 0x0, 0x3, 0x4, 0x0, 0x0, 0x4, 0x5, 0x0, 0x0);
+        const __m512i C6_SHFL = SIMD_MM512_SETR_EPI8(
+            0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5,
+            0x2, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x6, 0x6, 0x7, 0x7, 0x7,
+            0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5,
+            0x2, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x6, 0x6, 0x7, 0x7, 0x7);
+        const __m512i C6_MULLO = SIMD_MM512_SETR_EPI16(
+            4, 16, 64, 256, 4, 16, 64, 256, 4, 16, 64, 256, 4, 16, 64, 256,
+            4, 16, 64, 256, 4, 16, 64, 256, 4, 16, 64, 256, 4, 16, 64, 256);
+
+        const __m512i C7_PERM = SIMD_MM512_SETR_EPI32(
+            0x0, 0x1, 0x0, 0x0, 0x1, 0x2, 0x3, 0x0, 0x3, 0x4, 0x5, 0x0, 0x5, 0x6, 0x0, 0x0);
+        const __m512i C7_SHFL = SIMD_MM512_SETR_EPI8(
+            0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6,
+            0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x9, 0x9, 0x9,
+            0x2, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x8,
+            0x1, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x7, 0x7, 0x7);
+        const __m512i C7_MULLO = SIMD_MM512_SETR_EPI16(
+            2, 4, 8, 16, 32, 64, 128, 256, 2, 4, 8, 16, 32, 64, 128, 256,
+            2, 4, 8, 16, 32, 64, 128, 256, 2, 4, 8, 16, 32, 64, 128, 256);
+
+        //-------------------------------------------------------------------------------------------------
+
+        static void Decode6(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        {
+            assert(size % 8 == 0);
+            __m512 _scale = _mm512_set1_ps(scale);
+            __m512 _shift = _mm512_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16), size32 = AlignLo(size, 32);
+            //for (; i < size32; i += 32)
+            //{
+            //    __m512i s6 = _mm512_permutexvar_epi32(C6_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(0x00FFFFFF, src)));
+            //    __m512i s16 = _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(s6, C6_SHFL), C6_MULLO), 10);
+            //    _mm512_storeu_ps(dst + 0 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(_mm512_extracti32x8_epi32(s16, 0))), _scale, _shift));
+            //    _mm512_storeu_ps(dst + 1 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(_mm512_extracti32x8_epi32(s16, 1))), _scale, _shift));
+            //    src += 24;
+            //    dst += 32;
+            //}
+            for (; i < size16; i += 16)
+            {
+                __m256i s6 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+                __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s6, Avx2::C6_SHFL), Avx2::C6_MULLO), 10);
+                _mm512_storeu_ps(dst + 0, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(s16)), _scale, _shift));
+                src += 12;
+                dst += 16;
+            }
+            for (; i < size; i += 8)
+            {
+                __m128i s6 = _mm_loadl_epi64((__m128i*)src);
+                __m128i s16 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(s6, Sse41::C6_SHFL0), Sse41::C6_MULLO), 10);
+                _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(s16)), _mm512_castps512_ps256(_scale), _mm512_castps512_ps256(_shift)));
+                src += 6;
+                dst += 8;
+            }
+        }
+
+        static void Decode7(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        {
+            assert(size % 8 == 0);
+            __m512 _scale = _mm512_set1_ps(scale);
+            __m512 _shift = _mm512_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16), size32 = AlignLo(size, 32);
+            //for (; i < size32; i += 32)
+            //{
+            //    __m512i s7 = _mm512_permutexvar_epi32(C7_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(0x0FFFFFFF, src)));
+            //    __m512i s16 = _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(s7, C7_SHFL), C7_MULLO), 9);
+            //    _mm512_storeu_ps(dst + 0 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(_mm512_extracti32x8_epi32(s16, 0))), _scale, _shift));
+            //    _mm512_storeu_ps(dst + 1 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(_mm512_extracti32x8_epi32(s16, 1))), _scale, _shift));
+            //    src += 28;
+            //    dst += 32;
+            //}
+            for (; i < size16; i += 16)
+            {
+                __m256i s6 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+                __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s6, Avx2::C7_SHFL), Avx2::C7_MULLO), 9);
+                _mm512_storeu_ps(dst + 0, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu16_epi32(s16)), _scale, _shift));
+                src += 14;
+                dst += 16;
+            }
+            for (; i < size; i += 8)
+            {
+                __m128i s7 = _mm_loadl_epi64((__m128i*)src);
+                __m128i s16 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(s7, Sse41::C7_SHFL0), Sse41::C7_MULLO), 9);
+                _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(s16)), _mm512_castps512_ps256(_scale), _mm512_castps512_ps256(_shift)));
+                src += 7;
+                dst += 8;
+            }
+        }
+
+        static void Decode8(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        {
+            assert(size % 8 == 0);
+            __m512 _scale = _mm512_set1_ps(scale);
+            __m512 _shift = _mm512_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16), size64 = AlignLo(size, 64);
+            for (; i < size64; i += 64)
+            {
+                __m512i u8 = _mm512_loadu_si512((__m512i*)(src + i));
+                _mm512_storeu_ps(dst + i + 0 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(u8, 0))), _scale, _shift));
+                _mm512_storeu_ps(dst + i + 1 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(u8, 1))), _scale, _shift));
+                _mm512_storeu_ps(dst + i + 2 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(u8, 2))), _scale, _shift));
+                _mm512_storeu_ps(dst + i + 3 * F, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(u8, 3))), _scale, _shift));
+            }
+            for (; i < size16; i += 16)
+            {
+                __m128i u8 = _mm_loadu_si128((__m128i*)(src + i));
+                _mm512_storeu_ps(dst + i, _mm512_fmadd_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(u8)), _scale, _shift));
+            }
+            if (i < size)
+            {
+                __m256 _src = _mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)(src + i))));
+                _mm256_storeu_ps(dst + i, _mm256_fmadd_ps(_src, _mm512_castps512_ps256(_scale), _mm512_castps512_ps256(_shift)));
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         DescrInt::DescrInt(size_t size, size_t depth)
             : Avx2::DescrInt(size, depth)
         {
@@ -220,7 +339,7 @@ namespace Simd
             case 6:
             {
                 _encode = Encode6;
-            //    _decode = Decode6;
+                _decode = Decode6;
             //    _cosineDistance = Avx2::CosineDistance<6>;
             //    _macroCosineDistances = Avx2::MacroCosineDistances<6>;
                 break;
@@ -228,7 +347,7 @@ namespace Simd
             case 7:
             {
                 _encode = Encode7;
-            //    _decode = Decode7;
+                _decode = Decode7;
             //    _cosineDistance = Avx2::CosineDistance<7>;
             //    _macroCosineDistances = Avx2::MacroCosineDistances<7>;
                 break;
@@ -236,7 +355,7 @@ namespace Simd
             case 8:
             {
                 _encode = Encode8;
-            //    _decode = Decode8;
+                _decode = Decode8;
             //    _cosineDistance = Avx2::CosineDistance<8>;
             //    _macroCosineDistances = Avx2::MacroCosineDistances<8>;
                 break;
