@@ -247,6 +247,16 @@ namespace Simd
             __m256i b = _mm256_add_epi64(_mm512_extracti64x4_epi64(a, 0), _mm512_extracti64x4_epi64(a, 1));
             return _mm_add_epi64(_mm256_extractf128_si256(b, 0), _mm256_extractf128_si256(b, 1));
         }
+
+        SIMD_INLINE __m128i Extract4Sums(const __m512i& a0, const __m512i& a1, const __m512i& a2, const __m512i& a3)
+        {
+            __m256i b0 = _mm512_castsi512_si256(_mm512_add_epi32(a0, Alignr<8>(a0, a0)));
+            __m256i b1 = _mm512_castsi512_si256(_mm512_add_epi32(a1, Alignr<8>(a1, a1)));
+            __m256i b2 = _mm512_castsi512_si256(_mm512_add_epi32(a2, Alignr<8>(a2, a2)));
+            __m256i b3 = _mm512_castsi512_si256(_mm512_add_epi32(a3, Alignr<8>(a3, a3)));
+            __m256i c = _mm256_hadd_epi32(_mm256_hadd_epi32(b0, b1), _mm256_hadd_epi32(b2, b3));
+            return _mm_add_epi32(_mm256_castsi256_si128(c), _mm256_extracti128_si256(c, 1));
+        }
     }
 #endif//SIMD_AVX512BW_ENABLE
 

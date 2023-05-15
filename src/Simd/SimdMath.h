@@ -864,6 +864,22 @@ namespace Simd
             return hi;
         }
 
+
+        template<int shift> SIMD_INLINE __m512i Alignr(const __m512i& lo, const __m512i& hi)
+        {
+            return _mm512_alignr_epi32(hi, lo, shift);
+        }
+
+        template<> SIMD_INLINE __m512i Alignr<0>(const __m512i& lo, const __m512i& hi)
+        {
+            return lo;
+        }
+
+        template<> SIMD_INLINE __m512i Alignr<F>(const __m512i& lo, const __m512i& hi)
+        {
+            return hi;
+        }
+
         template<int shift, bool mask> SIMD_INLINE __m512 Alignr(const __m512& lo, const __m512& hi, __mmask16 m)
         {
             return Mask<mask>(Alignr<shift>(lo, hi), m);
