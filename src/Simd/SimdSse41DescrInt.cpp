@@ -795,7 +795,7 @@ namespace Simd
             {
                 size_t dM = Simd::Min(M, i + mM) - i;
                 for (size_t k = 0; k < dM; ++k)
-                    ap[k] = A + k * _encSize;
+                    ap[k] = A + (i + k) * _encSize;
                 for (size_t j = 0; j < N; j += mN)
                 {
                     size_t dN = Simd::Min(N, j + mN) - j;
