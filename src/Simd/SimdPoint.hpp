@@ -26,6 +26,9 @@
 
 #include "Simd/SimdLib.h"
 
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
 #include <math.h>
 
 #ifdef SIMD_OPENCV_ENABLE
