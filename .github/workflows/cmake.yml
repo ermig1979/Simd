@@ -156,4 +156,4 @@ jobs:
 
     - name: Test
       working-directory: build
-      run: ./Test.exe "-r=.." -m=a -tt=0 "-ot=log_${{matrix.build_type}}.txt" -ts=10
+      run: ./Test.exe "-r=.." -m=a -tt=0 "-ot=log_${{matrix.build_type}}.txt" -ts=10 -fi=Gemm32fNN
