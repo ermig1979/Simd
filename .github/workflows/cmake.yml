@@ -149,7 +149,7 @@ jobs:
       run: wmic cpu get /format:value
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+      run: cmake ./prj/cmake -B build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TARGET="x86_64" -DSIMD_GET_VERSION=OFF
 
     - name: Build
       run: cmake --build build --config ${{matrix.build_type}} --parallel2
