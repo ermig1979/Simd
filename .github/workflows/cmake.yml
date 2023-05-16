@@ -121,3 +121,39 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
+      
+  build_and_test_mingw:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+            
+    - name: Setup MSYS
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        install: git mingw-w64-ucrt-x86_64-gcc git make
+        pacboy: toolchain:p cmake:p ninja:p
+
+    - name: Host properties
+      run: wmic cpu get /format:value
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="" -DSIMD_TARGET=""
+
+    - name: Build
+      run: cmake --build build --config ${{matrix.build_type}} --parallel2
+
+    - name: Test
+      working-directory: build
+      run: ./Test "-r=.." -m=a -tt=-1 "-ot=log_${{matrix.build_type}}.txt" -ts=10
