@@ -77,12 +77,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga597d136b464cfbdd65791f5343ca3a6f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__descrint.html#ga597d136b464cfbdd65791f5343ca3a6f">SimdDescrIntVectorNorm</a> (const void *context, const uint8_t *a, float *norm)</td></tr>
 <tr class="memdesc:ga597d136b464cfbdd65791f5343ca3a6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates vector norm for integer descriptor.  <a href="group__descrint.html#ga597d136b464cfbdd65791f5343ca3a6f">More...</a><br /></td></tr>
 <tr class="separator:ga597d136b464cfbdd65791f5343ca3a6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga27577859578e6f6ba230d92f6dae8f5c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__descrint.html#ga27577859578e6f6ba230d92f6dae8f5c">SimdDescrIntVectorNormsNa</a> (const void *context, size_t N, const uint8_t *const *A, float *norms)</td></tr>
-<tr class="memdesc:ga27577859578e6f6ba230d92f6dae8f5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates vector norms for array of integer descriptor arrays.  <a href="group__descrint.html#ga27577859578e6f6ba230d92f6dae8f5c">More...</a><br /></td></tr>
-<tr class="separator:ga27577859578e6f6ba230d92f6dae8f5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga676f083426144cba2ff324df01e24b6b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__descrint.html#ga676f083426144cba2ff324df01e24b6b">SimdDescrIntVectorNormsNp</a> (const void *context, size_t N, const uint8_t *A, float *norms)</td></tr>
-<tr class="memdesc:ga676f083426144cba2ff324df01e24b6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates vector norms for array of integer descriptors.  <a href="group__descrint.html#ga676f083426144cba2ff324df01e24b6b">More...</a><br /></td></tr>
-<tr class="separator:ga676f083426144cba2ff324df01e24b6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions for conversion and comparison of Integer Descriptor. </p>
@@ -117,12 +111,12 @@ Functions</h2></td></tr>
 <p >All images must have the same width and height. This function used for NV12 to YUV420P conversion.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an original 32-bit float descriptor size. It be multiple of 8. Also it must be less or equal than 32 768. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an original 32-bit float descriptor size. It be multiple of 8. Also it must be less or equal than 32768. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">depth</td><td>- a number of bits in encoded integer descriptor. Supported values: 6, 7, 8. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__descrint.html#gaf0b9048006ffc1d6663de8c707bbaad7" title="Gets size in bytes of encoded integer descriptor.">SimdDescrIntEncodedSize</a>, <a class="el" href="group__descrint.html#ga84e3a3f6817ef40bec588eaae974d82e" title="Gets size of original 32-bit float descriptor.">SimdDescrIntDecodedSize</a>, <a class="el" href="group__descrint.html#ga87e7c3dc64ffe6e0029b00d8eb0f5f87" title="Encodes 32-bit float descriptor to integer form.">SimdDescrIntEncode</a>, <a class="el" href="group__descrint.html#ga25d10ee5546a01d690e6cc68ea6fcb72" title="Decodes integer descriptor to original 32-bit float form.">SimdDescrIntDecode</a>, <a class="el" href="group__descrint.html#gad19afb4821f4e4ecf07c06730ae5847c" title="Calculates cosine distance of two integer descriptors.">SimdDescrIntCosineDistance</a>, <a class="el" href="group__descrint.html#gaa0644c0c0a77aef8d1c0bedf17066ecf" title="Calculates mutual cosine distance of two arrays of integer descriptor arrays.">SimdDescrIntCosineDistancesMxNa</a>, <a class="el" href="group__descrint.html#gab7ee06fa831e04c9eff9bf39e833f323" title="Calculates mutual cosine distance of two arrays of integer descriptors.">SimdDescrIntCosineDistancesMxNp</a>, <a class="el" href="group__descrint.html#ga597d136b464cfbdd65791f5343ca3a6f" title="Calculates vector norm for integer descriptor.">SimdDescrIntVectorNorm</a>, <a class="el" href="group__descrint.html#ga27577859578e6f6ba230d92f6dae8f5c" title="Calculates vector norms for array of integer descriptor arrays.">SimdDescrIntVectorNormsNa</a>, <a class="el" href="group__descrint.html#ga676f083426144cba2ff324df01e24b6b" title="Calculates vector norms for array of integer descriptors.">SimdDescrIntVectorNormsNp</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__descrint.html#gaf0b9048006ffc1d6663de8c707bbaad7" title="Gets size in bytes of encoded integer descriptor.">SimdDescrIntEncodedSize</a>, <a class="el" href="group__descrint.html#ga84e3a3f6817ef40bec588eaae974d82e" title="Gets size of original 32-bit float descriptor.">SimdDescrIntDecodedSize</a>, <a class="el" href="group__descrint.html#ga87e7c3dc64ffe6e0029b00d8eb0f5f87" title="Encodes 32-bit float descriptor to integer form.">SimdDescrIntEncode</a>, <a class="el" href="group__descrint.html#ga25d10ee5546a01d690e6cc68ea6fcb72" title="Decodes integer descriptor to original 32-bit float form.">SimdDescrIntDecode</a>, <a class="el" href="group__descrint.html#gad19afb4821f4e4ecf07c06730ae5847c" title="Calculates cosine distance of two integer descriptors.">SimdDescrIntCosineDistance</a>, <a class="el" href="group__descrint.html#gaa0644c0c0a77aef8d1c0bedf17066ecf" title="Calculates mutual cosine distance of two arrays of integer descriptor arrays.">SimdDescrIntCosineDistancesMxNa</a>, <a class="el" href="group__descrint.html#gab7ee06fa831e04c9eff9bf39e833f323" title="Calculates mutual cosine distance of two arrays of integer descriptors.">SimdDescrIntCosineDistancesMxNp</a>, <a class="el" href="group__descrint.html#ga597d136b464cfbdd65791f5343ca3a6f" title="Calculates vector norm for integer descriptor.">SimdDescrIntVectorNorm</a>. </dd></dl>
 
 </div>
 </div>
@@ -491,110 +485,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Integer Descriptor Engine context. It must be created by function <a class="el" href="group__descrint.html#ga9a34fef8e808d9d7c0c62f3832e0c1d2" title="Initilizes Integer Descriptor Engine.">SimdDescrIntInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to integer descriptor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">norm</td><td>- a pointer to result 32-bit float norm. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga27577859578e6f6ba230d92f6dae8f5c" name="ga27577859578e6f6ba230d92f6dae8f5c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga27577859578e6f6ba230d92f6dae8f5c">&#9670;&nbsp;</a></span>SimdDescrIntVectorNormsNa()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdDescrIntVectorNormsNa </td>
-          <td>(</td>
-          <td class="paramtype">const void *&#160;</td>
-          <td class="paramname"><em>context</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>N</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const uint8_t *const *&#160;</td>
-          <td class="paramname"><em>A</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>norms</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Calculates vector norms for array of integer descriptor arrays. </p>
-<dl class="section note"><dt>Note</dt><dd>Integer descriptor can be recieved by function <a class="el" href="group__descrint.html#ga87e7c3dc64ffe6e0029b00d8eb0f5f87" title="Encodes 32-bit float descriptor to integer form.">SimdDescrIntEncode</a>. Its size in bytes is determined by function <a class="el" href="group__descrint.html#gaf0b9048006ffc1d6663de8c707bbaad7" title="Gets size in bytes of encoded integer descriptor.">SimdDescrIntEncodedSize</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Integer Descriptor Engine context. It must be created by function <a class="el" href="group__descrint.html#ga9a34fef8e808d9d7c0c62f3832e0c1d2" title="Initilizes Integer Descriptor Engine.">SimdDescrIntInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- a number of A arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to array with pointers to integer descriptors. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">norms</td><td>- a pointer to result 32-bit float array with vector norms. It size must be N. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga676f083426144cba2ff324df01e24b6b" name="ga676f083426144cba2ff324df01e24b6b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga676f083426144cba2ff324df01e24b6b">&#9670;&nbsp;</a></span>SimdDescrIntVectorNormsNp()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdDescrIntVectorNormsNp </td>
-          <td>(</td>
-          <td class="paramtype">const void *&#160;</td>
-          <td class="paramname"><em>context</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>N</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>A</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>norms</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Calculates vector norms for array of integer descriptors. </p>
-<dl class="section note"><dt>Note</dt><dd>Integer descriptor can be recieved by function <a class="el" href="group__descrint.html#ga87e7c3dc64ffe6e0029b00d8eb0f5f87" title="Encodes 32-bit float descriptor to integer form.">SimdDescrIntEncode</a>. Its size in bytes is determined by function <a class="el" href="group__descrint.html#gaf0b9048006ffc1d6663de8c707bbaad7" title="Gets size in bytes of encoded integer descriptor.">SimdDescrIntEncodedSize</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Integer Descriptor Engine context. It must be created by function <a class="el" href="group__descrint.html#ga9a34fef8e808d9d7c0c62f3832e0c1d2" title="Initilizes Integer Descriptor Engine.">SimdDescrIntInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- a number of A arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to array with integer descriptors. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">norms</td><td>- a pointer to result 32-bit float array with vector norms. It size must be N. </td></tr>
   </table>
   </dd>
 </dl>

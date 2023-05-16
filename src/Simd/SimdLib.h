@@ -2468,12 +2468,11 @@ extern "C"
         All images must have the same width and height.
         This function used for NV12 to YUV420P conversion.
 
-        \param [in] size - an original 32-bit float descriptor size. It be multiple of 8. Also it must be less or equal than 32 768.
+        \param [in] size - an original 32-bit float descriptor size. It be multiple of 8. Also it must be less or equal than 32768.
         \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 6, 7, 8.
         \return a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function ::SimdRelease.
                 This pointer is used in functions ::SimdDescrIntEncodedSize, ::SimdDescrIntDecodedSize, ::SimdDescrIntEncode, ::SimdDescrIntDecode, 
-                ::SimdDescrIntCosineDistance, ::SimdDescrIntCosineDistancesMxNa, ::SimdDescrIntCosineDistancesMxNp, 
-                ::SimdDescrIntVectorNorm, ::SimdDescrIntVectorNormsNa, ::SimdDescrIntVectorNormsNp.
+                ::SimdDescrIntCosineDistance, ::SimdDescrIntCosineDistancesMxNa, ::SimdDescrIntCosineDistancesMxNp, ::SimdDescrIntVectorNorm.
     */
     SIMD_API void * SimdDescrIntInit(size_t size, size_t depth);
 
@@ -2585,37 +2584,6 @@ extern "C"
         \param [out] norm - a pointer to result 32-bit float norm.
     */
     SIMD_API void SimdDescrIntVectorNorm(const void* context, const uint8_t* a, float* norm);
-
-
-    /*! @ingroup descrint
-
-        \fn void SimdDescrIntVectorNormsNa(const void* context, size_t N, const uint8_t* const* A, float* norms);
-
-        \short Calculates vector norms for array of integer descriptor arrays.
-
-        \note Integer descriptor can be recieved by function ::SimdDescrIntEncode. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
-
-        \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] N - a number of A arrays.
-        \param [in] A - a pointer to array with pointers to integer descriptors.
-        \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
-    */
-    SIMD_API void SimdDescrIntVectorNormsNa(const void* context, size_t N, const uint8_t* const* A, float* norms);
-
-    /*! @ingroup descrint
-
-        \fn void SimdDescrIntVectorNormsNp(const void* context, size_t N, const uint8_t* A, float* norms);
-
-        \short Calculates vector norms for array of integer descriptors.
-
-        \note Integer descriptor can be recieved by function ::SimdDescrIntEncode. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
-
-        \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] N - a number of A arrays.
-        \param [in] A - a pointer to array with integer descriptors.
-        \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
-    */
-    SIMD_API void SimdDescrIntVectorNormsNp(const void* context, size_t N, const uint8_t* A, float* norms);
 
     /*! @ingroup deinterleave_conversion
 

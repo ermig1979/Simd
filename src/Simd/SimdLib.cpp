@@ -1975,18 +1975,6 @@ SIMD_API void SimdDescrIntVectorNorm(const void* context, const uint8_t* a, floa
     return ((Base::DescrInt*)context)->VectorNorm(a, norm);
 }
 
-SIMD_API void SimdDescrIntVectorNormsNa(const void* context, size_t N, const uint8_t* const* A, float* norms)
-{
-    SIMD_EMPTY();
-    return ((Base::DescrInt*)context)->VectorNormsNa(N, A, norms);
-}
-
-SIMD_API void SimdDescrIntVectorNormsNp(const void* context, size_t N, const uint8_t* A, float* norms)
-{
-    SIMD_EMPTY();
-    return ((Base::DescrInt*)context)->VectorNormsNp(N, A, norms);
-}
-
 SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
                     uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
 {
