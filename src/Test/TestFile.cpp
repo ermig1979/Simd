@@ -32,18 +32,16 @@
 #ifdef __linux__
 #include <unistd.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #endif
 
 namespace Test
 {
     bool FileExists(const String& path)
     {
-#if defined(WIN32)
-        DWORD fileAttribute = ::GetFileAttributes(path.c_str());
-        return (fileAttribute != INVALID_FILE_ATTRIBUTES);
-#else
-        return (::access(path.c_str(), F_OK) != -1);
-#endif
+        std::ifstream ifs;
+        ifs.open(path, std::ios::in | std::ios::binary);
+        return (!ifs.fail());
     }
 
     bool DirectoryExists(const String & path)
