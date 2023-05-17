@@ -6140,9 +6140,9 @@ SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetDeconvolution32f * d = (SynetDeconvolution32f*)context;
-    SIMD_PERF_EXT(d);
-    d->Forward(src, buf, dst);
+    SynetDeconvolution32f * dec = (SynetDeconvolution32f*)context;
+    SIMD_PERF_EXT(dec);
+    dec->Forward(src, buf, dst);
 #else
     assert(0);
 #endif

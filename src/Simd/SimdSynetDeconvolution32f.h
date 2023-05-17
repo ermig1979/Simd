@@ -161,7 +161,7 @@ namespace Simd
         }
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* Perf(const String& func);
+        Base::PerformanceMeasurer* Perf(const char * func);
 #endif
 
         const char * Info() const
