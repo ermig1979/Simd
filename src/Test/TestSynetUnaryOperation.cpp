@@ -47,6 +47,8 @@ namespace Test
             return "Log";
         case SimdSynetUnaryOperation32fNeg:
             return "Neg";
+        case SimdSynetUnaryOperation32fRcp:
+            return "Rcp";
         case SimdSynetUnaryOperation32fRsqrt:
             return "Rsqrt";
         case SimdSynetUnaryOperation32fSqrt:
@@ -97,7 +99,7 @@ namespace Test
 
         Tensor32f src({ size });
         float lo = -10.0, hi = 10.0f;
-        if (type == SimdSynetUnaryOperation32fLog || type == SimdSynetUnaryOperation32fRsqrt || type == SimdSynetUnaryOperation32fSqrt)
+        if (type == SimdSynetUnaryOperation32fLog || type == SimdSynetUnaryOperation32fRcp || type == SimdSynetUnaryOperation32fRsqrt || type == SimdSynetUnaryOperation32fSqrt)
             lo = 0.000001f;
         FillRandom(src.Data(), src.Size(), lo, hi);
 

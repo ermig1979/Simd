@@ -252,6 +252,18 @@ namespace Simd
             return _mm_mul_ps(value, value);
         }
 
+        template<bool fast> __m128 Rcp(__m128 value);
+
+        template<> SIMD_INLINE __m128 Rcp<true>(__m128 value)
+        {
+            return _mm_rcp_ps(value);
+        }
+
+        template<> SIMD_INLINE __m128 Rcp<false>(__m128 value)
+        {
+            return _mm_div_ps(_mm_set1_ps(1.0f), value);
+        }
+
         template<bool fast> __m128 Sqrt(__m128 value);
 
         template<> SIMD_INLINE __m128 Sqrt<false>(__m128 value)
@@ -502,6 +514,18 @@ namespace Simd
         SIMD_INLINE __m256 Square(__m256 value)
         {
             return _mm256_mul_ps(value, value);
+        }
+
+        template<bool fast> __m256 Rcp(__m256 value);
+
+        template<> SIMD_INLINE __m256 Rcp<true>(__m256 value)
+        {
+            return _mm256_rcp_ps(value);
+        }
+
+        template<> SIMD_INLINE __m256 Rcp<false>(__m256 value)
+        {
+            return _mm256_div_ps(_mm256_set1_ps(1.0f), value);
         }
 
         template<bool fast> __m256 Sqrt(__m256 value);
@@ -817,6 +841,18 @@ namespace Simd
 #else
             return _mm512_castsi512_ps(_mm512_xor_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
 #endif
+        }
+
+        template<bool fast> __m512 Rcp(__m512 value);
+
+        template<> SIMD_INLINE __m512 Rcp<true>(__m512 value)
+        {
+            return _mm512_rcp14_ps(value);
+        }
+
+        template<> SIMD_INLINE __m512 Rcp<false>(__m512 value)
+        {
+            return _mm512_div_ps(_mm512_set1_ps(1.0f), value);
         }
 
         SIMD_INLINE __m512 Rcp14(const __m512& a)
