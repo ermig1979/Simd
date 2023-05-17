@@ -139,7 +139,7 @@ jobs:
       run: sudo apt-get -y install g++-12
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-12" -DSIMD_TARGET=""
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-12" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
@@ -182,4 +182,4 @@ jobs:
 
     - name: Test
       working-directory: build
-      run: ./Test.exe "-r=.." -m=a -tt=0 "-ot=log_${{matrix.build_type}}.txt" -ts=10 -fi=Gemm32fNN
+      run: ./Test.exe "-r=.." -m=a -tt=0 "-ot=log_${{matrix.build_type}}.txt" -ts=10 -fi=Gemm32f
