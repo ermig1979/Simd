@@ -121,7 +121,33 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
-      
+
+  build_and_test_gcc_12:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: sudo apt-get -y install g++-12
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-12" -DSIMD_TARGET=""
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
+
   build_and_test_mingw:
     runs-on: windows-latest
 
