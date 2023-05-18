@@ -404,15 +404,20 @@ namespace Test
             float _b = *b.Data(index);
             float absolute = ::fabs(_a - _b);
             float relative = ::fabs(_a - _b) / Simd::Max(::fabs(_a), ::fabs(_b));
+            bool aNan = _a != _a;
+            bool bNan = _b != _b;
             bool error = false;
             switch (differenceType)
             {
-            case DifferenceAbsolute: error = absolute > differenceMax; break;
+            case DifferenceAbsolute: error = absolute > differenceMax || aNan || bNan; break;
             case DifferenceRelative: error = relative > differenceMax; break;
-            case DifferenceBoth: error = absolute > differenceMax && relative > differenceMax; break;
-            case DifferenceAny: error = absolute > differenceMax || relative > differenceMax; break;
+            case DifferenceBoth: error = (absolute > differenceMax && relative > differenceMax) || aNan || bNan; break;
+            case DifferenceAny: error = absolute > differenceMax || relative > differenceMax || aNan || bNan; break;
+            case DifferenceLogical: error = aNan != bNan || (aNan == false && _a != _b); break;
+            default:
+                assert(0);
             }
-            if (error || _a != _a || _b != _b)
+            if (error)
             {
                 errorCount++;
                 if (printError)

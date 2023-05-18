@@ -289,6 +289,11 @@ namespace Simd
             return -value;
         }
 
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fNot>(float value)
+        {
+            return Not(value);
+        }
+
         template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fRcp>(float value)
         {
             return 1.0f / value;

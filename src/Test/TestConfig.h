@@ -121,6 +121,7 @@ namespace Test
         DifferenceRelative,
         DifferenceBoth,
         DifferenceAny,
+        DifferenceLogical,
     };
 }
 

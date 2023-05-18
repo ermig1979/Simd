@@ -87,6 +87,12 @@ namespace Simd
 
     namespace Base
     {
+        SIMD_INLINE float Not(float f)
+        {
+            int i = ~(int&)f;
+            return (float&)i;
+        }
+
         SIMD_INLINE int Min(int a, int b)
         {
             return a < b ? a : b;
@@ -250,6 +256,11 @@ namespace Simd
         SIMD_INLINE __m128 Square(__m128 value)
         {
             return _mm_mul_ps(value, value);
+        }
+
+        SIMD_INLINE __m128 Not(__m128 value)
+        {
+            return _mm_andnot_ps(value, _mm_castsi128_ps(K_INV_ZERO));
         }
 
         template<bool fast> __m128 Rcp(__m128 value);
@@ -607,6 +618,11 @@ namespace Simd
         using Avx::RightNotZero32f;
 #endif
 
+        SIMD_INLINE __m256 Not(__m256 value)
+        {
+            return _mm256_andnot_ps(value, _mm256_castsi256_ps(K_INV_ZERO));
+        }
+
         SIMD_INLINE __m256i SaturateI16ToU8(__m256i value)
         {
             return _mm256_min_epi16(K16_00FF, _mm256_max_epi16(value, K_ZERO));
@@ -823,6 +839,11 @@ namespace Simd
 #else
             return _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
 #endif
+        }
+
+        SIMD_INLINE __m512 Not(__m512 value)
+        {
+            return _mm512_andnot_ps(value, _mm512_castsi512_ps(K_INV_ZERO));
         }
 
         SIMD_INLINE __m512 AndNotMaskZ(const __m512& a, const __m512& b, __mmask16 m)
@@ -1533,6 +1554,11 @@ namespace Simd
         {
             const int32_t mask[DF] = { -1, -1, -1, -1, 0, 0, 0, 0 };
             return vld1q_f32((float*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
+        }
+
+        SIMD_INLINE float32x4_t Not(float32x4_t a)
+        {
+            return (float32x4_t)vmvnq_u32((uint32x4_t)a);
         }
 
         SIMD_INLINE float32x4_t And(float32x4_t a, float32x4_t b)

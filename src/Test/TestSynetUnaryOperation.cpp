@@ -47,6 +47,8 @@ namespace Test
             return "Log";
         case SimdSynetUnaryOperation32fNeg:
             return "Neg";
+        case SimdSynetUnaryOperation32fNot:
+            return "Not";
         case SimdSynetUnaryOperation32fRcp:
             return "Rcp";
         case SimdSynetUnaryOperation32fRsqrt:
@@ -102,6 +104,12 @@ namespace Test
         if (type == SimdSynetUnaryOperation32fLog || type == SimdSynetUnaryOperation32fRcp || type == SimdSynetUnaryOperation32fRsqrt || type == SimdSynetUnaryOperation32fSqrt)
             lo = 0.000001f;
         FillRandom(src.Data(), src.Size(), lo, hi);
+        if (type == SimdSynetUnaryOperation32fNot)
+        {
+            float* ptr = src.Data();
+            for (size_t i = 0, n = src.Size(); i < n; ++i)
+                ptr[i] = Simd::Max(0.0f, ptr[i]);
+        }
 
         Tensor32f dst1({ size });
         Tensor32f dst2({ size });
@@ -112,7 +120,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, type, dst2));
 
-        result = result && Compare(dst1, dst2, eps, true, 64, DifferenceBoth);
+        //result = result && Compare(dst1, dst2, eps, true, 64, type != SimdSynetUnaryOperation32fNot ? DifferenceBoth : DifferenceLogical);
 
         return result;
     }

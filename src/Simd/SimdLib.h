@@ -479,6 +479,8 @@ typedef enum
     /*! Gets negative for every point of input tensor. */
     SimdSynetUnaryOperation32fNeg,
     /*! Gets reciprocal for every point of input tensor. */
+    SimdSynetUnaryOperation32fNot,
+    /*! Performs logical NOT operation for every point of input tensor. */
     SimdSynetUnaryOperation32fRcp,
     /*! Gets reverse square root for every point of input tensor. */
     SimdSynetUnaryOperation32fRsqrt,

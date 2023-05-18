@@ -182,4 +182,4 @@ jobs:
 
     - name: Test
       working-directory: build
-      run: ./Test.exe "-r=.." -m=a -tt=0 -ts=10 -fe=Gemm32fNN
+      run: ./Test.exe "-r=.." -m=a -tt=0 -ts=10 -fe=Gemm32fN
