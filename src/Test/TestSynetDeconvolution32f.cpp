@@ -141,9 +141,11 @@ namespace Test
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 32, 44, 80, 30, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
 #if 1
-        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 512, 44, 80, 512, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, a, t), f1, f2);
+        //result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 512, 44, 80, 512, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
+        //result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, a, t), f1, f2);
         result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 256, 22, 40, 256, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
@@ -157,13 +159,13 @@ namespace Test
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRelu, ::SimdTrue, f1, f2);
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationLeakyRelu, ::SimdTrue, f1, f2);
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdTrue, f1, f2);
-        //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationPrelu, ::SimdTrue, f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationPrelu, ::SimdTrue, f1, f2);
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationElu, ::SimdTrue, f1, f2);
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationMish, ::SimdTrue, f1, f2);
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHardSigmoid, ::SimdTrue, f1, f2);
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationSwish, ::SimdTrue, f1, f2);
-        result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationGelu, ::SimdTrue, f1, f2);
+        //result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationGelu, ::SimdTrue, f1, f2);
 
         return result;
     }

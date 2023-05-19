@@ -55,6 +55,56 @@ namespace Simd
             _biasAndActivation = Avx512bw::ConvolutionBiasAndActivation;
         }
 
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetDeconvolution32fGemmNN::RowToImg(const float* src, float* dst)
+        {
+            const DeconvParam32f& p = _param;
+            assert(p.trans && p.group == 1);
+            if (p.IsPad(0) && p.IsDilation(1) && p.kernelY == p.strideX && p.kernelX == p.strideX)
+            {
+                Avx::SynetDeconvolution32fGemmNN::RowToImg(src, dst);
+                return;
+            }
+            else
+            {
+                size_t dstCF = AlignLo(p.dstC, F);
+                __mmask16 mask = TailMask16(p.dstC - dstCF);
+                for (size_t dy = 0; dy < p.dstH; ++dy)
+                    for (size_t dx = 0; dx < p.dstW; ++dx)
+                        memset(dst + (dy * p.dstW + dx) * p.dstC, 0, p.dstC * sizeof(float));
+                for (size_t sy = 0; sy < p.srcH; ++sy)
+                {
+                    for (size_t sx = 0; sx < p.srcW; ++sx)
+                    {
+                        size_t dy = sy * p.strideY - p.padY;
+                        for (size_t ky = 0; ky < p.kernelY; ky++, dy += p.dilationY)
+                        {
+                            if (dy < p.dstH)
+                            {
+                                size_t dx = sx * p.strideX - p.padX;
+                                for (size_t kx = 0; kx < p.kernelX; kx++, dx += p.dilationX)
+                                {
+                                    if (dx < p.dstW)
+                                    {
+                                        float* d = dst + (dy * p.dstW + dx) * p.dstC;
+                                        size_t dc = 0;
+                                        for (; dc < dstCF; dc += F)
+                                            _mm512_storeu_ps(d + dc, _mm512_add_ps(_mm512_loadu_ps(d + dc), _mm512_loadu_ps(src + dc)));
+                                        if(dc < p.dstC)
+                                            _mm512_mask_storeu_ps(d + dc, mask, _mm512_add_ps(_mm512_maskz_loadu_ps(mask, d + dc), _mm512_maskz_loadu_ps(mask, src + dc)));
+                                    }
+                                    src += p.dstC;
+                                }
+                            }
+                            else
+                                src += p.kernelX * p.dstC;
+                        }
+                    }
+                }
+            }
+        }
+
         //---------------------------------------------------------------------
 
         typedef void(*DeconvolutionNhwcDirect2x2_Ptr) (const float * src0, const DeconvParam32f & p, size_t srcC, size_t dstC, 
