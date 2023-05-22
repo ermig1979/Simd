@@ -183,7 +183,7 @@ namespace Simd
                     }
                     if (!_is1x1)
                     {
-                        SIMD_PERF_BEG("RowToImg");
+                        //SIMD_PERF_BEG("RowToImg");
                         if (_param.trans)
                             RowToImg(tmp, dst);
                         else

@@ -4614,6 +4614,31 @@ namespace Simd
         }
     }
 
+    /*! @ingroup warp_affine
+
+        \fn bool InvertAffineTransform(const float* src, float* dst)
+
+        \short Performs inversion of warp affine transform matrix.
+
+        \note This function is a C++ wrapper for functions ::SimdWarpAffineInit and ::SimdWarpAffineRun.
+
+        \param [in] src - a pointer to input 2x3 matrix with coefficients of affine warp.
+        \param [out] dst - a pointer to output 2x3 matrix with coefficients of inverse affine warp.
+        \return false if can't inverse it.
+    */
+    SIMD_INLINE bool InvertAffineTransform(const float* src, float* dst)
+    {
+        double D = src[0] * src[4] - src[1] * src[3];
+        bool valid = D != 0.0;
+        D = valid ? double(1.0) / D : double(0.0);
+        double A11 = src[4] * D, A22 = src[0] * D, A12 = -src[1] * D, A21 = -src[3] * D;
+        double b1 = -A11 * src[2] - A12 * src[5];
+        double b2 = -A21 * src[2] - A22 * src[5];
+        dst[0] = (float)A11; dst[1] = (float)A12; dst[2] = (float)b1;
+        dst[3] = (float)A21; dst[4] = (float)A22; dst[5] = (float)b2;
+        return valid;
+    }
+
     /*! @ingroup yuv_conversion
 
         \fn void Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra)

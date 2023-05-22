@@ -85,6 +85,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga03ebb0fcd0f0bb257db1662fd30d7333"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__warp__affine.html#ga03ebb0fcd0f0bb257db1662fd30d7333">WarpAffine</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const float *mat, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, <a class="el" href="group__warp__affine.html#ga18ec670b06abd539fb8b7f7183065200">SimdWarpAffineFlags</a> flags=(<a class="el" href="group__warp__affine.html#ga18ec670b06abd539fb8b7f7183065200">SimdWarpAffineFlags</a>)(<a class="el" href="group__warp__affine.html#gga18ec670b06abd539fb8b7f7183065200a81e68b2fe30123c7dc30fe64e42a2879">SimdWarpAffineChannelByte</a>|<a class="el" href="group__warp__affine.html#gga18ec670b06abd539fb8b7f7183065200a98b264063ddb20c56ee5dd9bc8440f34">SimdWarpAffineInterpBilinear</a>|<a class="el" href="group__warp__affine.html#gga18ec670b06abd539fb8b7f7183065200a8efc4d657e8d81c53586181d25825984">SimdWarpAffineBorderConstant</a>), const uint8_t *border=NULL)</td></tr>
 <tr class="memdesc:ga03ebb0fcd0f0bb257db1662fd30d7333"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs warp affine for current image.  <a href="group__warp__affine.html#ga03ebb0fcd0f0bb257db1662fd30d7333">More...</a><br /></td></tr>
 <tr class="separator:ga03ebb0fcd0f0bb257db1662fd30d7333"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad69a792126bf952cb14ac3b1c385ece5"><td class="memItemLeft" align="right" valign="top">SIMD_INLINE bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__warp__affine.html#gad69a792126bf952cb14ac3b1c385ece5">InvertAffineTransform</a> (const float *src, float *dst)</td></tr>
+<tr class="memdesc:gad69a792126bf952cb14ac3b1c385ece5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs inversion of warp affine transform matrix.  <a href="group__warp__affine.html#gad69a792126bf952cb14ac3b1c385ece5">More...</a><br /></td></tr>
+<tr class="separator:gad69a792126bf952cb14ac3b1c385ece5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions for Affine Warp of images. </p>
@@ -330,6 +333,45 @@ if (context)
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="gad69a792126bf952cb14ac3b1c385ece5" name="gad69a792126bf952cb14ac3b1c385ece5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad69a792126bf952cb14ac3b1c385ece5">&#9670;&nbsp;</a></span>InvertAffineTransform()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool InvertAffineTransform </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs inversion of warp affine transform matrix. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for functions <a class="el" href="group__warp__affine.html#ga190e3594adfa696ac4c75863dbd04c4f" title="Creates wrap affine context.">SimdWarpAffineInit</a> and <a class="el" href="group__warp__affine.html#gaa1b41e25cb57778b2320bbf6943a8dcc" title="Performs warp affine for current image.">SimdWarpAffineRun</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input 2x3 matrix with coefficients of affine warp. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 2x3 matrix with coefficients of inverse affine warp. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>false if can't inverse it. </dd></dl>
 
 </div>
 </div>
