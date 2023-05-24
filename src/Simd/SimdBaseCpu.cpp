@@ -24,6 +24,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdMath.h"
 
 #include <vector>
 #ifdef SIMD_CPP_2011_ENABLE
@@ -180,7 +181,20 @@ namespace Simd
                     return info[i].Cache.Size;
             return 0;
         }
+
 #elif defined(__GNUC__)
+
+#ifdef __MINGW32__
+        size_t CpuSocketNumber()
+        {
+            return 1;
+        }
+
+        size_t CpuCoreNumber()
+        {
+            return Simd::Max<uint32_t>(1, std::thread::hardware_concurrency() / 2);
+        }
+#else
         size_t CpuSocketNumber()
         {
             uint32_t number = 0;
@@ -208,6 +222,7 @@ namespace Simd
             }
             return number;
         }
+#endif
 
         SIMD_INLINE size_t CorrectIfZero(size_t value, size_t otherwise)
         {
