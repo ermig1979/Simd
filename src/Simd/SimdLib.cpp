@@ -30,7 +30,7 @@
 #define SIMD_LIB_CPP
 #endif
 
-#if defined(WIN32) && !defined(SIMD_STATIC)
+#if defined(_WIN32) && !defined(SIMD_STATIC)
 
 #define SIMD_EXPORTS
 #ifndef NOMINMAX
@@ -50,7 +50,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
     }
     return TRUE;
 }
-#endif//WIN32
+#endif//_WIN32
 
 #include "Simd/SimdLib.h"
 

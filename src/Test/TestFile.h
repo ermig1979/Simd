@@ -40,7 +40,7 @@ namespace Test
 
     SIMD_INLINE String FolderSeparator()
     {
-#ifdef WIN32
+#if defined(_WIN32)
         return String("\\");
 #elif defined(__unix__) || defined(__APPLE__)
         return String("/");

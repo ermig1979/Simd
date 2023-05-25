@@ -924,7 +924,7 @@ namespace Test
 
         int maxDifference = 0;
         if (!Simd::FmaAvoid(flags) || width != W || width <= 128)
-#ifdef WIN32 
+#if defined(_WIN32) 
             maxDifference = 2;
 #else
             maxDifference = 1;
@@ -956,7 +956,7 @@ namespace Test
     {
         bool result = true;
 
-#ifdef WIN32 
+#if defined(_WIN32) 
         int fma = 0;
 #else
         int fma = SimdRecursiveBilateralFilterFmaAvoid;

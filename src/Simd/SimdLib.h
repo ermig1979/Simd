@@ -655,7 +655,7 @@ typedef struct SimdConvolutionParameters
     SimdConvolutionActivationType activation;
 } SimdConvolutionParameters;
 
-#if defined(WIN32) && !defined(SIMD_STATIC)
+#if defined(_WIN32) && !defined(SIMD_STATIC)
 #  ifdef SIMD_EXPORTS
 #    define SIMD_API __declspec(dllexport)
 #  else

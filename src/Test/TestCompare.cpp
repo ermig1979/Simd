@@ -29,17 +29,6 @@
 #include "Simd/SimdFont.hpp"
 #include "Simd/SimdSynet.h"
 
-#ifdef WIN32
-#define NOMINMAX
-#include <windows.h>
-#include <filesystem>
-#endif
-
-#ifdef __linux__
-#include <unistd.h>
-#include <dirent.h>
-#endif
-
 #include <bitset>
 
 namespace Test

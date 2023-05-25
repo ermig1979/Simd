@@ -77,7 +77,7 @@ namespace Simd
 
     SIMD_INLINE size_t Alignment()
     {
-#if defined(WIN32)
+#if defined(_WIN32)
         return GetAlignment();
 #else
         return ALIGNMENT;

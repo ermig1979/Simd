@@ -84,7 +84,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-#if !(defined(WIN32) && defined(NDEBUG) && defined(SIMD_X86_ENABLE))
+#if !(defined(_WIN32) && defined(NDEBUG) && defined(SIMD_X86_ENABLE))
         result = result && Compare(d1, d2, 0, true, 64);
 #endif
 

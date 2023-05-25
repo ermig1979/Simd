@@ -165,7 +165,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, channels, mat, flags, border, buf));
 
-#if !((defined(WIN32) && defined(SIMD_X86_ENABLE) && defined(_DEBUG)) || (defined(__clang__) && !defined(NDEBUG)))
+#if !((defined(_WIN32) && defined(SIMD_X86_ENABLE) && defined(_DEBUG)) || (defined(__clang__) && !defined(NDEBUG)))
         result = result && Compare(dst1, dst2, 0, true, 64);
 #endif
 

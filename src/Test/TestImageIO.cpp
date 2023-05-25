@@ -41,7 +41,7 @@ namespace Test
     {
         if (!REAL_IMAGE.empty())
             return 4;
-#if defined(WIN32)
+#if defined(_WIN32)
 #if !defined(NDEBUG)
         return quality <= 10 ? 32 : 9;
 #else

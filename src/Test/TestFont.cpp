@@ -29,7 +29,7 @@
 
 //#define TEST_GENERATE_FONT
 
-#if defined(WIN32) && defined(TEST_GENERATE_FONT)
+#if defined(_WIN32) && defined(TEST_GENERATE_FONT)
 using namespace std;
 #define NOMINMAX
 #include <windows.h>
