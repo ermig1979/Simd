@@ -591,7 +591,7 @@ namespace Test
 
         size_t testThreads, workThreads, testRepeats, testStatistics;
 
-        bool printAlign, printInternal;
+        bool printAlign, printInternal, checkCpp;
 
         Options(int argc, char* argv[])
             : mode(Auto)
@@ -602,6 +602,7 @@ namespace Test
             , testStatistics(0)
             , printAlign(false)
             , printInternal(true)
+            , checkCpp(false)
         {
             for (int i = 1; i < argc; ++i)
             {
@@ -697,6 +698,10 @@ namespace Test
                 else if (arg.find("-ri=") == 0)
                 {
                     REAL_IMAGE = arg.substr(4, arg.size() - 4);
+                }
+                else if (arg.find("-cc=") == 0)
+                {
+                    checkCpp = FromString<bool>(arg.substr(4, arg.size() - 4));
                 }
                 else
                 {
@@ -857,6 +862,7 @@ namespace Test
         std::cout << "                  The image have to be placed in ./data/image directory." << std::endl << std::endl;
         std::cout << "    -tr=2         a number of test execution repeats." << std::endl;
         std::cout << "    -ts=1         to print statistics of time of tests execution." << std::endl;
+        std::cout << "    -cc=1         to check c++ API." << std::endl;
         return 0;
     }
 
@@ -886,12 +892,13 @@ namespace Test
 
 int main(int argc, char* argv[])
 {
-    Test::CheckCpp();
-
     Test::Options options(argc, argv);
 
     if (options.help)
         return Test::PrintHelp();
+
+    if(options.checkCpp)
+        Test::CheckCpp();
 
     Test::Groups groups;
     for (const Test::Group& group : Test::g_groups)

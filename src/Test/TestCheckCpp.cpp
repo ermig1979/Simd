@@ -29,6 +29,10 @@
 
 //#define SIMD_OPENCV_ENABLE
 
+#if defined(__GNUC__) && defined(__MINGW32__) && !defined(SIMD_STATIC)
+#define SIMD_STATIC
+#endif
+
 #include "Simd/SimdLib.hpp"
 #include "Simd/SimdFrame.hpp"
 #include "Simd/SimdPyramid.hpp"
@@ -150,15 +154,6 @@ namespace Test
         }
     }
 
-    static void TestViewMove()
-    {
-        typedef Simd::View<Simd::Allocator> View;
-
-        View a = View(128, 96, View::Gray8), b(40, 30, View::Bgr24);
-
-        b = std::move(a);
-    }
-
     static void TestFrameVector()
     {
         typedef Simd::View<Simd::Allocator> View;
@@ -170,6 +165,16 @@ namespace Test
             frames.push_back(Frame(View(128 + i, 96 + i, View::Gray8), false, i * 0.040));
     }
 
+#if defined(SIMD_CPP_2011_ENABLE)
+    static void TestViewMove()
+    {
+        typedef Simd::View<Simd::Allocator> View;
+
+        View a = View(128, 96, View::Gray8), b(40, 30, View::Bgr24);
+
+        b = std::move(a);
+    }
+
     static void TestFrameMove()
     {
         typedef Simd::View<Simd::Allocator> View;
@@ -179,6 +184,7 @@ namespace Test
 
         b = std::move(a);
     }
+#endif
 
     void CheckCpp()
     {
@@ -200,11 +206,13 @@ namespace Test
 
         TestViewVector();
 
-        TestViewMove();
-
         TestFrameVector();
 
+#if defined(SIMD_CPP_2011_ENABLE)
+        TestViewMove();
+
         TestFrameMove();
+#endif
     }
 }
 
