@@ -120,7 +120,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, type, dst2));
 
-        //result = result && Compare(dst1, dst2, eps, true, 64, type != SimdSynetUnaryOperation32fNot ? DifferenceBoth : DifferenceLogical);
+        result = result && Compare(dst1, dst2, eps, true, 64, type != SimdSynetUnaryOperation32fNot ? DifferenceBoth : DifferenceLogical);
 
         return result;
     }
