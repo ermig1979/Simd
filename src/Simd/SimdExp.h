@@ -377,8 +377,8 @@ namespace Simd
     {
         class Exp
         {
-            __m512i _exponent, _mantissa, _127;
-            __m512 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
+            __m512i _127;
+            __m512 _1_0, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
 
             SIMD_INLINE __m512 Poly5(__m512 x) const
             {
@@ -394,7 +394,7 @@ namespace Simd
             SIMD_INLINE __m512 Exp2(__m512 x) const
             {
                 x = _mm512_max_ps(_mm512_min_ps(x, _max), _min);
-                __m512i ipart = _mm512_cvtps_epi32(_mm512_sub_ps(x, _0_5));
+                __m512i ipart = _mm512_cvt_roundps_epi32(x, _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC);
                 __m512 fpart = _mm512_sub_ps(x, _mm512_cvtepi32_ps(ipart));
                 __m512 expipart = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_add_epi32(ipart, _127), 23));
                 __m512 expfpart = Poly5(fpart);
@@ -405,11 +405,8 @@ namespace Simd
 
             SIMD_INLINE Exp(float k = 1.0f)
             {
-                _exponent = _mm512_set1_epi32(0x7F800000);
-                _mantissa = _mm512_set1_epi32(0x007FFFFF);
                 _127 = _mm512_set1_epi32(127);
                 _1_0 = _mm512_set1_ps(1.0f);
-                _0_5 = _mm512_set1_ps(0.5f);
                 _min = _mm512_set1_ps(-126.99999f);
                 _max = _mm512_set1_ps(126.99999f);
                 _exp0 = _mm512_set1_ps(9.9999994e-1f);
@@ -469,7 +466,7 @@ namespace Simd
             SIMD_INLINE __m512 Exp2(__m512 x)
             {
                 x = _mm512_max_ps(_mm512_min_ps(x, _mm512_set1_ps(126.99999f)), _mm512_set1_ps(-126.99999f));
-                __m512i ipart = _mm512_cvtps_epi32(_mm512_sub_ps(x, _mm512_set1_ps(0.5f)));
+                __m512i ipart = _mm512_cvt_roundps_epi32(x, _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC);
                 __m512 fpart = _mm512_sub_ps(x, _mm512_cvtepi32_ps(ipart));
                 __m512 expipart = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_add_epi32(ipart, _mm512_set1_epi32(127)), 23));
                 __m512 expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);

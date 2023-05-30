@@ -100,7 +100,7 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
 
         Tensor32f src({ size });
-        float lo = -10.0, hi = 10.0f;
+        float lo = -200.0, hi = 10.0f;
         if (type == SimdSynetUnaryOperation32fLog || type == SimdSynetUnaryOperation32fRcp || type == SimdSynetUnaryOperation32fRsqrt || type == SimdSynetUnaryOperation32fSqrt)
             lo = 0.000001f;
         FillRandom(src.Data(), src.Size(), lo, hi);

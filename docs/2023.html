@@ -53,7 +53,7 @@
 <h5>Improving</h5>
 <ul>
  <li>SSE4.1, AVX, AVX-512BW optimizations of method SynetDeconvolution32fGemmNN::RowToImg.</li>
- <li>AVX-512BW optimizations of function SynetUnaryOperation32f (case of SimdSynetUnaryOperation32fLog).</li>
+ <li>AVX-512BW optimizations of function SynetUnaryOperation32f (case of SimdSynetUnaryOperation32fLog, SimdSynetUnaryOperation32fExp).</li>
  <li>AVX-512BW optimizations of function SynetSoftplus32f.</li>
 </ul>
 <h5>Bug fixing</h5>
@@ -63,7 +63,7 @@
  <li>GCC compiler error in function Test::FileExists (Windows, MinGW).</li>
  <li>Crash in function SimdSynetDeconvolution32fForward (Linux, GCC-12, GCC-13).</li>
  <li>Crash in function Base::AlgCacheL3 (Windows, MinGW).</li>
- <li>Using of WIN32 macro instead of _WIN32.</li>
+ <li>Using of _WIN32 macro instead of WIN32.</li>
 </ul>
 
 <h4>Test framework</h4>
