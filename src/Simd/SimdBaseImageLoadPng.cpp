@@ -735,7 +735,7 @@ namespace Simd
             return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
         }
 
-        static int ConvertFormat(Png& a, int img_n, int req_comp, unsigned int x, unsigned int y)
+        static int ConvertFormat8(Png& a, int img_n, int req_comp, unsigned int x, unsigned int y)
         {
             SIMD_PERF_FUNC();
 
@@ -818,22 +818,178 @@ namespace Simd
             return a.Swap();
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        template<class T> SIMD_INLINE uint8_t Convert(int r, int g, int b)
+        {
+            return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> (sizeof(T) * 8));
+        };
+
+        template<class T> uint8_t Convert(int g);
+
+        template<> SIMD_INLINE uint8_t Convert<uint8_t>(int g)
+        {
+            return (uint8_t)(g);
+        };
+
+        template<> SIMD_INLINE uint8_t Convert<uint16_t>(int g)
+        {
+            return (uint8_t)(g >> 8);
+        };
+
+        template<class T, int channels, SimdPixelFormatType format> SIMD_INLINE void ConvertPixel(const T* src, uint8_t* dst)
+        {
+            if ((channels == 1 || channels == 2) && format == SimdPixelFormatGray8) 
+            { 
+                dst[0] = Convert<T>(src[0]); 
+            }
+            else if ((channels == 1 || channels == 2) && (format == SimdPixelFormatBgr24 || format == SimdPixelFormatRgb24))
+            {
+                uint8_t gray = Convert<T>(src[0]);
+                dst[0] = gray;
+                dst[1] = gray;
+                dst[2] = gray;
+            }
+            else if (channels == 1 && (format == SimdPixelFormatBgra32 || format == SimdPixelFormatRgba32))
+            {
+                uint8_t gray = Convert<T>(src[0]);
+                dst[0] = Convert<T>(src[0]);
+                dst[1] = gray;
+                dst[2] = gray;
+                dst[3] = 0xFF;
+            }
+            else if (channels == 2 && (format == SimdPixelFormatBgra32 || format == SimdPixelFormatRgba32))
+            {
+                uint8_t gray = Convert<T>(src[0]);
+                dst[0] = Convert<T>(src[0]);
+                dst[1] = gray;
+                dst[2] = gray;
+                dst[3] = Convert<T>(src[1]);
+            }
+            else if ((channels == 3 || channels == 4) && format == SimdPixelFormatGray8)
+            {
+                dst[0] = Convert<T>(src[0], src[1], src[2]);
+            }
+            else if ((channels == 3 || channels == 4) && format == SimdPixelFormatBgr24)
+            {
+                dst[0] = Convert<T>(src[2]);
+                dst[1] = Convert<T>(src[1]);
+                dst[2] = Convert<T>(src[0]);
+            }
+            else if ((channels == 3 || channels == 4) && format == SimdPixelFormatRgb24)
+            {
+                dst[0] = Convert<T>(src[0]);
+                dst[1] = Convert<T>(src[1]);
+                dst[2] = Convert<T>(src[2]);
+            }
+            else if (channels == 3 && format == SimdPixelFormatBgra32)
+            {
+                dst[0] = Convert<T>(src[2]);
+                dst[1] = Convert<T>(src[1]);
+                dst[2] = Convert<T>(src[0]);
+                dst[3] = 0xFF;
+            }
+            else if (channels == 3 && format == SimdPixelFormatRgba32)
+            {
+                dst[0] = Convert<T>(src[0]);
+                dst[1] = Convert<T>(src[1]);
+                dst[2] = Convert<T>(src[2]);
+                dst[3] = 0xFF;
+            }
+            else if (channels == 4 && format == SimdPixelFormatBgra32)
+            {
+                dst[0] = Convert<T>(src[2]);
+                dst[1] = Convert<T>(src[1]);
+                dst[2] = Convert<T>(src[0]);
+                dst[3] = Convert<T>(src[3]);
+            }
+            else if (channels == 4 && format == SimdPixelFormatRgba32)
+            {
+                dst[0] = Convert<T>(src[0]);
+                dst[1] = Convert<T>(src[1]);
+                dst[2] = Convert<T>(src[2]);
+                dst[3] = Convert<T>(src[3]);
+            }
+            else 
+                assert(0);
+        }
+
+        template<class T, int channels, SimdPixelFormatType format> void ConvertFormat(const T* src, size_t width, size_t height, uint8_t* dst, size_t stride)
+        {
+            typedef Simd::View<Simd::Allocator> Image;
+            size_t step = Image::ChannelCount((Image::Format)format), gap = stride - step * width;
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < width; ++x)
+                {
+                    ConvertPixel<T, channels, format>(src, dst);
+                    src += channels;
+                    dst += step;
+                }
+                dst += gap;
+            }
+        }
+
+        typedef void (*ConverterPtr)(const uint8_t* src, size_t width, size_t height, uint8_t* dst, size_t stride);
+
+        template<class T, int channels> ConverterPtr GetConverter(SimdPixelFormatType format)
+        {
+            switch (format)
+            {
+            case SimdPixelFormatGray8: return (ConverterPtr)ConvertFormat<T, channels, SimdPixelFormatGray8>;
+            case SimdPixelFormatBgr24: return (ConverterPtr)ConvertFormat<T, channels, SimdPixelFormatBgr24>;
+            case SimdPixelFormatBgra32: return (ConverterPtr)ConvertFormat<T, channels, SimdPixelFormatBgra32>;
+            case SimdPixelFormatRgb24: return (ConverterPtr)ConvertFormat<T, channels, SimdPixelFormatRgb24>;
+            case SimdPixelFormatRgba32: return (ConverterPtr)ConvertFormat<T, channels, SimdPixelFormatRgba32>;
+            default:
+                assert(0);
+                return NULL;
+            }
+        }
+
+        template<class T> ConverterPtr GetConverter(int channels, SimdPixelFormatType format)
+        {
+            switch (channels)
+            {
+            case 1: return GetConverter<T, 1>(format);
+            case 2: return GetConverter<T, 2>(format);
+            case 3: return GetConverter<T, 3>(format);
+            case 4: return GetConverter<T, 4>(format);
+            default:
+                assert(0);
+                return NULL;
+            }
+        }
+
+        static ConverterPtr GetConverter(int depth, int channels, SimdPixelFormatType format)
+        {
+            if (depth <= 8)
+                return GetConverter<uint8_t>(channels, format);
+            else if(depth == 16)
+                return GetConverter<uint16_t>(channels, format);
+            assert(0);
+            return NULL;
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         ImagePngLoader::ImagePngLoader(const ImageLoaderParam& param)
             : ImageLoader(param)
-            , _toAny8(NULL)
-            , _toBgra8(NULL)
-            , _toAny16(NULL)
-            , _toBgra16(NULL)
+            , _bgrToBgra(NULL)
+            , _converter(NULL)
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgba32;
         }
 
-        void ImagePngLoader::SetConverters()
+        void ImagePngLoader::SetBgrToBgra()
         {
             _bgrToBgra = Base::BgrToBgra;
+        }
+
+        void ImagePngLoader::SetConverter(int channels)
+        {
+            _converter = GetConverter(_depth, channels, _param.format);
         }
 
 #ifdef SIMD_CPP_2011_ENABLE
@@ -893,11 +1049,18 @@ namespace Simd
 
             if (!(p.depth <= 8 || p.depth == 16))
                 return false;
+
+            SIMD_PERF_BEG("conversion");
+#if 1
+            SetConverter(p.img_out_n);
+            _image.Recreate(p.width, p.height, (Image::Format)_param.format);
+            _converter(p.buf0.data, p.width, p.height, _image.data, _image.stride);
+#else
             if (req_comp && (req_comp != p.img_out_n || p.depth == 16))
             {
                 int res;
                 if (p.depth <= 8)
-                    res = ConvertFormat(p, p.img_out_n, req_comp, _width, _height);
+                    res = ConvertFormat8(p, p.img_out_n, req_comp, _width, _height);
                 else
                     res = ConvertFormat16(p, p.img_out_n, req_comp, _width, _height);
                 p.img_out_n = req_comp;
@@ -939,6 +1102,7 @@ namespace Simd
                 }
                 return true;
             }
+#endif
             return false;
         }
 
@@ -961,7 +1125,7 @@ namespace Simd
                 {
                     if (!ReadHeader(chunk))
                         return false;
-                    SetConverters();
+                    SetBgrToBgra();
                 }
                 else if (chunk.type == ChunkType('P', 'L', 'T', 'E'))
                 {

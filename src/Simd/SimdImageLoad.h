@@ -154,17 +154,17 @@ namespace Simd
 
             virtual bool FromStream();
 
-        protected:
-            typedef void (*ToAny8Ptr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
-            typedef void (*ToBgra8Ptr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
-            typedef void (*ToAny16Ptr)(const uint16_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
-            typedef void (*ToBgra16Ptr)(const uint16_t* src, size_t width, size_t height, size_t srcStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
-            ToAny8Ptr _toAny8;
-            ToBgra8Ptr _toBgra8, _bgrToBgra;
-            ToAny16Ptr _toAny16;
-            ToBgra16Ptr _toBgra16;
+            typedef void (*ConverterPtr)(const uint8_t* src, size_t width, size_t height, uint8_t* dst, size_t stride);
 
-            virtual void SetConverters();
+        protected:
+            typedef void (*ToBgraPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
+
+            ToBgraPtr _bgrToBgra;
+            ConverterPtr _converter;
+
+            virtual void SetBgrToBgra();
+            virtual void SetConverter(int channels);
+
         private:
             bool _first, _hasTrans, _iPhone;
             uint32_t _width, _height, _channels;
