@@ -154,15 +154,11 @@ namespace Simd
 
             virtual bool FromStream();
 
-            typedef void (*ConverterPtr)(const uint8_t* src, size_t width, size_t height, uint8_t* dst, size_t stride);
+            typedef void (*ConverterPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
 
         protected:
-            typedef void (*ToBgraPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
 
-            ToBgraPtr _bgrToBgra;
             ConverterPtr _converter;
-
-            virtual void SetBgrToBgra();
             virtual void SetConverter(int channels);
 
         private:

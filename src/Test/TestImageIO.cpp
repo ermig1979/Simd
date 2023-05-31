@@ -631,9 +631,13 @@ namespace Test
                 result = result && Compare(dst1, dst2, 0, true, 64, 0, "dst1 & dst2");
             if (dst1.data && SaveLoadCompatible(format, file, quality))
                 result = result && Compare(dst1, src, 0, true, 64, 0, "dst1 & src");
+            if (!result)
+            {
+                SaveTestImage(dst1, file, quality, "_1");
+                SaveTestImage(dst2, file, quality, "_2");
+                SaveTestImage(src, SimdImageFilePpmBin, 100, "_error");
+            }
         }
-
-        SaveTestImage(dst1, file, quality);
 
         if (dst1.data)
             Simd::Free(dst1.data);
