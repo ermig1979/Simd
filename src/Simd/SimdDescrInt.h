@@ -27,7 +27,6 @@
 #include "Simd/SimdMemory.h"
 
 #define SIMD_DESCR_INT_EPS 0.000001f
-#define SIMD_DESCR_INT_VER 1
 
 namespace Simd
 {
@@ -43,8 +42,10 @@ namespace Simd
             size_t DecodedSize() const { return _size; }
             size_t EncodedSize() const { return _encSize; }
 
-            void Encode(const float* src, uint8_t* dst) const;
-            void Decode(const uint8_t* src, float* dst) const;
+            void Encode32f(const float* src, uint8_t* dst) const;
+            void Encode16f(const uint16_t* src, uint8_t* dst) const;
+            void Decode32f(const uint8_t* src, float* dst) const;
+            void Decode16f(const uint8_t* src, uint16_t* dst) const;
 
             void CosineDistance(const uint8_t* a, const uint8_t* b, float* distance) const;
             virtual void CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const;
@@ -53,14 +54,20 @@ namespace Simd
             void VectorNorm(const uint8_t* a, float* norm) const;
 
         protected:
-            typedef void (*MinMaxPtr)(const float* src, size_t size, float &min, float &max);
-            typedef void (*EncodePtr)(const float* src, float scale, float min, size_t size, int32_t &sum, int32_t& sqsum, uint8_t* dst);
-            typedef void (*DecodePtr)(const uint8_t * src, float scale, float shift, size_t size, float* dst);
+            typedef void (*MinMax32fPtr)(const float* src, size_t size, float &min, float &max);
+            typedef void (*MinMax16fPtr)(const uint16_t* src, size_t size, float& min, float& max);
+            typedef void (*Encode32fPtr)(const float* src, float scale, float min, size_t size, int32_t &sum, int32_t& sqsum, uint8_t* dst);
+            typedef void (*Encode16fPtr)(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst);
+            typedef void (*Decode32fPtr)(const uint8_t * src, float scale, float shift, size_t size, float* dst);
+            typedef void (*Decode16fPtr)(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst);
             typedef void (*CosineDistancePtr)(const uint8_t* a, const uint8_t* b, size_t size, float* distance);
 
-            MinMaxPtr _minMax;
-            EncodePtr _encode;
-            DecodePtr _decode;
+            MinMax32fPtr _minMax32f;
+            MinMax16fPtr _minMax16f;
+            Encode32fPtr _encode32f;
+            Encode16fPtr _encode16f;
+            Decode32fPtr _decode32f;
+            Decode16fPtr _decode16f;
             CosineDistancePtr _cosineDistance;
             size_t _size, _depth, _encSize;
             float _range;

@@ -2472,10 +2472,11 @@ extern "C"
         All images must have the same width and height.
         This function used for NV12 to YUV420P conversion.
 
-        \param [in] size - an original 32-bit float descriptor size. It be multiple of 8. Also it must be less or equal than 32768.
+        \param [in] size - a length of original (32-bit or 16-bit) float descriptor. It be multiple of 8. Also it must be less or equal than 32768.
         \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 6, 7, 8.
         \return a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-                This pointer is used in functions ::SimdDescrIntEncodedSize, ::SimdDescrIntDecodedSize, ::SimdDescrIntEncode, ::SimdDescrIntDecode, 
+                This pointer is used in functions ::SimdDescrIntEncodedSize, ::SimdDescrIntDecodedSize, 
+                ::SimdDescrIntEncode32f, ::SimdDescrIntEncode16f, ::SimdDescrIntDecode32f, ::SimdDescrIntDecode16f, 
                 ::SimdDescrIntCosineDistance, ::SimdDescrIntCosineDistancesMxNa, ::SimdDescrIntCosineDistancesMxNp, ::SimdDescrIntVectorNorm.
     */
     SIMD_API void * SimdDescrIntInit(size_t size, size_t depth);
@@ -2495,36 +2496,60 @@ extern "C"
 
         \fn size_t SimdDescrIntDecodedSize(const void* context);
 
-        \short Gets size of original 32-bit float descriptor.
+        \short Gets length of original (32-bit or 16-bit) float descriptor.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \return size of original 32-bit float descriptor.
+        \return length of original (32-bit or 16-bit) float descriptor.
     */
     SIMD_API size_t SimdDescrIntDecodedSize(const void* context);
 
     /*! @ingroup descrint
 
-        \fn void SimdDescrIntEncode(const void* context, const float * src, uint8_t * dst);
+        \fn void SimdDescrIntEncode32f(const void* context, const float * src, uint8_t * dst);
 
         \short Encodes 32-bit float descriptor to integer form.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to original 32-bit float descriptor. Its size can be determined by function ::SimdDescrIntDecodedSize.
+        \param [in] src - a pointer to original 32-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
         \param [out] dst - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
     */
-    SIMD_API void SimdDescrIntEncode(const void* context, const float * src, uint8_t * dst);
+    SIMD_API void SimdDescrIntEncode32f(const void* context, const float * src, uint8_t * dst);
 
     /*! @ingroup descrint
 
-        \fn void SimdDescrIntDecode(const void* context, const uint8_t* src, float* dst);
+        \fn void SimdDescrIntEncode16f(const void* context, const uint16_t * src, uint8_t * dst);
+
+        \short Encodes 16-bit float descriptor to integer form.
+
+        \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to original 16-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
+        \param [out] dst - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
+    */
+    SIMD_API void SimdDescrIntEncode16f(const void* context, const uint16_t* src, uint8_t* dst);
+
+    /*! @ingroup descrint
+
+        \fn void SimdDescrIntDecode32f(const void* context, const uint8_t* src, float* dst);
 
         \short Decodes integer descriptor to original 32-bit float form.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] src - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
-        \param [out] dst - a pointer to output 32-bit float descriptor. Its size can be determined by function ::SimdDescrIntDecodedSize.
+        \param [out] dst - a pointer to output 32-bit float descriptor. Its lenght can be determined by function ::SimdDescrIntDecodedSize.
     */
-    SIMD_API void SimdDescrIntDecode(const void* context, const uint8_t* src, float* dst);
+    SIMD_API void SimdDescrIntDecode32f(const void* context, const uint8_t* src, float* dst);
+
+    /*! @ingroup descrint
+
+        \fn void SimdDescrIntDecode16f(const void* context, const uint8_t* src, uint16_t* dst);
+
+        \short Decodes integer descriptor to original 16-bit float form.
+
+        \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
+        \param [out] dst - a pointer to output 16-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
+    */
+    SIMD_API void SimdDescrIntDecode16f(const void* context, const uint8_t* src, uint16_t* dst);
 
     /*! @ingroup descrint
 
@@ -2532,7 +2557,7 @@ extern "C"
 
         \short Calculates cosine distance of two integer descriptors.
 
-        \note Integer descriptor can be recieved by function ::SimdDescrIntEncode. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] a - a pointer to the first integer descriptor. 
@@ -2547,7 +2572,7 @@ extern "C"
 
         \short Calculates mutual cosine distance of two arrays of integer descriptor arrays.
 
-        \note Integer descriptor can be recieved by function ::SimdDescrIntEncode. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] M - a number of A arrays.
@@ -2564,7 +2589,7 @@ extern "C"
 
         \short Calculates mutual cosine distance of two arrays of integer descriptors.
 
-        \note Integer descriptor can be recieved by function ::SimdDescrIntEncode. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] M - a number of A arrays.
@@ -2581,7 +2606,7 @@ extern "C"
 
         \short Calculates vector norm for integer descriptor.
 
-        \note Integer descriptor can be recieved by function ::SimdDescrIntEncode. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] a - a pointer to integer descriptor.

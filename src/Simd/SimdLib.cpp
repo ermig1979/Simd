@@ -1939,16 +1939,28 @@ SIMD_API size_t SimdDescrIntDecodedSize(const void* context)
     return ((Base::DescrInt*)context)->DecodedSize();
 }
 
-SIMD_API void SimdDescrIntEncode(const void* context, const float* src, uint8_t* dst)
+SIMD_API void SimdDescrIntEncode32f(const void* context, const float* src, uint8_t* dst)
 {
     SIMD_EMPTY();
-    return ((Base::DescrInt*)context)->Encode(src, dst);
+    return ((Base::DescrInt*)context)->Encode32f(src, dst);
 }
 
-SIMD_API void SimdDescrIntDecode(const void* context, const uint8_t* src, float* dst)
+SIMD_API void SimdDescrIntEncode16f(const void* context, const uint16_t* src, uint8_t* dst)
 {
     SIMD_EMPTY();
-    return ((Base::DescrInt*)context)->Decode(src, dst);
+    return ((Base::DescrInt*)context)->Encode16f(src, dst);
+}
+
+SIMD_API void SimdDescrIntDecode32f(const void* context, const uint8_t* src, float* dst)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->Decode32f(src, dst);
+}
+
+SIMD_API void SimdDescrIntDecode16f(const void* context, const uint8_t* src, uint16_t* dst)
+{
+    SIMD_EMPTY();
+    return ((Base::DescrInt*)context)->Decode16f(src, dst);
 }
 
 SIMD_API void SimdDescrIntCosineDistance(const void* context, const uint8_t* a, const uint8_t* b, float* distance)

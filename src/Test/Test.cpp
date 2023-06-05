@@ -161,8 +161,10 @@ namespace Test
     TEST_ADD_GROUP_A0(Crc32);
     TEST_ADD_GROUP_A0(Crc32c);
 
-    TEST_ADD_GROUP_A0(DescrIntEncode);
-    TEST_ADD_GROUP_A0(DescrIntDecode);
+    TEST_ADD_GROUP_A0(DescrIntEncode32f);
+    TEST_ADD_GROUP_A0(DescrIntEncode16f);
+    TEST_ADD_GROUP_A0(DescrIntDecode32f);
+    TEST_ADD_GROUP_A0(DescrIntDecode16f);
     TEST_ADD_GROUP_A0(DescrIntCosineDistance);
     TEST_ADD_GROUP_A0(DescrIntCosineDistancesMxNa);
     TEST_ADD_GROUP_A0(DescrIntCosineDistancesMxNp);

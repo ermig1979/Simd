@@ -25,6 +25,7 @@
 #define __SimdDescrIntCommon_h__
 
 #include "Simd/SimdDefs.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
@@ -32,7 +33,6 @@ namespace Simd
     {
         SIMD_INLINE void DecodeCosineDistance(const uint8_t* a, const uint8_t* b, float abSum, float size, float* distance)
         {
-#if SIMD_DESCR_INT_VER  == 1
             float aScale = ((float*)a)[0];
             float aShift = ((float*)a)[1];
             float aMean = ((float*)a)[2];
@@ -42,27 +42,21 @@ namespace Simd
             float bMean = ((float*)b)[2];
             float bNorm = ((float*)b)[3];
             float ab = abSum * aScale * bScale + aMean * bShift + bMean * aShift;
-            distance[0] = 1.0f - ab / (aNorm * bNorm);
-#else
-            float aScale = ((float*)a)[0];
-            float aShift = ((float*)a)[1];
-            float aSum = ((float*)a)[2];
-            float aaSum = ((float*)a)[3];
-            float bScale = ((float*)b)[0];
-            float bShift = ((float*)b)[1];
-            float bSum = ((float*)b)[2];
-            float bbSum = ((float*)b)[3];
-            float aa = aaSum * aScale * aScale + aSum * aScale * aShift * 2.0f + size * aShift * aShift;
-            float ab = abSum * aScale * bScale + aSum * aScale * bShift + bSum * bScale * aShift + size * aShift * bShift;
-            float bb = bbSum * bScale * bScale + bSum * bScale * bShift * 2.0f + size * bShift * bShift;
-            distance[0] = 1.0f - ab / ::sqrt(aa * bb);
-#endif
+            distance[0] = Simd::RestrictRange(1.0f - ab / (aNorm * bNorm), 0.0f, 2.0f);
         }
     }
 
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+        const __m128i E6_MULLO = SIMD_MM_SETR_EPI16(256, 64, 16, 4, 256, 64, 16, 4);
+        const __m128i E6_SHFL0 = SIMD_MM_SETR_EPI8(0x1, 0x3, 0x5, 0x9, 0xB, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m128i E6_SHFL1 = SIMD_MM_SETR_EPI8(0x2, 0x4, 0x6, 0xA, 0xC, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+
+        const __m128i E7_MULLO = SIMD_MM_SETR_EPI16(256, 128, 64, 32, 16, 8, 4, 2);
+        const __m128i E7_SHFL0 = SIMD_MM_SETR_EPI8(0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m128i E7_SHFL1 = SIMD_MM_SETR_EPI8(0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+
         const __m128i C6_SHFL0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
         const __m128i C6_SHFL1 = SIMD_MM_SETR_EPI8(0x6, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xB);
         const __m128i C6_MULLO = SIMD_MM_SETR_EPI16(4, 16, 64, 256, 4, 16, 64, 256);
@@ -75,7 +69,6 @@ namespace Simd
 
         SIMD_INLINE void DecodeCosineDistances(const uint8_t* a, const uint8_t* const* B, __m128 abSum, __m128 size, float* distances)
         {
-#if SIMD_DESCR_INT_VER  == 1
             __m128 aScale, aShift, aMean, aNorm, bScale, bShift, bMean, bNorm;
             bScale = _mm_loadu_ps((float*)B[0]);
             bShift = _mm_loadu_ps((float*)B[1]);
@@ -99,43 +92,7 @@ namespace Simd
             ab = _mm_add_ps(_mm_mul_ps(aMean, bShift), ab);
             ab = _mm_add_ps(_mm_mul_ps(bMean, aShift), ab);
 
-            _mm_storeu_ps(distances, _mm_sub_ps(_mm_set1_ps(1.0), _mm_div_ps(ab, _mm_mul_ps(aNorm, bNorm))));
-#else
-            __m128 aScale, aShift, aSum, aaSum, bScale, bShift, bSum, bbSum;
-            bScale = _mm_loadu_ps((float*)B[0]);
-            bShift = _mm_loadu_ps((float*)B[1]);
-            bSum = _mm_loadu_ps((float*)B[2]);
-            bbSum = _mm_loadu_ps((float*)B[3]);
-            aScale = _mm_unpacklo_ps(bScale, bSum);
-            aShift = _mm_unpacklo_ps(bShift, bbSum);
-            aSum = _mm_unpackhi_ps(bScale, bSum);
-            aaSum = _mm_unpackhi_ps(bShift, bbSum);
-            bScale = _mm_unpacklo_ps(aScale, aShift);
-            bShift = _mm_unpackhi_ps(aScale, aShift);
-            bSum = _mm_unpacklo_ps(aSum, aaSum);
-            bbSum = _mm_unpackhi_ps(aSum, aaSum);
-
-            aScale = _mm_set1_ps(((float*)a)[0]);
-            aShift = _mm_set1_ps(((float*)a)[1]);
-            aSum = _mm_set1_ps(((float*)a)[2]);
-            aaSum = _mm_set1_ps(((float*)a)[3]);
-
-            __m128 _2 = _mm_set1_ps(2.0);
-            __m128 aa = _mm_mul_ps(aaSum, _mm_mul_ps(aScale, aScale));
-            aa = _mm_add_ps(_mm_mul_ps(_mm_mul_ps(_2, aSum), _mm_mul_ps(aScale, aShift)), aa);
-            aa = _mm_add_ps(_mm_mul_ps(size, _mm_mul_ps(aShift, aShift)), aa);
-
-            __m128 ab = _mm_mul_ps(abSum, _mm_mul_ps(aScale, bScale));
-            ab = _mm_add_ps(_mm_mul_ps(aSum, _mm_mul_ps(aScale, bShift)), ab);
-            ab = _mm_add_ps(_mm_mul_ps(bSum, _mm_mul_ps(bScale, aShift)), ab);
-            ab = _mm_add_ps(_mm_mul_ps(size, _mm_mul_ps(aShift, bShift)), ab);
-
-            __m128 bb = _mm_mul_ps(bbSum, _mm_mul_ps(bScale, bScale));
-            bb = _mm_add_ps(_mm_mul_ps(_mm_mul_ps(_2, bSum), _mm_mul_ps(bScale, bShift)), bb);
-            bb = _mm_add_ps(_mm_mul_ps(size, _mm_mul_ps(bShift, bShift)), bb);
-
-            _mm_storeu_ps(distances, _mm_sub_ps(_mm_set1_ps(1.0), _mm_div_ps(ab, _mm_sqrt_ps(_mm_mul_ps(bb, aa)))));
-#endif
+            _mm_storeu_ps(distances, _mm_min_ps(_mm_max_ps(_mm_sub_ps(_mm_set1_ps(1.0f), _mm_div_ps(ab, _mm_mul_ps(aNorm, bNorm))), _mm_setzero_ps()), _mm_set1_ps(2.0f)));
         }
     }
 #endif
