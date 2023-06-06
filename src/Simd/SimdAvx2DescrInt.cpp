@@ -363,6 +363,77 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void Decode16f6(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
+        {
+            assert(size % 8 == 0);
+            __m256 _scale = _mm256_set1_ps(scale);
+            __m256 _shift = _mm256_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+            {
+                __m256i s6 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+                __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s6, C6_SHFL), C6_MULLO), 10);
+                _mm_storeu_si128((__m128i*)dst + 0, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 0))), _scale, _shift), 0));
+                _mm_storeu_si128((__m128i*)dst + 1, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 1))), _scale, _shift), 0));
+                src += 12;
+                dst += 16;
+            }
+            for (; i < size; i += 8)
+            {
+                __m128i s6 = _mm_loadl_epi64((__m128i*)src);
+                __m128i s16 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(s6, Sse41::C6_SHFL0), Sse41::C6_MULLO), 10);
+                _mm_storeu_si128((__m128i*)dst, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(s16)), _scale, _shift), 0));
+                src += 6;
+                dst += 8;
+            }
+        }
+
+        static void Decode16f7(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
+        {
+            assert(size % 8 == 0);
+            __m256 _scale = _mm256_set1_ps(scale);
+            __m256 _shift = _mm256_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+            {
+                __m256i s6 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+                __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s6, C7_SHFL), C7_MULLO), 9);
+                _mm_storeu_si128((__m128i*)dst + 0, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 0))), _scale, _shift), 0));
+                _mm_storeu_si128((__m128i*)dst + 1, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 1))), _scale, _shift), 0));
+                src += 14;
+                dst += 16;
+            }
+            for (; i < size; i += 8)
+            {
+                __m128i s7 = _mm_loadl_epi64((__m128i*)src);
+                __m128i s16 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(s7, Sse41::C7_SHFL0), Sse41::C7_MULLO), 9);
+                _mm_storeu_si128((__m128i*)dst, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(s16)), _scale, _shift), 0));
+                src += 7;
+                dst += 8;
+            }
+        }
+
+        static void Decode16f8(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
+        {
+            assert(size % 8 == 0);
+            __m256 _scale = _mm256_set1_ps(scale);
+            __m256 _shift = _mm256_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+            {
+                __m128i u8 = _mm_loadu_si128((__m128i*)(src + i));
+                _mm_storeu_si128((__m128i*)(dst + i) + 0, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(u8)), _scale, _shift), 0));
+                _mm_storeu_si128((__m128i*)(dst + i) + 1, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_mm_srli_si128(u8, 8))), _scale, _shift), 0));
+            }
+            for (; i < size; i += 8)
+            {
+                __m256 _src = _mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)(src + i))));
+                _mm_storeu_si128((__m128i*)(dst + i), _mm256_cvtps_ph(_mm256_fmadd_ps(_src, _scale, _shift), 0));
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
 
         template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
@@ -796,6 +867,7 @@ namespace Simd
                 _encode32f = Encode32f6;
                 _encode16f = Encode16f6;
                 _decode32f = Decode32f6;
+                _decode16f = Decode16f6;
                 _cosineDistance = Avx2::CosineDistance<6>;
                 _macroCosineDistances = Avx2::MacroCosineDistances<6>;
                 break;
@@ -805,6 +877,7 @@ namespace Simd
                 _encode32f = Encode32f7;
                 _encode16f = Encode16f7;
                 _decode32f = Decode32f7;
+                _decode16f = Decode16f7;
                 _cosineDistance = Avx2::CosineDistance<7>;
                 _macroCosineDistances = Avx2::MacroCosineDistances<7>;
                 break;
@@ -814,6 +887,7 @@ namespace Simd
                 _encode32f = Encode32f8;
                 _encode16f = Encode16f8;
                 _decode32f = Decode32f8;
+                _decode16f = Decode16f8;
                 _cosineDistance = Avx2::CosineDistance<8>;
                 _macroCosineDistances = Avx2::MacroCosineDistances<8>;
                 break;
