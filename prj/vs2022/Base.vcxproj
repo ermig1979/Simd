@@ -48,6 +48,7 @@
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageLoadPng.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSaveJpeg.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSavePng.h" />

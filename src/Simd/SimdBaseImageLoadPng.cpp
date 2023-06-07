@@ -23,6 +23,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdImageLoad.h"
+#include "Simd/SimdImageLoadPng.h"
 #include "Simd/SimdImageSavePng.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdCpu.h"
@@ -32,12 +33,6 @@ namespace Simd
 {
     namespace Base
     {
-        SIMD_INLINE int PngError(const char* str, const char* stub)
-        {
-            std::cout << "PNG load error: " << str << ", " << stub << "!" << std::endl;
-            return 0;
-        }
-
         namespace Zlib
         {
             const size_t ZFAST_BITS = 9;
@@ -65,7 +60,7 @@ namespace Simd
                     sizes[0] = 0;
                     for (i = 1; i < 16; ++i)
                         if (sizes[i] > (1 << i))
-                            return PngError("bad sizes", "Corrupt PNG");
+                            return CorruptPngError("bad sizes");
                     code = 0;
                     for (i = 1; i < 16; ++i)
                     {
@@ -74,12 +69,12 @@ namespace Simd
                         firstSymbol[i] = (uint16_t)k;
                         code = (code + sizes[i]);
                         if (sizes[i] && code - 1 >= (1 << i))
-                            return PngError("bad codelengths", "Corrupt PNG");
-                        maxCode[i] = code << (16 - i); // preshift for inner loop
+                            return CorruptPngError("bad codelengths");
+                        maxCode[i] = code << (16 - i);
                         code <<= 1;
                         k += sizes[i];
                     }
-                    maxCode[16] = 0x10000; // sentinel
+                    maxCode[16] = 0x10000;
                     for (i = 0; i < num; ++i)
                     {
                         int s = sizelist[i];
@@ -163,7 +158,7 @@ namespace Simd
                     if (z < 256)
                     {
                         if (z < 0)
-                            return PngError("bad huffman code", "Corrupt PNG");
+                            return CorruptPngError("bad huffman code");
                         if (dst >= end)
                         {
                             os.Reserve(end - beg + 1);
@@ -187,12 +182,12 @@ namespace Simd
                             len += (int)is.ReadBits(zlengthExtra[z]);
                         z = ZhuffmanDecode(is, zDistance);
                         if (z < 0)
-                            return PngError("bad huffman code", "Corrupt PNG");
+                            return CorruptPngError("bad huffman code");
                         dist = zdistBase[z];
                         if (zdistExtra[z])
                             dist += (int)is.ReadBits(zdistExtra[z]);
                         if (dst - beg < dist)
-                            return PngError("bad dist", "Corrupt PNG");
+                            return CorruptPngError("bad dist");
                         if (dst + len > end)
                         {
                             os.Reserve(dst - beg + len);
@@ -258,7 +253,7 @@ namespace Simd
                 {
                     int c = ZhuffmanDecode(is, z_codelength);
                     if (c < 0 || c >= 19)
-                        return PngError("bad codelengths", "Corrupt PNG");
+                        return CorruptPngError("bad codelengths");
                     if (c < 16)
                         lencodes[n++] = (uint8_t)c;
                     else
@@ -267,7 +262,7 @@ namespace Simd
                         if (c == 16)
                         {
                             c = (int)is.ReadBits(2) + 3;
-                            if (n == 0) return PngError("bad codelengths", "Corrupt PNG");
+                            if (n == 0) return CorruptPngError("bad codelengths");
                             fill = lencodes[n - 1];
                         }
                         else if (c == 17)
@@ -275,15 +270,15 @@ namespace Simd
                         else if (c == 18)
                             c = (int)is.ReadBits(7) + 11;
                         else
-                            return PngError("bad codelengths", "Corrupt PNG");
+                            return CorruptPngError("bad codelengths");
                         if (ntot - n < c)
-                            return PngError("bad codelengths", "Corrupt PNG");
+                            return CorruptPngError("bad codelengths");
                         memset(lencodes + n, fill, c);
                         n += c;
                     }
                 }
                 if (n != ntot)
-                    return PngError("bad codelengths", "Corrupt PNG");
+                    return CorruptPngError("bad codelengths");
                 if (!zLength.Build(lencodes, hlit))
                     return 0;
                 if (!zDistance.Build(lencodes + hlit, hdist))
@@ -296,9 +291,9 @@ namespace Simd
                 is.ClearBits();
                 uint16_t len, nlen;
                 if (!is.Read16u(len) || !is.Read16u(nlen) || nlen != (len ^ 0xffff))
-                    return PngError("zlib corrupt", "Corrupt PNG");
+                    return CorruptPngError("zlib corrupt");
                 if (!os.Write(is, len))
-                    return PngError("read past buffer", "Corrupt PNG");
+                    return CorruptPngError("read past buffer");
                 return 1;
             }
 
@@ -306,13 +301,13 @@ namespace Simd
             {
                 uint8_t cmf, flg;
                 if (!(is.Read8u(cmf) && is.Read8u(flg)))
-                    return PngError("bad zlib header", "Corrupt PNG");
+                    return CorruptPngError("bad zlib header");
                 if ((int(cmf) * 256 + flg) % 31 != 0)
-                    return PngError("bad zlib header", "Corrupt PNG");
+                    return CorruptPngError("bad zlib header");
                 if (flg & 32)
-                    return PngError("no preset dict", "Corrupt PNG");
+                    return CorruptPngError("no preset dict");
                 if ((cmf & 15) != 8)
-                    return PngError("bad compression", "Corrupt PNG");
+                    return CorruptPngError("bad compression");
                 return 1;
             }
 
@@ -427,13 +422,13 @@ namespace Simd
 
             a.buf0.Resize(x * y * output_bytes);
             if (a.buf0.Empty()) 
-                return PngError("outofmem", "Out of memory");
+                return PngLoadError("outofmem", "Out of memory");
 
             img_width_bytes = (img_n * x * depth + 7) >> 3;
             img_len = (img_width_bytes + 1) * y;
 
             if (raw_len < img_len) 
-                return PngError("not enough pixels", "Corrupt PNG");
+                return CorruptPngError("not enough pixels");
 
             for (j = 0; j < y; ++j) 
             {
@@ -442,12 +437,12 @@ namespace Simd
                 int filter = *raw++;
 
                 if (filter > 4)
-                    return PngError("invalid filter", "Corrupt PNG");
+                    return CorruptPngError("invalid filter");
 
                 if (depth < 8) 
                 {
                     if (img_width_bytes > x) 
-                        return PngError("invalid width", "Corrupt PNG");
+                        return CorruptPngError("invalid width");
                     cur += x * out_n - img_width_bytes; // store output to the rightmost img_len bytes, so we can decode in place
                     filter_bytes = 1;
                     width = img_width_bytes;
@@ -701,7 +696,7 @@ namespace Simd
 
             a.buf1.Resize(pixel_count * a.img_out_n);
             if(a.buf1.Empty())
-                return PngError("outofmem", "Out of memory");
+                return PngLoadError("outofmem", "Out of memory");
 
             uint8_t* p = a.buf1.data;
             if (a.img_out_n == 3)
