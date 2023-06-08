@@ -154,19 +154,21 @@ namespace Simd
 
             virtual bool FromStream();
 
+            typedef void (*ExpandPalettePtr)(const uint8_t* src, size_t size, int outN, const uint8_t* palette, uint8_t* dst);
             typedef void (*ConverterPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
 
         protected:
 
+            ExpandPalettePtr _expandPalette;
             ConverterPtr _converter;
-            virtual void SetConverter(int channels);
+            virtual void SetConverter();
 
         private:
             bool _first, _hasTrans, _iPhone;
-            uint32_t _width, _height, _channels;
+            uint32_t _width, _height, _channels, _outN;
             uint16_t _tc16[3];
             uint8_t _depth, _color, _interlace, _paletteChannels, _tc[3];
-            Array8u _palette, _idat;
+            Array8u _palette, _idat, _buffer;
 
             struct Chunk
             {
@@ -185,6 +187,8 @@ namespace Simd
             bool ReadTransparency(const Chunk& chunk);
             bool ReadData(const Chunk& chunk);
             InputMemoryStream MergedDataStream();
+            void ExpandPalette();
+            void ConvertImage();
         };
 
         class ImageJpegLoader : public ImageLoader

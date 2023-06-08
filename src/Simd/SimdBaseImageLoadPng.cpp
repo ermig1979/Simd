@@ -370,20 +370,6 @@ namespace Simd
 
 #define PNG__BYTECAST(x)  ((uint8_t) ((x) & 255))  // truncate int to byte without warnings
 
-        struct Png
-        {
-            uint32_t width, height;
-            int channels, img_out_n;
-            uint8_t depth;
-            Array8u buf0, buf1;
-
-            SIMD_INLINE int Swap()
-            {
-                buf0.Swap(buf1);
-                return 1;
-            }
-        };
-
         enum 
         {
             PNG__F_none = 0,
@@ -406,22 +392,22 @@ namespace Simd
 
         static const uint8_t DepthScaleTable[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
 
-        static int CreatePngImageRaw(Png& a, const uint8_t* raw, uint32_t raw_len, int out_n, uint32_t x, uint32_t y, int depth, int color)
+        static int CreatePngImageRaw(const uint8_t* raw, uint32_t raw_len, int outN, uint32_t x, uint32_t y, int depth, int color, int channels, Array8u & dst)
         {
             int bytes = (depth == 16 ? 2 : 1);
-            uint32_t i, j, stride = x * out_n * bytes;
+            uint32_t i, j, stride = x * outN * bytes;
             uint32_t img_len, img_width_bytes;
             int k;
-            int img_n = a.channels;
+            int img_n = channels;
 
-            int output_bytes = out_n * bytes;
+            int output_bytes = outN * bytes;
             int filter_bytes = img_n * bytes;
             int width = x;
 
-            assert(out_n == a.channels || out_n == a.channels + 1);
+            assert(outN == channels || outN == channels + 1);
 
-            a.buf0.Resize(x * y * output_bytes);
-            if (a.buf0.Empty()) 
+            dst.Resize(x * y * output_bytes);
+            if (dst.Empty()) 
                 return PngLoadError("outofmem", "Out of memory");
 
             img_width_bytes = (img_n * x * depth + 7) >> 3;
@@ -432,7 +418,7 @@ namespace Simd
 
             for (j = 0; j < y; ++j) 
             {
-                uint8_t* cur = a.buf0.data + stride * j;
+                uint8_t* cur = dst.data + stride * j;
                 uint8_t* prior;
                 int filter = *raw++;
 
@@ -443,7 +429,7 @@ namespace Simd
                 {
                     if (img_width_bytes > x) 
                         return CorruptPngError("invalid width");
-                    cur += x * out_n - img_width_bytes; // store output to the rightmost img_len bytes, so we can decode in place
+                    cur += x * outN - img_width_bytes; // store output to the rightmost img_len bytes, so we can decode in place
                     filter_bytes = 1;
                     width = img_width_bytes;
                 }
@@ -467,15 +453,15 @@ namespace Simd
 
                 if (depth == 8) 
                 {
-                    if (img_n != out_n)
+                    if (img_n != outN)
                         cur[img_n] = 255; // first pixel
                     raw += img_n;
-                    cur += out_n;
-                    prior += out_n;
+                    cur += outN;
+                    prior += outN;
                 }
                 else if (depth == 16) 
                 {
-                    if (img_n != out_n) 
+                    if (img_n != outN) 
                     {
                         cur[filter_bytes] = 255; // first pixel top byte
                         cur[filter_bytes + 1] = 255; // first pixel bottom byte
@@ -490,7 +476,7 @@ namespace Simd
                     cur += 1;
                     prior += 1;
                 }
-                if (depth < 8 || img_n == out_n) 
+                if (depth < 8 || img_n == outN) 
                 {
                     int nk = (width - 1) * filter_bytes;
 #define PNG__CASE(f) \
@@ -510,7 +496,7 @@ namespace Simd
                 }
                 else 
                 {
-                    assert(img_n + 1 == out_n);
+                    assert(img_n + 1 == outN);
 #define PNG__CASE(f) \
              case f:     \
                 for (i=x-1; i >= 1; --i, cur[filter_bytes]=255,raw+=filter_bytes,cur+=output_bytes,prior+=output_bytes) \
@@ -527,7 +513,7 @@ namespace Simd
 #undef PNG__CASE
                     if (depth == 16) 
                     {
-                        cur = a.buf0.data + stride * j;
+                        cur = dst.data + stride * j;
                         for (i = 0; i < x; ++i, cur += output_bytes) 
                             cur[filter_bytes + 1] = 255;
                     }
@@ -537,8 +523,8 @@ namespace Simd
             {
                 for (j = 0; j < y; ++j)
                 {
-                    uint8_t* cur = a.buf0.data + stride * j;
-                    const uint8_t* in = a.buf0.data + stride * j + x * out_n - img_width_bytes;
+                    uint8_t* cur = dst.data + stride * j;
+                    const uint8_t* in = dst.data + stride * j + x * outN - img_width_bytes;
                     uint8_t scale = (color == 0) ? DepthScaleTable[depth] : 1;
                     if (depth == 4) 
                     {
@@ -587,10 +573,10 @@ namespace Simd
                         if (k > 5) *cur++ = scale * ((*in >> 2) & 0x01);
                         if (k > 6) *cur++ = scale * ((*in >> 1) & 0x01);
                     }
-                    if (img_n != out_n) 
+                    if (img_n != outN) 
                     {
                         int q;
-                        cur = a.buf0.data + stride * j;
+                        cur = dst.data + stride * j;
                         if (img_n == 1) 
                         {
                             for (q = x - 1; q >= 0; --q)
@@ -615,24 +601,24 @@ namespace Simd
             }
             else if (depth == 16) 
             {
-                uint8_t* cur = a.buf0.data;
+                uint8_t* cur = dst.data;
                 uint16_t* cur16 = (uint16_t*)cur;
-                for (i = 0; i < x * y * out_n; ++i, cur16++, cur += 2)
+                for (i = 0; i < x * y * outN; ++i, cur16++, cur += 2)
                     *cur16 = (cur[0] << 8) | cur[1];
             }
             return 1;
         }
 
-        static int CreatePngImage(Png& a, const uint8_t* image_data, uint32_t image_data_len, int out_n, int depth, int color, int interlaced)
+        static int CreatePngImage(const uint8_t* image_data, uint32_t image_data_len, int outN, int depth, int color, int interlaced, int width, int height, int channels, Array8u& dst)
         {
             SIMD_PERF_FUNC();
 
             int bytes = (depth == 16 ? 2 : 1);
-            int out_bytes = out_n * bytes;
+            int out_bytes = outN * bytes;
             if (!interlaced)
-                return CreatePngImageRaw(a, image_data, image_data_len, out_n, a.width, a.height, depth, color);
+                return CreatePngImageRaw(image_data, image_data_len, outN, width, height, depth, color, channels, dst);
 
-            a.buf1.Resize(a.width * a.height * out_bytes);
+            Array8u buf(width * height * out_bytes);
             for (int p = 0; p < 7; ++p) 
             {
                 int xorig[] = { 0,4,0,2,0,1,0 };
@@ -640,12 +626,12 @@ namespace Simd
                 int xspc[] = { 8,8,4,4,2,2,1 };
                 int yspc[] = { 8,8,8,4,4,2,2 };
                 int i, j, x, y;
-                x = (a.width - xorig[p] + xspc[p] - 1) / xspc[p];
-                y = (a.height - yorig[p] + yspc[p] - 1) / yspc[p];
+                x = (width - xorig[p] + xspc[p] - 1) / xspc[p];
+                y = (height - yorig[p] + yspc[p] - 1) / yspc[p];
                 if (x && y) 
                 {
-                    uint32_t img_len = ((((a.channels * x * depth) + 7) >> 3) + 1) * y;
-                    if (!CreatePngImageRaw(a, image_data, image_data_len, out_n, x, y, depth, color))
+                    uint32_t img_len = ((((channels * x * depth) + 7) >> 3) + 1) * y;
+                    if (!CreatePngImageRaw(image_data, image_data_len, outN, x, y, depth, color, channels, dst))
                     {
                         return 0;
                     }
@@ -655,20 +641,23 @@ namespace Simd
                         {
                             int out_y = j * yspc[p] + yorig[p];
                             int out_x = i * xspc[p] + xorig[p];
-                            memcpy(a.buf1.data + out_y * a.width * out_bytes + out_x * out_bytes,
-                                a.buf0.data + (j * x + i) * out_bytes, out_bytes);
+                            memcpy(buf.data + out_y * width * out_bytes + out_x * out_bytes,
+                                dst.data + (j * x + i) * out_bytes, out_bytes);
                         }
                     }
                     image_data += img_len;
                     image_data_len -= img_len;
                 }
             }
-            return a.Swap();
+            dst.Swap(buf);
+            return 1;
         }
 
-        template<class T> void ComputeTransparency(T * dst, size_t size, size_t out_n, T tc[3])
+        //-------------------------------------------------------------------------------------------------
+
+        template<class T> void ComputeTransparency(T * dst, size_t size, size_t outN, T tc[3])
         {
-            if (out_n == 2)
+            if (outN == 2)
             {
                 for (size_t i = 0; i < size; ++i)
                 {
@@ -676,7 +665,7 @@ namespace Simd
                     dst += 2;
                 }
             }
-            else if (out_n == 4)
+            else if (outN == 4)
             {
                 for (size_t i = 0; i < size; ++i)
                 {
@@ -689,40 +678,35 @@ namespace Simd
                 assert(0);
         }
 
-        static int ExpandPalette(Png & a, const uint8_t* palette)
+        //-------------------------------------------------------------------------------------------------
+
+        static void ExpandPalette(const uint8_t* src, size_t size, int outN, const uint8_t* palette, uint8_t* dst)
         {
-            uint32_t i, pixel_count = a.width * a.height;
-            uint8_t * orig = a.buf0.data;
-
-            a.buf1.Resize(pixel_count * a.img_out_n);
-            if(a.buf1.Empty())
-                return PngLoadError("outofmem", "Out of memory");
-
-            uint8_t* p = a.buf1.data;
-            if (a.img_out_n == 3)
+            if (outN == 3)
             {
-                for (i = 0; i < pixel_count; ++i) 
+                for (size_t i = 0; i < size; ++i)
                 {
-                    int n = orig[i] * 4;
-                    p[0] = palette[n];
-                    p[1] = palette[n + 1];
-                    p[2] = palette[n + 2];
-                    p += 3;
+                    int n = src[i] * 4;
+                    dst[0] = palette[n];
+                    dst[1] = palette[n + 1];
+                    dst[2] = palette[n + 2];
+                    dst += 3;
                 }
             }
-            else 
+            else if (outN == 4)
             {
-                for (i = 0; i < pixel_count; ++i) 
+                for (size_t i = 0; i < size; ++i)
                 {
-                    int n = orig[i] * 4;
-                    p[0] = palette[n];
-                    p[1] = palette[n + 1];
-                    p[2] = palette[n + 2];
-                    p[3] = palette[n + 3];
-                    p += 4;
+                    int n = src[i] * 4;
+                    dst[0] = palette[n];
+                    dst[1] = palette[n + 1];
+                    dst[2] = palette[n + 2];
+                    dst[3] = palette[n + 3];
+                    dst += 4;
                 }
             }
-            return a.Swap();
+            else
+                assert(0);
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -887,11 +871,12 @@ namespace Simd
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgba32;
+            _expandPalette = Base::ExpandPalette;
         }
 
-        void ImagePngLoader::SetConverter(int channels)
+        void ImagePngLoader::SetConverter()
         {
-            _converter = GetConverter(_depth, channels, _param.format);
+            _converter = GetConverter(_depth, _outN, _param.format);
         }
 
 #ifdef SIMD_CPP_2011_ENABLE
@@ -908,54 +893,25 @@ namespace Simd
             if (!ParseFile())
                 return false;
 
-            Png p;
-            p.width = _width;
-            p.height = _height;
-            p.channels = _channels;
-            p.depth = _depth;
-
             InputMemoryStream zSrc = MergedDataStream();
             OutputMemoryStream zDst(AlignHi(size_t(_width) * _depth, 8) * _height * _channels + _height);
             if(!Zlib::Decode(zSrc, zDst, !_iPhone))
                 return false;
 
-            int req_comp = 4;
-            if (Image::ChannelCount((Image::Format)_param.format) == _channels && _depth != 16)
-                req_comp = _channels;
-
-            if ((req_comp == p.channels + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
-                p.img_out_n = p.channels + 1;
-            else
-                p.img_out_n = p.channels;
-            if (!CreatePngImage(p, zDst.Data(), (int)zDst.Size(), p.img_out_n, p.depth, _color, _interlace))
+            if (!CreatePngImage(zDst.Data(), (int)zDst.Size(), _outN, _depth, _color, _interlace, _width, _height, _channels, _buffer))
                 return 0;
+
             if (_hasTrans) 
             {
-                if (p.depth == 16)
-                    ComputeTransparency((uint16_t*)p.buf0.data, p.width * p.height, p.img_out_n, _tc16);
-
+                if (_depth == 16)
+                    ComputeTransparency((uint16_t*)_buffer.data, _width * _height, _outN, _tc16);
                 else
-                    ComputeTransparency(p.buf0.data, p.width * p.height, p.img_out_n, _tc);
+                    ComputeTransparency(_buffer.data, _width * _height, _outN, _tc);
             }
-            if (_paletteChannels)
-            {
-                p.channels = _paletteChannels;
-                p.img_out_n = _paletteChannels;
-                if (req_comp >= 3) 
-                    p.img_out_n = req_comp;
-                if (!ExpandPalette(p, _palette.data))
-                    return false;
-            }
-            else if (_hasTrans)
-                ++p.channels;
 
-            if (!(p.depth <= 8 || p.depth == 16))
-                return false;
+            ExpandPalette();
 
-            SIMD_PERF_BEG("conversion");
-            SetConverter(p.img_out_n);
-            _image.Recreate(p.width, p.height, (Image::Format)_param.format);
-            _converter(p.buf0.data, p.width, p.height, p.width * p.img_out_n, _image.data, _image.stride);
+            ConvertImage();
 
             return true;
         }
@@ -1011,6 +967,15 @@ namespace Simd
                 if (!_stream.ReadBe32u(crc32))
                     return false;
             }
+            int reqN = 4;
+            if (Image::ChannelCount((Image::Format)_param.format) == _channels && _depth != 16)
+                reqN = _channels;
+            else
+                reqN = 4;
+            if ((reqN == _channels + 1 && reqN != 3 && !_paletteChannels) || _hasTrans)
+                _outN = _channels + 1;
+            else
+                _outN = _channels;
             return _idats.size() != 0;
         }
 
@@ -1153,6 +1118,25 @@ namespace Simd
                 }
                 return InputMemoryStream(_idat.data, _idat.size);
             }
+        }
+
+        void ImagePngLoader::ExpandPalette()
+        {
+            if (_paletteChannels)
+            {
+                _outN = Max(_paletteChannels, _outN);
+                Array8u buf(_width * _height * _outN);
+                _expandPalette(_buffer.data, _width * _height, _outN, _palette.data, buf.data);
+                _buffer.Swap(buf);
+            }
+        }
+
+        void ImagePngLoader::ConvertImage()
+        {
+            SIMD_PERF_FUNC();
+            SetConverter();
+            _image.Recreate(_width, _height, (Image::Format)_param.format);
+            _converter(_buffer.data, _width, _height, _width * _outN, _image.data, _image.stride);
         }
     }
 }
