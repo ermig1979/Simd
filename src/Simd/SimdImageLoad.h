@@ -187,6 +187,8 @@ namespace Simd
             bool ReadTransparency(const Chunk& chunk);
             bool ReadData(const Chunk& chunk);
             InputMemoryStream MergedDataStream();
+            bool CreateImage(const uint8_t* data, size_t size);
+            bool CreateImageRaw(const uint8_t* data, uint32_t size, uint32_t width, uint32_t height);
             void ExpandPalette();
             void ConvertImage();
         };

@@ -368,6 +368,8 @@ namespace Simd
             }
         }
 
+        //-------------------------------------------------------------------------------------------------
+
 #define PNG__BYTECAST(x)  ((uint8_t) ((x) & 255))  // truncate int to byte without warnings
 
         enum 
@@ -391,267 +393,6 @@ namespace Simd
         };
 
         static const uint8_t DepthScaleTable[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
-
-        static int CreatePngImageRaw(const uint8_t* raw, uint32_t raw_len, int outN, uint32_t x, uint32_t y, int depth, int color, int channels, Array8u & dst)
-        {
-            int bytes = (depth == 16 ? 2 : 1);
-            uint32_t i, j, stride = x * outN * bytes;
-            uint32_t img_len, img_width_bytes;
-            int k;
-            int img_n = channels;
-
-            int output_bytes = outN * bytes;
-            int filter_bytes = img_n * bytes;
-            int width = x;
-
-            assert(outN == channels || outN == channels + 1);
-
-            dst.Resize(x * y * output_bytes);
-            if (dst.Empty()) 
-                return PngLoadError("outofmem", "Out of memory");
-
-            img_width_bytes = (img_n * x * depth + 7) >> 3;
-            img_len = (img_width_bytes + 1) * y;
-
-            if (raw_len < img_len) 
-                return CorruptPngError("not enough pixels");
-
-            for (j = 0; j < y; ++j) 
-            {
-                uint8_t* cur = dst.data + stride * j;
-                uint8_t* prior;
-                int filter = *raw++;
-
-                if (filter > 4)
-                    return CorruptPngError("invalid filter");
-
-                if (depth < 8) 
-                {
-                    if (img_width_bytes > x) 
-                        return CorruptPngError("invalid width");
-                    cur += x * outN - img_width_bytes; // store output to the rightmost img_len bytes, so we can decode in place
-                    filter_bytes = 1;
-                    width = img_width_bytes;
-                }
-                prior = cur - stride; // bugfix: need to compute this after 'cur +=' computation above
-                if (j == 0) 
-                    filter = FirstRowFilter[filter];
-
-                for (k = 0; k < filter_bytes; ++k) 
-                {
-                    switch (filter) 
-                    {
-                    case PNG__F_none: cur[k] = raw[k]; break;
-                    case PNG__F_sub: cur[k] = raw[k]; break;
-                    case PNG__F_up: cur[k] = PNG__BYTECAST(raw[k] + prior[k]); break;
-                    case PNG__F_avg: cur[k] = PNG__BYTECAST(raw[k] + (prior[k] >> 1)); break;
-                    case PNG__F_paeth: cur[k] = PNG__BYTECAST(raw[k] + Paeth(0, prior[k], 0)); break;
-                    case PNG__F_avg_first: cur[k] = raw[k]; break;
-                    case PNG__F_paeth_first: cur[k] = raw[k]; break;
-                    }
-                }
-
-                if (depth == 8) 
-                {
-                    if (img_n != outN)
-                        cur[img_n] = 255; // first pixel
-                    raw += img_n;
-                    cur += outN;
-                    prior += outN;
-                }
-                else if (depth == 16) 
-                {
-                    if (img_n != outN) 
-                    {
-                        cur[filter_bytes] = 255; // first pixel top byte
-                        cur[filter_bytes + 1] = 255; // first pixel bottom byte
-                    }
-                    raw += filter_bytes;
-                    cur += output_bytes;
-                    prior += output_bytes;
-                }
-                else 
-                {
-                    raw += 1;
-                    cur += 1;
-                    prior += 1;
-                }
-                if (depth < 8 || img_n == outN) 
-                {
-                    int nk = (width - 1) * filter_bytes;
-#define PNG__CASE(f) \
-             case f:     \
-                for (k=0; k < nk; ++k)
-                    switch (filter) {
-                    case PNG__F_none:         memcpy(cur, raw, nk); break;
-                        PNG__CASE(PNG__F_sub) { cur[k] = PNG__BYTECAST(raw[k] + cur[k - filter_bytes]); } break;
-                        PNG__CASE(PNG__F_up) { cur[k] = PNG__BYTECAST(raw[k] + prior[k]); } break;
-                        PNG__CASE(PNG__F_avg) { cur[k] = PNG__BYTECAST(raw[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(raw[k] + Paeth(cur[k - filter_bytes], prior[k], prior[k - filter_bytes])); } break;
-                        PNG__CASE(PNG__F_avg_first) { cur[k] = PNG__BYTECAST(raw[k] + (cur[k - filter_bytes] >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(raw[k] + Paeth(cur[k - filter_bytes], 0, 0)); } break;
-                    }
-#undef PNG__CASE
-                    raw += nk;
-                }
-                else 
-                {
-                    assert(img_n + 1 == outN);
-#define PNG__CASE(f) \
-             case f:     \
-                for (i=x-1; i >= 1; --i, cur[filter_bytes]=255,raw+=filter_bytes,cur+=output_bytes,prior+=output_bytes) \
-                   for (k=0; k < filter_bytes; ++k)
-                    switch (filter) {
-                        PNG__CASE(PNG__F_none) { cur[k] = raw[k]; } break;
-                        PNG__CASE(PNG__F_sub) { cur[k] = PNG__BYTECAST(raw[k] + cur[k - output_bytes]); } break;
-                        PNG__CASE(PNG__F_up) { cur[k] = PNG__BYTECAST(raw[k] + prior[k]); } break;
-                        PNG__CASE(PNG__F_avg) { cur[k] = PNG__BYTECAST(raw[k] + ((prior[k] + cur[k - output_bytes]) >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(raw[k] + Paeth(cur[k - output_bytes], prior[k], prior[k - output_bytes])); } break;
-                        PNG__CASE(PNG__F_avg_first) { cur[k] = PNG__BYTECAST(raw[k] + (cur[k - output_bytes] >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(raw[k] + Paeth(cur[k - output_bytes], 0, 0)); } break;
-                    }
-#undef PNG__CASE
-                    if (depth == 16) 
-                    {
-                        cur = dst.data + stride * j;
-                        for (i = 0; i < x; ++i, cur += output_bytes) 
-                            cur[filter_bytes + 1] = 255;
-                    }
-                }
-            }
-            if (depth < 8)
-            {
-                for (j = 0; j < y; ++j)
-                {
-                    uint8_t* cur = dst.data + stride * j;
-                    const uint8_t* in = dst.data + stride * j + x * outN - img_width_bytes;
-                    uint8_t scale = (color == 0) ? DepthScaleTable[depth] : 1;
-                    if (depth == 4) 
-                    {
-                        for (k = x * img_n; k >= 2; k -= 2, ++in) 
-                        {
-                            *cur++ = scale * ((*in >> 4));
-                            *cur++ = scale * ((*in) & 0x0f);
-                        }
-                        if (k > 0) 
-                            *cur++ = scale * ((*in >> 4));
-                    }
-                    else if (depth == 2) 
-                    {
-                        for (k = x * img_n; k >= 4; k -= 4, ++in) 
-                        {
-                            *cur++ = scale * ((*in >> 6));
-                            *cur++ = scale * ((*in >> 4) & 0x03);
-                            *cur++ = scale * ((*in >> 2) & 0x03);
-                            *cur++ = scale * ((*in) & 0x03);
-                        }
-                        if (k > 0) 
-                            *cur++ = scale * ((*in >> 6));
-                        if (k > 1) 
-                            *cur++ = scale * ((*in >> 4) & 0x03);
-                        if (k > 2) 
-                            *cur++ = scale * ((*in >> 2) & 0x03);
-                    }
-                    else if (depth == 1)
-                    {
-                        for (k = x * img_n; k >= 8; k -= 8, ++in) 
-                        {
-                            *cur++ = scale * ((*in >> 7));
-                            *cur++ = scale * ((*in >> 6) & 0x01);
-                            *cur++ = scale * ((*in >> 5) & 0x01);
-                            *cur++ = scale * ((*in >> 4) & 0x01);
-                            *cur++ = scale * ((*in >> 3) & 0x01);
-                            *cur++ = scale * ((*in >> 2) & 0x01);
-                            *cur++ = scale * ((*in >> 1) & 0x01);
-                            *cur++ = scale * ((*in) & 0x01);
-                        }
-                        if (k > 0) *cur++ = scale * ((*in >> 7));
-                        if (k > 1) *cur++ = scale * ((*in >> 6) & 0x01);
-                        if (k > 2) *cur++ = scale * ((*in >> 5) & 0x01);
-                        if (k > 3) *cur++ = scale * ((*in >> 4) & 0x01);
-                        if (k > 4) *cur++ = scale * ((*in >> 3) & 0x01);
-                        if (k > 5) *cur++ = scale * ((*in >> 2) & 0x01);
-                        if (k > 6) *cur++ = scale * ((*in >> 1) & 0x01);
-                    }
-                    if (img_n != outN) 
-                    {
-                        int q;
-                        cur = dst.data + stride * j;
-                        if (img_n == 1) 
-                        {
-                            for (q = x - 1; q >= 0; --q)
-                            {
-                                cur[q * 2 + 1] = 255;
-                                cur[q * 2 + 0] = cur[q];
-                            }
-                        }
-                        else
-                        {
-                            assert(img_n == 3);
-                            for (q = x - 1; q >= 0; --q) 
-                            {
-                                cur[q * 4 + 3] = 255;
-                                cur[q * 4 + 2] = cur[q * 3 + 2];
-                                cur[q * 4 + 1] = cur[q * 3 + 1];
-                                cur[q * 4 + 0] = cur[q * 3 + 0];
-                            }
-                        }
-                    }
-                }
-            }
-            else if (depth == 16) 
-            {
-                uint8_t* cur = dst.data;
-                uint16_t* cur16 = (uint16_t*)cur;
-                for (i = 0; i < x * y * outN; ++i, cur16++, cur += 2)
-                    *cur16 = (cur[0] << 8) | cur[1];
-            }
-            return 1;
-        }
-
-        static int CreatePngImage(const uint8_t* image_data, uint32_t image_data_len, int outN, int depth, int color, int interlaced, int width, int height, int channels, Array8u& dst)
-        {
-            SIMD_PERF_FUNC();
-
-            int bytes = (depth == 16 ? 2 : 1);
-            int out_bytes = outN * bytes;
-            if (!interlaced)
-                return CreatePngImageRaw(image_data, image_data_len, outN, width, height, depth, color, channels, dst);
-
-            Array8u buf(width * height * out_bytes);
-            for (int p = 0; p < 7; ++p) 
-            {
-                int xorig[] = { 0,4,0,2,0,1,0 };
-                int yorig[] = { 0,0,4,0,2,0,1 };
-                int xspc[] = { 8,8,4,4,2,2,1 };
-                int yspc[] = { 8,8,8,4,4,2,2 };
-                int i, j, x, y;
-                x = (width - xorig[p] + xspc[p] - 1) / xspc[p];
-                y = (height - yorig[p] + yspc[p] - 1) / yspc[p];
-                if (x && y) 
-                {
-                    uint32_t img_len = ((((channels * x * depth) + 7) >> 3) + 1) * y;
-                    if (!CreatePngImageRaw(image_data, image_data_len, outN, x, y, depth, color, channels, dst))
-                    {
-                        return 0;
-                    }
-                    for (j = 0; j < y; ++j) 
-                    {
-                        for (i = 0; i < x; ++i) 
-                        {
-                            int out_y = j * yspc[p] + yorig[p];
-                            int out_x = i * xspc[p] + xorig[p];
-                            memcpy(buf.data + out_y * width * out_bytes + out_x * out_bytes,
-                                dst.data + (j * x + i) * out_bytes, out_bytes);
-                        }
-                    }
-                    image_data += img_len;
-                    image_data_len -= img_len;
-                }
-            }
-            dst.Swap(buf);
-            return 1;
-        }
 
         //-------------------------------------------------------------------------------------------------
 
@@ -898,8 +639,8 @@ namespace Simd
             if(!Zlib::Decode(zSrc, zDst, !_iPhone))
                 return false;
 
-            if (!CreatePngImage(zDst.Data(), (int)zDst.Size(), _outN, _depth, _color, _interlace, _width, _height, _channels, _buffer))
-                return 0;
+            if (!CreateImage(zDst.Data(), zDst.Size()))
+                return false;
 
             if (_hasTrans) 
             {
@@ -1118,6 +859,261 @@ namespace Simd
                 }
                 return InputMemoryStream(_idat.data, _idat.size);
             }
+        }
+
+        bool ImagePngLoader::CreateImage(const uint8_t* data, size_t size)
+        {
+            SIMD_PERF_FUNC();
+            int outS = _outN * (_depth == 16 ? 2 : 1);
+            if (!_interlace)
+                return CreateImageRaw(data, (int)size, _width, _height);
+            Array8u buf(_width * _height * outS);
+            for (int p = 0; p < 7; ++p)
+            {
+                int xorig[] = { 0,4,0,2,0,1,0 };
+                int yorig[] = { 0,0,4,0,2,0,1 };
+                int xspc[] = { 8,8,4,4,2,2,1 };
+                int yspc[] = { 8,8,8,4,4,2,2 };
+                int i, j, x, y;
+                x = (_width - xorig[p] + xspc[p] - 1) / xspc[p];
+                y = (_height - yorig[p] + yspc[p] - 1) / yspc[p];
+                if (x && y)
+                {
+                    uint32_t img_len = ((((_channels * x * _depth) + 7) >> 3) + 1) * y;
+                    if (!CreateImageRaw(data, (int)size, x, y))
+                        return false;
+                    for (j = 0; j < y; ++j)
+                    {
+                        for (i = 0; i < x; ++i)
+                        {
+                            int out_y = j * yspc[p] + yorig[p];
+                            int out_x = i * xspc[p] + xorig[p];
+                            memcpy(buf.data + out_y * _width * outS + out_x * outS, _buffer.data + (j * x + i) * outS, outS);
+                        }
+                    }
+                    data += img_len;
+                    size -= img_len;
+                }
+            }
+            _buffer.Swap(buf);
+            return true;
+        }
+
+        bool ImagePngLoader::CreateImageRaw(const uint8_t* data, uint32_t size, uint32_t width, uint32_t height)
+        {
+            int bytes = (_depth == 16 ? 2 : 1);
+            uint32_t i, j, stride = width * _outN * bytes;
+            uint32_t img_len, img_width_bytes;
+            int k;
+            int img_n = _channels;
+            int width_ = width;
+
+            int output_bytes = _outN * bytes;
+            int filter_bytes = img_n * bytes;
+
+            assert(_outN == _channels || _outN == _channels + 1);
+
+            _buffer.Resize(width * height * output_bytes);
+            if (_buffer.Empty())
+                return PngLoadError("outofmem", "Out of memory");
+
+            img_width_bytes = (img_n * width * _depth + 7) >> 3;
+            img_len = (img_width_bytes + 1) * height;
+
+            if (size < img_len)
+                return CorruptPngError("not enough pixels");
+
+            for (j = 0; j < height; ++j)
+            {
+                uint8_t* cur = _buffer.data + stride * j;
+                uint8_t* prior;
+                int filter = *data++;
+
+                if (filter > 4)
+                    return CorruptPngError("invalid filter");
+
+                if (_depth < 8)
+                {
+                    if (img_width_bytes > width)
+                        return CorruptPngError("invalid width");
+                    cur += width * _outN - img_width_bytes; // store output to the rightmost img_len bytes, so we can decode in place
+                    filter_bytes = 1;
+                    width_ = img_width_bytes;
+                }
+                prior = cur - stride; // bugfix: need to compute this after 'cur +=' computation above
+                if (j == 0)
+                    filter = FirstRowFilter[filter];
+
+                for (k = 0; k < filter_bytes; ++k)
+                {
+                    switch (filter)
+                    {
+                    case PNG__F_none: cur[k] = data[k]; break;
+                    case PNG__F_sub: cur[k] = data[k]; break;
+                    case PNG__F_up: cur[k] = PNG__BYTECAST(data[k] + prior[k]); break;
+                    case PNG__F_avg: cur[k] = PNG__BYTECAST(data[k] + (prior[k] >> 1)); break;
+                    case PNG__F_paeth: cur[k] = PNG__BYTECAST(data[k] + Paeth(0, prior[k], 0)); break;
+                    case PNG__F_avg_first: cur[k] = data[k]; break;
+                    case PNG__F_paeth_first: cur[k] = data[k]; break;
+                    }
+                }
+
+                if (_depth == 8)
+                {
+                    if (img_n != _outN)
+                        cur[img_n] = 255; // first pixel
+                    data += img_n;
+                    cur += _outN;
+                    prior += _outN;
+                }
+                else if (_depth == 16)
+                {
+                    if (img_n != _outN)
+                    {
+                        cur[filter_bytes] = 255; // first pixel top byte
+                        cur[filter_bytes + 1] = 255; // first pixel bottom byte
+                    }
+                    data += filter_bytes;
+                    cur += output_bytes;
+                    prior += output_bytes;
+                }
+                else
+                {
+                    data += 1;
+                    cur += 1;
+                    prior += 1;
+                }
+                if (_depth < 8 || img_n == _outN)
+                {
+                    int nk = (width_ - 1) * filter_bytes;
+#define PNG__CASE(f) \
+             case f:     \
+                for (k=0; k < nk; ++k)
+                    switch (filter) {
+                    case PNG__F_none:         memcpy(cur, data, nk); break;
+                        PNG__CASE(PNG__F_sub) { cur[k] = PNG__BYTECAST(data[k] + cur[k - filter_bytes]); } break;
+                        PNG__CASE(PNG__F_up) { cur[k] = PNG__BYTECAST(data[k] + prior[k]); } break;
+                        PNG__CASE(PNG__F_avg) { cur[k] = PNG__BYTECAST(data[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)); } break;
+                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(data[k] + Paeth(cur[k - filter_bytes], prior[k], prior[k - filter_bytes])); } break;
+                        PNG__CASE(PNG__F_avg_first) { cur[k] = PNG__BYTECAST(data[k] + (cur[k - filter_bytes] >> 1)); } break;
+                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(data[k] + Paeth(cur[k - filter_bytes], 0, 0)); } break;
+                    }
+#undef PNG__CASE
+                    data += nk;
+                }
+                else
+                {
+                    assert(img_n + 1 == _outN);
+#define PNG__CASE(f) \
+             case f:     \
+                for (i=width-1; i >= 1; --i, cur[filter_bytes]=255,data+=filter_bytes,cur+=output_bytes,prior+=output_bytes) \
+                   for (k=0; k < filter_bytes; ++k)
+                    switch (filter) {
+                        PNG__CASE(PNG__F_none) { cur[k] = data[k]; } break;
+                        PNG__CASE(PNG__F_sub) { cur[k] = PNG__BYTECAST(data[k] + cur[k - output_bytes]); } break;
+                        PNG__CASE(PNG__F_up) { cur[k] = PNG__BYTECAST(data[k] + prior[k]); } break;
+                        PNG__CASE(PNG__F_avg) { cur[k] = PNG__BYTECAST(data[k] + ((prior[k] + cur[k - output_bytes]) >> 1)); } break;
+                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(data[k] + Paeth(cur[k - output_bytes], prior[k], prior[k - output_bytes])); } break;
+                        PNG__CASE(PNG__F_avg_first) { cur[k] = PNG__BYTECAST(data[k] + (cur[k - output_bytes] >> 1)); } break;
+                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(data[k] + Paeth(cur[k - output_bytes], 0, 0)); } break;
+                    }
+#undef PNG__CASE
+                    if (_depth == 16)
+                    {
+                        cur = _buffer.data + stride * j;
+                        for (i = 0; i < width; ++i, cur += output_bytes)
+                            cur[filter_bytes + 1] = 255;
+                    }
+                }
+            }
+            if (_depth < 8)
+            {
+                for (j = 0; j < height; ++j)
+                {
+                    uint8_t* cur = _buffer.data + stride * j;
+                    const uint8_t* in = _buffer.data + stride * j + width * _outN - img_width_bytes;
+                    uint8_t scale = (_color == 0) ? DepthScaleTable[_depth] : 1;
+                    if (_depth == 4)
+                    {
+                        for (k = width * img_n; k >= 2; k -= 2, ++in)
+                        {
+                            *cur++ = scale * ((*in >> 4));
+                            *cur++ = scale * ((*in) & 0x0f);
+                        }
+                        if (k > 0)
+                            *cur++ = scale * ((*in >> 4));
+                    }
+                    else if (_depth == 2)
+                    {
+                        for (k = width * img_n; k >= 4; k -= 4, ++in)
+                        {
+                            *cur++ = scale * ((*in >> 6));
+                            *cur++ = scale * ((*in >> 4) & 0x03);
+                            *cur++ = scale * ((*in >> 2) & 0x03);
+                            *cur++ = scale * ((*in) & 0x03);
+                        }
+                        if (k > 0)
+                            *cur++ = scale * ((*in >> 6));
+                        if (k > 1)
+                            *cur++ = scale * ((*in >> 4) & 0x03);
+                        if (k > 2)
+                            *cur++ = scale * ((*in >> 2) & 0x03);
+                    }
+                    else if (_depth == 1)
+                    {
+                        for (k = width * img_n; k >= 8; k -= 8, ++in)
+                        {
+                            *cur++ = scale * ((*in >> 7));
+                            *cur++ = scale * ((*in >> 6) & 0x01);
+                            *cur++ = scale * ((*in >> 5) & 0x01);
+                            *cur++ = scale * ((*in >> 4) & 0x01);
+                            *cur++ = scale * ((*in >> 3) & 0x01);
+                            *cur++ = scale * ((*in >> 2) & 0x01);
+                            *cur++ = scale * ((*in >> 1) & 0x01);
+                            *cur++ = scale * ((*in) & 0x01);
+                        }
+                        if (k > 0) *cur++ = scale * ((*in >> 7));
+                        if (k > 1) *cur++ = scale * ((*in >> 6) & 0x01);
+                        if (k > 2) *cur++ = scale * ((*in >> 5) & 0x01);
+                        if (k > 3) *cur++ = scale * ((*in >> 4) & 0x01);
+                        if (k > 4) *cur++ = scale * ((*in >> 3) & 0x01);
+                        if (k > 5) *cur++ = scale * ((*in >> 2) & 0x01);
+                        if (k > 6) *cur++ = scale * ((*in >> 1) & 0x01);
+                    }
+                    if (img_n != _outN)
+                    {
+                        int q;
+                        cur = _buffer.data + stride * j;
+                        if (img_n == 1)
+                        {
+                            for (q = width - 1; q >= 0; --q)
+                            {
+                                cur[q * 2 + 1] = 255;
+                                cur[q * 2 + 0] = cur[q];
+                            }
+                        }
+                        else
+                        {
+                            assert(img_n == 3);
+                            for (q = width - 1; q >= 0; --q)
+                            {
+                                cur[q * 4 + 3] = 255;
+                                cur[q * 4 + 2] = cur[q * 3 + 2];
+                                cur[q * 4 + 1] = cur[q * 3 + 1];
+                                cur[q * 4 + 0] = cur[q * 3 + 0];
+                            }
+                        }
+                    }
+                }
+            }
+            else if (_depth == 16)
+            {
+                uint8_t* cur = _buffer.data;
+                uint16_t* cur16 = (uint16_t*)cur;
+                for (i = 0; i < width * height * _outN; ++i, cur16++, cur += 2)
+                    *cur16 = (cur[0] << 8) | cur[1];
+            }
+            return 1;
         }
 
         void ImagePngLoader::ExpandPalette()
