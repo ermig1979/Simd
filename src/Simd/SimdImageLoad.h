@@ -154,11 +154,13 @@ namespace Simd
 
             virtual bool FromStream();
 
+            typedef void (*DecodeLinePtr)(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst);
             typedef void (*ExpandPalettePtr)(const uint8_t* src, size_t size, int outN, const uint8_t* palette, uint8_t* dst);
             typedef void (*ConverterPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
 
         protected:
 
+            DecodeLinePtr _decodeLine[7];
             ExpandPalettePtr _expandPalette;
             ConverterPtr _converter;
             virtual void SetConverter();

@@ -370,29 +370,208 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-#define PNG__BYTECAST(x)  ((uint8_t) ((x) & 255))  // truncate int to byte without warnings
-
-        enum 
-        {
-            PNG__F_none = 0,
-            PNG__F_sub = 1,
-            PNG__F_up = 2,
-            PNG__F_avg = 3,
-            PNG__F_paeth = 4,
-            PNG__F_avg_first,
-            PNG__F_paeth_first
-        };
-
-        static uint8_t FirstRowFilter[5] =
-        {
-           PNG__F_none,
-           PNG__F_sub,
-           PNG__F_none,
-           PNG__F_avg_first,
-           PNG__F_paeth_first
-        };
-
         static const uint8_t DepthScaleTable[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
+
+        static void DecodeLine0(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
+        {
+            if (srcN == dstN)
+                memcpy(dst, curr, width * srcN);
+            else
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    int i = 0;
+                    for (; i < srcN; ++i)
+                        dst[i] = curr[i];
+                    for (; i < dstN; ++i)
+                        dst[i] = 0xFF;
+                    curr += srcN;
+                    dst += dstN;
+                }
+            }
+        }
+
+        static void DecodeLine1(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
+        {
+            if (srcN == dstN)
+            {
+                for (int i = 0; i < srcN; ++i)
+                    dst[i] = curr[i];
+                for (int i = srcN, n = srcN * width; i < n; ++i)
+                    dst[i] = curr[i] + dst[i - dstN];
+            }
+            else
+            {
+                int i = 0;
+                for (; i < srcN; ++i)
+                    dst[i] = curr[i];
+                for (; i < dstN; ++i)
+                    dst[i] = 0xFF;
+                curr += srcN;
+                dst += dstN;
+                for (int x = 1; x < width; ++x)
+                {
+                    int i = 0;
+                    for (; i < srcN; ++i)
+                        dst[i] = curr[i] + dst[i - dstN];
+                    for (; i < dstN; ++i)
+                        dst[i] = 0xFF;
+                    curr += srcN;
+                    dst += dstN;
+                }
+            }
+        }
+
+        static void DecodeLine2(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
+        {
+            if (srcN == dstN)
+            {
+                for (int i = 0, n = srcN * width; i < n; ++i)
+                    dst[i] = curr[i] + prev[i];
+            }
+            else
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    int i = 0;
+                    for (; i < srcN; ++i)
+                        dst[i] = curr[i] + prev[i];
+                    for (; i < dstN; ++i)
+                        dst[i] = 0xFF;
+                    curr += srcN;
+                    prev += dstN;
+                    dst += dstN;
+                }
+            }
+        }
+
+        static void DecodeLine3(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
+        {
+            if (srcN == dstN)
+            {
+                for (int i = 0; i < srcN; ++i)
+                    dst[i] = curr[i] + (prev[i] >> 1);
+                for (int i = srcN, n = srcN * width; i < n; ++i)
+                    dst[i] = curr[i] + ((prev[i] + dst[i - dstN]) >> 1);
+            }
+            else
+            {
+                int i = 0;
+                for (; i < srcN; ++i)
+                    dst[i] = curr[i] + (prev[i] >> 1);
+                for (; i < dstN; ++i)
+                    dst[i] = 0xFF;
+                curr += srcN;
+                prev += dstN;
+                dst += dstN;
+                for (int x = 1; x < width; ++x)
+                {
+                    int i = 0;
+                    for (; i < srcN; ++i)
+                        dst[i] = curr[i] + ((prev[i] + dst[i - dstN]) >> 1);
+                    for (; i < dstN; ++i)
+                        dst[i] = 0xFF;
+                    curr += srcN;
+                    prev += dstN;                    
+                    dst += dstN;
+                }
+            }
+        }
+
+        static void DecodeLine4(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
+        {
+            if (srcN == dstN)
+            {
+                for (int i = 0; i < srcN; ++i)
+                    dst[i] = curr[i] + Paeth(0, prev[i], 0);
+                for (int i = srcN, n = srcN * width; i < n; ++i)
+                    dst[i] = curr[i] + Paeth(dst[i - dstN], prev[i], prev[i - dstN]);
+            }
+            else
+            {
+                int i = 0;
+                for (; i < srcN; ++i)
+                    dst[i] = curr[i] + Paeth(0, prev[i], 0);
+                for (; i < dstN; ++i)
+                    dst[i] = 0xFF;
+                curr += srcN;
+                prev += dstN;
+                dst += dstN;
+                for (int x = 1; x < width; ++x)
+                {
+                    int i = 0;
+                    for (; i < srcN; ++i)
+                        dst[i] = curr[i] + Paeth(dst[i - dstN], prev[i], prev[i - dstN]);
+                    for (; i < dstN; ++i)
+                        dst[i] = 0xFF;
+                    curr += srcN;
+                    prev += dstN;
+                    dst += dstN;
+                }
+            }
+        }
+
+        static void DecodeLine5(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
+        {
+            if (srcN == dstN)
+            {
+                for (int i = 0; i < srcN; ++i)
+                    dst[i] = curr[i];
+                for (int i = srcN, n = srcN * width; i < n; ++i)
+                    dst[i] = curr[i] + (dst[i - dstN] >> 1);
+            }
+            else
+            {
+                int i = 0;
+                for (; i < srcN; ++i)
+                    dst[i] = curr[i];
+                for (; i < dstN; ++i)
+                    dst[i] = 0xFF;
+                curr += srcN;
+                dst += dstN;
+                for (int x = 1; x < width; ++x)
+                {
+                    int i = 0;
+                    for (; i < srcN; ++i)
+                        dst[i] = curr[i] + (dst[i - dstN] >> 1);;
+                    for (; i < dstN; ++i)
+                        dst[i] = 0xFF;
+                    curr += srcN;
+                    dst += dstN;
+                }
+            }
+        }
+
+        static void DecodeLine6(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
+        {
+            if (srcN == dstN)
+            {
+                for (int i = 0; i < srcN; ++i)
+                    dst[i] = curr[i];
+                for (int i = srcN, n = srcN * width; i < n; ++i)
+                    dst[i] = curr[i] + Paeth(dst[i - dstN], 0, 0);
+            }
+            else
+            {
+                int i = 0;
+                for (; i < srcN; ++i)
+                    dst[i] = curr[i];
+                for (; i < dstN; ++i)
+                    dst[i] = 0xFF;
+                curr += srcN;
+                dst += dstN;
+                for (int x = 1; x < width; ++x)
+                {
+                    int i = 0;
+                    for (; i < srcN; ++i)
+                        dst[i] = curr[i] + Paeth(dst[i - dstN], 0, 0);
+                    for (; i < dstN; ++i)
+                        dst[i] = 0xFF;
+                    curr += srcN;
+                    dst += dstN;
+                }
+            }
+        }
 
         //-------------------------------------------------------------------------------------------------
 
@@ -612,6 +791,13 @@ namespace Simd
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgba32;
+            _decodeLine[0] = Base::DecodeLine0;
+            _decodeLine[1] = Base::DecodeLine1;
+            _decodeLine[2] = Base::DecodeLine2;
+            _decodeLine[3] = Base::DecodeLine3;
+            _decodeLine[4] = Base::DecodeLine4;
+            _decodeLine[5] = Base::DecodeLine5;
+            _decodeLine[6] = Base::DecodeLine6;
             _expandPalette = Base::ExpandPalette;
         }
 
@@ -901,15 +1087,15 @@ namespace Simd
 
         bool ImagePngLoader::CreateImageRaw(const uint8_t* data, uint32_t size, uint32_t width, uint32_t height)
         {
+            static uint8_t FirstRowFilter[5] = { 0, 1, 0, 5, 6 };
             int bytes = (_depth == 16 ? 2 : 1);
             uint32_t i, j, stride = width * _outN * bytes;
             uint32_t img_len, img_width_bytes;
             int k;
-            int img_n = _channels;
             int width_ = width;
 
             int output_bytes = _outN * bytes;
-            int filter_bytes = img_n * bytes;
+            int filter_bytes = _channels * bytes;
 
             assert(_outN == _channels || _outN == _channels + 1);
 
@@ -917,7 +1103,7 @@ namespace Simd
             if (_buffer.Empty())
                 return PngLoadError("outofmem", "Out of memory");
 
-            img_width_bytes = (img_n * width * _depth + 7) >> 3;
+            img_width_bytes = (_channels * width * _depth + 7) >> 3;
             img_len = (img_width_bytes + 1) * height;
 
             if (size < img_len)
@@ -940,91 +1126,14 @@ namespace Simd
                     filter_bytes = 1;
                     width_ = img_width_bytes;
                 }
-                prior = cur - stride; // bugfix: need to compute this after 'cur +=' computation above
+                prior = cur - stride;
                 if (j == 0)
                     filter = FirstRowFilter[filter];
 
-                for (k = 0; k < filter_bytes; ++k)
-                {
-                    switch (filter)
-                    {
-                    case PNG__F_none: cur[k] = data[k]; break;
-                    case PNG__F_sub: cur[k] = data[k]; break;
-                    case PNG__F_up: cur[k] = PNG__BYTECAST(data[k] + prior[k]); break;
-                    case PNG__F_avg: cur[k] = PNG__BYTECAST(data[k] + (prior[k] >> 1)); break;
-                    case PNG__F_paeth: cur[k] = PNG__BYTECAST(data[k] + Paeth(0, prior[k], 0)); break;
-                    case PNG__F_avg_first: cur[k] = data[k]; break;
-                    case PNG__F_paeth_first: cur[k] = data[k]; break;
-                    }
-                }
-
-                if (_depth == 8)
-                {
-                    if (img_n != _outN)
-                        cur[img_n] = 255; // first pixel
-                    data += img_n;
-                    cur += _outN;
-                    prior += _outN;
-                }
-                else if (_depth == 16)
-                {
-                    if (img_n != _outN)
-                    {
-                        cur[filter_bytes] = 255; // first pixel top byte
-                        cur[filter_bytes + 1] = 255; // first pixel bottom byte
-                    }
-                    data += filter_bytes;
-                    cur += output_bytes;
-                    prior += output_bytes;
-                }
-                else
-                {
-                    data += 1;
-                    cur += 1;
-                    prior += 1;
-                }
-                if (_depth < 8 || img_n == _outN)
-                {
-                    int nk = (width_ - 1) * filter_bytes;
-#define PNG__CASE(f) \
-             case f:     \
-                for (k=0; k < nk; ++k)
-                    switch (filter) {
-                    case PNG__F_none:         memcpy(cur, data, nk); break;
-                        PNG__CASE(PNG__F_sub) { cur[k] = PNG__BYTECAST(data[k] + cur[k - filter_bytes]); } break;
-                        PNG__CASE(PNG__F_up) { cur[k] = PNG__BYTECAST(data[k] + prior[k]); } break;
-                        PNG__CASE(PNG__F_avg) { cur[k] = PNG__BYTECAST(data[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(data[k] + Paeth(cur[k - filter_bytes], prior[k], prior[k - filter_bytes])); } break;
-                        PNG__CASE(PNG__F_avg_first) { cur[k] = PNG__BYTECAST(data[k] + (cur[k - filter_bytes] >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(data[k] + Paeth(cur[k - filter_bytes], 0, 0)); } break;
-                    }
-#undef PNG__CASE
-                    data += nk;
-                }
-                else
-                {
-                    assert(img_n + 1 == _outN);
-#define PNG__CASE(f) \
-             case f:     \
-                for (i=width-1; i >= 1; --i, cur[filter_bytes]=255,data+=filter_bytes,cur+=output_bytes,prior+=output_bytes) \
-                   for (k=0; k < filter_bytes; ++k)
-                    switch (filter) {
-                        PNG__CASE(PNG__F_none) { cur[k] = data[k]; } break;
-                        PNG__CASE(PNG__F_sub) { cur[k] = PNG__BYTECAST(data[k] + cur[k - output_bytes]); } break;
-                        PNG__CASE(PNG__F_up) { cur[k] = PNG__BYTECAST(data[k] + prior[k]); } break;
-                        PNG__CASE(PNG__F_avg) { cur[k] = PNG__BYTECAST(data[k] + ((prior[k] + cur[k - output_bytes]) >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth) { cur[k] = PNG__BYTECAST(data[k] + Paeth(cur[k - output_bytes], prior[k], prior[k - output_bytes])); } break;
-                        PNG__CASE(PNG__F_avg_first) { cur[k] = PNG__BYTECAST(data[k] + (cur[k - output_bytes] >> 1)); } break;
-                        PNG__CASE(PNG__F_paeth_first) { cur[k] = PNG__BYTECAST(data[k] + Paeth(cur[k - output_bytes], 0, 0)); } break;
-                    }
-#undef PNG__CASE
-                    if (_depth == 16)
-                    {
-                        cur = _buffer.data + stride * j;
-                        for (i = 0; i < width; ++i, cur += output_bytes)
-                            cur[filter_bytes + 1] = 255;
-                    }
-                }
+                int size = (_depth < 8 || _channels == _outN ? width_ : width);
+                int dstN = _depth < 8 || _channels == _outN ? filter_bytes : output_bytes;
+                _decodeLine[filter](data, cur - stride, size, filter_bytes, dstN, cur);
+                data += size * filter_bytes;
             }
             if (_depth < 8)
             {
@@ -1035,7 +1144,7 @@ namespace Simd
                     uint8_t scale = (_color == 0) ? DepthScaleTable[_depth] : 1;
                     if (_depth == 4)
                     {
-                        for (k = width * img_n; k >= 2; k -= 2, ++in)
+                        for (k = width * _channels; k >= 2; k -= 2, ++in)
                         {
                             *cur++ = scale * ((*in >> 4));
                             *cur++ = scale * ((*in) & 0x0f);
@@ -1045,7 +1154,7 @@ namespace Simd
                     }
                     else if (_depth == 2)
                     {
-                        for (k = width * img_n; k >= 4; k -= 4, ++in)
+                        for (k = width * _channels; k >= 4; k -= 4, ++in)
                         {
                             *cur++ = scale * ((*in >> 6));
                             *cur++ = scale * ((*in >> 4) & 0x03);
@@ -1061,7 +1170,7 @@ namespace Simd
                     }
                     else if (_depth == 1)
                     {
-                        for (k = width * img_n; k >= 8; k -= 8, ++in)
+                        for (k = width * _channels; k >= 8; k -= 8, ++in)
                         {
                             *cur++ = scale * ((*in >> 7));
                             *cur++ = scale * ((*in >> 6) & 0x01);
@@ -1080,11 +1189,11 @@ namespace Simd
                         if (k > 5) *cur++ = scale * ((*in >> 2) & 0x01);
                         if (k > 6) *cur++ = scale * ((*in >> 1) & 0x01);
                     }
-                    if (img_n != _outN)
+                    if (_channels != _outN)
                     {
                         int q;
                         cur = _buffer.data + stride * j;
-                        if (img_n == 1)
+                        if (_channels == 1)
                         {
                             for (q = width - 1; q >= 0; --q)
                             {
@@ -1094,7 +1203,7 @@ namespace Simd
                         }
                         else
                         {
-                            assert(img_n == 3);
+                            assert(_channels == 3);
                             for (q = width - 1; q >= 0; --q)
                             {
                                 cur[q * 4 + 3] = 255;
