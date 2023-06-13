@@ -817,6 +817,8 @@ namespace Simd
 
         bool ImagePngLoader::FromStream()
         {
+            SIMD_PERF_FUNC();
+
             if (!ParseFile())
                 return false;
 
@@ -1050,16 +1052,17 @@ namespace Simd
         bool ImagePngLoader::CreateImage(const uint8_t* data, size_t size)
         {
             SIMD_PERF_FUNC();
+
             int outS = _outN * (_depth == 16 ? 2 : 1);
             if (!_interlace)
                 return CreateImageRaw(data, (int)size, _width, _height);
             Array8u buf(_width * _height * outS);
             for (int p = 0; p < 7; ++p)
             {
-                int xorig[] = { 0,4,0,2,0,1,0 };
-                int yorig[] = { 0,0,4,0,2,0,1 };
-                int xspc[] = { 8,8,4,4,2,2,1 };
-                int yspc[] = { 8,8,8,4,4,2,2 };
+                static const int xorig[] = { 0,4,0,2,0,1,0 };
+                static const int yorig[] = { 0,0,4,0,2,0,1 };
+                static const int xspc[] = { 8,8,4,4,2,2,1 };
+                static const int yspc[] = { 8,8,8,4,4,2,2 };
                 int i, j, x, y;
                 x = (_width - xorig[p] + xspc[p] - 1) / xspc[p];
                 y = (_height - yorig[p] + yspc[p] - 1) / yspc[p];
@@ -1087,7 +1090,7 @@ namespace Simd
 
         bool ImagePngLoader::CreateImageRaw(const uint8_t* data, uint32_t size, uint32_t width, uint32_t height)
         {
-            static uint8_t FirstRowFilter[5] = { 0, 1, 0, 5, 6 };
+            static const uint8_t FirstRowFilter[5] = { 0, 1, 0, 5, 6 };
             int bytes = (_depth == 16 ? 2 : 1);
             uint32_t i, j, stride = width * _outN * bytes;
             uint32_t img_len, img_width_bytes;

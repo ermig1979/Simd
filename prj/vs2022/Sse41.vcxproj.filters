@@ -373,6 +373,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrInt.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoadJpeg.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
@@ -615,6 +618,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdImageLoadJpeg.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
