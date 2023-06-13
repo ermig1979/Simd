@@ -902,6 +902,10 @@ namespace Simd
             _microN = 4;
             switch (depth)
             {
+            case 4:
+            {
+                break;
+            }
             case 5:
             {
                 break;

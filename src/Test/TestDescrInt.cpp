@@ -171,7 +171,7 @@ namespace Test
         bool result = true;
 
         size_t size = Simd::Min(H * W, 128 * 256);
-        for (size_t depth = 6; depth <= 8; depth++)
+        for (size_t depth = 4; depth <= 8; depth++)
         {
             //result = result && DescrIntEncode32fAutoTest(256, depth, f1, f2);
             //result = result && DescrIntEncode32fAutoTest(512, depth, f1, f2);
@@ -255,7 +255,7 @@ namespace Test
         bool result = true;
 
         size_t size = Simd::Min(H * W, 128 * 256);
-        for (size_t depth = 5; depth <= 8; depth++)
+        for (size_t depth = 4; depth <= 8; depth++)
         {
             //result = result && DescrIntEncode16fAutoTest(256, depth, f1, f2);
             //result = result && DescrIntEncode16fAutoTest(512, depth, f1, f2);
@@ -340,7 +340,7 @@ namespace Test
         bool result = true;
 
         size_t size = Simd::Min(H * W, 128 * 256);
-        for (size_t depth = 5; depth <= 8; depth++)
+        for (size_t depth = 4; depth <= 8; depth++)
         {
             //result = result && DescrIntDecode32fAutoTest(256, depth, f1, f2);
             //result = result && DescrIntDecode32fAutoTest(512, depth, f1, f2);
@@ -422,7 +422,7 @@ namespace Test
         bool result = true;
 
         size_t size = Simd::Min(H * W, 128 * 256);
-        for (size_t depth = 5; depth <= 8; depth++)
+        for (size_t depth = 4; depth <= 8; depth++)
         {
             //result = result && DescrIntDecode16fAutoTest(256, depth, f1, f2);
             //result = result && DescrIntDecode16fAutoTest(512, depth, f1, f2);
@@ -505,7 +505,7 @@ namespace Test
         bool result = true;
 
         size_t size = Simd::Min(H * W, 128 * 256);
-        for (size_t depth = 5; depth <= 8; depth++)
+        for (size_t depth = 4; depth <= 8; depth++)
         {
             //result = result && DescrIntCosineDistanceAutoTest(256, depth, f1, f2);
             //result = result && DescrIntCosineDistanceAutoTest(512, depth, f1, f2);
@@ -580,7 +580,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 5; depth <= 8; depth++)
+        for (size_t depth = 4; depth <= 8; depth++)
         {
             result = result && DescrIntCosineDistancesMxNaAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(128, 128, 512, depth, f1, f2);
@@ -653,7 +653,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 5; depth <= 8; depth++)
+        for (size_t depth = 4; depth <= 8; depth++)
         {
             result = result && DescrIntCosineDistancesMxNpAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNpAutoTest(128, 128, 512, depth, f1, f2);

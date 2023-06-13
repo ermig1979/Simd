@@ -1003,6 +1003,10 @@ namespace Simd
             _minMax16f = MinMax16f;
             switch (depth)
             {
+            case 4:
+            {
+                break;
+            }
             case 5:
             {
                 break;
