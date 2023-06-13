@@ -61,6 +61,8 @@ namespace Simd
             typedef void (*Decode32fPtr)(const uint8_t * src, float scale, float shift, size_t size, float* dst);
             typedef void (*Decode16fPtr)(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst);
             typedef void (*CosineDistancePtr)(const uint8_t* a, const uint8_t* b, size_t size, float* distance);
+            typedef void (*MacroCosineDistancesPtr)(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+
 
             MinMax32fPtr _minMax32f;
             MinMax16fPtr _minMax16f;
@@ -69,7 +71,8 @@ namespace Simd
             Decode32fPtr _decode32f;
             Decode16fPtr _decode16f;
             CosineDistancePtr _cosineDistance;
-            size_t _size, _depth, _encSize;
+            MacroCosineDistancesPtr _macroCosineDistances;
+            size_t _size, _depth, _encSize, _microM, _microN;
             float _range;
         };
 
@@ -88,12 +91,6 @@ namespace Simd
 
             virtual void CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const;
             virtual void CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const;
-
-        protected:
-            typedef void (*MacroCosineDistancesPtr)(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
-
-            MacroCosineDistancesPtr _macroCosineDistances;
-            size_t _microM, _microN;
         };
 
         //-------------------------------------------------------------------------------------------------

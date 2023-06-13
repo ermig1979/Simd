@@ -862,6 +862,10 @@ namespace Simd
             _minMax16f = MinMax16f;
             switch (depth)
             {
+            case 5:
+            {
+                break;
+            }
             case 6:
             {
                 _encode32f = Encode32f6;

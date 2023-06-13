@@ -902,6 +902,10 @@ namespace Simd
             _microN = 4;
             switch (depth)
             {
+            case 5:
+            {
+                break;
+            }
             case 6:
             {
                 _encode32f = Encode32f6;

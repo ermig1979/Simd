@@ -498,23 +498,6 @@ namespace Simd
             return k & 0x80000000;
         }
 
-        // given a value that's at position X in the zigzag stream,
-        // where does it appear in the 8x8 matrix coded as row-major?
-        static const jpeg_uc jpeg__jpeg_dezigzag[64 + 15] =
-        {
-            0,  1,  8, 16,  9,  2,  3, 10,
-           17, 24, 32, 25, 18, 11,  4,  5,
-           12, 19, 26, 33, 40, 48, 41, 34,
-           27, 20, 13,  6,  7, 14, 21, 28,
-           35, 42, 49, 56, 57, 50, 43, 36,
-           29, 22, 15, 23, 30, 37, 44, 51,
-           58, 59, 52, 45, 38, 31, 39, 46,
-           53, 60, 61, 54, 47, 55, 62, 63,
-           // let corrupt input sample past end
-           63, 63, 63, 63, 63, 63, 63, 63,
-           63, 63, 63, 63, 63, 63, 63
-        };
-
         // decode one 64-entry block--
         static int jpeg__jpeg_decode_block(jpeg__jpeg* j, short data[64], jpeg__huffman* hdc, jpeg__huffman* hac, jpeg__int16* fac, int b, jpeg__uint16* dequant)
         {
@@ -547,7 +530,7 @@ namespace Simd
                     j->code_buffer <<= s;
                     j->code_bits -= s;
                     // decode into unzigzag'd location
-                    zig = jpeg__jpeg_dezigzag[k++];
+                    zig = Base::JpegDeZigZag[k++];
                     data[zig] = (short)((r >> 8) * dequant[zig]);
                 }
                 else {
@@ -562,7 +545,7 @@ namespace Simd
                     else {
                         k += r;
                         // decode into unzigzag'd location
-                        zig = jpeg__jpeg_dezigzag[k++];
+                        zig = Base::JpegDeZigZag[k++];
                         data[zig] = (short)(jpeg__extend_receive(j, s) * dequant[zig]);
                     }
                 }
@@ -624,7 +607,7 @@ namespace Simd
                         s = r & 15; // combined length
                         j->code_buffer <<= s;
                         j->code_bits -= s;
-                        zig = jpeg__jpeg_dezigzag[k++];
+                        zig = Base::JpegDeZigZag[k++];
                         data[zig] = (short)((r >> 8) << shift);
                     }
                     else {
@@ -644,7 +627,7 @@ namespace Simd
                         }
                         else {
                             k += r;
-                            zig = jpeg__jpeg_dezigzag[k++];
+                            zig = Base::JpegDeZigZag[k++];
                             data[zig] = (short)(jpeg__extend_receive(j, s) << shift);
                         }
                     }
@@ -658,7 +641,7 @@ namespace Simd
                 if (j->eob_run) {
                     --j->eob_run;
                     for (k = j->spec_start; k <= j->spec_end; ++k) {
-                        short* p = &data[jpeg__jpeg_dezigzag[k]];
+                        short* p = &data[Base::JpegDeZigZag[k]];
                         if (*p != 0)
                             if (jpeg__jpeg_get_bit(j))
                                 if ((*p & bit) == 0) {
@@ -701,7 +684,7 @@ namespace Simd
 
                         // advance by r
                         while (k <= j->spec_end) {
-                            short* p = &data[jpeg__jpeg_dezigzag[k++]];
+                            short* p = &data[Base::JpegDeZigZag[k++]];
                             if (*p != 0) {
                                 if (jpeg__jpeg_get_bit(j))
                                     if ((*p & bit) == 0) {
@@ -1228,7 +1211,7 @@ namespace Simd
                     if (t > 3) return JpegLoadError("bad DQT table", "Corrupt JPEG");
 
                     for (i = 0; i < 64; ++i)
-                        z->dequant[t][jpeg__jpeg_dezigzag[i]] = (jpeg__uint16)(sixteen ? jpeg__get16be(z->s) : jpeg__get8(z->s));
+                        z->dequant[t][Base::JpegDeZigZag[i]] = (jpeg__uint16)(sixteen ? jpeg__get16be(z->s) : jpeg__get8(z->s));
                     L -= (sixteen ? 129 : 65);
                 }
                 return L == 0;

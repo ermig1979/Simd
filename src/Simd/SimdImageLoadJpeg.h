@@ -30,6 +30,10 @@ namespace Simd
 {
     namespace Base
     {
+        extern const uint8_t JpegDeZigZag[80];
+
+        //-------------------------------------------------------------------------------------------------
+
         static SIMD_INLINE int JpegLoadError(const char* text, const char* type)
         {
             std::cout << "JPEG load error: " << text << ", " << type << "!" << std::endl;

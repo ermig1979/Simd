@@ -255,7 +255,7 @@ namespace Test
         bool result = true;
 
         size_t size = Simd::Min(H * W, 128 * 256);
-        for (size_t depth = 6; depth <= 8; depth++)
+        for (size_t depth = 5; depth <= 8; depth++)
         {
             //result = result && DescrIntEncode16fAutoTest(256, depth, f1, f2);
             //result = result && DescrIntEncode16fAutoTest(512, depth, f1, f2);
@@ -309,7 +309,8 @@ namespace Test
         void* context2 = f2.func(size, depth);
 
         View orig(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        FillRandom32f(orig, -17.0, 13.0);
+        const float lo = -17.0f, hi = 13.0f, eps = (hi - lo) * 0.0021f * (1 << (8 - depth));
+        FillRandom32f(orig, lo, hi);
 
         View src(SimdDescrIntEncodedSize(context2), 1, View::Gray8, NULL, TEST_ALIGN(SIMD_ALIGN));
         SimdDescrIntEncode32f(context2, (float*)orig.data, src.data);
@@ -327,7 +328,9 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = result && Compare(dst1, dst2, EPS, true, 64);
+        result = result && Compare(dst1, dst2, EPS, true, 64, true, "dst1 & dst2");
+
+        result = result && Compare(dst1, orig, eps, true, 64, false, "dst1 & orig");
 
         return result;
     }
@@ -337,7 +340,7 @@ namespace Test
         bool result = true;
 
         size_t size = Simd::Min(H * W, 128 * 256);
-        for (size_t depth = 6; depth <= 8; depth++)
+        for (size_t depth = 5; depth <= 8; depth++)
         {
             //result = result && DescrIntDecode32fAutoTest(256, depth, f1, f2);
             //result = result && DescrIntDecode32fAutoTest(512, depth, f1, f2);
@@ -419,7 +422,7 @@ namespace Test
         bool result = true;
 
         size_t size = Simd::Min(H * W, 128 * 256);
-        for (size_t depth = 6; depth <= 8; depth++)
+        for (size_t depth = 5; depth <= 8; depth++)
         {
             //result = result && DescrIntDecode16fAutoTest(256, depth, f1, f2);
             //result = result && DescrIntDecode16fAutoTest(512, depth, f1, f2);
@@ -502,7 +505,7 @@ namespace Test
         bool result = true;
 
         size_t size = Simd::Min(H * W, 128 * 256);
-        for (size_t depth = 6; depth <= 8; depth++)
+        for (size_t depth = 5; depth <= 8; depth++)
         {
             //result = result && DescrIntCosineDistanceAutoTest(256, depth, f1, f2);
             //result = result && DescrIntCosineDistanceAutoTest(512, depth, f1, f2);
@@ -577,7 +580,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 6; depth <= 8; depth++)
+        for (size_t depth = 5; depth <= 8; depth++)
         {
             result = result && DescrIntCosineDistancesMxNaAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(128, 128, 512, depth, f1, f2);
@@ -650,7 +653,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 6; depth <= 8; depth++)
+        for (size_t depth = 5; depth <= 8; depth++)
         {
             result = result && DescrIntCosineDistancesMxNpAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNpAutoTest(128, 128, 512, depth, f1, f2);
