@@ -29,6 +29,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdUnpack.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdLoad.h"
 
 namespace Simd
 {
