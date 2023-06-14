@@ -49,6 +49,8 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+        const __m128i E4_MULLO = SIMD_MM_SETR_EPI16(4096, 1, 4096, 1, 4096, 1, 4096, 1);
+
         const __m128i E5_MULLO = SIMD_MM_SETR_EPI16(256, 32, 4, 128, 16, 2, 64, 8);
         const __m128i E5_SHFL0 = SIMD_MM_SETR_EPI8(0x1, 0x3, 0x7, 0x9, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
         const __m128i E5_SHFL1 = SIMD_MM_SETR_EPI8(0x2, 0x4, 0x8, 0xA, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);

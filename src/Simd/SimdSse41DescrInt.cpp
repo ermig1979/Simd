@@ -86,6 +86,42 @@ namespace Simd
             return Encode32f(_mm_loadu_ps(src), scale, min, sum, sqsum);
         }
 
+        static SIMD_INLINE __m128i Encode32f4(const float* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
+        {
+            __m128i i0 = Encode32f(src + 0, scale, min, sum, sqsum);
+            __m128i i4 = Encode32f(src + 4, scale, min, sum, sqsum);
+            return _mm_srli_epi32(_mm_mullo_epi16(_mm_packus_epi32(i0, i4), E4_MULLO), 12);
+        }
+
+        static SIMD_INLINE __m128i Encode32f4x8(const float* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
+        {
+            __m128i s0 = Encode32f4(src + 0 * 8, scale, min, sum, sqsum);
+            return _mm_packus_epi16(_mm_packus_epi32(s0, K_ZERO), K_ZERO);
+        }
+
+        static SIMD_INLINE __m128i Encode32f4x16(const float* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
+        {
+            __m128i s0 = Encode32f4(src + 0 * 8, scale, min, sum, sqsum);
+            __m128i s1 = Encode32f4(src + 1 * 8, scale, min, sum, sqsum);
+            return _mm_packus_epi16(_mm_packus_epi32(s0, s1), K_ZERO);
+        }
+
+        static void Encode32f4(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        {
+            assert(size % 8 == 0);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            __m128 _scale = _mm_set1_ps(scale);
+            __m128 _min = _mm_set1_ps(min);
+            __m128i _sum = _mm_setzero_si128();
+            __m128i _sqsum = _mm_setzero_si128();
+            for (; i < size16; i += 16, src += 16, dst += 8)
+                _mm_storel_epi64((__m128i*)dst, Encode32f4x16(src, _scale, _min, _sum, _sqsum));
+            for (; i < size; i += 8, src += 8, dst += 4)
+                *(uint32_t*)(dst) = _mm_extract_epi32(Encode32f4x8(src, _scale, _min, _sum, _sqsum), 0);
+            sum = ExtractInt32Sum(_sum);
+            sqsum = ExtractInt32Sum(_sqsum);
+        }
+
         static SIMD_INLINE __m128i Encode32f5(const float* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
         {
             __m128i i0 = Encode32f(src + 0, scale, min, sum, sqsum);
@@ -197,6 +233,43 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
+
+        static SIMD_INLINE __m128i Encode16f4(const uint16_t* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
+        {
+            __m128i u0 = _mm_loadu_si128((__m128i*)(src));
+            __m128i i0 = Encode32f(Float16ToFloat32(UnpackU16<0>(u0)), scale, min, sum, sqsum);
+            __m128i i4 = Encode32f(Float16ToFloat32(UnpackU16<1>(u0)), scale, min, sum, sqsum);
+            return _mm_srli_epi32(_mm_mullo_epi16(_mm_packus_epi32(i0, i4), E4_MULLO), 12);
+        }
+
+        static SIMD_INLINE __m128i Encode16f4x8(const uint16_t* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
+        {
+            __m128i s0 = Encode16f4(src + 0 * 8, scale, min, sum, sqsum);
+            return _mm_packus_epi16(_mm_packus_epi32(s0, K_ZERO), K_ZERO);
+        }
+
+        static SIMD_INLINE __m128i Encode16f4x16(const uint16_t* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
+        {
+            __m128i s0 = Encode16f4(src + 0 * 8, scale, min, sum, sqsum);
+            __m128i s1 = Encode16f4(src + 1 * 8, scale, min, sum, sqsum);
+            return _mm_packus_epi16(_mm_packus_epi32(s0, s1), K_ZERO);
+        }
+
+        static void Encode16f4(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        {
+            assert(size % 8 == 0);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            __m128 _scale = _mm_set1_ps(scale);
+            __m128 _min = _mm_set1_ps(min);
+            __m128i _sum = _mm_setzero_si128();
+            __m128i _sqsum = _mm_setzero_si128();
+            for (; i < size16; i += 16, src += 16, dst += 8)
+                _mm_storel_epi64((__m128i*)dst, Encode16f4x16(src, _scale, _min, _sum, _sqsum));
+            for (; i < size; i += 8, src += 8, dst += 4)
+                *(uint32_t*)(dst) = _mm_extract_epi32(Encode16f4x8(src, _scale, _min, _sum, _sqsum), 0);
+            sum = ExtractInt32Sum(_sum);
+            sqsum = ExtractInt32Sum(_sqsum);
+        }
 
         static SIMD_INLINE __m128i Encode16f5(const uint16_t* src, __m128 scale, __m128 min, __m128i& sum, __m128i& sqsum)
         {
@@ -1159,6 +1232,8 @@ namespace Simd
             {
             case 4:
             {
+                _encode32f = Encode32f4;
+                _encode16f = Encode16f4;
                 break;
             }
             case 5:
