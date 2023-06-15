@@ -114,6 +114,17 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
+        const __m256i E5_MULLO = SIMD_MM256_SETR_EPI16(256, 32, 4, 128, 16, 2, 64, 8, 256, 32, 4, 128, 16, 2, 64, 8);
+        const __m256i E5_SHFL0 = SIMD_MM256_SETR_EPI8(
+            0x1, 0x3, 0x7, 0x9, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, 0x1, 0x3, 0x7, 0x9, 0xD, -1, -1, -1, -1, -1, -1);
+        const __m256i E5_SHFL1 = SIMD_MM256_SETR_EPI8(
+            0x2, 0x4, 0x8, 0xA, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, 0x2, 0x4, 0x8, 0xA, 0xE, -1, -1, -1, -1, -1, -1);
+        const __m256i E5_SHFL2 = SIMD_MM256_SETR_EPI8(
+            -1, 0x6, -1, 0xC, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, 0x6, -1, 0xC, -1, -1, -1, -1, -1, -1, -1);
+
         const __m256i E6_MULLO = SIMD_MM256_SETR_EPI16(256, 64, 16, 4, 256, 64, 16, 4, 256, 64, 16, 4, 256, 64, 16, 4);
         const __m256i E6_SHFL0 = SIMD_MM256_SETR_EPI8(
             0x1, 0x3, 0x5, 0x9, 0xB, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -129,6 +140,11 @@ namespace Simd
         const __m256i E7_SHFL1 = SIMD_MM256_SETR_EPI8(
             0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, -1, -1);
+
+        const __m256i C5_SHFL = SIMD_MM256_SETR_EPI8(
+            0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4,
+            0x5, 0x5, 0x5, 0x6, 0x6, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9);
+        const __m256i C5_MULLO = SIMD_MM256_SETR_EPI16(8, 64, 2, 16, 128, 4, 32, 256, 8, 64, 2, 16, 128, 4, 32, 256);
 
         const __m256i C6_SHFL = SIMD_MM256_SETR_EPI8(
             0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5,

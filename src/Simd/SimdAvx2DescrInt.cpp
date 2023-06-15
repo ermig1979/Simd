@@ -84,6 +84,44 @@ namespace Simd
             return Encode32f(_mm256_loadu_ps(src), scale, min, sum, sqsum);
         }
 
+        static SIMD_INLINE __m128i Encode32f5x1(const float* src, __m256 scale, __m256 min, __m256i& sum, __m256i& sqsum)
+        {
+            __m256i i0 = Encode32f(src + 0, scale, min, sum, sqsum);
+            __m128i s0 = _mm_mullo_epi16(_mm256_castsi256_si128(PackU32ToI16(i0, _mm256_setzero_si256())), Sse41::E5_MULLO);
+            return _mm_or_si128(_mm_or_si128(_mm_shuffle_epi8(s0, Sse41::E5_SHFL0), _mm_shuffle_epi8(s0, Sse41::E5_SHFL1)), _mm_shuffle_epi8(s0, Sse41::E5_SHFL2));
+        }
+
+        static SIMD_INLINE __m128i Encode32f5x2(const float* src, __m256 scale, __m256 min, __m256i& sum, __m256i& sqsum)
+        {
+            __m256i i0 = Encode32f(src + 0, scale, min, sum, sqsum);
+            __m256i i8 = Encode32f(src + 8, scale, min, sum, sqsum);
+            __m256i s0 = _mm256_mullo_epi16(PackU32ToI16(i0, i8), E5_MULLO);
+            __m256i e0 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s0, E5_SHFL0), _mm256_shuffle_epi8(s0, E5_SHFL1)), _mm256_shuffle_epi8(s0, E5_SHFL2));
+            return _mm_or_si128(_mm256_castsi256_si128(e0), _mm256_extracti128_si256(e0, 1));
+        }
+
+        static void Encode32f5(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        {
+            assert(size % 8 == 0);
+            size_t i = 0, main = size - 8, main16 = AlignLo(main, 16);
+            __m256 _scale = _mm256_set1_ps(scale);
+            __m256 _min = _mm256_set1_ps(min);
+            __m256i _sum = _mm256_setzero_si256();
+            __m256i _sqsum = _mm256_setzero_si256();
+            for (; i < main16; i += 16, src += 16, dst += 10)
+                _mm_storeu_si128((__m128i*)dst, Encode32f5x2(src, _scale, _min, _sum, _sqsum));
+            for (; i < main; i += 8, src += 8, dst += 5)
+                _mm_storel_epi64((__m128i*)dst, Encode32f5x1(src, _scale, _min, _sum, _sqsum));
+            for (; i < size; i += 8, src += 8, dst += 5)
+            {
+                __m128i d0 = Encode32f5x1(src, _scale, _min, _sum, _sqsum);
+                *(uint32_t*)(dst + 0) = _mm_extract_epi32(d0, 0);
+                *(uint8_t*)(dst + 4) = _mm_extract_epi8(d0, 4);
+            }
+            sum = ExtractSum<uint32_t>(_sum);
+            sqsum = ExtractSum<uint32_t>(_sqsum);
+        }
+
         static SIMD_INLINE __m128i Encode32f6x1(const float* src, __m256 scale, __m256 min, __m256i& sum, __m256i& sqsum)
         {
             __m256i i0 = Encode32f(src + 0, scale, min, sum, sqsum);
@@ -187,6 +225,44 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
+
+        static SIMD_INLINE __m128i Encode16f5x1(const uint16_t* src, __m256 scale, __m256 min, __m256i& sum, __m256i& sqsum)
+        {
+            __m256i i0 = Encode32f(_mm256_cvtph_ps(_mm_loadu_si128((__m128i*)src)), scale, min, sum, sqsum);
+            __m128i s0 = _mm_mullo_epi16(_mm256_castsi256_si128(PackU32ToI16(i0, _mm256_setzero_si256())), Sse41::E5_MULLO);
+            return _mm_or_si128(_mm_or_si128(_mm_shuffle_epi8(s0, Sse41::E5_SHFL0), _mm_shuffle_epi8(s0, Sse41::E5_SHFL1)), _mm_shuffle_epi8(s0, Sse41::E5_SHFL2));
+        }
+
+        static SIMD_INLINE __m128i Encode16f5x2(const uint16_t* src, __m256 scale, __m256 min, __m256i& sum, __m256i& sqsum)
+        {
+            __m256i i0 = Encode32f(_mm256_cvtph_ps(_mm_loadu_si128((__m128i*)src + 0)), scale, min, sum, sqsum);
+            __m256i i8 = Encode32f(_mm256_cvtph_ps(_mm_loadu_si128((__m128i*)src + 1)), scale, min, sum, sqsum);
+            __m256i s0 = _mm256_mullo_epi16(PackU32ToI16(i0, i8), E5_MULLO);
+            __m256i e0 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s0, E5_SHFL0), _mm256_shuffle_epi8(s0, E5_SHFL1)), _mm256_shuffle_epi8(s0, E5_SHFL2));
+            return _mm_or_si128(_mm256_castsi256_si128(e0), _mm256_extracti128_si256(e0, 1));
+        }
+
+        static void Encode16f5(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        {
+            assert(size % 8 == 0);
+            size_t i = 0, main = size - 8, main16 = AlignLo(main, 16);
+            __m256 _scale = _mm256_set1_ps(scale);
+            __m256 _min = _mm256_set1_ps(min);
+            __m256i _sum = _mm256_setzero_si256();
+            __m256i _sqsum = _mm256_setzero_si256();
+            for (; i < main16; i += 16, src += 16, dst += 10)
+                _mm_storeu_si128((__m128i*)dst, Encode16f5x2(src, _scale, _min, _sum, _sqsum));
+            for (; i < main; i += 8, src += 8, dst += 5)
+                _mm_storel_epi64((__m128i*)dst, Encode16f5x1(src, _scale, _min, _sum, _sqsum));
+            for (; i < size; i += 8, src += 8, dst += 5)
+            {
+                __m128i d0 = Encode16f5x1(src, _scale, _min, _sum, _sqsum);
+                *(uint32_t*)(dst + 0) = _mm_extract_epi32(d0, 0);
+                *(uint8_t*)(dst + 4) = _mm_extract_epi8(d0, 4);
+            }
+            sum = ExtractSum<uint32_t>(_sum);
+            sqsum = ExtractSum<uint32_t>(_sqsum);
+        }
 
         static SIMD_INLINE __m128i Encode16f6x1(const uint16_t* src, __m256 scale, __m256 min, __m256i& sum, __m256i& sqsum)
         {
@@ -292,6 +368,31 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void Decode32f5(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        {
+            assert(size % 8 == 0);
+            __m256 _scale = _mm256_set1_ps(scale);
+            __m256 _shift = _mm256_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+            {
+                __m256i s5 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+                __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s5, C5_SHFL), C5_MULLO), 11);
+                _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 0))), _scale, _shift));
+                _mm256_storeu_ps(dst + 8, _mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 1))), _scale, _shift));
+                src += 10;
+                dst += 16;
+            }
+            for (; i < size; i += 8)
+            {
+                __m128i s5 = _mm_loadl_epi64((__m128i*)src);
+                __m128i s16 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(s5, Sse41::C5_SHFL0), Sse41::C5_MULLO), 11);
+                _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(s16)), _scale, _shift));
+                src += 5;
+                dst += 8;
+            }
+        }
+
         static void Decode32f6(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
             assert(size % 8 == 0);
@@ -362,6 +463,31 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
+
+        static void Decode16f5(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
+        {
+            assert(size % 8 == 0);
+            __m256 _scale = _mm256_set1_ps(scale);
+            __m256 _shift = _mm256_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+            {
+                __m256i s5 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+                __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s5, C5_SHFL), C5_MULLO), 11);
+                _mm_storeu_si128((__m128i*)dst + 0, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 0))), _scale, _shift), 0));
+                _mm_storeu_si128((__m128i*)dst + 1, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 1))), _scale, _shift), 0));
+                src += 10;
+                dst += 16;
+            }
+            for (; i < size; i += 8)
+            {
+                __m128i s5 = _mm_loadl_epi64((__m128i*)src);
+                __m128i s16 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(s5, Sse41::C5_SHFL0), Sse41::C5_MULLO), 11);
+                _mm_storeu_si128((__m128i*)dst, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(s16)), _scale, _shift), 0));
+                src += 5;
+                dst += 8;
+            }
+        }
 
         static void Decode16f6(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
         {
@@ -436,6 +562,26 @@ namespace Simd
 
         template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
 
+        template<> int32_t Correlation<5>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0);
+            __m256i _ab = _mm256_setzero_si256();
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16, a += 10, b += 10)
+            {
+                __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)a)), C5_SHFL), C5_MULLO), 11);
+                __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)b)), C5_SHFL), C5_MULLO), 11);
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
+            }
+            for (; i < size; i += 8, a += 5, b += 5)
+            {
+                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), Sse41::C5_SHFL0), Sse41::C5_MULLO), 11);
+                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), Sse41::C5_SHFL0), Sse41::C5_MULLO), 11);
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_mm256_castsi128_si256(_a), _mm256_castsi128_si256(_b)), _ab);
+            }
+            return ExtractSum<uint32_t>(_ab);
+        }
+
         template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
@@ -504,6 +650,67 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         template<int bits> void MicroCosineDistances2x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+
+        template<> void MicroCosineDistances2x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            __m256i a0, a1, b0;
+            __m256i ab00 = _mm256_setzero_si256();
+            __m256i ab01 = _mm256_setzero_si256();
+            __m256i ab02 = _mm256_setzero_si256();
+            __m256i ab03 = _mm256_setzero_si256();
+            __m256i ab10 = _mm256_setzero_si256();
+            __m256i ab11 = _mm256_setzero_si256();
+            __m256i ab12 = _mm256_setzero_si256();
+            __m256i ab13 = _mm256_setzero_si256();
+            for (; i < size16; i += 16, o += 10)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[0] + o))), C5_SHFL), C5_MULLO), 11);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[1] + o))), C5_SHFL), C5_MULLO), 11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[0] + o))), C5_SHFL), C5_MULLO), 11);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+                ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[1] + o))), C5_SHFL), C5_MULLO), 11);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+                ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[2] + o))), C5_SHFL), C5_MULLO), 11);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+                ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[3] + o))), C5_SHFL), C5_MULLO), 11);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+                ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
+            }
+            for (; i < size; i += 8, o += 5)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C5_SHFL), C5_MULLO), 11);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[1] + o))), C5_SHFL), C5_MULLO), 11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C5_SHFL), C5_MULLO), 11);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+                ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C5_SHFL), C5_MULLO), 11);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+                ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C5_SHFL), C5_MULLO), 11);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+                ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C5_SHFL), C5_MULLO), 11);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+                ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 ab1 = _mm_cvtepi32_ps(Extract4Sums(ab10, ab11, ab12, ab13));
+            __m128 _size = _mm_set1_ps(float(size));
+            Sse41::DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+            Sse41::DecodeCosineDistances(A[1], B, ab1, _size, distances + 1 * stride);
+        }
 
         template<> void MicroCosineDistances2x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
@@ -690,6 +897,51 @@ namespace Simd
 
         template<int bits> void MicroCosineDistances1x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
 
+        template<> void MicroCosineDistances1x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            __m256i a0, b0;
+            __m256i ab00 = _mm256_setzero_si256();
+            __m256i ab01 = _mm256_setzero_si256();
+            __m256i ab02 = _mm256_setzero_si256();
+            __m256i ab03 = _mm256_setzero_si256();
+            for (; i < size16; i += 16, o += 10)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[0] + o))), C5_SHFL), C5_MULLO), 11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[0] + o))), C5_SHFL), C5_MULLO), 11);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[1] + o))), C5_SHFL), C5_MULLO), 11);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[2] + o))), C5_SHFL), C5_MULLO), 11);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[3] + o))), C5_SHFL), C5_MULLO), 11);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+            }
+            for (; i < size; i += 8, o += 5)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C5_SHFL), C5_MULLO), 11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C5_SHFL), C5_MULLO), 11);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C5_SHFL), C5_MULLO), 11);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C5_SHFL), C5_MULLO), 11);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C5_SHFL), C5_MULLO), 11);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 _size = _mm_set1_ps(float(size));
+            Sse41::DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+        }
+
         template<> void MicroCosineDistances1x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
@@ -868,6 +1120,12 @@ namespace Simd
             }
             case 5:
             {
+                _encode32f = Encode32f5;
+                _encode16f = Encode16f5;
+                _decode32f = Decode32f5;
+                _decode16f = Decode16f5;
+                _cosineDistance = Avx2::CosineDistance<5>;
+                _macroCosineDistances = Avx2::MacroCosineDistances<5>;
                 break;
             }
             case 6:
