@@ -216,6 +216,7 @@ namespace Simd
         const __m256i K8_04 = SIMD_MM256_SET1_EPI8(0x04);
         const __m256i K8_07 = SIMD_MM256_SET1_EPI8(0x07);
         const __m256i K8_08 = SIMD_MM256_SET1_EPI8(0x08);
+        const __m256i K8_0F = SIMD_MM256_SET1_EPI8(0x0F);
         const __m256i K8_10 = SIMD_MM256_SET1_EPI8(0x10);
         const __m256i K8_20 = SIMD_MM256_SET1_EPI8(0x20);
         const __m256i K8_40 = SIMD_MM256_SET1_EPI8(0x40);

@@ -438,6 +438,31 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void Decode32f4(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        {
+            assert(size % 8 == 0);
+            __m256 _scale = _mm256_set1_ps(scale);
+            __m256 _shift = _mm256_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+            {
+                __m256i s4 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+                __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s4, C4_SHFL), C4_MULLO), 12);
+                _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 0))), _scale, _shift));
+                _mm256_storeu_ps(dst + 8, _mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 1))), _scale, _shift));
+                src += 8;
+                dst += 16;
+            }
+            for (; i < size; i += 8)
+            {
+                __m128i s4 = _mm_loadl_epi64((__m128i*)src);
+                __m128i s16 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(s4, Sse41::C4_SHFL0), Sse41::C4_MULLO), 12);
+                _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(s16)), _scale, _shift));
+                src += 4;
+                dst += 8;
+            }
+        }
+
         static void Decode32f5(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
             assert(size % 8 == 0);
@@ -533,6 +558,31 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
+
+        static void Decode16f4(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
+        {
+            assert(size % 8 == 0);
+            __m256 _scale = _mm256_set1_ps(scale);
+            __m256 _shift = _mm256_set1_ps(shift);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+            {
+                __m256i s4 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+                __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s4, C4_SHFL), C4_MULLO), 12);
+                _mm_storeu_si128((__m128i*)dst + 0, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 0))), _scale, _shift), 0));
+                _mm_storeu_si128((__m128i*)dst + 1, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(_mm256_extracti128_si256(s16, 1))), _scale, _shift), 0));
+                src += 8;
+                dst += 16;
+            }
+            for (; i < size; i += 8)
+            {
+                __m128i s4 = _mm_loadl_epi64((__m128i*)src);
+                __m128i s16 = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(s4, Sse41::C4_SHFL0), Sse41::C4_MULLO), 12);
+                _mm_storeu_si128((__m128i*)dst, _mm256_cvtps_ph(_mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_cvtepu16_epi32(s16)), _scale, _shift), 0));
+                src += 4;
+                dst += 8;
+            }
+        }
 
         static void Decode16f5(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
         {
@@ -632,6 +682,28 @@ namespace Simd
 
         template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
 
+        template<> int32_t Correlation<4>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0);
+            __m256i ab32 = _mm256_setzero_si256();
+            size_t i = 0, size64 = AlignLo(size, 64);
+            for (; i < size64; i += 64, a += 32, b += 32)
+            {
+                __m256i _a = _mm256_loadu_si256((__m256i*)a);
+                __m256i _b = _mm256_loadu_si256((__m256i*)b);
+                __m256i ab16 = _mm256_maddubs_epi16(_mm256_and_si256(_a, K8_0F), _mm256_and_si256(_b, K8_0F));
+                ab16 = _mm256_add_epi16(ab16, _mm256_maddubs_epi16(_mm256_and_si256(_mm256_srli_epi16(_a, 4), K8_0F), _mm256_and_si256(_mm256_srli_epi16(_b, 4), K8_0F)));
+                ab32 = _mm256_add_epi32(ab32, _mm256_madd_epi16(ab16, K16_0001));
+            }
+            for (; i < size; i += 8, a += 4, b += 4)
+            {
+                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), Sse41::C4_SHFL0), Sse41::C4_MULLO), 12);
+                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), Sse41::C4_SHFL0), Sse41::C4_MULLO), 12);
+                ab32 = _mm256_add_epi32(_mm256_madd_epi16(_mm256_castsi128_si256(_a), _mm256_castsi128_si256(_b)), ab32);
+            }
+            return ExtractSum<uint32_t>(ab32);
+        }
+
         template<> int32_t Correlation<5>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
@@ -720,6 +792,86 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         template<int bits> void MicroCosineDistances2x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+
+        template<> void MicroCosineDistances2x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size64 = AlignLo(size, 64), o = 16;
+            __m256i a0, a1, b0;
+            __m256i ab00 = _mm256_setzero_si256();
+            __m256i ab01 = _mm256_setzero_si256();
+            __m256i ab02 = _mm256_setzero_si256();
+            __m256i ab03 = _mm256_setzero_si256();
+            __m256i ab10 = _mm256_setzero_si256();
+            __m256i ab11 = _mm256_setzero_si256();
+            __m256i ab12 = _mm256_setzero_si256();
+            __m256i ab13 = _mm256_setzero_si256();
+            for (; i < size64; i += 64, o += 32)
+            {
+                a0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(A[0] + o)), K8_0F);
+                a1 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(A[1] + o)), K8_0F);
+
+                b0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(B[0] + o)), K8_0F);
+                ab00 = _mm256_add_epi32(ab00, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+                ab10 = _mm256_add_epi32(ab10, _mm256_madd_epi16(_mm256_maddubs_epi16(a1, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(B[1] + o)), K8_0F);
+                ab01 = _mm256_add_epi32(ab01, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+                ab11 = _mm256_add_epi32(ab11, _mm256_madd_epi16(_mm256_maddubs_epi16(a1, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(B[2] + o)), K8_0F);
+                ab02 = _mm256_add_epi32(ab02, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+                ab12 = _mm256_add_epi32(ab12, _mm256_madd_epi16(_mm256_maddubs_epi16(a1, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(B[3] + o)), K8_0F);
+                ab03 = _mm256_add_epi32(ab03, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+                ab13 = _mm256_add_epi32(ab13, _mm256_madd_epi16(_mm256_maddubs_epi16(a1, b0), K16_0001));
+
+                a0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(A[0] + o)), 4), K8_0F);
+                a1 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(A[1] + o)), 4), K8_0F);
+
+                b0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(B[0] + o)), 4), K8_0F);
+                ab00 = _mm256_add_epi32(ab00, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+                ab10 = _mm256_add_epi32(ab10, _mm256_madd_epi16(_mm256_maddubs_epi16(a1, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(B[1] + o)), 4), K8_0F);
+                ab01 = _mm256_add_epi32(ab01, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+                ab11 = _mm256_add_epi32(ab11, _mm256_madd_epi16(_mm256_maddubs_epi16(a1, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(B[2] + o)), 4), K8_0F);
+                ab02 = _mm256_add_epi32(ab02, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+                ab12 = _mm256_add_epi32(ab12, _mm256_madd_epi16(_mm256_maddubs_epi16(a1, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(B[3] + o)), 4), K8_0F);
+                ab03 = _mm256_add_epi32(ab03, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+                ab13 = _mm256_add_epi32(ab13, _mm256_madd_epi16(_mm256_maddubs_epi16(a1, b0), K16_0001));
+            }
+            for (; i < size; i += 8, o += 4)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C4_SHFL), C4_MULLO), 12);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[1] + o))), C4_SHFL), C4_MULLO), 12);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C4_SHFL), C4_MULLO), 12);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+                ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C4_SHFL), C4_MULLO), 12);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+                ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C4_SHFL), C4_MULLO), 12);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+                ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C4_SHFL), C4_MULLO), 12);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+                ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 ab1 = _mm_cvtepi32_ps(Extract4Sums(ab10, ab11, ab12, ab13));
+            __m128 _size = _mm_set1_ps(float(size));
+            Sse41::DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+            Sse41::DecodeCosineDistances(A[1], B, ab1, _size, distances + 1 * stride);
+        }
 
         template<> void MicroCosineDistances2x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
@@ -967,6 +1119,65 @@ namespace Simd
 
         template<int bits> void MicroCosineDistances1x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
 
+        template<> void MicroCosineDistances1x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size64 = AlignLo(size, 64), o = 16;
+            __m256i a0, b0;
+            __m256i ab00 = _mm256_setzero_si256();
+            __m256i ab01 = _mm256_setzero_si256();
+            __m256i ab02 = _mm256_setzero_si256();
+            __m256i ab03 = _mm256_setzero_si256();
+            for (; i < size64; i += 64, o += 32)
+            {
+                a0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(A[0] + o)), K8_0F);
+
+                b0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(B[0] + o)), K8_0F);
+                ab00 = _mm256_add_epi32(ab00, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(B[1] + o)), K8_0F);
+                ab01 = _mm256_add_epi32(ab01, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(B[2] + o)), K8_0F);
+                ab02 = _mm256_add_epi32(ab02, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(B[3] + o)), K8_0F);
+                ab03 = _mm256_add_epi32(ab03, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+
+                a0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(A[0] + o)), 4), K8_0F);
+
+                b0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(B[0] + o)), 4), K8_0F);
+                ab00 = _mm256_add_epi32(ab00, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(B[1] + o)), 4), K8_0F);
+                ab01 = _mm256_add_epi32(ab01, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(B[2] + o)), 4), K8_0F);
+                ab02 = _mm256_add_epi32(ab02, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+
+                b0 = _mm256_and_si256(_mm256_srli_epi16(_mm256_loadu_si256((__m256i*)(B[3] + o)), 4), K8_0F);
+                ab03 = _mm256_add_epi32(ab03, _mm256_madd_epi16(_mm256_maddubs_epi16(a0, b0), K16_0001));
+            }
+            for (; i < size; i += 8, o += 4)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C4_SHFL), C4_MULLO), 12);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C4_SHFL), C4_MULLO), 12);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C4_SHFL), C4_MULLO), 12);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C4_SHFL), C4_MULLO), 12);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C4_SHFL), C4_MULLO), 12);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+            }
+            __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
+            __m128 _size = _mm_set1_ps(float(size));
+            Sse41::DecodeCosineDistances(A[0], B, ab0, _size, distances + 0 * stride);
+        }
+
         template<> void MicroCosineDistances1x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
@@ -1188,6 +1399,10 @@ namespace Simd
             {
                 _encode32f = Encode32f4;
                 _encode16f = Encode16f4;
+                _decode32f = Decode32f4;
+                _decode16f = Decode16f4;
+                _cosineDistance = Avx2::CosineDistance<4>;
+                _macroCosineDistances = Avx2::MacroCosineDistances<4>;
                 break;
             }
             case 5:
