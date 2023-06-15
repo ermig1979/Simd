@@ -508,7 +508,7 @@ namespace Simd
         template<int bits> void CosineDistance(const uint8_t* a, const uint8_t* b, size_t size, float* distance)
         {
             float abSum = (float)Correlation<bits>(a + 16, b + 16, size);
-            Base::DecodeCosineDistance(a, b, abSum, float(size), distance);
+            Base::DecodeCosineDistance(a, b, abSum, distance);
         }
 
         //-------------------------------------------------------------------------------------------------

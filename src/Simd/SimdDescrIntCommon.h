@@ -26,12 +26,15 @@
 
 #include "Simd/SimdDefs.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdSet.h"
+#include "Simd/SimdStore.h"
 
 namespace Simd
 {
     namespace Base
     {
-        SIMD_INLINE void DecodeCosineDistance(const uint8_t* a, const uint8_t* b, float abSum, float size, float* distance)
+        SIMD_INLINE void DecodeCosineDistance(const uint8_t* a, const uint8_t* b, float abSum, float* distance)
         {
             float aScale = ((float*)a)[0];
             float aShift = ((float*)a)[1];
@@ -81,7 +84,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void DecodeCosineDistances(const uint8_t* a, const uint8_t* const* B, __m128 abSum, __m128 size, float* distances)
+        SIMD_INLINE void DecodeCosineDistances(const uint8_t* a, const uint8_t* const* B, __m128 abSum, float* distances)
         {
             __m128 aScale, aShift, aMean, aNorm, bScale, bShift, bMean, bNorm;
             bScale = _mm_loadu_ps((float*)B[0]);
@@ -162,6 +165,38 @@ namespace Simd
             0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6,
             0x7, 0x7, 0x7, 0x8, 0x8, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xC, 0xC, 0xD, 0xD, 0xD);
         const __m256i C7_MULLO = SIMD_MM256_SETR_EPI16(2, 4, 8, 16, 32, 64, 128, 256, 2, 4, 8, 16, 32, 64, 128, 256);
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void DecodeCosineDistances(const uint8_t* const* A, const uint8_t* const* B, __m256 abSum, float* distances, size_t stride)
+        {
+            __m256 aScale, aShift, aMean, aNorm, bScale, bShift, bMean, bNorm;
+            bScale = _mm256_broadcast_ps((__m128*)B[0]);
+            bShift = _mm256_broadcast_ps((__m128*)B[1]);
+            bMean = _mm256_broadcast_ps((__m128*)B[2]);
+            bNorm = _mm256_broadcast_ps((__m128*)B[3]);
+            aScale = _mm256_unpacklo_ps(bScale, bMean);
+            aShift = _mm256_unpacklo_ps(bShift, bNorm);
+            aMean = _mm256_unpackhi_ps(bScale, bMean);
+            aNorm = _mm256_unpackhi_ps(bShift, bNorm);
+            bScale = _mm256_unpacklo_ps(aScale, aShift);
+            bShift = _mm256_unpackhi_ps(aScale, aShift);
+            bMean = _mm256_unpacklo_ps(aMean, aNorm);
+            bNorm = _mm256_unpackhi_ps(aMean, aNorm);
+
+            aNorm = Avx::Load<false>((float*)A[0], (float*)A[1]);
+            aScale = Broadcast<0>(aNorm);
+            aShift = Broadcast<1>(aNorm);
+            aMean = Broadcast<2>(aNorm);
+            aNorm = Broadcast<3>(aNorm);
+
+            __m256 ab = _mm256_mul_ps(abSum, _mm256_mul_ps(aScale, bScale));
+            ab = _mm256_fmadd_ps(aMean, bShift, ab);
+            ab = _mm256_fmadd_ps(bMean, aShift, ab);
+
+            Avx::Store<false>(distances + 0 * stride, distances + 1 * stride,
+                _mm256_min_ps(_mm256_max_ps(_mm256_sub_ps(_mm256_set1_ps(1.0f), _mm256_div_ps(ab, _mm256_mul_ps(aNorm, bNorm))), _mm256_setzero_ps()), _mm256_set1_ps(2.0f)));
+        }
     }
 #endif
 
