@@ -96,6 +96,41 @@ namespace Simd
             return Encode32f(_mm512_maskz_loadu_ps(mask, src), scale, min, sum, sqsum);
         }
 
+        static SIMD_INLINE __m128i Encode32f5x2(const float* src, __m512 scale, __m512 min, __m512i& sum, __m512i& sqsum, __mmask16 mask = -1)
+        {
+            __m512i i0 = Encode32f(src, scale, min, sum, sqsum, mask);
+            __m256i s0 = _mm256_mullo_epi16(_mm512_cvtepi32_epi16(i0), Avx2::E5_MULLO);
+            __m256i e0 = _mm256_or_si256(_mm256_shuffle_epi8(s0, Avx2::E5_SHFL0), _mm256_shuffle_epi8(s0, Avx2::E5_SHFL1));
+            return _mm_or_si128(_mm256_castsi256_si128(e0), _mm256_extracti128_si256(e0, 1));
+        }
+
+        static SIMD_INLINE __m256i Encode32f5x4(const float* src, __m512 scale, __m512 min, __m512i& sum, __m512i& sqsum)
+        {
+            __m512i i0 = Encode32f(src + 0 * F, scale, min, sum, sqsum);
+            __m512i i1 = Encode32f(src + 1 * F, scale, min, sum, sqsum);
+            __m512i s0 = _mm512_mullo_epi16(_mm512_permutexvar_epi64(EX_PERM, _mm512_packus_epi32(i0, i1)), E5_MULLO);
+            __m512i e0 = _mm512_or_si512(_mm512_or_si512(_mm512_shuffle_epi8(s0, E5_SHFL0), _mm512_shuffle_epi8(s0, E5_SHFL1)), _mm512_shuffle_epi8(s0, E5_SHFL2));
+            return _mm256_or_si256(_mm512_castsi512_si256(e0), _mm512_extracti32x8_epi32(e0, 1));
+        }
+
+        static void Encode32f5(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        {
+            assert(size % 8 == 0);
+            size_t size16 = AlignLo(size, 16), size32 = AlignLo(size, 32), i = 0;
+            __m512 _scale = _mm512_set1_ps(scale);
+            __m512 _min = _mm512_set1_ps(min);
+            __m512i _sum = _mm512_setzero_si512();
+            __m512i _sqsum = _mm512_setzero_si512();
+            for (; i < size32; i += 32, src += 32, dst += 20)
+                _mm256_mask_storeu_epi8(dst - 6, 0x03FFFFC0, Encode32f5x4(src, _scale, _min, _sum, _sqsum));
+            for (; i < size16; i += 16, src += 16, dst += 10)
+                _mm_mask_storeu_epi8(dst, 0x03FF, Encode32f5x2(src, _scale, _min, _sum, _sqsum));
+            if (i < size)
+                _mm_mask_storeu_epi8(dst, 0x001F, Encode32f5x2(src, _scale, _min, _sum, _sqsum, 0x00FF));
+            sum = ExtractSum<uint32_t>(_sum);
+            sqsum = ExtractSum<uint32_t>(_sqsum);
+        }
+
         static SIMD_INLINE __m128i Encode32f6x2(const float* src, __m512 scale, __m512 min, __m512i& sum, __m512i& sqsum, __mmask16 mask = -1)
         {
             __m512i i0 = Encode32f(src, scale, min, sum, sqsum, mask);
@@ -201,6 +236,41 @@ namespace Simd
         SIMD_INLINE __m512i Encode16f(const uint16_t* src, __m512 scale, __m512 min, __m512i& sum, __m512i& sqsum, __mmask16 mask = -1)
         {
             return Encode32f(_mm512_cvtph_ps(_mm256_maskz_loadu_epi16(mask, src)), scale, min, sum, sqsum);
+        }
+
+        static SIMD_INLINE __m128i Encode16f5x2(const uint16_t* src, __m512 scale, __m512 min, __m512i& sum, __m512i& sqsum, __mmask16 mask = -1)
+        {
+            __m512i i0 = Encode16f(src, scale, min, sum, sqsum, mask);
+            __m256i s0 = _mm256_mullo_epi16(_mm512_cvtepi32_epi16(i0), Avx2::E5_MULLO);
+            __m256i e0 = _mm256_or_si256(_mm256_shuffle_epi8(s0, Avx2::E5_SHFL0), _mm256_shuffle_epi8(s0, Avx2::E5_SHFL1));
+            return _mm_or_si128(_mm256_castsi256_si128(e0), _mm256_extracti128_si256(e0, 1));
+        }
+
+        static SIMD_INLINE __m256i Encode16f5x4(const uint16_t* src, __m512 scale, __m512 min, __m512i& sum, __m512i& sqsum)
+        {
+            __m512i i0 = Encode16f(src + 0 * F, scale, min, sum, sqsum);
+            __m512i i1 = Encode16f(src + 1 * F, scale, min, sum, sqsum);
+            __m512i s0 = _mm512_mullo_epi16(_mm512_permutexvar_epi64(EX_PERM, _mm512_packus_epi32(i0, i1)), E5_MULLO);
+            __m512i e0 = _mm512_or_si512(_mm512_or_si512(_mm512_shuffle_epi8(s0, E5_SHFL0), _mm512_shuffle_epi8(s0, E5_SHFL1)), _mm512_shuffle_epi8(s0, E5_SHFL2));
+            return _mm256_or_si256(_mm512_castsi512_si256(e0), _mm512_extracti32x8_epi32(e0, 1));
+        }
+
+        static void Encode16f5(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        {
+            assert(size % 8 == 0);
+            size_t size16 = AlignLo(size, 16), size32 = AlignLo(size, 32), i = 0;
+            __m512 _scale = _mm512_set1_ps(scale);
+            __m512 _min = _mm512_set1_ps(min);
+            __m512i _sum = _mm512_setzero_si512();
+            __m512i _sqsum = _mm512_setzero_si512();
+            for (; i < size32; i += 32, src += 32, dst += 20)
+                _mm256_mask_storeu_epi8(dst - 6, 0x03FFFFC0, Encode16f5x4(src, _scale, _min, _sum, _sqsum));
+            for (; i < size16; i += 16, src += 16, dst += 10)
+                _mm_mask_storeu_epi8(dst, 0x03FF, Encode16f5x2(src, _scale, _min, _sum, _sqsum));
+            if (i < size)
+                _mm_mask_storeu_epi8(dst, 0x001F, Encode16f5x2(src, _scale, _min, _sum, _sqsum, 0x00FF));
+            sum = ExtractSum<uint32_t>(_sum);
+            sqsum = ExtractSum<uint32_t>(_sqsum);
         }
 
         static SIMD_INLINE __m128i Encode16f6x2(const uint16_t* src, __m512 scale, __m512 min, __m512i& sum, __m512i& sqsum, __mmask16 mask = -1)
@@ -1003,6 +1073,8 @@ namespace Simd
             }
             case 5:
             {
+                _encode32f = Encode32f5;
+                _encode16f = Encode16f5;
                 break;
             }
             case 6:
