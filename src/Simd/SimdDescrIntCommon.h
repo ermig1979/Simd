@@ -84,7 +84,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void DecodeCosineDistances(const uint8_t* a, const uint8_t* const* B, __m128 abSum, float* distances)
+        SIMD_INLINE void DecodeCosineDistances1x4(const uint8_t* a, const uint8_t* const* B, __m128 abSum, float* distances)
         {
             __m128 aScale, aShift, aMean, aNorm, bScale, bShift, bMean, bNorm;
             bScale = _mm_loadu_ps((float*)B[0]);
@@ -168,7 +168,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void DecodeCosineDistances(const uint8_t* const* A, const uint8_t* const* B, __m256 abSum, float* distances, size_t stride)
+        SIMD_INLINE void DecodeCosineDistances2x4(const uint8_t* const* A, const uint8_t* const* B, __m256 abSum, float* distances, size_t stride)
         {
             __m256 aScale, aShift, aMean, aNorm, bScale, bShift, bMean, bNorm;
             bScale = _mm256_broadcast_ps((__m128*)B[0]);

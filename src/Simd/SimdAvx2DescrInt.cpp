@@ -867,7 +867,7 @@ namespace Simd
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
             __m256 ab = _mm256_cvtepi32_ps(Extract8Sums(ab00, ab01, ab02, ab03, ab10, ab11, ab12, ab13));
-            DecodeCosineDistances(A, B, ab, distances, stride);
+            DecodeCosineDistances2x4(A, B, ab, distances, stride);
         }
 
         template<> void MicroCosineDistances2x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
@@ -925,7 +925,7 @@ namespace Simd
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
             __m256 ab = _mm256_cvtepi32_ps(Extract8Sums(ab00, ab01, ab02, ab03, ab10, ab11, ab12, ab13));
-            DecodeCosineDistances(A, B, ab, distances, stride);
+            DecodeCosineDistances2x4(A, B, ab, distances, stride);
         }
 
         template<> void MicroCosineDistances2x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
@@ -983,7 +983,7 @@ namespace Simd
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
             __m256 ab = _mm256_cvtepi32_ps(Extract8Sums(ab00, ab01, ab02, ab03, ab10, ab11, ab12, ab13));
-            DecodeCosineDistances(A, B, ab, distances, stride);
+            DecodeCosineDistances2x4(A, B, ab, distances, stride);
         }
 
         template<> void MicroCosineDistances2x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
@@ -1041,7 +1041,7 @@ namespace Simd
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
             __m256 ab = _mm256_cvtepi32_ps(Extract8Sums(ab00, ab01, ab02, ab03, ab10, ab11, ab12, ab13));
-            DecodeCosineDistances(A, B, ab, distances, stride);
+            DecodeCosineDistances2x4(A, B, ab, distances, stride);
         }
 
         template<> void MicroCosineDistances2x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
@@ -1099,7 +1099,7 @@ namespace Simd
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
             __m256 ab = _mm256_cvtepi32_ps(Extract8Sums(ab00, ab01, ab02, ab03, ab10, ab11, ab12, ab13));
-            DecodeCosineDistances(A, B, ab, distances, stride);
+            DecodeCosineDistances2x4(A, B, ab, distances, stride);
         }
 
         template<int bits> void MicroCosineDistances1x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
@@ -1159,7 +1159,7 @@ namespace Simd
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
-            Sse41::DecodeCosineDistances(A[0], B, ab0, distances + 0 * stride);
+            Sse41::DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
         template<> void MicroCosineDistances1x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
@@ -1203,7 +1203,7 @@ namespace Simd
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
-            Sse41::DecodeCosineDistances(A[0], B, ab0, distances + 0 * stride);
+            Sse41::DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
         template<> void MicroCosineDistances1x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
@@ -1247,7 +1247,7 @@ namespace Simd
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
-            Sse41::DecodeCosineDistances(A[0], B, ab0, distances + 0 * stride);
+            Sse41::DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
         template<> void MicroCosineDistances1x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
@@ -1291,7 +1291,7 @@ namespace Simd
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
-            Sse41::DecodeCosineDistances(A[0], B, ab0, distances + 0 * stride);
+            Sse41::DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
         template<> void MicroCosineDistances1x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
@@ -1335,7 +1335,7 @@ namespace Simd
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
-            Sse41::DecodeCosineDistances(A[0], B, ab0, distances + 0 * stride);
+            Sse41::DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
         template<int bits> void MacroCosineDistances(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
