@@ -228,7 +228,7 @@ namespace Simd
 
                         float sqsum = 0;
                         for (size_t s = 0; s < spatial; ++s)
-                            sqsum += Square(dst[s]);
+                            sqsum += Simd::Square(dst[s]);
                         float norm = 1.0f / ::sqrt(sqsum * k + e);
                         for (size_t s = 0; s < spatial; ++s)
                             dst[s] = dst[s] * norm * scale[c] + shift[c];
@@ -269,7 +269,7 @@ namespace Simd
                     for (size_t s = 0, o = 0; s < spatial; ++s)
                     {
                         for (size_t c = 0; c < channels; ++c, ++o)
-                            buf[c] += Square(dst[o]);
+                            buf[c] += Simd::Square(dst[o]);
                     }
                     for (size_t c = 0; c < channels; ++c)
                         buf[c] = 1.0f / ::sqrt(buf[c] * k + e);

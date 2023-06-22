@@ -245,11 +245,11 @@ namespace Test
 
         result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Base::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sse41::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sse41::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx2::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));

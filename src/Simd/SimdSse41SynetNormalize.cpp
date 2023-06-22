@@ -347,6 +347,161 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+
+        void NormalizeNchwV3(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, float eps, float* dst)
+        {
+            float k = 1.0f / float(spatial);
+            size_t spatialF = AlignLo(spatial, F), s;
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    __m128 _sum = _mm_setzero_ps();
+                    for (s = 0; s < spatialF; s += F)
+                        _sum = _mm_add_ps(_mm_loadu_ps(src + s), _sum);
+                    float sum = ExtractSum(_sum);
+                    for (; s < spatial; ++s)
+                        sum += src[s];
+                    __m128 mean = _mm_set1_ps(sum * k);
+                    for (s = 0; s < spatialF; s += F)
+                        _mm_storeu_ps(dst + s, _mm_sub_ps(_mm_loadu_ps(src + s), mean));
+                    for (; s < spatial; ++s)
+                        _mm_store_ss(dst + s, _mm_sub_ss(_mm_load_ss(src + s), mean));
+
+                    __m128 _sqsum = _mm_setzero_ps();
+                    for (s = 0; s < spatialF; s += F)
+                        _sqsum = _mm_add_ps(Square(_mm_loadu_ps(dst + s)), _sqsum);
+                    float sqsum = ExtractSum(_sqsum);
+                    for (; s < spatial; ++s)
+                        sqsum += Simd::Square(dst[s]);
+                    __m128 norm = _mm_set1_ps(1.0f / ::sqrt(sqsum * k + eps));
+                    __m128 _scale = _mm_set1_ps(scale[c]);
+                    __m128 _shift = _mm_set1_ps(shift[c]);
+                    for (s = 0; s < spatialF; s += F)
+                        _mm_storeu_ps(dst + s, _mm_add_ps(_mm_mul_ps(_mm_mul_ps(_mm_loadu_ps(dst + s), norm), _scale), _shift));
+                    for (; s < spatial; ++s)
+                        _mm_store_ss(dst + s, _mm_add_ss(_mm_mul_ss(_mm_mul_ss(_mm_load_ss(dst + s), norm), _scale), _shift));
+
+                    dst += spatial;
+                    src += spatial;
+                }
+            }
+        }
+
+        void NormalizeNhwcV3(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, float eps, float* buf, float* dst)
+        {
+            float k = 1.0f / float(spatial);
+            Array32f _buf;
+            if (buf == NULL)
+            {
+                _buf.Resize(spatial);
+                buf = _buf.data;
+            }
+            size_t channelsF = AlignLo(channels, F);
+            __m128 _eps = _mm_set1_ps(eps), _k = _mm_set1_ps(k), _1 = _mm_set1_ps(1.0f);
+            for (size_t b = 0, c; b < batch; ++b)
+            {
+                for (c = 0; c < channelsF; c += F)
+                    _mm_storeu_ps(buf + c, _mm_setzero_ps());
+                for (; c < channels; ++c)
+                    _mm_store_ss(buf + c, _mm_setzero_ps());
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    const float* ps = src + s * channels;
+                    for (c = 0; c < channelsF; c += F)
+                    {
+                        __m128 _src = _mm_loadu_ps(ps + c);
+                        __m128 _sum = _mm_loadu_ps(buf + c);
+                        _mm_storeu_ps(buf + c, _mm_add_ps(_sum, _src));
+                    }
+                    for (; c < channels; ++c)
+                    {
+                        __m128 _src = _mm_load_ss(ps + c);
+                        __m128 _sum = _mm_load_ss(buf + c);
+                        _mm_store_ss(buf + c, _mm_add_ss(_sum, _src));
+                    }
+                }
+                for (c = 0; c < channelsF; c += F)
+                    _mm_storeu_ps(buf + c, _mm_mul_ps(_mm_loadu_ps(buf + c), _k));
+                for (; c < channels; ++c)
+                    _mm_store_ss(buf + c, _mm_mul_ss(_mm_load_ss(buf + c), _k));
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    const float* ps = src + s * channels;
+                    float* pd = dst + s * channels;
+                    for (c = 0; c < channelsF; c += F)
+                    {
+                        __m128 _src = _mm_loadu_ps(ps + c);
+                        __m128 mean = _mm_loadu_ps(buf + c);
+                        _mm_storeu_ps(pd + c, _mm_sub_ps(_src, mean));
+                    }
+                    for (; c < channels; ++c)
+                    {
+                        __m128 _src = _mm_load_ss(ps + c);
+                        __m128 mean = _mm_load_ss(buf + c);
+                        _mm_store_ss(pd + c, _mm_sub_ps(_src, mean));
+                    }
+                }
+
+                for (c = 0; c < channelsF; c += F)
+                    _mm_storeu_ps(buf + c, _mm_setzero_ps());
+                for (; c < channels; ++c)
+                    _mm_store_ss(buf + c, _mm_setzero_ps());
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    const float* pd = dst + s * channels;
+                    for (c = 0; c < channelsF; c += F)
+                    {
+                        __m128 _dst = _mm_loadu_ps(pd + c);
+                        __m128 _sum = _mm_loadu_ps(buf + c);
+                        _mm_storeu_ps(buf + c, _mm_add_ps(_sum, _mm_mul_ps(_dst, _dst)));
+                    }
+                    for (; c < channels; ++c)
+                    {
+                        __m128 _dst = _mm_load_ss(pd + c);
+                        __m128 _sum = _mm_load_ss(buf + c);
+                        _mm_store_ss(buf + c, _mm_add_ss(_sum, _mm_mul_ss(_dst, _dst)));
+                    }
+                }
+                for (c = 0; c < channelsF; c += F)
+                    _mm_storeu_ps(buf + c, _mm_div_ps(_1, _mm_sqrt_ps(_mm_add_ps(_mm_mul_ps(_mm_loadu_ps(buf + c), _k), _eps))));
+                for (; c < channels; ++c)
+                    _mm_store_ss(buf + c, _mm_div_ss(_1, _mm_sqrt_ss(_mm_add_ss(_mm_mul_ss(_mm_load_ss(buf + c), _k), _eps))));
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    float* pd = dst + s * channels;
+                    for (c = 0; c < channelsF; c += F)
+                    {
+                        __m128 _dst = _mm_loadu_ps(pd + c);
+                        __m128 norm = _mm_loadu_ps(buf + c);
+                        _mm_storeu_ps(pd + c, _mm_add_ps(_mm_mul_ps(_mm_mul_ps(_dst, norm), _mm_loadu_ps(scale + c)), _mm_loadu_ps(shift + c)));
+                    }
+                    for (; c < channels; ++c)
+                    {
+                        __m128 _dst = _mm_load_ss(pd + c);
+                        __m128 norm = _mm_load_ss(buf + c);
+                        _mm_store_ss(pd + c, _mm_add_ss(_mm_mul_ss(_mm_mul_ss(_dst, norm), _mm_load_ss(scale + c)), _mm_load_ss(shift + c)));
+                    }
+                }
+
+                src += channels * spatial;
+                dst += channels * spatial;
+            }
+        }
+
+        void SynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst)
+        {
+            if (format == SimdTensorFormatNchw)
+                NormalizeNchwV3(src, batch, channels, spatial, scale, shift, *eps, dst);
+            else if (format == SimdTensorFormatNhwc)
+                NormalizeNhwcV3(src, batch, channels, spatial, scale, shift, *eps, buf, dst);
+            else
+                assert(0);
+        }
     }
 #endif
 }
