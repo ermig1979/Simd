@@ -350,7 +350,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-
         void NormalizeNchwV3(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, float eps, float* dst)
         {
             float k = 1.0f / float(spatial);
