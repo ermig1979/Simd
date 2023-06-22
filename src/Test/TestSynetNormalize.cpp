@@ -181,7 +181,7 @@ namespace Test
         Tensor32f shift(ToShape(channels));
         Tensor32f buf;
         if (extBuf)
-            buf.Reshape(ToShape(spatial));
+            buf.Reshape(ToShape(Simd::Max(spatial, channels)));
         Tensor32f dst1(ToShape(batch, channels, 1, spatial, format));
         Tensor32f dst2(ToShape(batch, channels, 1, spatial, format));
 
@@ -235,6 +235,30 @@ namespace Test
         if (Simd::Avx512bw::Enable)
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx512bw::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
 #endif 
+
+        return result;
+    }
+
+    bool SynetNormalizeLayerForwardV3AutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Base::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable)
+//            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sse41::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx2::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
+//#endif 
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx512bw::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
+//#endif 
 
         return result;
     }

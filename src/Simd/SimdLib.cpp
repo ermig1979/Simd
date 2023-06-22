@@ -6583,6 +6583,21 @@ SIMD_API void SimdSynetNormalizeLayerForwardV2(const float* src, size_t batch, s
 #endif
 }
 
+SIMD_API void SimdSynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial,
+    const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetNormalizeLayerForwardV3Ptr) (const float* src, size_t batch, size_t channels, size_t spatial,
+        const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
+    const static SimdSynetNormalizeLayerForwardV3Ptr simdSynetNormalizeLayerForwardV3 = SIMD_FUNC0(SynetNormalizeLayerForwardV3);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetNormalizeLayerForwardV3(src, batch, channels, spatial, scale, shift, eps, format, buf, dst);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void* SimdSynetPermuteInit(const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type)
 {
     SIMD_EMPTY();

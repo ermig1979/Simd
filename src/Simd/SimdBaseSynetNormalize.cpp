@@ -205,6 +205,87 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst)
+        {
+            float k = 1.0f / float(spatial), e = *eps;
+
+            if (format == SimdTensorFormatNchw)
+            {
+                for (size_t b = 0; b < batch; ++b)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                    {
+                        float sum = 0;
+                        for (size_t s = 0; s < spatial; ++s)
+                            sum += src[s];
+                        float mean = sum * k;
+                        for (size_t s = 0; s < spatial; ++s)
+                            dst[s] = src[s] - mean;
+
+                        float sqsum = 0;
+                        for (size_t s = 0; s < spatial; ++s)
+                            sqsum += Square(dst[s]);
+                        float norm = 1.0f / ::sqrt(sqsum * k + e);
+                        for (size_t s = 0; s < spatial; ++s)
+                            dst[s] = dst[s] * norm * scale[c] + shift[c];
+
+                        dst += spatial;
+                        src += spatial;
+                    }
+                }                
+
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                Array32f _buf;
+                if (buf == NULL)
+                {
+                    _buf.Resize(channels);
+                    buf = _buf.data;
+                }
+                for (size_t b = 0; b < batch; ++b)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                        buf[c] = 0;
+                    for (size_t s = 0, o = 0; s < spatial; ++s)
+                    {
+                        for (size_t c = 0; c < channels; ++c, ++o)
+                            buf[c] += src[o];
+                    }
+                    for (size_t c = 0; c < channels; ++c)
+                        buf[c] = buf[c] * k;
+                    for (size_t s = 0, o = 0; s < spatial; ++s)
+                    {
+                        for (size_t c = 0; c < channels; ++c, ++o)
+                            dst[o] = src[o] - buf[c];
+                    }
+
+                    for (size_t c = 0; c < channels; ++c)
+                        buf[c] = 0;
+                    for (size_t s = 0, o = 0; s < spatial; ++s)
+                    {
+                        for (size_t c = 0; c < channels; ++c, ++o)
+                            buf[c] += Square(dst[o]);
+                    }
+                    for (size_t c = 0; c < channels; ++c)
+                        buf[c] = 1.0f / ::sqrt(buf[c] * k + e);
+                    for (size_t s = 0, o = 0; s < spatial; ++s)
+                    {
+                        for (size_t c = 0; c < channels; ++c, ++o)
+                            dst[o] = dst[o] * buf[c] * scale[c] + shift[c];
+                    }
+
+                    src += channels * spatial;
+                    dst += channels * spatial;
+                }
+            }
+            else
+                assert(0);
+        }
     }
 #endif
 }

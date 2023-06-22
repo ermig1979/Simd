@@ -415,6 +415,7 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetNormalizeLayerForward);
     TEST_ADD_GROUP_A0(SynetNormalizeLayerForwardV2);
+    TEST_ADD_GROUP_A0(SynetNormalizeLayerForwardV3);
 
     TEST_ADD_GROUP_A0(SynetPermute);
 
