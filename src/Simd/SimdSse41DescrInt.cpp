@@ -682,9 +682,9 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<int bits> void MicroCosineDistances2x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+        template<int bits> void MicroCosineDistancesDirect2x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
 
-        template<> void MicroCosineDistances2x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect2x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size32 = AlignLo(size, 32), o = 16;
             __m128i a0, a1, b0;
@@ -763,7 +763,7 @@ namespace Simd
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
         }
 
-        template<> void MicroCosineDistances2x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect2x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m128i a00, a01, a10, a11, b00, b01;
@@ -843,7 +843,7 @@ namespace Simd
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
         }
 
-        template<> void MicroCosineDistances2x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect2x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m128i a00, a01, a10, a11, b00, b01;
@@ -923,7 +923,7 @@ namespace Simd
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
         }
 
-        template<> void MicroCosineDistances2x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect2x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m128i a00, a01, a10, a11, b00, b01;
@@ -1003,7 +1003,7 @@ namespace Simd
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
         }
 
-        template<> void MicroCosineDistances2x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect2x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m128i a00, a01, a10, a11, b00, b01;
@@ -1083,9 +1083,9 @@ namespace Simd
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
         }
 
-        template<int bits> void MicroCosineDistances1x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+        template<int bits> void MicroCosineDistancesDirect1x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
 
-        template<> void MicroCosineDistances1x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect1x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size32 = AlignLo(size, 32), o = 16;
             __m128i a0, a1, b0;
@@ -1143,7 +1143,7 @@ namespace Simd
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
-        template<> void MicroCosineDistances1x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect1x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m128i a00, a01, b00, b01;
@@ -1201,7 +1201,7 @@ namespace Simd
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
-        template<> void MicroCosineDistances1x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect1x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m128i a00, a01, b00, b01;
@@ -1259,7 +1259,7 @@ namespace Simd
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
-        template<> void MicroCosineDistances1x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect1x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m128i a00, a01, b00, b01;
@@ -1317,7 +1317,7 @@ namespace Simd
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
-        template<> void MicroCosineDistances1x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<> void MicroCosineDistancesDirect1x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m128i a00, a01, b00, b01;
@@ -1375,7 +1375,7 @@ namespace Simd
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
-        template<int bits> void MacroCosineDistances(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<int bits> void MacroCosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t M2 = AlignLoAny(M, 2);
             size_t N4 = AlignLo(N, 4);
@@ -1384,7 +1384,7 @@ namespace Simd
             {
                 size_t j = 0;
                 for (; j < N4; j += 4)
-                    MicroCosineDistances2x4<bits>(A + i, B + j, size, distances + j, stride);
+                    MicroCosineDistancesDirect2x4<bits>(A + i, B + j, size, distances + j, stride);
                 for (; j < N; j += 1)
                 {
                     CosineDistance<bits>(A[i + 0], B[j], size, distances + j + 0 * stride);
@@ -1396,7 +1396,7 @@ namespace Simd
             {
                 size_t j = 0;
                 for (; j < N4; j += 4)
-                    MicroCosineDistances1x4<bits>(A + i, B + j, size, distances + j, stride);
+                    MicroCosineDistancesDirect1x4<bits>(A + i, B + j, size, distances + j, stride);
                 for (; j < N; j += 1)
                     CosineDistance<bits>(A[i], B[j], size, distances + j);
                 distances += 1 * stride;
@@ -1410,8 +1410,8 @@ namespace Simd
         {
             _minMax32f = MinMax32f;
             _minMax16f = MinMax16f;
-            _microM = 2;
-            _microN = 4;
+            _microMd = 2;
+            _microNd = 4;
             switch (depth)
             {
             case 4:
@@ -1421,7 +1421,7 @@ namespace Simd
                 _decode32f = Decode32f4;
                 _decode16f = Decode16f4;
                 _cosineDistance = Sse41::CosineDistance<4>;
-                _macroCosineDistances = Sse41::MacroCosineDistances<4>;
+                _macroCosineDistancesDirect = Sse41::MacroCosineDistancesDirect<4>;
                 break;
             }
             case 5:
@@ -1431,7 +1431,7 @@ namespace Simd
                 _decode32f = Decode32f5;
                 _decode16f = Decode16f5;
                 _cosineDistance = Sse41::CosineDistance<5>;
-                _macroCosineDistances = Sse41::MacroCosineDistances<5>;
+                _macroCosineDistancesDirect = Sse41::MacroCosineDistancesDirect<5>;
                 break;
             }
             case 6:
@@ -1441,7 +1441,7 @@ namespace Simd
                 _decode32f = Decode32f6;
                 _decode16f = Decode16f6;
                 _cosineDistance = Sse41::CosineDistance<6>;
-                _macroCosineDistances = Sse41::MacroCosineDistances<6>;
+                _macroCosineDistancesDirect = Sse41::MacroCosineDistancesDirect<6>;
                 break;
             }
             case 7:
@@ -1451,7 +1451,7 @@ namespace Simd
                 _decode32f = Decode32f7;
                 _decode16f = Decode16f7;
                 _cosineDistance = Sse41::CosineDistance<7>;
-                _macroCosineDistances = Sse41::MacroCosineDistances<7>;
+                _macroCosineDistancesDirect = Sse41::MacroCosineDistancesDirect<7>;
                 break;
             }
             case 8:
@@ -1461,7 +1461,7 @@ namespace Simd
                 _decode32f = Decode32f8;
                 _decode16f = Decode16f8;
                 _cosineDistance = Sse41::CosineDistance<8>;
-                _macroCosineDistances = Sse41::MacroCosineDistances<8>;
+                _macroCosineDistancesDirect = Sse41::MacroCosineDistancesDirect<8>;
                 break;
             }
             default:
@@ -1471,40 +1471,32 @@ namespace Simd
 
         void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
         {
-            const size_t L2 = Base::AlgCacheL2();
-            size_t mN = AlignLoAny(L2 / _encSize, _microN);
-            size_t mM = AlignLoAny(L2 / _encSize, _microM);
-            for (size_t i = 0; i < M; i += mM)
-            {
-                size_t dM = Simd::Min(M, i + mM) - i;
-                for (size_t j = 0; j < N; j += mN)
-                {
-                    size_t dN = Simd::Min(N, j + mN) - j;
-                    _macroCosineDistances(dM, dN, A + i, B + j, _size, distances + i * N + j, N);
-                }
-            }
+            CosineDistancesDirect(M, N, A, B, distances);
         }
 
         void DescrInt::CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const
         {
+            Array8ucp a(M);
+            for (size_t i = 0; i < M; ++i) 
+                a[i] = A + i * _encSize;
+            Array8ucp b(N);
+            for (size_t j = 0; j < N; ++j)
+                b[j] = B + j * _encSize;
+            CosineDistancesMxNa(M, N, a.data, b.data, distances);
+        }
+
+        void DescrInt::CosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
+        {
             const size_t L2 = Base::AlgCacheL2();
-            size_t mN = AlignLoAny(L2 / _encSize, _microN);
-            size_t mM = AlignLoAny(L2 / _encSize, _microM);
-            Array8ucp ap(mM), bp(N);
+            size_t mN = AlignLoAny(L2 / _encSize, _microNd);
+            size_t mM = AlignLoAny(L2 / _encSize, _microMd);
             for (size_t i = 0; i < M; i += mM)
             {
                 size_t dM = Simd::Min(M, i + mM) - i;
-                for (size_t k = 0; k < dM; ++k)
-                    ap[k] = A + (i + k) * _encSize;
                 for (size_t j = 0; j < N; j += mN)
                 {
                     size_t dN = Simd::Min(N, j + mN) - j;
-                    if (i == 0)
-                    {
-                        for (size_t k = j, n = j + dN; k < n; ++k)
-                            bp[k] = B + k * _encSize;
-                    }
-                    _macroCosineDistances(dM, dN, ap.data, bp.data + j, _size, distances + i * N + j, N);
+                    _macroCosineDistancesDirect(dM, dN, A + i, B + j, _size, distances + i * N + j, N);
                 }
             }
         }
