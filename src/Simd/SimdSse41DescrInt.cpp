@@ -1405,13 +1405,56 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void UnpackNormA(size_t count, const uint8_t* const* src, float* dst, size_t stride)
+        {
+            for (size_t i = 0; i < count; ++i)
+                _mm_storeu_si128((__m128i*)dst + i, _mm_loadu_si128((__m128i*)src[i]));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+
+        static void UnpackNormB(size_t count, const uint8_t* const* src, float* dst, size_t stride)
+        {
+            size_t count4 = AlignLo(count, 4), i = 0;
+            for (; i < count4; i += 4, src += 4, dst += 4)
+            {
+                __m128 s0 = _mm_loadu_ps((float*)src[0]);
+                __m128 s1 = _mm_loadu_ps((float*)src[1]);
+                __m128 s2 = _mm_loadu_ps((float*)src[2]);
+                __m128 s3 = _mm_loadu_ps((float*)src[3]);
+                __m128 s00 = _mm_unpacklo_ps(s0, s2);
+                __m128 s01 = _mm_unpacklo_ps(s1, s3);
+                __m128 s10 = _mm_unpackhi_ps(s0, s2);
+                __m128 s11 = _mm_unpackhi_ps(s1, s3);
+                _mm_storeu_ps(dst + 0 * stride, _mm_unpacklo_ps(s00, s01));
+                _mm_storeu_ps(dst + 1 * stride, _mm_unpackhi_ps(s00, s01));
+                _mm_storeu_ps(dst + 2 * stride, _mm_unpacklo_ps(s10, s11));
+                _mm_storeu_ps(dst + 3 * stride, _mm_unpackhi_ps(s10, s11));
+            }
+            for (; i < count; i++, src++, dst++)
+            {
+                dst[0 * stride] = ((float*)src)[0];
+                dst[1 * stride] = ((float*)src)[1];
+                dst[2 * stride] = ((float*)src)[2];
+                dst[3 * stride] = ((float*)src)[3];
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         DescrInt::DescrInt(size_t size, size_t depth)
             : Base::DescrInt(size, depth)
         {
             _minMax32f = MinMax32f;
             _minMax16f = MinMax16f;
+            _unpackNormA = UnpackNormA;
+            _unpackNormB = UnpackNormB;
             _microMd = 2;
             _microNd = 4;
+            _unpSize = _size * (_depth == 8 ? 2 : 1);
+            _microMu = 5;
+            _microNu = 8;
             switch (depth)
             {
             case 4:
@@ -1471,7 +1514,10 @@ namespace Simd
 
         void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
         {
-            CosineDistancesDirect(M, N, A, B, distances);
+            if(_unpSize * _microNu > Base::AlgCacheL1() || N * 2 < _microNu || 1)
+                CosineDistancesDirect(M, N, A, B, distances);
+            else
+                CosineDistancesUnpack(M, N, A, B, distances);
         }
 
         void DescrInt::CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const
@@ -1497,6 +1543,29 @@ namespace Simd
                 {
                     size_t dN = Simd::Min(N, j + mN) - j;
                     _macroCosineDistancesDirect(dM, dN, A + i, B + j, _size, distances + i * N + j, N);
+                }
+            }
+        }
+
+        void DescrInt::CosineDistancesUnpack(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
+        {
+            size_t macroM = AlignLoAny(Base::AlgCacheL2() / _unpSize, _microMu);
+            size_t macroN = AlignLoAny(Base::AlgCacheL3() / _unpSize, _microNu);
+            Array8u dA(Min(macroM, M) * _unpSize);
+            Array8u dB(Min(macroN, N) * _unpSize);
+            Array32f nA(Min(macroM, M) * 4);
+            Array32f nB(AlignHi(Min(macroN, N), _microNu) * 4);
+            for (size_t i = 0; i < M; i += macroM)
+            {
+                size_t dM = Simd::Min(M, i + macroM) - i;
+                _unpackNormA(dM, A + i, nA.data, 1);
+                //_unpackDataA(dM, A + i, _size, dA.data, 1);
+                for (size_t j = 0; j < N; j += macroN)
+                {
+                    size_t dN = Simd::Min(N, j + macroN) - j;
+                    _unpackNormB(dN, B + j, nB.data, dN);
+                    //_unpackDataB(dN, B + j, _size, dB.data, _microNu);
+                    //_macroCosineDistancesUnpack(dM, dN, dA.data, nA.data, dB.data, nB.data, _size, distances + i * N + j, N);
                 }
             }
         }

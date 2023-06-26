@@ -61,7 +61,6 @@ namespace Simd
             typedef void (*Decode32fPtr)(const uint8_t * src, float scale, float shift, size_t size, float* dst);
             typedef void (*Decode16fPtr)(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst);
             typedef void (*CosineDistancePtr)(const uint8_t* a, const uint8_t* b, size_t size, float* distance);
-            typedef void (*MacroCosineDistancesDirectPtr)(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
 
             MinMax32fPtr _minMax32f;
             MinMax16fPtr _minMax16f;
@@ -70,8 +69,7 @@ namespace Simd
             Decode32fPtr _decode32f;
             Decode16fPtr _decode16f;
             CosineDistancePtr _cosineDistance;
-            MacroCosineDistancesDirectPtr _macroCosineDistancesDirect;
-            size_t _size, _depth, _encSize, _microMd, _microNd;
+            size_t _size, _depth, _encSize;
             float _range;
         };
 
@@ -94,6 +92,19 @@ namespace Simd
         protected:
             void CosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const;
 
+            typedef void (*MacroCosineDistancesDirectPtr)(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+            MacroCosineDistancesDirectPtr _macroCosineDistancesDirect;
+            size_t _microMd, _microNd;
+
+            void CosineDistancesUnpack(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const;
+
+            typedef void (*UnpackNormPtr)(size_t count, const uint8_t* const* src, float* dst, size_t stride);
+            typedef void (*UnpackDataPtr)(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride);
+            typedef void (*MacroCosineDistancesUnpackPtr)(size_t M, size_t N, const uint8_t* ad, const float * an, const uint8_t* bd, const float* bn, size_t size, float* distances, size_t stride);
+            UnpackNormPtr _unpackNormA, _unpackNormB;
+            UnpackDataPtr _unpackDataA, _unpackDataB;
+            MacroCosineDistancesUnpackPtr _macroCosineDistancesUnpack;
+            size_t _microMu, _microNu, _unpSize;
         };
 
         //-------------------------------------------------------------------------------------------------

@@ -543,8 +543,6 @@ namespace Simd
         {
             _encSize = 16 + DivHi(size * depth, 8);
             _range = float((1 << _depth) - 1);
-            _microMd = 1;
-            _microNd = 1;
             _minMax32f = MinMax32f;
             _minMax16f = MinMax16f;
             switch (depth)
@@ -556,7 +554,6 @@ namespace Simd
                 _decode32f = Decode32f4;
                 _decode16f = Decode16f4;
                 _cosineDistance = Base::CosineDistance<4>;
-                _macroCosineDistancesDirect = Base::MacroCosineDistancesDirect<4>;
                 break;
             }
             case 5:
@@ -566,7 +563,6 @@ namespace Simd
                 _decode32f = Decode32f5;
                 _decode16f = Decode16f5;
                 _cosineDistance = Base::CosineDistance<5>;
-                _macroCosineDistancesDirect = Base::MacroCosineDistancesDirect<5>;
                 break;
             }
             case 6:
@@ -576,7 +572,6 @@ namespace Simd
                 _decode32f = Decode32f6;
                 _decode16f = Decode16f6;
                 _cosineDistance = Base::CosineDistance<6>;
-                _macroCosineDistancesDirect = Base::MacroCosineDistancesDirect<6>;
                 break;
             }
             case 7:
@@ -586,7 +581,6 @@ namespace Simd
                 _decode32f = Decode32f7;
                 _decode16f = Decode16f7;
                 _cosineDistance = Base::CosineDistance<7>;
-                _macroCosineDistancesDirect = Base::MacroCosineDistancesDirect<7>;
                 break;
             }
             case 8: 
@@ -596,7 +590,6 @@ namespace Simd
                 _decode32f = Decode32f8;
                 _decode16f = Decode16f8;
                 _cosineDistance = Base::CosineDistance<8>;
-                _macroCosineDistancesDirect = Base::MacroCosineDistancesDirect<8>;
                 break;
             }
             default:
