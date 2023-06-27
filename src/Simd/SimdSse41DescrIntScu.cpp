@@ -37,14 +37,65 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        SIMD_INLINE __m128i UnpackData7x8(const uint8_t* src)
+        template<int bits> __m128i UnpackData8(const uint8_t* src);
+
+        template<> SIMD_INLINE __m128i UnpackData8<4>(const uint8_t* src)
+        {
+            __m128i _src = _mm_loadl_epi64((__m128i*)src);
+            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C4_SHFL0), C4_MULLO), 12);
+            return _mm_packus_epi16(lo, K_ZERO);
+        }
+
+        template<> SIMD_INLINE __m128i UnpackData8<5>(const uint8_t* src)
+        {
+            __m128i _src = _mm_loadl_epi64((__m128i*)src);
+            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C5_SHFL0), C5_MULLO), 11);
+            return _mm_packus_epi16(lo, K_ZERO);
+        }
+
+        template<> SIMD_INLINE __m128i UnpackData8<6>(const uint8_t* src)
+        {
+            __m128i _src = _mm_loadl_epi64((__m128i*)src);
+            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C6_SHFL0), C6_MULLO), 10);
+            return _mm_packus_epi16(lo, K_ZERO);
+        }
+
+        template<> SIMD_INLINE __m128i UnpackData8<7>(const uint8_t* src)
         {
             __m128i _src = _mm_loadl_epi64((__m128i*)src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C7_SHFL0), C7_MULLO), 9);
             return _mm_packus_epi16(lo, K_ZERO);
         }
 
-        SIMD_INLINE __m128i UnpackData7x16(const uint8_t* src)
+        //-------------------------------------------------------------------------------------------------
+
+        template<int bits> __m128i UnpackData16(const uint8_t* src);
+
+        template<> SIMD_INLINE __m128i UnpackData16<4>(const uint8_t* src)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C4_SHFL0), C4_MULLO), 12);
+            __m128i hi = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C4_SHFL1), C4_MULLO), 12);
+            return _mm_packus_epi16(lo, hi);
+        }
+
+        template<> SIMD_INLINE __m128i UnpackData16<5>(const uint8_t* src)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C5_SHFL0), C5_MULLO), 11);
+            __m128i hi = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C5_SHFL1), C5_MULLO), 11);
+            return _mm_packus_epi16(lo, hi);
+        }
+
+        template<> SIMD_INLINE __m128i UnpackData16<6>(const uint8_t* src)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C6_SHFL0), C6_MULLO), 10);
+            __m128i hi = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C6_SHFL1), C6_MULLO), 10);
+            return _mm_packus_epi16(lo, hi);
+        }
+
+        template<> SIMD_INLINE __m128i UnpackData16<7>(const uint8_t* src)
         {
             __m128i _src = _mm_loadu_si128((__m128i*)src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C7_SHFL0), C7_MULLO), 9);
@@ -52,7 +103,9 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        static void UnpackDataA7(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
+        //-------------------------------------------------------------------------------------------------
+
+        template<int bits> void UnpackDataA(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
             size_t size16 = AlignLo(size, 16);
             for (size_t i = 0; i < count; i++)
@@ -60,12 +113,14 @@ namespace Simd
                 const uint8_t* ps = src[i] + 16;
                 uint8_t* pd = (uint8_t*)dst + i * size;
                 size_t j = 0;
-                for (; j < size16; j += 16, ps += 14, pd += 16)
-                    _mm_storeu_si128((__m128i*)pd, UnpackData7x16(ps));
-                for (; j < size; j += 8, ps += 7, pd += 8)
-                    _mm_storel_epi64((__m128i*)pd, UnpackData7x8(ps));
+                for (; j < size16; j += 16, ps += 2 * bits, pd += 16)
+                    _mm_storeu_si128((__m128i*)pd, UnpackData16<bits>(ps));
+                for (; j < size; j += 8, ps += bits, pd += 8)
+                    _mm_storel_epi64((__m128i*)pd, UnpackData8<bits>(ps));
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         static void UnpackDataA8(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
@@ -90,12 +145,12 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void UnpackDataB7x4x16(const uint8_t* const* src, size_t offset, uint8_t* dst)
+        template<int bits> SIMD_INLINE void UnpackDataBx4x16(const uint8_t* const* src, size_t offset, uint8_t* dst)
         {
-            __m128i a0 = UnpackData7x16(src[0] + offset);
-            __m128i a1 = UnpackData7x16(src[1] + offset);
-            __m128i a2 = UnpackData7x16(src[2] + offset);
-            __m128i a3 = UnpackData7x16(src[3] + offset);
+            __m128i a0 = UnpackData16<bits>(src[0] + offset);
+            __m128i a1 = UnpackData16<bits>(src[1] + offset);
+            __m128i a2 = UnpackData16<bits>(src[2] + offset);
+            __m128i a3 = UnpackData16<bits>(src[3] + offset);
             __m128i b0 = _mm_unpacklo_epi32(a0, a2);
             __m128i b1 = _mm_unpacklo_epi32(a1, a3);
             __m128i b2 = _mm_unpackhi_epi32(a0, a2);
@@ -106,32 +161,32 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst + 6, _mm_unpackhi_epi32(b2, b3));
         }
 
-        SIMD_INLINE void UnpackDataB7x4x8(const uint8_t* const* src, size_t offset, uint8_t* dst)
+        template<int bits> SIMD_INLINE void UnpackDataBx4x8(const uint8_t* const* src, size_t offset, uint8_t* dst)
         {
-            __m128i a0 = UnpackData7x8(src[0] + offset);
-            __m128i a1 = UnpackData7x8(src[1] + offset);
-            __m128i a2 = UnpackData7x8(src[2] + offset);
-            __m128i a3 = UnpackData7x8(src[3] + offset);
+            __m128i a0 = UnpackData8<bits>(src[0] + offset);
+            __m128i a1 = UnpackData8<bits>(src[1] + offset);
+            __m128i a2 = UnpackData8<bits>(src[2] + offset);
+            __m128i a3 = UnpackData8<bits>(src[3] + offset);
             __m128i b0 = _mm_unpacklo_epi32(a0, a2);
             __m128i b1 = _mm_unpacklo_epi32(a1, a3);
             _mm_storeu_si128((__m128i*)dst + 0, _mm_unpacklo_epi32(b0, b1));
             _mm_storeu_si128((__m128i*)dst + 2, _mm_unpackhi_epi32(b0, b1));
         }
 
-        static void UnpackDataB7(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
+        template<int bits> void UnpackDataB(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
             size_t count8 = AlignLo(count, 8), size16 = AlignLo(size, 16), i, j, o;
             for (i = 0; i < count8; i += 8, src += 8)
             {
-                for (j = 0, o = 16; j < size16; j += 16, o += 14, dst += 8 * A)
+                for (j = 0, o = 16; j < size16; j += 16, o += 2 * bits, dst += 8 * A)
                 {
-                    UnpackDataB7x4x16(src + 0, o, dst + 0);
-                    UnpackDataB7x4x16(src + 4, o, dst + A);
+                    UnpackDataBx4x16<bits>(src + 0, o, dst + 0);
+                    UnpackDataBx4x16<bits>(src + 4, o, dst + A);
                 }
-                for (; j < size; j += 8, o += 7, dst += 4 * A)
+                for (; j < size; j += 8, o += bits, dst += 4 * A)
                 {
-                    UnpackDataB7x4x8(src + 0, o, dst + 0);
-                    UnpackDataB7x4x8(src + 2, o, dst + A);
+                    UnpackDataBx4x8<bits>(src + 0, o, dst + 0);
+                    UnpackDataBx4x8<bits>(src + 2, o, dst + A);
                 }
             }
             if (i < count)
@@ -139,18 +194,20 @@ namespace Simd
                 const uint8_t* _src[8];
                 for (size_t j = 0; j < 8; i++, j++)
                     _src[j] = i < count ? *src++ : src[-1];
-                for (j = 0, o = 16; j < size16; j += 16, o += 14, dst += 8 * A)
+                for (j = 0, o = 16; j < size16; j += 16, o += 2 * bits, dst += 8 * A)
                 {
-                    UnpackDataB7x4x16(src + 0, o, dst + 0);
-                    UnpackDataB7x4x16(src + 4, o, dst + A);
+                    UnpackDataBx4x16<bits>(src + 0, o, dst + 0);
+                    UnpackDataBx4x16<bits>(src + 4, o, dst + A);
                 }
-                for (; j < size; j += 8, o += 7, dst += 4 * A)
+                for (; j < size; j += 8, o += bits, dst += 4 * A)
                 {
-                    UnpackDataB7x4x8(src + 0, o, dst + 0);
-                    UnpackDataB7x4x8(src + 2, o, dst + A);
+                    UnpackDataBx4x8<bits>(src + 0, o, dst + 0);
+                    UnpackDataBx4x8<bits>(src + 2, o, dst + A);
                 }
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void UnpackDataB8x4(const uint8_t* const* src, size_t offset, uint8_t* dst)
         {
@@ -453,7 +510,10 @@ namespace Simd
         {
             switch (depth)
             {
-            case 7: return transpose ? UnpackDataB7 : UnpackDataA7;
+            case 4: return transpose ? UnpackDataB<4> : UnpackDataA<4>;
+            case 5: return transpose ? UnpackDataB<5> : UnpackDataA<5>;
+            case 6: return transpose ? UnpackDataB<6> : UnpackDataA<6>;
+            case 7: return transpose ? UnpackDataB<7> : UnpackDataA<7>;
             case 8: return transpose ? UnpackDataB8 : UnpackDataA8;
             default: return NULL;
             }
