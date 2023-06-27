@@ -139,7 +139,7 @@ namespace Simd
 
         void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
         {
-            if(_unpSize * _microNu > Base::AlgCacheL1() || N * 2 < _microNu || _depth < 5 || _depth == 8)
+            if(_unpSize * _microNu > Base::AlgCacheL1() || N * 2 < _microNu || _depth == 8)
                 CosineDistancesDirect(M, N, A, B, distances);
             else
                 CosineDistancesUnpack(M, N, A, B, distances);

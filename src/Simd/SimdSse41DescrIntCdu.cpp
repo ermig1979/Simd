@@ -37,38 +37,6 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template<int bits> __m128i UnpackData8(const uint8_t* src);
-
-        template<> SIMD_INLINE __m128i UnpackData8<4>(const uint8_t* src)
-        {
-            __m128i _src = _mm_loadl_epi64((__m128i*)src);
-            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C4_SHFL0), C4_MULLO), 12);
-            return _mm_packus_epi16(lo, K_ZERO);
-        }
-
-        template<> SIMD_INLINE __m128i UnpackData8<5>(const uint8_t* src)
-        {
-            __m128i _src = _mm_loadl_epi64((__m128i*)src);
-            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C5_SHFL0), C5_MULLO), 11);
-            return _mm_packus_epi16(lo, K_ZERO);
-        }
-
-        template<> SIMD_INLINE __m128i UnpackData8<6>(const uint8_t* src)
-        {
-            __m128i _src = _mm_loadl_epi64((__m128i*)src);
-            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C6_SHFL0), C6_MULLO), 10);
-            return _mm_packus_epi16(lo, K_ZERO);
-        }
-
-        template<> SIMD_INLINE __m128i UnpackData8<7>(const uint8_t* src)
-        {
-            __m128i _src = _mm_loadl_epi64((__m128i*)src);
-            __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C7_SHFL0), C7_MULLO), 9);
-            return _mm_packus_epi16(lo, K_ZERO);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         template<int bits> __m128i UnpackData16(const uint8_t* src);
 
         template<> SIMD_INLINE __m128i UnpackData16<4>(const uint8_t* src)
@@ -291,21 +259,21 @@ namespace Simd
                 } 
                 if (N == 8)
                 {
-                    if (M > 0) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab00, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab01, distances + 4), an += 4, distances += stride;
-                    if (M > 1) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab10, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab11, distances + 4), an += 4, distances += stride;
-                    if (M > 2) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab20, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab21, distances + 4), an += 4, distances += stride;
-                    if (M > 3) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab30, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab31, distances + 4), an += 4, distances += stride;
-                    if (M > 4) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab40, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab41, distances + 4), an += 4, distances += stride;
-                    if (M > 5) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab50, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab51, distances + 4), an += 4, distances += stride;
+                    if (M > 0) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab00, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab01, distances + 4), an += 4, distances += stride;
+                    if (M > 1) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab10, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab11, distances + 4), an += 4, distances += stride;
+                    if (M > 2) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab20, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab21, distances + 4), an += 4, distances += stride;
+                    if (M > 3) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab30, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab31, distances + 4), an += 4, distances += stride;
+                    if (M > 4) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab40, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab41, distances + 4), an += 4, distances += stride;
+                    if (M > 5) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab50, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab51, distances + 4), an += 4, distances += stride;
                 }
                 else
                 {
-                    if (M > 0) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab00, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab01, distances + 4, N - 4), an += 4, distances += stride;
-                    if (M > 1) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab10, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab11, distances + 4, N - 4), an += 4, distances += stride;
-                    if (M > 2) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab20, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab21, distances + 4, N - 4), an += 4, distances += stride;
-                    if (M > 3) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab30, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab31, distances + 4, N - 4), an += 4, distances += stride;
-                    if (M > 4) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab40, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab41, distances + 4, N - 4), an += 4, distances += stride;
-                    if (M > 5) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab50, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab51, distances + 4, N - 4), an += 4, distances += stride;
+                    if (M > 0) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab00, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab01, distances + 4, N - 4), an += 4, distances += stride;
+                    if (M > 1) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab10, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab11, distances + 4, N - 4), an += 4, distances += stride;
+                    if (M > 2) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab20, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab21, distances + 4, N - 4), an += 4, distances += stride;
+                    if (M > 3) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab30, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab31, distances + 4, N - 4), an += 4, distances += stride;
+                    if (M > 4) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab40, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab41, distances + 4, N - 4), an += 4, distances += stride;
+                    if (M > 5) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab50, distances + 0), DecodeCosineDistances1xF(an, bn + 4, bnStride, ab51, distances + 4, N - 4), an += 4, distances += stride;
                 }
             }
             else
@@ -329,21 +297,21 @@ namespace Simd
                 }
                 if (N == 4)
                 {
-                    if (M > 0) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab00, distances + 0), an += 4, distances += stride;
-                    if (M > 1) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab10, distances + 0), an += 4, distances += stride;
-                    if (M > 2) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab20, distances + 0), an += 4, distances += stride;
-                    if (M > 3) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab30, distances + 0), an += 4, distances += stride;
-                    if (M > 4) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab40, distances + 0), an += 4, distances += stride;
-                    if (M > 5) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab50, distances + 0), an += 4, distances += stride;
+                    if (M > 0) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab00, distances + 0), an += 4, distances += stride;
+                    if (M > 1) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab10, distances + 0), an += 4, distances += stride;
+                    if (M > 2) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab20, distances + 0), an += 4, distances += stride;
+                    if (M > 3) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab30, distances + 0), an += 4, distances += stride;
+                    if (M > 4) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab40, distances + 0), an += 4, distances += stride;
+                    if (M > 5) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab50, distances + 0), an += 4, distances += stride;
                 }
                 else
                 {
-                    if (M > 0) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab00, distances + 0, N), an += 4, distances += stride;
-                    if (M > 1) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab10, distances + 0, N), an += 4, distances += stride;
-                    if (M > 2) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab20, distances + 0, N), an += 4, distances += stride;
-                    if (M > 3) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab30, distances + 0, N), an += 4, distances += stride;
-                    if (M > 4) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab40, distances + 0, N), an += 4, distances += stride;
-                    if (M > 5) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab50, distances + 0, N), an += 4, distances += stride;
+                    if (M > 0) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab00, distances + 0, N), an += 4, distances += stride;
+                    if (M > 1) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab10, distances + 0, N), an += 4, distances += stride;
+                    if (M > 2) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab20, distances + 0, N), an += 4, distances += stride;
+                    if (M > 3) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab30, distances + 0, N), an += 4, distances += stride;
+                    if (M > 4) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab40, distances + 0, N), an += 4, distances += stride;
+                    if (M > 5) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab50, distances + 0, N), an += 4, distances += stride;
                 }
             }
         }
@@ -414,21 +382,21 @@ namespace Simd
                     if (M > 4) a0 = Set4(ad4 + k), Madd4<true>(ab40, a0, b0), Madd4<true>(ab41, a0, b1);
                     bd += DA;
                 }
-                if (N == 8)
+                if (N == DF)
                 {
-                    if (M > 0) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab00, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab01, distances + 4), an += 4, distances += stride;
-                    if (M > 1) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab10, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab11, distances + 4), an += 4, distances += stride;
-                    if (M > 2) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab20, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab21, distances + 4), an += 4, distances += stride;
-                    if (M > 3) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab30, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab31, distances + 4), an += 4, distances += stride;
-                    if (M > 4) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab40, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab41, distances + 4), an += 4, distances += stride;
+                    if (M > 0) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab00, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab01, distances + F), an += 4, distances += stride;
+                    if (M > 1) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab10, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab11, distances + F), an += 4, distances += stride;
+                    if (M > 2) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab20, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab21, distances + F), an += 4, distances += stride;
+                    if (M > 3) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab30, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab31, distances + F), an += 4, distances += stride;
+                    if (M > 4) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab40, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab41, distances + F), an += 4, distances += stride;
                 }
                 else
                 {
-                    if (M > 0) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab00, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab01, distances + 4, N - 4), an += 4, distances += stride;
-                    if (M > 1) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab10, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab11, distances + 4, N - 4), an += 4, distances += stride;
-                    if (M > 2) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab20, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab21, distances + 4, N - 4), an += 4, distances += stride;
-                    if (M > 3) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab30, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab31, distances + 4, N - 4), an += 4, distances += stride;
-                    if (M > 4) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab40, distances + 0), DecodeCosineDistances1x4(an, bn + 4, bnStride, ab41, distances + 4, N - 4), an += 4, distances += stride;
+                    if (M > 0) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab00, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab01, distances + F, N - F), an += 4, distances += stride;
+                    if (M > 1) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab10, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab11, distances + F, N - F), an += 4, distances += stride;
+                    if (M > 2) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab20, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab21, distances + F, N - F), an += 4, distances += stride;
+                    if (M > 3) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab30, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab31, distances + F, N - F), an += 4, distances += stride;
+                    if (M > 4) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab40, distances + 0), DecodeCosineDistances1xF(an, bn + F, bnStride, ab41, distances + F, N - F), an += 4, distances += stride;
                 }
             }
             else
@@ -448,21 +416,21 @@ namespace Simd
                     if (M > 4) a0 = Set4(ad4 + k), Madd4<true>(ab40, a0, b0);
                     bd += DA;
                 }
-                if (N == 4)
+                if (N == F)
                 {
-                    if (M > 0) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab00, distances + 0), an += 4, distances += stride;
-                    if (M > 1) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab10, distances + 0), an += 4, distances += stride;
-                    if (M > 2) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab20, distances + 0), an += 4, distances += stride;
-                    if (M > 3) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab30, distances + 0), an += 4, distances += stride;
-                    if (M > 4) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab40, distances + 0), an += 4, distances += stride;
+                    if (M > 0) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab00, distances + 0), an += 4, distances += stride;
+                    if (M > 1) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab10, distances + 0), an += 4, distances += stride;
+                    if (M > 2) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab20, distances + 0), an += 4, distances += stride;
+                    if (M > 3) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab30, distances + 0), an += 4, distances += stride;
+                    if (M > 4) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab40, distances + 0), an += 4, distances += stride;
                 }
                 else
                 {
-                    if (M > 0) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab00, distances + 0, N), an += 4, distances += stride;
-                    if (M > 1) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab10, distances + 0, N), an += 4, distances += stride;
-                    if (M > 2) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab20, distances + 0, N), an += 4, distances += stride;
-                    if (M > 3) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab30, distances + 0, N), an += 4, distances += stride;
-                    if (M > 4) DecodeCosineDistances1x4(an, bn + 0, bnStride, ab40, distances + 0, N), an += 4, distances += stride;
+                    if (M > 0) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab00, distances + 0, N), an += 4, distances += stride;
+                    if (M > 1) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab10, distances + 0, N), an += 4, distances += stride;
+                    if (M > 2) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab20, distances + 0, N), an += 4, distances += stride;
+                    if (M > 3) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab30, distances + 0, N), an += 4, distances += stride;
+                    if (M > 4) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab40, distances + 0, N), an += 4, distances += stride;
                 }
             }
         }
@@ -489,20 +457,19 @@ namespace Simd
             size_t M5 = AlignLoAny(M, 5);
             Correlation8_2xM_Ptr correlation_2x5 = GetCorrelation8_2xM(5);
             Correlation8_2xM_Ptr correlation_2xT = GetCorrelation8_2xM(M - M5);
-            for (size_t j = 0; j < N; j += 8)
+            for (size_t j = 0; j < N; j += DF)
             {
-                size_t dN = Simd::Min<size_t>(8, N - j);
+                size_t dN = Simd::Min<size_t>(DF, N - j);
                 size_t i = 0;
                 for (; i < M5; i += 5)
                     correlation_2x5(dN, K, ad + i * K, bd, an + i * 4, bn, N, distances + i * stride, stride);
                 if (i < M)
                     correlation_2xT(dN, K, ad + i * K, bd, an + i * 4, bn, N, distances + i * stride, stride);
-                bd += K * 8;
-                bn += 8;
-                distances += 8;
+                bd += K * DF;
+                bn += DF;
+                distances += DF;
             }
         }
-
 
         //-------------------------------------------------------------------------------------------------
 

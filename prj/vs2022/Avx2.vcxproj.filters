@@ -337,6 +337,18 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2DescrInt.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntCdd.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntCdu.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntDec.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntEnc.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">

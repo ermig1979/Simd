@@ -382,10 +382,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntDec.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntScd.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdd.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntScu.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdu.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
   </ItemGroup>

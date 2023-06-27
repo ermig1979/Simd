@@ -37,8 +37,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrInt.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntDec.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntEnc.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntScd.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntScu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41EdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Fill.cpp" />

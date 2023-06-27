@@ -32,6 +32,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Deinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2DescrInt.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntCdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntCdu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntDec.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntEnc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Detection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2EdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp" />
