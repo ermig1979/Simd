@@ -100,7 +100,7 @@ namespace Simd
 
             typedef void (*UnpackNormPtr)(size_t count, const uint8_t* const* src, float* dst, size_t stride);
             typedef void (*UnpackDataPtr)(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride);
-            typedef void (*MacroCosineDistancesUnpackPtr)(size_t M, size_t N, const uint8_t* ad, const float * an, const uint8_t* bd, const float* bn, size_t size, float* distances, size_t stride);
+            typedef void (*MacroCosineDistancesUnpackPtr)(size_t M, size_t N, size_t K, const uint8_t* ad, const float * an, const uint8_t* bd, const float* bn, float* distances, size_t stride);
             UnpackNormPtr _unpackNormA, _unpackNormB;
             UnpackDataPtr _unpackDataA, _unpackDataB;
             MacroCosineDistancesUnpackPtr _macroCosineDistancesUnpack;

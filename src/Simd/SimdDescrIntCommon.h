@@ -111,6 +111,30 @@ namespace Simd
 
             _mm_storeu_ps(distances, _mm_min_ps(_mm_max_ps(_mm_sub_ps(_mm_set1_ps(1.0f), _mm_div_ps(ab, _mm_mul_ps(aNorm, bNorm))), _mm_setzero_ps()), _mm_set1_ps(2.0f)));
         }
+
+        SIMD_INLINE void DecodeCosineDistances1x4(const float* a, const float *b, size_t stride, __m128i abSum, float* distances)
+        {
+            __m128 aScale = _mm_set1_ps(a[0]);
+            __m128 aShift = _mm_set1_ps(a[1]);
+            __m128 aMean = _mm_set1_ps(a[2]);
+            __m128 aNorm = _mm_set1_ps(a[3]);
+            __m128 bScale = _mm_loadu_ps(b + 0 * stride);
+            __m128 bShift = _mm_loadu_ps(b + 1 * stride);
+            __m128 bMean = _mm_loadu_ps(b + 2 * stride);
+            __m128 bNorm = _mm_loadu_ps(b + 3 * stride);
+            __m128 ab = _mm_mul_ps(_mm_cvtepi32_ps(abSum), _mm_mul_ps(aScale, bScale));
+            ab = _mm_add_ps(_mm_mul_ps(aMean, bShift), ab);
+            ab = _mm_add_ps(_mm_mul_ps(bMean, aShift), ab);
+            _mm_storeu_ps(distances, _mm_min_ps(_mm_max_ps(_mm_sub_ps(_mm_set1_ps(1.0f), _mm_div_ps(ab, _mm_mul_ps(aNorm, bNorm))), _mm_setzero_ps()), _mm_set1_ps(2.0f)));
+        }
+
+        SIMD_INLINE void DecodeCosineDistances1x4(const float* a, const float* b, size_t stride, __m128i abSum, float* distances, size_t N)
+        {
+            float d[4];
+            DecodeCosineDistances1x4(a, b, stride, abSum, d);
+            for (size_t i = 0; i < N; ++i)
+                distances[i] = d[i];
+        }
     }
 #endif
 
