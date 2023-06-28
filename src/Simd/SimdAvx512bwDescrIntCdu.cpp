@@ -137,7 +137,7 @@ namespace Simd
                 size_t j = 0;
                 for (; j < size64; j += 64, ps += 8 * bits, pd += 64)
                     _mm512_mask_storeu_epi8(pd, dstBody, UnpackData64<bits>(ps, srcBody));
-                if(j < size64)
+                if(j < size)
                     _mm512_mask_storeu_epi8(pd, dstTail, UnpackData64<bits>(ps, srcTail));
             }
         }
@@ -274,9 +274,9 @@ namespace Simd
 
         template<int bits> void UnpackDataB(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
-            size_t countDF = AlignLo(count, DF), size64 = AlignLo(size, 64), i, j, o;
+            size_t countDF = AlignLo(count, DF), size64 = AlignLo(size, 64), tail = size - size64, i, j, o;
             UnpackDataBx16xN_Ptr unpackDataMain = GetUnpackDataBx16xN<bits>(64);
-            UnpackDataBx16xN_Ptr unpackDataTail = GetUnpackDataBx16xN<bits>(size - size64);
+            UnpackDataBx16xN_Ptr unpackDataTail = GetUnpackDataBx16xN<bits>(tail);
             for (i = 0; i < countDF; i += DF, src += DF)
             {
                 for (j = 0, o = 16; j < size64; j += 64, o += 8 * bits, dst += 32 * A)
@@ -288,6 +288,7 @@ namespace Simd
                 {
                     unpackDataTail(src + 0, o, dst + 0);
                     unpackDataTail(src + F, o, dst + A);
+                    dst += tail * DF;
                 }
             }
             if (i < count)
@@ -398,7 +399,7 @@ namespace Simd
                     if (M > 0xB) a0 = Set4(ad5 + k6), Madd4<true>(abB0, a0, b0);
                     bd += DA;
                 }
-                __mmask16 tail = TailMask16(N - F);
+                __mmask16 tail = TailMask16(N);
                 if (M > 0x0) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab00, distances + 0, tail), an += 4, distances += stride;
                 if (M > 0x1) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab10, distances + 0, tail), an += 4, distances += stride;
                 if (M > 0x2) DecodeCosineDistances1xF(an, bn + 0, bnStride, ab20, distances + 0, tail), an += 4, distances += stride;

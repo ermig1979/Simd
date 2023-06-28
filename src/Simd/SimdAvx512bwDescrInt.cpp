@@ -146,10 +146,10 @@ namespace Simd
             }
             for (; i < count; i++, src++, dst++)
             {
-                dst[0 * stride] = ((float*)src)[0];
-                dst[1 * stride] = ((float*)src)[1];
-                dst[2 * stride] = ((float*)src)[2];
-                dst[3 * stride] = ((float*)src)[3];
+                dst[0 * stride] = ((float*)src[0])[0];
+                dst[1 * stride] = ((float*)src[0])[1];
+                dst[2 * stride] = ((float*)src[0])[2];
+                dst[3 * stride] = ((float*)src[0])[3];
             }
         }
 

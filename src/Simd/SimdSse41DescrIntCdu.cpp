@@ -154,7 +154,7 @@ namespace Simd
                 for (; j < size; j += 8, o += bits, dst += 4 * A)
                 {
                     UnpackDataBx4x8<bits>(src + 0, o, dst + 0);
-                    UnpackDataBx4x8<bits>(src + 2, o, dst + A);
+                    UnpackDataBx4x8<bits>(src + 4, o, dst + A);
                 }
             }
             if (i < count)
@@ -164,13 +164,13 @@ namespace Simd
                     _src[j] = i < count ? *src++ : src[-1];
                 for (j = 0, o = 16; j < size16; j += 16, o += 2 * bits, dst += 8 * A)
                 {
-                    UnpackDataBx4x16<bits>(src + 0, o, dst + 0);
-                    UnpackDataBx4x16<bits>(src + 4, o, dst + A);
+                    UnpackDataBx4x16<bits>(_src + 0, o, dst + 0);
+                    UnpackDataBx4x16<bits>(_src + 4, o, dst + A);
                 }
                 for (; j < size; j += 8, o += bits, dst += 4 * A)
                 {
-                    UnpackDataBx4x8<bits>(src + 0, o, dst + 0);
-                    UnpackDataBx4x8<bits>(src + 2, o, dst + A);
+                    UnpackDataBx4x8<bits>(_src + 0, o, dst + 0);
+                    UnpackDataBx4x8<bits>(_src + 4, o, dst + A);
                 }
             }
         }

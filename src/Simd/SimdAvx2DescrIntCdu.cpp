@@ -186,9 +186,9 @@ namespace Simd
                 for (; j < size; j += 8, o += bits, dst += 8 * Sse41::A)
                 {
                     UnpackDataBx4x8<bits>(src + 0, o, dst + 0 * Sse41::A);
-                    UnpackDataBx4x8<bits>(src + 2, o, dst + 1 * Sse41::A);
-                    UnpackDataBx4x8<bits>(src + 4, o, dst + 2 * Sse41::A);
-                    UnpackDataBx4x8<bits>(src + 6, o, dst + 3 * Sse41::A);
+                    UnpackDataBx4x8<bits>(src + 4, o, dst + 1 * Sse41::A);
+                    UnpackDataBx4x8<bits>(src + 8, o, dst + 2 * Sse41::A);
+                    UnpackDataBx4x8<bits>(src + 12, o, dst + 3 * Sse41::A);
                 }
             }
             if (i < count)
@@ -198,24 +198,24 @@ namespace Simd
                     _src[j] = i < count ? *src++ : src[-1];
                 for (j = 0, o = 16; j < size32; j += 32, o += 4 * bits, dst += 16 * A)
                 {
-                    UnpackDataBx4x32<bits>(src + 0, o, dst + 0 * Sse41::A);
-                    UnpackDataBx4x32<bits>(src + 4, o, dst + 1 * Sse41::A);
-                    UnpackDataBx4x32<bits>(src + 8, o, dst + 2 * Sse41::A);
-                    UnpackDataBx4x32<bits>(src + 12, o, dst + 3 * Sse41::A);
+                    UnpackDataBx4x32<bits>(_src + 0, o, dst + 0 * Sse41::A);
+                    UnpackDataBx4x32<bits>(_src + 4, o, dst + 1 * Sse41::A);
+                    UnpackDataBx4x32<bits>(_src + 8, o, dst + 2 * Sse41::A);
+                    UnpackDataBx4x32<bits>(_src + 12, o, dst + 3 * Sse41::A);
                 }
                 for (; j < size16; j += 16, o += 2 * bits, dst += 16 * Sse41::A)
                 {
-                    UnpackDataBx4x16<bits>(src + 0, o, dst + 0 * Sse41::A);
-                    UnpackDataBx4x16<bits>(src + 4, o, dst + 1 * Sse41::A);
-                    UnpackDataBx4x16<bits>(src + 8, o, dst + 2 * Sse41::A);
-                    UnpackDataBx4x16<bits>(src + 12, o, dst + 3 * Sse41::A);
+                    UnpackDataBx4x16<bits>(_src + 0, o, dst + 0 * Sse41::A);
+                    UnpackDataBx4x16<bits>(_src + 4, o, dst + 1 * Sse41::A);
+                    UnpackDataBx4x16<bits>(_src + 8, o, dst + 2 * Sse41::A);
+                    UnpackDataBx4x16<bits>(_src + 12, o, dst + 3 * Sse41::A);
                 }
                 for (; j < size; j += 8, o += bits, dst += 8 * Sse41::A)
                 {
-                    UnpackDataBx4x8<bits>(src + 0, o, dst + 0 * Sse41::A);
-                    UnpackDataBx4x8<bits>(src + 2, o, dst + 1 * Sse41::A);
-                    UnpackDataBx4x8<bits>(src + 4, o, dst + 2 * Sse41::A);
-                    UnpackDataBx4x8<bits>(src + 6, o, dst + 3 * Sse41::A);
+                    UnpackDataBx4x8<bits>(_src + 0, o, dst + 0 * Sse41::A);
+                    UnpackDataBx4x8<bits>(_src + 4, o, dst + 1 * Sse41::A);
+                    UnpackDataBx4x8<bits>(_src + 8, o, dst + 2 * Sse41::A);
+                    UnpackDataBx4x8<bits>(_src + 12, o, dst + 3 * Sse41::A);
                 }
             }
         }
