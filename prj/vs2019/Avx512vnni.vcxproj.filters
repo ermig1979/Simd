@@ -99,6 +99,18 @@
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDescrInt.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdErf.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDepthwise.cpp">
@@ -123,6 +135,12 @@
       <Filter>Avx512vnni</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iOutput.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniDescrInt.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniDescrIntCdu.cpp">
       <Filter>Avx512vnni</Filter>
     </ClCompile>
   </ItemGroup>

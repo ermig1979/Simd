@@ -18,7 +18,10 @@
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDescrInt.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdErf.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />
@@ -32,6 +35,7 @@
     <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
@@ -43,6 +47,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniCpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniDescrInt.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniDescrIntCdu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirect.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirect1x1.cpp" />

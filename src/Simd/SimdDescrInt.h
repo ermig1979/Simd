@@ -187,5 +187,24 @@ namespace Simd
         void* DescrIntInit(size_t size, size_t depth);
     }
 #endif
+
+#ifdef SIMD_AVX512VNNI_ENABLE
+    namespace Avx512vnni
+    {
+        class DescrInt : public Avx512bw::DescrInt
+        {
+        public:
+            DescrInt(size_t size, size_t depth);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        Sse41::DescrInt::MacroCosineDistancesUnpackPtr GetMacroCosineDistancesUnpack(size_t depth);
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* DescrIntInit(size_t size, size_t depth);
+    }
+#endif
 }
 #endif//__SimdDescrInt_h__
