@@ -34,6 +34,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrInt.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntCdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntCdu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntDec.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntEnc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDetection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwEdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFill.cpp" />

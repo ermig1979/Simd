@@ -176,10 +176,9 @@ namespace Simd
         {
             size_t macroM = AlignLoAny(Base::AlgCacheL2() / _unpSize, _microMu);
             size_t macroN = AlignLoAny(Base::AlgCacheL3() / _unpSize, _microNu);
-            Array8u dA(Min(macroM, M) * _unpSize);
-            Array8u dB(Min(macroN, N) * _unpSize);
-            Array32f nA(Min(macroM, M) * 4);
-            Array32f nB(AlignHi(Min(macroN, N), _microNu) * 4);
+            size_t sizeA = Min(macroM, M), sizeB = AlignHi(Min(macroN, N), _microNu);
+            Array8u dA(sizeA * _unpSize), dB(sizeB * _unpSize);
+            Array32f nA(sizeA * 4), nB(sizeB * 4);
             for (size_t i = 0; i < M; i += macroM)
             {
                 size_t dM = Simd::Min(M, i + macroM) - i;

@@ -370,6 +370,18 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrInt.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntCdd.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntCdu.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntDec.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntEnc.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">

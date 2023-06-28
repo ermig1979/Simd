@@ -229,7 +229,7 @@ namespace Simd
             const uint8_t* ad2 = ad0 + 2 * K;
             const uint8_t* ad3 = ad0 + 3 * K;
             const uint8_t* ad4 = ad0 + 4 * K;
-            if (N > 4)
+            if (N > F)
             {
                 if (M > 0) ab00 = _mm256_setzero_si256(), ab01 = _mm256_setzero_si256();
                 if (M > 1) ab10 = _mm256_setzero_si256(), ab11 = _mm256_setzero_si256();

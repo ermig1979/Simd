@@ -257,6 +257,8 @@ namespace Simd
                 _mm256_min_ps(_mm256_max_ps(_mm256_sub_ps(_mm256_set1_ps(1.0f), _mm256_div_ps(ab, _mm256_mul_ps(aNorm, bNorm))), _mm256_setzero_ps()), _mm256_set1_ps(2.0f)));
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void DecodeCosineDistances1xF(const float* a, const float* b, size_t stride, __m256i abSum, float* distances)
         {
             __m256 aScale = _mm256_set1_ps(a[0]);
@@ -339,6 +341,10 @@ namespace Simd
             -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE,
             -1, -1, -1, -1, -1, -1, -1, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, -1, -1);
 
+        const __m512i C4_MULLO = SIMD_MM512_SETR_EPI16(
+            4096, 256, 4096, 256, 4096, 256, 4096, 256, 4096, 256, 4096, 256, 4096, 256, 4096, 256,
+            4096, 256, 4096, 256, 4096, 256, 4096, 256, 4096, 256, 4096, 256, 4096, 256, 4096, 256);
+
         const __m512i C5_PERM = SIMD_MM512_SETR_EPI32(
             0x0, 0x1, 0x0, 0x0, 0x1, 0x2, 0x0, 0x0, 0x2, 0x3, 0x0, 0x0, 0x3, 0x4, 0x0, 0x0);
         const __m512i C5_SHFL = SIMD_MM512_SETR_EPI8(
@@ -371,6 +377,24 @@ namespace Simd
         const __m512i C7_MULLO = SIMD_MM512_SETR_EPI16(
             2, 4, 8, 16, 32, 64, 128, 256, 2, 4, 8, 16, 32, 64, 128, 256,
             2, 4, 8, 16, 32, 64, 128, 256, 2, 4, 8, 16, 32, 64, 128, 256);
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void DecodeCosineDistances1xF(const float* a, const float* b, size_t stride, __m512i abSum, float* distances, __mmask16 mask = -1)
+        {
+            __m512 aScale = _mm512_set1_ps(a[0]);
+            __m512 aShift = _mm512_set1_ps(a[1]);
+            __m512 aMean = _mm512_set1_ps(a[2]);
+            __m512 aNorm = _mm512_set1_ps(a[3]);
+            __m512 bScale = _mm512_maskz_loadu_ps(mask, b + 0 * stride);
+            __m512 bShift = _mm512_maskz_loadu_ps(mask, b + 1 * stride);
+            __m512 bMean = _mm512_maskz_loadu_ps(mask, b + 2 * stride);
+            __m512 bNorm = _mm512_maskz_loadu_ps(mask, b + 3 * stride);
+            __m512 ab = _mm512_mul_ps(_mm512_cvtepi32_ps(abSum), _mm512_mul_ps(aScale, bScale));
+            ab = _mm512_add_ps(_mm512_mul_ps(aMean, bShift), ab);
+            ab = _mm512_add_ps(_mm512_mul_ps(bMean, aShift), ab);
+            _mm512_mask_storeu_ps(distances, mask, _mm512_min_ps(_mm512_max_ps(_mm512_sub_ps(_mm512_set1_ps(1.0f), _mm512_div_ps(ab, _mm512_mul_ps(aNorm, bNorm))), _mm512_setzero_ps()), _mm512_set1_ps(2.0f)));
+        }
     }
 #endif
 }
