@@ -28,8 +28,10 @@
 #include "Test/TestLog.h"
 #include "Test/TestString.h"
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #endif
 
@@ -555,7 +557,7 @@ namespace Test
     private:
         static bool RunGroup(const Group & group)
         {
-#if defined(_WIN32)
+#if defined(_MSC_VER)
             __try
             {
                 return group.autoTest();
@@ -570,7 +572,7 @@ namespace Test
 #endif
         }
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
         static void PrintErrorMessage(int code)
         {
             String desc;

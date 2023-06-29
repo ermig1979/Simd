@@ -254,7 +254,7 @@ namespace Simd
 
         typedef void (*UnpackDataBx16xN_Ptr)(const uint8_t* const* src, size_t offset, uint8_t* dst);
 
-        template<int bits> UnpackDataBx16xN_Ptr GetUnpackDataBx16xN(int tail)
+        template<int bits> UnpackDataBx16xN_Ptr GetUnpackDataBx16xN(size_t tail)
         {
             switch (tail / 8)
             {

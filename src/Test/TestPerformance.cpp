@@ -29,7 +29,9 @@
 #include "Test/TestHtml.h"
 
 #if defined(_MSC_VER)
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #elif defined(__GNUC__)
 #include <sys/time.h>
@@ -295,7 +297,7 @@ namespace Test
             AddToFunction(src, dst.avx512vnni, enable.avx512vnni);
         if (desc.find("Simd::Avx512bf16::") != std::string::npos)
             AddToFunction(src, dst.avx512bf16, enable.avx512bf16);
-        if (desc.find("Simd::Amx::") != std::string::npos)
+        if (desc.find("Simd::AmxBf16::") != std::string::npos)
             AddToFunction(src, dst.amx, enable.amx);
         if (desc.find("Simd::Vmx::") != std::string::npos)
             AddToFunction(src, dst.vmx, enable.vmx);
@@ -444,8 +446,8 @@ namespace Test
         info << "Execution time: " + GetCurrentDateTimeString();
         info << ". Test threads: " << threads;
         info << ". Simd version: " << SimdVersion() << ".";
-#if defined(__linux__)
         String cpu = "Unknown", mem = "Unknown";
+#if defined(__linux__)
         ::FILE* c = ::popen("lscpu | grep 'Model name:' | sed -r 's/Model name:\\s{1,}//g'", "r");
         if (c)
         {
@@ -464,6 +466,7 @@ namespace Test
             mem = mem.substr(0, mem.find('\n'));
             ::pclose(m);
         }
+#endif        
         info << std::endl;
         info << "CPU: " << cpu;
         info << "; Sockets: " << SimdCpuInfo(SimdCpuInfoSockets);
@@ -485,7 +488,7 @@ namespace Test
         info << (SimdCpuInfo(SimdCpuInfoVsx) ? " VSX" : "");
         info << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
         info << ".";
-#endif
+
         return info.str();
     }
 
