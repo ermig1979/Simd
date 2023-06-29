@@ -29,7 +29,7 @@ jobs:
       run: nuget restore ./prj/vs2022 -Project2ProjectTimeOut 300
 
     - name: Host properties
-      run: wmic cpu get /format:value
+      run: wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors /format:value
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -58,7 +58,7 @@ jobs:
       run: nuget restore ./prj/vs2019 -Project2ProjectTimeOut 300
 
     - name: Host properties
-      run: wmic cpu get /format:value
+      run: wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors /format:value
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -93,7 +93,7 @@ jobs:
         Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit", "OptionId.NetFxSoftwareDevelopmentKit"
 
     - name: Host properties
-      run: wmic cpu get /format:value
+      run: wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors /format:value
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -129,7 +129,7 @@ jobs:
         Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit", "OptionId.NetFxSoftwareDevelopmentKit"
 
     - name: Host properties
-      run: wmic cpu get /format:value
+      run: wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors /format:value
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}

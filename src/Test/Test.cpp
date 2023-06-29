@@ -28,7 +28,7 @@
 #include "Test/TestLog.h"
 #include "Test/TestString.h"
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
 #endif
@@ -555,19 +555,38 @@ namespace Test
     private:
         static bool RunGroup(const Group & group)
         {
-#if defined(_MSC_VER)
+#if defined(_WIN32)
             __try
             {
                 return group.autoTest();
             }
             __except (EXCEPTION_EXECUTE_HANDLER)
             {
+                PrintErrorMessage(GetExceptionCode());
                 return false;
             }
 #else
             return group.autoTest();
 #endif
         }
+
+#if defined(_WIN32)
+        static void PrintErrorMessage(int code)
+        {
+            String desc;
+            switch (code)
+            {
+            case EXCEPTION_ACCESS_VIOLATION: desc = "Access violation"; break;
+            case EXCEPTION_FLT_DIVIDE_BY_ZERO: desc = "Float divide by zero"; break;
+            case EXCEPTION_INT_DIVIDE_BY_ZERO: desc = "Integer divide by zero"; break;
+            case EXCEPTION_ILLEGAL_INSTRUCTION: desc = "Illegal instruction"; break;
+            case EXCEPTION_STACK_OVERFLOW: desc = "Stack overflow"; break;
+            default:
+                desc = "Unknown error(" + std::to_string(code) + ")";
+            }
+            TEST_LOG_SS(Error, "There is unhandled exception: " << desc << " !");
+        }
+#endif
     };
     volatile bool Task::s_stopped = false;
     typedef std::shared_ptr<Task> TaskPtr;
