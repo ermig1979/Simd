@@ -44,12 +44,14 @@ namespace Test
     static void TestCpuInfo()
     {
         std::cout << "Simd Library : " << SimdVersion() << std::endl;
+        std::cout << "CPU : " << SimdCpuDesc(SimdCpuDescModel) << std::endl;
         std::cout << "Sockets : " << SimdCpuInfo(SimdCpuInfoSockets) << std::endl;
         std::cout << "Cores : " << SimdCpuInfo(SimdCpuInfoCores) << std::endl;
         std::cout << "Threads : " << SimdCpuInfo(SimdCpuInfoThreads) << std::endl;
         std::cout << "L1D Cache : " << SimdCpuInfo(SimdCpuInfoCacheL1) / 1024 << " KB" << std::endl;
         std::cout << "L2 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024 << " KB" << std::endl;
         std::cout << "L3 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024 << " KB" << std::endl;
+        std::cout << "RAM : " << SimdCpuInfo(SimdCpuInfoRam) / 1024 / 1024  << " MB" << std::endl;
         std::cout << "SSE4.1: " << (SimdCpuInfo(SimdCpuInfoSse41) ? "Yes" : "No") << std::endl;
         std::cout << "AVX: " << (SimdCpuInfo(SimdCpuInfoAvx) ? "Yes" : "No") << std::endl;
         std::cout << "AVX2: " << (SimdCpuInfo(SimdCpuInfoAvx2) ? "Yes" : "No") << std::endl;

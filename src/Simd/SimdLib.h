@@ -221,6 +221,14 @@ typedef enum
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types
+    Describes type of description which can return function ::SimdCpuDesc.
+*/
+typedef enum
+{
+    SimdCpuDescModel, /*!< A CPU model name. */
+} SimdCpuDescType;
+
+/*! @ingroup c_types
     Describes type of information which can return function ::SimdCpuInfo.
 */
 typedef enum
@@ -685,9 +693,34 @@ extern "C"
 
     /*! @ingroup info
 
-        \fn size_t SimdCpuInfo(SimdCpuInfoType type);
+        \fn const char* SimdCpuDesc(SimdCpuDescType type);
 
-        \short Gets info about CPU and %Simd Library.
+        \short Gets description of CPU and %Simd Library.
+
+        \note See enumeration ::SimdCpuDescType.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdLib.h"
+        #include <iostream>
+
+        int main()
+        {
+            std::cout << "CPU: " << SimdCpuDesc(SimdCpuDescModel) << std::endl;
+            return 0;
+        }
+        \endverbatim
+
+        \param [in] type - a type of required description.
+        \return a value which contains description of CPU and %Simd Library.
+    */
+    SIMD_API const char* SimdCpuDesc(SimdCpuDescType type);
+
+    /*! @ingroup info
+
+        \fn uint64_t SimdCpuInfo(SimdCpuInfoType type);
+
+        \short Gets information about CPU and %Simd Library.
 
         \note See enumeration ::SimdCpuInfoType.
 
@@ -2470,9 +2503,6 @@ extern "C"
         \fn void * SimdDescrIntInit(size_t size, size_t depth);
 
         \short Initilizes Integer Descriptor Engine.
-
-        All images must have the same width and height.
-        This function used for NV12 to YUV420P conversion.
 
         \param [in] size - a length of original (32-bit or 16-bit) float descriptor. It be multiple of 8. Also it must be less or equal than 32768.
         \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 4, 5, 6, 7, 8.
@@ -7676,9 +7706,9 @@ extern "C"
 
     /*! @ingroup synet_normalize
 
-    \fn void SimdSynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
+        \fn void SimdSynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
 
-    \short Performs forward propagation of NormalizeLayer (Version 3).
+        \short Performs forward propagation of NormalizeLayer (Version 3).
 
         Algorithm's details:
         \verbatim

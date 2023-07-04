@@ -462,29 +462,10 @@ namespace Test
         std::stringstream info;
         info << "Execution time: " + GetCurrentDateTimeString();
         info << ". Test threads: " << threads;
-        info << ". Simd version: " << SimdVersion() << ".";
-        String cpu = "Unknown";
-#if defined(__linux__)
-        ::FILE* c = ::popen("lscpu | grep 'Model name:' | sed -r 's/Model name:\\s{1,}//g'", "r");
-        if (c)
-        {
-            char buf[PATH_MAX];
-            while (::fgets(buf, PATH_MAX, c));
-            cpu = buf;
-            cpu = cpu.substr(0, cpu.find('\n'));
-            ::pclose(c);
-        }
-#elif defined(_WIN32)
-        String cpuRaw = Execute("wmic cpu get Name /format:value");
-        size_t cpuBeg = cpuRaw.find('=') + 1;
-        size_t cpuEnd = cpuRaw.find('\r', cpuBeg);
-        while (cpuRaw[cpuEnd - 1] == ' ')
-            cpuEnd--;
-        cpu = cpuRaw.substr(cpuBeg, cpuEnd - cpuBeg);
-#endif        
+        info << ". Simd version: " << SimdVersion();
+        info << ". CPU: " << SimdCpuDesc(SimdCpuDescModel) << ".";
         info << std::endl;
-        info << "CPU: " << cpu;
-        info << "; Sockets: " << SimdCpuInfo(SimdCpuInfoSockets);
+        info << "Sockets: " << SimdCpuInfo(SimdCpuInfoSockets);
         info << ", Cores: " << SimdCpuInfo(SimdCpuInfoCores);
         info << ", Threads: " << SimdCpuInfo(SimdCpuInfoThreads);
         info << "; Cache L1D: " << SimdCpuInfo(SimdCpuInfoCacheL1) / 1024 << " KB";

@@ -182,6 +182,15 @@ namespace Simd
             return 0;
         }
 
+        uint64_t CpuRamSize()
+        {
+            MEMORYSTATUSEX memorystatusex;
+            memorystatusex.dwLength = sizeof(memorystatusex);
+            if (GlobalMemoryStatusEx(&memorystatusex) == TRUE)
+                return memorystatusex.ullTotalPhys;
+            return 0;
+        }
+
         static std::string Execute(const char* cmd)
         {
             std::string result = "";            
@@ -199,13 +208,14 @@ namespace Simd
             return result;
         }
 
-        uint64_t CpuRamSize()
+        std::string CpuModel()
         {
-            MEMORYSTATUSEX memorystatusex;
-            memorystatusex.dwLength = sizeof(memorystatusex);
-            if (GlobalMemoryStatusEx(&memorystatusex) == TRUE)
-                return memorystatusex.ullTotalPhys;
-            return 0;
+            std::string raw = Execute("wmic cpu get Name /format:value");
+            size_t beg = raw.find('=') + 1;
+            size_t end = raw.find('\r', beg);
+            while (raw[end - 1] == ' ')
+                end--;
+            return raw.substr(beg, end - beg);
         }
 
 #elif defined(__GNUC__)
@@ -280,7 +290,6 @@ namespace Simd
             }
         }
 #endif
-
         uint64_t CpuRamSize()
         {
             uint64_t size = 0;
@@ -295,6 +304,20 @@ namespace Simd
             return size;
         }
 
+        std::string CpuModel()
+        {
+            std::string model;
+            ::FILE* file = ::popen("lscpu | grep 'Model name:' | sed -r 's/Model name:\\s{1,}//g'", "r");
+            if (file)
+            {
+                char buffer[PATH_MAX];
+                while (::fgets(buffer, PATH_MAX, file));
+                model = buffer;
+                model = model.substr(0, model.find('\n'));
+                ::pclose(file);
+            }
+            return model;
+        }
 #else
 #error This platform is unsupported!
 #endif
@@ -302,6 +325,7 @@ namespace Simd
 
     namespace Cpu
     {
+        const std::string CPU_MODEL = Base::CpuModel();
         const size_t SOCKET_NUMBER = Base::CpuSocketNumber();
         const size_t CORE_NUMBER = Base::CpuCoreNumber();
 #ifdef SIMD_CPP_2011_ENABLE

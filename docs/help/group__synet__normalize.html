@@ -352,9 +352,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Performs forward propagation of NormalizeLayer (Version 3). </p>
-<pre class="fragment">Algorithm's details:
-\verbatim
-for(b = 0; b &lt; batch; ++b)
+<p >Algorithm's details: </p><pre class="fragment">for(b = 0; b &lt; batch; ++b)
     for(c = 0; c &lt; channels; ++c)
     {
         sum = 0;
@@ -383,7 +381,7 @@ for(b = 0; b &lt; batch; ++b)
     <tr><td class="paramdir">[in]</td><td class="paramname">eps</td><td>- a pointer to epsilon parameter. It is used to prevent division by zero. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size of the buffer must be equal to channels. Can be NULL (it causes usage of internal buffer). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float tensor.  </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float tensor. </td></tr>
   </table>
   </dd>
 </dl>

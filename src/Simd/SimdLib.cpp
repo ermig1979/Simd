@@ -107,6 +107,16 @@ SIMD_API const char * SimdVersion()
 
 using namespace Simd;
 
+SIMD_API const char* SimdCpuDesc(SimdCpuDescType type)
+{
+    switch (type)
+    {
+    case SimdCpuDescModel: return Cpu::CPU_MODEL.c_str();
+    default:
+        return NULL;
+    }
+}
+
 SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 {
     switch (type)
