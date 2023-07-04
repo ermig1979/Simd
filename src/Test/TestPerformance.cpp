@@ -446,11 +446,11 @@ namespace Test
         std::shared_ptr<FILE> pipe(_popen(cmd, "r"), _pclose);
         if (!pipe) 
             return "ERROR";
-        char buffer[MAX_PATH];
+        char buffer[260];
         std::string result = "";
         while (!feof(pipe.get())) 
         {
-            if (fgets(buffer, MAX_PATH, pipe.get()) != NULL)
+            if (fgets(buffer, sizeof(buffer), pipe.get()) != NULL)
                 result += buffer;
         }
         return result;
@@ -463,7 +463,7 @@ namespace Test
         info << "Execution time: " + GetCurrentDateTimeString();
         info << ". Test threads: " << threads;
         info << ". Simd version: " << SimdVersion() << ".";
-        String cpu = "Unknown", mem = "Unknown";
+        String cpu = "Unknown";
 #if defined(__linux__)
         ::FILE* c = ::popen("lscpu | grep 'Model name:' | sed -r 's/Model name:\\s{1,}//g'", "r");
         if (c)
@@ -474,15 +474,6 @@ namespace Test
             cpu = cpu.substr(0, cpu.find('\n'));
             ::pclose(c);
         }
-        ::FILE* m = ::popen("grep MemTotal /proc/meminfo | awk '{printf \"%.1f\", $2 / 1024 / 1024 }'", "r");
-        if (m)
-        {
-            char buf[PATH_MAX];
-            while (::fgets(buf, PATH_MAX, m));
-            mem = buf;
-            mem = mem.substr(0, mem.find('\n'));
-            ::pclose(m);
-        }
 #elif defined(_WIN32)
         String cpuRaw = Execute("wmic cpu get Name /format:value");
         size_t cpuBeg = cpuRaw.find('=') + 1;
@@ -490,13 +481,6 @@ namespace Test
         while (cpuRaw[cpuEnd - 1] == ' ')
             cpuEnd--;
         cpu = cpuRaw.substr(cpuBeg, cpuEnd - cpuBeg);
-        MEMORYSTATUSEX memorystatusex;
-        memorystatusex.dwLength = sizeof(memorystatusex);
-        if (GlobalMemoryStatusEx(&memorystatusex) == TRUE)
-        {
-            double memGB = double(memorystatusex.ullTotalPhys) / 1024.0 / 1024.0 / 1024.0;
-            mem = ToString(memGB, 1, false);
-        }
 #endif        
         info << std::endl;
         info << "CPU: " << cpu;
@@ -505,8 +489,8 @@ namespace Test
         info << ", Threads: " << SimdCpuInfo(SimdCpuInfoThreads);
         info << "; Cache L1D: " << SimdCpuInfo(SimdCpuInfoCacheL1) / 1024 << " KB";
         info << ", L2: " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024 << " KB";
-        info << ", L3: " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024 / 1024 << " MB";
-        info << ", RAM: " << mem << " GB";
+        info << ", L3: " << ToString(double(SimdCpuInfo(SimdCpuInfoCacheL3) / 1024) / 1024, 1, false) << " MB";
+        info << ", RAM: " << ToString(double(SimdCpuInfo(SimdCpuInfoRam)) / 1024 / 1024 / 1024, 1, false) << " GB";
         info << "; SIMD:";
         info << (SimdCpuInfo(SimdCpuInfoAmx) ? " AMX" : "");
         info << (SimdCpuInfo(SimdCpuInfoAvx512bf16) ? " AVX-512BF16" : "");

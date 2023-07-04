@@ -107,7 +107,7 @@ SIMD_API const char * SimdVersion()
 
 using namespace Simd;
 
-SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
+SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 {
     switch (type)
     {
@@ -117,6 +117,7 @@ SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
     case SimdCpuInfoCacheL1: return Cpu::L1_CACHE_SIZE;
     case SimdCpuInfoCacheL2: return Cpu::L2_CACHE_SIZE;
     case SimdCpuInfoCacheL3: return Cpu::L3_CACHE_SIZE;
+    case SimdCpuInfoRam: return Cpu::RAM_SIZE;
 #ifdef SIMD_SSE41_ENABLE
     case SimdCpuInfoSse41: return Sse41::Enable ? 1 : 0;
 #endif

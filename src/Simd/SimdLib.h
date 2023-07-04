@@ -231,6 +231,7 @@ typedef enum
     SimdCpuInfoCacheL1, /*!< A size of level 1 data cache. */
     SimdCpuInfoCacheL2, /*!< A size of level 2 cache. */
     SimdCpuInfoCacheL3, /*!< A size of level 3 cache. */
+    SimdCpuInfoRam, /*!< A size of physical RAM. */
     SimdCpuInfoSse41, /*!< Availability of SSE4.1 (x86). */
     SimdCpuInfoAvx, /*!< Availability of AVX (x86). */
     SimdCpuInfoAvx2, /*!< Availability of AVX2 (x86). */
@@ -697,12 +698,13 @@ extern "C"
 
         int main()
         {
-            std::cout << "Sockets : " << SimdCpuInfo(SimdCpuInfoSockets) << std::endl;
-            std::cout << "Cores : " << SimdCpuInfo(SimdCpuInfoCores) << std::endl;
-            std::cout << "Threads : " << SimdCpuInfo(SimdCpuInfoThreads) << std::endl;
-            std::cout << "L1D Cache : " << SimdCpuInfo(SimdCpuInfoCacheL1) / 1024  << " KB" << std::endl;
-            std::cout << "L2 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024  << " KB" << std::endl;
-            std::cout << "L3 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024  << " KB" << std::endl;
+            std::cout << "Sockets: " << SimdCpuInfo(SimdCpuInfoSockets) << std::endl;
+            std::cout << "Cores: " << SimdCpuInfo(SimdCpuInfoCores) << std::endl;
+            std::cout << "Threads: " << SimdCpuInfo(SimdCpuInfoThreads) << std::endl;
+            std::cout << "L1D Cache: " << SimdCpuInfo(SimdCpuInfoCacheL1) / 1024  << " KB" << std::endl;
+            std::cout << "L2 Cache: " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024  << " KB" << std::endl;
+            std::cout << "L3 Cache: " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024  << " KB" << std::endl;
+            std::cout << "RAM: " << SimdCpuInfo(SimdCpuInfoRam) / 1024 / 1024 << " MB" << std::endl;
             std::cout << "SSE4.1: " << (SimdCpuInfo(SimdCpuInfoSse41) ? "Yes" : "No") << std::endl;
             std::cout << "AVX: " << (SimdCpuInfo(SimdCpuInfoAvx) ? "Yes" : "No") << std::endl;
             std::cout << "AVX2: " << (SimdCpuInfo(SimdCpuInfoAvx2) ? "Yes" : "No") << std::endl;
@@ -720,7 +722,7 @@ extern "C"
         \param [in] type - a type of required information.
         \return a value which contains information about CPU and %Simd Library.
     */
-    SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type);
+    SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type);
 
     /*! @ingroup info
 

@@ -95,6 +95,7 @@ namespace Simd
         extern const size_t L1_CACHE_SIZE;
         extern const size_t L2_CACHE_SIZE;
         extern const size_t L3_CACHE_SIZE;
+        extern const uint64_t RAM_SIZE;
     }
 
     namespace Base

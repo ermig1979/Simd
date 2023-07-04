@@ -182,6 +182,32 @@ namespace Simd
             return 0;
         }
 
+        static std::string Execute(const char* cmd)
+        {
+            std::string result = "";            
+            ::FILE * pipe = _popen(cmd, "r");
+            if (pipe)
+            {
+                char buffer[260];
+                while (!feof(pipe))
+                {
+                    if (fgets(buffer, sizeof(buffer), pipe) != NULL)
+                        result += buffer;
+                }
+                _pclose(pipe);
+            }
+            return result;
+        }
+
+        uint64_t CpuRamSize()
+        {
+            MEMORYSTATUSEX memorystatusex;
+            memorystatusex.dwLength = sizeof(memorystatusex);
+            if (GlobalMemoryStatusEx(&memorystatusex) == TRUE)
+                return memorystatusex.ullTotalPhys;
+            return 0;
+        }
+
 #elif defined(__GNUC__)
 
         size_t CpuSocketNumber()
@@ -255,6 +281,20 @@ namespace Simd
         }
 #endif
 
+        uint64_t CpuRamSize()
+        {
+            uint64_t size = 0;
+            ::FILE* file = ::popen("grep MemTotal /proc/meminfo | awk '{printf \"%d\", $2 }'", "r");
+            if (file)
+            {
+                char buf[PATH_MAX];
+                while (::fgets(buf, PATH_MAX, file));
+                size = atoll(buf) * 1024;
+                ::pclose(file);
+            }
+            return size;
+        }
+
 #else
 #error This platform is unsupported!
 #endif
@@ -270,5 +310,6 @@ namespace Simd
         const size_t L1_CACHE_SIZE = Base::CpuCacheSize(1);
         const size_t L2_CACHE_SIZE = Base::CpuCacheSize(2);
         const size_t L3_CACHE_SIZE = Base::CpuCacheSize(3);
+        const uint64_t RAM_SIZE = Base::CpuRamSize();
     }
 }

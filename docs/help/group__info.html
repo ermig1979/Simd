@@ -53,7 +53,7 @@ Functions</h2></td></tr>
 <tr class="memitem:gae04f3a0b6c983cfbfbecc36bf58aff64"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#gae04f3a0b6c983cfbfbecc36bf58aff64">SimdVersion</a> ()</td></tr>
 <tr class="memdesc:gae04f3a0b6c983cfbfbecc36bf58aff64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets version of Simd Library.  <a href="group__info.html#gae04f3a0b6c983cfbfbecc36bf58aff64">More...</a><br /></td></tr>
 <tr class="separator:gae04f3a0b6c983cfbfbecc36bf58aff64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9bfd6c53c168b66dbf73b966bcfb2e37"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#ga9bfd6c53c168b66dbf73b966bcfb2e37">SimdCpuInfo</a> (<a class="el" href="group__c__types.html#ga1fae7864d7881bf1ec39a5186cabbb74">SimdCpuInfoType</a> type)</td></tr>
+<tr class="memitem:ga9bfd6c53c168b66dbf73b966bcfb2e37"><td class="memItemLeft" align="right" valign="top">SIMD_API uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#ga9bfd6c53c168b66dbf73b966bcfb2e37">SimdCpuInfo</a> (<a class="el" href="group__c__types.html#ga1fae7864d7881bf1ec39a5186cabbb74">SimdCpuInfoType</a> type)</td></tr>
 <tr class="memdesc:ga9bfd6c53c168b66dbf73b966bcfb2e37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets info about CPU and Simd Library.  <a href="group__info.html#ga9bfd6c53c168b66dbf73b966bcfb2e37">More...</a><br /></td></tr>
 <tr class="separator:ga9bfd6c53c168b66dbf73b966bcfb2e37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga033c1ca6f8a20a74552c764d688514fe"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#ga033c1ca6f8a20a74552c764d688514fe">SimdPerformanceStatistic</a> ()</td></tr>
@@ -109,12 +109,13 @@ Functions</h2></td></tr>
 
 int main()
 {
-    std::cout &lt;&lt; "Sockets : " &lt;&lt; SimdCpuInfo(SimdCpuInfoSockets) &lt;&lt; std::endl;
-    std::cout &lt;&lt; "Cores : " &lt;&lt; SimdCpuInfo(SimdCpuInfoCores) &lt;&lt; std::endl;
-    std::cout &lt;&lt; "Threads : " &lt;&lt; SimdCpuInfo(SimdCpuInfoThreads) &lt;&lt; std::endl;
-    std::cout &lt;&lt; "L1D Cache : " &lt;&lt; SimdCpuInfo(SimdCpuInfoCacheL1) / 1024  &lt;&lt; " KB" &lt;&lt; std::endl;
-    std::cout &lt;&lt; "L2 Cache : " &lt;&lt; SimdCpuInfo(SimdCpuInfoCacheL2) / 1024  &lt;&lt; " KB" &lt;&lt; std::endl;
-    std::cout &lt;&lt; "L3 Cache : " &lt;&lt; SimdCpuInfo(SimdCpuInfoCacheL3) / 1024  &lt;&lt; " KB" &lt;&lt; std::endl;
+    std::cout &lt;&lt; "Sockets: " &lt;&lt; SimdCpuInfo(SimdCpuInfoSockets) &lt;&lt; std::endl;
+    std::cout &lt;&lt; "Cores: " &lt;&lt; SimdCpuInfo(SimdCpuInfoCores) &lt;&lt; std::endl;
+    std::cout &lt;&lt; "Threads: " &lt;&lt; SimdCpuInfo(SimdCpuInfoThreads) &lt;&lt; std::endl;
+    std::cout &lt;&lt; "L1D Cache: " &lt;&lt; SimdCpuInfo(SimdCpuInfoCacheL1) / 1024  &lt;&lt; " KB" &lt;&lt; std::endl;
+    std::cout &lt;&lt; "L2 Cache: " &lt;&lt; SimdCpuInfo(SimdCpuInfoCacheL2) / 1024  &lt;&lt; " KB" &lt;&lt; std::endl;
+    std::cout &lt;&lt; "L3 Cache: " &lt;&lt; SimdCpuInfo(SimdCpuInfoCacheL3) / 1024  &lt;&lt; " KB" &lt;&lt; std::endl;
+    std::cout &lt;&lt; "RAM: " &lt;&lt; SimdCpuInfo(SimdCpuInfoRam) / 1024 / 1024 &lt;&lt; " MB" &lt;&lt; std::endl;
     std::cout &lt;&lt; "SSE4.1: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoSse41) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "AVX: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "AVX2: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx2) ? "Yes" : "No") &lt;&lt; std::endl;
