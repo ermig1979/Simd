@@ -440,6 +440,23 @@ namespace Test
         return "Simd Library Performance Report:";
     }
 
+#if defined(_WIN32)
+    static std::string Execute(const char* cmd) 
+    {
+        std::shared_ptr<FILE> pipe(_popen(cmd, "r"), _pclose);
+        if (!pipe) 
+            return "ERROR";
+        char buffer[MAX_PATH];
+        std::string result = "";
+        while (!feof(pipe.get())) 
+        {
+            if (fgets(buffer, MAX_PATH, pipe.get()) != NULL)
+                result += buffer;
+        }
+        return result;
+    }
+#endif
+
     static String TestInfo(size_t threads)
     {
         std::stringstream info;
@@ -465,6 +482,20 @@ namespace Test
             mem = buf;
             mem = mem.substr(0, mem.find('\n'));
             ::pclose(m);
+        }
+#elif defined(_WIN32)
+        String cpuRaw = Execute("wmic cpu get Name /format:value");
+        size_t cpuBeg = cpuRaw.find('=') + 1;
+        size_t cpuEnd = cpuRaw.find('\r', cpuBeg);
+        while (cpuRaw[cpuEnd - 1] == ' ')
+            cpuEnd--;
+        cpu = cpuRaw.substr(cpuBeg, cpuEnd - cpuBeg);
+        MEMORYSTATUSEX memorystatusex;
+        memorystatusex.dwLength = sizeof(memorystatusex);
+        if (GlobalMemoryStatusEx(&memorystatusex) == TRUE)
+        {
+            double memGB = double(memorystatusex.ullTotalPhys) / 1024.0 / 1024.0 / 1024.0;
+            mem = ToString(memGB, 1, false);
         }
 #endif        
         info << std::endl;
