@@ -21,7 +21,7 @@ jobs:
       run: lscpu
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_AVX512VNNI=ON -DSIMD_TEST_FLAGS="-mavx2"
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_AVX512VNNI=ON -DSIMD_TEST_FLAGS="-march=native"
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
@@ -113,7 +113,7 @@ jobs:
       run: sudo apt-get -y install clang
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="clang" -DSIMD_TARGET=""
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="clang" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native"
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
@@ -139,7 +139,7 @@ jobs:
       run: sudo apt-get -y install g++-12
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-12" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=ON
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-12" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=ON -DSIMD_TEST_FLAGS="-march=native"
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
@@ -175,7 +175,7 @@ jobs:
       run: wmic cpu get /format:value
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TARGET="x86_64" -DSIMD_GET_VERSION=OFF
+      run: cmake ./prj/cmake -B build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TARGET="x86_64" -DSIMD_GET_VERSION=OFF -DSIMD_TEST_FLAGS="-march=native"
 
     - name: Build
       run: cmake --build build --config ${{matrix.build_type}} --parallel2
