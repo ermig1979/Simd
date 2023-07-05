@@ -122,7 +122,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
 
-  build_and_test_gcc_12:
+  build_and_test_gcc_13:
     runs-on: ubuntu-latest
 
     strategy:
@@ -136,10 +136,10 @@ jobs:
       run: lscpu
 
     - name: Install toolchain
-      run: sudo apt-get -y install g++-12
+      run: sudo apt-get -y install g++-13
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-12" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=ON -DSIMD_TEST_FLAGS="-march=native"
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-13" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_TEST_FLAGS="-march=native"
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)

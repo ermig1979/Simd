@@ -225,6 +225,7 @@ namespace Test
                 case DifferenceRelative: error = relative > differenceMax; break;
                 case DifferenceBoth: error = absolute > differenceMax && relative > differenceMax; break;
                 case DifferenceAny: error = absolute > differenceMax || relative > differenceMax; break;
+                case DifferenceLogical: assert(0); break;
                 }
                 if (error)
                 {

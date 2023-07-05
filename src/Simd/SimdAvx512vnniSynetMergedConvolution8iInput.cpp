@@ -873,6 +873,7 @@ namespace Simd
             case SimdConvolutionActivationElu: SetInput<SimdConvolutionActivationElu>(p, input); break;
             case SimdConvolutionActivationHswish: SetInput<SimdConvolutionActivationHswish>(p, input); break;
             case SimdConvolutionActivationMish: SetInput<SimdConvolutionActivationMish>(p, input); break;
+            case SimdConvolutionActivationHardSigmoid: SetInput<SimdConvolutionActivationHardSigmoid>(p, input); break;
             case SimdConvolutionActivationSwish: SetInput<SimdConvolutionActivationSwish>(p, input); break;
             case SimdConvolutionActivationGelu: SetInput<SimdConvolutionActivationGelu>(p, input); break;
             }
