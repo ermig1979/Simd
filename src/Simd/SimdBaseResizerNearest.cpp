@@ -37,7 +37,7 @@ namespace Simd
 
         void ResizerNearest::EstimateIndex(size_t srcSize, size_t dstSize, size_t channelSize, size_t channels, int32_t* indices)
         {
-            if (_param.method == SimdResizeMethodNearest)
+            if (_param.method == SimdResizeMethodNearest || _param.method == SimdResizeMethodBilinear || _param.method == SimdResizeMethodBicubic)
             {
                 float scale = (float)srcSize / dstSize;
                 for (size_t i = 0; i < dstSize; ++i)
@@ -51,7 +51,7 @@ namespace Simd
                     }
                 }
             }
-            else if (_param.method == SimdResizeMethodNearestPytorch)
+            else if (_param.method == SimdResizeMethodNearestPytorch || _param.method == SimdResizeMethodBilinearPytorch)
             {
                 for (size_t i = 0; i < dstSize; ++i)
                 {
