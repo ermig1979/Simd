@@ -357,7 +357,7 @@ Functions</h2></td></tr>
     {
         sum = 0;
         for (s = 0; s &lt; spatial; ++s)
-            sum += src[b, ñ, s];
+            sum += src[b, c, s];
         mean = sum / spatial;
         for (s = 0; s &lt; spatial; ++s)
             dst[b, c, s] = src[b, c, s] - mean;

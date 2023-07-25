@@ -6301,6 +6301,39 @@ SIMD_API void SimdSynetGelu32f(const float* src, size_t size, float* dst)
 #endif
 }
 
+SIMD_API void* SimdSynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW,
+    SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return NULL;
+#else
+    assert(0);
+    return NULL;
+#endif
+}
+
+SIMD_API size_t SimdSynetGridSample2dInternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetGridSample2dForward(void* context, const uint8_t* src, const uint8_t* grd, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    assert(0);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
 {
     SIMD_EMPTY();

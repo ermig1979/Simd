@@ -270,6 +270,32 @@ typedef enum
     SimdDetectionInfoCanInt16 = 8,
 } SimdDetectionInfoFlags;
 
+/*! @ingroup synet_grid_sample
+    Describes grid sample interpolation type. It is used in function ::SimdSynetGridSample2dInit.
+*/
+typedef enum
+{
+    /*! Using of bilinear interpolation. */
+    SimdGridSampleInterpBilinear = 0,
+    /*! Using of nearest pixel value. */
+    SimdGridSampleInterpNearest,
+    /*! Using of bicubic interpolation. */
+    SimdGridSampleInterpBicubic,
+} SimdGridSampleInterpType;
+
+/*! @ingroup synet_grid_sample
+    Describes grid sample padding type. It is used in function ::SimdSynetGridSample2dInit.
+*/
+typedef enum
+{
+    /*! Using of 0 for out-of-bound grid locations. */
+    SimdGridSamplePaddingZeros = 0,
+    /*! Using of border values for out-of-bound grid locations. */
+    SimdGridSamplePaddingBorder,
+    /*! Using of values at locations reflected by the border for out-of-bound grid locations. */
+    SimdGridSamplePaddingReflect,
+} SimdGridSamplePaddingType;
+
 /*! @ingroup c_types
     Describes formats of image file. It is used in functions ::SimdImageSaveToMemory and ::SimdImageSaveToFile.
 */
@@ -7258,6 +7284,52 @@ extern "C"
     */
     SIMD_API void SimdSynetGelu32f(const float* src, size_t size, float* dst);
 
+    /*! @ingroup synet_grid_sample
+
+        \fn void* SimdSynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW, SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
+
+        \short Initilizes <a href="https://github.com/onnx/onnx/blob/main/docs/Operators.md#GridSample">grid sample</a> 2D algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] channels - a number of channels in the input and output tensors.
+        \param [in] srcH - a height of input tensor.
+        \param [in] srcW - a width of input tensor.
+        \param [in] dstH - a height of output tensor.
+        \param [in] dstW - a width of output tensor.
+        \param [in] type - a type of input, grid and output tensor.
+        \param [in] interp - an interpolation type.
+        \param [in] padding - a padding type.
+        \param [in] align - a flag to align corners.
+        \return a pointer to grid sample 2D context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetGridSample2dInternalBufferSize, and ::SimdSynetGridSample2dForward.
+    */
+    SIMD_API void* SimdSynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW, 
+        SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
+
+    /*! @ingroup synet_grid_sample
+
+        \fn size_t SimdSynetGridSample2dInternalBufferSize(const void* context);
+
+        \short Gets size of internal buffer used inside permute algorithm.
+
+        \param [in] context - a pointer to grid sample 2D context. It must be created by function ::SimdSynetGridSample2dInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside grid sample 2D algorithm.
+    */
+    SIMD_API size_t SimdSynetGridSample2dInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_grid_sample
+
+        \fn void SimdSynetGridSample2dForward(void* context, const uint8_t* src, const uint8_t* grd, uint8_t* dst);
+
+        \short Performs forward propagation of grid sample algorithm.
+
+        \param [in] context - a pointer to grid sample 2D context. It must be created by function ::SimdSynetGridSample2dInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor. It has size = batch * channels * srcH * srcW.
+        \param [in] grd - a pointer to grid tensor. It has size = batch * dstH * dstW * 2.
+        \param [out] dst - a pointer to output tensor. It has size = batch * channels * dstH * dstW.
+    */
+    SIMD_API void SimdSynetGridSample2dForward(void* context, const uint8_t* src, const uint8_t* grd, uint8_t* dst);
+
     /*! @ingroup synet_activation
 
         \fn void SimdSynetHardSigmoid32f(const float * src, size_t size, const float * scale, const float * shift, float * dst);
@@ -7717,7 +7789,7 @@ extern "C"
             {
                 sum = 0;
                 for (s = 0; s < spatial; ++s)
-                    sum += src[b, ñ, s];
+                    sum += src[b, c, s];
                 mean = sum / spatial;
                 for (s = 0; s < spatial; ++s)
                     dst[b, c, s] = src[b, c, s] - mean;
@@ -7756,7 +7828,7 @@ extern "C"
         \param [in] shape - a pointer to shape of input tensor.
         \param [in] order - a pointer to order of dimensions in output tensor.
         \param [in] count - a count of dimensions of input / output tensor.
-        \param [in] type - an input / output tensor type
+        \param [in] type - an input / output tensor type.
         \return a pointer to permute context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetPermuteInternalBufferSize, and ::SimdSynetPermuteForward.
     */
