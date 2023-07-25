@@ -25,8 +25,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SYNET_ENABLE)
-    namespace Base
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)    
+    namespace Sse41
     {
         void* SynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW,
             SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align)
@@ -34,7 +34,10 @@ namespace Simd
             GridSample2dParam param(batch, channels, srcH, srcW, dstH, dstW, type, interp, padding, align);
             if (!param.Valid())
                 return NULL;
-            return new SynetGridSample2dRef(param);
+            if(param.Is32fBlZ())
+                return new Base::SynetGridSample2d32fBlZ(param);
+            else
+                return new Base::SynetGridSample2dRef(param);
         }
     }
 #endif

@@ -30,56 +30,96 @@
 
 namespace Simd
 {
+    struct GridSample2dParam
+    {
+        size_t batch, channels, srcH, srcW, dstH, dstW;
+        SimdTensorDataType type;
+        SimdGridSampleInterpType interp;
+        SimdGridSamplePaddingType padding;
+        SimdBool align;
+
+        SIMD_INLINE GridSample2dParam(size_t b, size_t c, size_t sh, size_t sw, size_t dh, size_t dw,
+            SimdTensorDataType t, SimdGridSampleInterpType i, SimdGridSamplePaddingType p, SimdBool a)
+            : batch(b)
+            , channels(c)
+            , srcH(sh)
+            , srcW(sw)
+            , dstH(dh)
+            , dstW(dw)
+            , type(t)
+            , interp(i)
+            , padding(p)
+            , align(a)
+        {
+        }
+
+        SIMD_INLINE bool Valid() const
+        {
+            return true;
+        }
+
+        bool Is32fBlZ() const
+        {
+            return type == SimdTensorData32f && interp == SimdGridSampleInterpBilinear && padding == SimdGridSamplePaddingZeros;
+        }
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    class SynetGridSample2d : public Deletable
+    {
+    public:
+        SynetGridSample2d(const GridSample2dParam& param)
+            : _param(param)
+        {
+        }
+
+        virtual size_t InternalBufferSize() const
+        {
+            return 0;
+        }
+
+        virtual void Forward(const uint8_t* src, const uint8_t* grd, uint8_t* dst) = 0;
+
+    protected:
+        GridSample2dParam _param;
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
     namespace Base
     {
-        struct GridSample2dParam
-        {
-            size_t batch, channels, srcH, srcW, dstH, dstW;
-            SimdTensorDataType type;
-            SimdGridSampleInterpType interp;
-            SimdGridSamplePaddingType padding;
-            SimdBool align;
-
-            SIMD_INLINE GridSample2dParam(size_t b, size_t c, size_t sh, size_t sw, size_t dh, size_t dw,
-                SimdTensorDataType t, SimdGridSampleInterpType i, SimdGridSamplePaddingType p, SimdBool a)
-                : batch(b)
-                , channels(c)
-                , srcH(sh)
-                , srcW(sw)
-                , dstH(dh)
-                , dstW(dw)
-                , type(t)
-                , interp(i)
-                , padding(p)
-                , align(a)
-            {
-            }
-
-            SIMD_INLINE bool Valid() const
-            {
-                return true;
-            }
-        };
-
-        //-------------------------------------------------------------------------------------------------
-
-        class SynetGridSample2d : public Deletable
+        class SynetGridSample2dRef : public Simd::SynetGridSample2d
         {
         public:
-            SynetGridSample2d(const GridSample2dParam & param);
+            SynetGridSample2dRef(const GridSample2dParam & param);
 
-            size_t InternalBufferSize() const
-            {
-                return 0;
-            }
-
-            void Forward(const uint8_t* src, const uint8_t* grd, uint8_t* dst);
+            virtual void Forward(const uint8_t* src, const uint8_t* grd, uint8_t* dst);
 
             typedef void (*GridSample2dPtr)(const uint8_t* src8, size_t batch, size_t channels, size_t srcH, size_t srcW, const uint8_t* grd8, size_t dstH, size_t dstW, uint8_t* dst8);
 
         protected:
-            GridSample2dParam _param;
             GridSample2dPtr _gridSample2d;
+        };
+
+        class SynetGridSample2d32fBlZ : public Simd::SynetGridSample2d
+        {
+        public:
+            SynetGridSample2d32fBlZ(const GridSample2dParam& param);
+
+            virtual size_t InternalBufferSize() const;
+
+            virtual void Forward(const uint8_t* src, const uint8_t* grd, uint8_t* dst);
+
+            typedef void (*IndexCoeffsPtr)(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float * dy, float *dx);
+            typedef void (*BilinearInterpPtr)(const float* pad, size_t dstS, int padW, uint32_t* idx, float * dy, float* dx, float * dst);
+
+        protected:
+            Array32f _padded, _coeffs;
+            Array32u _index;
+            size_t _padH, _padW, _srcS, _dstS;
+            IndexCoeffsPtr _indexCoeffs;
+            BilinearInterpPtr _bilinearInterp;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -91,6 +131,8 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        void* SynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW,
+            SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
     }
 #endif
 }

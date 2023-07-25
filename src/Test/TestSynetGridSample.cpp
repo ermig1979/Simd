@@ -166,10 +166,10 @@ namespace Test
 
         result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Base::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Sse41::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
-//#endif 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Sse41::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
+#endif 
 
         return result;
     }
