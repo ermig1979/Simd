@@ -72,6 +72,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetConvolution8i.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetDeconvolution32f.h"
+#include "Simd/SimdSynetGridSample.h"
 #include "Simd/SimdSynetInnerProduct32f.h"
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution8i.h"
@@ -6306,7 +6307,11 @@ SIMD_API void* SimdSynetGridSample2dInit(size_t batch, size_t channels, size_t s
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return NULL;
+    typedef void* (*SimdSynetGridSample2dInitPtr) (size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW,
+        SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
+    const static SimdSynetGridSample2dInitPtr simdSynetGridSample2dInit = SIMD_FUNC0(SynetGridSample2dInit);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    return simdSynetGridSample2dInit(batch, channels, srcH, srcW, dstH, dstW, type, interp, padding, align);
 #else
     assert(0);
     return NULL;
@@ -6317,7 +6322,7 @@ SIMD_API size_t SimdSynetGridSample2dInternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return 0;
+    return ((Base::SynetGridSample2d*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6328,7 +6333,7 @@ SIMD_API void SimdSynetGridSample2dForward(void* context, const uint8_t* src, co
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    assert(0);
+    ((Base::SynetGridSample2d*)context)->Forward(src, grd, dst);
 #else
     assert(0);
 #endif

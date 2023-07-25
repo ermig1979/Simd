@@ -407,6 +407,8 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetFusedLayerForward8);
     TEST_ADD_GROUP_A0(SynetFusedLayerForward9);
 
+    TEST_ADD_GROUP_A0(SynetGridSample2d);
+
     TEST_ADD_GROUP_A0(SynetInnerProduct32fForward);
     TEST_ADD_GROUP_A0(SynetInnerProductLayerForward);
     TEST_ADD_GROUP_A0(SynetInnerProduct8i);
