@@ -35,7 +35,7 @@ namespace Simd
             if (!param.Valid())
                 return NULL;
             if(param.Is32fBlZ())
-                return new Base::SynetGridSample2d32fBlZ(param);
+                return new Sse41::SynetGridSample2d32fBlZ(param);
             else
                 return new Base::SynetGridSample2dRef(param);
         }

@@ -137,9 +137,9 @@ namespace Test
         bool result = true;
 
         SimdBool t = SimdTrue, f = SimdFalse;
-        for (int i = 0; i <= SimdGridSampleInterpBicubic; ++i)
+        for (int i = 0; i < 3; ++i)
         {
-            for (int p = 0; p <= SimdGridSamplePaddingReflect; ++p)
+            for (int p = 0; p < 3; ++p)
             {
                 result = result && SynetGridSample2dAutoTest<float>(srcShape, grdShape, SimdTensorData32f, (SimdGridSampleInterpType)i, (SimdGridSamplePaddingType)p, f, f1, f2);
                 result = result && SynetGridSample2dAutoTest<float>(srcShape, grdShape, SimdTensorData32f, (SimdGridSampleInterpType)i, (SimdGridSamplePaddingType)p, t, f1, f2);
