@@ -143,6 +143,22 @@ namespace Simd
             SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
     }
 #endif
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        class SynetGridSample2d32fBlZ : public Sse41::SynetGridSample2d32fBlZ
+        {
+        public:
+            SynetGridSample2d32fBlZ(const GridSample2dParam& param);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW,
+            SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
+    }
+#endif
 }
 
 #endif

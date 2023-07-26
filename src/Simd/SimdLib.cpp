@@ -6309,7 +6309,7 @@ SIMD_API void* SimdSynetGridSample2dInit(size_t batch, size_t channels, size_t s
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetGridSample2dInitPtr) (size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW,
         SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
-    const static SimdSynetGridSample2dInitPtr simdSynetGridSample2dInit = SIMD_FUNC1(SynetGridSample2dInit, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetGridSample2dInitPtr simdSynetGridSample2dInit = SIMD_FUNC2(SynetGridSample2dInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetGridSample2dInit(batch, channels, srcH, srcW, dstH, dstW, type, interp, padding, align);
 #else
