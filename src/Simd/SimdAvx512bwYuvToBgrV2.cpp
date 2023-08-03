@@ -23,60 +23,65 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdInterleave.h"
 #include "Simd/SimdYuvToBgr.h"
+#include "Simd/SimdInterleave.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
-        template <bool align, class T> SIMD_YUV_TO_BGR_INLINE void YuvToBgrV2(__m256i y8, __m256i u8, __m256i v8, __m256i* bgr)
+        template <bool align, bool mask, class T> SIMD_INLINE void YuvToBgr(const __m512i& y, const __m512i& u, const __m512i& v, uint8_t* bgr, const __mmask64* tails)
         {
-            __m256i blue = YuvToBlue<T>(y8, u8);
-            __m256i green = YuvToGreen<T>(y8, u8, v8);
-            __m256i red = YuvToRed<T>(y8, v8);
-            Store<align>(bgr + 0, InterleaveBgr<0>(blue, green, red));
-            Store<align>(bgr + 1, InterleaveBgr<1>(blue, green, red));
-            Store<align>(bgr + 2, InterleaveBgr<2>(blue, green, red));
+            __m512i b = YuvToBlue<T>(y, u);
+            __m512i g = YuvToGreen<T>(y, u, v);
+            __m512i r = YuvToRed<T>(y, v);
+            Store<align, mask>(bgr + 0 * A, InterleaveBgr<0>(b, g, r), tails[0]);
+            Store<align, mask>(bgr + 1 * A, InterleaveBgr<1>(b, g, r), tails[1]);
+            Store<align, mask>(bgr + 2 * A, InterleaveBgr<2>(b, g, r), tails[2]);
         }
 
-        template <bool align, class T> SIMD_INLINE void Yuv422pToBgrV2(const uint8_t* y, const __m256i& u, const __m256i& v,
-            uint8_t* bgr)
+        template <bool align, bool mask, class T> SIMD_YUV_TO_BGR_INLINE void Yuv420pToBgrV2(const uint8_t* y0, const uint8_t* y1, 
+            const uint8_t* u, const uint8_t* v, uint8_t* bgr0, uint8_t* bgr1, const __mmask64* tails)
         {
-            YuvToBgrV2<align, T>(Load<align>((__m256i*)y + 0), _mm256_unpacklo_epi8(u, u), _mm256_unpacklo_epi8(v, v), (__m256i*)bgr + 0);
-            YuvToBgrV2<align, T>(Load<align>((__m256i*)y + 1), _mm256_unpackhi_epi8(u, u), _mm256_unpackhi_epi8(v, v), (__m256i*)bgr + 3);
+            __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(u, tails[0])));
+            __m512i u0 = UnpackU8<0>(_u, _u);
+            __m512i u1 = UnpackU8<1>(_u, _u);
+            __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(v, tails[0])));
+            __m512i v0 = UnpackU8<0>(_v, _v);
+            __m512i v1 = UnpackU8<1>(_v, _v);
+            YuvToBgr<align, mask, T>(Load<align, mask>(y0 + 0, tails[1]), u0, v0, bgr0 + 0 * A, tails + 3);
+            YuvToBgr<align, mask, T>(Load<align, mask>(y0 + A, tails[2]), u1, v1, bgr0 + 3 * A, tails + 6);
+            YuvToBgr<align, mask, T>(Load<align, mask>(y1 + 0, tails[1]), u0, v0, bgr1 + 0 * A, tails + 3);
+            YuvToBgr<align, mask, T>(Load<align, mask>(y1 + A, tails[2]), u1, v1, bgr1 + 3 * A, tails + 6);
         }
 
         template <bool align, class T> void Yuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
         {
-            assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
+            assert((width % 2 == 0) && (height % 2 == 0));
             if (align)
             {
                 assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
                 assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
             }
 
-            size_t bodyWidth = AlignLo(width, DA);
-            size_t tail = width - bodyWidth;
+            width /= 2;
+            size_t alignedWidth = AlignLo(width, A);
+            size_t tail = width - alignedWidth;
+            __mmask64 tailMasks[9];
+            tailMasks[0] = TailMask64(tail);
+            for (size_t i = 0; i < 2; ++i)
+                tailMasks[1 + i] = TailMask64(tail * 2 - A * i);
+            for (size_t i = 0; i < 6; ++i)
+                tailMasks[3 + i] = TailMask64(tail * 6 - A * i);
             for (size_t row = 0; row < height; row += 2)
             {
-                for (size_t colUV = 0, colY = 0, colBgr = 0; colY < bodyWidth; colY += DA, colUV += A, colBgr += A * 6)
-                {
-                    __m256i u_ = LoadPermuted<align>((__m256i*)(u + colUV));
-                    __m256i v_ = LoadPermuted<align>((__m256i*)(v + colUV));
-                    Yuv422pToBgrV2<align, T>(y + colY, u_, v_, bgr + colBgr);
-                    Yuv422pToBgrV2<align, T>(y + colY + yStride, u_, v_, bgr + colBgr + bgrStride);
-                }
-                if (tail)
-                {
-                    size_t offset = width - DA;
-                    __m256i u_ = LoadPermuted<false>((__m256i*)(u + offset / 2));
-                    __m256i v_ = LoadPermuted<false>((__m256i*)(v + offset / 2));
-                    Yuv422pToBgrV2<false, T>(y + offset, u_, v_, bgr + 3 * offset);
-                    Yuv422pToBgrV2<false, T>(y + offset + yStride, u_, v_, bgr + 3 * offset + bgrStride);
-                }
+                size_t col = 0;
+                for (; col < alignedWidth; col += A)
+                    Yuv420pToBgrV2<align, false, T>(y + col * 2, y + yStride + col * 2, u + col, v + col, bgr + col * 6, bgr + bgrStride + col * 6, tailMasks);
+                if (col < width)
+                    Yuv420pToBgrV2<align, true, T>(y + col * 2, y + yStride + col * 2, u + col, v + col, bgr + col * 6, bgr + bgrStride + col * 6, tailMasks);
                 y += 2 * yStride;
                 u += uStride;
                 v += vStride;
@@ -108,5 +113,5 @@ namespace Simd
                 Yuv420pToBgrV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
         }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 }

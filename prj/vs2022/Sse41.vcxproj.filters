@@ -394,6 +394,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample2d32fBlZ.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgrV2.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">

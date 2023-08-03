@@ -7521,11 +7521,11 @@ SIMD_API void SimdYuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t
     size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
 {
     SIMD_EMPTY();
-//#ifdef SIMD_AVX512BW_ENABLE
-//    if (Avx512bw::Enable)
-//        Avx512bw::Yuv420pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
-//    else
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::Yuv420pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::DA)
         Avx2::Yuv420pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);

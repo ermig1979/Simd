@@ -28,24 +28,24 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
-        template <bool align, class T> SIMD_YUV_TO_BGR_INLINE void YuvToBgrV2(__m256i y8, __m256i u8, __m256i v8, __m256i* bgr)
+        template <bool align, class T> SIMD_YUV_TO_BGR_INLINE void YuvToBgrV2(__m128i y8, __m128i u8, __m128i v8, __m128i* bgr)
         {
-            __m256i blue = YuvToBlue<T>(y8, u8);
-            __m256i green = YuvToGreen<T>(y8, u8, v8);
-            __m256i red = YuvToRed<T>(y8, v8);
+            __m128i blue = YuvToBlue<T>(y8, u8);
+            __m128i green = YuvToGreen<T>(y8, u8, v8);
+            __m128i red = YuvToRed<T>(y8, v8);
             Store<align>(bgr + 0, InterleaveBgr<0>(blue, green, red));
             Store<align>(bgr + 1, InterleaveBgr<1>(blue, green, red));
             Store<align>(bgr + 2, InterleaveBgr<2>(blue, green, red));
         }
 
-        template <bool align, class T> SIMD_INLINE void Yuv422pToBgrV2(const uint8_t* y, const __m256i& u, const __m256i& v,
+        template <bool align, class T> SIMD_INLINE void Yuv422pToBgrV2(const uint8_t* y, const __m128i& u, const __m128i& v,
             uint8_t* bgr)
         {
-            YuvToBgrV2<align, T>(Load<align>((__m256i*)y + 0), _mm256_unpacklo_epi8(u, u), _mm256_unpacklo_epi8(v, v), (__m256i*)bgr + 0);
-            YuvToBgrV2<align, T>(Load<align>((__m256i*)y + 1), _mm256_unpackhi_epi8(u, u), _mm256_unpackhi_epi8(v, v), (__m256i*)bgr + 3);
+            YuvToBgrV2<align, T>(Load<align>((__m128i*)y + 0), _mm_unpacklo_epi8(u, u), _mm_unpacklo_epi8(v, v), (__m128i*)bgr + 0);
+            YuvToBgrV2<align, T>(Load<align>((__m128i*)y + 1), _mm_unpackhi_epi8(u, u), _mm_unpackhi_epi8(v, v), (__m128i*)bgr + 3);
         }
 
         template <bool align, class T> void Yuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
@@ -64,16 +64,16 @@ namespace Simd
             {
                 for (size_t colUV = 0, colY = 0, colBgr = 0; colY < bodyWidth; colY += DA, colUV += A, colBgr += A * 6)
                 {
-                    __m256i u_ = LoadPermuted<align>((__m256i*)(u + colUV));
-                    __m256i v_ = LoadPermuted<align>((__m256i*)(v + colUV));
+                    __m128i u_ = Load<align>((__m128i*)(u + colUV));
+                    __m128i v_ = Load<align>((__m128i*)(v + colUV));
                     Yuv422pToBgrV2<align, T>(y + colY, u_, v_, bgr + colBgr);
                     Yuv422pToBgrV2<align, T>(y + colY + yStride, u_, v_, bgr + colBgr + bgrStride);
                 }
                 if (tail)
                 {
                     size_t offset = width - DA;
-                    __m256i u_ = LoadPermuted<false>((__m256i*)(u + offset / 2));
-                    __m256i v_ = LoadPermuted<false>((__m256i*)(v + offset / 2));
+                    __m128i u_ = Load<false>((__m128i*)(u + offset / 2));
+                    __m128i v_ = Load<false>((__m128i*)(v + offset / 2));
                     Yuv422pToBgrV2<false, T>(y + offset, u_, v_, bgr + 3 * offset);
                     Yuv422pToBgrV2<false, T>(y + offset + yStride, u_, v_, bgr + 3 * offset + bgrStride);
                 }
@@ -108,5 +108,5 @@ namespace Simd
                 Yuv420pToBgrV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
         }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 }

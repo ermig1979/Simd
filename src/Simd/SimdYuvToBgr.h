@@ -31,6 +31,12 @@
 #include "Simd/SimdLog.h"
 #include "Simd/SimdLoad.h"
 
+#if defined(_MSC_VER) && _MSC_VER >= 1900    
+#define SIMD_YUV_TO_BGR_INLINE inline
+#else
+#define SIMD_YUV_TO_BGR_INLINE SIMD_INLINE
+#endif
+
 namespace Simd
 {
     namespace Base

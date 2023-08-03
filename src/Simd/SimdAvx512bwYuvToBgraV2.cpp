@@ -94,14 +94,8 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align, bool mask, class T> 
-#if defined(_MSC_VER) && _MSC_VER >= 1900   
-        inline 
-#else
-        SIMD_INLINE 
-#endif
-        void Yuv420pToBgraV2(const uint8_t* y0, const uint8_t* y1, const uint8_t* u, const uint8_t* v,
-            const __m512i& a, uint8_t* bgra0, uint8_t* bgra1, const __mmask64* tails)
+        template <bool align, bool mask, class T> SIMD_YUV_TO_BGR_INLINE void Yuv420pToBgraV2(const uint8_t* y0, const uint8_t* y1, 
+            const uint8_t* u, const uint8_t* v, const __m512i& a, uint8_t* bgra0, uint8_t* bgra1, const __mmask64* tails)
         {
             __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(u, tails[0])));
             __m512i u0 = UnpackU8<0>(_u, _u);
