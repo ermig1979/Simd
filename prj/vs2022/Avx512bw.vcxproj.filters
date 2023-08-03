@@ -250,10 +250,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerNearest.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuv420pToBgraV2.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuv444pToBgraV2.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgraV2.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToUyvy.cpp">

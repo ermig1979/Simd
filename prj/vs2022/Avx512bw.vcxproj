@@ -131,8 +131,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd3.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuv420pToBgraV2.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuv444pToBgraV2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp" />
