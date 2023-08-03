@@ -484,6 +484,7 @@ namespace Test
     TEST_ADD_GROUP_A0(Yuv444pToBgr);
     TEST_ADD_GROUP_A0(Yuv422pToBgr);
     TEST_ADD_GROUP_AS(Yuv420pToBgr);
+    TEST_ADD_GROUP_A0(Yuv420pToBgrV2);
     TEST_ADD_GROUP_A0(Yuv444pToHsl);
     TEST_ADD_GROUP_A0(Yuv444pToHsv);
     TEST_ADD_GROUP_A0(Yuv444pToHue);

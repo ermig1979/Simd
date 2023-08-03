@@ -402,6 +402,98 @@ namespace Test
 
     //---------------------------------------------------------------------------------------------
 
+    namespace
+    {
+        struct FuncYuv2
+        {
+            typedef void(*FuncPtr)(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+                size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
+
+            FuncPtr func;
+            String description;
+
+            FuncYuv2(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& y, const View& u, const View& v, View& bgr, SimdYuvType yuvType) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride, yuvType);
+            }
+        };
+    }
+
+#define FUNC_YUV2(function) FuncYuv2(function, #function)
+
+    bool YuvToBgr2AutoTest(int width, int height, const FuncYuv2& f1, const FuncYuv2& f2, int dx, int dy, SimdYuvType yuvType)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        const int uvWidth = width / dx;
+        const int uvHeight = height / dy;
+
+        View y(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(y);
+        View u(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
+        FillRandom(u);
+        View v(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
+        FillRandom(v);
+
+        View bgr1(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
+        View bgr2(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(y, u, v, bgr1, yuvType));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(y, u, v, bgr2, yuvType));
+
+        result = result && Compare(bgr1, bgr2, 0, true, 64);
+
+        return result;
+    }
+
+    bool YuvToBgr2AutoTest(const FuncYuv2& f1, const FuncYuv2& f2, int dx, int dy)
+    {
+        bool result = true;
+
+        result = result && YuvToBgr2AutoTest(W, H, f1, f2, dx, dy, SimdYuvBt601);
+        result = result && YuvToBgr2AutoTest(W + O * dx, H - O * dy, f1, f2, dx, dy, SimdYuvBt709);
+        result = result && YuvToBgr2AutoTest(W - O * dx, H + O * dy, f1, f2, dx, dy, SimdYuvBt2020);
+
+        return result;
+    }
+
+    bool Yuv420pToBgrV2AutoTest()
+    {
+        bool result = true;
+
+        result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv420pToBgrV2), FUNC_YUV2(SimdYuv420pToBgrV2), 2, 2);
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Sse41::Yuv420pToBgrV2), FUNC_YUV2(SimdYuv420pToBgrV2), 2, 2);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Avx2::Yuv420pToBgrV2), FUNC_YUV2(SimdYuv420pToBgrV2), 2, 2);
+#endif 
+
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv420pToBgrV2), FUNC_YUV2(SimdYuv420pToBgrV2), 2, 2);
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv420pToBgrV2), FUNC_YUV2(SimdYuv420pToBgrV2), 2, 2);
+//#endif 
+
+        return result;
+    }
+
+    //---------------------------------------------------------------------------------------------
+
     bool Yuv420pToBgrSpecialTest()
     {
         bool result = true;
