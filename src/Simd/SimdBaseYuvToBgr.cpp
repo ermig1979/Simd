@@ -218,5 +218,35 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class YuvType> void Yuv444pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
+        {
+            for (size_t row = 0; row < height; row += 1)
+            {
+                for (size_t col = 0, colBgr = 0; col < width; col++, colBgr += 3)
+                    YuvToBgr<YuvType>(y[col], u[col], v[col], bgr + colBgr);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
+
+        void Yuv444pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv444pToBgrV2<Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt709: Yuv444pToBgrV2<Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt2020: Yuv444pToBgrV2<Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvTrect871: Yuv444pToBgrV2<Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            default:
+                assert(0);
+            }
+        }
     }
 }

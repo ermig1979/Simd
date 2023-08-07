@@ -521,6 +521,35 @@ namespace Test
         return result;
     }
 
+    bool Yuv444pToBgrV2AutoTest()
+    {
+        bool result = true;
+
+        result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv444pToBgrV2), FUNC_YUV2(SimdYuv444pToBgrV2), 1, 1);
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Sse41::Yuv444pToBgrV2), FUNC_YUV2(SimdYuv444pToBgrV2), 1, 1);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Avx2::Yuv444pToBgrV2), FUNC_YUV2(SimdYuv444pToBgrV2), 1, 1);
+#endif 
+
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv444pToBgrV2), FUNC_YUV2(SimdYuv444pToBgrV2), 1, 1);
+//#endif 
+
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv444pToBgrV2), FUNC_YUV2(SimdYuv444pToBgrV2), 1, 1);
+//#endif 
+
+        return result;
+    }
+
     //-------------------------------------------------------------------------------------------------
 
     bool Yuv420pToBgrSpecialTest()

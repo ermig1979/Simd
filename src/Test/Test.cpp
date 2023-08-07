@@ -482,6 +482,7 @@ namespace Test
 #endif
 
     TEST_ADD_GROUP_A0(Yuv444pToBgr);
+    TEST_ADD_GROUP_A0(Yuv444pToBgrV2);
     TEST_ADD_GROUP_A0(Yuv422pToBgr);
     TEST_ADD_GROUP_A0(Yuv422pToBgrV2);
     TEST_ADD_GROUP_AS(Yuv420pToBgr);
