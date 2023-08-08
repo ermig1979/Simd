@@ -80,6 +80,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonReorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonResizer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonResizerArea.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonResizerBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSobel.cpp" />
