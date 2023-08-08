@@ -139,6 +139,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Winograd3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgrV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToHue.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToUyvy.cpp" />
