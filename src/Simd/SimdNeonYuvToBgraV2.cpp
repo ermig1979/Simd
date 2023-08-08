@@ -100,7 +100,6 @@ namespace Simd
             else
                 Yuva444pToBgraV2<false>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
         }
-
         //-------------------------------------------------------------------------------------------------
 
         template <class T, bool align> SIMD_INLINE void Yuva422pToBgra(const uint8_t* y, const uint8x16x2_t& u, const uint8x16x2_t& v, const uint8x16_t& a, uint8_t* bgra)
@@ -108,6 +107,72 @@ namespace Simd
             YuvToBgra<T, align>(Load<align>(y + 0), u.val[0], v.val[0], a, bgra + 0);
             YuvToBgra<T, align>(Load<align>(y + A), u.val[1], v.val[1], a, bgra + QA);
         }
+
+        template <bool align, class T> void Yuv422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+        {
+            assert((width % 2 == 0) && (width >= DA));
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
+                assert(Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t bodyWidth = AlignLo(width, DA);
+            size_t tail = width - bodyWidth;
+            uint8x16_t _a = vdupq_n_u8(alpha);
+            uint8x16x2_t _u, _v;
+            for (size_t row = 0; row < height; row += 1)
+            {
+                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < bodyWidth; colY += DA, colUV += A, colBgra += OA)
+                {
+                    _u.val[1] = _u.val[0] = Load<align>(u + colUV);
+                    _u = vzipq_u8(_u.val[0], _u.val[1]);
+                    _v.val[1] = _v.val[0] = Load<align>(v + colUV);
+                    _v = vzipq_u8(_v.val[0], _v.val[1]);
+                    Yuva422pToBgra<T, align>(y + colY, _u, _v, _a, bgra + colBgra);
+                }
+                if (tail)
+                {
+                    size_t offset = width - DA;
+                    _u.val[1] = _u.val[0] = Load<false>(u + offset / 2);
+                    _u = vzipq_u8(_u.val[0], _u.val[1]);
+                    _v.val[1] = _v.val[0] = Load<false>(v + offset / 2);
+                    _v = vzipq_u8(_v.val[0], _v.val[1]);
+                    Yuva422pToBgra<T, false>(y + offset, _u, _v, _a, bgra + 4 * offset);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
+
+        template <bool align> void Yuv422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv422pToBgraV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            case SimdYuvBt709: Yuv422pToBgraV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            case SimdYuvBt2020: Yuv422pToBgraV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            case SimdYuvTrect871: Yuv422pToBgraV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void Yuv422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                Yuv422pToBgraV2<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+            else
+                Yuv422pToBgraV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align, class T> void Yuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha)

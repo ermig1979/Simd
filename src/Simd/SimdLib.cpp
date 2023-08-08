@@ -7757,11 +7757,11 @@ SIMD_API void SimdYuv422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_
     size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
 {
     SIMD_EMPTY();
-//#ifdef SIMD_AVX512BW_ENABLE
-//    if (Avx512bw::Enable)
-//        Avx512bw::Yuv422pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
-//    else
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::Yuv422pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::DA)
         Avx2::Yuv422pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
@@ -7772,11 +7772,11 @@ SIMD_API void SimdYuv422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_
         Sse41::Yuv422pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
     else
 #endif
-//#ifdef SIMD_NEON_ENABLE
-//    if (Neon::Enable && width >= Neon::DA)
-//        Neon::Yuv422pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
-//    else
-//#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::DA)
+        Neon::Yuv422pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+    else
+#endif
         Base::Yuv422pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
 }
 

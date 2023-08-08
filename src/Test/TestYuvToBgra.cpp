@@ -486,15 +486,15 @@ namespace Test
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx2::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
-//#endif 
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Neon::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
-//#endif 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Neon::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
+#endif 
 
         return result;
     }
