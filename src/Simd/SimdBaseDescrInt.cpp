@@ -259,14 +259,20 @@ namespace Simd
 
         static void Decode32f4(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
-            assert(size % 2 == 0);
-            for (size_t i = 0; i < size; i += 2)
+            assert(size % 8 == 0);
+            for (size_t i = 0; i < size; i += 8)
             {
                 uint32_t val = *(uint32_t*)(src + 0);
-                dst[0] = (val & 0xF) * scale + shift;
+                dst[0] = ((val >> 0) & 0xF) * scale + shift;
                 dst[1] = ((val >> 4) & 0xF) * scale + shift;
-                src += 1;
-                dst += 2;
+                dst[2] = ((val >> 8) & 0xF) * scale + shift;
+                dst[3] = ((val >> 12) & 0xF) * scale + shift;
+                dst[4] = ((val >> 16) & 0xF) * scale + shift;
+                dst[5] = ((val >> 20) & 0xF) * scale + shift;
+                dst[6] = ((val >> 24) & 0xF) * scale + shift;
+                dst[7] = ((val >> 28) & 0xF) * scale + shift;
+                src += 4;
+                dst += 8;
             }
         }
 
@@ -276,15 +282,15 @@ namespace Simd
             for (size_t i = 0; i < size; i += 8)
             {
                 uint32_t lo = *(uint32_t*)(src + 0);
-                dst[0] = (lo & 0x1F) * scale + shift;
+                dst[0] = ((lo >> 0) & 0x1F) * scale + shift;
                 dst[1] = ((lo >> 5) & 0x1F) * scale + shift;
                 dst[2] = ((lo >> 10) & 0x1F) * scale + shift;
                 dst[3] = ((lo >> 15) & 0x1F) * scale + shift;
-                uint32_t hi = *(uint32_t*)(src + 2);
-                dst[4] = ((hi >> 4) & 0x1F) * scale + shift;
-                dst[5] = ((hi >> 9) & 0x1F) * scale + shift;
-                dst[6] = ((hi >> 14) & 0x1F) * scale + shift;
-                dst[7] = ((hi >> 19) & 0x1F) * scale + shift;
+                uint32_t hi = *(uint32_t*)(src + 1);
+                dst[4] = ((hi >> 12) & 0x1F) * scale + shift;
+                dst[5] = ((hi >> 17) & 0x1F) * scale + shift;
+                dst[6] = ((hi >> 22) & 0x1F) * scale + shift;
+                dst[7] = ((hi >> 27) & 0x1F) * scale + shift;
                 src += 5;
                 dst += 8;
             }
@@ -292,16 +298,21 @@ namespace Simd
 
         static void Decode32f6(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
-            assert(size % 4 == 0);
-            for (size_t i = 0; i < size; i += 4)
+            assert(size % 8 == 0);
+            for (size_t i = 0; i < size; i += 8)
             {
-                uint32_t val = *(uint32_t*)(src + 0);
-                dst[0] = (val & 0x3F) * scale + shift;
-                dst[1] = ((val >> 6) & 0x3F) * scale + shift;
-                dst[2] = ((val >> 12) & 0x3F) * scale + shift;
-                dst[3] = ((val >> 18) & 0x3F) * scale + shift;
-                src += 3;
-                dst += 4;
+                uint32_t lo = *(uint32_t*)(src + 0);
+                dst[0] = ((lo >> 0) & 0x3F) * scale + shift;
+                dst[1] = ((lo >> 6) & 0x3F) * scale + shift;
+                dst[2] = ((lo >> 12) & 0x3F) * scale + shift;
+                dst[3] = ((lo >> 18) & 0x3F) * scale + shift;
+                uint32_t hi = *(uint32_t*)(src + 2);
+                dst[4] = ((hi >> 8) & 0x3F) * scale + shift;
+                dst[5] = ((hi >> 14) & 0x3F) * scale + shift;
+                dst[6] = ((hi >> 20) & 0x3F) * scale + shift;
+                dst[7] = ((hi >> 26) & 0x3F) * scale + shift;
+                src += 6;
+                dst += 8;
             }
         }
 
@@ -311,7 +322,7 @@ namespace Simd
             for (size_t i = 0; i < size; i += 8)
             {
                 uint32_t lo = *(uint32_t*)(src + 0);
-                dst[0] = (lo & 0x7F) * scale + shift;
+                dst[0] = ((lo >> 0) & 0x7F) * scale + shift;
                 dst[1] = ((lo >> 7) & 0x7F) * scale + shift;
                 dst[2] = ((lo >> 14) & 0x7F) * scale + shift;
                 dst[3] = ((lo >> 21) & 0x7F) * scale + shift;
@@ -335,14 +346,20 @@ namespace Simd
 
         static void Decode16f4(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
         {
-            assert(size % 2 == 0);
-            for (size_t i = 0; i < size; i += 2)
+            assert(size % 8 == 0);
+            for (size_t i = 0; i < size; i += 8)
             {
                 uint32_t val = *(uint32_t*)(src + 0);
-                dst[0] = Float32ToFloat16((val & 0xF) * scale + shift);
+                dst[0] = Float32ToFloat16(((val >> 0) & 0xF) * scale + shift);
                 dst[1] = Float32ToFloat16(((val >> 4) & 0xF) * scale + shift);
-                src += 1;
-                dst += 2;
+                dst[2] = Float32ToFloat16(((val >> 8) & 0xF) * scale + shift);
+                dst[3] = Float32ToFloat16(((val >> 12) & 0xF) * scale + shift);
+                dst[4] = Float32ToFloat16(((val >> 16) & 0xF) * scale + shift);
+                dst[5] = Float32ToFloat16(((val >> 20) & 0xF) * scale + shift);
+                dst[6] = Float32ToFloat16(((val >> 24) & 0xF) * scale + shift);
+                dst[7] = Float32ToFloat16(((val >> 28) & 0xF) * scale + shift);
+                src += 4;
+                dst += 8;
             }
         }
 
@@ -352,15 +369,15 @@ namespace Simd
             for (size_t i = 0; i < size; i += 8)
             {
                 uint32_t lo = *(uint32_t*)(src + 0);
-                dst[0] = Float32ToFloat16((lo & 0x1F) * scale + shift);
+                dst[0] = Float32ToFloat16(((lo >> 0) & 0x1F) * scale + shift);
                 dst[1] = Float32ToFloat16(((lo >> 5) & 0x1F) * scale + shift);
                 dst[2] = Float32ToFloat16(((lo >> 10) & 0x1F) * scale + shift);
                 dst[3] = Float32ToFloat16(((lo >> 15) & 0x1F) * scale + shift);
-                uint32_t hi = *(uint32_t*)(src + 2);
-                dst[4] = Float32ToFloat16(((hi >> 4) & 0x1F) * scale + shift);
-                dst[5] = Float32ToFloat16(((hi >> 9) & 0x1F) * scale + shift);
-                dst[6] = Float32ToFloat16(((hi >> 14) & 0x1F) * scale + shift);
-                dst[7] = Float32ToFloat16(((hi >> 19) & 0x1F) * scale + shift);
+                uint32_t hi = *(uint32_t*)(src + 1);
+                dst[4] = Float32ToFloat16(((hi >> 12) & 0x1F) * scale + shift);
+                dst[5] = Float32ToFloat16(((hi >> 17) & 0x1F) * scale + shift);
+                dst[6] = Float32ToFloat16(((hi >> 22) & 0x1F) * scale + shift);
+                dst[7] = Float32ToFloat16(((hi >> 27) & 0x1F) * scale + shift);
                 src += 5;
                 dst += 8;
             }
@@ -368,16 +385,21 @@ namespace Simd
 
         static void Decode16f6(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
         {
-            assert(size % 4 == 0);
-            for (size_t i = 0; i < size; i += 4)
+            assert(size % 8 == 0);
+            for (size_t i = 0; i < size; i += 8)
             {
-                uint32_t val = *(uint32_t*)(src + 0);
-                dst[0] = Float32ToFloat16((val & 0x3F) * scale + shift);
-                dst[1] = Float32ToFloat16(((val >> 6) & 0x3F) * scale + shift);
-                dst[2] = Float32ToFloat16(((val >> 12) & 0x3F) * scale + shift);
-                dst[3] = Float32ToFloat16(((val >> 18) & 0x3F) * scale + shift);
-                src += 3;
-                dst += 4;
+                uint32_t lo = *(uint32_t*)(src + 0);
+                dst[0] = Float32ToFloat16(((lo >> 0) & 0x3F) * scale + shift);
+                dst[1] = Float32ToFloat16(((lo >> 6) & 0x3F) * scale + shift);
+                dst[2] = Float32ToFloat16(((lo >> 12) & 0x3F) * scale + shift);
+                dst[3] = Float32ToFloat16(((lo >> 18) & 0x3F) * scale + shift);
+                uint32_t hi = *(uint32_t*)(src + 2);
+                dst[4] = Float32ToFloat16(((hi >> 8) & 0x3F) * scale + shift);
+                dst[5] = Float32ToFloat16(((hi >> 14) & 0x3F) * scale + shift);
+                dst[6] = Float32ToFloat16(((hi >> 20) & 0x3F) * scale + shift);
+                dst[7] = Float32ToFloat16(((hi >> 26) & 0x3F) * scale + shift);
+                src += 6;
+                dst += 8;
             }
         }
 
@@ -387,7 +409,7 @@ namespace Simd
             for (size_t i = 0; i < size; i += 8)
             {
                 uint32_t lo = *(uint32_t*)(src + 0);
-                dst[0] = Float32ToFloat16((lo & 0x7F) * scale + shift);
+                dst[0] = Float32ToFloat16(((lo >> 0) & 0x7F) * scale + shift);
                 dst[1] = Float32ToFloat16(((lo >> 7) & 0x7F) * scale + shift);
                 dst[2] = Float32ToFloat16(((lo >> 14) & 0x7F) * scale + shift);
                 dst[3] = Float32ToFloat16(((lo >> 21) & 0x7F) * scale + shift);
@@ -418,15 +440,22 @@ namespace Simd
 
         template<> int32_t Correlation<4>(const uint8_t* a, const uint8_t* b, size_t size)
         {
+            assert(size % 8 == 0);
             int32_t ab = 0;
-            for (size_t i = 0; i < size; i += 2)
+            for (size_t i = 0; i < size; i += 8)
             {
-                uint32_t a0 = a[0];
-                uint32_t b0 = b[0];
-                ab += Mul(a0 & 0xF, b0 & 0xF);
-                ab += Mul(a0 >> 4, b0 >> 4);
-                a += 1;
-                b += 1;
+                uint32_t a0 = *(uint32_t*)(a + 0);
+                uint32_t b0 = *(uint32_t*)(b + 0);
+                ab += Mul((a0 >> 0) & 0xF, (b0 >> 0) & 0xF);
+                ab += Mul((a0 >> 4) & 0xF, (b0 >> 4) & 0xF);
+                ab += Mul((a0 >> 8) & 0xF, (b0 >> 8) & 0xF);
+                ab += Mul((a0 >> 12) & 0xF, (b0 >> 12) & 0xF);
+                ab += Mul((a0 >> 16) & 0xF, (b0 >> 16) & 0xF);
+                ab += Mul((a0 >> 20) & 0xF, (b0 >> 20) & 0xF);
+                ab += Mul((a0 >> 24) & 0xF, (b0 >> 24) & 0xF);
+                ab += Mul((a0 >> 28) & 0xF, (b0 >> 28) & 0xF);
+                a += 4;
+                b += 4;
             }
             return ab;
         }
@@ -439,16 +468,16 @@ namespace Simd
             {
                 uint32_t a0 = *(uint32_t*)(a + 0);
                 uint32_t b0 = *(uint32_t*)(b + 0);
-                ab += Mul(a0 & 0x1F, b0 & 0x1F);
+                ab += Mul((a0 >> 0) & 0x1F, (b0 >> 0) & 0x1F);
                 ab += Mul((a0 >> 5) & 0x1F, (b0 >> 5) & 0x1F);
                 ab += Mul((a0 >> 10) & 0x1F, (b0 >> 10) & 0x1F);
                 ab += Mul((a0 >> 15) & 0x1F, (b0 >> 15) & 0x1F);
-                uint32_t a2 = *(uint32_t*)(a + 2);
-                uint32_t b2 = *(uint32_t*)(b + 2);
-                ab += Mul((a2 >> 4) & 0x1F, (b2 >> 4) & 0x1F);
-                ab += Mul((a2 >> 9) & 0x1F, (b2 >> 9) & 0x1F);
-                ab += Mul((a2 >> 14) & 0x1F, (b2 >> 14) & 0x1F);
-                ab += Mul((a2 >> 19) & 0x1F, (b2 >> 19) & 0x1F);
+                uint32_t a1 = *(uint32_t*)(a + 1);
+                uint32_t b1 = *(uint32_t*)(b + 1);
+                ab += Mul((a1 >> 12) & 0x1F, (b1 >> 12) & 0x1F);
+                ab += Mul((a1 >> 17) & 0x1F, (b1 >> 17) & 0x1F);
+                ab += Mul((a1 >> 22) & 0x1F, (b1 >> 22) & 0x1F);
+                ab += Mul((a1 >> 27) & 0x1F, (b1 >> 27) & 0x1F);
                 a += 5;
                 b += 5;
             }
@@ -457,18 +486,24 @@ namespace Simd
 
         template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
         {
-            assert(size % 4 == 0);
+            assert(size % 8 == 0);
             int32_t ab = 0;
-            for (size_t i = 0; i < size; i += 4)
+            for (size_t i = 0; i < size; i += 8)
             {
                 uint32_t a0 = *(uint32_t*)(a + 0);
                 uint32_t b0 = *(uint32_t*)(b + 0);
-                ab += Mul(a0 & 0x3F, b0 & 0x3F);
+                ab += Mul((a0 >> 0) & 0x3F, (b0 >> 0) & 0x3F);
                 ab += Mul((a0 >> 6) & 0x3F, (b0 >> 6) & 0x3F);
                 ab += Mul((a0 >> 12) & 0x3F, (b0 >> 12) & 0x3F);
                 ab += Mul((a0 >> 18) & 0x3F, (b0 >> 18) & 0x3F);
-                a += 3;
-                b += 3;
+                uint32_t a2 = *(uint32_t*)(a + 2);
+                uint32_t b2 = *(uint32_t*)(b + 2);
+                ab += Mul((a2 >> 8) & 0x3F, (b2 >> 8) & 0x3F);
+                ab += Mul((a2 >> 14) & 0x3F, (b2 >> 14) & 0x3F);
+                ab += Mul((a2 >> 20) & 0x3F, (b2 >> 20) & 0x3F);
+                ab += Mul((a2 >> 26) & 0x3F, (b2 >> 26) & 0x3F);
+                a += 6;
+                b += 6;
             }
             return ab;
         }
@@ -481,7 +516,7 @@ namespace Simd
             {
                 uint32_t a0 = *(uint32_t*)(a + 0);
                 uint32_t b0 = *(uint32_t*)(b + 0);
-                ab += Mul(a0 & 0x7F, b0 & 0x7F);
+                ab += Mul((a0 >> 0) & 0x7F, (b0 >> 0) & 0x7F);
                 ab += Mul((a0 >> 7) & 0x7F, (b0 >> 7) & 0x7F);
                 ab += Mul((a0 >> 14) & 0x7F, (b0 >> 14) & 0x7F);
                 ab += Mul((a0 >> 21) & 0x7F, (b0 >> 21) & 0x7F);
