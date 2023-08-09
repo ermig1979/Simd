@@ -40,6 +40,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#groups">Modules</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">BGRA-32<div class="ingroups"><a class="el" href="group__functions.html">Functions</a> &raquo; <a class="el" href="group__conversion.html">Conversion</a></div></div></div>
 </div><!--header-->
@@ -48,6 +49,12 @@ $(function() {
 <p>Functions for BGRA-32 image conversions.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="groups" name="groups"></a>
+Modules</h2></td></tr>
+<tr class="memitem:group__bgra__conversion__old"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion__old.html">Old API</a></td></tr>
+<tr class="memdesc:group__bgra__conversion__old"><td class="mdescLeft">&#160;</td><td class="mdescRight">Old deprecated functions for BGRA-32 image conversions. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaacf833a2ecf0704460d3993b4b175a84"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84">SimdBgraToBayer</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *bayer, size_t bayerStride, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> bayerFormat)</td></tr>
@@ -65,27 +72,15 @@ Functions</h2></td></tr>
 <tr class="memitem:gaad727dcf1c17f35bda7cba70fec01c19"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaad727dcf1c17f35bda7cba70fec01c19">SimdBgraToRgba</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *rgba, size_t rgbaStride)</td></tr>
 <tr class="memdesc:gaad727dcf1c17f35bda7cba70fec01c19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 32-bit RGBA image. Also it can be used for 32-bit RGBA to 32-bit BGRA conversion.  <a href="group__bgra__conversion.html#gaad727dcf1c17f35bda7cba70fec01c19">More...</a><br /></td></tr>
 <tr class="separator:gaad727dcf1c17f35bda7cba70fec01c19"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga07257a348e617b8125493448978fd4a1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga07257a348e617b8125493448978fd4a1">SimdBgraToYuv420p</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride)</td></tr>
-<tr class="memdesc:ga07257a348e617b8125493448978fd4a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV420P.  <a href="group__bgra__conversion.html#ga07257a348e617b8125493448978fd4a1">More...</a><br /></td></tr>
-<tr class="separator:ga07257a348e617b8125493448978fd4a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa190fdea85df5dbb3072cee27c79c7a2"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaa190fdea85df5dbb3072cee27c79c7a2">SimdBgraToYuv420pV2</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
 <tr class="memdesc:gaa190fdea85df5dbb3072cee27c79c7a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV420P.  <a href="group__bgra__conversion.html#gaa190fdea85df5dbb3072cee27c79c7a2">More...</a><br /></td></tr>
 <tr class="separator:gaa190fdea85df5dbb3072cee27c79c7a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaea0564d5f794730df6eddf800b5c4133"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaea0564d5f794730df6eddf800b5c4133">SimdBgraToYuv422p</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride)</td></tr>
-<tr class="memdesc:gaea0564d5f794730df6eddf800b5c4133"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV422P.  <a href="group__bgra__conversion.html#gaea0564d5f794730df6eddf800b5c4133">More...</a><br /></td></tr>
-<tr class="separator:gaea0564d5f794730df6eddf800b5c4133"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa8e87ecc1e8624dd7b52d00510e683dd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaa8e87ecc1e8624dd7b52d00510e683dd">SimdBgraToYuv422pV2</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
 <tr class="memdesc:gaa8e87ecc1e8624dd7b52d00510e683dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV422P.  <a href="group__bgra__conversion.html#gaa8e87ecc1e8624dd7b52d00510e683dd">More...</a><br /></td></tr>
 <tr class="separator:gaa8e87ecc1e8624dd7b52d00510e683dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7732a63658e5dd823f80a5b0cebfb1fb"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga7732a63658e5dd823f80a5b0cebfb1fb">SimdBgraToYuv444p</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride)</td></tr>
-<tr class="memdesc:ga7732a63658e5dd823f80a5b0cebfb1fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV444P.  <a href="group__bgra__conversion.html#ga7732a63658e5dd823f80a5b0cebfb1fb">More...</a><br /></td></tr>
-<tr class="separator:ga7732a63658e5dd823f80a5b0cebfb1fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga47b40bfee3757c58d0e41a3183e0d536"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga47b40bfee3757c58d0e41a3183e0d536">SimdBgraToYuv444pV2</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
 <tr class="memdesc:ga47b40bfee3757c58d0e41a3183e0d536"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV444P.  <a href="group__bgra__conversion.html#ga47b40bfee3757c58d0e41a3183e0d536">More...</a><br /></td></tr>
 <tr class="separator:ga47b40bfee3757c58d0e41a3183e0d536"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa0b28835657167e2a78e7e63dd3107aa"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaa0b28835657167e2a78e7e63dd3107aa">SimdBgraToYuva420p</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, uint8_t *a, size_t aStride)</td></tr>
-<tr class="memdesc:gaa0b28835657167e2a78e7e63dd3107aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUVA420P.  <a href="group__bgra__conversion.html#gaa0b28835657167e2a78e7e63dd3107aa">More...</a><br /></td></tr>
-<tr class="separator:gaa0b28835657167e2a78e7e63dd3107aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf54479c5b2f587f8523bfa09f68f26ed"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaf54479c5b2f587f8523bfa09f68f26ed">SimdBgraToYuva420pV2</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, uint8_t *a, size_t aStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
 <tr class="memdesc:gaf54479c5b2f587f8523bfa09f68f26ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUVA420P.  <a href="group__bgra__conversion.html#gaf54479c5b2f587f8523bfa09f68f26ed">More...</a><br /></td></tr>
 <tr class="separator:gaf54479c5b2f587f8523bfa09f68f26ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -109,22 +104,22 @@ Functions</h2></td></tr>
 <tr class="memitem:ga681760f2dbce44b6614881041a420927"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga681760f2dbce44b6614881041a420927">BgraToRgba</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;rgba)</td></tr>
 <tr class="memdesc:ga681760f2dbce44b6614881041a420927"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 32-bit RGBA image.  <a href="group__bgra__conversion.html#ga681760f2dbce44b6614881041a420927">More...</a><br /></td></tr>
 <tr class="separator:ga681760f2dbce44b6614881041a420927"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad58027f2c94aafcdf007dadb6c5e3dfb"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:gad58027f2c94aafcdf007dadb6c5e3dfb"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gad58027f2c94aafcdf007dadb6c5e3dfb">BgraToYuv420p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v)</td></tr>
-<tr class="memdesc:gad58027f2c94aafcdf007dadb6c5e3dfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV420P.  <a href="group__bgra__conversion.html#gad58027f2c94aafcdf007dadb6c5e3dfb">More...</a><br /></td></tr>
-<tr class="separator:gad58027f2c94aafcdf007dadb6c5e3dfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gafc4c6b906bad2d95031e299f0a3fbc63"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:gafc4c6b906bad2d95031e299f0a3fbc63"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gafc4c6b906bad2d95031e299f0a3fbc63">BgraToYuv422p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v)</td></tr>
-<tr class="memdesc:gafc4c6b906bad2d95031e299f0a3fbc63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV422P.  <a href="group__bgra__conversion.html#gafc4c6b906bad2d95031e299f0a3fbc63">More...</a><br /></td></tr>
-<tr class="separator:gafc4c6b906bad2d95031e299f0a3fbc63"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga96ecaea8744a6c6f4d3f723b60be3947"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:ga96ecaea8744a6c6f4d3f723b60be3947"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga96ecaea8744a6c6f4d3f723b60be3947">BgraToYuv444p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v)</td></tr>
-<tr class="memdesc:ga96ecaea8744a6c6f4d3f723b60be3947"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV444P.  <a href="group__bgra__conversion.html#ga96ecaea8744a6c6f4d3f723b60be3947">More...</a><br /></td></tr>
-<tr class="separator:ga96ecaea8744a6c6f4d3f723b60be3947"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaeda8983fd01411340528bdaedcbfc99e"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:gaeda8983fd01411340528bdaedcbfc99e"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaeda8983fd01411340528bdaedcbfc99e">BgraToYuva420p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a)</td></tr>
-<tr class="memdesc:gaeda8983fd01411340528bdaedcbfc99e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUVA420P.  <a href="group__bgra__conversion.html#gaeda8983fd01411340528bdaedcbfc99e">More...</a><br /></td></tr>
-<tr class="separator:gaeda8983fd01411340528bdaedcbfc99e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7f28bb1ac6c44cfb984597cbbda0f317"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga7f28bb1ac6c44cfb984597cbbda0f317"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga7f28bb1ac6c44cfb984597cbbda0f317">BgraToYuv420p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>)</td></tr>
+<tr class="memdesc:ga7f28bb1ac6c44cfb984597cbbda0f317"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV420P.  <a href="group__bgra__conversion.html#ga7f28bb1ac6c44cfb984597cbbda0f317">More...</a><br /></td></tr>
+<tr class="separator:ga7f28bb1ac6c44cfb984597cbbda0f317"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7f7427a8d73e62e62d8bb9a3222b99ee"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga7f7427a8d73e62e62d8bb9a3222b99ee"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga7f7427a8d73e62e62d8bb9a3222b99ee">BgraToYuv422p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>)</td></tr>
+<tr class="memdesc:ga7f7427a8d73e62e62d8bb9a3222b99ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV422P.  <a href="group__bgra__conversion.html#ga7f7427a8d73e62e62d8bb9a3222b99ee">More...</a><br /></td></tr>
+<tr class="separator:ga7f7427a8d73e62e62d8bb9a3222b99ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5c45050f30f435df11a3f739fc8e8c54"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga5c45050f30f435df11a3f739fc8e8c54"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga5c45050f30f435df11a3f739fc8e8c54">BgraToYuv444p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>)</td></tr>
+<tr class="memdesc:ga5c45050f30f435df11a3f739fc8e8c54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV444P.  <a href="group__bgra__conversion.html#ga5c45050f30f435df11a3f739fc8e8c54">More...</a><br /></td></tr>
+<tr class="separator:ga5c45050f30f435df11a3f739fc8e8c54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga95f94dcce123f351635bc30e560621e0"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga95f94dcce123f351635bc30e560621e0"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga95f94dcce123f351635bc30e560621e0">BgraToYuva420p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>)</td></tr>
+<tr class="memdesc:ga95f94dcce123f351635bc30e560621e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUVA420P.  <a href="group__bgra__conversion.html#ga95f94dcce123f351635bc30e560621e0">More...</a><br /></td></tr>
+<tr class="separator:ga95f94dcce123f351635bc30e560621e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions for BGRA-32 image conversions. </p>
@@ -471,101 +466,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga07257a348e617b8125493448978fd4a1" name="ga07257a348e617b8125493448978fd4a1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga07257a348e617b8125493448978fd4a1">&#9670;&nbsp;</a></span>SimdBgraToYuv420p()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdBgraToYuv420p </td>
-          <td>(</td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>bgra</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>bgraStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>y</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>yStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>u</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>uStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>v</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>vStride</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Converts 32-bit BGRA image to YUV420P. </p>
-<p >The input BGRA and output Y images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#gad58027f2c94aafcdf007dadb6c5e3dfb" title="Converts 32-bit BGRA image to YUV420P.">Simd::BgraToYuv420p(const View&lt;A&gt;&amp; bgra, View&lt;A&gt;&amp; y, View&lt;A&gt;&amp; u, View&lt;A&gt;&amp; v)</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the BGRA image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>- a pointer to pixels data of output 8-bit image with Y color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">u</td><td>- a pointer to pixels data of output 8-bit image with U color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="gaa190fdea85df5dbb3072cee27c79c7a2" name="gaa190fdea85df5dbb3072cee27c79c7a2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaa190fdea85df5dbb3072cee27c79c7a2">&#9670;&nbsp;</a></span>SimdBgraToYuv420pV2()</h2>
 
@@ -648,6 +548,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUV420P. </p>
 <p >The input BGRA and output Y images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#ga7f28bb1ac6c44cfb984597cbbda0f317" title="Converts 32-bit BGRA image to YUV420P.">Simd::BgraToYuv420p</a>(const View&amp; bgra, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
@@ -661,101 +562,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of output YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="gaea0564d5f794730df6eddf800b5c4133" name="gaea0564d5f794730df6eddf800b5c4133"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaea0564d5f794730df6eddf800b5c4133">&#9670;&nbsp;</a></span>SimdBgraToYuv422p()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdBgraToYuv422p </td>
-          <td>(</td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>bgra</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>bgraStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>y</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>yStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>u</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>uStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>v</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>vStride</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Converts 32-bit BGRA image to YUV422P. </p>
-<p >The input BGRA and output Y images must have the same width and height. The input U and V images must have the same width and height (their width is equal to half width of Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#gafc4c6b906bad2d95031e299f0a3fbc63" title="Converts 32-bit BGRA image to YUV422P.">Simd::BgraToYuv422p(const View&lt;A&gt;&amp; bgra, View&lt;A&gt;&amp; y, View&lt;A&gt;&amp; u, View&lt;A&gt;&amp; v)</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the BGRA image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>- a pointer to pixels data of output 8-bit image with Y color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">u</td><td>- a pointer to pixels data of output 8-bit image with U color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -844,6 +650,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUV422P. </p>
 <p >The input BGRA and output Y images must have the same width and height. The input U and V images must have the same width and height (their width is equal to half width of Y component).</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#ga7f7427a8d73e62e62d8bb9a3222b99ee" title="Converts 32-bit BGRA image to YUV422P.">Simd::BgraToYuv422p</a>(const View&amp; bgra, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
@@ -857,101 +664,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of output YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga7732a63658e5dd823f80a5b0cebfb1fb" name="ga7732a63658e5dd823f80a5b0cebfb1fb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga7732a63658e5dd823f80a5b0cebfb1fb">&#9670;&nbsp;</a></span>SimdBgraToYuv444p()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdBgraToYuv444p </td>
-          <td>(</td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>bgra</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>bgraStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>y</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>yStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>u</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>uStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>v</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>vStride</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Converts 32-bit BGRA image to YUV444P. </p>
-<p >The input BGRA and output Y, U and V images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#ga96ecaea8744a6c6f4d3f723b60be3947" title="Converts 32-bit BGRA image to YUV444P.">Simd::BgraToYuv444p(const View&lt;A&gt;&amp; bgra, View&lt;A&gt;&amp; y, View&lt;A&gt;&amp; u, View&lt;A&gt;&amp; v)</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the BGRA image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>- a pointer to pixels data of output 8-bit image with Y color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">u</td><td>- a pointer to pixels data of output 8-bit image with U color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1040,6 +752,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUV444P. </p>
 <p >The input BGRA and output Y, U and V images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#ga5c45050f30f435df11a3f739fc8e8c54" title="Converts 32-bit BGRA image to YUV444P.">Simd::BgraToYuv444p</a>(const View&amp; bgra, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
@@ -1053,115 +766,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of output YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="gaa0b28835657167e2a78e7e63dd3107aa" name="gaa0b28835657167e2a78e7e63dd3107aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaa0b28835657167e2a78e7e63dd3107aa">&#9670;&nbsp;</a></span>SimdBgraToYuva420p()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdBgraToYuva420p </td>
-          <td>(</td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>bgra</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>bgraStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>y</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>yStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>u</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>uStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>v</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>vStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>a</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>aStride</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Converts 32-bit BGRA image to YUVA420P. </p>
-<p >The input BGRA and output Y and A images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#gaeda8983fd01411340528bdaedcbfc99e" title="Converts 32-bit BGRA image to YUVA420P.">Simd::BgraToYuva420p(const View&lt;A&gt; &amp; bgra, View&lt;A&gt; &amp; y, View&lt;A&gt; &amp; u, View&lt;A&gt; &amp; v, View&lt;A&gt; &amp; a)</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the BGRA image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>- a pointer to pixels data of output 8-bit image with Y color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">u</td><td>- a pointer to pixels data of output 8-bit image with U color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a</td><td>- a pointer to pixels data of output 8-bit image with alpha plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">aStride</td><td>- a row size of the a image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1262,6 +866,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUVA420P. </p>
 <p >The input BGRA and output Y and A images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#ga95f94dcce123f351635bc30e560621e0" title="Converts 32-bit BGRA image to YUVA420P.">Simd::BgraToYuva420p</a>(const View &amp; bgra, View &amp; y, View &amp; u, View &amp; v, View &amp; a, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
@@ -1478,8 +1083,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gad58027f2c94aafcdf007dadb6c5e3dfb" name="gad58027f2c94aafcdf007dadb6c5e3dfb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gad58027f2c94aafcdf007dadb6c5e3dfb">&#9670;&nbsp;</a></span>BgraToYuv420p()</h2>
+<a id="ga7f28bb1ac6c44cfb984597cbbda0f317" name="ga7f28bb1ac6c44cfb984597cbbda0f317"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7f28bb1ac6c44cfb984597cbbda0f317">&#9670;&nbsp;</a></span>BgraToYuv420p()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1506,7 +1111,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>v</em>&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td>
+          <td class="paramname"><em>yuvType</em> = <code><a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1518,21 +1129,22 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUV420P. </p>
 <p >The input BGRA and output Y images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#ga07257a348e617b8125493448978fd4a1" title="Converts 32-bit BGRA image to YUV420P.">SimdBgraToYuv420p</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaa190fdea85df5dbb3072cee27c79c7a2" title="Converts 32-bit BGRA image to YUV420P.">SimdBgraToYuv420pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>- an output 8-bit image with Y color plane. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">u</td><td>- an output 8-bit image with U color plane. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- an output 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>).By default it is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="gafc4c6b906bad2d95031e299f0a3fbc63" name="gafc4c6b906bad2d95031e299f0a3fbc63"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gafc4c6b906bad2d95031e299f0a3fbc63">&#9670;&nbsp;</a></span>BgraToYuv422p()</h2>
+<a id="ga7f7427a8d73e62e62d8bb9a3222b99ee" name="ga7f7427a8d73e62e62d8bb9a3222b99ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7f7427a8d73e62e62d8bb9a3222b99ee">&#9670;&nbsp;</a></span>BgraToYuv422p()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1559,7 +1171,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>v</em>&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td>
+          <td class="paramname"><em>yuvType</em> = <code><a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1571,21 +1189,22 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUV422P. </p>
 <p >The input BGRA and output Y images must have the same width and height. The input U and V images must have the same width and height (their width is equal to half width of Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaea0564d5f794730df6eddf800b5c4133" title="Converts 32-bit BGRA image to YUV422P.">SimdBgraToYuv422p</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaa8e87ecc1e8624dd7b52d00510e683dd" title="Converts 32-bit BGRA image to YUV422P.">SimdBgraToYuv422pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>- an output 8-bit image with Y color plane. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">u</td><td>- an output 8-bit image with U color plane. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- an output 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>).By default it is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ga96ecaea8744a6c6f4d3f723b60be3947" name="ga96ecaea8744a6c6f4d3f723b60be3947"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga96ecaea8744a6c6f4d3f723b60be3947">&#9670;&nbsp;</a></span>BgraToYuv444p()</h2>
+<a id="ga5c45050f30f435df11a3f739fc8e8c54" name="ga5c45050f30f435df11a3f739fc8e8c54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5c45050f30f435df11a3f739fc8e8c54">&#9670;&nbsp;</a></span>BgraToYuv444p()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1612,7 +1231,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>v</em>&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td>
+          <td class="paramname"><em>yuvType</em> = <code><a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1624,21 +1249,22 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUV444P. </p>
 <p >The input BGRA and output Y, U and V images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#ga7732a63658e5dd823f80a5b0cebfb1fb" title="Converts 32-bit BGRA image to YUV444P.">SimdBgraToYuv444p</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#ga47b40bfee3757c58d0e41a3183e0d536" title="Converts 32-bit BGRA image to YUV444P.">SimdBgraToYuv444pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>- an output 8-bit image with Y color plane. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">u</td><td>- an output 8-bit image with U color plane. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- an output 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>).By default it is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="gaeda8983fd01411340528bdaedcbfc99e" name="gaeda8983fd01411340528bdaedcbfc99e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaeda8983fd01411340528bdaedcbfc99e">&#9670;&nbsp;</a></span>BgraToYuva420p()</h2>
+<a id="ga95f94dcce123f351635bc30e560621e0" name="ga95f94dcce123f351635bc30e560621e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga95f94dcce123f351635bc30e560621e0">&#9670;&nbsp;</a></span>BgraToYuva420p()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1671,7 +1297,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a</em>&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td>
+          <td class="paramname"><em>yuvType</em> = <code><a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1683,7 +1315,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUVA420P. </p>
 <p >The input BGRA and output Y and A images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaa0b28835657167e2a78e7e63dd3107aa" title="Converts 32-bit BGRA image to YUVA420P.">SimdBgraToYuva420p</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaf54479c5b2f587f8523bfa09f68f26ed" title="Converts 32-bit BGRA image to YUVA420P.">SimdBgraToYuva420pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
@@ -1691,6 +1323,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">u</td><td>- an output 8-bit image with U color plane. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">v</td><td>- an output 8-bit image with V color plane. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a</td><td>- an output 8-bit image with alpha plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>).By default it is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. </td></tr>
   </table>
   </dd>
 </dl>

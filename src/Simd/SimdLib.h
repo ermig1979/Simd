@@ -1780,7 +1780,7 @@ extern "C"
     */
     SIMD_API void SimdBgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride);
 
-    /*! @ingroup bgra_conversion
+    /*! @ingroup bgra_conversion_old
 
         \fn void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -1789,7 +1789,7 @@ extern "C"
         The input BGRA and output Y images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component).
 
-        \note This function has a C++ wrapper Simd::BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v).
+        \warning This function is deprecated and can be removed in the future. Use function SimdBgraToYuv420pV2 instead this one.
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] width - an image width.
@@ -1802,7 +1802,7 @@ extern "C"
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
     */
-    SIMD_API void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+    SIMD_API SIMD_DEPRECATED void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
     /*! @ingroup bgra_conversion
 
@@ -1812,6 +1812,8 @@ extern "C"
 
         The input BGRA and output Y images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function has a C++ wrapper Simd::BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] bgraStride - a row size of the BGRA image.
@@ -1827,7 +1829,7 @@ extern "C"
     */
     SIMD_API void SimdBgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
-    /*! @ingroup bgra_conversion
+    /*! @ingroup bgra_conversion_old
 
         \fn void SimdBgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -1836,7 +1838,7 @@ extern "C"
         The input BGRA and output Y images must have the same width and height.
         The input U and V images must have the same width and height (their width is equal to half width of Y component).
 
-        \note This function has a C++ wrapper Simd::BgraToYuv422p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v).
+        \warning This function is deprecated and can be removed in the future. Use function SimdBgraToYuv422pV2 instead this one.
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] width - an image width.
@@ -1849,7 +1851,7 @@ extern "C"
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
     */
-    SIMD_API void SimdBgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+    SIMD_API SIMD_DEPRECATED void SimdBgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
     /*! @ingroup bgra_conversion
 
@@ -1859,6 +1861,8 @@ extern "C"
 
         The input BGRA and output Y images must have the same width and height.
         The input U and V images must have the same width and height (their width is equal to half width of Y component).
+
+        \note This function has a C++ wrapper Simd::BgraToYuv422p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] bgraStride - a row size of the BGRA image.
@@ -1874,7 +1878,7 @@ extern "C"
     */
     SIMD_API void SimdBgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
-    /*! @ingroup bgra_conversion
+    /*! @ingroup bgra_conversion_old
 
         \fn void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -1882,7 +1886,7 @@ extern "C"
 
         The input BGRA and output Y, U and V images must have the same width and height.
 
-        \note This function has a C++ wrapper Simd::BgraToYuv444p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v).
+        \warning This function is deprecated and can be removed in the future. Use function SimdBgraToYuv444pV2 instead this one.
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] width - an image width.
@@ -1895,7 +1899,7 @@ extern "C"
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
     */
-    SIMD_API void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+    SIMD_API SIMD_DEPRECATED void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
     /*! @ingroup bgra_conversion
 
@@ -1904,6 +1908,8 @@ extern "C"
         \short Converts 32-bit BGRA image to YUV444P.
 
         The input BGRA and output Y, U and V images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::BgraToYuv444p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] bgraStride - a row size of the BGRA image.
@@ -1920,7 +1926,7 @@ extern "C"
     SIMD_API void SimdBgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, 
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
-    /*! @ingroup bgra_conversion
+    /*! @ingroup bgra_conversion_old
 
         \fn void SimdBgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride);
 
@@ -1929,7 +1935,7 @@ extern "C"
         The input BGRA and output Y and A images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component).
 
-        \note This function has a C++ wrapper Simd::BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a).
+        \warning This function is deprecated and can be removed in the future. Use function SimdBgraToYuva420pV2 instead this one.
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] bgraStride - a row size of the BGRA image.
@@ -1944,7 +1950,7 @@ extern "C"
         \param [out] a - a pointer to pixels data of output 8-bit image with alpha plane.
         \param [in] aStride - a row size of the a image.
     */
-    SIMD_API void SimdBgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, 
+    SIMD_API SIMD_DEPRECATED void SimdBgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
         uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride);
 
     /*! @ingroup bgra_conversion
@@ -1955,6 +1961,8 @@ extern "C"
 
         The input BGRA and output Y and A images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function has a C++ wrapper Simd::BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] bgraStride - a row size of the BGRA image.
@@ -8948,7 +8956,7 @@ extern "C"
     SIMD_API void SimdYuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType);
 
-    /*! @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion_old
 
         \fn void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
@@ -8999,7 +9007,7 @@ extern "C"
     SIMD_API void SimdYuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
 
-    /*! @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion_old
 
         \fn void SimdYuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
@@ -9050,7 +9058,7 @@ extern "C"
     SIMD_API void SimdYuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
 
-    /*! @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion_old
 
         \fn void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
@@ -9099,7 +9107,7 @@ extern "C"
     SIMD_API void SimdYuv444pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
 
-    /*! @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion_old
 
         \fn void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -9152,7 +9160,7 @@ extern "C"
     SIMD_API void SimdYuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
 
-    /*! @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion_old
 
         \fn void SimdYuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -9205,7 +9213,7 @@ extern "C"
     SIMD_API void SimdYuv422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
 
-    /*! @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion_old
 
         \fn void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
