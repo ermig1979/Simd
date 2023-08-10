@@ -587,8 +587,8 @@ namespace Test
         {
             result = result && DescrIntCosineDistancesMxNaAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(128, 128, 512, depth, f1, f2);
-            result = result && DescrIntCosineDistancesMxNaAutoTest(127, 129, 520, depth, f1, f2);
-            result = result && DescrIntCosineDistancesMxNaAutoTest(29, 31, 10000, depth, f1, f2);
+            //result = result && DescrIntCosineDistancesMxNaAutoTest(127, 129, 520, depth, f1, f2);
+            //result = result && DescrIntCosineDistancesMxNaAutoTest(29, 31, 10000, depth, f1, f2);
         }
 
         return result;

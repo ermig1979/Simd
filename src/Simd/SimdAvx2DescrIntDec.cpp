@@ -40,7 +40,7 @@ namespace Simd
             assert(size % 8 == 0);
             __m256 _scale = _mm256_set1_ps(scale);
             __m256 _shift = _mm256_set1_ps(shift);
-            size_t i = 0, size16 = AlignLo(size, 16);
+            size_t i = 0, size16 = AlignLo(size - 1, 16);
             for (; i < size16; i += 16)
             {
                 __m256i s4 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
