@@ -40,28 +40,28 @@ namespace Simd
 
         template<> SIMD_INLINE __m128i UnpackData16<4>(const uint8_t* src)
         {
-            __m256i s4 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+            __m256i s4 = _mm256_broadcastsi128_si256(Sse41::LoadLast16<4>(src));
             __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s4, C4_SHFL), C4_MULLO), 12);
             return _mm256_castsi256_si128(PackI16ToU8(s16, K_ZERO));
         }
 
         template<> SIMD_INLINE __m128i UnpackData16<5>(const uint8_t* src)
         {
-            __m256i s5 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+            __m256i s5 = _mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(src));
             __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s5, C5_SHFL), C5_MULLO), 11);
             return _mm256_castsi256_si128(PackI16ToU8(s16, K_ZERO));
         }
 
         template<> SIMD_INLINE __m128i UnpackData16<6>(const uint8_t* src)
         {
-            __m256i s6 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+            __m256i s6 = _mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(src));
             __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s6, C6_SHFL), C6_MULLO), 10);
             return _mm256_castsi256_si128(PackI16ToU8(s16, K_ZERO));
         }
 
         template<> SIMD_INLINE __m128i UnpackData16<7>(const uint8_t* src)
         {
-            __m256i s7 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)src));
+            __m256i s7 = _mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(src));
             __m256i s16 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(s7, C7_SHFL), C7_MULLO), 9);
             return _mm256_castsi256_si128(PackI16ToU8(s16, K_ZERO));
         }
@@ -103,7 +103,7 @@ namespace Simd
 
         template<int bits> void UnpackDataA(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
-            size_t size16 = AlignLo(size, 16), size32 = AlignLo(size, 32);
+            size_t size16 = AlignLo(size, 16), size32 = AlignLo(size - 1, 32);
             for (size_t i = 0; i < count; i++)
             {
                 const uint8_t* ps = src[i] + 16;
@@ -166,7 +166,7 @@ namespace Simd
 
         template<int bits> void UnpackDataB(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
-            size_t countDF = AlignLo(count, DF), size16 = AlignLo(size, 16), size32 = AlignLo(size, 32), i, j, o;
+            size_t countDF = AlignLo(count, DF), size16 = AlignLo(size, 16), size32 = AlignLo(size - 1, 32), i, j, o;
             for (i = 0; i < countDF; i += DF, src += DF)
             {
                 for (j = 0, o = 16; j < size32; j += 32, o += 4 * bits, dst += 16 * A)

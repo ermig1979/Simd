@@ -52,8 +52,8 @@ namespace Simd
             }
             for (; i < size; i += 8, a += 4, b += 4)
             {
-                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), Sse41::C4_SHFL0), Sse41::C4_MULLO), 12);
-                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), Sse41::C4_SHFL0), Sse41::C4_MULLO), 12);
+                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(Sse41::LoadLast8<4>(a), Sse41::C4_SHFL0), Sse41::C4_MULLO), 12);
+                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(Sse41::LoadLast8<4>(b), Sse41::C4_SHFL0), Sse41::C4_MULLO), 12);
                 ab32 = _mm256_add_epi32(_mm256_madd_epi16(_mm256_castsi128_si256(_a), _mm256_castsi128_si256(_b)), ab32);
             }
             return ExtractSum<uint32_t>(ab32);
@@ -63,17 +63,23 @@ namespace Simd
         {
             assert(size % 8 == 0);
             __m256i _ab = _mm256_setzero_si256();
-            size_t i = 0, size16 = AlignLo(size, 16);
-            for (; i < size16; i += 16, a += 10, b += 10)
+            size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16);
+            for (; i < size16a; i += 16, a += 10, b += 10)
             {
                 __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)a)), C5_SHFL), C5_MULLO), 11);
                 __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)b)), C5_SHFL), C5_MULLO), 11);
                 _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
             }
+            for (; i < size16; i += 16, a += 10, b += 10)
+            {
+                __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(a)), C5_SHFL), C5_MULLO), 11);
+                __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(b)), C5_SHFL), C5_MULLO), 11);
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
+            }
             for (; i < size; i += 8, a += 5, b += 5)
             {
-                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), Sse41::C5_SHFL0), Sse41::C5_MULLO), 11);
-                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), Sse41::C5_SHFL0), Sse41::C5_MULLO), 11);
+                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(Sse41::LoadLast8<5>(a), Sse41::C5_SHFL0), Sse41::C5_MULLO), 11);
+                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(Sse41::LoadLast8<5>(b), Sse41::C5_SHFL0), Sse41::C5_MULLO), 11);
                 _ab = _mm256_add_epi32(_mm256_madd_epi16(_mm256_castsi128_si256(_a), _mm256_castsi128_si256(_b)), _ab);
             }
             return ExtractSum<uint32_t>(_ab);
@@ -83,17 +89,23 @@ namespace Simd
         {
             assert(size % 8 == 0);
             __m256i _ab = _mm256_setzero_si256();
-            size_t i = 0, size16 = AlignLo(size, 16);
+            size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16);
             for (; i < size16; i += 16, a += 12, b += 12)
             {
                 __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)a)), C6_SHFL), C6_MULLO), 10);
                 __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)b)), C6_SHFL), C6_MULLO), 10);
                 _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
             }
+            for (; i < size16a; i += 16, a += 12, b += 12)
+            {
+                __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(a)), C6_SHFL), C6_MULLO), 10);
+                __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(b)), C6_SHFL), C6_MULLO), 10);
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
+            }
             for (; i < size; i += 8, a += 6, b += 6)
             {
-                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), Sse41::C6_SHFL0), Sse41::C6_MULLO), 10);
-                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), Sse41::C6_SHFL0), Sse41::C6_MULLO), 10);
+                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(Sse41::LoadLast8<6>(a), Sse41::C6_SHFL0), Sse41::C6_MULLO), 10);
+                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(Sse41::LoadLast8<6>(b), Sse41::C6_SHFL0), Sse41::C6_MULLO), 10);
                 _ab = _mm256_add_epi32(_mm256_madd_epi16(_mm256_castsi128_si256(_a), _mm256_castsi128_si256(_b)), _ab);
             }
             return ExtractSum<uint32_t>(_ab);
@@ -103,17 +115,23 @@ namespace Simd
         {
             assert(size % 8 == 0);
             __m256i _ab = _mm256_setzero_si256();
-            size_t i = 0, size16 = AlignLo(size, 16);
-            for (; i < size16; i += 16, a += 14, b += 14)
+            size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16);
+            for (; i < size16a; i += 16, a += 14, b += 14)
             {
                 __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)a)), C7_SHFL), C7_MULLO), 9);
                 __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)b)), C7_SHFL), C7_MULLO), 9);
                 _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
             }
+            for (; i < size16; i += 16, a += 14, b += 14)
+            {
+                __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(a)), C7_SHFL), C7_MULLO), 9);
+                __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(b)), C7_SHFL), C7_MULLO), 9);
+                _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
+            }
             for (; i < size; i += 8, a += 7, b += 7)
             {
-                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)a), Sse41::C7_SHFL0), Sse41::C7_MULLO), 9);
-                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_mm_loadl_epi64((__m128i*)b), Sse41::C7_SHFL0), Sse41::C7_MULLO), 9);
+                __m128i _a = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(Sse41::LoadLast8<7>(a), Sse41::C7_SHFL0), Sse41::C7_MULLO), 9);
+                __m128i _b = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(Sse41::LoadLast8<7>(b), Sse41::C7_SHFL0), Sse41::C7_MULLO), 9);
                 _ab = _mm256_add_epi32(_mm256_madd_epi16(_mm256_castsi128_si256(_a), _mm256_castsi128_si256(_b)), _ab);
             }
             return ExtractSum<uint32_t>(_ab);
@@ -202,22 +220,22 @@ namespace Simd
             }
             for (; i < size; i += 8, o += 4)
             {
-                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C4_SHFL), C4_MULLO), 12);
-                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[1] + o))), C4_SHFL), C4_MULLO), 12);
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(A[0] + o)), C4_SHFL), C4_MULLO), 12);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(A[1] + o)), C4_SHFL), C4_MULLO), 12);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C4_SHFL), C4_MULLO), 12);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(B[0] + o)), C4_SHFL), C4_MULLO), 12);
                 ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
                 ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C4_SHFL), C4_MULLO), 12);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(B[1] + o)), C4_SHFL), C4_MULLO), 12);
                 ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
                 ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C4_SHFL), C4_MULLO), 12);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(B[2] + o)), C4_SHFL), C4_MULLO), 12);
                 ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
                 ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C4_SHFL), C4_MULLO), 12);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(B[3] + o)), C4_SHFL), C4_MULLO), 12);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
@@ -227,7 +245,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect2x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
-            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, a1, b0;
             __m256i ab00 = _mm256_setzero_si256();
             __m256i ab01 = _mm256_setzero_si256();
@@ -237,7 +255,7 @@ namespace Simd
             __m256i ab11 = _mm256_setzero_si256();
             __m256i ab12 = _mm256_setzero_si256();
             __m256i ab13 = _mm256_setzero_si256();
-            for (; i < size16; i += 16, o += 10)
+            for (; i < size16a; i += 16, o += 10)
             {
                 a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[0] + o))), C5_SHFL), C5_MULLO), 11);
                 a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[1] + o))), C5_SHFL), C5_MULLO), 11);
@@ -258,24 +276,45 @@ namespace Simd
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
-            for (; i < size; i += 8, o += 5)
+            for (; i < size16; i += 16, o += 10)
             {
-                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C5_SHFL), C5_MULLO), 11);
-                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[1] + o))), C5_SHFL), C5_MULLO), 11);
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(A[0] + o)), C5_SHFL), C5_MULLO), 11);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(A[1] + o)), C5_SHFL), C5_MULLO), 11);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C5_SHFL), C5_MULLO), 11);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(B[0] + o)), C5_SHFL), C5_MULLO), 11);
                 ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
                 ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C5_SHFL), C5_MULLO), 11);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(B[1] + o)), C5_SHFL), C5_MULLO), 11);
                 ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
                 ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C5_SHFL), C5_MULLO), 11);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(B[2] + o)), C5_SHFL), C5_MULLO), 11);
                 ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
                 ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C5_SHFL), C5_MULLO), 11);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(B[3] + o)), C5_SHFL), C5_MULLO), 11);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+                ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
+            }
+            for (; i < size; i += 8, o += 5)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(A[0] + o)), C5_SHFL), C5_MULLO), 11);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(A[1] + o)), C5_SHFL), C5_MULLO), 11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(B[0] + o)), C5_SHFL), C5_MULLO), 11);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+                ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(B[1] + o)), C5_SHFL), C5_MULLO), 11);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+                ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(B[2] + o)), C5_SHFL), C5_MULLO), 11);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+                ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(B[3] + o)), C5_SHFL), C5_MULLO), 11);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
@@ -285,7 +324,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect2x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
-            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, a1, b0;
             __m256i ab00 = _mm256_setzero_si256();
             __m256i ab01 = _mm256_setzero_si256();
@@ -295,7 +334,7 @@ namespace Simd
             __m256i ab11 = _mm256_setzero_si256();
             __m256i ab12 = _mm256_setzero_si256();
             __m256i ab13 = _mm256_setzero_si256();
-            for (; i < size16; i += 16, o += 12)
+            for (; i < size16a; i += 16, o += 12)
             {
                 a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[0] + o))), C6_SHFL), C6_MULLO), 10);
                 a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[1] + o))), C6_SHFL), C6_MULLO), 10);
@@ -316,24 +355,45 @@ namespace Simd
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
-            for (; i < size; i += 8, o += 6)
+            for (; i < size16; i += 16, o += 12)
             {
-                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C6_SHFL), C6_MULLO), 10);
-                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[1] + o))), C6_SHFL), C6_MULLO), 10);
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(A[0] + o)), C6_SHFL), C6_MULLO), 10);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(A[1] + o)), C6_SHFL), C6_MULLO), 10);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C6_SHFL), C6_MULLO), 10);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(B[0] + o)), C6_SHFL), C6_MULLO), 10);
                 ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
                 ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C6_SHFL), C6_MULLO), 10);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(B[1] + o)), C6_SHFL), C6_MULLO), 10);
                 ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
                 ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C6_SHFL), C6_MULLO), 10);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(B[2] + o)), C6_SHFL), C6_MULLO), 10);
                 ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
                 ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C6_SHFL), C6_MULLO), 10);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(B[3] + o)), C6_SHFL), C6_MULLO), 10);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+                ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
+            }
+            for (; i < size; i += 8, o += 6)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(A[0] + o)), C6_SHFL), C6_MULLO), 10);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(A[1] + o)), C6_SHFL), C6_MULLO), 10);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(B[0] + o)), C6_SHFL), C6_MULLO), 10);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+                ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(B[1] + o)), C6_SHFL), C6_MULLO), 10);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+                ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(B[2] + o)), C6_SHFL), C6_MULLO), 10);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+                ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(B[3] + o)), C6_SHFL), C6_MULLO), 10);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
@@ -343,7 +403,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect2x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
-            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, a1, b0;
             __m256i ab00 = _mm256_setzero_si256();
             __m256i ab01 = _mm256_setzero_si256();
@@ -353,7 +413,7 @@ namespace Simd
             __m256i ab11 = _mm256_setzero_si256();
             __m256i ab12 = _mm256_setzero_si256();
             __m256i ab13 = _mm256_setzero_si256();
-            for (; i < size16; i += 16, o += 14)
+            for (; i < size16a; i += 16, o += 14)
             {
                 a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[0] + o))), C7_SHFL), C7_MULLO), 9);
                 a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[1] + o))), C7_SHFL), C7_MULLO), 9);
@@ -374,24 +434,45 @@ namespace Simd
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
-            for (; i < size; i += 8, o += 7)
+            for (; i < size16; i += 16, o += 14)
             {
-                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C7_SHFL), C7_MULLO), 9);
-                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[1] + o))), C7_SHFL), C7_MULLO), 9);
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(A[0] + o)), C7_SHFL), C7_MULLO), 9);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(A[1] + o)), C7_SHFL), C7_MULLO), 9);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C7_SHFL), C7_MULLO), 9);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(B[0] + o)), C7_SHFL), C7_MULLO), 9);
                 ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
                 ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C7_SHFL), C7_MULLO), 9);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(B[1] + o)), C7_SHFL), C7_MULLO), 9);
                 ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
                 ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C7_SHFL), C7_MULLO), 9);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(B[2] + o)), C7_SHFL), C7_MULLO), 9);
                 ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
                 ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C7_SHFL), C7_MULLO), 9);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(B[3] + o)), C7_SHFL), C7_MULLO), 9);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+                ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
+            }
+            for (; i < size; i += 8, o += 7)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(A[0] + o)), C7_SHFL), C7_MULLO), 9);
+                a1 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(A[1] + o)), C7_SHFL), C7_MULLO), 9);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(B[0] + o)), C7_SHFL), C7_MULLO), 9);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+                ab10 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab10);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(B[1] + o)), C7_SHFL), C7_MULLO), 9);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+                ab11 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(B[2] + o)), C7_SHFL), C7_MULLO), 9);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+                ab12 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab12);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(B[3] + o)), C7_SHFL), C7_MULLO), 9);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
                 ab13 = _mm256_add_epi32(_mm256_madd_epi16(a1, b0), ab13);
             }
@@ -499,18 +580,18 @@ namespace Simd
             }
             for (; i < size; i += 8, o += 4)
             {
-                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C4_SHFL), C4_MULLO), 12);
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(A[0] + o)), C4_SHFL), C4_MULLO), 12);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C4_SHFL), C4_MULLO), 12);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(B[0] + o)), C4_SHFL), C4_MULLO), 12);
                 ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C4_SHFL), C4_MULLO), 12);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(B[1] + o)), C4_SHFL), C4_MULLO), 12);
                 ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C4_SHFL), C4_MULLO), 12);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(B[2] + o)), C4_SHFL), C4_MULLO), 12);
                 ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C4_SHFL), C4_MULLO), 12);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<4>(B[3] + o)), C4_SHFL), C4_MULLO), 12);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
@@ -519,13 +600,13 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect1x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
-            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, b0;
             __m256i ab00 = _mm256_setzero_si256();
             __m256i ab01 = _mm256_setzero_si256();
             __m256i ab02 = _mm256_setzero_si256();
             __m256i ab03 = _mm256_setzero_si256();
-            for (; i < size16; i += 16, o += 10)
+            for (; i < size16a; i += 16, o += 10)
             {
                 a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[0] + o))), C5_SHFL), C5_MULLO), 11);
 
@@ -541,20 +622,36 @@ namespace Simd
                 b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[3] + o))), C5_SHFL), C5_MULLO), 11);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
-            for (; i < size; i += 8, o += 5)
+            for (; i < size16; i += 16, o += 10)
             {
-                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C5_SHFL), C5_MULLO), 11);
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(A[0] + o)), C5_SHFL), C5_MULLO), 11);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C5_SHFL), C5_MULLO), 11);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(B[0] + o)), C5_SHFL), C5_MULLO), 11);
                 ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C5_SHFL), C5_MULLO), 11);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(B[1] + o)), C5_SHFL), C5_MULLO), 11);
                 ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C5_SHFL), C5_MULLO), 11);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(B[2] + o)), C5_SHFL), C5_MULLO), 11);
                 ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C5_SHFL), C5_MULLO), 11);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(B[3] + o)), C5_SHFL), C5_MULLO), 11);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+            }
+            for (; i < size; i += 8, o += 5)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(A[0] + o)), C5_SHFL), C5_MULLO), 11);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(B[0] + o)), C5_SHFL), C5_MULLO), 11);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(B[1] + o)), C5_SHFL), C5_MULLO), 11);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(B[2] + o)), C5_SHFL), C5_MULLO), 11);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<5>(B[3] + o)), C5_SHFL), C5_MULLO), 11);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
@@ -563,13 +660,13 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect1x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
-            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, b0;
             __m256i ab00 = _mm256_setzero_si256();
             __m256i ab01 = _mm256_setzero_si256();
             __m256i ab02 = _mm256_setzero_si256();
             __m256i ab03 = _mm256_setzero_si256();
-            for (; i < size16; i += 16, o += 12)
+            for (; i < size16a; i += 16, o += 12)
             {
                 a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[0] + o))), C6_SHFL), C6_MULLO), 10);
 
@@ -585,20 +682,36 @@ namespace Simd
                 b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[3] + o))), C6_SHFL), C6_MULLO), 10);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
-            for (; i < size; i += 8, o += 6)
+            for (; i < size16; i += 16, o += 12)
             {
-                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C6_SHFL), C6_MULLO), 10);
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(A[0] + o)), C6_SHFL), C6_MULLO), 10);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C6_SHFL), C6_MULLO), 10);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(B[0] + o)), C6_SHFL), C6_MULLO), 10);
                 ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C6_SHFL), C6_MULLO), 10);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(B[1] + o)), C6_SHFL), C6_MULLO), 10);
                 ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C6_SHFL), C6_MULLO), 10);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(B[2] + o)), C6_SHFL), C6_MULLO), 10);
                 ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C6_SHFL), C6_MULLO), 10);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(B[3] + o)), C6_SHFL), C6_MULLO), 10);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+            }
+            for (; i < size; i += 8, o += 6)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(A[0] + o)), C6_SHFL), C6_MULLO), 10);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(B[0] + o)), C6_SHFL), C6_MULLO), 10);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(B[1] + o)), C6_SHFL), C6_MULLO), 10);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(B[2] + o)), C6_SHFL), C6_MULLO), 10);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<6>(B[3] + o)), C6_SHFL), C6_MULLO), 10);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
@@ -607,13 +720,13 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect1x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
-            size_t i = 0, size16 = AlignLo(size, 16), o = 16;
+            size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, b0;
             __m256i ab00 = _mm256_setzero_si256();
             __m256i ab01 = _mm256_setzero_si256();
             __m256i ab02 = _mm256_setzero_si256();
             __m256i ab03 = _mm256_setzero_si256();
-            for (; i < size16; i += 16, o += 14)
+            for (; i < size16a; i += 16, o += 14)
             {
                 a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(A[0] + o))), C7_SHFL), C7_MULLO), 9);
 
@@ -629,20 +742,36 @@ namespace Simd
                 b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(B[3] + o))), C7_SHFL), C7_MULLO), 9);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
-            for (; i < size; i += 8, o += 7)
+            for (; i < size16; i += 16, o += 14)
             {
-                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(A[0] + o))), C7_SHFL), C7_MULLO), 9);
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(A[0] + o)), C7_SHFL), C7_MULLO), 9);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[0] + o))), C7_SHFL), C7_MULLO), 9);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(B[0] + o)), C7_SHFL), C7_MULLO), 9);
                 ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[1] + o))), C7_SHFL), C7_MULLO), 9);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(B[1] + o)), C7_SHFL), C7_MULLO), 9);
                 ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[2] + o))), C7_SHFL), C7_MULLO), 9);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(B[2] + o)), C7_SHFL), C7_MULLO), 9);
                 ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
 
-                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)(B[3] + o))), C7_SHFL), C7_MULLO), 9);
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(B[3] + o)), C7_SHFL), C7_MULLO), 9);
+                ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
+            }
+            for (; i < size; i += 8, o += 7)
+            {
+                a0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(A[0] + o)), C7_SHFL), C7_MULLO), 9);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(B[0] + o)), C7_SHFL), C7_MULLO), 9);
+                ab00 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab00);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(B[1] + o)), C7_SHFL), C7_MULLO), 9);
+                ab01 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab01);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(B[2] + o)), C7_SHFL), C7_MULLO), 9);
+                ab02 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab02);
+
+                b0 = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_castsi128_si256(Sse41::LoadLast8<7>(B[3] + o)), C7_SHFL), C7_MULLO), 9);
                 ab03 = _mm256_add_epi32(_mm256_madd_epi16(a0, b0), ab03);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
