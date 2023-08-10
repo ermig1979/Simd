@@ -568,4 +568,32 @@ namespace Test
 
         return result;
     }
+
+    bool ResizeAreaGraySpecialTest()
+    {
+        bool result = true;
+
+        View src(W, H, View::Gray8);
+        FillRandom(src);
+
+        View dst(W / 7, H / 7, View::Gray8);
+
+        ResizeAreaGray(src, dst);
+
+        return result;
+    }
+
+    bool ResizeAreaSpecialTest()
+    {
+        bool result = true;
+
+        View src(W, H, View::Bgr24);
+        FillRandom(src);
+
+        View dst(W / 7, H / 7, View::Bgr24);
+
+        ResizeArea(src, dst);
+
+        return result;
+    }
 }

@@ -3256,7 +3256,7 @@ namespace Simd
         SimdReduceColor2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, src.ChannelCount());
     }
 
-    /*! @ingroup resizing
+    /*! @ingroup resizing_old
 
         \fn void ResizeBilinear(const View<A>& src, View<A>& dst)
 
@@ -3266,10 +3266,12 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdResizeBilinear.
 
+        \warning This function is deprecated and can be removed in the future. Use function Simd::Resize instead this one.
+
         \param [in] src - an original input image.
         \param [out] dst - a resized output image.
     */
-    template<template<class> class A> SIMD_INLINE void ResizeBilinear(const View<A> & src, View<A> & dst)
+    template<template<class> class A> SIMD_INLINE SIMD_DEPRECATED void ResizeBilinear(const View<A> & src, View<A> & dst)
     {
         assert(src.format == dst.format && src.ChannelSize() == 1);
 
@@ -3284,7 +3286,7 @@ namespace Simd
         }
     }
 
-    /*! @ingroup resizing
+    /*! @ingroup resizing_old
 
         \fn void ResizeAreaGray(const View<A> & src, View<A> & dst)
 
@@ -3292,10 +3294,12 @@ namespace Simd
 
         All images must have the same format (8-bit gray).
 
+        \warning This function is deprecated and can be removed in the future. Use function Simd::Resize instead this one.
+
         \param [in] src - an original input image.
         \param [out] dst - a resized output image.
     */
-    template<template<class> class A> SIMD_INLINE void ResizeAreaGray(const View<A> & src, View<A> & dst)
+    template<template<class> class A> SIMD_INLINE SIMD_DEPRECATED void ResizeAreaGray(const View<A> & src, View<A> & dst)
     {
         assert(src.format == dst.format && src.format == View<A>::Gray8);
 
@@ -3321,7 +3325,7 @@ namespace Simd
         }
     }
 
-    /*! @ingroup resizing
+    /*! @ingroup resizing_old
 
         \fn void ResizeArea(const View<A> & src, View<A> & dst)
 
@@ -3329,10 +3333,12 @@ namespace Simd
 
         All images must have the same format.
 
+        \warning This function is deprecated and can be removed in the future. Use function Simd::Resize instead this one.
+
         \param [in] src - an original input image.
         \param [out] dst - a resized output image.
     */
-    template<template<class> class A> SIMD_INLINE void ResizeArea(const View<A> & src, View<A> & dst)
+    template<template<class> class A> SIMD_INLINE SIMD_DEPRECATED void ResizeArea(const View<A> & src, View<A> & dst)
     {
         assert(src.format == dst.format);
 
@@ -3348,15 +3354,15 @@ namespace Simd
             if (level)
             {
                 std::vector<View<A> > pyramid(level);
-                pyramid[0].Resize(size, src.format);
+                pyramid[0].Recreate(size, src.format);
                 Simd::ResizeBilinear(src, pyramid[0]);
                 for (size_t i = 1; i < level; ++i)
                 {
                     size = Simd::Scale(size);
-                    pyramid[i].Resize(size, src.format);
-                    Simd::Reduce2x2(pyramid.At(i - 1), pyramid.At(i));
+                    pyramid[i].Recreate(size, src.format);
+                    Simd::Reduce2x2(pyramid[i - 1], pyramid[i]);
                 }
-                Simd::Reduce2x2(pyramid.At(level - 1), dst);
+                Simd::Reduce2x2(pyramid[level - 1], dst);
             }
             else
                 Simd::ResizeBilinear(src, dst);

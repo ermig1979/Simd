@@ -40,6 +40,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#groups">Modules</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">Resizing<div class="ingroups"><a class="el" href="group__functions.html">Functions</a></div></div></div>
@@ -49,6 +50,12 @@ $(function() {
 <p>Functions for image resizing.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="groups" name="groups"></a>
+Modules</h2></td></tr>
+<tr class="memitem:group__resizing__old"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__resizing__old.html">Old API</a></td></tr>
+<tr class="memdesc:group__resizing__old"><td class="mdescLeft">&#160;</td><td class="mdescRight">Old deprecated functions for image resizing. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr class="memitem:ga7f03c4de676449287955615f68c8a83b"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga7f03c4de676449287955615f68c8a83b">SimdResizeChannelType</a> { <br />
@@ -97,9 +104,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga0a89812c8da5bfbbebabd9717855f7ce"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga0a89812c8da5bfbbebabd9717855f7ce">SimdReduceGray5x5</a> (const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation)</td></tr>
 <tr class="memdesc:ga0a89812c8da5bfbbebabd9717855f7ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 5x5.  <a href="group__resizing.html#ga0a89812c8da5bfbbebabd9717855f7ce">More...</a><br /></td></tr>
 <tr class="separator:ga0a89812c8da5bfbbebabd9717855f7ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1dd25f3a0d5736af1db87518b379f23f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga1dd25f3a0d5736af1db87518b379f23f">SimdResizeBilinear</a> (const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)</td></tr>
-<tr class="memdesc:ga1dd25f3a0d5736af1db87518b379f23f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs resizing of input image with using bilinear interpolation.  <a href="group__resizing.html#ga1dd25f3a0d5736af1db87518b379f23f">More...</a><br /></td></tr>
-<tr class="separator:ga1dd25f3a0d5736af1db87518b379f23f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabee5cdab6c6e3c678381d5b872287184"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__resizing.html#gabee5cdab6c6e3c678381d5b872287184">SimdResizerInit</a> (size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, <a class="el" href="group__resizing.html#ga7f03c4de676449287955615f68c8a83b">SimdResizeChannelType</a> type, <a class="el" href="group__resizing.html#gabcaf67f1fd7327ca3f47c0d04b671b1a">SimdResizeMethodType</a> method)</td></tr>
 <tr class="memdesc:gabee5cdab6c6e3c678381d5b872287184"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates resize context.  <a href="group__resizing.html#gabee5cdab6c6e3c678381d5b872287184">More...</a><br /></td></tr>
 <tr class="separator:gabee5cdab6c6e3c678381d5b872287184"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -133,18 +137,6 @@ Functions</h2></td></tr>
 <tr class="memitem:gab02efa69c6bee2a2920dd076a4437bc8"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#gab02efa69c6bee2a2920dd076a4437bc8">Reduce2x2</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gab02efa69c6bee2a2920dd076a4437bc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs reducing of image (in 2 times).  <a href="group__resizing.html#gab02efa69c6bee2a2920dd076a4437bc8">More...</a><br /></td></tr>
 <tr class="separator:gab02efa69c6bee2a2920dd076a4437bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gade5047dc4b419a9d7dbbab980deefb4f"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:gade5047dc4b419a9d7dbbab980deefb4f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#gade5047dc4b419a9d7dbbab980deefb4f">ResizeBilinear</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:gade5047dc4b419a9d7dbbab980deefb4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs resizing of input image with using bilinear interpolation.  <a href="group__resizing.html#gade5047dc4b419a9d7dbbab980deefb4f">More...</a><br /></td></tr>
-<tr class="separator:gade5047dc4b419a9d7dbbab980deefb4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3b8b4d3f80b3b56cdec02096a7a4e76b"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:ga3b8b4d3f80b3b56cdec02096a7a4e76b"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga3b8b4d3f80b3b56cdec02096a7a4e76b">ResizeAreaGray</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:ga3b8b4d3f80b3b56cdec02096a7a4e76b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs resizing of input image with using area interpolation.  <a href="group__resizing.html#ga3b8b4d3f80b3b56cdec02096a7a4e76b">More...</a><br /></td></tr>
-<tr class="separator:ga3b8b4d3f80b3b56cdec02096a7a4e76b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga85dc649888ecd2244cf5e2cdb3726519"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:ga85dc649888ecd2244cf5e2cdb3726519"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga85dc649888ecd2244cf5e2cdb3726519">ResizeArea</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:ga85dc649888ecd2244cf5e2cdb3726519"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs resizing of input image with using area interpolation.  <a href="group__resizing.html#ga85dc649888ecd2244cf5e2cdb3726519">More...</a><br /></td></tr>
-<tr class="separator:ga85dc649888ecd2244cf5e2cdb3726519"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2533cff5d7d01182fd6bc8d4757ffa7f"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga2533cff5d7d01182fd6bc8d4757ffa7f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga2533cff5d7d01182fd6bc8d4757ffa7f">Resize</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, <a class="el" href="group__resizing.html#gabcaf67f1fd7327ca3f47c0d04b671b1a">::SimdResizeMethodType</a> method=<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">::SimdResizeMethodBilinear</a>)</td></tr>
 <tr class="memdesc:ga2533cff5d7d01182fd6bc8d4757ffa7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs resizing of image.  <a href="group__resizing.html#ga2533cff5d7d01182fd6bc8d4757ffa7f">More...</a><br /></td></tr>
@@ -663,94 +655,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga1dd25f3a0d5736af1db87518b379f23f" name="ga1dd25f3a0d5736af1db87518b379f23f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga1dd25f3a0d5736af1db87518b379f23f">&#9670;&nbsp;</a></span>SimdResizeBilinear()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdResizeBilinear </td>
-          <td>(</td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>srcWidth</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>srcHeight</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>srcStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstWidth</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstHeight</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>channelCount</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs resizing of input image with using bilinear interpolation. </p>
-<p >All images must have the same format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__resizing.html#gade5047dc4b419a9d7dbbab980deefb4f" title="Performs resizing of input image with using bilinear interpolation.">Simd::ResizeBilinear(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst)</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcWidth</td><td>- a width of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcHeight</td><td>- a height of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the reduced output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstWidth</td><td>- a width of the output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstHeight</td><td>- a height of the output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="gabee5cdab6c6e3c678381d5b872287184" name="gabee5cdab6c6e3c678381d5b872287184"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gabee5cdab6c6e3c678381d5b872287184">&#9670;&nbsp;</a></span>SimdResizerInit()</h2>
 
@@ -1237,121 +1141,6 @@ if (resizer)
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a reduced output image. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="gade5047dc4b419a9d7dbbab980deefb4f" name="gade5047dc4b419a9d7dbbab980deefb4f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gade5047dc4b419a9d7dbbab980deefb4f">&#9670;&nbsp;</a></span>ResizeBilinear()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ResizeBilinear </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs resizing of input image with using bilinear interpolation. </p>
-<p >All images must have the same format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__resizing.html#ga1dd25f3a0d5736af1db87518b379f23f" title="Performs resizing of input image with using bilinear interpolation.">SimdResizeBilinear</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a resized output image. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga3b8b4d3f80b3b56cdec02096a7a4e76b" name="ga3b8b4d3f80b3b56cdec02096a7a4e76b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga3b8b4d3f80b3b56cdec02096a7a4e76b">&#9670;&nbsp;</a></span>ResizeAreaGray()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ResizeAreaGray </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs resizing of input image with using area interpolation. </p>
-<p >All images must have the same format (8-bit gray).</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a resized output image. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga85dc649888ecd2244cf5e2cdb3726519" name="ga85dc649888ecd2244cf5e2cdb3726519"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga85dc649888ecd2244cf5e2cdb3726519">&#9670;&nbsp;</a></span>ResizeArea()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ResizeArea </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs resizing of input image with using area interpolation. </p>
-<p >All images must have the same format.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a resized output image. </td></tr>
   </table>
   </dd>
 </dl>

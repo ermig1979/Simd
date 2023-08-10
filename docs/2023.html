@@ -61,6 +61,10 @@
  <li>The mark of function SimdBgraToYuv422p as deprecated.</li>
  <li>The mark of function SimdBgraToYuv444p as deprecated.</li>
  <li>The mark of function SimdBgraToYuva420p as deprecated.</li>
+ <li>The mark of function SimdResizeBilinear as deprecated.</li>
+ <li>The mark of function Simd::ResizeBilinear as deprecated.</li>
+ <li>The mark of function Simd::ResizeAreaGray as deprecated.</li>
+ <li>The mark of function Simd::ResizeArea as deprecated.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -72,6 +76,7 @@
  <li>The memory reading outside border of input array in Base implementation, SSE4.1, AVX2 optimizations of function DescrIntCosineDistancesMxNp.</li>
  <li>Error in AVX-512BW optimizations of function DescrIntEncode32f.</li>
  <li>Error in AVX-512BW optimizations of function DescrIntEncode16f.</li>
+ <li>Compiler error in function Simd::ResizeArea.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -81,6 +86,8 @@
  <li>Tests for verifying functionality of function Yuv422pToBgrV2.</li>
  <li>Tests for verifying functionality of function Yuv444pToBgrV2.</li>
  <li>Tests for verifying functionality of function Yuv422pToBgraV2.</li>
+ <li>Special test for verifying functionality of function Simd::ResizeAreaGray.</li>
+ <li>Special test for verifying functionality of function Simd::ResizeArea.</li>
 </ul>
 
 <a href="#HOME">Home</a>

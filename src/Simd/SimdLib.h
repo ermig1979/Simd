@@ -5716,7 +5716,7 @@ extern "C"
     */
     SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
 
-    /*! @ingroup resizing
+    /*! @ingroup resizing_old
 
         \fn void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
@@ -5725,6 +5725,8 @@ extern "C"
         All images must have the same format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
 
         \note This function has a C++ wrappers: Simd::ResizeBilinear(const View<A>& src, View<A>& dst).
+
+        \warning This function is deprecated and can be removed in the future. Use functions ::SimdResizerInit, ::SimdResizerRun, ::SimdRelease instead this one.
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -5736,7 +5738,7 @@ extern "C"
         \param [in] dstStride - a row size of the output image.
         \param [in] channelCount - a channel count.
     */
-    SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+    SIMD_API SIMD_DEPRECATED void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
     /*! @ingroup resizing
