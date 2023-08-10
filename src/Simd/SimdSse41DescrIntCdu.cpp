@@ -75,7 +75,7 @@ namespace Simd
 
         template<int bits> void UnpackDataA(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
-            size_t size16 = AlignLo(size, 16);
+            size_t size16 = AlignLo(size - 1, 16);
             for (size_t i = 0; i < count; i++)
             {
                 const uint8_t* ps = src[i] + 16;
@@ -143,7 +143,7 @@ namespace Simd
 
         template<int bits> void UnpackDataB(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
-            size_t count8 = AlignLo(count, 8), size16 = AlignLo(size, 16), i, j, o;
+            size_t count8 = AlignLo(count, 8), size16 = AlignLo(size - 1, 16), i, j, o;
             for (i = 0; i < count8; i += 8, src += 8)
             {
                 for (j = 0, o = 16; j < size16; j += 16, o += 2 * bits, dst += 8 * A)

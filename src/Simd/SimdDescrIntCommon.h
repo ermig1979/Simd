@@ -85,32 +85,44 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<int bits> __m128i LoadLast8(const uint8_t* src)
+        {
+            return _mm_srli_si128(_mm_loadl_epi64((__m128i*)(src + bits - 8)), 8 - bits);
+        }
+
+        template<int bits> __m128i LoadLast16(const uint8_t* src)
+        {
+            return _mm_srli_si128(_mm_loadu_si128((__m128i*)(src + bits * 2 - 16)), 16 - bits * 2);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template<int bits> __m128i UnpackData8(const uint8_t* src);
 
         template<> SIMD_INLINE __m128i UnpackData8<4>(const uint8_t* src)
         {
-            __m128i _src = _mm_loadl_epi64((__m128i*)src);
+            __m128i _src = LoadLast8<4>(src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C4_SHFL0), C4_MULLO), 12);
             return _mm_packus_epi16(lo, K_ZERO);
         }
 
         template<> SIMD_INLINE __m128i UnpackData8<5>(const uint8_t* src)
         {
-            __m128i _src = _mm_loadl_epi64((__m128i*)src);
+            __m128i _src = LoadLast8<5>(src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C5_SHFL0), C5_MULLO), 11);
             return _mm_packus_epi16(lo, K_ZERO);
         }
 
         template<> SIMD_INLINE __m128i UnpackData8<6>(const uint8_t* src)
         {
-            __m128i _src = _mm_loadl_epi64((__m128i*)src);
+            __m128i _src = LoadLast8<6>(src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C6_SHFL0), C6_MULLO), 10);
             return _mm_packus_epi16(lo, K_ZERO);
         }
 
         template<> SIMD_INLINE __m128i UnpackData8<7>(const uint8_t* src)
         {
-            __m128i _src = _mm_loadl_epi64((__m128i*)src);
+            __m128i _src = LoadLast8<7>(src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C7_SHFL0), C7_MULLO), 9);
             return _mm_packus_epi16(lo, K_ZERO);
         }

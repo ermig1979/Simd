@@ -494,8 +494,11 @@ namespace Test
 
         result = result && Compare(d1, d2, EPS * 0.1f * (1 << (8 - depth)), true, DifferenceRelative, "d1 & d2");
 
-        ::SimdCosineDistance32f((float*)oA.data, (float*)oB.data, size, &d3);
-        result = result && Compare(d2, d3, EPS * 1.0f * (1 << (8 - depth)), true, DifferenceRelative, "d2 & d3");
+        if (size >= 256)
+        {
+            ::SimdCosineDistance32f((float*)oA.data, (float*)oB.data, size, &d3);
+            result = result && Compare(d2, d3, EPS * 1.0f * (1 << (8 - depth)), true, DifferenceRelative, "d2 & d3");
+        }
 
         return result;
     }
@@ -582,9 +585,10 @@ namespace Test
 
         for (size_t depth = 4; depth <= 8; depth++)
         {
-            //result = result && DescrIntCosineDistancesMxNaAutoTest(127, 129, 520, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(128, 128, 512, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNaAutoTest(127, 129, 520, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNaAutoTest(29, 31, 10000, depth, f1, f2);
         }
 
         return result;
