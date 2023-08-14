@@ -112,12 +112,12 @@ namespace Simd
                 if (level)
                 {
                     Pyramid pyramid(size, level + 1);
-                    Simd::ResizeBilinear(_originalSymbols[i].image, pyramid[0]);
+                    Simd::Resize(_originalSymbols[i].image, pyramid[0], SimdResizeMethodBilinear);
                     Simd::Build(pyramid, SimdReduce2x2);
                     Simd::Copy(pyramid[level], _currentSymbols[i].image);
                 }
                 else
-                    Simd::ResizeBilinear(_originalSymbols[i].image, _currentSymbols[i].image);
+                    Simd::Resize(_originalSymbols[i].image, _currentSymbols[i].image, SimdResizeMethodBilinear);
             }
 
             return true;
