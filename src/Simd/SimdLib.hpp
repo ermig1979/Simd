@@ -2572,11 +2572,13 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdInterferenceIncrement.
 
+        \warning This function is deprecated and can be removed in the future.
+
         \param [in, out] dst - a 16-bit signed integer image with statistic.
         \param [in] increment - an increment of statistic.
         \param [in] saturation - an upper saturation of statistic.
     */
-    template<template<class> class A> SIMD_INLINE void InterferenceIncrement(View<A> & dst, uint8_t increment, int16_t saturation)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void InterferenceIncrement(View<A> & dst, uint8_t increment, int16_t saturation)
     {
         assert(dst.format == View<A>::Int16);
 
@@ -2600,13 +2602,15 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdInterferenceIncrementMasked.
 
+        \warning This function is deprecated and can be removed in the future.
+
         \param [in, out] dst - a 16-bit signed integer image with statistic.
         \param [in] increment - an increment of statistic.
         \param [in] saturation - an upper saturation of statistic.
         \param [in] mask - a 8-bit gray image with mask.
         \param [in] index - an index of mask.
     */
-    template<template<class> class A> SIMD_INLINE void InterferenceIncrementMasked(View<A> & dst, uint8_t increment, int16_t saturation, const View<A>& mask, uint8_t index)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void InterferenceIncrementMasked(View<A> & dst, uint8_t increment, int16_t saturation, const View<A>& mask, uint8_t index)
     {
         assert(dst.format == View<A>::Int16 && mask.format == View<A>::Gray8 && EqualSize(dst, mask));
 
@@ -2628,11 +2632,13 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdInterferenceDecrement.
 
+        \warning This function is deprecated and can be removed in the future.
+
         \param [in, out] dst - a 16-bit signed integer image with statistic.
         \param [in] decrement - a decrement of statistic.
         \param [in] saturation - a lower saturation of statistic.
     */
-    template<template<class> class A> SIMD_INLINE void InterferenceDecrement(View<A> & dst, uint8_t decrement, int16_t saturation)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void InterferenceDecrement(View<A> & dst, uint8_t decrement, int16_t saturation)
     {
         assert(dst.format == View<A>::Int16);
 
@@ -2656,13 +2662,15 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdInterferenceDecrementMasked.
 
+        \warning This function is deprecated and can be removed in the future.
+
         \param [in, out] dst - a 16-bit signed integer image with statistic.
         \param [in] decrement - a decrement of statistic.
         \param [in] saturation - a lower saturation of statistic.
         \param [in] mask - a 8-bit gray image with mask.
         \param [in] index - an index of mask.
     */
-    template<template<class> class A> SIMD_INLINE void InterferenceDecrementMasked(View<A> & dst, uint8_t decrement, int16_t saturation, const View<A>& mask, uint8_t index)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void InterferenceDecrementMasked(View<A> & dst, uint8_t decrement, int16_t saturation, const View<A>& mask, uint8_t index)
     {
         assert(dst.format == View<A>::Int16 && mask.format == View<A>::Gray8 && EqualSize(dst, mask));
 
@@ -3271,7 +3279,7 @@ namespace Simd
         \param [in] src - an original input image.
         \param [out] dst - a resized output image.
     */
-    template<template<class> class A> SIMD_INLINE SIMD_DEPRECATED void ResizeBilinear(const View<A> & src, View<A> & dst)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void ResizeBilinear(const View<A> & src, View<A> & dst)
     {
         assert(src.format == dst.format && src.ChannelSize() == 1);
 
@@ -3299,7 +3307,7 @@ namespace Simd
         \param [in] src - an original input image.
         \param [out] dst - a resized output image.
     */
-    template<template<class> class A> SIMD_INLINE SIMD_DEPRECATED void ResizeAreaGray(const View<A> & src, View<A> & dst)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void ResizeAreaGray(const View<A> & src, View<A> & dst)
     {
         assert(src.format == dst.format && src.format == View<A>::Gray8);
 
@@ -3338,7 +3346,7 @@ namespace Simd
         \param [in] src - an original input image.
         \param [out] dst - a resized output image.
     */
-    template<template<class> class A> SIMD_INLINE SIMD_DEPRECATED void ResizeArea(const View<A> & src, View<A> & dst)
+    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void ResizeArea(const View<A> & src, View<A> & dst)
     {
         assert(src.format == dst.format);
 
