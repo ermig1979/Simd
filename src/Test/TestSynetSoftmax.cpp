@@ -69,7 +69,7 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
 
         Tensor32f src({ outer, count, inner });
-        FillRandom(src.Data(), src.Size(), -10.0, 10.0f);
+        FillRandom(src.Data(), src.Size(), -1000.0, 0.0f);
 
         Tensor32f dst1(ToShape(outer, count, inner, SimdTensorFormatNchw), SimdTensorFormatNchw, 0.1f);
         Tensor32f dst2(ToShape(outer, count, inner, SimdTensorFormatNchw), SimdTensorFormatNchw, 0.2f);
@@ -89,6 +89,7 @@ namespace Test
     {
         bool result = true;
 
+        result = result && SynetSoftmaxLayerForwardAutoTest(392, 49, 1, f1, f2);
         result = result && SynetSoftmaxLayerForwardAutoTest(21825, 2, 1, f1, f2);
         result = result && SynetSoftmaxLayerForwardAutoTest(50, 10, 100, f1, f2);
         result = result && SynetSoftmaxLayerForwardAutoTest(13666, 3, 1, f1, f2);

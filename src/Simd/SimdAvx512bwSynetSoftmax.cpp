@@ -128,22 +128,23 @@ namespace Simd
             __m512 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aA, aB, aC, aD, aE, aF, b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, bA, bB, bC, bD, bE, bF;
 
             __mmask16 srcMask = __mmask16(-1) >> (16 - cols);
-            a0 = _mm512_maskz_loadu_ps(srcMask, src + 0x0 * srcStride);
-            a1 = _mm512_maskz_loadu_ps(srcMask, src + 0x1 * srcStride);
-            a2 = _mm512_maskz_loadu_ps(srcMask, src + 0x2 * srcStride);
-            a3 = _mm512_maskz_loadu_ps(srcMask, src + 0x3 * srcStride);
-            a4 = _mm512_maskz_loadu_ps(srcMask, src + 0x4 * srcStride);
-            a5 = _mm512_maskz_loadu_ps(srcMask, src + 0x5 * srcStride);
-            a6 = _mm512_maskz_loadu_ps(srcMask, src + 0x6 * srcStride);
-            a7 = _mm512_maskz_loadu_ps(srcMask, src + 0x7 * srcStride);
-            a8 = _mm512_maskz_loadu_ps(srcMask, src + 0x8 * srcStride);
-            a9 = _mm512_maskz_loadu_ps(srcMask, src + 0x9 * srcStride);
-            aA = _mm512_maskz_loadu_ps(srcMask, src + 0xA * srcStride);
-            aB = _mm512_maskz_loadu_ps(srcMask, src + 0xB * srcStride);
-            aC = _mm512_maskz_loadu_ps(srcMask, src + 0xC * srcStride);
-            aD = _mm512_maskz_loadu_ps(srcMask, src + 0xD * srcStride);
-            aE = _mm512_maskz_loadu_ps(srcMask, src + 0xE * srcStride);
-            aF = _mm512_maskz_loadu_ps(srcMask, src + 0xF * srcStride);
+            __m512 def = _mm512_set1_ps(-FLT_MAX);
+            a0 = _mm512_mask_loadu_ps(def, srcMask, src + 0x0 * srcStride);
+            a1 = _mm512_mask_loadu_ps(def, srcMask, src + 0x1 * srcStride);
+            a2 = _mm512_mask_loadu_ps(def, srcMask, src + 0x2 * srcStride);
+            a3 = _mm512_mask_loadu_ps(def, srcMask, src + 0x3 * srcStride);
+            a4 = _mm512_mask_loadu_ps(def, srcMask, src + 0x4 * srcStride);
+            a5 = _mm512_mask_loadu_ps(def, srcMask, src + 0x5 * srcStride);
+            a6 = _mm512_mask_loadu_ps(def, srcMask, src + 0x6 * srcStride);
+            a7 = _mm512_mask_loadu_ps(def, srcMask, src + 0x7 * srcStride);
+            a8 = _mm512_mask_loadu_ps(def, srcMask, src + 0x8 * srcStride);
+            a9 = _mm512_mask_loadu_ps(def, srcMask, src + 0x9 * srcStride);
+            aA = _mm512_mask_loadu_ps(def, srcMask, src + 0xA * srcStride);
+            aB = _mm512_mask_loadu_ps(def, srcMask, src + 0xB * srcStride);
+            aC = _mm512_mask_loadu_ps(def, srcMask, src + 0xC * srcStride);
+            aD = _mm512_mask_loadu_ps(def, srcMask, src + 0xD * srcStride);
+            aE = _mm512_mask_loadu_ps(def, srcMask, src + 0xE * srcStride);
+            aF = _mm512_mask_loadu_ps(def, srcMask, src + 0xF * srcStride);
 
             b0 = _mm512_unpacklo_ps(a0, a2);
             b1 = _mm512_unpacklo_ps(a1, a3);
@@ -252,8 +253,9 @@ namespace Simd
             __m512 a[16], b[16];
 
             __mmask16 srcMask = __mmask16(-1) >> (16 - cols);
+            __m512 def = _mm512_set1_ps(-FLT_MAX);
             for(size_t r = 0; r < rows; ++r)
-                a[r] = _mm512_maskz_loadu_ps(srcMask, src + r * srcStride);
+                a[r] = _mm512_mask_loadu_ps(def, srcMask, src + r * srcStride);
 
             for (size_t r = 0; r < rows; r += 4)
             {
