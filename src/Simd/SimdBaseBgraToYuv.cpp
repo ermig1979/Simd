@@ -351,6 +351,5 @@ namespace Simd
                 assert(0);
             }
         }
-
     }
 }
