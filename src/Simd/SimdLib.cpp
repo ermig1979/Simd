@@ -1606,11 +1606,11 @@ SIMD_API void SimdBgrToYuv420pV2(const uint8_t* bgr, size_t bgrStride, size_t wi
 //        Avx2::BgrToYuv420pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
 //    else
 //#endif
-//#ifdef SIMD_SSE41_ENABLE
-//    if (Sse41::Enable && width >= Sse41::DA)
-//        Sse41::BgrToYuv420pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
-//    else
-//#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::DA)
+        Sse41::BgrToYuv420pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+    else
+#endif
 //#ifdef SIMD_NEON_ENABLE
 //    if (Neon::Enable && width >= Neon::DA)
 //        Neon::BgrToYuv420pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);

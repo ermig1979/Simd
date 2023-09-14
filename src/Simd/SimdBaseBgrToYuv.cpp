@@ -124,7 +124,7 @@ namespace Simd
             uint8_t* y1 = y0 + yStride;
 
             y0[0] = BgrToY<YuvType>(bgr0[0], bgr0[1], bgr0[2]);
-            y0[1] = BgrToY<YuvType>(bgr0[2], bgr0[4], bgr0[5]);
+            y0[1] = BgrToY<YuvType>(bgr0[3], bgr0[4], bgr0[5]);
             y1[0] = BgrToY<YuvType>(bgr1[0], bgr1[1], bgr1[2]);
             y1[1] = BgrToY<YuvType>(bgr1[3], bgr1[4], bgr1[5]);
 
