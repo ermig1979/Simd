@@ -352,7 +352,7 @@ namespace Simd
             uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
         {
 #if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
-            Base::BgrToYuv420pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+            Base::BgrToYuv422pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
 #else
             switch (yuvType)
             {
