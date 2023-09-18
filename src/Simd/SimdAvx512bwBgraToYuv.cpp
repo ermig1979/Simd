@@ -361,9 +361,9 @@ namespace Simd
             LoadPreparedBgra16<false, tail>(bgra + 2 * A, _b16_r16[1][0], _g16_1[1][0], tails + 2);
             LoadPreparedBgra16<false, tail>(bgra + 3 * A, _b16_r16[1][1], _g16_1[1][1], tails + 3);
 
-            Store<false, tail>(y, PackI16ToU8(BgrToY16<T>(_b16_r16[0], _g16_1[0]), BgrToY16<T>(_b16_r16[1], _g16_1[1])), tails[4]);
-            Store<false, tail>(u, PackI16ToU8(BgrToU16<T>(_b16_r16[0], _g16_1[0]), BgrToU16<T>(_b16_r16[1], _g16_1[1])), tails[4]);
-            Store<false, tail>(v, PackI16ToU8(BgrToV16<T>(_b16_r16[0], _g16_1[0]), BgrToV16<T>(_b16_r16[1], _g16_1[1])), tails[4]);
+            Store<false, tail>(y, Permuted2Pack16iTo8u(BgrToY16<T>(_b16_r16[0], _g16_1[0]), BgrToY16<T>(_b16_r16[1], _g16_1[1])), tails[4]);
+            Store<false, tail>(u, Permuted2Pack16iTo8u(BgrToU16<T>(_b16_r16[0], _g16_1[0]), BgrToU16<T>(_b16_r16[1], _g16_1[1])), tails[4]);
+            Store<false, tail>(v, Permuted2Pack16iTo8u(BgrToV16<T>(_b16_r16[0], _g16_1[0]), BgrToV16<T>(_b16_r16[1], _g16_1[1])), tails[4]);
         }
 
         template <class T> void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
@@ -420,7 +420,9 @@ namespace Simd
 
         template <class T, bool tail> SIMD_INLINE __m512i LoadAndBgrToY8(const uint8_t* bgra, __m512i b16_r16[2], __m512i g16_1[2], const __mmask64* tails)
         {
-            return PackI16ToU8(LoadAndBgrToY16<T, tail>(bgra + 0 * A, b16_r16[0], g16_1[0], tails + 0), LoadAndBgrToY16<T, tail>(bgra + 2 * A, b16_r16[1], g16_1[1], tails + 2));
+            __m512i lo = LoadAndBgrToY16<T, tail>(bgra + 0 * A, b16_r16[0], g16_1[0], tails + 0);
+            __m512i hi = LoadAndBgrToY16<T, tail>(bgra + 2 * A, b16_r16[1], g16_1[1], tails + 2);
+            return Permuted2Pack16iTo8u(lo, hi);
         }
 
         template <class T, bool tail> SIMD_INLINE void BgraToYuv422pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v, const __mmask64* tails)
@@ -432,8 +434,8 @@ namespace Simd
             Average16(_b16_r16);
             Average16(_g16_1);
 
-            Store<false, tail>(u, PackI16ToU8(BgrToU16<T>(_b16_r16[0], _g16_1[0]), BgrToU16<T>(_b16_r16[1], _g16_1[1])), tails[10]);
-            Store<false, tail>(v, PackI16ToU8(BgrToV16<T>(_b16_r16[0], _g16_1[0]), BgrToV16<T>(_b16_r16[1], _g16_1[1])), tails[10]);
+            Store<false, tail>(u, Permuted2Pack16iTo8u(BgrToU16<T>(_b16_r16[0], _g16_1[0]), BgrToU16<T>(_b16_r16[1], _g16_1[1])), tails[10]);
+            Store<false, tail>(v, Permuted2Pack16iTo8u(BgrToV16<T>(_b16_r16[0], _g16_1[0]), BgrToV16<T>(_b16_r16[1], _g16_1[1])), tails[10]);
         }
 
         template <class T>  void BgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
@@ -500,8 +502,8 @@ namespace Simd
             Average16(_g16_1[0][1][0], _g16_1[1][1][0]);
             Average16(_g16_1[0][1][1], _g16_1[1][1][1]);
 
-            Store<false, tail>(u, PackI16ToU8(BgrToU16<T>(_b16_r16[0][0], _g16_1[0][0]), BgrToU16<T>(_b16_r16[0][1], _g16_1[0][1])), tails[10]);
-            Store<false, tail>(v, PackI16ToU8(BgrToV16<T>(_b16_r16[0][0], _g16_1[0][0]), BgrToV16<T>(_b16_r16[0][1], _g16_1[0][1])), tails[10]);
+            Store<false, tail>(u, Permuted2Pack16iTo8u(BgrToU16<T>(_b16_r16[0][0], _g16_1[0][0]), BgrToU16<T>(_b16_r16[0][1], _g16_1[0][1])), tails[10]);
+            Store<false, tail>(v, Permuted2Pack16iTo8u(BgrToV16<T>(_b16_r16[0][0], _g16_1[0][0]), BgrToV16<T>(_b16_r16[0][1], _g16_1[0][1])), tails[10]);
         }
 
         template <class T>  void BgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
@@ -590,8 +592,8 @@ namespace Simd
             Average16(_g16_1[0][1][0], _g16_1[1][1][0]);
             Average16(_g16_1[0][1][1], _g16_1[1][1][1]);
 
-            Store<false, mask>(u, PackI16ToU8(BgrToU16<T>(_b16_r16[0][0], _g16_1[0][0]), BgrToU16<T>(_b16_r16[0][1], _g16_1[0][1])), tails[10]);
-            Store<false, mask>(v, PackI16ToU8(BgrToV16<T>(_b16_r16[0][0], _g16_1[0][0]), BgrToV16<T>(_b16_r16[0][1], _g16_1[0][1])), tails[10]);
+            Store<false, mask>(u, Permuted2Pack16iTo8u(BgrToU16<T>(_b16_r16[0][0], _g16_1[0][0]), BgrToU16<T>(_b16_r16[0][1], _g16_1[0][1])), tails[10]);
+            Store<false, mask>(v, Permuted2Pack16iTo8u(BgrToV16<T>(_b16_r16[0][0], _g16_1[0][0]), BgrToV16<T>(_b16_r16[0][1], _g16_1[0][1])), tails[10]);
         }
 
         template <class T>  void BgraToYuva420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride,
