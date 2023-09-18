@@ -165,5 +165,50 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class YuvType> SIMD_INLINE void BgrToYuv422pV2(const uint8_t* bgr, uint8_t* y, uint8_t* u, uint8_t* v)
+        {
+            y[0] = BgrToY<YuvType>(bgr[0], bgr[1], bgr[2]);
+            y[1] = BgrToY<YuvType>(bgr[3], bgr[4], bgr[5]);
+
+            int blue = Average(bgr[0], bgr[3]);
+            int green = Average(bgr[1], bgr[4]);
+            int red = Average(bgr[2], bgr[5]);
+
+            u[0] = BgrToU<YuvType>(blue, green, red);
+            v[0] = BgrToV<YuvType>(blue, green, red);
+        }
+
+        template <class YuvType> void BgrToYuv422pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert((width % 2 == 0) && (width >= 2));
+
+            for (size_t row = 0; row < height; row += 1)
+            {
+                for (size_t colUV = 0, colY = 0, colBgr = 0; colY < width; colY += 2, colUV++, colBgr += 6)
+                    BgrToYuv422pV2<YuvType>(bgr + colBgr, y + colY, u + colUV, v + colUV);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
+
+        void BgrToYuv422pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgrToYuv422pV2<Bt601>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgrToYuv422pV2<Bt709>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgrToYuv422pV2<Bt2020>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgrToYuv422pV2<Trect871>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
     }
 }
