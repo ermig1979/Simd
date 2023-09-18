@@ -353,24 +353,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template <class T> SIMD_INLINE __m512i BgrToY16(__m512i b16_r16[2], __m512i g16_1[2])
-        {
-            static const __m512i Y_LO = SIMD_MM512_SET1_EPI16(T::Y_LO);
-            return SaturateI16ToU8(_mm512_add_epi16(Y_LO, PackI32ToI16(BgrToY32<T>(b16_r16[0], g16_1[0]), BgrToY32<T>(b16_r16[1], g16_1[1]))));
-        }
-
-        template <class T> SIMD_INLINE __m512i BgrToU16(__m512i b16_r16[2], __m512i g16_1[2])
-        {
-            static const __m512i UV_Z = SIMD_MM512_SET1_EPI16(T::UV_Z);
-            return SaturateI16ToU8(_mm512_add_epi16(UV_Z, PackI32ToI16(BgrToU32<T>(b16_r16[0], g16_1[0]), BgrToU32<T>(b16_r16[1], g16_1[1]))));
-        }
-
-        template <class T> SIMD_INLINE __m512i BgrToV16(__m512i b16_r16[2], __m512i g16_1[2])
-        {
-            static const __m512i UV_Z = SIMD_MM512_SET1_EPI16(T::UV_Z);
-            return SaturateI16ToU8(_mm512_add_epi16(UV_Z, PackI32ToI16(BgrToV32<T>(b16_r16[0], g16_1[0]), BgrToV32<T>(b16_r16[1], g16_1[1]))));
-        }
-
         template <class T, bool tail> SIMD_INLINE void BgraToYuv444pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v, const __mmask64* tails)
         {
             __m512i _b16_r16[2][2], _g16_1[2][2];
