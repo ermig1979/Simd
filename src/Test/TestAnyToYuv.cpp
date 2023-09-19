@@ -563,11 +563,11 @@ namespace Test
 
         result = result && AnyToYuvV2AutoTest(View::Bgr24, 1, 1, FUNC_YUV2(Simd::Base::BgrToYuv444pV2), FUNC_YUV2(SimdBgrToYuv444pV2));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && AnyToYuvV2AutoTest(View::Bgr24, 1, 1, FUNC_YUV2(Simd::Sse41::BgrToYuv444pV2), FUNC_YUV2(SimdBgrToYuv444pV2));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && AnyToYuvV2AutoTest(View::Bgr24, 1, 1, FUNC_YUV2(Simd::Sse41::BgrToYuv444pV2), FUNC_YUV2(SimdBgrToYuv444pV2));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && AnyToYuvV2AutoTest(View::Bgr24, 1, 1, FUNC_YUV2(Simd::Avx2::BgrToYuv444pV2), FUNC_YUV2(SimdBgrToYuv444pV2));
