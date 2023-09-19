@@ -323,5 +323,35 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class YuvType> void Yuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
+        {
+            for (size_t row = 0; row < height; row += 1)
+            {
+                for (size_t col = 0; col < width; col++)
+                    YuvToRgb<YuvType>(y[col], u[col], v[col], rgb + col * 3);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                rgb += rgbStride;
+            }
+        }
+
+        void Yuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv444pToRgbV2<Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt709: Yuv444pToRgbV2<Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt2020: Yuv444pToRgbV2<Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvTrect871: Yuv444pToRgbV2<Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            default:
+                assert(0);
+            }
+        }
     }
 }
