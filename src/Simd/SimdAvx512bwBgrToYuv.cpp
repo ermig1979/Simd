@@ -349,6 +349,63 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T, bool mask> SIMD_INLINE void BgrToYuv422pV2(const uint8_t* bgr, uint8_t* y, uint8_t* u, uint8_t* v, const __mmask64* tails)
+        {
+            __m512i _b16_r16[2][2], _g16_1[2][2];
+            Store<false, mask>(y + 0, LoadAndConvertBgrToY8V2<T, mask>(bgr + 0 * A, _b16_r16[0], _g16_1[0], tails + 0), tails[8]);
+            Store<false, mask>(y + A, LoadAndConvertBgrToY8V2<T, mask>(bgr + 3 * A, _b16_r16[1], _g16_1[1], tails + 4), tails[9]);
+
+            Average16(_b16_r16);
+            Average16(_g16_1);
+
+            Store<false, mask>(u, Permuted2Pack16iTo8u(BgrToU16<T>(_b16_r16[0], _g16_1[0]), BgrToU16<T>(_b16_r16[1], _g16_1[1])), tails[10]);
+            Store<false, mask>(v, Permuted2Pack16iTo8u(BgrToV16<T>(_b16_r16[0], _g16_1[0]), BgrToV16<T>(_b16_r16[1], _g16_1[1])), tails[10]);
+        }
+
+        template <class T>  void BgrToYuv422pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert(width % 2 == 0);
+
+            width /= 2;
+            size_t widthA = AlignLo(width - 1, A);
+            size_t tail = width - widthA;
+            __mmask64 tails[11];
+            for (size_t i = 0; i < 8; ++i)
+                tails[i] = TailMask64(tail * 6 - 48 * i) & 0x0000FFFFFFFFFFFF;
+            for (size_t i = 0; i < 2; ++i)
+                tails[8 + i] = TailMask64(tail * 2 - A * i);
+            tails[10] = TailMask64(tail);
+            for (size_t row = 0; row < height; row += 1)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BgrToYuv422pV2<T, false>(bgr + col * 6, y + col * 2, u + col, v + col, tails);
+                if (tail)
+                    BgrToYuv422pV2<T, true>(bgr + col * 6, y + col * 2, u + col, v + col, tails);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
+
+        void BgrToYuv422pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgrToYuv422pV2<Base::Bt601>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgrToYuv422pV2<Base::Bt709>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgrToYuv422pV2<Base::Bt2020>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgrToYuv422pV2<Base::Trect871>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
