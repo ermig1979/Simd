@@ -374,6 +374,57 @@ namespace Simd
             }
 #endif
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T> SIMD_INLINE void BgrToYuv444pV2(const uint8_t* bgr, uint8_t* y, uint8_t* u, uint8_t* v)
+        {
+            __m256i blue, green, red;
+            LoadBgr<false>((__m256i*)bgr, blue, green, red);
+            _mm256_storeu_si256((__m256i*)y, BgrToY8<T>(blue, green, red));
+            _mm256_storeu_si256((__m256i*)u, BgrToU8<T>(blue, green, red));
+            _mm256_storeu_si256((__m256i*)v, BgrToV8<T>(blue, green, red));
+        }
+
+        template <class T>  void BgrToYuv444pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert(width >= A);
+
+            size_t widthA = AlignLo(width, A);
+            for (size_t row = 0; row < height; row += 1)
+            {
+                for (size_t col = 0; col < widthA; col += A)
+                    BgrToYuv444pV2<T>(bgr + col * 3, y + col, u + col, v + col);
+                if (width != widthA)
+                {
+                    size_t col = width - A;
+                    BgrToYuv444pV2<T>(bgr + col * 3, y + col, u + col, v + col);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
+
+        void BgrToYuv444pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+#if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
+            Base::BgrToYuv444pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+#else
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgrToYuv444pV2<Base::Bt601>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgrToYuv444pV2<Base::Bt709>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgrToYuv444pV2<Base::Bt2020>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgrToYuv444pV2<Base::Trect871>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+#endif
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }
