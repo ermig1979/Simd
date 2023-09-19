@@ -549,10 +549,39 @@ namespace Test
 //            result = result && AnyToYuvV2AutoTest(View::Bgr24, 2, 1, FUNC_YUV2(Simd::Avx512bw::BgrToYuv422pV2), FUNC_YUV2(SimdBgrToYuv422pV2));
 //#endif 
 
-    //#ifdef SIMD_NEON_ENABLE
-    //        if (Simd::Neon::Enable)
-    //            result = result && AnyToYuvV2AutoTest(View::Bgr24, 2, 1, FUNC_YUV2(Simd::Neon::BgrToYuv422pV2), FUNC_YUV2(SimdBgrToYuv422pV2));
-    //#endif
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && AnyToYuvV2AutoTest(View::Bgr24, 2, 1, FUNC_YUV2(Simd::Neon::BgrToYuv422pV2), FUNC_YUV2(SimdBgrToYuv422pV2));
+//#endif
+
+        return result;
+    }
+
+    bool BgrToYuv444pV2AutoTest()
+    {
+        bool result = true;
+
+        result = result && AnyToYuvV2AutoTest(View::Bgr24, 1, 1, FUNC_YUV2(Simd::Base::BgrToYuv444pV2), FUNC_YUV2(SimdBgrToYuv444pV2));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable)
+//            result = result && AnyToYuvV2AutoTest(View::Bgr24, 1, 1, FUNC_YUV2(Simd::Sse41::BgrToYuv444pV2), FUNC_YUV2(SimdBgrToYuv444pV2));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && AnyToYuvV2AutoTest(View::Bgr24, 1, 1, FUNC_YUV2(Simd::Avx2::BgrToYuv444pV2), FUNC_YUV2(SimdBgrToYuv444pV2));
+//#endif 
+
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && AnyToYuvV2AutoTest(View::Bgr24, 1, 1, FUNC_YUV2(Simd::Avx512bw::BgrToYuv444pV2), FUNC_YUV2(SimdBgrToYuv444pV2));
+//#endif 
+
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && AnyToYuvV2AutoTest(View::Bgr24, 1, 1, FUNC_YUV2(Simd::Neon::BgrToYuv444pV2), FUNC_YUV2(SimdBgrToYuv444pV2));
+//#endif
 
         return result;
     }

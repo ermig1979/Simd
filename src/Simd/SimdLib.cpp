@@ -1671,7 +1671,7 @@ SIMD_API void SimdBgrToYuv422pV2(const uint8_t* bgr, size_t bgrStride, size_t wi
 #endif
 //#ifdef SIMD_NEON_ENABLE
 //    if (Neon::Enable && width >= Neon::DA)
-//        Neon::BgrToYuv420pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+//        Neon::BgrToYuv422pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
 //    else
 //#endif
         Base::BgrToYuv422pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
@@ -1706,6 +1706,33 @@ SIMD_API void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height,
     else
 #endif
         Base::BgrToYuv444p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+}
+
+SIMD_API void SimdBgrToYuv444pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+    uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+{
+    SIMD_EMPTY();
+//#ifdef SIMD_AVX512BW_ENABLE
+//    if (Avx512bw::Enable)
+//        Avx512bw::BgrToYuv444pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+//    else
+//#endif
+//#ifdef SIMD_AVX2_ENABLE
+//    if (Avx2::Enable && width >= Avx2::A)
+//        Avx2::BgrToYuv444pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+//    else
+//#endif
+//#ifdef SIMD_SSE41_ENABLE
+//    if (Sse41::Enable && width >= Sse41::A)
+//        Sse41::BgrToYuv444pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+//    else
+//#endif
+//#ifdef SIMD_NEON_ENABLE
+//    if (Neon::Enable && width >= Neon::A)
+//        Neon::BgrToYuv444pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+//    else
+//#endif
+        Base::BgrToYuv444pV2(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
 }
 
 SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,

@@ -210,5 +210,43 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class YuvType> SIMD_INLINE void BgrToYuv444pV2(const uint8_t* bgr, uint8_t* y, uint8_t* u, uint8_t* v)
+        {
+            const int blue = bgr[0], green = bgr[1], red = bgr[2];
+            y[0] = BgrToY<YuvType>(blue, green, red);
+            u[0] = BgrToU<YuvType>(blue, green, red);
+            v[0] = BgrToV<YuvType>(blue, green, red);
+        }
+
+        template <class YuvType> void BgrToYuv444pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            for (size_t row = 0; row < height; row += 1)
+            {
+                for (size_t col = 0; col < width; col++)
+                    BgrToYuv444pV2<YuvType>(bgr + col * 3, y + col, u + col, v + col);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
+
+        void BgrToYuv444pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgrToYuv444pV2<Bt601>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgrToYuv444pV2<Bt709>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgrToYuv444pV2<Bt2020>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgrToYuv444pV2<Trect871>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
     }
 }
