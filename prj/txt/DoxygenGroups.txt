@@ -155,6 +155,11 @@
     \short Functions for BGR-24 image conversions.
 */
 
+/*! @ingroup bgr_conversion
+    @defgroup bgr_conversion_old Old API 
+    \short Old deprecated functions for BGR-24 image conversions.
+*/
+
 /*! @ingroup conversion
     @defgroup bgra_conversion BGRA-32 
     \short Functions for BGRA-32 image conversions.

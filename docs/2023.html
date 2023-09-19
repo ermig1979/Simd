@@ -40,10 +40,21 @@
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON optimizations of function BgrToYuv420pV2.</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON optimizations of function BgrToYuv422pV2.</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON optimizations of function BgrToYuv444pV2.</li>
+ <li>Parameter yuvType in function Simd::BgrToYuv420p.</li>
+ <li>Parameter yuvType in function Simd::BgrToYuv422p.</li>
+ <li>Parameter yuvType in function Simd::BgrToYuv444p.</li>
+ <li>The mark of function SimdBgrToYuv420p as deprecated.</li>
+ <li>The mark of function SimdBgrToYuv422p as deprecated.</li>
+ <li>The mark of function SimdBgrToYuv444p as deprecated.</li>
+
 </ul>
+<h5>Bug fixing</h5>
 <ul>
  <li>Error in AVX-512BW optimizations of function SynetSoftmaxLayerForward.</li>
  <li>Error in AVX2 optimizations of class ResizerByteArea2x2 (internal buffer overflow).</li>
+ <li>Error in function Simd::BgraToYuv420p.</li>
+ <li>Error in function Simd::BgraToYuv422p.</li>
+ <li>Error in function Simd::BgraToYuv444p.</li>
 </ul>
 
 <h4>Test framework</h4>

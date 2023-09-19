@@ -2123,7 +2123,7 @@ extern "C"
     */
     SIMD_API void SimdBgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride);
 
-    /*! @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion_old
 
         \fn void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -2132,7 +2132,7 @@ extern "C"
         The input BGR and output Y images must have the same width and height.
         The output U and V images must have the same width and height (half size relative to Y component).
 
-        \note This function has a C++ wrapper Simd::BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v).
+        \warning This function is deprecated and can be removed in the future. Use function SimdBgrToYuv420pV2 instead this one.
 
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] width - an image width.
@@ -2145,7 +2145,7 @@ extern "C"
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
     */
-    SIMD_API void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+    SIMD_API SIMD_DEPRECATED void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
     /*! @ingroup bgr_conversion
 
@@ -2155,6 +2155,8 @@ extern "C"
 
         The input BGR and output Y images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function has a C++ wrapper Simd::BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] bgrStride - a row size of the BGR image.
@@ -2170,7 +2172,7 @@ extern "C"
     */
     SIMD_API void SimdBgrToYuv420pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
-    /*! @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion_old
 
         \fn void SimdBgrToYuv422p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -2179,7 +2181,7 @@ extern "C"
         The input BGR and output Y images must have the same width and height.
         The output U and V images must have the same width and height (their width is equal to half width of Y component).
 
-        \note This function has a C++ wrapper Simd::BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v).
+        \warning This function is deprecated and can be removed in the future. Use function SimdBgrToYuv420pV2 instead this one.
 
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] width - an image width.
@@ -2192,9 +2194,9 @@ extern "C"
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
     */
-    SIMD_API void SimdBgrToYuv422p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+    SIMD_API SIMD_DEPRECATED void SimdBgrToYuv422p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /*! @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion_old
 
         \fn void SimdBgrToYuv422pV2(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, SimdYuvType yuvType);
 
@@ -2202,6 +2204,8 @@ extern "C"
 
         The input BGR and output Y images must have the same width and height.
         The input U and V images must have the same width and height (their width is equal to half width of Y component).
+
+        \note This function has a C++ wrapper Simd::BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] bgrStride - a row size of the BGR image.
@@ -2226,7 +2230,7 @@ extern "C"
 
         The input BGR and output Y, U and V images must have the same width and height.
 
-        \note This function has a C++ wrapper Simd::BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v).
+        \warning This function is deprecated and can be removed in the future. Use function SimdBgrToYuv420pV2 instead this one.
 
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] width - an image width.
@@ -2239,7 +2243,7 @@ extern "C"
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
     */
-    SIMD_API void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+    SIMD_API SIMD_DEPRECATED void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
     /*! @ingroup bgr_conversion
 
@@ -2248,6 +2252,8 @@ extern "C"
         \short Converts 24-bit BGR image to YUV444P.
 
         The input BGR and output Y, U and V images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] bgrStride - a row size of the BGR image.
