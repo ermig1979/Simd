@@ -61,8 +61,8 @@
 #define SIMD_AVX512BF16_DISABLE
 #endif
 
-#if defined(SIMD_AVX512BF16_DISABLE) && !defined(SIMD_AMX_DISABLE)
-#define SIMD_AMX_DISABLE
+#if defined(SIMD_AVX512BF16_DISABLE) && !defined(SIMD_AMXBF16_DISABLE)
+#define SIMD_AMXBF16_DISABLE
 #endif
 
 #if defined(SIMD_VMX_DISABLE) && !defined(SIMD_VSX_DISABLE)

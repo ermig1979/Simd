@@ -136,7 +136,7 @@ namespace Simd
             _ay.Resize(_param.dstH, false, _param.align);
             _iy.Resize(_param.dstH, false, _param.align);
             EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy.data, _ay.data);
-            size_t rs = _param.dstW * _param.channels + SIMD_ALIGN;
+            size_t rs = _param.dstW * _param.channels + _param.align;
             _ax.Resize(rs, false, _param.align);
             _ix.Resize(rs, false, _param.align);
             EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, _ix.data, _ax.data);

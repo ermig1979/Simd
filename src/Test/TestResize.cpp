@@ -321,6 +321,8 @@ namespace Test
     {
         bool result = true;
 
+        result = result && ResizerAutoTest(method, type, channels, 530, 404, 96, 96, f1, f2);
+
         result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
@@ -345,8 +347,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 4, 100, 1, 200, 10, f1, f2);
-        result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 4, 100, 2, 200, 10, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 530, 404, 96, 96, f1, f2);
+        //result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 4, 100, 1, 200, 10, f1, f2);
+        //result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 4, 100, 2, 200, 10, f1, f2);
 
 #if !defined(__aarch64__) || 1  
         std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBicubic, SimdResizeMethodArea, SimdResizeMethodAreaFast };
