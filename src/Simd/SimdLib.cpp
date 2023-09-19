@@ -8025,6 +8025,33 @@ SIMD_API void SimdYuv420pToRgb(const uint8_t* y, size_t yStride, const uint8_t* 
         Base::Yuv420pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
 }
 
+SIMD_API void SimdYuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+    size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
+{
+    SIMD_EMPTY();
+//#ifdef SIMD_AVX512BW_ENABLE
+//    if (Avx512bw::Enable)
+//        Avx512bw::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+//    else
+//#endif
+//#ifdef SIMD_AVX2_ENABLE
+//    if (Avx2::Enable && width >= Avx2::DA)
+//        Avx2::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+//    else
+//#endif
+//#ifdef SIMD_SSE41_ENABLE
+//    if (Sse41::Enable && width >= Sse41::DA)
+//        Sse41::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+//    else
+//#endif
+//#ifdef SIMD_NEON_ENABLE
+//    if (Neon::Enable && width >= Neon::DA)
+//        Neon::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+//    else
+//#endif
+        Base::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+}
+
 SIMD_API void SimdYuv422pToRgb(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
     size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
 {
