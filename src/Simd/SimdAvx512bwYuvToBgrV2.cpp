@@ -248,6 +248,90 @@ namespace Simd
             else
                 Yuv444pToBgrV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <bool align, bool mask, class T> SIMD_INLINE void YuvToRgb(const __m512i& y, const __m512i& u, const __m512i& v, uint8_t* rgb, const __mmask64* tails)
+        {
+            __m512i b = YuvToBlue<T>(y, u);
+            __m512i g = YuvToGreen<T>(y, u, v);
+            __m512i r = YuvToRed<T>(y, v);
+            Store<align, mask>(rgb + 0 * A, InterleaveBgr<0>(r, g, b), tails[0]);
+            Store<align, mask>(rgb + 1 * A, InterleaveBgr<1>(r, g, b), tails[1]);
+            Store<align, mask>(rgb + 2 * A, InterleaveBgr<2>(r, g, b), tails[2]);
+        }
+
+        template <bool align, bool mask, class T> SIMD_YUV_TO_BGR_INLINE void Yuv420pToRgbV2(const uint8_t* y0, const uint8_t* y1,
+            const uint8_t* u, const uint8_t* v, uint8_t* rgb0, uint8_t* rgb1, const __mmask64* tails)
+        {
+            __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(u, tails[0])));
+            __m512i u0 = UnpackU8<0>(_u, _u);
+            __m512i u1 = UnpackU8<1>(_u, _u);
+            __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(v, tails[0])));
+            __m512i v0 = UnpackU8<0>(_v, _v);
+            __m512i v1 = UnpackU8<1>(_v, _v);
+            YuvToRgb<align, mask, T>(Load<align, mask>(y0 + 0, tails[1]), u0, v0, rgb0 + 0 * A, tails + 3);
+            YuvToRgb<align, mask, T>(Load<align, mask>(y0 + A, tails[2]), u1, v1, rgb0 + 3 * A, tails + 6);
+            YuvToRgb<align, mask, T>(Load<align, mask>(y1 + 0, tails[1]), u0, v0, rgb1 + 0 * A, tails + 3);
+            YuvToRgb<align, mask, T>(Load<align, mask>(y1 + A, tails[2]), u1, v1, rgb1 + 3 * A, tails + 6);
+        }
+
+        template <bool align, class T> void Yuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0));
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(rgb) && Aligned(rgbStride));
+            }
+
+            width /= 2;
+            size_t alignedWidth = AlignLo(width, A);
+            size_t tail = width - alignedWidth;
+            __mmask64 tailMasks[9];
+            tailMasks[0] = TailMask64(tail);
+            for (size_t i = 0; i < 2; ++i)
+                tailMasks[1 + i] = TailMask64(tail * 2 - A * i);
+            for (size_t i = 0; i < 6; ++i)
+                tailMasks[3 + i] = TailMask64(tail * 6 - A * i);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                size_t col = 0;
+                for (; col < alignedWidth; col += A)
+                    Yuv420pToRgbV2<align, false, T>(y + col * 2, y + yStride + col * 2, u + col, v + col, rgb + col * 6, rgb + rgbStride + col * 6, tailMasks);
+                if (col < width)
+                    Yuv420pToRgbV2<align, true, T>(y + col * 2, y + yStride + col * 2, u + col, v + col, rgb + col * 6, rgb + rgbStride + col * 6, tailMasks);
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                rgb += 2 * rgbStride;
+            }
+        }
+
+        template <bool align> void Yuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv420pToRgbV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt709: Yuv420pToRgbV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt2020: Yuv420pToRgbV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvTrect871: Yuv420pToRgbV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void Yuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+                && Aligned(v) && Aligned(vStride) && Aligned(rgb) && Aligned(rgbStride))
+                Yuv420pToRgbV2<true>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+            else
+                Yuv420pToRgbV2<false>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+        }
     }
 #endif
 }
