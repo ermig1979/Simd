@@ -8152,11 +8152,11 @@ SIMD_API void SimdYuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t
         Sse41::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
     else
 #endif
-    //#ifdef SIMD_NEON_ENABLE
-    //    if (Neon::Enable && width >= Neon::A)
-    //        Neon::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-    //    else
-    //#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+    else
+#endif
         Base::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
 }
 
