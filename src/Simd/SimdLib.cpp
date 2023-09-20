@@ -8034,11 +8034,11 @@ SIMD_API void SimdYuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t
 //        Avx512bw::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
 //    else
 //#endif
-//#ifdef SIMD_AVX2_ENABLE
-//    if (Avx2::Enable && width >= Avx2::DA)
-//        Avx2::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-//    else
-//#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::DA)
+        Avx2::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+    else
+#endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::DA)
         Sse41::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
@@ -8088,11 +8088,11 @@ SIMD_API void SimdYuv422pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t
     //        Avx512bw::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
     //    else
     //#endif
-    //#ifdef SIMD_AVX2_ENABLE
-    //    if (Avx2::Enable && width >= Avx2::DA)
-    //        Avx2::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-    //    else
-    //#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::DA)
+        Avx2::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+    else
+#endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::DA)
         Sse41::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
