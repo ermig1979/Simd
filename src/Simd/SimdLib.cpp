@@ -8098,11 +8098,11 @@ SIMD_API void SimdYuv422pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t
         Sse41::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
     else
 #endif
-    //#ifdef SIMD_NEON_ENABLE
-    //    if (Neon::Enable && width >= Neon::DA)
-    //        Neon::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-    //    else
-    //#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::DA)
+        Neon::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+    else
+#endif
         Base::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
 }
 

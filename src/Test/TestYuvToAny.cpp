@@ -600,10 +600,10 @@ namespace Test
             result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv422pToRgbV2), FUNC_YUV2(SimdYuv422pToRgbV2), 2, 1);
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv422pToRgbV2), FUNC_YUV2(SimdYuv422pToRgbV2), 2, 1);
-//#endif 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv422pToRgbV2), FUNC_YUV2(SimdYuv422pToRgbV2), 2, 1);
+#endif 
 
         return result;
     }
