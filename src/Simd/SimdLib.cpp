@@ -8137,11 +8137,11 @@ SIMD_API void SimdYuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t
     size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
 {
     SIMD_EMPTY();
-    //#ifdef SIMD_AVX512BW_ENABLE
-    //    if (Avx512bw::Enable)
-    //        Avx512bw::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-    //    else
-    //#endif
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
