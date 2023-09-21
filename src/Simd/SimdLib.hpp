@@ -4939,76 +4939,79 @@ namespace Simd
 
     /*! @ingroup yuv_conversion
 
-        \fn void Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb)
+        \fn void Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
 
         \short Converts YUV420P image to 24-bit RGB image.
 
         The input Y and output RGB images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component).
 
-        \note This function is a C++ wrapper for function ::SimdYuv420pToRgb.
+        \note This function is a C++ wrapper for function ::SimdYuv420pToRgbV2.
 
         \param [in] y - an input 8-bit image with Y color plane.
         \param [in] u - an input 8-bit image with U color plane.
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] rgb - an output 24-bit RGB image.
+        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
-    template<template<class> class A> SIMD_INLINE void Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb)
+    template<template<class> class A> SIMD_INLINE void Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
     {
         assert(y.width == 2 * u.width && y.height == 2 * u.height && y.format == u.format);
         assert(y.width == 2 * v.width && y.height == 2 * v.height && y.format == v.format);
         assert(y.width == rgb.width && y.height == rgb.height);
         assert(y.format == View<A>::Gray8 && rgb.format == View<A>::Rgb24);
 
-        SimdYuv420pToRgb(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, rgb.data, rgb.stride);
+        SimdYuv420pToRgbV2(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, rgb.data, rgb.stride, yuvType);
     }
 
     /*! @ingroup yuv_conversion
 
-        \fn void Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb)
+        \fn void Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
 
         \short Converts YUV422P image to 24-bit RGB image.
 
         The input Y and output RGB images must have the same width and height.
         The input U and V images must have the same width and height (their width is equal to half width of Y component).
 
-        \note This function is a C++ wrapper for function ::SimdYuv422pToRgb.
+        \note This function is a C++ wrapper for function ::SimdYuv422pToRgbV2.
 
         \param [in] y - an input 8-bit image with Y color plane.
         \param [in] u - an input 8-bit image with U color plane.
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] rgb - an output 24-bit RGB image.
+        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
-    template<template<class> class A> SIMD_INLINE void Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb)
+    template<template<class> class A> SIMD_INLINE void Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
     {
         assert(y.width == 2 * u.width && y.height == u.height && y.format == u.format);
         assert(y.width == 2 * v.width && y.height == v.height && y.format == v.format);
         assert(y.width == rgb.width && y.height == rgb.height);
         assert(y.format == View<A>::Gray8 && rgb.format == View<A>::Rgb24);
 
-        SimdYuv422pToRgb(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, rgb.data, rgb.stride);
+        SimdYuv422pToRgbV2(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, rgb.data, rgb.stride, yuvType);
     }
 
     /*! @ingroup yuv_conversion
 
-        \fn void Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb)
+        \fn void Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
 
         \short Converts YUV444P image to 24-bit RGB image.
 
         The input Y, U, V and output RGB images must have the same width and height.
 
-        \note This function is a C++ wrapper for function ::SimdYuv444pToRgb.
+        \note This function is a C++ wrapper for function ::SimdYuv444pToRgbV2.
 
         \param [in] y - an input 8-bit image with Y color plane.
         \param [in] u - an input 8-bit image with U color plane.
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] rgb - an output 24-bit RGB image.
+        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
-    template<template<class> class A> SIMD_INLINE void Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb)
+    template<template<class> class A> SIMD_INLINE void Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
     {
         assert(Compatible(y, u, v) && EqualSize(y, rgb) && y.format == View<A>::Gray8 && rgb.format == View<A>::Rgb24);
 
-        SimdYuv444pToRgb(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, rgb.data, rgb.stride);
+        SimdYuv444pToRgbV2(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, rgb.data, rgb.stride, yuvType);
     }
 
     /*! @ingroup yuv_conversion

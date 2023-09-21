@@ -68,6 +68,15 @@ Functions</h2></td></tr>
 <tr class="memitem:gaf0654fdf8591b8ffeb6a0b6f1f114d51"><td class="memItemLeft" align="right" valign="top">SIMD_API SIMD_DEPRECATED void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion__old.html#gaf0654fdf8591b8ffeb6a0b6f1f114d51">SimdYuv444pToBgra</a> (const uint8_t *y, size_t yStride, const uint8_t *u, size_t uStride, const uint8_t *v, size_t vStride, size_t width, size_t height, uint8_t *bgra, size_t bgraStride, uint8_t alpha)</td></tr>
 <tr class="memdesc:gaf0654fdf8591b8ffeb6a0b6f1f114d51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV444P image to 32-bit BGRA image.  <a href="group__yuv__conversion__old.html#gaf0654fdf8591b8ffeb6a0b6f1f114d51">More...</a><br /></td></tr>
 <tr class="separator:gaf0654fdf8591b8ffeb6a0b6f1f114d51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga94e83804481a619bd5cc955df85cc48b"><td class="memItemLeft" align="right" valign="top">SIMD_API SIMD_DEPRECATED void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion__old.html#ga94e83804481a619bd5cc955df85cc48b">SimdYuv420pToRgb</a> (const uint8_t *y, size_t yStride, const uint8_t *u, size_t uStride, const uint8_t *v, size_t vStride, size_t width, size_t height, uint8_t *rgb, size_t rgbStride)</td></tr>
+<tr class="memdesc:ga94e83804481a619bd5cc955df85cc48b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV420P image to 24-bit RGB image.  <a href="group__yuv__conversion__old.html#ga94e83804481a619bd5cc955df85cc48b">More...</a><br /></td></tr>
+<tr class="separator:ga94e83804481a619bd5cc955df85cc48b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga06f53db9950f7618ef5df8f31978e5b6"><td class="memItemLeft" align="right" valign="top">SIMD_API SIMD_DEPRECATED void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion__old.html#ga06f53db9950f7618ef5df8f31978e5b6">SimdYuv422pToRgb</a> (const uint8_t *y, size_t yStride, const uint8_t *u, size_t uStride, const uint8_t *v, size_t vStride, size_t width, size_t height, uint8_t *rgb, size_t rgbStride)</td></tr>
+<tr class="memdesc:ga06f53db9950f7618ef5df8f31978e5b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV422P image to 24-bit RGB image.  <a href="group__yuv__conversion__old.html#ga06f53db9950f7618ef5df8f31978e5b6">More...</a><br /></td></tr>
+<tr class="separator:ga06f53db9950f7618ef5df8f31978e5b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaba99f8ba44ae5355c6a66f745a8ad7c"><td class="memItemLeft" align="right" valign="top">SIMD_API SIMD_DEPRECATED void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion__old.html#gaaba99f8ba44ae5355c6a66f745a8ad7c">SimdYuv444pToRgb</a> (const uint8_t *y, size_t yStride, const uint8_t *u, size_t uStride, const uint8_t *v, size_t vStride, size_t width, size_t height, uint8_t *rgb, size_t rgbStride)</td></tr>
+<tr class="memdesc:gaaba99f8ba44ae5355c6a66f745a8ad7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV444P image to 24-bit RGB image.  <a href="group__yuv__conversion__old.html#gaaba99f8ba44ae5355c6a66f745a8ad7c">More...</a><br /></td></tr>
+<tr class="separator:gaaba99f8ba44ae5355c6a66f745a8ad7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Old deprecated functions for YUV image conversions. </p>
@@ -657,6 +666,291 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of output 32-bit BGRA image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a value of alpha channel. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga94e83804481a619bd5cc955df85cc48b" name="ga94e83804481a619bd5cc955df85cc48b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga94e83804481a619bd5cc955df85cc48b">&#9670;&nbsp;</a></span>SimdYuv420pToRgb()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdYuv420pToRgb </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>yStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>uStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>vStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>rgb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>rgbStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts YUV420P image to 24-bit RGB image. </p>
+<p >The input Y and output RGB images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
+<dl class="section warning"><dt>Warning</dt><dd>This function is deprecated and can be removed in the future. Use function SimdYuv420pToRgbV2 instead this one.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- a pointer to pixels data of input 8-bit image with Y color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>- a pointer to pixels data of input 8-bit image with U color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>- a pointer to pixels data of input 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">rgb</td><td>- a pointer to pixels data of output 24-bit RGB image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgbStride</td><td>- a row size of the rgb image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga06f53db9950f7618ef5df8f31978e5b6" name="ga06f53db9950f7618ef5df8f31978e5b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga06f53db9950f7618ef5df8f31978e5b6">&#9670;&nbsp;</a></span>SimdYuv422pToRgb()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdYuv422pToRgb </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>yStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>uStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>vStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>rgb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>rgbStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts YUV422P image to 24-bit RGB image. </p>
+<p >The input Y and output RGB images must have the same width and height. The input U and V images must have the same width and height (their width is equal to half width of Y component).</p>
+<dl class="section warning"><dt>Warning</dt><dd>This function is deprecated and can be removed in the future. Use function SimdYuv422pToRgbV2 instead this one.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- a pointer to pixels data of input 8-bit image with Y color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>- a pointer to pixels data of input 8-bit image with U color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>- a pointer to pixels data of input 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">rgb</td><td>- a pointer to pixels data of output 24-bit RGB image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgbStride</td><td>- a row size of the rgb image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gaaba99f8ba44ae5355c6a66f745a8ad7c" name="gaaba99f8ba44ae5355c6a66f745a8ad7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaaba99f8ba44ae5355c6a66f745a8ad7c">&#9670;&nbsp;</a></span>SimdYuv444pToRgb()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdYuv444pToRgb </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>yStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>uStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>vStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>rgb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>rgbStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts YUV444P image to 24-bit RGB image. </p>
+<p >The input Y, U, V and output RGB images must have the same width and height.</p>
+<dl class="section warning"><dt>Warning</dt><dd>This function is deprecated and can be removed in the future. Use function SimdYuv444pToRgbV2 instead this one.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- a pointer to pixels data of input 8-bit image with Y color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>- a pointer to pixels data of input 8-bit image with U color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>- a pointer to pixels data of input 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">rgb</td><td>- a pointer to pixels data of output 24-bit RGB image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgbStride</td><td>- a row size of the rgb image. </td></tr>
   </table>
   </dd>
 </dl>
