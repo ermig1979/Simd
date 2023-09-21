@@ -553,6 +553,11 @@ SIMD_API void SimdAlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStr
         Sse41::AlphaBlendingBgraToYuv420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::AlphaBlendingBgraToYuv420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+    else
+#endif
         Base::AlphaBlendingBgraToYuv420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
 }
 

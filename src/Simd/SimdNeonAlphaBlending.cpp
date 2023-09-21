@@ -26,6 +26,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
@@ -289,6 +290,107 @@ namespace Simd
                 AlphaBlending2x<true>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
             else
                 AlphaBlending2x<false>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <bool align> SIMD_INLINE void AlphaBlending(const uint8x16_t & src, uint8_t* dst, const uint8x16_t& alpha)
+        {
+            uint8x16_t _dst = Load<align>(dst);
+            uint8x16_t ff_alpha = vsubq_u8(K8_FF, alpha);
+            uint8x8_t lo = AlphaBlending<0>(src, _dst, alpha, ff_alpha);
+            uint8x8_t hi = AlphaBlending<1>(src, _dst, alpha, ff_alpha);
+            Store<align>(dst, vcombine_u8(lo, hi));
+        }
+
+        SIMD_INLINE uint16x8_t Average16(uint8x16_t a, uint8x16_t b)
+        {
+            return vshrq_n_u16(vpadalq_u8(vpadalq_u8(K16_0002, a), b), 2);
+        }
+
+        template <bool align> SIMD_INLINE void AlphaBlending(const uint8x8_t& src, uint8_t* dst, const uint8x8_t& alpha)
+        {
+            uint8x8_t _dst = LoadHalf<align>(dst);
+            uint8x8_t ff_alpha = vsub_u8(Half<0>(K8_FF), alpha);
+            uint16x8_t value = vaddq_u16(vmull_u8(src, alpha), vmull_u8(_dst, ff_alpha));
+            _dst = vshrn_n_u16(vaddq_u16(vaddq_u16(value, K16_0001), vshrq_n_u16(value, 8)), 8);
+            Store<align>(dst, _dst);
+        }
+
+        template <class T, bool align, bool tail> SIMD_INLINE void AlphaBlendingBgraToYuv420p(const uint8_t* bgra0, size_t bgraStride, uint8_t* y0, size_t yStride, uint8_t* u, uint8_t* v, uint8x16_t mask = K8_FF)
+        {
+            const uint8_t* bgra1 = bgra0 + bgraStride;
+            uint8_t* y1 = y0 + yStride;
+
+            uint8x16x4_t bgra00 = Load4<align>(bgra0);
+            if (tail)
+                bgra00.val[3] = vandq_u8(bgra00.val[3], mask);
+            AlphaBlending<align>(BgrToY8<T>(bgra00.val[0], bgra00.val[1], bgra00.val[2]), y0, bgra00.val[3]);
+
+            uint8x16x4_t bgra10 = Load4<align>(bgra1);
+            if (tail)
+                bgra10.val[3] = vandq_u8(bgra10.val[3], mask);
+            AlphaBlending<align>(BgrToY8<T>(bgra10.val[0], bgra10.val[1], bgra10.val[2]), y1, bgra10.val[3]);
+
+            uint16x8_t b0 = Average16(bgra00.val[0], bgra10.val[0]);
+            uint16x8_t g0 = Average16(bgra00.val[1], bgra10.val[1]);
+            uint16x8_t r0 = Average16(bgra00.val[2], bgra10.val[2]);
+            uint8x8_t a0 = vmovn_u16(Average16(bgra00.val[3], bgra10.val[3]));
+            AlphaBlending<align>(vqmovun_s16(BgrToU16<T>(b0, g0, r0)), u, a0);
+            AlphaBlending<align>(vqmovun_s16(BgrToV16<T>(b0, g0, r0)), v, a0);
+        }
+
+        template <class T, bool align> void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= A) && (height >= 2));
+            if (align)
+            {
+                assert(Aligned(bgra) && Aligned(bgraStride));
+                assert(Aligned(y) && Aligned(yStride));
+                assert(Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride));
+            }
+
+            size_t widthA = AlignLo(width, A);
+            uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + widthA);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colY = 0, colUV = 0, colBgra = 0; colY < widthA; colY += A, colUV += HA, colBgra += QA)
+                    AlphaBlendingBgraToYuv420p<T, align, false>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV);
+                if (widthA != width)
+                {
+                    size_t colY = width - A, colUV = colY / 2, colBgra = colY * 4;
+                    AlphaBlendingBgraToYuv420p<T, align, true>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV, tailMask);
+                }
+                bgra += 2 * bgraStride;
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+            }
+        }
+
+        template <bool align> void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: AlphaBlendingBgraToYuv420p<Base::Bt601, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: AlphaBlendingBgraToYuv420p<Base::Bt709, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: AlphaBlendingBgraToYuv420p<Base::Bt2020, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: AlphaBlendingBgraToYuv420p<Base::Trect871, align>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            if (Aligned(bgra) && Aligned(bgraStride) && Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride))
+                AlphaBlendingBgraToYuv420p<true>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
+            else
+                AlphaBlendingBgraToYuv420p<false>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
         }
 
         //-----------------------------------------------------------------------

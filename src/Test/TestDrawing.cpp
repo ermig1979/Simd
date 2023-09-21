@@ -310,6 +310,11 @@ namespace Test
             result = result && AlphaBlendingBgraToYuv420pAutoTest(FUNC_ABBY(Simd::Avx512bw::AlphaBlendingBgraToYuv420p), FUNC_ABBY(SimdAlphaBlendingBgraToYuv420p));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+            result = result && AlphaBlendingBgraToYuv420pAutoTest(FUNC_ABBY(Simd::Neon::AlphaBlendingBgraToYuv420p), FUNC_ABBY(SimdAlphaBlendingBgraToYuv420p));
+#endif 
+
         return result;
     }
 
