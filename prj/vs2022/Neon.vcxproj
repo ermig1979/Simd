@@ -35,11 +35,13 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonCpu.cpp" />

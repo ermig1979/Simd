@@ -168,7 +168,6 @@ namespace Simd
                 BgrToYuv422p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
         }
 
-
         template <bool align> SIMD_INLINE void BgrToYuv444p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v)
         {
             uint8x16x3_t _bgr = Load3<align>(bgr);
