@@ -74,7 +74,7 @@ namespace Simd
 						for (size_t dy = yBeg; dy < yEnd; ++dy)
 						{
 							float* pd = dst + dy * dstS;
-							for (size_t dx = 0; dx < p.dstW; ++dx, pd += srcC)
+							for (size_t dx = 0; dx < p.dstW; ++dx, pd += p.dstC)
 							{
 								float32x4_t sum = _bias;
 								for (size_t ky = 0; ky < p.kernelY; ++ky)
@@ -106,7 +106,7 @@ namespace Simd
 							if (dy >= noseY && dy < bodyY)
 							{
 								size_t dx = 0;
-								for (; dx < noseX; ++dx, pd += srcC)
+								for (; dx < noseX; ++dx, pd += p.dstC)
 								{
 									float32x4_t sum = _bias;
 									for (size_t ky = 0; ky < p.kernelY; ++ky)
@@ -125,7 +125,7 @@ namespace Simd
 									}
 									Store<false>(pd, Activate<type>(sum, _params, 0));
 								}
-								for (; dx < bodyX8; dx += 8, pd += 8 * srcC)
+								for (; dx < bodyX8; dx += 8, pd += 8 * p.dstC)
 								{
 									float32x4_t sum0 = _bias;
 									float32x4_t sum1 = _bias;
@@ -153,16 +153,16 @@ namespace Simd
 											sum7 = vmlaq_f32(sum7, Load<false>(ps + 7 * strideXF), w0);
 										}
 									}
-									Store<false>(pd + 0 * srcC, Activate<type>(sum0, _params, 0));
-									Store<false>(pd + 1 * srcC, Activate<type>(sum1, _params, 0));
-									Store<false>(pd + 2 * srcC, Activate<type>(sum2, _params, 0));
-									Store<false>(pd + 3 * srcC, Activate<type>(sum3, _params, 0));
-									Store<false>(pd + 4 * srcC, Activate<type>(sum4, _params, 0));
-									Store<false>(pd + 5 * srcC, Activate<type>(sum5, _params, 0));
-									Store<false>(pd + 6 * srcC, Activate<type>(sum6, _params, 0));
-									Store<false>(pd + 7 * srcC, Activate<type>(sum7, _params, 0));
+									Store<false>(pd + 0 * p.dstC, Activate<type>(sum0, _params, 0));
+									Store<false>(pd + 1 * p.dstC, Activate<type>(sum1, _params, 0));
+									Store<false>(pd + 2 * p.dstC, Activate<type>(sum2, _params, 0));
+									Store<false>(pd + 3 * p.dstC, Activate<type>(sum3, _params, 0));
+									Store<false>(pd + 4 * p.dstC, Activate<type>(sum4, _params, 0));
+									Store<false>(pd + 5 * p.dstC, Activate<type>(sum5, _params, 0));
+									Store<false>(pd + 6 * p.dstC, Activate<type>(sum6, _params, 0));
+									Store<false>(pd + 7 * p.dstC, Activate<type>(sum7, _params, 0));
 								}
-								for (; dx < bodyX4; dx += 4, pd += 4 * srcC)
+								for (; dx < bodyX4; dx += 4, pd += 4 * p.dstC)
 								{
 									float32x4_t sum0 = _bias;
 									float32x4_t sum1 = _bias;
@@ -182,12 +182,12 @@ namespace Simd
 											sum3 = vmlaq_f32(sum3, Load<false>(ps + 3 * strideXF), w0);
 										}
 									}
-									Store<false>(pd + 0 * srcC, Activate<type>(sum0, _params, 0));
-									Store<false>(pd + 1 * srcC, Activate<type>(sum1, _params, 0));
-									Store<false>(pd + 2 * srcC, Activate<type>(sum2, _params, 0));
-									Store<false>(pd + 3 * srcC, Activate<type>(sum3, _params, 0));
+									Store<false>(pd + 0 * p.dstC, Activate<type>(sum0, _params, 0));
+									Store<false>(pd + 1 * p.dstC, Activate<type>(sum1, _params, 0));
+									Store<false>(pd + 2 * p.dstC, Activate<type>(sum2, _params, 0));
+									Store<false>(pd + 3 * p.dstC, Activate<type>(sum3, _params, 0));
 								}
-								for (; dx < bodyX2; dx += 2, pd += 2 * srcC)
+								for (; dx < bodyX2; dx += 2, pd += 2 * p.dstC)
 								{
 									float32x4_t sum0 = _bias;
 									float32x4_t sum1 = _bias;
@@ -203,10 +203,10 @@ namespace Simd
 											sum1 = vmlaq_f32(sum1, Load<false>(ps + 1 * strideXF), w0);
 										}
 									}
-									Store<false>(pd + 0 * srcC, Activate<type>(sum0, _params, 0));
-									Store<false>(pd + 1 * srcC, Activate<type>(sum1, _params, 0));
+									Store<false>(pd + 0 * p.dstC, Activate<type>(sum0, _params, 0));
+									Store<false>(pd + 1 * p.dstC, Activate<type>(sum1, _params, 0));
 								}
-								for (; dx < bodyX; ++dx, pd += srcC)
+								for (; dx < bodyX; ++dx, pd += p.dstC)
 								{
 									float32x4_t sum = _bias;
 									const float* pw = weight;
@@ -222,7 +222,7 @@ namespace Simd
 									}
 									Store<false>(pd, Activate<type>(sum, _params, 0));
 								}
-								for (; dx < p.dstW; ++dx, pd += srcC)
+								for (; dx < p.dstW; ++dx, pd += p.dstC)
 								{
 									float32x4_t sum = _bias;
 									for (size_t ky = 0; ky < p.kernelY; ++ky)
@@ -244,7 +244,7 @@ namespace Simd
 							}
 							else
 							{
-								for (size_t dx = 0; dx < p.dstW; ++dx, pd += srcC)
+								for (size_t dx = 0; dx < p.dstW; ++dx, pd += p.dstC)
 								{
 									float32x4_t sum = _bias;
 									for (size_t ky = 0; ky < p.kernelY; ++ky)
