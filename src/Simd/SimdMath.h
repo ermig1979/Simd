@@ -1631,6 +1631,18 @@ namespace Simd
         {
             return vcombine_u8(a.val[0], a.val[1]);
         }
+
+        SIMD_INLINE void MaxVal32f(float32x4_t src, float& dst)
+        {
+            float32x2_t half = vpmax_f32(vget_low_f32(src), vget_high_f32(src));
+            dst = vget_lane_f32(vpmax_f32(half, half), 0);
+        }
+
+        SIMD_INLINE void MinVal32f(float32x4_t src, float& dst)
+        {
+            float32x2_t half = vpmin_f32(vget_low_f32(src), vget_high_f32(src));
+            dst = vget_lane_f32(vpmin_f32(half, half), 0);
+        }
     }
 #endif//SIMD_NEON_ENABLE
 }
