@@ -98,7 +98,7 @@ namespace Simd
         {
             _minMax32f = MinMax32f;
             _minMax16f = MinMax16f;
-            if (_depth >= 7)
+            if (_depth >= 6)
                 _encode32f = GetEncode32f(_depth);
             if (_depth >= 8)
                 _encode16f = GetEncode16f(_depth);
