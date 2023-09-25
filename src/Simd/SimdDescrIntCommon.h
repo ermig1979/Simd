@@ -409,5 +409,14 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        const uint16x8_t E7_MULLO = SIMD_VEC_SETR_EPI16(256, 128, 64, 32, 16, 8, 4, 2);
+        const uint8x8_t E7_SHFL0 = SIMD_VEC_SETR_PI8(0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0);
+        const uint8x8_t E7_SHFL1 = SIMD_VEC_SETR_PI8(0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0);
+    }
+#endif
 }
 #endif//__SimdDescrIntCommon_h__
