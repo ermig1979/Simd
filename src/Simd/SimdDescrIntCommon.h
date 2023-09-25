@@ -413,6 +413,11 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
+        const uint16x8_t E5_MULLO = SIMD_VEC_SETR_EPI16(256, 32, 4, 128, 16, 2, 64, 8);
+        const uint8x8_t E5_SHFL0 = SIMD_VEC_SETR_PI8(0x1, 0x3, 0x7, 0x9, 0xD, 0, 0, 0);
+        const uint8x8_t E5_SHFL1 = SIMD_VEC_SETR_PI8(0x2, 0x4, 0x8, 0xA, 0xE, 0, 0, 0);
+        const uint8x8_t E5_SHFL2 = SIMD_VEC_SETR_PI8(0, 0x6, 0, 0xC, 0, 0, 0, 0);
+
         const uint16x8_t E6_MULLO = SIMD_VEC_SETR_EPI16(256, 64, 16, 4, 256, 64, 16, 4);
         const uint8x8_t E6_SHFL0 = SIMD_VEC_SETR_PI8(0x1, 0x3, 0x5, 0x9, 0xB, 0xD, 0, 0);
         const uint8x8_t E6_SHFL1 = SIMD_VEC_SETR_PI8(0x2, 0x4, 0x6, 0xA, 0xC, 0xE, 0, 0);

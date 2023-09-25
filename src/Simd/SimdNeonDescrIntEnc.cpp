@@ -46,6 +46,42 @@ namespace Simd
             return Encode32f(Load<align>(src), scale, min, sum, sqsum);
         }
 
+        template<bool align> static SIMD_INLINE uint8x8_t Encode32f5(const float* src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
+        {
+            uint32x4_t i0 = Encode32f<align>(src + 0, scale, min, sum, sqsum);
+            uint32x4_t i4 = Encode32f<align>(src + 4, scale, min, sum, sqsum);
+            uint16x8_t s0 = vmulq_u16(PackU32(i0, i4), E5_MULLO);
+            return vorr_u8(vorr_u8(vtbl2_u8((const uint8x8x2_t&)s0, E5_SHFL0), vtbl2_u8((const uint8x8x2_t&)s0, E5_SHFL1)), vtbl2_u8((const uint8x8x2_t&)s0, E5_SHFL2));
+        }
+
+        static void Encode32f5(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        {
+            assert(size % 8 == 0);
+            size_t i = 0, main = size - 8;
+            float32x4_t _scale = vdupq_n_f32(scale);
+            float32x4_t _min = vdupq_n_f32(min);
+            uint32x4_t _sum = K32_00000000;
+            uint32x4_t _sqsum = K32_00000000;
+            if (Aligned(src))
+            {
+                for (; i < main; i += 8, src += 8, dst += 5)
+                    Store<false>(dst, Encode32f5<true>(src, _scale, _min, _sum, _sqsum));
+            }
+            else
+            {
+                for (; i < main; i += 8, src += 8, dst += 5)
+                    Store<false>(dst, Encode32f5<false>(src, _scale, _min, _sum, _sqsum));
+            }
+            for (; i < size; i += 8, src += 8, dst += 5)
+            {
+                uint8x8_t d0 = Encode32f5<false>(src, _scale, _min, _sum, _sqsum);
+                *(uint32_t*)(dst + 0) = vget_lane_u32((uint32x2_t)d0, 0);
+                *(uint8_t*)(dst + 4) = vget_lane_u8(d0, 4);
+            }
+            sum = ExtractSum32u(_sum);
+            sqsum = ExtractSum32u(_sqsum);
+        }
+
         template<bool align> static SIMD_INLINE uint8x8_t Encode32f6(const float* src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
         {
             uint32x4_t i0 = Encode32f<align>(src + 0, scale, min, sum, sqsum);
@@ -214,7 +250,7 @@ namespace Simd
             switch (depth)
             {
             //case 4: return Encode32f4;
-            //case 5: return Encode32f5;
+            case 5: return Encode32f5;
             case 6: return Encode32f6;
             case 7: return Encode32f7;
             case 8: return Encode32f8;
