@@ -88,6 +88,54 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<bool align> SIMD_INLINE uint32x4_t Encode16f(const uint16_t* src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
+        {
+            return Encode32f(vcvt_f32_f16((float16x4_t)LoadHalf<align>(src)), scale, min, sum, sqsum);
+        }
+
+        static void Encode16f8(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        {
+            assert(size % 8 == 0);
+            size_t sizeA = AlignLo(size, A), i = 0;
+            float32x4_t _scale = vdupq_n_f32(scale);
+            float32x4_t _min = vdupq_n_f32(min);
+            uint32x4_t _sum = K32_00000000;
+            uint32x4_t _sqsum = K32_00000000;
+            if (Aligned(src))
+            {
+                for (; i < sizeA; i += A)
+                {
+                    uint32x4_t d0 = Encode16f<true>(src + i + 0 * F, _scale, _min, _sum, _sqsum);
+                    uint32x4_t d1 = Encode16f<true>(src + i + 1 * F, _scale, _min, _sum, _sqsum);
+                    uint32x4_t d2 = Encode16f<true>(src + i + 2 * F, _scale, _min, _sum, _sqsum);
+                    uint32x4_t d3 = Encode16f<true>(src + i + 3 * F, _scale, _min, _sum, _sqsum);
+                    Store<false>(dst + i, PackU16(PackU32(d0, d1), PackU32(d2, d3)));
+                }
+            }
+            else
+            {
+                for (; i < sizeA; i += A)
+                {
+                    uint32x4_t d0 = Encode16f<false>(src + i + 0 * F, _scale, _min, _sum, _sqsum);
+                    uint32x4_t d1 = Encode16f<false>(src + i + 1 * F, _scale, _min, _sum, _sqsum);
+                    uint32x4_t d2 = Encode16f<false>(src + i + 2 * F, _scale, _min, _sum, _sqsum);
+                    uint32x4_t d3 = Encode16f<false>(src + i + 3 * F, _scale, _min, _sum, _sqsum);
+                    Store<false>(dst + i, PackU16(PackU32(d0, d1), PackU32(d2, d3)));
+                }
+}
+            for (; i < size; i += F)
+            {
+                uint32x4_t d0 = Encode16f<false>(src + i + 0 * F, _scale, _min, _sum, _sqsum);
+                uint32x4_t d1 = Encode16f<false>(src + i + 1 * F, _scale, _min, _sum, _sqsum);
+                Store<false>(dst + i, Half<0>(PackU16(PackU32(d0, d1), K16_0000)));
+            }
+            sum = ExtractSum32u(_sum);
+            sqsum = ExtractSum32u(_sqsum);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+
         Base::DescrInt::Encode32fPtr GetEncode32f(size_t depth)
         {
             switch (depth)
@@ -109,7 +157,7 @@ namespace Simd
             //case 5: return Encode16f5;
             //case 6: return Encode16f6;
             //case 7: return Encode16f7;
-            //case 8: return Encode16f8;
+            case 8: return Encode16f8;
             default: assert(0); return NULL;
             }
         }
