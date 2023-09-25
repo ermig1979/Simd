@@ -63,11 +63,41 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void MinMax16f(const uint16_t* src, size_t size, float& min, float& max)
+        {
+            assert(size % 8 == 0);
+            float32x4_t _min = vdupq_n_f32(FLT_MAX);
+            float32x4_t _max = vdupq_n_f32(-FLT_MAX);
+            size_t i = 0;
+            if (Aligned(src))
+            {
+                for (; i < size; i += 4)
+                {
+                    float32x4_t _src = vcvt_f32_f16((float16x4_t)LoadHalf<true>(src + i));
+                    _min = vminq_f32(_src, _min);
+                    _max = vmaxq_f32(_src, _max);
+                }
+            }
+            else
+            {
+                for (; i < size; i += 4)
+                {
+                    float32x4_t _src = vcvt_f32_f16((float16x4_t)LoadHalf<false>(src + i));
+                    _min = vminq_f32(_src, _min);
+                    _max = vmaxq_f32(_src, _max);
+                }
+            }
+            MinVal32f(_min, min);
+            MaxVal32f(_max, max);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         DescrInt::DescrInt(size_t size, size_t depth)
             : Base::DescrInt(size, depth)
         {
             _minMax32f = MinMax32f;
-            //_minMax16f = MinMax16f;
+            _minMax16f = MinMax16f;
             //_encode32f = GetEncode32f(_depth);
             //_encode16f = GetEncode16f(_depth);
 
