@@ -1615,6 +1615,11 @@ namespace Simd
             return vcvtq_s32_f32(vaddq_f32(value, round));
         }
 
+        SIMD_INLINE uint32x4_t RoundPositive(float32x4_t value)
+        {
+            return vcvtq_u32_f32(vaddq_f32(value, vdupq_n_f32(0.5f)));
+        }
+
         template<bool nofma> float32x4_t Fmadd(float32x4_t a, float32x4_t b, float32x4_t c);
 
         template <> SIMD_INLINE float32x4_t Fmadd<false>(float32x4_t a, float32x4_t b, float32x4_t c)

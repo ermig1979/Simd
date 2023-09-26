@@ -27,6 +27,7 @@
 #include "Simd/SimdDescrInt.h"
 #include "Simd/SimdDescrIntCommon.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
@@ -35,7 +36,7 @@ namespace Simd
     {
         SIMD_INLINE uint32x4_t Encode32f(float32x4_t src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
         {
-            uint32x4_t value = (uint32x4_t)Round(vmulq_f32(vsubq_f32(src, min), scale));
+            uint32x4_t value = RoundPositive(vmulq_f32(vsubq_f32(src, min), scale));
             sum = vaddq_u32(value, sum);
             sqsum = vmlaq_u32(sqsum, value, value);
             return value;
@@ -44,6 +45,53 @@ namespace Simd
         template<bool align> SIMD_INLINE uint32x4_t Encode32f(const float* src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
         {
             return Encode32f(Load<align>(src), scale, min, sum, sqsum);
+        }
+
+        template<bool align> static SIMD_INLINE uint16x4_t Encode32f4(const float* src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
+        {
+            uint32x4_t i0 = Encode32f<align>(src + 0, scale, min, sum, sqsum);
+            uint32x4_t i4 = Encode32f<align>(src + 4, scale, min, sum, sqsum);
+            return vmovn_u32(vshrq_n_u32((uint32x4_t)vmulq_u16(PackU32(i0, i4), E4_MULLO), 12));
+        }
+
+        template<bool align> static SIMD_INLINE uint8x8_t Encode32f4x8(const float* src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
+        {
+            uint16x4_t s0 = Encode32f4<align>(src + 0, scale, min, sum, sqsum);
+            return vmovn_u16(vcombine_u16(s0, s0));
+        }
+
+        template<bool align> static SIMD_INLINE uint8x8_t Encode32f4x16(const float* src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
+        {
+            uint16x4_t s0 = Encode32f4<align>(src + 0, scale, min, sum, sqsum);
+            uint16x4_t s8 = Encode32f4<align>(src + 8, scale, min, sum, sqsum);
+            return vmovn_u16(vcombine_u16(s0, s8));
+        }
+
+        static void Encode32f4(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        {
+            assert(size % 8 == 0);
+            size_t i = 0, size16 = AlignLo(size, 16);
+            float32x4_t _scale = vdupq_n_f32(scale);
+            float32x4_t _min = vdupq_n_f32(min);
+            uint32x4_t _sum = K32_00000000;
+            uint32x4_t _sqsum = K32_00000000;
+            if (Aligned(src))
+            {
+                for (; i < size16; i += 16, src += 16, dst += 8)
+                    Store<false>(dst, Encode32f4x16<true>(src, _scale, _min, _sum, _sqsum));
+            }
+            else
+            {
+                for (; i < size16; i += 16, src += 16, dst += 8)
+                    Store<false>(dst, Encode32f4x16<false>(src, _scale, _min, _sum, _sqsum));
+            }
+            for (; i < size; i += 8, src += 8, dst += 4)
+            {
+                uint8x8_t d0 = Encode32f4x8<false>(src, _scale, _min, _sum, _sqsum);
+                *(uint32_t*)(dst + 0) = vget_lane_u32((uint32x2_t)d0, 0);
+            }
+            sum = ExtractSum32u(_sum);
+            sqsum = ExtractSum32u(_sqsum);
         }
 
         template<bool align> static SIMD_INLINE uint8x8_t Encode32f5(const float* src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
@@ -249,7 +297,7 @@ namespace Simd
         {
             switch (depth)
             {
-            //case 4: return Encode32f4;
+            case 4: return Encode32f4;
             case 5: return Encode32f5;
             case 6: return Encode32f6;
             case 7: return Encode32f7;

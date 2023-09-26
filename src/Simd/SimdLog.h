@@ -195,11 +195,25 @@ namespace Simd
             Simd::Log(buffer, 16, name);
         }
 
+        SIMD_INLINE void Log8u(const uint8x8_t& value, const std::string& name)
+        {
+            uint8_t buffer[8];
+            vst1_u8(buffer, value);
+            Simd::Log(buffer, 8, name);
+        }
+
         SIMD_INLINE void Log16u(const uint16x8_t & value, const std::string & name)
         {
             uint16_t buffer[8];
             vst1q_u16(buffer, value);
             Simd::Log(buffer, 8, name);
+        }
+
+        SIMD_INLINE void Log16u(const uint16x4_t& value, const std::string& name)
+        {
+            uint16_t buffer[4];
+            vst1_u16(buffer, value);
+            Simd::Log(buffer, 4, name);
         }
 
         SIMD_INLINE void Log16i(const int16x8_t & value, const std::string & name)
@@ -209,11 +223,25 @@ namespace Simd
             Simd::Log(buffer, 8, name);
         }
 
+        SIMD_INLINE void Log16i(const int16x4_t& value, const std::string& name)
+        {
+            int16_t buffer[4];
+            vst1_s16(buffer, value);
+            Simd::Log(buffer, 4, name);
+        }
+
         SIMD_INLINE void Log32u(const uint32x4_t & value, const std::string & name)
         {
             uint32_t buffer[4];
             vst1q_u32(buffer, value);
             Simd::Log(buffer, 4, name);
+        }
+
+        SIMD_INLINE void Log32u(const uint32x2_t& value, const std::string& name)
+        {
+            uint32_t buffer[2];
+            vst1_u32(buffer, value);
+            Simd::Log(buffer, 2, name);
         }
 
         SIMD_INLINE void Log32i(const int32x4_t & value, const std::string & name)
@@ -223,12 +251,29 @@ namespace Simd
             Simd::Log(buffer, 4, name);
         }
 
+        SIMD_INLINE void Log32i(const int32x2_t& value, const std::string& name)
+        {
+            int32_t buffer[2];
+            vst1_s32(buffer, value);
+            Simd::Log(buffer, 2, name);
+        }
+
         SIMD_INLINE void Log32f(const float32x4_t & value, const std::string & name)
         {
             float buffer[4];
             vst1q_f32(buffer, value);
             std::cout << name << " = { ";
             for (int i = 0; i < 4; i++)
+                std::cout << buffer[i] << " ";
+            std::cout << "} " << std::endl;
+        }
+
+        SIMD_INLINE void Log32f(const float32x2_t& value, const std::string& name)
+        {
+            float buffer[2];
+            vst1_f32(buffer, value);
+            std::cout << name << " = { ";
+            for (int i = 0; i < 2; i++)
                 std::cout << buffer[i] << " ";
             std::cout << "} " << std::endl;
         }
