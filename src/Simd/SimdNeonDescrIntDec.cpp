@@ -35,6 +35,47 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        static void Decode32f6(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        {
+            assert(size % 8 == 0);
+            float32x4_t _scale = vdupq_n_f32(scale);
+            float32x4_t _shift = vdupq_n_f32(shift);
+            size_t size8 = AlignLo(size - 1, 8), i = 0;
+            if (Aligned(dst))
+            {
+                for (; i < size8; i += 8)
+                {
+                    uint8x8_t s6 = LoadHalf<false>(src);
+                    uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s6, C6_TBL0, C6_TBL1), C6_MULLO), 10);
+                    Store<true>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
+                    Store<true>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
+                    src += 6;
+                    dst += 8;
+                }
+            }
+            else
+            {
+                for (; i < size8; i += 8)
+                {
+                    uint8x8_t s6 = LoadHalf<false>(src);
+                    uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s6, C6_TBL0, C6_TBL1), C6_MULLO), 10);
+                    Store<false>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
+                    Store<false>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
+                    src += 6;
+                    dst += 8;
+                }
+            }
+            for (; i < size; i += 8)
+            {
+                uint8x8_t s6 = LoadLast8<6>(src);
+                uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s6, C6_TBL0, C6_TBL1), C6_MULLO), 10);
+                Store<false>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
+                Store<false>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
+                src += 6;
+                dst += 8;
+            }
+        }
+
         static void Decode32f7(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
             assert(size % 8 == 0);
@@ -114,7 +155,7 @@ namespace Simd
             {
             //case 4: return Decode32f4;
             //case 5: return Decode32f5;
-            //case 6: return Decode32f6;
+            case 6: return Decode32f6;
             case 7: return Decode32f7;
             case 8: return Decode32f8;
             default: assert(0); return NULL;
