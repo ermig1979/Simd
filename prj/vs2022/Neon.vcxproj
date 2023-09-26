@@ -47,6 +47,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDescrInt.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonDescrIntDec.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDescrIntEnc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDetection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonEdgeBackground.cpp" />

@@ -243,8 +243,8 @@ namespace Simd
         Base::DescrInt::Encode32fPtr GetEncode32f(size_t depth);
         Base::DescrInt::Encode16fPtr GetEncode16f(size_t depth);
 
-        //Base::DescrInt::Decode32fPtr GetDecode32f(size_t depth);
-        //Base::DescrInt::Decode16fPtr GetDecode16f(size_t depth);
+        Base::DescrInt::Decode32fPtr GetDecode32f(size_t depth);
+        Base::DescrInt::Decode16fPtr GetDecode16f(size_t depth);
 
         //Base::DescrInt::CosineDistancePtr GetCosineDistance(size_t depth);
         //Sse41::DescrInt::MacroCosineDistancesDirectPtr GetMacroCosineDistancesDirect(size_t depth);

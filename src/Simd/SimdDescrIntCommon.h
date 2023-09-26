@@ -427,6 +427,30 @@ namespace Simd
         const uint16x8_t E7_MULLO = SIMD_VEC_SETR_EPI16(256, 128, 64, 32, 16, 8, 4, 2);
         const uint8x8_t E7_SHFL0 = SIMD_VEC_SETR_PI8(0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0);
         const uint8x8_t E7_SHFL1 = SIMD_VEC_SETR_PI8(0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0);
+
+        const uint8x8_t C6_TBL0 = SIMD_VEC_SETR_PI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2);
+        const uint8x8_t C6_TBL1 = SIMD_VEC_SETR_PI8(0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
+        //const __m128i C6_SHFL1 = SIMD_MM_SETR_EPI8(0x6, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xB);
+        const uint16x8_t C6_MULLO = SIMD_VEC_SETR_EPI16(4, 16, 64, 256, 4, 16, 64, 256);
+
+        const uint8x8_t C7_TBL0 = SIMD_VEC_SETR_PI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3);
+        const uint8x8_t C7_TBL1 = SIMD_VEC_SETR_PI8(0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6);
+        //const __m128i C7_SHFL1 = SIMD_MM_SETR_EPI8(0x7, 0x7, 0x7, 0x8, 0x8, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xC, 0xC, 0xD, 0xD, 0xD);
+        const uint16x8_t C7_MULLO = SIMD_VEC_SETR_EPI16(2, 4, 8, 16, 32, 64, 128, 256);
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<int bits> uint8x8_t LoadLast8(const uint8_t* src)
+        {
+            uint8x8_t val = LoadHalf<false>(src + bits - 8);
+            return vext_u8(val, val, 8 - bits);
+        }
+
+        template<int bits> uint8x16_t LoadLast16(const uint8_t* src)
+        {
+            uint8x16_t val = Load<false>(src + bits * 2 - 16);
+            return vextq_u8(val, val, 16 - bits * 2);
+        }
     }
 #endif
 }
