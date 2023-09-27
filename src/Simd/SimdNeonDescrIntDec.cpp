@@ -248,6 +248,39 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void Decode16f4(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
+        {
+            assert(size % 8 == 0);
+            float32x4_t _scale = vdupq_n_f32(scale);
+            float32x4_t _shift = vdupq_n_f32(shift);
+            if (Aligned(dst))
+            {
+                for (size_t i = 0; i < size; i += 8)
+                {
+                    uint32x4_t s0 = vdupq_n_u32(*(uint32_t*)(src + 0));
+                    uint32x4_t u0 = vandq_u32(vshlq_u32(s0, C4_SHL0), C4_AND);
+                    Store<true>(dst + 0, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u0))));
+                    uint32x4_t u1 = vandq_u32(vshlq_u32(s0, C4_SHL1), C4_AND);
+                    Store<true>(dst + 4, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u1))));
+                    src += 4;
+                    dst += 8;
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < size; i += 8)
+                {
+                    uint32x4_t s0 = vdupq_n_u32(*(uint32_t*)(src + 0));
+                    uint32x4_t u0 = vandq_u32(vshlq_u32(s0, C4_SHL0), C4_AND);
+                    Store<false>(dst + 0, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u0))));
+                    uint32x4_t u1 = vandq_u32(vshlq_u32(s0, C4_SHL1), C4_AND);
+                    Store<false>(dst + 4, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u1))));
+                    src += 4;
+                    dst += 8;
+                }
+            }
+        }
+
         static void Decode16f5(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
         {
             assert(size % 8 == 0);
@@ -402,7 +435,7 @@ namespace Simd
         {
             switch (depth)
             {
-            //case 4: return Decode16f4;
+            case 4: return Decode16f4;
             case 5: return Decode16f5;
             case 6: return Decode16f6;
             case 7: return Decode16f7;
