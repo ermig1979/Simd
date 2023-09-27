@@ -219,6 +219,38 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void Decode16f8(const uint8_t* src, float scale, float shift, size_t size, uint16_t * dst)
+        {
+            assert(size % 8 == 0);
+            float32x4_t _scale = vdupq_n_f32(scale);
+            float32x4_t _shift = vdupq_n_f32(shift);
+            size_t i = 0;
+            if (Aligned(src) && Aligned(dst))
+            {
+                for (; i < size; i += 8)
+                {
+                    uint16x8_t u16 = vmovl_u8(LoadHalf<true>(src));
+                    Store<true>(dst + 0, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16)))));
+                    Store<true>(dst + 4, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16)))));
+                    src += 8;
+                    dst += 8;
+                }
+            }
+            else
+            {
+                for (; i < size; i += 8)
+                {
+                    uint16x8_t u16 = vmovl_u8(LoadHalf<false>(src));
+                    Store<false>(dst + 0, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16)))));
+                    Store<false>(dst + 4, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16)))));
+                    src += 8;
+                    dst += 8;
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         Base::DescrInt::Decode32fPtr GetDecode32f(size_t depth)
         {
             switch (depth)
@@ -240,7 +272,7 @@ namespace Simd
             //case 5: return Decode16f5;
             //case 6: return Decode16f6;
             //case 7: return Decode16f7;
-            //case 8: return Decode16f8;
+            case 8: return Decode16f8;
             default: assert(0); return NULL;
             }
         }

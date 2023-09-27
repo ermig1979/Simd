@@ -102,7 +102,7 @@ namespace Simd
             _encode16f = GetEncode16f(_depth);
             
             _decode32f = GetDecode32f(_depth);
-            if (_depth >= 9) _decode16f = GetDecode16f(_depth);
+            if (_depth >= 8) _decode16f = GetDecode16f(_depth);
 
             //_cosineDistance = GetCosineDistance(_depth);
             //_macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
