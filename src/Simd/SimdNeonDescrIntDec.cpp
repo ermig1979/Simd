@@ -111,44 +111,79 @@ namespace Simd
             }
         }
 
+        //static void Decode32f6(const uint8_t* src, float scale, float shift, size_t size, float* dst)
+        //{
+        //    assert(size % 8 == 0);
+        //    float32x4_t _scale = vdupq_n_f32(scale);
+        //    float32x4_t _shift = vdupq_n_f32(shift);
+        //    size_t size8 = AlignLo(size - 1, 8), i = 0;
+        //    if (Aligned(dst))
+        //    {
+        //        for (; i < size8; i += 8)
+        //        {
+        //            uint8x8_t s6 = LoadHalf<false>(src);
+        //            uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s6, C6_TBL0, C6_TBL1), C6_MULLO), 10);
+        //            Store<true>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
+        //            Store<true>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
+        //            src += 6;
+        //            dst += 8;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        for (; i < size8; i += 8)
+        //        {
+        //            uint8x8_t s6 = LoadHalf<false>(src);
+        //            uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s6, C6_TBL0, C6_TBL1), C6_MULLO), 10);
+        //            Store<false>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
+        //            Store<false>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
+        //            src += 6;
+        //            dst += 8;
+        //        }
+        //    }
+        //    for (; i < size; i += 8)
+        //    {
+        //        uint8x8_t s6 = LoadLast8<6>(src);
+        //        uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s6, C6_TBL0, C6_TBL1), C6_MULLO), 10);
+        //        Store<false>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
+        //        Store<false>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
+        //        src += 6;
+        //        dst += 8;
+        //    }
+        //}
+
         static void Decode32f6(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
             assert(size % 8 == 0);
             float32x4_t _scale = vdupq_n_f32(scale);
             float32x4_t _shift = vdupq_n_f32(shift);
-            size_t size8 = AlignLo(size - 1, 8), i = 0;
             if (Aligned(dst))
             {
-                for (; i < size8; i += 8)
+                for (size_t i = 0; i < size; i += 8)
                 {
-                    uint8x8_t s6 = LoadHalf<false>(src);
-                    uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s6, C6_TBL0, C6_TBL1), C6_MULLO), 10);
-                    Store<true>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
-                    Store<true>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
+                    uint32x4_t s0 = vdupq_n_u32(*(uint32_t*)(src + 0));
+                    uint32x4_t u0 = vandq_u32(vshlq_u32(s0, C6_SHL0), C6_AND);
+                    Store<true>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u0)));
+                    uint32x4_t s1 = vdupq_n_u32(*(uint32_t*)(src + 2));
+                    uint32x4_t u1 = vandq_u32(vshlq_u32(s1, C6_SHL1), C6_AND);
+                    Store<true>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u1)));
                     src += 6;
                     dst += 8;
                 }
             }
             else
             {
-                for (; i < size8; i += 8)
+                for (size_t i = 0; i < size; i += 8)
                 {
-                    uint8x8_t s6 = LoadHalf<false>(src);
-                    uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s6, C6_TBL0, C6_TBL1), C6_MULLO), 10);
-                    Store<false>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
-                    Store<false>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
+                    uint32x4_t s0 = vdupq_n_u32(*(uint32_t*)(src + 0));
+                    uint32x4_t u0 = vandq_u32(vshlq_u32(s0, C6_SHL0), C6_AND);
+                    Store<false>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u0)));
+                    uint32x4_t s1 = vdupq_n_u32(*(uint32_t*)(src + 2));
+                    uint32x4_t u1 = vandq_u32(vshlq_u32(s1, C6_SHL1), C6_AND);
+                    Store<false>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u1)));
                     src += 6;
                     dst += 8;
                 }
-            }
-            for (; i < size; i += 8)
-            {
-                uint8x8_t s6 = LoadLast8<6>(src);
-                uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s6, C6_TBL0, C6_TBL1), C6_MULLO), 10);
-                Store<false>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
-                Store<false>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
-                src += 6;
-                dst += 8;
             }
         }
 
@@ -218,6 +253,41 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
+
+        static void Decode16f6(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
+        {
+            assert(size % 8 == 0);
+            float32x4_t _scale = vdupq_n_f32(scale);
+            float32x4_t _shift = vdupq_n_f32(shift);
+            if (Aligned(dst))
+            {
+                for (size_t i = 0; i < size; i += 8)
+                {
+                    uint32x4_t s0 = vdupq_n_u32(*(uint32_t*)(src + 0));
+                    uint32x4_t u0 = vandq_u32(vshlq_u32(s0, C6_SHL0), C6_AND);
+                    Store<true>(dst + 0, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u0))));
+                    uint32x4_t s1 = vdupq_n_u32(*(uint32_t*)(src + 2));
+                    uint32x4_t u1 = vandq_u32(vshlq_u32(s1, C6_SHL1), C6_AND);
+                    Store<true>(dst + 4, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u1))));
+                    src += 6;
+                    dst += 8;
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < size; i += 8)
+                {
+                    uint32x4_t s0 = vdupq_n_u32(*(uint32_t*)(src + 0));
+                    uint32x4_t u0 = vandq_u32(vshlq_u32(s0, C6_SHL0), C6_AND);
+                    Store<false>(dst + 0, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u0))));
+                    uint32x4_t s1 = vdupq_n_u32(*(uint32_t*)(src + 2));
+                    uint32x4_t u1 = vandq_u32(vshlq_u32(s1, C6_SHL1), C6_AND);
+                    Store<false>(dst + 4, (uint16x4_t)vcvt_f16_f32(vmlaq_f32(_shift, _scale, vcvtq_f32_u32(u1))));
+                    src += 6;
+                    dst += 8;
+                }
+            }
+        }
 
         static void Decode16f7(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
         {
@@ -305,7 +375,7 @@ namespace Simd
             {
             //case 4: return Decode16f4;
             //case 5: return Decode16f5;
-            //case 6: return Decode16f6;
+            case 6: return Decode16f6;
             case 7: return Decode16f7;
             case 8: return Decode16f8;
             default: assert(0); return NULL;

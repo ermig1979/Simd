@@ -447,6 +447,10 @@ namespace Simd
         //const __m128i C7_SHFL1 = SIMD_MM_SETR_EPI8(0x7, 0x7, 0x7, 0x8, 0x8, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xC, 0xC, 0xD, 0xD, 0xD);
         const uint16x8_t C7_MULLO = SIMD_VEC_SETR_EPI16(2, 4, 8, 16, 32, 64, 128, 256);
 
+        const int32x4_t C6_SHL0 = SIMD_VEC_SETR_EPI32(0, -6, -12, -18);
+        const int32x4_t C6_SHL1 = SIMD_VEC_SETR_EPI32(-8, -14, -20, -26);
+        const uint32x4_t C6_AND = SIMD_VEC_SET1_EPI32(0x3F);
+
         const int32x4_t C7_SHL0 = SIMD_VEC_SETR_EPI32(0, -7, -14, -21);
         const int32x4_t C7_SHL1 = SIMD_VEC_SETR_EPI32(-4, -11, -18, -25);
         const uint32x4_t C7_AND = SIMD_VEC_SET1_EPI32(0x7F);
