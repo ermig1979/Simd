@@ -650,11 +650,10 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
-        SIMD_INLINE uint32x4_t Correlation(const uint8x16_t & a, const uint8x16_t & b)
+        SIMD_INLINE void Correlation(const uint8x16_t& a, const uint8x16_t& b, uint32x4_t& ab)
         {
-            uint16x8_t lo = vmull_u8(Half<0>(a), Half<0>(b));
-            uint16x8_t hi = vmull_u8(Half<1>(a), Half<1>(b));
-            return vaddq_u32(vpaddlq_u16(lo), vpaddlq_u16(hi));
+            ab = vpadalq_u16(ab, vmull_u8(Half<0>(a), Half<0>(b)));
+            ab = vpadalq_u16(ab, vmull_u8(Half<1>(a), Half<1>(b)));
         }
 
         template <bool align> void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
@@ -674,15 +673,15 @@ namespace Simd
                 {
                     uint8x16_t _a = Load<align>(a + col);
                     uint8x16_t _b = Load<align>(b + col);
-                    rowSum = vaddq_u32(rowSum, Correlation(_a, _b));
+                    Correlation(_a, _b, rowSum);
                 }
                 if (alignedWidth != width)
                 {
                     uint8x16_t _a = vandq_u8(Load<align>(a + width - A), tailMask);
                     uint8x16_t _b = vandq_u8(Load<align>(b + width - A), tailMask);
-                    rowSum = vaddq_u32(rowSum, Correlation(_a, _b));
+                    Correlation(_a, _b, rowSum);
                 }
-                fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
+                fullSum = vpadalq_u32(fullSum, rowSum);
                 a += aStride;
                 b += bStride;
             }

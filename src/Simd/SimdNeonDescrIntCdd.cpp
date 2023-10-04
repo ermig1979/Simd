@@ -80,7 +80,7 @@ namespace Simd
             {
                 uint8x8_t _a = LoadHalf<false>(a + i);
                 uint8x8_t _b = LoadHalf<false>(b + i);
-                _ab = vpadal_u16(_ab, vmull_u8(_a, _b));
+                _ab = vpadalq_u16(_ab, vmull_u8(_a, _b));
             }
             return ExtractSum32u(_ab);
         }
