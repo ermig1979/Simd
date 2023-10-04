@@ -620,10 +620,10 @@ namespace Test
             result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Avx512vnni::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif
         
-        //#if defined(SIMD_NEON_ENABLE)
-        //        if (Simd::Neon::Enable)
-        //            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-        //#endif
+#if defined(SIMD_NEON_ENABLE)
+        if (Simd::Neon::Enable)
+            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
 
         return result;
     }
@@ -698,10 +698,10 @@ namespace Test
             result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Avx512vnni::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif
 
-//#if defined(SIMD_NEON_ENABLE)
-//        if (Simd::Neon::Enable)
-//            result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
-//#endif
+#if defined(SIMD_NEON_ENABLE)
+        if (Simd::Neon::Enable)
+            result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
 
         return result;
     }

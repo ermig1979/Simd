@@ -25,6 +25,7 @@
 #include "Simd/SimdDescrInt.h"
 #include "Simd/SimdDescrIntCommon.h"
 #include "Simd/SimdFloat16.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -563,6 +564,73 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        Base::DescrInt::Encode32fPtr GetEncode32f(size_t depth)
+        {
+            switch (depth)
+            {
+            case 4: return Encode32f4;
+            case 5: return Encode32f5;
+            case 6: return Encode32f6;
+            case 7: return Encode32f7;
+            case 8: return Encode32f8;
+            default: assert(0); return NULL;
+            }
+        }
+
+        Base::DescrInt::Encode16fPtr GetEncode16f(size_t depth)
+        {
+            switch (depth)
+            {
+            case 4: return Encode16f4;
+            case 5: return Encode16f5;
+            case 6: return Encode16f6;
+            case 7: return Encode16f7;
+            case 8: return Encode16f8;
+            default: assert(0); return NULL;
+            }
+        }
+
+        Base::DescrInt::Decode32fPtr GetDecode32f(size_t depth)
+        {
+            switch (depth)
+            {
+            case 4: return Decode32f4;
+            case 5: return Decode32f5;
+            case 6: return Decode32f6;
+            case 7: return Decode32f7;
+            case 8: return Decode32f8;
+            default: assert(0); return NULL;
+            }
+        }
+
+        Base::DescrInt::Decode16fPtr GetDecode16f(size_t depth)
+        {
+            switch (depth)
+            {
+            case 4: return Decode16f4;
+            case 5: return Decode16f5;
+            case 6: return Decode16f6;
+            case 7: return Decode16f7;
+            case 8: return Decode16f8;
+            default: assert(0); return NULL;
+            }
+        }
+
+        Base::DescrInt::CosineDistancePtr GetCosineDistance(size_t depth)
+        {
+            switch (depth)
+            {
+            case 4: return CosineDistance<4>;
+            case 5: return CosineDistance<5>;
+            case 6: return CosineDistance<6>;
+            case 7: return CosineDistance<7>;
+            case 8: return CosineDistance<8>;
+            default: assert(0); return NULL;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         bool DescrInt::Valid(size_t size, size_t depth)
         {
             if (depth < 4 || depth > 8)
@@ -580,56 +648,27 @@ namespace Simd
             _range = float((1 << _depth) - 1);
             _minMax32f = MinMax32f;
             _minMax16f = MinMax16f;
-            switch (depth)
-            {
-            case 4:
-            {
-                _encode32f = Encode32f4;
-                _encode16f = Encode16f4;
-                _decode32f = Decode32f4;
-                _decode16f = Decode16f4;
-                _cosineDistance = Base::CosineDistance<4>;
-                break;
-            }
-            case 5:
-            {
-                _encode32f = Encode32f5;
-                _encode16f = Encode16f5;
-                _decode32f = Decode32f5;
-                _decode16f = Decode16f5;
-                _cosineDistance = Base::CosineDistance<5>;
-                break;
-            }
-            case 6:
-            {
-                _encode32f = Encode32f6;
-                _encode16f = Encode16f6;
-                _decode32f = Decode32f6;
-                _decode16f = Decode16f6;
-                _cosineDistance = Base::CosineDistance<6>;
-                break;
-            }
-            case 7:
-            {
-                _encode32f = Encode32f7;
-                _encode16f = Encode16f7;
-                _decode32f = Decode32f7;
-                _decode16f = Decode16f7;
-                _cosineDistance = Base::CosineDistance<7>;
-                break;
-            }
-            case 8: 
-            {
-                _encode32f = Encode32f8;
-                _encode16f = Encode16f8;
-                _decode32f = Decode32f8;
-                _decode16f = Decode16f8;
-                _cosineDistance = Base::CosineDistance<8>;
-                break;
-            }
-            default:
-                assert(0);
-            }
+
+            _encode32f = GetEncode32f(_depth);
+            _encode16f = GetEncode16f(_depth);
+
+            _decode32f = GetDecode32f(_depth);
+            _decode16f = GetDecode16f(_depth);
+
+            _cosineDistance = GetCosineDistance(_depth);
+
+            _macroCosineDistancesDirect = NULL;
+            _microMd = 0;
+            _microNd = 0;
+
+            _unpackNormA = NULL;
+            _unpackNormB = NULL;
+            _unpackDataA = NULL;
+            _unpackDataB = NULL;
+            _macroCosineDistancesUnpack = NULL;
+            _unpSize = 0;
+            _microMu = 0;
+            _microNu = 0;
         }
 
         void DescrInt::Encode32f(const float* src, uint8_t* dst) const
@@ -677,33 +716,79 @@ namespace Simd
 
         void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
         {
-            for (size_t i = 0; i < M; ++i)
+            if (_macroCosineDistancesDirect)
             {
-                const uint8_t* a = A[i];
-                for (size_t j = 0; j < N; ++j)
+                if (_unpSize * _microNu > Base::AlgCacheL1() || N * 2 < _microNu || _depth == 8)
+                    CosineDistancesDirect(M, N, A, B, distances);
+                else
+                    CosineDistancesUnpack(M, N, A, B, distances);
+            }
+            else
+            {
+                for (size_t i = 0; i < M; ++i)
                 {
-                    const uint8_t* b = B[j];
-                    _cosineDistance(a, b, _size, distances++);
+                    const uint8_t* a = A[i];
+                    for (size_t j = 0; j < N; ++j)
+                    {
+                        const uint8_t* b = B[j];
+                        _cosineDistance(a, b, _size, distances++);
+                    }
                 }
             }
         }
 
         void DescrInt::CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const
         {
+            Array8ucp a(M);
             for (size_t i = 0; i < M; ++i)
-            {
-                const uint8_t* a = A + i * _encSize;
-                for (size_t j = 0; j < N; ++j)
-                {
-                    const uint8_t* b = B + j * _encSize;
-                    _cosineDistance(a, b, _size, distances++);
-                }
-            }
+                a[i] = A + i * _encSize;
+            Array8ucp b(N);
+            for (size_t j = 0; j < N; ++j)
+                b[j] = B + j * _encSize;
+            CosineDistancesMxNa(M, N, a.data, b.data, distances);
         }
 
         void DescrInt::VectorNorm(const uint8_t* a, float* norm) const
         {
             *norm = ((float*)a)[3];
+        }
+
+        void DescrInt::CosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
+        {
+            const size_t L2 = Base::AlgCacheL2();
+            size_t mN = AlignLoAny(L2 / _encSize, _microNd);
+            size_t mM = AlignLoAny(L2 / _encSize, _microMd);
+            for (size_t i = 0; i < M; i += mM)
+            {
+                size_t dM = Simd::Min(M, i + mM) - i;
+                for (size_t j = 0; j < N; j += mN)
+                {
+                    size_t dN = Simd::Min(N, j + mN) - j;
+                    _macroCosineDistancesDirect(dM, dN, A + i, B + j, _size, distances + i * N + j, N);
+                }
+            }
+        }
+
+        void DescrInt::CosineDistancesUnpack(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
+        {
+            size_t macroM = AlignLoAny(Base::AlgCacheL2() / _unpSize, _microMu);
+            size_t macroN = AlignLoAny(Base::AlgCacheL3() / _unpSize, _microNu);
+            size_t sizeA = Min(macroM, M), sizeB = AlignHi(Min(macroN, N), _microNu);
+            Array8u dA(sizeA * _unpSize), dB(sizeB * _unpSize);
+            Array32f nA(sizeA * 4), nB(sizeB * 4);
+            for (size_t i = 0; i < M; i += macroM)
+            {
+                size_t dM = Simd::Min(M, i + macroM) - i;
+                _unpackNormA(dM, A + i, nA.data, 1);
+                _unpackDataA(dM, A + i, _size, dA.data, _unpSize);
+                for (size_t j = 0; j < N; j += macroN)
+                {
+                    size_t dN = Simd::Min(N, j + macroN) - j;
+                    _unpackNormB(dN, B + j, nB.data, dN);
+                    _unpackDataB(dN, B + j, _size, dB.data, 1);
+                    _macroCosineDistancesUnpack(dM, dN, _size, dA.data, nA.data, dB.data, nB.data, distances + i * N + j, N);
+                }
+            }
         }
 
         //-------------------------------------------------------------------------------------------------

@@ -104,7 +104,7 @@ namespace Simd
             _decode32f = GetDecode32f(_depth);
             _decode16f = GetDecode16f(_depth);
 
-            if(_depth >= 8)_cosineDistance = GetCosineDistance(_depth);
+            _cosineDistance = GetCosineDistance(_depth);
             //_macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
             //_microMd = 2;
             //_microNd = 4;
@@ -117,64 +117,6 @@ namespace Simd
             _unpSize = _size * (_depth == 8 ? 2 : 1);
             _microMu = _depth == 8 ? 6 : 5;
             _microNu = 8;
-}
-
-        void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
-        {
-            Base::DescrInt::CosineDistancesMxNa(M, N, A, B, distances);
-            //if (_unpSize * _microNu > Base::AlgCacheL1() || N * 2 < _microNu || _depth == 8)
-            //    CosineDistancesDirect(M, N, A, B, distances);
-            //else
-            //    CosineDistancesUnpack(M, N, A, B, distances);
-        }
-
-        void DescrInt::CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const
-        {
-            Array8ucp a(M);
-            for (size_t i = 0; i < M; ++i)
-                a[i] = A + i * _encSize;
-            Array8ucp b(N);
-            for (size_t j = 0; j < N; ++j)
-                b[j] = B + j * _encSize;
-            CosineDistancesMxNa(M, N, a.data, b.data, distances);
-        }
-
-        void DescrInt::CosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
-        {
-            const size_t L2 = Base::AlgCacheL2();
-            size_t mN = AlignLoAny(L2 / _encSize, _microNd);
-            size_t mM = AlignLoAny(L2 / _encSize, _microMd);
-            for (size_t i = 0; i < M; i += mM)
-            {
-                size_t dM = Simd::Min(M, i + mM) - i;
-                for (size_t j = 0; j < N; j += mN)
-                {
-                    size_t dN = Simd::Min(N, j + mN) - j;
-                    _macroCosineDistancesDirect(dM, dN, A + i, B + j, _size, distances + i * N + j, N);
-                }
-            }
-        }
-
-        void DescrInt::CosineDistancesUnpack(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
-        {
-            size_t macroM = AlignLoAny(Base::AlgCacheL2() / _unpSize, _microMu);
-            size_t macroN = AlignLoAny(Base::AlgCacheL3() / _unpSize, _microNu);
-            size_t sizeA = Min(macroM, M), sizeB = AlignHi(Min(macroN, N), _microNu);
-            Array8u dA(sizeA * _unpSize), dB(sizeB * _unpSize);
-            Array32f nA(sizeA * 4), nB(sizeB * 4);
-            for (size_t i = 0; i < M; i += macroM)
-            {
-                size_t dM = Simd::Min(M, i + macroM) - i;
-                _unpackNormA(dM, A + i, nA.data, 1);
-                _unpackDataA(dM, A + i, _size, dA.data, _unpSize);
-                for (size_t j = 0; j < N; j += macroN)
-                {
-                    size_t dN = Simd::Min(N, j + macroN) - j;
-                    _unpackNormB(dN, B + j, nB.data, dN);
-                    _unpackDataB(dN, B + j, _size, dB.data, 1);
-                    _macroCosineDistancesUnpack(dM, dN, _size, dA.data, nA.data, dB.data, nB.data, distances + i * N + j, N);
-                }
-            }
         }
 
         //-------------------------------------------------------------------------------------------------

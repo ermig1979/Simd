@@ -422,12 +422,12 @@ namespace Simd
         {
             switch (depth)
             {
-            case 4: return Decode32f4;
+            //case 4: return Decode32f4;
             case 5: return Decode32f5;
             case 6: return Decode32f6;
             case 7: return Decode32f7;
-            case 8: return Decode32f8;
-            default: assert(0); return NULL;
+            //case 8: return Decode32f8;
+            default: return Base::GetDecode32f(depth);
             }
         }
 
@@ -440,7 +440,7 @@ namespace Simd
             case 6: return Decode16f6;
             case 7: return Decode16f7;
             case 8: return Decode16f8;
-            default: assert(0); return NULL;
+            default: return Base::GetDecode16f(depth);
             }
         }
     }

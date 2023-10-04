@@ -959,7 +959,7 @@ namespace Simd
             }
         }
 
-        Sse41::DescrInt::MacroCosineDistancesDirectPtr GetMacroCosineDistancesDirect(size_t depth)
+        Base::DescrInt::MacroCosineDistancesDirectPtr GetMacroCosineDistancesDirect(size_t depth)
         {
             switch (depth)
             {

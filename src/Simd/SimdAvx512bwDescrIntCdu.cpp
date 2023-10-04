@@ -461,7 +461,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        Sse41::DescrInt::UnpackDataPtr GetUnpackData(size_t depth, bool transpose)
+        Base::DescrInt::UnpackDataPtr GetUnpackData(size_t depth, bool transpose)
         {
             switch (depth)
             {
@@ -473,7 +473,7 @@ namespace Simd
             }
         }
 
-        Sse41::DescrInt::MacroCosineDistancesUnpackPtr GetMacroCosineDistancesUnpack(size_t depth)
+        Base::DescrInt::MacroCosineDistancesUnpackPtr GetMacroCosineDistancesUnpack(size_t depth)
         {
             return depth == 8 ? NULL : MacroCorrelation8;
         }

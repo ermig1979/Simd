@@ -458,7 +458,7 @@ namespace Simd
             case 6: return Encode32f6;
             case 7: return Encode32f7;
             case 8: return Encode32f8;
-            default: assert(0); return NULL;
+            default: return Base::GetEncode32f(depth);
             }
         }
 
@@ -471,7 +471,7 @@ namespace Simd
             case 6: return Encode16f6;
             case 7: return Encode16f7;
             case 8: return Encode16f8;
-            default: assert(0); return NULL;
+            default: return Base::GetEncode16f(depth);
             }
         }
     }

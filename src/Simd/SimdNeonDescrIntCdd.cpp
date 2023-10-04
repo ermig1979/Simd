@@ -35,11 +35,30 @@ namespace Simd
     {
         template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
 
-        SIMD_INLINE uint32x4_t Correlation8(const uint8x16_t& a, const uint8x16_t& b)
+        template<> int32_t Correlation<7>(const uint8_t* a, const uint8_t* b, size_t size)
         {
-            uint16x8_t lo = vmull_u8(Half<0>(a), Half<0>(b));
-            uint16x8_t hi = vmull_u8(Half<1>(a), Half<1>(b));
-            return vaddq_u32(vpaddlq_u16(lo), vpaddlq_u16(hi));
+            assert(size % 8 == 0);
+            uint32x4_t _ab = K32_00000000;
+            for (size_t i = 0; i < size; i += 8)
+            {
+                uint32x4_t _a0 = vandq_u32(vshlq_u32(vdupq_n_u32(*(uint32_t*)(a + 0)), C7_SHL0), C7_AND);
+                uint32x4_t _b0 = vandq_u32(vshlq_u32(vdupq_n_u32(*(uint32_t*)(b + 0)), C7_SHL0), C7_AND);
+                _ab = vmlaq_u32(_ab, _a0, _b0);
+                uint32x4_t _a1 = vandq_u32(vshlq_u32(vdupq_n_u32(*(uint32_t*)(a + 3)), C7_SHL1), C7_AND);
+                uint32x4_t _b1 = vandq_u32(vshlq_u32(vdupq_n_u32(*(uint32_t*)(b + 3)), C7_SHL1), C7_AND);
+                _ab = vmlaq_u32(_ab, _a1, _b1);
+                a += 7;
+                b += 7;
+            }
+            return ExtractSum32u(_ab);
+        }
+
+        template<bool align> SIMD_INLINE void Correlation8(const uint8_t* a, const uint8_t* b, uint32x4_t & ab)
+        {
+            uint8x16_t _a = Load<align>(a);
+            uint8x16_t _b = Load<align>(b);
+            ab = vpadalq_u16(ab, vmull_u8(Half<0>(_a), Half<0>(_b)));
+            ab = vpadalq_u16(ab, vmull_u8(Half<1>(_a), Half<1>(_b)));
         }
 
         template<> int32_t Correlation<8>(const uint8_t* a, const uint8_t* b, size_t size)
@@ -50,26 +69,18 @@ namespace Simd
             if (Aligned(a) && Aligned(b))
             {
                 for (; i < size16; i += 16)
-                {
-                    uint8x16_t _a = Load<true>(a + i);
-                    uint8x16_t _b = Load<true>(b + i);
-                    _ab = vaddq_u32(_ab, Correlation8(_a, _b));
-                }
+                    Correlation8<true>(a + i, b + i, _ab);
             }
             else
             {
                 for (; i < size16; i += 16)
-                {
-                    uint8x16_t _a = Load<false>(a + i);
-                    uint8x16_t _b = Load<false>(b + i);
-                    _ab = vaddq_u32(_ab, Correlation8(_a, _b));
-                }
+                    Correlation8<false>(a + i, b + i, _ab);
             }
             for (; i < size; i += 8)
             {
                 uint8x8_t _a = LoadHalf<false>(a + i);
                 uint8x8_t _b = LoadHalf<false>(b + i);
-                _ab = vaddq_u32(_ab, vpaddlq_u16(vmull_u8(_a, _b)));
+                _ab = vpadal_u16(_ab, vmull_u8(_a, _b));
             }
             return ExtractSum32u(_ab);
         }
@@ -91,7 +102,7 @@ namespace Simd
             //case 6: return CosineDistance<6>;
             //case 7: return CosineDistance<7>;
             case 8: return CosineDistance<8>;
-            default: assert(0); return NULL;
+            default: Base::GetCosineDistance(depth);
             }
         }
     }
