@@ -27,6 +27,7 @@
 #include "Simd/SimdDescrInt.h"
 #include "Simd/SimdDescrIntCommon.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdShuffle.h"
 
 namespace Simd
 {
@@ -41,12 +42,11 @@ namespace Simd
             uint32x4_t _ab = K32_00000000;
             for (size_t i = 0; i < size; i += 8)
             {
-                uint32x4_t _a0 = vandq_u32(vshlq_u32(vdupq_n_u32(*(uint32_t*)(a + 0)), C7_SHL0), C7_AND);
-                uint32x4_t _b0 = vandq_u32(vshlq_u32(vdupq_n_u32(*(uint32_t*)(b + 0)), C7_SHL0), C7_AND);
-                _ab = vmlaq_u32(_ab, _a0, _b0);
-                uint32x4_t _a1 = vandq_u32(vshlq_u32(vdupq_n_u32(*(uint32_t*)(a + 3)), C7_SHL1), C7_AND);
-                uint32x4_t _b1 = vandq_u32(vshlq_u32(vdupq_n_u32(*(uint32_t*)(b + 3)), C7_SHL1), C7_AND);
-                _ab = vmlaq_u32(_ab, _a1, _b1);
+                uint8x8_t _a = LoadHalf<false>(a);
+                uint8x8_t _b = LoadHalf<false>(b);
+                uint16x8_t a16 = vandq_u16(vshlq_u16((uint16x8_t)Shuffle(_a, C7_TBL0, C7_TBL1), C7_16SHL), C7_16AND);
+                uint16x8_t b16 = vandq_u16(vshlq_u16((uint16x8_t)Shuffle(_b, C7_TBL0, C7_TBL1), C7_16SHL), C7_16AND);
+                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
                 a += 7;
                 b += 7;
             }
