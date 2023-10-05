@@ -70,47 +70,6 @@ namespace Simd
             }
         }
 
-        //static void Decode32f5(const uint8_t* src, float scale, float shift, size_t size, float* dst)
-        //{
-        //    assert(size % 8 == 0);
-        //    float32x4_t _scale = vdupq_n_f32(scale);
-        //    float32x4_t _shift = vdupq_n_f32(shift);
-        //    size_t size8 = AlignLo(size - 1, 8), i = 0;
-        //    if (Aligned(dst))
-        //    {
-        //        for (; i < size8; i += 8)
-        //        {
-        //            uint8x8_t s5 = LoadHalf<false>(src);
-        //            uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s5, C5_TBL0, C5_TBL1), C5_MULLO), 11);
-        //            Store<true>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
-        //            Store<true>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
-        //            src += 5;
-        //            dst += 8;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        for (; i < size8; i += 8)
-        //        {
-        //            uint8x8_t s5 = LoadHalf<false>(src);
-        //            uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s5, C5_TBL0, C5_TBL1), C5_MULLO), 11);
-        //            Store<false>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
-        //            Store<false>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
-        //            src += 5;
-        //            dst += 8;
-        //        }
-        //    }
-        //    for (; i < size; i += 8)
-        //    {
-        //        uint8x8_t s5 = LoadLast8<5>(src);
-        //        uint16x8_t u16 = vshrq_n_u16(vmulq_u16((uint16x8_t)Shuffle(s5, C5_TBL0, C5_TBL1), C5_MULLO), 11);
-        //        Store<false>(dst + 0, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<0>(u16))));
-        //        Store<false>(dst + 4, vmlaq_f32(_shift, _scale, vcvtq_f32_u32(UnpackU16<1>(u16))));
-        //        src += 5;
-        //        dst += 8;
-        //    }
-        //}
-
         static void Decode32f5(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
             assert(size % 8 == 0);

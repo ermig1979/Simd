@@ -27,7 +27,6 @@
 #include "Simd/SimdDescrInt.h"
 #include "Simd/SimdDescrIntCommon.h"
 #include "Simd/SimdCpu.h"
-#include "Simd/SimdShuffle.h"
 
 namespace Simd
 {
@@ -36,16 +35,96 @@ namespace Simd
     {
         template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
 
+        template<> int32_t Correlation<4>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0 && size >= 8);
+            uint32x4_t _ab = K32_00000000;
+            size_t size16 = AlignLo(size - 8, 16), i = 0;
+            for (; i < size16; i += 16)
+            {
+                uint8x16_t a8 = Cvt4To8(LoadHalf<false>(a));
+                uint8x16_t b8 = Cvt4To8(LoadHalf<false>(b));
+                _ab = vpadalq_u16(_ab, vmull_u8(Half<0>(a8), Half<0>(b8)));
+                _ab = vpadalq_u16(_ab, vmull_u8(Half<1>(a8), Half<1>(b8)));
+                a += 8;
+                b += 8;
+            }
+            for (; i < size; i += 8)
+            {
+                uint8x8_t a8 = Half<0>(Cvt4To8(LoadLast8<4>(a)));
+                uint8x8_t b8 = Half<0>(Cvt4To8(LoadLast8<4>(b)));
+                _ab = vpadalq_u16(_ab, vmull_u8(a8, b8));
+                a += 4;
+                b += 4;
+            }
+            return ExtractSum32u(_ab);
+        }
+
+        template<> int32_t Correlation<5>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0 && size >= 8);
+            uint32x4_t _ab = K32_00000000;
+            size_t size1 = size - 8, i = 0;
+            for (; i < size1; i += 8)
+            {
+                uint16x8_t a16 = Cvt5To16(LoadHalf<false>(a));
+                uint16x8_t b16 = Cvt5To16(LoadHalf<false>(b));
+                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
+                a += 5;
+                b += 5;
+            }
+            for (; i < size; i += 8)
+            {
+                uint16x8_t a16 = Cvt5To16(LoadLast8<5>(a));
+                uint16x8_t b16 = Cvt5To16(LoadLast8<5>(b));
+                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
+                a += 5;
+                b += 5;
+            }
+            return ExtractSum32u(_ab);
+        }
+
+        template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0 && size >= 8);
+            uint32x4_t _ab = K32_00000000;
+            size_t size1 = size - 8, i = 0;
+            for (; i < size1; i += 8)
+            {
+                uint16x8_t a16 = Cvt6To16(LoadHalf<false>(a));
+                uint16x8_t b16 = Cvt6To16(LoadHalf<false>(b));
+                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
+                a += 6;
+                b += 6;
+            }
+            for (; i < size; i += 8)
+            {
+                uint16x8_t a16 = Cvt6To16(LoadLast8<6>(a));
+                uint16x8_t b16 = Cvt6To16(LoadLast8<6>(b));
+                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
+                a += 6;
+                b += 6;
+            }
+            return ExtractSum32u(_ab);
+        }
+
         template<> int32_t Correlation<7>(const uint8_t* a, const uint8_t* b, size_t size)
         {
-            assert(size % 8 == 0);
+            assert(size % 8 == 0 && size >= 8);
             uint32x4_t _ab = K32_00000000;
-            for (size_t i = 0; i < size; i += 8)
+            size_t size1 = size - 8, i = 0;
+            for (; i < size1; i += 8)
             {
-                uint8x8_t _a = LoadHalf<false>(a);
-                uint8x8_t _b = LoadHalf<false>(b);
-                uint16x8_t a16 = vandq_u16(vshlq_u16((uint16x8_t)Shuffle(_a, C7_TBL0, C7_TBL1), C7_16SHL), C7_16AND);
-                uint16x8_t b16 = vandq_u16(vshlq_u16((uint16x8_t)Shuffle(_b, C7_TBL0, C7_TBL1), C7_16SHL), C7_16AND);
+                uint16x8_t a16 = Cvt7To16(LoadHalf<false>(a));
+                uint16x8_t b16 = Cvt7To16(LoadHalf<false>(b));
+                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
+                a += 7;
+                b += 7;
+            }
+            for (; i < size; i += 8)
+            {
+                uint16x8_t a16 = Cvt7To16(LoadLast8<7>(a));
+                uint16x8_t b16 = Cvt7To16(LoadLast8<7>(b));
                 _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
                 a += 7;
                 b += 7;
@@ -97,7 +176,7 @@ namespace Simd
         {
             switch (depth)
             {
-            //case 4: return CosineDistance<4>;
+            case 4: return CosineDistance<4>;
             //case 5: return CosineDistance<5>;
             //case 6: return CosineDistance<6>;
             //case 7: return CosineDistance<7>;

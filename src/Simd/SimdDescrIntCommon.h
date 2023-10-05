@@ -29,6 +29,7 @@
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdShuffle.h"
 
 namespace Simd
 {
@@ -431,45 +432,83 @@ namespace Simd
         const int32x4_t C4_SHL0 = SIMD_VEC_SETR_EPI32(0, -4, -8, -12);
         const int32x4_t C4_SHL1 = SIMD_VEC_SETR_EPI32(-16, -20, -24, -28);
         const uint32x4_t C4_AND = SIMD_VEC_SET1_EPI32(0x0F);
-
-        const uint8x8_t C5_TBL0 = SIMD_VEC_SETR_PI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x2);
-        const uint8x8_t C5_TBL1 = SIMD_VEC_SETR_PI8(0x2, 0x3, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4);
-        //const __m128i C5_SHFL1 = SIMD_MM_SETR_EPI8(0x5, 0x5, 0x5, 0x6, 0x6, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9);
-        const uint16x8_t C5_MULLO = SIMD_VEC_SETR_EPI16(8, 64, 2, 16, 128, 4, 32, 256);
-
-        const uint8x8_t C6_TBL0 = SIMD_VEC_SETR_PI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2);
-        const uint8x8_t C6_TBL1 = SIMD_VEC_SETR_PI8(0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
-        //const __m128i C6_SHFL1 = SIMD_MM_SETR_EPI8(0x6, 0x6, 0x6, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA, 0xB, 0xB, 0xB);
-        const uint16x8_t C6_MULLO = SIMD_VEC_SETR_EPI16(4, 16, 64, 256, 4, 16, 64, 256);
+        const int8x16_t C4_8SHL = SIMD_VEC_SETR_EPI8(0, -4, 0, -4, 0, -4, 0, -4, 0, -4, 0, -4, 0, -4, 0, -4);
+        const uint8x16_t C4_8AND = SIMD_VEC_SET1_EPI8(0x0F);
 
         const int32x4_t C5_SHL0 = SIMD_VEC_SETR_EPI32(0, -5, -10, -15);
         const int32x4_t C5_SHL1 = SIMD_VEC_SETR_EPI32(-12, -17, -22, -27);
         const uint32x4_t C5_AND = SIMD_VEC_SET1_EPI32(0x1F);
+        const uint8x8_t C5_TBL0 = SIMD_VEC_SETR_PI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x2);
+        const uint8x8_t C5_TBL1 = SIMD_VEC_SETR_PI8(0x2, 0x3, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4);
+        const int16x8_t C5_16SHL = SIMD_VEC_SETR_EPI16(-8, -5, -10, -7, -4, -9, -6, -11);
+        const uint16x8_t C5_16AND = SIMD_VEC_SET1_EPI16(0x1F);
 
         const int32x4_t C6_SHL0 = SIMD_VEC_SETR_EPI32(0, -6, -12, -18);
         const int32x4_t C6_SHL1 = SIMD_VEC_SETR_EPI32(-8, -14, -20, -26);
         const uint32x4_t C6_AND = SIMD_VEC_SET1_EPI32(0x3F);
+        const uint8x8_t C6_TBL0 = SIMD_VEC_SETR_PI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x2);
+        const uint8x8_t C6_TBL1 = SIMD_VEC_SETR_PI8(0x3, 0x3, 0x3, 0x4, 0x4, 0x5, 0x5, 0x5);
+        const int16x8_t C6_16SHL = SIMD_VEC_SETR_EPI16(-8, -6, -4, -2, -8, -6, -4, -2);
+        const uint16x8_t C6_16AND = SIMD_VEC_SET1_EPI16(0x3F);
 
         const int32x4_t C7_SHL0 = SIMD_VEC_SETR_EPI32(0, -7, -14, -21);
         const int32x4_t C7_SHL1 = SIMD_VEC_SETR_EPI32(-4, -11, -18, -25);
         const uint32x4_t C7_AND = SIMD_VEC_SET1_EPI32(0x7F);
-        const uint16x8_t C7_16AND = SIMD_VEC_SET1_EPI16(0x7F);
         const uint8x8_t C7_TBL0 = SIMD_VEC_SETR_PI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3);
         const uint8x8_t C7_TBL1 = SIMD_VEC_SETR_PI8(0x3, 0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x6);
         const int16x8_t C7_16SHL = SIMD_VEC_SETR_EPI16(-8, -7, -6, -5, -4, -3, -2, -1);
+        const uint16x8_t C7_16AND = SIMD_VEC_SET1_EPI16(0x7F);
 
         //-------------------------------------------------------------------------------------------------
 
-        template<int bits> uint8x8_t LoadLast8(const uint8_t* src)
+        template<int bits> SIMD_INLINE uint8x8_t LoadLast8(const uint8_t* src)
         {
             uint8x8_t val = LoadHalf<false>(src + bits - 8);
             return vext_u8(val, val, 8 - bits);
         }
 
-        template<int bits> uint8x16_t LoadLast16(const uint8_t* src)
+        template<int bits> SIMD_INLINE uint8x16_t LoadLast16(const uint8_t* src)
         {
             uint8x16_t val = Load<false>(src + bits * 2 - 16);
             return vextq_u8(val, val, 16 - bits * 2);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE uint8x16_t Cvt4To8(uint8x8_t a)
+        {
+            uint8x8x2_t aa = vzip_u8(a, a);
+            return vandq_u8(vshlq_u8(*(uint8x16_t*)&aa, C4_8SHL), C4_8AND);
+        }
+
+        SIMD_INLINE uint16x8_t Cvt5To16(uint8x8_t src)
+        {
+            return vandq_u16(vshlq_u16((uint16x8_t)Shuffle(src, C5_TBL0, C5_TBL1), C5_16SHL), C5_16AND);
+        }
+
+        SIMD_INLINE uint8x8_t Cvt5To8(uint8x8_t src)
+        {
+            return vmovn_u16(Cvt5To16(src));
+        }
+
+        SIMD_INLINE uint16x8_t Cvt6To16(uint8x8_t src)
+        {
+            return vandq_u16(vshlq_u16((uint16x8_t)Shuffle(src, C6_TBL0, C6_TBL1), C6_16SHL), C6_16AND);
+        }
+
+        SIMD_INLINE uint8x8_t Cvt6To8(uint8x8_t src)
+        {
+            return vmovn_u16(Cvt6To16(src));
+        }
+
+        SIMD_INLINE uint16x8_t Cvt7To16(uint8x8_t src)
+        {
+            return vandq_u16(vshlq_u16((uint16x8_t)Shuffle(src, C7_TBL0, C7_TBL1), C7_16SHL), C7_16AND);
+        }
+
+        SIMD_INLINE uint8x8_t Cvt7To8(uint8x8_t src)
+        {
+            return vmovn_u16(Cvt7To16(src));
         }
     }
 #endif
