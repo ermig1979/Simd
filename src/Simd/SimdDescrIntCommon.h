@@ -510,6 +510,29 @@ namespace Simd
         {
             return vmovn_u16(Cvt7To16(src));
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void DecodeCosineDistances1x4(const uint8_t* a, const uint8_t* const* B, float32x4_t abSum, float* distances)
+        {
+            float32x4x2_t a0, a1, b0, b1;
+            b0.val[0] = Load<false>((float*)B[0]);
+            b0.val[1] = Load<false>((float*)B[1]);
+            b1.val[0] = Load<false>((float*)B[2]);
+            b1.val[1] = Load<false>((float*)B[3]);
+            a0 = vzipq_f32(b0.val[0], b1.val[0]);
+            a1 = vzipq_f32(b0.val[1], b1.val[1]);
+            b0 = vzipq_f32(a0.val[0], a1.val[0]);
+            b1 = vzipq_f32(a0.val[1], a1.val[1]);
+            a0.val[0] = vdupq_n_f32(((float*)a)[0]);
+            a0.val[1] = vdupq_n_f32(((float*)a)[1]);
+            a1.val[0] = vdupq_n_f32(((float*)a)[2]);
+            a1.val[1] = vdupq_n_f32(((float*)a)[3]);
+            float32x4_t ab = vmulq_f32(abSum, vmulq_f32(a0.val[0], b0.val[0]));
+            ab = vmlaq_f32(ab, a1.val[0], b0.val[1]);
+            ab = vmlaq_f32(ab, b1.val[0], a0.val[1]);
+            Store<false>(distances, vminq_f32(vmaxq_f32(vsubq_f32(vdupq_n_f32(1.0f), Div<2>(ab, vmulq_f32(a1.val[1], b1.val[1]))), vdupq_n_f32(0.0f)), vdupq_n_f32(2.0f)));
+        }
     }
 #endif
 }

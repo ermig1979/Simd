@@ -105,9 +105,9 @@ namespace Simd
             _decode16f = GetDecode16f(_depth);
 
             _cosineDistance = GetCosineDistance(_depth);
-            //_macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
-            //_microMd = 2;
-            //_microNd = 4;
+            _macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
+            _microMd = 2;
+            _microNd = 4;
 
             //_unpackNormA = UnpackNormA;
             //_unpackNormB = UnpackNormB;
