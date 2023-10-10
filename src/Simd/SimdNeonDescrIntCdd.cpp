@@ -33,7 +33,29 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size);
+        template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size)
+        {
+            assert(size % 8 == 0 && size >= 8);
+            uint32x4_t _ab = K32_00000000;
+            size_t size1 = size - 8, i = 0;
+            for (; i < size1; i += 8)
+            {
+                uint16x8_t a16 = CvtTo16<bits>(LoadHalf<false>(a));
+                uint16x8_t b16 = CvtTo16<bits>(LoadHalf<false>(b));
+                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
+                a += bits;
+                b += bits;
+            }
+            for (; i < size; i += 8)
+            {
+                uint16x8_t a16 = CvtTo16<bits>(LoadLast8<5>(a));
+                uint16x8_t b16 = CvtTo16<bits>(LoadLast8<5>(b));
+                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
+                a += bits;
+                b += bits;
+            }
+            return ExtractSum32u(_ab);
+        }
 
         template<> int32_t Correlation<4>(const uint8_t* a, const uint8_t* b, size_t size)
         {
@@ -56,78 +78,6 @@ namespace Simd
                 _ab = vpadalq_u16(_ab, vmull_u8(a8, b8));
                 a += 4;
                 b += 4;
-            }
-            return ExtractSum32u(_ab);
-        }
-
-        template<> int32_t Correlation<5>(const uint8_t* a, const uint8_t* b, size_t size)
-        {
-            assert(size % 8 == 0 && size >= 8);
-            uint32x4_t _ab = K32_00000000;
-            size_t size1 = size - 8, i = 0;
-            for (; i < size1; i += 8)
-            {
-                uint16x8_t a16 = Cvt5To16(LoadHalf<false>(a));
-                uint16x8_t b16 = Cvt5To16(LoadHalf<false>(b));
-                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
-                a += 5;
-                b += 5;
-            }
-            for (; i < size; i += 8)
-            {
-                uint16x8_t a16 = Cvt5To16(LoadLast8<5>(a));
-                uint16x8_t b16 = Cvt5To16(LoadLast8<5>(b));
-                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
-                a += 5;
-                b += 5;
-            }
-            return ExtractSum32u(_ab);
-        }
-
-        template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
-        {
-            assert(size % 8 == 0 && size >= 8);
-            uint32x4_t _ab = K32_00000000;
-            size_t size1 = size - 8, i = 0;
-            for (; i < size1; i += 8)
-            {
-                uint16x8_t a16 = Cvt6To16(LoadHalf<false>(a));
-                uint16x8_t b16 = Cvt6To16(LoadHalf<false>(b));
-                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
-                a += 6;
-                b += 6;
-            }
-            for (; i < size; i += 8)
-            {
-                uint16x8_t a16 = Cvt6To16(LoadLast8<6>(a));
-                uint16x8_t b16 = Cvt6To16(LoadLast8<6>(b));
-                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
-                a += 6;
-                b += 6;
-            }
-            return ExtractSum32u(_ab);
-        }
-
-        template<> int32_t Correlation<7>(const uint8_t* a, const uint8_t* b, size_t size)
-        {
-            assert(size % 8 == 0 && size >= 8);
-            uint32x4_t _ab = K32_00000000;
-            size_t size1 = size - 8, i = 0;
-            for (; i < size1; i += 8)
-            {
-                uint16x8_t a16 = Cvt7To16(LoadHalf<false>(a));
-                uint16x8_t b16 = Cvt7To16(LoadHalf<false>(b));
-                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
-                a += 7;
-                b += 7;
-            }
-            for (; i < size; i += 8)
-            {
-                uint16x8_t a16 = Cvt7To16(LoadLast8<7>(a));
-                uint16x8_t b16 = Cvt7To16(LoadLast8<7>(b));
-                _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
-                a += 7;
-                b += 7;
             }
             return ExtractSum32u(_ab);
         }
@@ -485,7 +435,66 @@ namespace Simd
         }
 #endif
 
-        template<int bits> void MicroCosineDistancesDirect2x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+        template<int bits> void MicroCosineDistancesDirect2x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size1 = size - 8, o = 16;
+            uint32x4_t ab00 = K32_00000000;
+            uint32x4_t ab01 = K32_00000000;
+            uint32x4_t ab02 = K32_00000000;
+            uint32x4_t ab03 = K32_00000000;
+            uint32x4_t ab10 = K32_00000000;
+            uint32x4_t ab11 = K32_00000000;
+            uint32x4_t ab12 = K32_00000000;
+            uint32x4_t ab13 = K32_00000000;
+            for (; i < size1; i += 8, o += bits)
+            {
+                uint16x8_t a0, a1, b0;
+                a0 = CvtTo16<bits>(LoadHalf<false>(A[0] + o));
+                a1 = CvtTo16<bits>(LoadHalf<false>(A[1] + o));
+
+                b0 = CvtTo16<bits>(LoadHalf<false>(B[0] + o));
+                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
+                ab10 = vpadalq_u16(ab10, vmulq_u16(a1, b0));
+
+                b0 = CvtTo16<bits>(LoadHalf<false>(B[1] + o));
+                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
+                ab11 = vpadalq_u16(ab11, vmulq_u16(a1, b0));
+
+                b0 = CvtTo16<bits>(LoadHalf<false>(B[2] + o));
+                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
+                ab12 = vpadalq_u16(ab12, vmulq_u16(a1, b0));
+
+                b0 = CvtTo16<bits>(LoadHalf<false>(B[3] + o));
+                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
+                ab13 = vpadalq_u16(ab13, vmulq_u16(a1, b0));
+            }
+            for (; i < size; i += 8, o += bits)
+            {
+                uint16x8_t a0, a1, b0;
+                a0 = CvtTo16<bits>(LoadLast8<bits>(A[0] + o));
+                a1 = CvtTo16<bits>(LoadLast8<bits>(A[1] + o));
+
+                b0 = CvtTo16<bits>(LoadLast8<bits>(B[0] + o));
+                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
+                ab10 = vpadalq_u16(ab10, vmulq_u16(a1, b0));
+
+                b0 = CvtTo16<bits>(LoadLast8<bits>(B[1] + o));
+                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
+                ab11 = vpadalq_u16(ab11, vmulq_u16(a1, b0));
+
+                b0 = CvtTo16<bits>(LoadLast8<bits>(B[2] + o));
+                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
+                ab12 = vpadalq_u16(ab12, vmulq_u16(a1, b0));
+
+                b0 = CvtTo16<bits>(LoadLast8<bits>(B[3] + o));
+                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
+                ab13 = vpadalq_u16(ab13, vmulq_u16(a1, b0));
+            }
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
+            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
+            DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
+            DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
+        }
 
         template<> void MicroCosineDistancesDirect2x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
@@ -549,189 +558,6 @@ namespace Simd
                 b0 = Half<0>(Cvt4To8(LoadLast8<4>(B[3] + o)));
                 ab03 = vpadalq_u16(ab03, vmull_u8(a0, b0));
                 ab13 = vpadalq_u16(ab13, vmull_u8(a1, b0));
-            }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
-            DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
-            DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
-        }
-
-        template<> void MicroCosineDistancesDirect2x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
-        {
-            size_t i = 0, size1 = size - 8, o = 16;
-            uint32x4_t ab00 = K32_00000000;
-            uint32x4_t ab01 = K32_00000000;
-            uint32x4_t ab02 = K32_00000000;
-            uint32x4_t ab03 = K32_00000000;
-            uint32x4_t ab10 = K32_00000000;
-            uint32x4_t ab11 = K32_00000000;
-            uint32x4_t ab12 = K32_00000000;
-            uint32x4_t ab13 = K32_00000000;
-            for (; i < size1; i += 8, o += 5)
-            {
-                uint16x8_t a0, a1, b0;
-                a0 = Cvt5To16(LoadHalf<false>(A[0] + o));
-                a1 = Cvt5To16(LoadHalf<false>(A[1] + o));
-
-                b0 = Cvt5To16(LoadHalf<false>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-                ab10 = vpadalq_u16(ab10, vmulq_u16(a1, b0));
-
-                b0 = Cvt5To16(LoadHalf<false>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-                ab11 = vpadalq_u16(ab11, vmulq_u16(a1, b0));
-
-                b0 = Cvt5To16(LoadHalf<false>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-                ab12 = vpadalq_u16(ab12, vmulq_u16(a1, b0));
-
-                b0 = Cvt5To16(LoadHalf<false>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-                ab13 = vpadalq_u16(ab13, vmulq_u16(a1, b0));
-            }
-            for (; i < size; i += 8, o += 5)
-            {
-                uint16x8_t a0, a1, b0;
-                a0 = Cvt5To16(LoadLast8<5>(A[0] + o));
-                a1 = Cvt5To16(LoadLast8<5>(A[1] + o));
-
-                b0 = Cvt5To16(LoadLast8<5>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-                ab10 = vpadalq_u16(ab10, vmulq_u16(a1, b0));
-
-                b0 = Cvt5To16(LoadLast8<5>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-                ab11 = vpadalq_u16(ab11, vmulq_u16(a1, b0));
-
-                b0 = Cvt5To16(LoadLast8<5>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-                ab12 = vpadalq_u16(ab12, vmulq_u16(a1, b0));
-
-                b0 = Cvt5To16(LoadLast8<5>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-                ab13 = vpadalq_u16(ab13, vmulq_u16(a1, b0));
-            }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
-            DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
-            DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
-        }
-
-        template<> void MicroCosineDistancesDirect2x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
-        {
-            size_t i = 0, size1 = size - 8, o = 16;
-            uint32x4_t ab00 = K32_00000000;
-            uint32x4_t ab01 = K32_00000000;
-            uint32x4_t ab02 = K32_00000000;
-            uint32x4_t ab03 = K32_00000000;
-            uint32x4_t ab10 = K32_00000000;
-            uint32x4_t ab11 = K32_00000000;
-            uint32x4_t ab12 = K32_00000000;
-            uint32x4_t ab13 = K32_00000000;
-            for (; i < size1; i += 8, o += 6)
-            {
-                uint16x8_t a0, a1, b0;
-                a0 = Cvt6To16(LoadHalf<false>(A[0] + o));
-                a1 = Cvt6To16(LoadHalf<false>(A[1] + o));
-
-                b0 = Cvt6To16(LoadHalf<false>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-                ab10 = vpadalq_u16(ab10, vmulq_u16(a1, b0));
-
-                b0 = Cvt6To16(LoadHalf<false>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-                ab11 = vpadalq_u16(ab11, vmulq_u16(a1, b0));
-
-                b0 = Cvt6To16(LoadHalf<false>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-                ab12 = vpadalq_u16(ab12, vmulq_u16(a1, b0));
-
-                b0 = Cvt6To16(LoadHalf<false>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-                ab13 = vpadalq_u16(ab13, vmulq_u16(a1, b0));
-            }
-            for (; i < size; i += 8, o += 6)
-            {
-                uint16x8_t a0, a1, b0;
-                a0 = Cvt6To16(LoadLast8<6>(A[0] + o));
-                a1 = Cvt6To16(LoadLast8<6>(A[1] + o));
-
-                b0 = Cvt6To16(LoadLast8<6>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-                ab10 = vpadalq_u16(ab10, vmulq_u16(a1, b0));
-
-                b0 = Cvt6To16(LoadLast8<6>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-                ab11 = vpadalq_u16(ab11, vmulq_u16(a1, b0));
-
-                b0 = Cvt6To16(LoadLast8<6>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-                ab12 = vpadalq_u16(ab12, vmulq_u16(a1, b0));
-
-                b0 = Cvt6To16(LoadLast8<6>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-                ab13 = vpadalq_u16(ab13, vmulq_u16(a1, b0));
-            }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
-            DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
-            DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
-        }
-
-        template<> void MicroCosineDistancesDirect2x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
-        {
-            size_t i = 0, size1 = size - 8, o = 16;
-            uint32x4_t ab00 = K32_00000000;
-            uint32x4_t ab01 = K32_00000000;
-            uint32x4_t ab02 = K32_00000000;
-            uint32x4_t ab03 = K32_00000000;
-            uint32x4_t ab10 = K32_00000000;
-            uint32x4_t ab11 = K32_00000000;
-            uint32x4_t ab12 = K32_00000000;
-            uint32x4_t ab13 = K32_00000000;
-            for (; i < size1; i += 8, o += 7)
-            {
-                uint16x8_t a0, a1, b0;
-                a0 = Cvt7To16(LoadHalf<false>(A[0] + o));
-                a1 = Cvt7To16(LoadHalf<false>(A[1] + o));
-
-                b0 = Cvt7To16(LoadHalf<false>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-                ab10 = vpadalq_u16(ab10, vmulq_u16(a1, b0));
-
-                b0 = Cvt7To16(LoadHalf<false>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-                ab11 = vpadalq_u16(ab11, vmulq_u16(a1, b0));
-
-                b0 = Cvt7To16(LoadHalf<false>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-                ab12 = vpadalq_u16(ab12, vmulq_u16(a1, b0));
-
-                b0 = Cvt7To16(LoadHalf<false>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-                ab13 = vpadalq_u16(ab13, vmulq_u16(a1, b0));
-            }
-            for (; i < size; i += 8, o += 7)
-            {
-                uint16x8_t a0, a1, b0;
-                a0 = Cvt7To16(LoadLast8<7>(A[0] + o));
-                a1 = Cvt7To16(LoadLast8<7>(A[1] + o));
-
-                b0 = Cvt7To16(LoadLast8<7>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-                ab10 = vpadalq_u16(ab10, vmulq_u16(a1, b0));
-
-                b0 = Cvt7To16(LoadLast8<7>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-                ab11 = vpadalq_u16(ab11, vmulq_u16(a1, b0));
-
-                b0 = Cvt7To16(LoadLast8<7>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-                ab12 = vpadalq_u16(ab12, vmulq_u16(a1, b0));
-
-                b0 = Cvt7To16(LoadLast8<7>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-                ab13 = vpadalq_u16(ab13, vmulq_u16(a1, b0));
             }
             float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
             float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
@@ -808,7 +634,50 @@ namespace Simd
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
         }
 
-        template<int bits> void MicroCosineDistancesDirect1x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride);
+        template<int bits> void MicroCosineDistancesDirect1x4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t i = 0, size1 = size - 8, o = 16;
+            uint32x4_t ab00 = K32_00000000;
+            uint32x4_t ab01 = K32_00000000;
+            uint32x4_t ab02 = K32_00000000;
+            uint32x4_t ab03 = K32_00000000;
+            for (; i < size1; i += 8, o += bits)
+            {
+                uint16x8_t a0, b0;
+                a0 = CvtTo16<bits>(LoadHalf<false>(A[0] + o));
+
+                b0 = CvtTo16<bits>(LoadHalf<false>(B[0] + o));
+                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
+
+                b0 = CvtTo16<bits>(LoadHalf<false>(B[1] + o));
+                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
+
+                b0 = CvtTo16<bits>(LoadHalf<false>(B[2] + o));
+                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
+
+                b0 = CvtTo16<bits>(LoadHalf<false>(B[3] + o));
+                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
+            }
+            for (; i < size; i += 8, o += bits)
+            {
+                uint16x8_t a0, b0;
+                a0 = CvtTo16<bits>(LoadLast8<bits>(A[0] + o));
+
+                b0 = CvtTo16<bits>(LoadLast8<bits>(B[0] + o));
+                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
+
+                b0 = CvtTo16<bits>(LoadLast8<bits>(B[1] + o));
+                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
+
+                b0 = CvtTo16<bits>(LoadLast8<bits>(B[2] + o));
+                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
+
+                b0 = CvtTo16<bits>(LoadLast8<bits>(B[3] + o));
+                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
+            }
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
+            DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
+        }
 
         template<> void MicroCosineDistancesDirect1x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
@@ -854,141 +723,6 @@ namespace Simd
 
                 b0 = Half<0>(Cvt4To8(LoadLast8<4>(B[3] + o)));
                 ab03 = vpadalq_u16(ab03, vmull_u8(a0, b0));
-            }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
-        }
-
-        template<> void MicroCosineDistancesDirect1x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
-        {
-            size_t i = 0, size1 = size - 8, o = 16;
-            uint32x4_t ab00 = K32_00000000;
-            uint32x4_t ab01 = K32_00000000;
-            uint32x4_t ab02 = K32_00000000;
-            uint32x4_t ab03 = K32_00000000;
-            for (; i < size1; i += 8, o += 5)
-            {
-                uint16x8_t a0, b0;
-                a0 = Cvt5To16(LoadHalf<false>(A[0] + o));
-
-                b0 = Cvt5To16(LoadHalf<false>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-
-                b0 = Cvt5To16(LoadHalf<false>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-
-                b0 = Cvt5To16(LoadHalf<false>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-
-                b0 = Cvt5To16(LoadHalf<false>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-            }
-            for (; i < size; i += 8, o += 5)
-            {
-                uint16x8_t a0, b0;
-                a0 = Cvt5To16(LoadLast8<5>(A[0] + o));
-
-                b0 = Cvt5To16(LoadLast8<5>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-
-                b0 = Cvt5To16(LoadLast8<5>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-
-                b0 = Cvt5To16(LoadLast8<5>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-
-                b0 = Cvt5To16(LoadLast8<5>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-            }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
-        }
-
-        template<> void MicroCosineDistancesDirect1x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
-        {
-            size_t i = 0, size1 = size - 8, o = 16;
-            uint32x4_t ab00 = K32_00000000;
-            uint32x4_t ab01 = K32_00000000;
-            uint32x4_t ab02 = K32_00000000;
-            uint32x4_t ab03 = K32_00000000;
-            for (; i < size1; i += 8, o += 6)
-            {
-                uint16x8_t a0, b0;
-                a0 = Cvt6To16(LoadHalf<false>(A[0] + o));
-
-                b0 = Cvt6To16(LoadHalf<false>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-
-                b0 = Cvt6To16(LoadHalf<false>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-
-                b0 = Cvt6To16(LoadHalf<false>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-
-                b0 = Cvt6To16(LoadHalf<false>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-            }
-            for (; i < size; i += 8, o += 6)
-            {
-                uint16x8_t a0, b0;
-                a0 = Cvt6To16(LoadLast8<6>(A[0] + o));
-
-                b0 = Cvt6To16(LoadLast8<6>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-
-                b0 = Cvt6To16(LoadLast8<6>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-
-                b0 = Cvt6To16(LoadLast8<6>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-
-                b0 = Cvt6To16(LoadLast8<6>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-            }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
-        }
-
-        template<> void MicroCosineDistancesDirect1x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
-        {
-            size_t i = 0, size1 = size - 8, o = 16;
-            uint32x4_t ab00 = K32_00000000;
-            uint32x4_t ab01 = K32_00000000;
-            uint32x4_t ab02 = K32_00000000;
-            uint32x4_t ab03 = K32_00000000;
-            for (; i < size1; i += 8, o += 7)
-            {
-                uint16x8_t a0, b0;
-                a0 = Cvt7To16(LoadHalf<false>(A[0] + o));
-
-                b0 = Cvt7To16(LoadHalf<false>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-
-                b0 = Cvt7To16(LoadHalf<false>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-
-                b0 = Cvt7To16(LoadHalf<false>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-
-                b0 = Cvt7To16(LoadHalf<false>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
-            }
-            for (; i < size; i += 8, o += 7)
-            {
-                uint16x8_t a0, b0;
-                a0 = Cvt7To16(LoadLast8<7>(A[0] + o));
-
-                b0 = Cvt7To16(LoadLast8<7>(B[0] + o));
-                ab00 = vpadalq_u16(ab00, vmulq_u16(a0, b0));
-
-                b0 = Cvt7To16(LoadLast8<7>(B[1] + o));
-                ab01 = vpadalq_u16(ab01, vmulq_u16(a0, b0));
-
-                b0 = Cvt7To16(LoadLast8<7>(B[2] + o));
-                ab02 = vpadalq_u16(ab02, vmulq_u16(a0, b0));
-
-                b0 = Cvt7To16(LoadLast8<7>(B[3] + o));
-                ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
             }
             float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
