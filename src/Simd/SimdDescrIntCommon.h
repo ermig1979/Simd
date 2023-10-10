@@ -511,6 +511,28 @@ namespace Simd
             return vmovn_u16(Cvt7To16(src));
         }
 
+        template<int bits> SIMD_INLINE uint16x8_t CvtTo16(uint8x8_t src);
+
+        template<> SIMD_INLINE uint16x8_t CvtTo16<5>(uint8x8_t src)
+        {
+            return vandq_u16(vshlq_u16((uint16x8_t)Shuffle(src, C5_TBL0, C5_TBL1), C5_16SHL), C5_16AND);
+        }
+
+        template<> SIMD_INLINE uint16x8_t CvtTo16<6>(uint8x8_t src)
+        {
+            return vandq_u16(vshlq_u16((uint16x8_t)Shuffle(src, C6_TBL0, C6_TBL1), C6_16SHL), C6_16AND);
+        }
+
+        template<> SIMD_INLINE uint16x8_t CvtTo16<7>(uint8x8_t src)
+        {
+            return vandq_u16(vshlq_u16((uint16x8_t)Shuffle(src, C7_TBL0, C7_TBL1), C7_16SHL), C7_16AND);
+        }
+        
+        template<int bits> SIMD_INLINE uint8x8_t CvtTo8(uint8x8_t src)
+        {
+            return vmovn_u16(CvtTo16<bits>(src));
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void DecodeCosineDistances1x4(const uint8_t* a, const uint8_t* const* B, float32x4_t abSum, float* distances)

@@ -93,6 +93,44 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void UnpackNormA(size_t count, const uint8_t* const* src, float* dst, size_t stride)
+        {
+            for (size_t i = 0; i < count; ++i)
+                Store<false>(dst + i * 4, Load<false>((float*)src[i]));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        static void UnpackNormB(size_t count, const uint8_t* const* src, float* dst, size_t stride)
+        {
+            size_t count4 = AlignLo(count, 4), i = 0;
+            float32x4x2_t a0, a1, b0, b1;
+            for (; i < count4; i += 4, src += 4, dst += 4)
+            {
+                a0.val[0] = Load<false>((float*)src[0]);
+                a0.val[1] = Load<false>((float*)src[1]);
+                a1.val[0] = Load<false>((float*)src[2]);
+                a1.val[1] = Load<false>((float*)src[3]);
+                b0 = vzipq_f32(a0.val[0], a1.val[0]);
+                b1 = vzipq_f32(a0.val[1], a1.val[1]);
+                a0 = vzipq_f32(b0.val[0], b1.val[0]);
+                a1 = vzipq_f32(b0.val[1], b1.val[1]);
+                Store<false>(dst + 0 * stride, a0.val[0]);
+                Store<false>(dst + 1 * stride, a0.val[1]);
+                Store<false>(dst + 2 * stride, a1.val[0]);
+                Store<false>(dst + 3 * stride, a1.val[1]);
+            }
+            for (; i < count; i++, src++, dst++)
+            {
+                dst[0 * stride] = ((float*)src[0])[0];
+                dst[1 * stride] = ((float*)src[0])[1];
+                dst[2 * stride] = ((float*)src[0])[2];
+                dst[3 * stride] = ((float*)src[0])[3];
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         DescrInt::DescrInt(size_t size, size_t depth)
             : Base::DescrInt(size, depth)
         {
@@ -109,11 +147,11 @@ namespace Simd
             _microMd = 2;
             _microNd = 4;
 
-            //_unpackNormA = UnpackNormA;
-            //_unpackNormB = UnpackNormB;
-            //_unpackDataA = GetUnpackData(_depth, false);
-            //_unpackDataB = GetUnpackData(_depth, true);
-            //_macroCosineDistancesUnpack = GetMacroCosineDistancesUnpack(_depth);
+            _unpackNormA = UnpackNormA;
+            _unpackNormB = UnpackNormB;
+            _unpackDataA = GetUnpackData(_depth, false);
+            _unpackDataB = GetUnpackData(_depth, true);
+            _macroCosineDistancesUnpack = GetMacroCosineDistancesUnpack(_depth);
             _unpSize = _size * (_depth == 8 ? 2 : 1);
             _microMu = _depth == 8 ? 6 : 5;
             _microNu = 8;
