@@ -603,6 +603,36 @@ namespace Simd
             DecodeCosineDistances1x4(a, b + 0 * 4, stride, ab0, distances + 0 * 4);
             DecodeCosineDistances1x4(a, b + 1 * 4, stride, ab1, distances + 1 * 4, N - 4);
         }
+
+        SIMD_INLINE void DecodeCosineDistances1x12(const float* a, const float* b, size_t stride, uint32x4_t ab0, uint32x4_t ab1, uint32x4_t ab2, float* distances)
+        {
+            DecodeCosineDistances1x4(a, b + 0 * 4, stride, ab0, distances + 0 * 4);
+            DecodeCosineDistances1x4(a, b + 1 * 4, stride, ab1, distances + 1 * 4);
+            DecodeCosineDistances1x4(a, b + 2 * 4, stride, ab2, distances + 2 * 4);
+        }
+
+        SIMD_INLINE void DecodeCosineDistances1x12(const float* a, const float* b, size_t stride, uint32x4_t ab0, uint32x4_t ab1, uint32x4_t ab2, float* distances, size_t N)
+        {
+            DecodeCosineDistances1x4(a, b + 0 * 4, stride, ab0, distances + 0 * 4);
+            DecodeCosineDistances1x4(a, b + 1 * 4, stride, ab1, distances + 1 * 4);
+            DecodeCosineDistances1x4(a, b + 2 * 4, stride, ab2, distances + 2 * 4, N - 8);
+        }
+
+        SIMD_INLINE void DecodeCosineDistances1x16(const float* a, const float* b, size_t stride, uint32x4_t ab0, uint32x4_t ab1, uint32x4_t ab2, uint32x4_t ab3, float* distances)
+        {
+            DecodeCosineDistances1x4(a, b + 0 * 4, stride, ab0, distances + 0 * 4);
+            DecodeCosineDistances1x4(a, b + 1 * 4, stride, ab1, distances + 1 * 4);
+            DecodeCosineDistances1x4(a, b + 2 * 4, stride, ab2, distances + 2 * 4);
+            DecodeCosineDistances1x4(a, b + 3 * 4, stride, ab3, distances + 3 * 4);
+        }
+
+        SIMD_INLINE void DecodeCosineDistances1x16(const float* a, const float* b, size_t stride, uint32x4_t ab0, uint32x4_t ab1, uint32x4_t ab2, uint32x4_t ab3, float* distances, size_t N)
+        {
+            DecodeCosineDistances1x4(a, b + 0 * 4, stride, ab0, distances + 0 * 4);
+            DecodeCosineDistances1x4(a, b + 1 * 4, stride, ab1, distances + 1 * 4);
+            DecodeCosineDistances1x4(a, b + 2 * 4, stride, ab2, distances + 2 * 4);
+            DecodeCosineDistances1x4(a, b + 3 * 4, stride, ab3, distances + 3 * 4, N - 12);
+        }
     }
 #endif
 }

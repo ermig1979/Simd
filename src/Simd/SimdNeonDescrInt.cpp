@@ -158,7 +158,11 @@ namespace Simd
             _macroCosineDistancesUnpack = GetMacroCosineDistancesUnpack(_depth);
             _unpSize = _size;
             _microMu = 6;
+#if defined(SIMD_ARM64_ENABLE)
+            _microNu = 16;
+#else
             _microNu = 8;
+#endif
         }
 
         //-------------------------------------------------------------------------------------------------
