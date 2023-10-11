@@ -533,6 +533,16 @@ namespace Simd
             return vmovn_u16(CvtTo16<bits>(src));
         }
 
+        template<> SIMD_INLINE uint8x8_t CvtTo8<4>(uint8x8_t src)
+        {
+            return Half<0>(Cvt4To8(src));
+        }
+
+        template<> SIMD_INLINE uint8x8_t CvtTo8<8>(uint8x8_t src)
+        {
+            return src;
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void DecodeCosineDistances1x4(const uint8_t* a, const uint8_t* const* B, float32x4_t abSum, float* distances)
@@ -554,6 +564,44 @@ namespace Simd
             ab = vmlaq_f32(ab, a1.val[0], b0.val[1]);
             ab = vmlaq_f32(ab, b1.val[0], a0.val[1]);
             Store<false>(distances, vminq_f32(vmaxq_f32(vsubq_f32(vdupq_n_f32(1.0f), Div<2>(ab, vmulq_f32(a1.val[1], b1.val[1]))), vdupq_n_f32(0.0f)), vdupq_n_f32(2.0f)));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void DecodeCosineDistances1x4(const float* a, const float* b, size_t stride, uint32x4_t abSum, float* distances)
+        {
+            float32x4_t aScale = vdupq_n_f32(a[0]);
+            float32x4_t aShift = vdupq_n_f32(a[1]);
+            float32x4_t aMean = vdupq_n_f32(a[2]);
+            float32x4_t aNorm = vdupq_n_f32(a[3]);
+            float32x4_t bScale = Load<false>(b + 0 * stride);
+            float32x4_t bShift = Load<false>(b + 1 * stride);
+            float32x4_t bMean = Load<false>(b + 2 * stride);
+            float32x4_t bNorm = Load<false>(b + 3 * stride);
+            float32x4_t ab = vmulq_f32(vcvtq_f32_u32(abSum), vmulq_f32(aScale, bScale));
+            ab = vmlaq_f32(ab, aMean, bShift);
+            ab = vmlaq_f32(ab, bMean, aShift);
+            Store<false>(distances, vminq_f32(vmaxq_f32(vsubq_f32(vdupq_n_f32(1.0f), Div<2>(ab, vmulq_f32(aNorm, bNorm))), vdupq_n_f32(0.0f)), vdupq_n_f32(2.0f)));
+        }
+
+        SIMD_INLINE void DecodeCosineDistances1x4(const float* a, const float* b, size_t stride, uint32x4_t abSum, float* distances, size_t N)
+        {
+            float d[F];
+            DecodeCosineDistances1x4(a, b, stride, abSum, d);
+            for (size_t i = 0; i < N; ++i)
+                distances[i] = d[i];
+        }
+
+        SIMD_INLINE void DecodeCosineDistances1x8(const float* a, const float* b, size_t stride, uint32x4_t ab0, uint32x4_t ab1, float* distances)
+        {
+            DecodeCosineDistances1x4(a, b + 0 * 4, stride, ab0, distances + 0 * 4);
+            DecodeCosineDistances1x4(a, b + 1 * 4, stride, ab1, distances + 1 * 4);
+        }
+
+        SIMD_INLINE void DecodeCosineDistances1x8(const float* a, const float* b, size_t stride, uint32x4_t ab0, uint32x4_t ab1, float* distances, size_t N)
+        {
+            DecodeCosineDistances1x4(a, b + 0 * 4, stride, ab0, distances + 0 * 4);
+            DecodeCosineDistances1x4(a, b + 1 * 4, stride, ab1, distances + 1 * 4, N - 4);
         }
     }
 #endif

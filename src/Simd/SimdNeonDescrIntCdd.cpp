@@ -48,8 +48,8 @@ namespace Simd
             }
             for (; i < size; i += 8)
             {
-                uint16x8_t a16 = CvtTo16<bits>(LoadLast8<5>(a));
-                uint16x8_t b16 = CvtTo16<bits>(LoadLast8<5>(b));
+                uint16x8_t a16 = CvtTo16<bits>(LoadLast8<bits>(a));
+                uint16x8_t b16 = CvtTo16<bits>(LoadLast8<bits>(b));
                 _ab = vpadalq_u16(_ab, vmulq_u16(a16, b16));
                 a += bits;
                 b += bits;

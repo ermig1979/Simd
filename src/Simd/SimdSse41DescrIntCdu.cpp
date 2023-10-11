@@ -488,7 +488,8 @@ namespace Simd
 
         Base::DescrInt::MacroCosineDistancesUnpackPtr GetMacroCosineDistancesUnpack(size_t depth)
         {
-            return depth == 8 ? MacroCorrelation16 : MacroCorrelation8;
+            //return depth == 8 ? MacroCorrelation16 : MacroCorrelation8;
+            return depth == 8 ? NULL : MacroCorrelation8;
         }
     }
 #endif
