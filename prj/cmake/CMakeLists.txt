@@ -16,6 +16,7 @@ option(SIMD_HIDE "Hide internal functions of Simd Library" OFF)
 option(SIMD_AMX_EMULATE "AMX emulation enable" OFF)
 option(SIMD_RUNTIME "Runtime faster algorithm choise enable" ON)
 option(SIMD_OPENCV "OpenCV tests enable" OFF)
+option(SIMD_UNINSTALL "Enabling of uninstall target" ON)
 set(MAX_ERRORS 5)
 
 if((NOT DEFINED SIMD_ROOT) OR (SIMD_ROOT STREQUAL ""))
@@ -172,7 +173,9 @@ install(TARGETS Simd EXPORT simdtargets
 	PUBLIC_HEADER DESTINATION "include/Simd")
 install(EXPORT simdtargets DESTINATION share/simd)
 
-add_custom_target("uninstall")
-add_custom_command(TARGET "uninstall" POST_BUILD COMMENT "Uninstall Simd Library..."
-	COMMAND cat install_manifest.txt | sudo xargs rm -v
-	COMMAND cat install_manifest.txt | xargs -L1 dirname | grep '/[Ss]imd' | uniq | sudo xargs rmdir -v)
+if(SIMD_UNINSTALL)
+	add_custom_target("uninstall")
+	add_custom_command(TARGET "uninstall" POST_BUILD COMMENT "Uninstall Simd Library..."
+		COMMAND cat install_manifest.txt | sudo xargs rm -v
+		COMMAND cat install_manifest.txt | xargs -L1 dirname | grep '/[Ss]imd' | uniq | sudo xargs rmdir -v)
+endif()
