@@ -16,6 +16,7 @@ option(SIMD_HIDE "Hide internal functions of Simd Library" OFF)
 option(SIMD_AMX_EMULATE "AMX emulation enable" OFF)
 option(SIMD_RUNTIME "Runtime faster algorithm choise enable" ON)
 option(SIMD_OPENCV "OpenCV tests enable" OFF)
+option(SIMD_INSTALL "Enabling of install target" ON)
 option(SIMD_UNINSTALL "Enabling of uninstall target" ON)
 set(MAX_ERRORS 5)
 
@@ -165,13 +166,15 @@ else()
 	endif()
 endif()
 
-file(GLOB_RECURSE SIMD_LIB_HPP ${SIMD_ROOT}/src/Simd/Simd*.hpp)
-set_target_properties(Simd PROPERTIES PUBLIC_HEADER "${SIMD_ROOT}/src/Simd/SimdLib.h;${SIMD_LIB_HPP}")
-install(TARGETS Simd EXPORT simdtargets 
-	LIBRARY DESTINATION "lib" 
-	ARCHIVE DESTINATION "lib" 
-	PUBLIC_HEADER DESTINATION "include/Simd")
-install(EXPORT simdtargets DESTINATION share/simd)
+if(SIMD_UNINSTALL)
+	file(GLOB_RECURSE SIMD_LIB_HPP ${SIMD_ROOT}/src/Simd/Simd*.hpp)
+	set_target_properties(Simd PROPERTIES PUBLIC_HEADER "${SIMD_ROOT}/src/Simd/SimdLib.h;${SIMD_LIB_HPP}")
+	install(TARGETS Simd EXPORT simdtargets 
+		LIBRARY DESTINATION "lib" 
+		ARCHIVE DESTINATION "lib" 
+		PUBLIC_HEADER DESTINATION "include/Simd")
+	install(EXPORT simdtargets DESTINATION share/simd)
+endif()
 
 if(SIMD_UNINSTALL)
 	add_custom_target("uninstall")
