@@ -166,7 +166,7 @@ else()
 	endif()
 endif()
 
-if(SIMD_UNINSTALL)
+if(SIMD_INSTALL)
 	file(GLOB_RECURSE SIMD_LIB_HPP ${SIMD_ROOT}/src/Simd/Simd*.hpp)
 	set_target_properties(Simd PROPERTIES PUBLIC_HEADER "${SIMD_ROOT}/src/Simd/SimdLib.h;${SIMD_LIB_HPP}")
 	install(TARGETS Simd EXPORT simdtargets 
