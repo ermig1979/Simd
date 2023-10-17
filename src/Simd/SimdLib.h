@@ -4269,6 +4269,8 @@ extern "C"
 
         \short Saves an image to memory in given image file format.
 
+        \note This function has a C++ wrapper Simd::View::Save(const std::string & path, ::SimdImageFileType type = ::SimdImageFileUndefined, int quality = 100).
+
         \param [in] src - a pointer to pixels data of input image.
         \param [in] stride - a row size of input image in bytes.
         \param [in] width - a width of input image.
@@ -4331,6 +4333,8 @@ extern "C"
 
         \short Loads an image from memory buffer.
 
+        \note This function has a C++ wrapper Simd::View::Load(const uint8_t * src, size_t size, Simd::View::Format format = Simd::View::None).
+
         \param [in] data - a pointer to memory buffer with input image file.
         \param [in] size - a size of input image file in bytes.
         \param [out] stride - a pointer to row size of output image in bytes.
@@ -4349,6 +4353,8 @@ extern "C"
         \fn uint8_t* SimdImageLoadFromFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
 
         \short Loads an image from file.
+
+        \note This function has a C++ wrapper Simd::View::Load(const std::string & path, Simd::View::Format format = Simd::View::None).
 
         \param [in] path - a path to input image file.
         \param [out] stride - a pointer to row size of output image in bytes.
