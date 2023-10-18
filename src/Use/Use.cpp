@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 *
-* In order to be enable of OpenCV examples for Visual Studio 2015/2019 you have to rename file 'Ocv.prop.default' into 'Ocv.prop' and set there correct paths to OpenCV.
+* In order to be enable of OpenCV examples for Visual Studio 2015/2019/2022 you have to rename file 'Ocv.prop.default' into 'Ocv.prop' and set there correct paths to OpenCV.
 */
 #include <iostream>
 #include <string>
@@ -51,6 +51,10 @@ Examples g_examples;
 #ifdef SIMD_OPENCV_ENABLE
 USE_ADD_EXAMPLE(FaceDetection);
 USE_ADD_EXAMPLE(MotionDetector);
+#endif
+
+#if (defined(__cplusplus) && (__cplusplus >= 201703L)) || (defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L))
+USE_ADD_EXAMPLE(ImageMatcher);
 #endif
 
 void Print()

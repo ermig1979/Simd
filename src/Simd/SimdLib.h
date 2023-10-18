@@ -65,6 +65,19 @@ typedef signed __int64    int64_t;
 typedef unsigned __int64  uint64_t;
 #endif
 
+#if defined(_MSVC_LANG) 
+#if _MSVC_LANG >= 201103L
+#define SIMD_CPP_2011_ENABLE
+#endif
+
+#if _MSVC_LANG >= 201402L
+#define SIMD_CPP_2014_ENABLE
+#endif
+
+#if _MSVC_LANG >= 201703L
+#define SIMD_CPP_2017_ENABLE
+#endif
+#else
 #if __cplusplus >= 201103L
 #define SIMD_CPP_2011_ENABLE
 #endif
@@ -75,6 +88,7 @@ typedef unsigned __int64  uint64_t;
 
 #if __cplusplus >= 201703L
 #define SIMD_CPP_2017_ENABLE
+#endif
 #endif
 
 #if defined(SIMD_CPP_2014_ENABLE)

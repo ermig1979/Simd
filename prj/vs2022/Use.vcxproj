@@ -18,6 +18,7 @@
       <PreprocessorDefinitions>_CONSOLE;SIMD_USE_INSIDE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -31,6 +32,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Use\Use.cpp" />
     <ClCompile Include="..\..\src\Use\UseFaceDetection.cpp" />
+    <ClCompile Include="..\..\src\Use\UseImageMatcher.cpp" />
     <ClCompile Include="..\..\src\Use\UseMotionDetector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
