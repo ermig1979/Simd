@@ -514,7 +514,7 @@ namespace Simd
                         Simd::Fill(level.roi, 255);
                     else
                     {
-                        Simd::ResizeBilinear(roi, level.roi);
+                        Simd::Resize(roi, level.roi, SimdResizeMethodBilinear);
                         Simd::Binarization(level.roi, 0, 255, 0, level.roi, SimdCompareGreater);
                         Simd::SegmentationShrinkRegion(level.roi, 255, level.rect);
                     }
@@ -534,13 +534,13 @@ namespace Simd
                 src = gray;
             }
 
-            Simd::ResizeBilinear(src, _levels[0]->src);
+            Simd::Resize(src, _levels[0]->src, SimdResizeMethodBilinear);
             if (_needNormalization)
                 Simd::NormalizeHistogram(_levels[0]->src, _levels[0]->src);
             EstimateIntegral(*_levels[0]);
             for (size_t i = 1; i < _levels.size(); ++i)
             {
-                Simd::ResizeBilinear(_levels[0]->src, _levels[i]->src);
+                Simd::Resize(_levels[0]->src, _levels[i]->src, SimdResizeMethodBilinear);
                 EstimateIntegral(*_levels[i]);
             }
         }
