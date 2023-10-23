@@ -2191,29 +2191,29 @@ namespace Simd
             jpeg__refill_buffer(&s);
             s.img_buffer_original_end = s.img_buffer_end;
             jpeg__result_info ri;
-            uint8_t * data = (uint8_t*)jpeg__jpeg_load(&s, &x, &y, &comp, 3, &ri);
+            uint8_t* data = (uint8_t*)jpeg__jpeg_load(&s, &x, &y, &comp, 4, &ri);
             if (data)
             {
-                size_t stride = 3 * x;
+                size_t stride = 4 * x;
                 _image.Recreate(x, y, (Image::Format)_param.format);
                 switch (_param.format)
                 {
                 case SimdPixelFormatGray8:
-                    Sse41::RgbToGray(data, x, y, stride, _image.data, _image.stride);
+                    Sse41::RgbaToGray(data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgr24:
-                    Sse41::BgrToRgb(data, x, y, stride, _image.data, _image.stride);
+                    Sse41::BgraToRgb(data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgra32:
-                    Sse41::RgbToBgra(data, x, y, stride, _image.data, _image.stride, 0xFF);
+                    Sse41::BgraToRgba(data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgb24:
-                    Base::Copy(data, stride, x, y, 3, _image.data, _image.stride);
+                    Sse41::BgraToBgr(data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgba32:
-                    Sse41::BgrToBgra(data, x, y, stride, _image.data, _image.stride, 0xFF);
+                    Base::Copy(data, stride, x, y, 4, _image.data, _image.stride);
                     break;
-                default: 
+                default:
                     break;
                 }
                 JPEG_FREE(data);
