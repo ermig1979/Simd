@@ -59,20 +59,6 @@ namespace Simd
 #define JPEG_NEON
 #endif
 
-        typedef unsigned char jpeg_uc;
-        typedef unsigned short jpeg_us;
-        typedef unsigned short jpeg__uint16;
-        typedef   signed short jpeg__int16;
-        typedef unsigned int   jpeg__uint32;
-        typedef   signed int   jpeg__int32;
-
-        typedef struct
-        {
-            int      (*read)  (void* user, char* data, int size);   // fill 'data' with 'size' bytes.  return number of bytes actually read
-            void     (*skip)  (void* user, int n);                 // skip the next 'n' bytes, or 'unget' the last -n bytes if negative
-            int      (*eof)   (void* user);                       // returns nonzero if we are at end of file/data
-        } jpeg_io_callbacks;
-
 #ifdef _MSC_VER
 #define JPEG_NOTUSED(v)  (void)(v)
 #else
@@ -81,26 +67,24 @@ namespace Simd
 
         typedef struct
         {
-            jpeg__uint32 img_x, img_y;
+            InputMemoryStream* stream;
+
+            uint32_t img_x, img_y;
             int img_n, img_out_n;
 
-            jpeg_io_callbacks io;
-            void* io_user_data;
-
             int read_from_callbacks;
-            int buflen;
-            jpeg_uc buffer_start[128];
+            uint8_t buffer_start[128];
             int callback_already_read;
 
-            jpeg_uc* img_buffer, * img_buffer_end;
-            jpeg_uc* img_buffer_original, * img_buffer_original_end;
+            uint8_t* img_buffer, * img_buffer_end;
+            uint8_t* img_buffer_original, * img_buffer_original_end;
         } jpeg__context;
 
 #define jpeg__errpuc(x,y)  ((unsigned char *)(size_t) (JpegLoadError(x,y)?NULL:NULL))
 
         static void jpeg__refill_buffer(jpeg__context* s)
         {
-            int n = (s->io.read)(s->io_user_data, (char*)s->buffer_start, s->buflen);
+            int n = (int)s->stream->Read(sizeof(s->buffer_start), s->buffer_start);
             s->callback_already_read += (int)(s->img_buffer - s->img_buffer_original);
             if (n == 0) {
                 // at end of file, treat same as if from memory, but need to handle case
@@ -116,7 +100,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE static jpeg_uc jpeg__get8(jpeg__context* s)
+        SIMD_INLINE static uint8_t jpeg__get8(jpeg__context* s)
         {
             if (s->img_buffer < s->img_buffer_end)
                 return *s->img_buffer++;
@@ -144,11 +128,13 @@ namespace Simd
                 s->img_buffer = s->img_buffer_end;
                 return;
             }
-            if (s->io.read) {
+            if (s->stream) 
+            {
                 int blen = (int)(s->img_buffer_end - s->img_buffer);
-                if (blen < n) {
+                if (blen < n) 
+                {
                     s->img_buffer = s->img_buffer_end;
-                    (s->io.skip)(s->io_user_data, n - blen);
+                    s->stream->Skip(n - blen);
                     return;
                 }
             }
@@ -157,13 +143,13 @@ namespace Simd
 
         SIMD_INLINE static int jpeg__at_eof(jpeg__context* s)
         {
-            if (s->io.read) {
-                if (!(s->io.eof)(s->io_user_data)) return 0;
-                // if feof() is true, check if buffer = end
-                // special case: we've only got the special 0 character at the end
-                if (s->read_from_callbacks == 0) return 1;
+            if (s->stream) 
+            {
+                if (s->stream->Pos() != s->stream->Size()) 
+                    return 0;
+                if (s->read_from_callbacks == 0) 
+                    return 1;
             }
-
             return s->img_buffer >= s->img_buffer_end;
         }
 
@@ -233,9 +219,9 @@ namespace Simd
             return jpeg__malloc(a * b * c + add);
         }
 
-        static jpeg_uc jpeg__compute_y(int r, int g, int b)
+        static uint8_t jpeg__compute_y(int r, int g, int b)
         {
-            return (jpeg_uc)(((r * 77) + (g * 150) + (29 * b)) >> 8);
+            return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
         }
 
         typedef struct
@@ -261,11 +247,11 @@ namespace Simd
 
         typedef struct
         {
-            jpeg_uc  fast[1 << FAST_BITS];
+            uint8_t  fast[1 << FAST_BITS];
             // weirdly, repacking this into AoS is a 10% speed loss, instead of a win
-            jpeg__uint16 code[256];
-            jpeg_uc  values[256];
-            jpeg_uc  size[257];
+            uint16_t code[256];
+            uint8_t  values[256];
+            uint8_t  size[257];
             unsigned int maxcode[18];
             int    delta[17];   // old 'firstsymbol' - old 'firstcode'
         } jpeg__huffman;
@@ -275,8 +261,8 @@ namespace Simd
             jpeg__context* s;
             jpeg__huffman huff_dc[4];
             jpeg__huffman huff_ac[4];
-            jpeg__uint16 dequant[4][64];
-            jpeg__int16 fast_ac[4][1 << FAST_BITS];
+            uint16_t dequant[4][64];
+            int16_t fast_ac[4][1 << FAST_BITS];
 
             // sizes for components, interleaved MCUs
             int img_h_max, img_v_max;
@@ -293,14 +279,14 @@ namespace Simd
                 int dc_pred;
 
                 int x, y, w2, h2;
-                jpeg_uc* data;
+                uint8_t* data;
                 void* raw_data, * raw_coeff;
-                jpeg_uc* linebuf;
+                uint8_t* linebuf;
                 short* coeff;   // progressive only
                 int      coeff_w, coeff_h; // number of 8x8 coefficient blocks
             } img_comp[4];
 
-            jpeg__uint32   code_buffer; // jpeg entropy-coded buffer
+            uint32_t   code_buffer; // jpeg entropy-coded buffer
             int            code_bits;   // number of valid bits
             unsigned char  marker;      // marker seen while filling entropy buffer
             int            nomore;      // flag if we saw a marker so must stop
@@ -319,9 +305,9 @@ namespace Simd
             int restart_interval, todo;
 
             // kernels
-            void (*idct_block_kernel)(jpeg_uc* out, int out_stride, short data[64]);
-            void (*YCbCr_to_RGB_kernel)(jpeg_uc* out, const jpeg_uc* y, const jpeg_uc* pcb, const jpeg_uc* pcr, int count, int step);
-            jpeg_uc* (*resample_row_hv_2_kernel)(jpeg_uc* out, jpeg_uc* in_near, jpeg_uc* in_far, int w, int hs);
+            void (*idct_block_kernel)(uint8_t* out, int out_stride, short data[64]);
+            void (*YCbCr_to_RGB_kernel)(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step);
+            uint8_t* (*resample_row_hv_2_kernel)(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs);
         } jpeg__jpeg;
 
         static int jpeg__build_huffman(jpeg__huffman* h, int* count)
@@ -331,7 +317,7 @@ namespace Simd
             // build size list for each symbol (from JPEG spec)
             for (i = 0; i < 16; ++i)
                 for (j = 0; j < count[i]; ++j)
-                    h->size[k++] = (jpeg_uc)(i + 1);
+                    h->size[k++] = (uint8_t)(i + 1);
             h->size[k] = 0;
 
             // compute actual symbols (from jpeg spec)
@@ -342,7 +328,7 @@ namespace Simd
                 h->delta[j] = k - code;
                 if (h->size[k] == j) {
                     while (h->size[k] == j)
-                        h->code[k++] = (jpeg__uint16)(code++);
+                        h->code[k++] = (uint16_t)(code++);
                     if (code - 1 >= (1u << j)) return JpegLoadError("bad code lengths", "Corrupt JPEG");
                 }
                 // compute largest code + 1 for this size, preshifted as needed later
@@ -359,7 +345,7 @@ namespace Simd
                     int c = h->code[i] << (FAST_BITS - s);
                     int m = 1 << (FAST_BITS - s);
                     for (j = 0; j < m; ++j) {
-                        h->fast[c + j] = (jpeg_uc)i;
+                        h->fast[c + j] = (uint8_t)i;
                     }
                 }
             }
@@ -368,11 +354,11 @@ namespace Simd
 
         // build a table that decodes both magnitude and value of small ACs in
         // one go.
-        static void jpeg__build_fast_ac(jpeg__int16* fast_ac, jpeg__huffman* h)
+        static void jpeg__build_fast_ac(int16_t* fast_ac, jpeg__huffman* h)
         {
             int i;
             for (i = 0; i < (1 << FAST_BITS); ++i) {
-                jpeg_uc fast = h->fast[i];
+                uint8_t fast = h->fast[i];
                 fast_ac[i] = 0;
                 if (fast < 255) {
                     int rs = h->values[fast];
@@ -387,7 +373,7 @@ namespace Simd
                         if (k < m) k += (~0U << magbits) + 1;
                         // if the result is small enough, we can fit it in fast_ac table
                         if (k >= -128 && k <= 127)
-                            fast_ac[i] = (jpeg__int16)((k * 256) + (run * 16) + (len + magbits));
+                            fast_ac[i] = (int16_t)((k * 256) + (run * 16) + (len + magbits));
                     }
                 }
             }
@@ -412,7 +398,7 @@ namespace Simd
         }
 
         // (1 << n) - 1
-        static const jpeg__uint32 jpeg__bmask[17] = { 0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,16383,32767,65535 };
+        static const uint32_t jpeg__bmask[17] = { 0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,16383,32767,65535 };
 
         // decode a jpeg huffman value from the bitstream
         SIMD_INLINE static int jpeg__jpeg_huff_decode(jpeg__jpeg* j, jpeg__huffman* h)
@@ -475,7 +461,7 @@ namespace Simd
             int sgn;
             if (j->code_bits < n) jpeg__grow_buffer_unsafe(j);
 
-            sgn = (jpeg__int32)j->code_buffer >> 31; // sign bit is always in MSB
+            sgn = (int32_t)j->code_buffer >> 31; // sign bit is always in MSB
             k = jpeg_lrot(j->code_buffer, n);
             if (n < 0 || n >= (int)(sizeof(jpeg__bmask) / sizeof(*jpeg__bmask))) return 0;
             j->code_buffer = k & ~jpeg__bmask[n];
@@ -507,7 +493,7 @@ namespace Simd
         }
 
         // decode one 64-entry block--
-        static int jpeg__jpeg_decode_block(jpeg__jpeg* j, short data[64], jpeg__huffman* hdc, jpeg__huffman* hac, jpeg__int16* fac, int b, jpeg__uint16* dequant)
+        static int jpeg__jpeg_decode_block(jpeg__jpeg* j, short data[64], jpeg__huffman* hdc, jpeg__huffman* hac, int16_t* fac, int b, uint16_t* dequant)
         {
             int diff, dc, k;
             int t;
@@ -590,7 +576,7 @@ namespace Simd
 
         // @OPTIMIZE: store non-zigzagged during the decode passes,
         // and only de-zigzag when dequantizing
-        static int jpeg__jpeg_decode_block_prog_ac(jpeg__jpeg* j, short data[64], jpeg__huffman* hac, jpeg__int16* fac)
+        static int jpeg__jpeg_decode_block_prog_ac(jpeg__jpeg* j, short data[64], jpeg__huffman* hac, int16_t* fac)
         {
             int k;
             if (j->spec_start == 0) return JpegLoadError("can't merge dc and ac", "Corrupt JPEG");
@@ -717,14 +703,14 @@ namespace Simd
         }
 
         // take a -128..127 value and jpeg__clamp it and convert to 0..255
-        SIMD_INLINE static jpeg_uc jpeg__clamp(int x)
+        SIMD_INLINE static uint8_t jpeg__clamp(int x)
         {
             // trick to use a single test to catch both cases
             if ((unsigned int)x > 255) {
                 if (x < 0) return 0;
                 if (x > 255) return 255;
             }
-            return (jpeg_uc)x;
+            return (uint8_t)x;
         }
 
 #define jpeg__f2f(x)  ((int) (((x) * 4096 + 0.5)))
@@ -768,10 +754,10 @@ namespace Simd
    t1 += p2+p4;                                \
    t0 += p1+p3;
 
-        static void jpeg__idct_block(jpeg_uc* out, int out_stride, short data[64])
+        static void jpeg__idct_block(uint8_t* out, int out_stride, short data[64])
         {
             int i, val[64], * v = val;
-            jpeg_uc* o;
+            uint8_t* o;
             short* d = data;
 
             // columns
@@ -832,7 +818,7 @@ namespace Simd
         // sse2 integer IDCT. not the fastest possible implementation but it
         // produces bit-identical results to the generic C version so it's
         // fully "transparent".
-        static void jpeg__idct_simd(jpeg_uc* out, int out_stride, short data[64])
+        static void jpeg__idct_simd(uint8_t* out, int out_stride, short data[64])
         {
             // This is constructed to match our regular (generic) integer IDCT exactly.
             __m128i row0, row1, row2, row3, row4, row5, row6, row7;
@@ -1013,7 +999,7 @@ namespace Simd
 
         // NEON integer IDCT. should produce bit-identical
         // results to the generic C version.
-        static void jpeg__idct_simd(jpeg_uc* out, int out_stride, short data[64])
+        static void jpeg__idct_simd(uint8_t* out, int out_stride, short data[64])
         {
             int16x8_t row0, row1, row2, row3, row4, row5, row6, row7;
 
@@ -1221,9 +1207,9 @@ namespace Simd
         // if there's a pending marker from the entropy stream, return that
         // otherwise, fetch from the stream and get a marker. if there's no
         // marker, return 0xff, which is never a valid marker value
-        static jpeg_uc jpeg__get_marker(jpeg__jpeg* j)
+        static uint8_t jpeg__get_marker(jpeg__jpeg* j)
         {
-            jpeg_uc x;
+            uint8_t x;
             if (j->marker != JPEG__MARKER_none) { x = j->marker; j->marker = JPEG__MARKER_none; return x; }
             x = jpeg__get8(j->s);
             if (x != 0xff) return JPEG__MARKER_none;
@@ -1379,7 +1365,7 @@ namespace Simd
             }
         }
 
-        static void jpeg__jpeg_dequantize(short* data, jpeg__uint16* dequant)
+        static void jpeg__jpeg_dequantize(short* data, uint16_t* dequant)
         {
             int i;
             for (i = 0; i < 64; ++i)
@@ -1427,7 +1413,7 @@ namespace Simd
                     if (t > 3) return JpegLoadError("bad DQT table", "Corrupt JPEG");
 
                     for (i = 0; i < 64; ++i)
-                        z->dequant[t][Base::JpegDeZigZag[i]] = (jpeg__uint16)(sixteen ? jpeg__get16be(z->s) : jpeg__get8(z->s));
+                        z->dequant[t][Base::JpegDeZigZag[i]] = (uint16_t)(sixteen ? jpeg__get16be(z->s) : jpeg__get8(z->s));
                     L -= (sixteen ? 129 : 65);
                 }
                 return L == 0;
@@ -1435,7 +1421,7 @@ namespace Simd
             case 0xC4: // DHT - define huffman table
                 L = jpeg__get16be(z->s) - 2;
                 while (L > 0) {
-                    jpeg_uc* v;
+                    uint8_t* v;
                     int sizes[16], i, n = 0;
                     int q = jpeg__get8(z->s);
                     int tc = q >> 4;
@@ -1642,7 +1628,7 @@ namespace Simd
                 if (z->img_comp[i].raw_data == NULL)
                     return jpeg__free_jpeg_components(z, i + 1, JpegLoadError("outofmem", "Out of memory"));
                 // align blocks for idct using mmx/sse
-                z->img_comp[i].data = (jpeg_uc*)(((size_t)z->img_comp[i].raw_data + 15) & ~15);
+                z->img_comp[i].data = (uint8_t*)(((size_t)z->img_comp[i].raw_data + 15) & ~15);
                 if (z->progressive) {
                     // w2, h2 are multiples of 8 (see above)
                     z->img_comp[i].coeff_w = z->img_comp[i].w2 / 8;
@@ -1719,7 +1705,7 @@ namespace Simd
                 }
                 else if (jpeg__DNL(m)) {
                     int Ld = jpeg__get16be(j->s);
-                    jpeg__uint32 NL = jpeg__get16be(j->s);
+                    uint32_t NL = jpeg__get16be(j->s);
                     if (Ld != 4) return JpegLoadError("bad DNL len", "Corrupt JPEG");
                     if (NL != j->s->img_y) return JpegLoadError("bad DNL height", "Corrupt JPEG");
                 }
@@ -1735,12 +1721,12 @@ namespace Simd
 
         // static jfif-centered resampling (across block boundaries)
 
-        typedef jpeg_uc* (*resample_row_func)(jpeg_uc* out, jpeg_uc* in0, jpeg_uc* in1,
+        typedef uint8_t* (*resample_row_func)(uint8_t* out, uint8_t* in0, uint8_t* in1,
             int w, int hs);
 
-#define jpeg__div4(x) ((jpeg_uc) ((x) >> 2))
+#define jpeg__div4(x) ((uint8_t) ((x) >> 2))
 
-        static jpeg_uc* resample_row_1(jpeg_uc* out, jpeg_uc* in_near, jpeg_uc* in_far, int w, int hs)
+        static uint8_t* resample_row_1(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
             JPEG_NOTUSED(out);
             JPEG_NOTUSED(in_far);
@@ -1749,7 +1735,7 @@ namespace Simd
             return in_near;
         }
 
-        static jpeg_uc* jpeg__resample_row_v_2(jpeg_uc* out, jpeg_uc* in_near, jpeg_uc* in_far, int w, int hs)
+        static uint8_t* jpeg__resample_row_v_2(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
             // need to generate two samples vertically for every one in input
             int i;
@@ -1759,11 +1745,11 @@ namespace Simd
             return out;
         }
 
-        static jpeg_uc* jpeg__resample_row_h_2(jpeg_uc* out, jpeg_uc* in_near, jpeg_uc* in_far, int w, int hs)
+        static uint8_t* jpeg__resample_row_h_2(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
             // need to generate two samples horizontally for every one in input
             int i;
-            jpeg_uc* input = in_near;
+            uint8_t* input = in_near;
 
             if (w == 1) {
                 // if only one sample, can't do any interpolation
@@ -1787,9 +1773,9 @@ namespace Simd
             return out;
         }
 
-#define jpeg__div16(x) ((jpeg_uc) ((x) >> 4))
+#define jpeg__div16(x) ((uint8_t) ((x) >> 4))
 
-        static jpeg_uc* jpeg__resample_row_hv_2(jpeg_uc* out, jpeg_uc* in_near, jpeg_uc* in_far, int w, int hs)
+        static uint8_t* jpeg__resample_row_hv_2(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
             // need to generate 2x2 samples for every one in input
             int i, t0, t1;
@@ -1814,7 +1800,7 @@ namespace Simd
         }
 
 #if defined(JPEG_SSE2) || defined(JPEG_NEON)
-        static jpeg_uc* jpeg__resample_row_hv_2_simd(jpeg_uc* out, jpeg_uc* in_near, jpeg_uc* in_far, int w, int hs)
+        static uint8_t* jpeg__resample_row_hv_2_simd(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
             // need to generate 2x2 samples for every one in input
             int i = 0, t0, t1;
@@ -1930,7 +1916,7 @@ namespace Simd
         }
 #endif
 
-        static jpeg_uc* jpeg__resample_row_generic(jpeg_uc* out, jpeg_uc* in_near, jpeg_uc* in_far, int w, int hs)
+        static uint8_t* jpeg__resample_row_generic(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
             // resample with nearest-neighbor
             int i, j;
@@ -1944,7 +1930,7 @@ namespace Simd
         // this is a reduced-precision calculation of YCbCr-to-RGB introduced
         // to make sure the code produces the same results in both SIMD and scalar
 #define jpeg__float2fixed(x)  (((int) ((x) * 4096.0f + 0.5f)) << 8)
-        static void jpeg__YCbCr_to_RGB_row(jpeg_uc* out, const jpeg_uc* y, const jpeg_uc* pcb, const jpeg_uc* pcr, int count, int step)
+        static void jpeg__YCbCr_to_RGB_row(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step)
         {
             int i;
             for (i = 0; i < count; ++i) {
@@ -1961,16 +1947,16 @@ namespace Simd
                 if ((unsigned)r > 255) { if (r < 0) r = 0; else r = 255; }
                 if ((unsigned)g > 255) { if (g < 0) g = 0; else g = 255; }
                 if ((unsigned)b > 255) { if (b < 0) b = 0; else b = 255; }
-                out[0] = (jpeg_uc)r;
-                out[1] = (jpeg_uc)g;
-                out[2] = (jpeg_uc)b;
+                out[0] = (uint8_t)r;
+                out[1] = (uint8_t)g;
+                out[2] = (uint8_t)b;
                 out[3] = 255;
                 out += step;
             }
         }
 
 #if defined(JPEG_SSE2) || defined(JPEG_NEON)
-        static void jpeg__YCbCr_to_RGB_simd(jpeg_uc* out, jpeg_uc const* y, jpeg_uc const* pcb, jpeg_uc const* pcr, int count, int step)
+        static void jpeg__YCbCr_to_RGB_simd(uint8_t* out, uint8_t const* y, uint8_t const* pcb, uint8_t const* pcr, int count, int step)
         {
             int i = 0;
 
@@ -2095,9 +2081,9 @@ namespace Simd
                 if ((unsigned)r > 255) { if (r < 0) r = 0; else r = 255; }
                 if ((unsigned)g > 255) { if (g < 0) g = 0; else g = 255; }
                 if ((unsigned)b > 255) { if (b < 0) b = 0; else b = 255; }
-                out[0] = (jpeg_uc)r;
-                out[1] = (jpeg_uc)g;
-                out[2] = (jpeg_uc)b;
+                out[0] = (uint8_t)r;
+                out[1] = (uint8_t)g;
+                out[2] = (uint8_t)b;
                 out[3] = 255;
                 out += step;
             }
@@ -2135,7 +2121,7 @@ namespace Simd
         typedef struct
         {
             resample_row_func resample;
-            jpeg_uc* line0, * line1;
+            uint8_t* line0, * line1;
             int hs, vs;   // expansion factor in each axis
             int w_lores; // horizontal pixels pre-expansion
             int ystep;   // how far through vertical expansion we are
@@ -2143,13 +2129,13 @@ namespace Simd
         } jpeg__resample;
 
         // fast 0..255 * 0..255 => 0..255 rounded multiplication
-        static jpeg_uc jpeg__blinn_8x8(jpeg_uc x, jpeg_uc y)
+        static uint8_t jpeg__blinn_8x8(uint8_t x, uint8_t y)
         {
             unsigned int t = x * y + 128;
-            return (jpeg_uc)((t + (t >> 8)) >> 8);
+            return (uint8_t)((t + (t >> 8)) >> 8);
         }
 
-        static jpeg_uc* load_jpeg_image(jpeg__jpeg* z, int* out_x, int* out_y, int* comp, int req_comp)
+        static uint8_t* load_jpeg_image(jpeg__jpeg* z, int* out_x, int* out_y, int* comp, int req_comp)
         {
             int n, decode_n, is_rgb;
             z->s->img_n = 0; // make jpeg__cleanup_jpeg safe
@@ -2174,8 +2160,8 @@ namespace Simd
             {
                 int k;
                 unsigned int i, j;
-                jpeg_uc* output;
-                jpeg_uc* coutput[4] = { NULL, NULL, NULL, NULL };
+                uint8_t* output;
+                uint8_t* coutput[4] = { NULL, NULL, NULL, NULL };
 
                 jpeg__resample res_comp[4];
 
@@ -2184,7 +2170,7 @@ namespace Simd
 
                     // allocate line buffer big enough for upsampling off the edges
                     // with upsample factor of 4
-                    z->img_comp[k].linebuf = (jpeg_uc*)jpeg__malloc(z->s->img_x + 3);
+                    z->img_comp[k].linebuf = (uint8_t*)jpeg__malloc(z->s->img_x + 3);
                     if (!z->img_comp[k].linebuf) { jpeg__cleanup_jpeg(z); return jpeg__errpuc("outofmem", "Out of memory"); }
 
                     r->hs = z->img_h_max / z->img_comp[k].h;
@@ -2202,12 +2188,12 @@ namespace Simd
                 }
 
                 // can't error after this so, this is safe
-                output = (jpeg_uc*)jpeg__malloc_mad3(n, z->s->img_x, z->s->img_y, 1);
+                output = (uint8_t*)jpeg__malloc_mad3(n, z->s->img_x, z->s->img_y, 1);
                 if (!output) { jpeg__cleanup_jpeg(z); return jpeg__errpuc("outofmem", "Out of memory"); }
 
                 // now go ahead and resample
                 for (j = 0; j < z->s->img_y; ++j) {
-                    jpeg_uc* out = output + n * z->s->img_x * j;
+                    uint8_t* out = output + n * z->s->img_x * j;
                     for (k = 0; k < decode_n; ++k) {
                         jpeg__resample* r = &res_comp[k];
                         int y_bot = r->ystep >= (r->vs >> 1);
@@ -2223,7 +2209,7 @@ namespace Simd
                         }
                     }
                     if (n >= 3) {
-                        jpeg_uc* y = coutput[0];
+                        uint8_t* y = coutput[0];
                         if (z->s->img_n == 3) {
                             if (is_rgb) {
                                 for (i = 0; i < z->s->img_x; ++i) {
@@ -2241,7 +2227,7 @@ namespace Simd
                         else if (z->s->img_n == 4) {
                             if (z->app14_color_transform == 0) { // CMYK
                                 for (i = 0; i < z->s->img_x; ++i) {
-                                    jpeg_uc m = coutput[3][i];
+                                    uint8_t m = coutput[3][i];
                                     out[0] = jpeg__blinn_8x8(coutput[0][i], m);
                                     out[1] = jpeg__blinn_8x8(coutput[1][i], m);
                                     out[2] = jpeg__blinn_8x8(coutput[2][i], m);
@@ -2252,7 +2238,7 @@ namespace Simd
                             else if (z->app14_color_transform == 2) { // YCCK
                                 z->YCbCr_to_RGB_kernel(out, y, coutput[1], coutput[2], z->s->img_x, n);
                                 for (i = 0; i < z->s->img_x; ++i) {
-                                    jpeg_uc m = coutput[3][i];
+                                    uint8_t m = coutput[3][i];
                                     out[0] = jpeg__blinn_8x8(255 - out[0], m);
                                     out[1] = jpeg__blinn_8x8(255 - out[1], m);
                                     out[2] = jpeg__blinn_8x8(255 - out[2], m);
@@ -2284,10 +2270,10 @@ namespace Simd
                         }
                         else if (z->s->img_n == 4 && z->app14_color_transform == 0) {
                             for (i = 0; i < z->s->img_x; ++i) {
-                                jpeg_uc m = coutput[3][i];
-                                jpeg_uc r = jpeg__blinn_8x8(coutput[0][i], m);
-                                jpeg_uc g = jpeg__blinn_8x8(coutput[1][i], m);
-                                jpeg_uc b = jpeg__blinn_8x8(coutput[2][i], m);
+                                uint8_t m = coutput[3][i];
+                                uint8_t r = jpeg__blinn_8x8(coutput[0][i], m);
+                                uint8_t g = jpeg__blinn_8x8(coutput[1][i], m);
+                                uint8_t b = jpeg__blinn_8x8(coutput[2][i], m);
                                 out[0] = jpeg__compute_y(r, g, b);
                                 out[1] = 255;
                                 out += n;
@@ -2301,7 +2287,7 @@ namespace Simd
                             }
                         }
                         else {
-                            jpeg_uc* y = coutput[0];
+                            uint8_t* y = coutput[0];
                             if (n == 1)
                                 for (i = 0; i < z->s->img_x; ++i) out[i] = y[i];
                             else
@@ -2363,26 +2349,6 @@ namespace Simd
             return result;
         }
 
-        //------------------------------------------------------------------------
-
-        static int jpeg__stdio_read(void* user, char* data, int size)
-        {
-            InputMemoryStream* stream = (InputMemoryStream*)user;
-            return (int)stream->Read(size, data);
-        }
-
-        static void jpeg__stdio_skip(void* user, int n)
-        {
-            InputMemoryStream* stream = (InputMemoryStream*)user;
-            stream->Skip(n);
-        }
-
-        static int jpeg__stdio_eof(void* user)
-        {
-            InputMemoryStream* stream = (InputMemoryStream*)user;
-            return stream->Pos() == stream->Size() ? 1 : 0;
-        }
-
         //---------------------------------------------------------------------
 
         ImageJpegLoader::ImageJpegLoader(const ImageLoaderParam& param)
@@ -2396,11 +2362,7 @@ namespace Simd
         {
             int x, y, comp;
             jpeg__context s;
-            s.io.eof = jpeg__stdio_eof;
-            s.io.read = jpeg__stdio_read;
-            s.io.skip = jpeg__stdio_skip;
-            s.io_user_data = &_stream;
-            s.buflen = sizeof(s.buffer_start);
+            s.stream = &_stream;
             s.read_from_callbacks = 1;
             s.callback_already_read = 0;
             s.img_buffer = s.img_buffer_original = s.buffer_start;
