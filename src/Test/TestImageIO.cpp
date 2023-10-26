@@ -760,11 +760,14 @@ namespace Test
         return result;
     }
 
+#define SIMD_PNG_TEST
+//#define SIMD_JPEG_TEST
+
     bool ImageLoadFromMemorySpecialTest(const FuncLM& f1, const FuncLM& f2)
     {
         bool result = true;
 
-#if 1
+#if defined(SIMD_PNG_TEST) && 1
         result = result && ImageLoadFromMemorySpecialTest("png/basn0g01.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basn0g02.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basn0g04.png", f1, f2);
@@ -785,7 +788,7 @@ namespace Test
         result = result && ImageLoadFromMemorySpecialTest("png/basn6a08.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basn6a16.png", f1, f2);
 #endif
-#if 1
+#if defined(SIMD_PNG_TEST) && 1
         result = result && ImageLoadFromMemorySpecialTest("png/basi0g01.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basi0g02.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basi0g04.png", f1, f2);
@@ -806,7 +809,7 @@ namespace Test
         result = result && ImageLoadFromMemorySpecialTest("png/basi6a08.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basi6a16.png", f1, f2);
 #endif
-#if 1
+#if defined(SIMD_PNG_TEST) && 1
         result = result && ImageLoadFromMemorySpecialTest("png/s01i3p01.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/s01n3p01.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/s02i3p01.png", f1, f2);
@@ -846,7 +849,7 @@ namespace Test
         result = result && ImageLoadFromMemorySpecialTest("png/s40i3p04.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/s40n3p04.png", f1, f2);
 #endif
-#if 1
+#if defined(SIMD_PNG_TEST) && 1
         result = result && ImageLoadFromMemorySpecialTest("png/bgai4a08.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/bgai4a16.png", f1, f2);
 
@@ -859,7 +862,7 @@ namespace Test
         result = result && ImageLoadFromMemorySpecialTest("png/bgwn6a08.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/bgyn6a16.png", f1, f2);
 #endif
-#if 1
+#if defined(SIMD_PNG_TEST) && 1
         result = result && ImageLoadFromMemorySpecialTest("png/tbbn0g04.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/tbbn2c16.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/tbbn3p08.png", f1, f2);
@@ -874,6 +877,14 @@ namespace Test
         result = result && ImageLoadFromMemorySpecialTest("png/tp0n2c08.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/tp0n3p08.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/tp1n3p08.png", f1, f2);
+#endif
+
+#if defined(SIMD_JPEG_TEST) && 1
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg_progress.jpg", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg400jfif.jpg", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg420exif.jpg", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg422jfif.jpg", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg444.jpg", f1, f2);
 #endif
 
         return result;

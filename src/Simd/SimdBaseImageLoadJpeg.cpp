@@ -72,42 +72,15 @@ namespace Simd
             uint32_t img_x, img_y;
             int img_n, img_out_n;
 
-            int read_from_callbacks;
-            uint8_t buffer_start[128];
-            int callback_already_read;
-
-            uint8_t* img_buffer, * img_buffer_end;
-            uint8_t* img_buffer_original, * img_buffer_original_end;
         } jpeg__context;
 
 #define jpeg__errpuc(x,y)  ((unsigned char *)(size_t) (JpegLoadError(x,y)?NULL:NULL))
 
-        static void jpeg__refill_buffer(jpeg__context* s)
-        {
-            int n = (int)s->stream->Read(sizeof(s->buffer_start), s->buffer_start);
-            s->callback_already_read += (int)(s->img_buffer - s->img_buffer_original);
-            if (n == 0) {
-                // at end of file, treat same as if from memory, but need to handle case
-                // where s->img_buffer isn't pointing to safe memory, e.g. 0-byte file
-                s->read_from_callbacks = 0;
-                s->img_buffer = s->buffer_start;
-                s->img_buffer_end = s->buffer_start + 1;
-                *s->img_buffer = 0;
-            }
-            else {
-                s->img_buffer = s->buffer_start;
-                s->img_buffer_end = s->buffer_start + n;
-            }
-        }
-
         SIMD_INLINE static uint8_t jpeg__get8(jpeg__context* s)
         {
-            if (s->img_buffer < s->img_buffer_end)
-                return *s->img_buffer++;
-            if (s->read_from_callbacks) {
-                jpeg__refill_buffer(s);
-                return *s->img_buffer++;
-            }
+            uint8_t val;
+            if (s->stream->Read8u(val))
+                return val;
             return 0;
         }
 
@@ -123,34 +96,13 @@ namespace Simd
 
         static void jpeg__skip(jpeg__context* s, int n)
         {
-            if (n == 0) return;  // already there!
-            if (n < 0) {
-                s->img_buffer = s->img_buffer_end;
-                return;
-            }
-            if (s->stream) 
-            {
-                int blen = (int)(s->img_buffer_end - s->img_buffer);
-                if (blen < n) 
-                {
-                    s->img_buffer = s->img_buffer_end;
-                    s->stream->Skip(n - blen);
-                    return;
-                }
-            }
-            s->img_buffer += n;
+            if (n > 0)
+                s->stream->Skip(n);
         }
 
         SIMD_INLINE static int jpeg__at_eof(jpeg__context* s)
         {
-            if (s->stream) 
-            {
-                if (s->stream->Pos() != s->stream->Size()) 
-                    return 0;
-                if (s->read_from_callbacks == 0) 
-                    return 1;
-            }
-            return s->img_buffer >= s->img_buffer_end;
+            return s->stream->Eof() ? 1 : 0;
         }
 
 #define JPEG_MALLOC(sz)           malloc(sz)
@@ -233,11 +185,7 @@ namespace Simd
 
         static void jpeg__rewind(jpeg__context* s)
         {
-            // conceptually rewind SHOULD rewind to the beginning of the stream,
-            // but we just rewind to the beginning of the initial buffer, because
-            // we only use it after doing 'test', which only ever looks at at most 92 bytes
-            s->img_buffer = s->img_buffer_original;
-            s->img_buffer_end = s->img_buffer_original_end;
+            s->stream->Seek(0);
         }
 
         //------------------------------------------------------------------------------
@@ -2363,11 +2311,6 @@ namespace Simd
             int x, y, comp;
             jpeg__context s;
             s.stream = &_stream;
-            s.read_from_callbacks = 1;
-            s.callback_already_read = 0;
-            s.img_buffer = s.img_buffer_original = s.buffer_start;
-            jpeg__refill_buffer(&s);
-            s.img_buffer_original_end = s.img_buffer_end;
             jpeg__result_info ri;
             uint8_t * data = (uint8_t*)jpeg__jpeg_load(&s, &x, &y, &comp, 4, &ri);
             if (data)
