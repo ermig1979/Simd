@@ -119,6 +119,11 @@ namespace Simd
                 return false;
         }
 
+        SIMD_INLINE uint8_t Get8u()
+        {
+            return _pos < _size ? _data[_pos++] : 0;
+        }
+
         SIMD_INLINE bool Read16u(uint16_t& value)
         {
             if (_pos + 2 <= _size)
@@ -156,6 +161,17 @@ namespace Simd
             }
             else
                 return false;
+        }
+
+        SIMD_INLINE uint16_t GetBe16u()
+        {
+            uint32_t hi = Get8u();
+            uint32_t lo = Get8u();
+#if defined(SIMD_BIG_ENDIAN)
+            return (uint16_t)(hi | (lo >> 8));
+#else
+            return (uint16_t)((hi << 8) | lo);
+#endif
         }
 
         SIMD_INLINE bool ReadBe32u(uint32_t& value)
