@@ -221,6 +221,7 @@ namespace Simd
             max = _mm512_max_ps(max, a4);
             max = _mm512_max_ps(max, a5);
             max = _mm512_max_ps(max, a6);
+            max = _mm512_max_ps(max, a7);
             max = _mm512_max_ps(max, a8);
             max = _mm512_max_ps(max, a9);
             max = _mm512_max_ps(max, aA);

@@ -47,7 +47,7 @@ namespace Simd
     {
         class Exp
         {
-            __m128i _exponent, _mantissa, _127;
+            __m128i _127;
             __m128 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
 
             SIMD_INLINE __m128 Poly5(__m128 x) const
@@ -75,8 +75,6 @@ namespace Simd
 
             SIMD_INLINE Exp(float k = 1.0f)
             {
-                _exponent = _mm_set1_epi32(0x7F800000);
-                _mantissa = _mm_set1_epi32(0x007FFFFF);
                 _127 = _mm_set1_epi32(127);
                 _1_0 = _mm_set1_ps(1.0f);
                 _0_5 = _mm_set1_ps(0.5f);
@@ -212,7 +210,7 @@ namespace Simd
     {
         class Exp
         {
-            __m256i _exponent, _mantissa, _127;
+            __m256i _127;
             __m256 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
 
             SIMD_INLINE __m256 Poly5(__m256 x) const
@@ -240,8 +238,6 @@ namespace Simd
 
             SIMD_INLINE Exp(float k = 1.0f)
             {
-                _exponent = _mm256_set1_epi32(0x7F800000);
-                _mantissa = _mm256_set1_epi32(0x007FFFFF);
                 _127 = _mm256_set1_epi32(127);
                 _1_0 = _mm256_set1_ps(1.0f);
                 _0_5 = _mm256_set1_ps(0.5f);
