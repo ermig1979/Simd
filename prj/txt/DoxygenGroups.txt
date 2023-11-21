@@ -523,3 +523,7 @@
     @defgroup descrint Integer Descriptor
     \short Functions for conversion and comparison of Integer Descriptor.
 */
+
+/*! @defgroup python Python Wrapper
+    \short Python Wrapper of %Simd Library.
+*/

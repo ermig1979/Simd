@@ -10,35 +10,61 @@ Simd = sys.modules[__name__]
 
 ###################################################################################################
 
+## @ingroup python
+# Describes type of description which can return function Simd.Lib.CpuDesc.
 class CpuDesc(enum.Enum) :
-	Model = 0
+	## A CPU model name.
+	Model = 0 
 
 ###################################################################################################
 
+## @ingroup python
+# Describes type of information which can return function Simd.Lib.CpuInfo.
 class CpuInfo(enum.Enum) :	
-    Sockets = 0
-    Cores = 1
-    Threads = 2
-    CacheL1 = 3
-    CacheL2 = 4
-    CacheL3 = 5
-    RAM = 6
-    SSE41 = 7
-    AVX = 8
-    AVX2 = 9
-    AVX512BW = 10
-    AVX512VNNI = 11
-    AVX512BF16 = 12
-    AMX = 13
-    VMX = 14
-    VSX = 15
-    NEON = 16
+	## A system sockets number.
+	Sockets = 0
+	## A number of physical CPU cores.
+	Cores = 1
+	## A number of logical CPU cores.
+	Threads = 2
+	## A size of level 1 data cache.
+	CacheL1 = 3
+	## A size of level 2 cache.
+	CacheL2 = 4
+	## A size of level 3 cache.
+	CacheL3 = 5
+	## A size of system memory.
+	RAM = 6
+	## Enabling of SSE, SSE2, SSE3, SSSE3, SSE4.1 CPU extensions (x86 specific).
+	SSE41 = 7
+	## Enabling of AVX CPU extensions (x86 specific).
+	AVX = 8
+	## Enabling of AVX2, FMA CPU extensions (x86 specific).
+	AVX2 = 9
+	## Enabling of AVX-512F, AVX-512BW CPU extensions (x86 specific).
+	AVX512BW = 10
+	## Enabling of AVX-512VNNI CPU extensions (x86 specific).
+	AVX512VNNI = 11
+	## Enabling of AVX-512BF16 CPU extensions (x86 specific).
+	AVX512BF16 = 12
+	## Enabling of AMX CPU extensions (x86 specific).
+	AMX = 13
+	## Enabling of VMX (Altivec) CPU extensions (PPC specific).
+	VMX = 14
+	## Enabling of VSX (Power 7) CPU extensions (PPC specific).
+	VSX = 15
+	## Enabling of NEON CPU extensions (ARM specific).
+	NEON = 16
 
 ###################################################################################################
 
+## @ingroup python
+# A wrapper around %Simd Library API.
 class Lib():
 	lib : ctypes.CDLL
 	
+	## Simd.Lib constructor
+	# @param dir - a directory with %Simd Library binaries (Simd.dll or libSimd.so).
 	def __init__(self, dir: str):
 		if not os.path.isdir(dir):
 			raise Exception("Directory '{0}' with binaries is not exist!".format(dir))
@@ -62,16 +88,23 @@ class Lib():
 		self.lib.SimdCpuInfo.argtypes = [ ctypes.c_int ]
 		self.lib.SimdCpuInfo.restype = ctypes.c_size_t 
 		
+		self.lib.SimdPerformanceStatistic.argtypes = []
+		self.lib.SimdPerformanceStatistic.restype = ctypes.c_char_p 
+		
 		self.lib.SimdRelease.argtypes = [ ctypes.c_void_p ]
 		
+	## Gets verion of %Simd Library.
+	# @return A string with version.
 	def Version(self) -> str: 
 		ptr = self.lib.SimdVersion()
 		return str(ptr, encoding='utf-8')
 	
+	## 
 	def CpuDesc(self, type: Simd.CpuDesc) -> str: 
 		ptr = self.lib.SimdCpuDesc(type.value)
 		return str(ptr, encoding='utf-8')
 	
+	## 
 	def CpuInfo(self, type: Simd.CpuInfo) -> int: 
 		return self.lib.SimdCpuInfo(type.value)
 	
@@ -108,5 +141,11 @@ class Lib():
 		if self.CpuInfo(Simd.CpuInfo.VMX) > 0 :
 			info += " Altivec"
 		return info
+	
+	def PerformanceStatistic(self) -> str: 
+		ptr = self.lib.SimdPerformanceStatistic()
+		return str(ptr, encoding='utf-8')
+	
+
 	
 ###################################################################################################
