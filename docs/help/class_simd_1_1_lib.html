@@ -60,6 +60,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3336ecf17978317bfb284fb2dbecfd8a"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a3336ecf17978317bfb284fb2dbecfd8a">Version</a> (self)</td></tr>
 <tr class="memdesc:a3336ecf17978317bfb284fb2dbecfd8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets verion of Simd Library.  <a href="class_simd_1_1_lib.html#a3336ecf17978317bfb284fb2dbecfd8a">More...</a><br /></td></tr>
 <tr class="separator:a3336ecf17978317bfb284fb2dbecfd8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af93f415995120b79be9f7167e38c3345"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#af93f415995120b79be9f7167e38c3345">CpuDesc</a> (self, <a class="el" href="class_simd_1_1_cpu_desc.html">Simd.CpuDesc</a> type)</td></tr>
+<tr class="memdesc:af93f415995120b79be9f7167e38c3345"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets string with CPU description.  <a href="class_simd_1_1_lib.html#af93f415995120b79be9f7167e38c3345">More...</a><br /></td></tr>
+<tr class="separator:af93f415995120b79be9f7167e38c3345"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36156feb216e02ed5daf12dd03a7c3eb"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a36156feb216e02ed5daf12dd03a7c3eb">CpuInfo</a> (self, <a class="el" href="class_simd_1_1_cpu_info.html">Simd.CpuInfo</a> type)</td></tr>
+<tr class="memdesc:a36156feb216e02ed5daf12dd03a7c3eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets information about CPU.  <a href="class_simd_1_1_lib.html#a36156feb216e02ed5daf12dd03a7c3eb">More...</a><br /></td></tr>
+<tr class="separator:a36156feb216e02ed5daf12dd03a7c3eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a301ac0d531291c793c52a5b1005867fe"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a301ac0d531291c793c52a5b1005867fe">SysInfo</a> (self)</td></tr>
+<tr class="memdesc:a301ac0d531291c793c52a5b1005867fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets string with CPU and Simd Library description.  <a href="class_simd_1_1_lib.html#a301ac0d531291c793c52a5b1005867fe">More...</a><br /></td></tr>
+<tr class="separator:a301ac0d531291c793c52a5b1005867fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b7bf25feae55adecf85da197a08a10c"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a9b7bf25feae55adecf85da197a08a10c">PerformanceStatistic</a> (self)</td></tr>
+<tr class="memdesc:a9b7bf25feae55adecf85da197a08a10c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets string with internal Simd Library performance statistics.  <a href="class_simd_1_1_lib.html#a9b7bf25feae55adecf85da197a08a10c">More...</a><br /></td></tr>
+<tr class="separator:a9b7bf25feae55adecf85da197a08a10c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A wrapper around Simd Library API. </p>
@@ -119,6 +131,123 @@ Public Member Functions</h2></td></tr>
 
 <p>Gets verion of Simd Library. </p>
 <dl class="section return"><dt>Returns</dt><dd>A string with version. </dd></dl>
+
+</div>
+</div>
+<a id="af93f415995120b79be9f7167e38c3345" name="af93f415995120b79be9f7167e38c3345"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af93f415995120b79be9f7167e38c3345">&#9670;&nbsp;</a></span>CpuDesc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str <a class="el" href="class_simd_1_1_cpu_desc.html">CpuDesc</a> </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_cpu_desc.html">Simd.CpuDesc</a>&#160;</td>
+          <td class="paramname"><em>type</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets string with CPU description. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>- a type of CPU description. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A string with system description. </dd></dl>
+
+</div>
+</div>
+<a id="a36156feb216e02ed5daf12dd03a7c3eb" name="a36156feb216e02ed5daf12dd03a7c3eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36156feb216e02ed5daf12dd03a7c3eb">&#9670;&nbsp;</a></span>CpuInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> int <a class="el" href="class_simd_1_1_cpu_info.html">CpuInfo</a> </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_cpu_info.html">Simd.CpuInfo</a>&#160;</td>
+          <td class="paramname"><em>type</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets information about CPU. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>- a type of CPU information. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>integer value of given CPU parameter. </dd></dl>
+
+</div>
+</div>
+<a id="a301ac0d531291c793c52a5b1005867fe" name="a301ac0d531291c793c52a5b1005867fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a301ac0d531291c793c52a5b1005867fe">&#9670;&nbsp;</a></span>SysInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str SysInfo </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets string with CPU and Simd Library description. </p>
+<dl class="section return"><dt>Returns</dt><dd>string with CPU and Simd Library description. </dd></dl>
+
+</div>
+</div>
+<a id="a9b7bf25feae55adecf85da197a08a10c" name="a9b7bf25feae55adecf85da197a08a10c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b7bf25feae55adecf85da197a08a10c">&#9670;&nbsp;</a></span>PerformanceStatistic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str PerformanceStatistic </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets string with internal Simd Library performance statistics. </p>
+<dl class="section note"><dt>Note</dt><dd>Simd Library must be built with switched on SIMD_PERF flag. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>string with internal Simd Library performance statistics. </dd></dl>
 
 </div>
 </div>

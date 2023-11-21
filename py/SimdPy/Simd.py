@@ -16,8 +16,6 @@ class CpuDesc(enum.Enum) :
 	## A CPU model name.
 	Model = 0 
 
-###################################################################################################
-
 ## @ingroup python
 # Describes type of information which can return function Simd.Lib.CpuInfo.
 class CpuInfo(enum.Enum) :	
@@ -49,9 +47,9 @@ class CpuInfo(enum.Enum) :
 	AVX512BF16 = 12
 	## Enabling of AMX CPU extensions (x86 specific).
 	AMX = 13
-	## Enabling of VMX (Altivec) CPU extensions (PPC specific).
+	## Enabling of VMX (Altivec) CPU extensions (PowerPC specific).
 	VMX = 14
-	## Enabling of VSX (Power 7) CPU extensions (PPC specific).
+	## Enabling of VSX (Power 7) CPU extensions (PowerPC specific).
 	VSX = 15
 	## Enabling of NEON CPU extensions (ARM specific).
 	NEON = 16
@@ -91,6 +89,17 @@ class Lib():
 		self.lib.SimdPerformanceStatistic.argtypes = []
 		self.lib.SimdPerformanceStatistic.restype = ctypes.c_char_p 
 		
+		self.lib.SimdAllocate.argtypes = [ ctypes.c_size_t, ctypes.c_size_t ]
+		self.lib.SimdAllocate.restype = ctypes.c_void_p 
+		
+		self.lib.SimdFree.argtypes = [ ctypes.c_void_p ]
+		
+		self.lib.SimdAlign.argtypes = [ ctypes.c_size_t, ctypes.c_size_t ]
+		self.lib.SimdAlign.restype = ctypes.c_size_t 
+		
+		self.lib.SimdAlignment.argtypes = []
+		self.lib.SimdAlignment.restype = ctypes.c_size_t 
+		
 		self.lib.SimdRelease.argtypes = [ ctypes.c_void_p ]
 		
 	## Gets verion of %Simd Library.
@@ -99,15 +108,21 @@ class Lib():
 		ptr = self.lib.SimdVersion()
 		return str(ptr, encoding='utf-8')
 	
-	## 
+	## Gets string with CPU description.
+	# @param type - a type of CPU description.
+	# @return A string with system description.
 	def CpuDesc(self, type: Simd.CpuDesc) -> str: 
 		ptr = self.lib.SimdCpuDesc(type.value)
 		return str(ptr, encoding='utf-8')
 	
-	## 
+	## Gets information about CPU.
+	# @param type - a type of CPU information.
+	# @return integer value of given CPU parameter.
 	def CpuInfo(self, type: Simd.CpuInfo) -> int: 
 		return self.lib.SimdCpuInfo(type.value)
-	
+
+	## Gets string with CPU and %Simd Library description.
+	# @return string with CPU and %Simd Library description.	
 	def SysInfo(self) -> str: 
 		info = ""
 		info += "Simd Library: {0}".format(self.Version())
@@ -142,10 +157,11 @@ class Lib():
 			info += " Altivec"
 		return info
 	
+	## Gets string with internal %Simd Library performance statistics.
+	# @note %Simd Library must be built with switched on SIMD_PERF flag.
+	# @return string with internal %Simd Library performance statistics.	
 	def PerformanceStatistic(self) -> str: 
 		ptr = self.lib.SimdPerformanceStatistic()
 		return str(ptr, encoding='utf-8')
-	
-
 	
 ###################################################################################################
