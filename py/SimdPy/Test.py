@@ -13,11 +13,13 @@ def main():
 	parser.add_argument("-b", "--bin", help="Directory with binary files.", required=False, type=str, default=".")
 	args = parser.parse_args()
 	
-	simd = Simd.Simd(args.bin)
+	simd = Simd.Lib(args.bin)
 	
-	print("Simd version: {0}. \n".format(simd.Version()))
+	print("Simd version: {0}.".format(simd.Version()))
+	print("CPU model: {0}.".format(simd.CpuDesc(Simd.CpuDesc.Model)))
+	print(simd.SysInfo())
 	
-	print("\nSimd Python Wrapper ended successfully!")
+	print("\nSimd Python Wrapper test ended successfully!")
 	
 	return 0
 	
