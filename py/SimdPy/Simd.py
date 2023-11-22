@@ -54,6 +54,50 @@ class CpuInfo(enum.Enum) :
 	## Enabling of NEON CPU extensions (ARM specific).
 	NEON = 16
 
+## @ingroup python
+# Describes pixel format type.	
+class PixelFormat(enum.Enum) :
+	## Undefined pixel format.
+	Empty = 0
+	## A 8-bit gray pixel format.
+	Gray8 = 1
+    ## A 16-bit (2 8-bit channels) pixel format (UV plane of NV12 pixel format).
+	Uv16 = 2
+    ## A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.
+	Bgr24 = 3
+    ## A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.
+	Bgra32 = 4
+    ## A single channel 16-bit integer pixel format.
+	Int16 = 5
+    ## A single channel 32-bit integer pixel format.
+	Int32 = 6
+    ## A single channel 64-bit integer pixel format. */
+	Int64 = 7
+    ## A single channel 32-bit float point pixel format. */
+	Float = 8
+    ## A single channel 64-bit float point pixel format. */
+	Double = 9
+    ## A 8-bit Bayer pixel format (GRBG). */
+	BayerGrbg = 10
+    ## A 8-bit Bayer pixel format (GBRG). */
+	BayerGbrg = 11
+    ## A 8-bit Bayer pixel format (RGGB). */
+	BayerRggb = 12
+    ## A 8-bit Bayer pixel format (BGGR). */
+	BayerBggr = 13
+    ## A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format. */
+	Hsv24 = 14
+    ## A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format. */
+	Hsl24 = 15
+    ## A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. */
+	Rgb24 = 16
+    ## A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
+	Rgba32 = 17
+    ## A 16-bit (2 8-bit channels) UYVY422 pixel format. */
+	Uyvy16 = 18
+    ## A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format. */
+	Argb32 = 19
+
 ###################################################################################################
 
 ## @ingroup python
@@ -202,3 +246,9 @@ class Lib():
 		self.lib.SimdSetFastMode(fast)
 	
 ###################################################################################################
+
+class Image():
+	lib : Simd.Lib
+	
+	def __init__(self, lib: Simd.Lib) :
+		self.lib = lib
