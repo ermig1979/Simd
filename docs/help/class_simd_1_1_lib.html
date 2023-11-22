@@ -72,6 +72,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9b7bf25feae55adecf85da197a08a10c"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a9b7bf25feae55adecf85da197a08a10c">PerformanceStatistic</a> (self)</td></tr>
 <tr class="memdesc:a9b7bf25feae55adecf85da197a08a10c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets string with internal Simd Library performance statistics.  <a href="class_simd_1_1_lib.html#a9b7bf25feae55adecf85da197a08a10c">More...</a><br /></td></tr>
 <tr class="separator:a9b7bf25feae55adecf85da197a08a10c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a756932df30e85cf59012e2b9478776da"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a756932df30e85cf59012e2b9478776da">GetThreadNumber</a> (self)</td></tr>
+<tr class="memdesc:a756932df30e85cf59012e2b9478776da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets number of threads used by Simd Library to parallelize some algorithms.  <a href="class_simd_1_1_lib.html#a756932df30e85cf59012e2b9478776da">More...</a><br /></td></tr>
+<tr class="separator:a756932df30e85cf59012e2b9478776da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab459a244ddb6b4746df2667143d73679"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ab459a244ddb6b4746df2667143d73679">SetThreadNumber</a> (self, int threadNumber)</td></tr>
+<tr class="memdesc:ab459a244ddb6b4746df2667143d73679"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets number of threads used by Simd Library to parallelize some algorithms.  <a href="class_simd_1_1_lib.html#ab459a244ddb6b4746df2667143d73679">More...</a><br /></td></tr>
+<tr class="separator:ab459a244ddb6b4746df2667143d73679"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a559062634c90ceee3387ca849cf4fe4e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a559062634c90ceee3387ca849cf4fe4e">GetFastMode</a> (self)</td></tr>
+<tr class="memdesc:a559062634c90ceee3387ca849cf4fe4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags.  <a href="class_simd_1_1_lib.html#a559062634c90ceee3387ca849cf4fe4e">More...</a><br /></td></tr>
+<tr class="separator:a559062634c90ceee3387ca849cf4fe4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d7835f3b807f9a9819e4d2d7fe60c7c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a8d7835f3b807f9a9819e4d2d7fe60c7c">SetFastMode</a> (self, bool fast)</td></tr>
+<tr class="memdesc:a8d7835f3b807f9a9819e4d2d7fe60c7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags.  <a href="class_simd_1_1_lib.html#a8d7835f3b807f9a9819e4d2d7fe60c7c">More...</a><br /></td></tr>
+<tr class="separator:a8d7835f3b807f9a9819e4d2d7fe60c7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A wrapper around Simd Library API. </p>
@@ -248,6 +260,124 @@ Public Member Functions</h2></td></tr>
 <p>Gets string with internal Simd Library performance statistics. </p>
 <dl class="section note"><dt>Note</dt><dd>Simd Library must be built with switched on SIMD_PERF flag. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>string with internal Simd Library performance statistics. </dd></dl>
+
+</div>
+</div>
+<a id="a756932df30e85cf59012e2b9478776da" name="a756932df30e85cf59012e2b9478776da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a756932df30e85cf59012e2b9478776da">&#9670;&nbsp;</a></span>GetThreadNumber()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> int GetThreadNumber </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets number of threads used by Simd Library to parallelize some algorithms. </p>
+<dl class="section return"><dt>Returns</dt><dd>thread number used by Simd Library. <br  />
+ </dd></dl>
+
+</div>
+</div>
+<a id="ab459a244ddb6b4746df2667143d73679" name="ab459a244ddb6b4746df2667143d73679"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab459a244ddb6b4746df2667143d73679">&#9670;&nbsp;</a></span>SetThreadNumber()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def SetThreadNumber </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>threadNumber</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets number of threads used by Simd Library to parallelize some algorithms. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">threadNumber</td><td>- number used by Simd Library. <br  />
+ </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a559062634c90ceee3387ca849cf4fe4e" name="a559062634c90ceee3387ca849cf4fe4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a559062634c90ceee3387ca849cf4fe4e">&#9670;&nbsp;</a></span>GetFastMode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool GetFastMode </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. </p>
+<p >It is used in order to process subnormal numbers. </p><dl class="section return"><dt>Returns</dt><dd>current 'fast' mode. <br  />
+ </dd></dl>
+
+</div>
+</div>
+<a id="a8d7835f3b807f9a9819e4d2d7fe60c7c" name="a8d7835f3b807f9a9819e4d2d7fe60c7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d7835f3b807f9a9819e4d2d7fe60c7c">&#9670;&nbsp;</a></span>SetFastMode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def SetFastMode </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>fast</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. </p>
+<p >It is used in order to process subnormal numbers. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fast</td><td>- a value of 'fast' mode to set. <br  />
+ </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

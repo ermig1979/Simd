@@ -93,6 +93,7 @@ class Lib():
 		self.lib.SimdAllocate.restype = ctypes.c_void_p 
 		
 		self.lib.SimdFree.argtypes = [ ctypes.c_void_p ]
+		self.lib.SimdFree.restype = None
 		
 		self.lib.SimdAlign.argtypes = [ ctypes.c_size_t, ctypes.c_size_t ]
 		self.lib.SimdAlign.restype = ctypes.c_size_t 
@@ -101,6 +102,22 @@ class Lib():
 		self.lib.SimdAlignment.restype = ctypes.c_size_t 
 		
 		self.lib.SimdRelease.argtypes = [ ctypes.c_void_p ]
+		self.lib.SimdRelease.restype = None
+		
+		self.lib.SimdGetThreadNumber.argtypes = []
+		self.lib.SimdGetThreadNumber.restype = ctypes.c_size_t 
+
+		self.lib.SimdSetThreadNumber.argtypes = [ ctypes.c_size_t ]
+		self.lib.SimdSetThreadNumber.restype = None 
+		
+		self.lib.SimdEmpty.argtypes = []
+		self.lib.SimdEmpty.restype = None
+		
+		self.lib.SimdGetFastMode.argtypes = []
+		self.lib.SimdGetFastMode.restype = ctypes.c_bool
+		
+		self.lib.SimdSetFastMode.argtypes = [ ctypes.c_bool ]
+		self.lib.SimdSetFastMode.restype = None
 		
 	## Gets verion of %Simd Library.
 	# @return A string with version.
@@ -163,5 +180,25 @@ class Lib():
 	def PerformanceStatistic(self) -> str: 
 		ptr = self.lib.SimdPerformanceStatistic()
 		return str(ptr, encoding='utf-8')
+	
+	## Gets number of threads used by %Simd Library to parallelize some algorithms.
+	# @return thread number used by %Simd Library.	
+	def GetThreadNumber(self) -> int: 
+		return self.lib.SimdGetThreadNumber()
+	
+	## Sets number of threads used by %Simd Library to parallelize some algorithms.
+	# @param threadNumber - number used by %Simd Library.	
+	def SetThreadNumber(self, threadNumber: int) : 
+		self.lib.SimdSetThreadNumber(threadNumber)
+		
+	## Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
+	# @return current 'fast' mode.	
+	def GetFastMode(self) -> bool: 
+		return self.lib.SimdGetFastMode()
+	
+	## Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
+	# @param fast - a value of 'fast' mode to set.	
+	def SetFastMode(self, fast: bool) : 
+		self.lib.SimdSetFastMode(fast)
 	
 ###################################################################################################
