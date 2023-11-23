@@ -90,12 +90,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae12a4e5e0e9c630f745faef00e472da4"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ae12a4e5e0e9c630f745faef00e472da4">SetThreadNumber</a> (int threadNumber)</td></tr>
 <tr class="memdesc:ae12a4e5e0e9c630f745faef00e472da4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets number of threads used by Simd Library to parallelize some algorithms.  <a href="class_simd_1_1_lib.html#ae12a4e5e0e9c630f745faef00e472da4">More...</a><br /></td></tr>
 <tr class="separator:ae12a4e5e0e9c630f745faef00e472da4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a137811f454011e7f2d35ce0328cb897a"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a137811f454011e7f2d35ce0328cb897a">ClearMmx</a> ()</td></tr>
+<tr class="memdesc:a137811f454011e7f2d35ce0328cb897a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears MMX registers.  <a href="class_simd_1_1_lib.html#a137811f454011e7f2d35ce0328cb897a">More...</a><br /></td></tr>
+<tr class="separator:a137811f454011e7f2d35ce0328cb897a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4f6746634e5a089912ff24c1681768d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ab4f6746634e5a089912ff24c1681768d">GetFastMode</a> ()</td></tr>
 <tr class="memdesc:ab4f6746634e5a089912ff24c1681768d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags.  <a href="class_simd_1_1_lib.html#ab4f6746634e5a089912ff24c1681768d">More...</a><br /></td></tr>
 <tr class="separator:ab4f6746634e5a089912ff24c1681768d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a530baa04cae1f9edb43fb1c944476ba2"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a530baa04cae1f9edb43fb1c944476ba2">SetFastMode</a> (bool fast)</td></tr>
 <tr class="memdesc:a530baa04cae1f9edb43fb1c944476ba2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags.  <a href="class_simd_1_1_lib.html#a530baa04cae1f9edb43fb1c944476ba2">More...</a><br /></td></tr>
 <tr class="separator:a530baa04cae1f9edb43fb1c944476ba2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac631541fc429c4b20ecacb4573f337cc"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac631541fc429c4b20ecacb4573f337cc">Crc32</a> (ctypes.c_void_p src, int size)</td></tr>
+<tr class="memdesc:ac631541fc429c4b20ecacb4573f337cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 32-bit cyclic redundancy check (CRC32) for current data.  <a href="class_simd_1_1_lib.html#ac631541fc429c4b20ecacb4573f337cc">More...</a><br /></td></tr>
+<tr class="separator:ac631541fc429c4b20ecacb4573f337cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0a39a09c94cfc19437823497fb70bef"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ae0a39a09c94cfc19437823497fb70bef">Crc32c</a> (ctypes.c_void_p src, int size)</td></tr>
+<tr class="memdesc:ae0a39a09c94cfc19437823497fb70bef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 32-bit cyclic redundancy check (CRC32c) for current data.  <a href="class_simd_1_1_lib.html#ae0a39a09c94cfc19437823497fb70bef">More...</a><br /></td></tr>
+<tr class="separator:ae0a39a09c94cfc19437823497fb70bef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A wrapper around Simd Library API. </p>
@@ -412,6 +421,26 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a137811f454011e7f2d35ce0328cb897a" name="a137811f454011e7f2d35ce0328cb897a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a137811f454011e7f2d35ce0328cb897a">&#9670;&nbsp;</a></span>ClearMmx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ClearMmx </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Clears MMX registers. </p>
+<p >Clears MMX registers (runs EMMS instruction). It is x86 specific functionality. </p>
+
+</div>
+</div>
 <a id="ab4f6746634e5a089912ff24c1681768d" name="ab4f6746634e5a089912ff24c1681768d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab4f6746634e5a089912ff24c1681768d">&#9670;&nbsp;</a></span>GetFastMode()</h2>
 
@@ -457,6 +486,82 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ac631541fc429c4b20ecacb4573f337cc" name="ac631541fc429c4b20ecacb4573f337cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac631541fc429c4b20ecacb4573f337cc">&#9670;&nbsp;</a></span>Crc32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def Crc32 </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets 32-bit cyclic redundancy check (CRC32) for current data. </p>
+<p >Calculation is performed for polynomial 0xEDB88320. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to data. </td></tr>
+    <tr><td class="paramname">size</td><td>- a size of the data. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>32-bit cyclic redundancy check (CRC32). </dd></dl>
+
+</div>
+</div>
+<a id="ae0a39a09c94cfc19437823497fb70bef" name="ae0a39a09c94cfc19437823497fb70bef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0a39a09c94cfc19437823497fb70bef">&#9670;&nbsp;</a></span>Crc32c()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def Crc32c </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets 32-bit cyclic redundancy check (CRC32c) for current data. </p>
+<p >Calculation is performed for polynomial 0x1EDC6F41 (Castagnoli-crc). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to data. </td></tr>
+    <tr><td class="paramname">size</td><td>- a size of the data. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>32-bit cyclic redundancy check (CRC32c). </dd></dl>
 
 </div>
 </div>

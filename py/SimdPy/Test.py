@@ -32,7 +32,9 @@ def GetSetParamsTest(args) :
 
 def ImageTest(args) :
 	image = Simd.Image(Simd.PixelFormat.Bgr24, 120, 90)
-	print("Creates image: {0} {1}x{2}".format(image.Format(), image.Width(), image.Height()))
+	crc32 = Simd.Lib.Crc32(image.Data(), image.Height() * image.Stride())
+	print("Creates image: {0} {1}x{2}, Crc32: {3:X}".format(image.Format(), image.Width(), image.Height(), (crc32 & 0xffffffff)))
+	
 
 ###################################################################################################
 

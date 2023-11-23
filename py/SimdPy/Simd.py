@@ -71,31 +71,31 @@ class PixelFormat(enum.Enum) :
 	Int16 = 5
     ## A single channel 32-bit integer pixel format.
 	Int32 = 6
-    ## A single channel 64-bit integer pixel format. */
+    ## A single channel 64-bit integer pixel format.
 	Int64 = 7
-    ## A single channel 32-bit float point pixel format. */
+    ## A single channel 32-bit float point pixel format.
 	Float = 8
-    ## A single channel 64-bit float point pixel format. */
+    ## A single channel 64-bit float point pixel format.
 	Double = 9
-    ## A 8-bit Bayer pixel format (GRBG). */
+    ## A 8-bit Bayer pixel format (GRBG).
 	BayerGrbg = 10
-    ## A 8-bit Bayer pixel format (GBRG). */
+    ## A 8-bit Bayer pixel format (GBRG).
 	BayerGbrg = 11
-    ## A 8-bit Bayer pixel format (RGGB). */
+    ## A 8-bit Bayer pixel format (RGGB).
 	BayerRggb = 12
-    ## A 8-bit Bayer pixel format (BGGR). */
+    ## A 8-bit Bayer pixel format (BGGR).
 	BayerBggr = 13
-    ## A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format. */
+    ## A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format.
 	Hsv24 = 14
-    ## A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format. */
+    ## A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format.
 	Hsl24 = 15
-    ## A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. */
+    ## A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.
 	Rgb24 = 16
-    ## A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
+    ## A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.
 	Rgba32 = 17
-    ## A 16-bit (2 8-bit channels) UYVY422 pixel format. */
+    ## A 16-bit (2 8-bit channels) UYVY422 pixel format.
 	Uyvy16 = 18
-    ## A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format. */
+    ## A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format.
 	Argb32 = 19
 	
 	## Gets pixel size in bytes.
@@ -111,6 +111,56 @@ class PixelFormat(enum.Enum) :
 		elif self == Simd.PixelFormat.Int64 : return 8
 		elif self == Simd.PixelFormat.Float : return 4
 		elif self == Simd.PixelFormat.Double : return 8
+		elif self == Simd.PixelFormat.BayerGrbg : return 1	
+		elif self == Simd.PixelFormat.BayerGbrg : return 1
+		elif self == Simd.PixelFormat.BayerRggb : return 1
+		elif self == Simd.PixelFormat.BayerBggr : return 1
+		elif self == Simd.PixelFormat.Hsv24 : return 3
+		elif self == Simd.PixelFormat.Hsl24 : return 3
+		elif self == Simd.PixelFormat.Rgb24 : return 3
+		elif self == Simd.PixelFormat.Rgba32 : return 4
+		elif self == Simd.PixelFormat.Uyvy16 : return 2
+		elif self == Simd.PixelFormat.Argb32 : return 4
+		else : return 0
+		
+	## Gets channel size in bytes.
+	# @return channel size in bytes.	
+	def ChannelSize(self) -> int :
+		if self == Simd.PixelFormat.Empty : return 0
+		elif self == Simd.PixelFormat.Gray8 : return 1
+		elif self == Simd.PixelFormat.Uv16 : return 1
+		elif self == Simd.PixelFormat.Bgr24 : return 1
+		elif self == Simd.PixelFormat.Bgra32 : return 1
+		elif self == Simd.PixelFormat.Int16 : return 2
+		elif self == Simd.PixelFormat.Int32 : return 4
+		elif self == Simd.PixelFormat.Int64 : return 8
+		elif self == Simd.PixelFormat.Float : return 4
+		elif self == Simd.PixelFormat.Double : return 8
+		elif self == Simd.PixelFormat.BayerGrbg : return 1	
+		elif self == Simd.PixelFormat.BayerGbrg : return 1
+		elif self == Simd.PixelFormat.BayerRggb : return 1
+		elif self == Simd.PixelFormat.BayerBggr : return 1
+		elif self == Simd.PixelFormat.Hsv24 : return 1
+		elif self == Simd.PixelFormat.Hsl24 : return 1
+		elif self == Simd.PixelFormat.Rgb24 : return 1
+		elif self == Simd.PixelFormat.Rgba32 : return 1
+		elif self == Simd.PixelFormat.Uyvy16 : return 1
+		elif self == Simd.PixelFormat.Argb32 : return 1
+		else : return 0
+		
+	## Gets channels count.
+	# @return channels count.	
+	def ChannelCount(self) -> int :
+		if self == Simd.PixelFormat.Empty : return 0
+		elif self == Simd.PixelFormat.Gray8 : return 1
+		elif self == Simd.PixelFormat.Uv16 : return 2
+		elif self == Simd.PixelFormat.Bgr24 : return 3
+		elif self == Simd.PixelFormat.Bgra32 : return 4
+		elif self == Simd.PixelFormat.Int16 : return 1
+		elif self == Simd.PixelFormat.Int32 : return 1
+		elif self == Simd.PixelFormat.Int64 : return 1
+		elif self == Simd.PixelFormat.Float : return 1
+		elif self == Simd.PixelFormat.Double : return 1
 		elif self == Simd.PixelFormat.BayerGrbg : return 1	
 		elif self == Simd.PixelFormat.BayerGbrg : return 1
 		elif self == Simd.PixelFormat.BayerRggb : return 1
@@ -189,6 +239,12 @@ class Lib():
 		
 		Lib.__lib.SimdSetFastMode.argtypes = [ ctypes.c_bool ]
 		Lib.__lib.SimdSetFastMode.restype = None
+
+		Lib.__lib.SimdCrc32.argtypes = [ ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdCrc32.restype = ctypes.c_int32
+
+		Lib.__lib.SimdCrc32c.argtypes = [ ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdCrc32c.restype = ctypes.c_int32
 	
 	## Gets version of %Simd Library.
 	# @return A string with version.
@@ -288,6 +344,11 @@ class Lib():
 	def SetThreadNumber(threadNumber: int) : 
 		Lib.__lib.SimdSetThreadNumber(threadNumber)
 		
+	## Clears MMX registers.
+	# Clears MMX registers (runs EMMS instruction). It is x86 specific functionality.
+	def ClearMmx(): 
+		Lib.__lib.SimdEmpty()
+		
 	## Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
 	# @return current 'fast' mode.	
 	def GetFastMode() -> bool: 
@@ -297,6 +358,22 @@ class Lib():
 	# @param fast - a value of 'fast' mode to set.	
 	def SetFastMode(fast: bool) : 
 		Lib.__lib.SimdSetFastMode(fast)
+		
+    ## Gets 32-bit cyclic redundancy check (CRC32) for current data.
+	# Calculation is performed for polynomial 0xEDB88320.
+	# @param src - a pointer to data.
+    # @param  size - a size of the data.
+    # @return 32-bit cyclic redundancy check (CRC32).
+	def Crc32(src : ctypes.c_void_p, size : int) :
+		return Lib.__lib.SimdCrc32(src, size)
+	
+    ## Gets 32-bit cyclic redundancy check (CRC32c) for current data.
+	# Calculation is performed for polynomial 0x1EDC6F41 (Castagnoli-crc).
+	# @param src - a pointer to data.
+    # @param  size - a size of the data.
+    # @return 32-bit cyclic redundancy check (CRC32c).
+	def Crc32c(src : ctypes.c_void_p, size : int) :
+		return Lib.__lib.SimdCrc32c(src, size)
 	
 ###################################################################################################
 
