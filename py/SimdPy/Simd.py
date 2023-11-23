@@ -192,6 +192,29 @@ class PixelFormat(enum.Enum) :
 		elif self == Simd.PixelFormat.Argb32 : return 4
 		else : return 0
 
+## @ingroup python
+# Describes the position of the child sub image relative to the parent image.
+# This enum is used for creation of sub image view in method Simd.Image.RegionAt.
+class Position(enum.Enum) :
+	## A position in the top-left corner.
+	TopLeft = 0
+	## A position at the top center.
+	TopCenter = 1 
+	## A position in the top-right corner.
+	TopRight = 2 
+	## A position of the left in the middle.
+	MiddleLeft = 3
+	## A central position.
+	MiddleCenter = 4 
+	## A position of the right in the middle.
+	MiddleRight = 5
+	## A position in the bottom-left corner.
+	BottomLeft = 6
+	## A position at the bottom center.
+	BottomCenter = 7 
+	## A position in the bottom-right corner.
+	BottomRight = 8 
+
 ###################################################################################################
 
 ## @ingroup python
@@ -549,5 +572,48 @@ class Image():
 			self.__data = data
 			self.__owner = True
 		return self.__owner
+	
+    ## Creates a new Simd.Image which points to the region of current image bounded by the rectangle with specified coordinates.
+    # @param left - a left side of the region.
+    # @param top - a top side of the region.
+    # @param right - a right side of the region.
+    # @param bottom - a bottom side of the region.
+    # @return - a new Simd.Image which points to the subregion of current image.
+	def Region(self, left: int, top : int, right : int, bottom : int) :
+		if self.Data() == ctypes.c_void_p(0) or right <= left or bottom <= top :
+			return Simd.Image()
+		left = min(max(left, 0), self.Width());
+		top = min(max(top, 0), self.Height());
+		right = min(max(right, 0), self.Width());
+		bottom = min(max(bottom, 0), self.Height());
+		return Simd.Image(self.Format(), right - left, bottom - top, 0, self.Stride(), self.Data() + top * self.Stride() + left * self.Format().PixelSize());
+	
+    ## Creates a new Simd.Image which points to the region of current image with given size at current position.
+    # @param width - a width of the region.
+    # @param height - a height of the region.
+    # @param position - a position of the region.
+    # @return - a new Simd.Image which points to the subregion of current image.
+	def RegionAt(self, width: int, height : int, position : Simd.Position) :
+		if position == Position.TopLeft :
+			return self.Region(0, 0, width, height)
+		elif position == Position.TopCenter :
+			return self.Region((self.Width() - width) // 2, 0, (self.Width() + width) // 2, height)
+		elif position == Position.TopRight :
+			return self.Region(self.Width() - width, 0, self.Width(), height)
+		elif position == Position.MiddleLeft:
+			return self.Region(0, (self.Height() - height) // 2, width, (self.Height() + height) // 2)
+		elif position == Position.MiddleCenter:
+			return self.Region((self.Width() - width) // 2, (self.Height() - height) // 2, (self.Width() + width) // 2, (self.Height() + height) // 2)
+		elif position == Position.MiddleRight:
+			return self.Region(self.Width() - width, (self.Height() - height) // 2, self.Width(), (self.Height() + height) // 2)
+		elif position == Position.BottomLeft:
+			return self.Region(0, self.Height() - height, width, self.Height());
+		elif position == Position.BottomCenter:
+			return self.Region((self.Width() - width) // 2, self.Height() - height, (self.Width() + width) // 2, self.Height())
+		elif position == Position.BottomRight:
+			return self.Region(self.Width() - width, self.Height() - height, self.Width(), self.Height())
+		else :
+			return Simd.Image()
+
 	
 		

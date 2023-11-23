@@ -90,6 +90,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7bd94609598d2e38586a07aaa5b0cf82"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#a7bd94609598d2e38586a07aaa5b0cf82">Load</a> (self, str path, desiredFormat=<a class="el" href="class_simd_1_1_pixel_format.html#a059be79f78c5d38e42123c35e5f8528c">Simd.PixelFormat.Empty</a>)</td></tr>
 <tr class="memdesc:a7bd94609598d2e38586a07aaa5b0cf82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads an image from file.  <a href="class_simd_1_1_image.html#a7bd94609598d2e38586a07aaa5b0cf82">More...</a><br /></td></tr>
 <tr class="separator:a7bd94609598d2e38586a07aaa5b0cf82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af38ddd04d78b2b6d9d1ce5632f02942e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#af38ddd04d78b2b6d9d1ce5632f02942e">Region</a> (self, int left, int top, int right, int bottom)</td></tr>
+<tr class="memdesc:af38ddd04d78b2b6d9d1ce5632f02942e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Simd.Image</a> which points to the region of current image bounded by the rectangle with specified coordinates.  <a href="class_simd_1_1_image.html#af38ddd04d78b2b6d9d1ce5632f02942e">More...</a><br /></td></tr>
+<tr class="separator:af38ddd04d78b2b6d9d1ce5632f02942e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bca23c3268e26c359dc6fea78c88964"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#a1bca23c3268e26c359dc6fea78c88964">RegionAt</a> (self, int width, int height, <a class="el" href="class_simd_1_1_position.html">Simd.Position</a> position)</td></tr>
+<tr class="memdesc:a1bca23c3268e26c359dc6fea78c88964"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Simd.Image</a> which points to the region of current image with given size at current position.  <a href="class_simd_1_1_image.html#a1bca23c3268e26c359dc6fea78c88964">More...</a><br /></td></tr>
+<tr class="separator:a1bca23c3268e26c359dc6fea78c88964"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >The <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a> class provides storage and manipulation of images. </p>
@@ -534,6 +540,115 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>result of the operation. </dd></dl>
+
+</div>
+</div>
+<a id="af38ddd04d78b2b6d9d1ce5632f02942e" name="af38ddd04d78b2b6d9d1ce5632f02942e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af38ddd04d78b2b6d9d1ce5632f02942e">&#9670;&nbsp;</a></span>Region()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def Region </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>left</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>top</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>right</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bottom</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a new <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Simd.Image</a> which points to the region of current image bounded by the rectangle with specified coordinates. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">left</td><td>- a left side of the region. </td></tr>
+    <tr><td class="paramname">top</td><td>- a top side of the region. </td></tr>
+    <tr><td class="paramname">right</td><td>- a right side of the region. </td></tr>
+    <tr><td class="paramname">bottom</td><td>- a bottom side of the region. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Simd.Image</a> which points to the subregion of current image. </dd></dl>
+
+</div>
+</div>
+<a id="a1bca23c3268e26c359dc6fea78c88964" name="a1bca23c3268e26c359dc6fea78c88964"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bca23c3268e26c359dc6fea78c88964">&#9670;&nbsp;</a></span>RegionAt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def RegionAt </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_position.html">Simd.Position</a>&#160;</td>
+          <td class="paramname"><em>position</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a new <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Simd.Image</a> which points to the region of current image with given size at current position. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">width</td><td>- a width of the region. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of the region. </td></tr>
+    <tr><td class="paramname">position</td><td>- a position of the region. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Simd.Image</a> which points to the subregion of current image. </dd></dl>
 
 </div>
 </div>

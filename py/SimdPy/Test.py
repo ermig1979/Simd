@@ -35,7 +35,8 @@ def ImageTest(args) :
 	image.Load("city.jpg")
 	crc32 = Simd.Lib.Crc32(image.Data(), image.Height() * image.Stride())
 	print("Creates image: {0} {1}x{2}, Crc32: {3:X}".format(image.Format(), image.Width(), image.Height(), crc32))
-	image.Save("python_wrapper_test.jpg", Simd.ImageFile.Jpeg, 85)
+	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter)
+	center.Save("center.jpg", Simd.ImageFile.Jpeg, 85)
 	
 
 ###################################################################################################
