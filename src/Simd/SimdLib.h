@@ -4281,7 +4281,7 @@ extern "C"
 
         \fn SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
 
-        \short Saves an image to memory in given image file format.
+        \short Saves an image to file in given image file format.
 
         \note This function has a C++ wrapper Simd::View::Save(const std::string & path, ::SimdImageFileType type = ::SimdImageFileUndefined, int quality = 100).
 

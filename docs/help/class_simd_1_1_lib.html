@@ -99,12 +99,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a530baa04cae1f9edb43fb1c944476ba2"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a530baa04cae1f9edb43fb1c944476ba2">SetFastMode</a> (bool fast)</td></tr>
 <tr class="memdesc:a530baa04cae1f9edb43fb1c944476ba2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags.  <a href="class_simd_1_1_lib.html#a530baa04cae1f9edb43fb1c944476ba2">More...</a><br /></td></tr>
 <tr class="separator:a530baa04cae1f9edb43fb1c944476ba2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac631541fc429c4b20ecacb4573f337cc"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac631541fc429c4b20ecacb4573f337cc">Crc32</a> (ctypes.c_void_p src, int size)</td></tr>
-<tr class="memdesc:ac631541fc429c4b20ecacb4573f337cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 32-bit cyclic redundancy check (CRC32) for current data.  <a href="class_simd_1_1_lib.html#ac631541fc429c4b20ecacb4573f337cc">More...</a><br /></td></tr>
-<tr class="separator:ac631541fc429c4b20ecacb4573f337cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe68d0236498c4b83d2f608a75f48d56"><td class="memItemLeft" align="right" valign="top">ctypes.c_uint32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#abe68d0236498c4b83d2f608a75f48d56">Crc32</a> (ctypes.c_void_p src, int size)</td></tr>
+<tr class="memdesc:abe68d0236498c4b83d2f608a75f48d56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 32-bit cyclic redundancy check (CRC32) for current data.  <a href="class_simd_1_1_lib.html#abe68d0236498c4b83d2f608a75f48d56">More...</a><br /></td></tr>
+<tr class="separator:abe68d0236498c4b83d2f608a75f48d56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0a39a09c94cfc19437823497fb70bef"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ae0a39a09c94cfc19437823497fb70bef">Crc32c</a> (ctypes.c_void_p src, int size)</td></tr>
 <tr class="memdesc:ae0a39a09c94cfc19437823497fb70bef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 32-bit cyclic redundancy check (CRC32c) for current data.  <a href="class_simd_1_1_lib.html#ae0a39a09c94cfc19437823497fb70bef">More...</a><br /></td></tr>
 <tr class="separator:ae0a39a09c94cfc19437823497fb70bef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#afbfca070bbcd00e94be3ee1e3577b0fb">ImageSaveToFile</a> (ctypes.c_void_p src, int stride, int width, int height, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> format, <a class="el" href="class_simd_1_1_image_file.html">Simd.ImageFile</a> file, int quality, str path)</td></tr>
+<tr class="memdesc:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves an image to file in given image file format.  <a href="class_simd_1_1_lib.html#afbfca070bbcd00e94be3ee1e3577b0fb">More...</a><br /></td></tr>
+<tr class="separator:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca40ba27a51c5a9e76adfdd5c4d1de6c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#aca40ba27a51c5a9e76adfdd5c4d1de6c">ImageLoadFromFile</a> (str path, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> desiredFormat)</td></tr>
+<tr class="memdesc:aca40ba27a51c5a9e76adfdd5c4d1de6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads an image from file.  <a href="class_simd_1_1_lib.html#aca40ba27a51c5a9e76adfdd5c4d1de6c">More...</a><br /></td></tr>
+<tr class="separator:aca40ba27a51c5a9e76adfdd5c4d1de6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A wrapper around Simd Library API. </p>
@@ -489,14 +495,14 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ac631541fc429c4b20ecacb4573f337cc" name="ac631541fc429c4b20ecacb4573f337cc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac631541fc429c4b20ecacb4573f337cc">&#9670;&nbsp;</a></span>Crc32()</h2>
+<a id="abe68d0236498c4b83d2f608a75f48d56" name="abe68d0236498c4b83d2f608a75f48d56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe68d0236498c4b83d2f608a75f48d56">&#9670;&nbsp;</a></span>Crc32()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">def Crc32 </td>
+          <td class="memname"> ctypes.c_uint32  Crc32 </td>
           <td>(</td>
           <td class="paramtype">ctypes.c_void_p&#160;</td>
           <td class="paramname"><em>src</em>, </td>
@@ -562,6 +568,124 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>32-bit cyclic redundancy check (CRC32c). </dd></dl>
+
+</div>
+</div>
+<a id="afbfca070bbcd00e94be3ee1e3577b0fb" name="afbfca070bbcd00e94be3ee1e3577b0fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbfca070bbcd00e94be3ee1e3577b0fb">&#9670;&nbsp;</a></span>ImageSaveToFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool  ImageSaveToFile </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_image_file.html">Simd.ImageFile</a>&#160;</td>
+          <td class="paramname"><em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>quality</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>path</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Saves an image to file in given image file format. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input image. </td></tr>
+    <tr><td class="paramname">stride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input image. </td></tr>
+    <tr><td class="paramname">format</td><td>- a pixel format of input image. Supported pixel formats: <a class="el" href="class_simd_1_1_pixel_format.html#a50493d3c7232815237fa6dee16fc5b1b" title="A 8-bit gray pixel format.">Simd.PixelFormat.Gray8</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a0b1b1a17224566f43dd3427347bdb0dc" title="A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.">Simd.PixelFormat.Bgr24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#ab1b15f83aaa223e4e6b2075aefe522be" title="A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.">Simd.PixelFormat.Bgra32</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a86f519c808ef15faed67904830427970" title="A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.">Simd.PixelFormat.Rgb24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a90d499b9eff49bf15196e5af0e4ef264" title="A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.">Simd.PixelFormat.Rgba32</a>. </td></tr>
+    <tr><td class="paramname">file</td><td>- a format of output image file. To auto choise format of output file set this parameter to <a class="el" href="class_simd_1_1_image_file.html#a49e9acb48005930ddcd635c93765874f" title="An undefined image file format (format auto choice).">Simd.ImageFile.Undefined</a>. </td></tr>
+    <tr><td class="paramname">quality</td><td>- a parameter of compression quality (if file format supports it). </td></tr>
+    <tr><td class="paramname">path</td><td>- a path to output image file. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>result of the operation. </dd></dl>
+
+</div>
+</div>
+<a id="aca40ba27a51c5a9e76adfdd5c4d1de6c" name="aca40ba27a51c5a9e76adfdd5c4d1de6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca40ba27a51c5a9e76adfdd5c4d1de6c">&#9670;&nbsp;</a></span>ImageLoadFromFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ImageLoadFromFile </td>
+          <td>(</td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a>&#160;</td>
+          <td class="paramname"><em>desiredFormat</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Loads an image from file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>- a path to input image file. </td></tr>
+    <tr><td class="paramname">desiredFormat</td><td>- a desired pixel format of output image. It can be <a class="el" href="class_simd_1_1_pixel_format.html#a50493d3c7232815237fa6dee16fc5b1b" title="A 8-bit gray pixel format.">Simd.PixelFormat.Gray8</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a0b1b1a17224566f43dd3427347bdb0dc" title="A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.">Simd.PixelFormat.Bgr24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#ab1b15f83aaa223e4e6b2075aefe522be" title="A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.">Simd.PixelFormat.Bgra32</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a86f519c808ef15faed67904830427970" title="A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.">Simd.PixelFormat.Rgb24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a90d499b9eff49bf15196e5af0e4ef264" title="A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.">Simd.PixelFormat.Rgba32</a> or <a class="el" href="class_simd_1_1_pixel_format.html#a059be79f78c5d38e42123c35e5f8528c" title="Undefined pixel format.">Simd.PixelFormat.Empty</a> (use pixel format of input image file). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to pixel data, row size in bytes, image width, image height, output pixel format. The output pixel data mast be deleted after use by function <a class="el" href="class_simd_1_1_lib.html#a073521385cd97c6a7b586e1d5dbb4408" title="Frees aligned memory block.">Simd.Lib.Free</a>. </dd></dl>
 
 </div>
 </div>

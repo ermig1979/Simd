@@ -54,7 +54,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga1445d4a63bdc08366f14fac283d9df59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves an image to memory in given image file format.  <a href="group__image__io.html#ga1445d4a63bdc08366f14fac283d9df59">More...</a><br /></td></tr>
 <tr class="separator:ga1445d4a63bdc08366f14fac283d9df59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga457825c43d193f3f971eef61257eacc4"><td class="memItemLeft" align="right" valign="top">SIMD_API <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__image__io.html#ga457825c43d193f3f971eef61257eacc4">SimdImageSaveToFile</a> (const uint8_t *src, size_t stride, size_t width, size_t height, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> format, <a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a> file, int quality, const char *path)</td></tr>
-<tr class="memdesc:ga457825c43d193f3f971eef61257eacc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves an image to memory in given image file format.  <a href="group__image__io.html#ga457825c43d193f3f971eef61257eacc4">More...</a><br /></td></tr>
+<tr class="memdesc:ga457825c43d193f3f971eef61257eacc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves an image to file in given image file format.  <a href="group__image__io.html#ga457825c43d193f3f971eef61257eacc4">More...</a><br /></td></tr>
 <tr class="separator:ga457825c43d193f3f971eef61257eacc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2fcf7cdf5452267607ef745ef83a6e41"><td class="memItemLeft" align="right" valign="top">SIMD_API uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__image__io.html#ga2fcf7cdf5452267607ef745ef83a6e41">SimdNv12SaveAsJpegToMemory</a> (const uint8_t *y, size_t yStride, const uint8_t *uv, size_t uvStride, size_t width, size_t height, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType, int quality, size_t *size)</td></tr>
 <tr class="memdesc:ga2fcf7cdf5452267607ef745ef83a6e41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves image in NV12 format to memory as JPEG.  <a href="group__image__io.html#ga2fcf7cdf5452267607ef745ef83a6e41">More...</a><br /></td></tr>
@@ -214,7 +214,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Saves an image to memory in given image file format. </p>
+<p>Saves an image to file in given image file format. </p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="struct_simd_1_1_view.html#af67086a33d893d3b1b944ae821a61a8c">Simd::View::Save</a>(const std::string &amp; path, <a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a> type = <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a>, int quality = 100).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

@@ -1,4 +1,5 @@
 import argparse
+from dataclasses import dataclass
 import os
 import ctypes
 import pathlib
@@ -53,6 +54,24 @@ class CpuInfo(enum.Enum) :
 	VSX = 15
 	## Enabling of NEON CPU extensions (ARM specific).
 	NEON = 16
+	
+## @ingroup python
+# Describes formats of image file. It is used in functions Simd.ImageSaveToMemory and Simd.ImageSaveToFile.
+class ImageFile(enum.Enum) :	
+    ## An undefined image file format (format auto choice).
+    Undefined = 0
+    ## A PGM (Portable Gray Map) text (P2) image file format.
+    PgmTxt = 1
+    ## A PGM (Portable Gray Map) binary (P5) image file format.
+    PgmBin = 2
+    ## A PGM (Portable Pixel Map) text (P3) image file format.
+    PpmTxt = 3
+    ## A PGM (Portable Pixel Map) binary (P6) image file format.
+    PpmBin = 4
+    ## A PNG (Portable Network Graphics) image file format.
+    Png = 5
+    ## A JPEG (Joint Photographic Experts Group) image file format.
+    Jpeg = 6
 
 ## @ingroup python
 # Describes pixel format type. It is used in Simd.Image.
@@ -241,10 +260,16 @@ class Lib():
 		Lib.__lib.SimdSetFastMode.restype = None
 
 		Lib.__lib.SimdCrc32.argtypes = [ ctypes.c_void_p, ctypes.c_size_t ]
-		Lib.__lib.SimdCrc32.restype = ctypes.c_int32
+		Lib.__lib.SimdCrc32.restype = ctypes.c_uint32
 
 		Lib.__lib.SimdCrc32c.argtypes = [ ctypes.c_void_p, ctypes.c_size_t ]
-		Lib.__lib.SimdCrc32c.restype = ctypes.c_int32
+		Lib.__lib.SimdCrc32c.restype = ctypes.c_uint32
+		
+		Lib.__lib.SimdImageSaveToFile.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.c_int32, ctypes.c_int32, ctypes.c_char_p ]
+		Lib.__lib.SimdImageSaveToFile.restype = ctypes.c_int32
+		
+		Lib.__lib.SimdImageLoadFromFile.argtypes = [ ctypes.c_char_p, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_int32) ]
+		Lib.__lib.SimdImageLoadFromFile.restype = ctypes.c_void_p
 	
 	## Gets version of %Simd Library.
 	# @return A string with version.
@@ -364,7 +389,7 @@ class Lib():
 	# @param src - a pointer to data.
     # @param  size - a size of the data.
     # @return 32-bit cyclic redundancy check (CRC32).
-	def Crc32(src : ctypes.c_void_p, size : int) :
+	def Crc32(src : ctypes.c_void_p, size : int) -> ctypes.c_uint32 :
 		return Lib.__lib.SimdCrc32(src, size)
 	
     ## Gets 32-bit cyclic redundancy check (CRC32c) for current data.
@@ -374,6 +399,32 @@ class Lib():
     # @return 32-bit cyclic redundancy check (CRC32c).
 	def Crc32c(src : ctypes.c_void_p, size : int) :
 		return Lib.__lib.SimdCrc32c(src, size)
+	
+    ## Saves an image to file in given image file format.
+    # @param src - a pointer to pixels data of input image.
+    # @param stride - a row size of input image in bytes.
+    # @param width - a width of input image.
+    # @param height - a height of input image.
+    # @param format - a pixel format of input image. Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
+    # @param file - a format of output image file. To auto choise format of output file set this parameter to Simd.ImageFile.Undefined.
+    # @param quality - a parameter of compression quality (if file format supports it).
+    # @param path - a path to output image file.
+    # @return result of the operation.
+	def ImageSaveToFile(src : ctypes.c_void_p, stride: int, width: int, height: int, format : Simd.PixelFormat, file : Simd.ImageFile, quality : int, path : str) -> bool :
+		return Lib.__lib.SimdImageSaveToFile(src, stride, width, height, format.value, file.value, quality, path.encode('utf-8')) != 0
+
+    ## Loads an image from file.
+    # @param path - a path to input image file.
+    # @param desiredFormat - a desired pixel format of output image. It can be Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, 
+    #                 Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32 or Simd.PixelFormat.Empty (use pixel format of input image file).
+	# @return a pointer to pixel data, row size in bytes, image width, image height, output pixel format. The output pixel data mast be deleted after use by function Simd.Lib.Free.
+	def ImageLoadFromFile(path : str, desiredFormat: Simd.PixelFormat):
+		stride = ctypes.c_size_t()
+		width = ctypes.c_size_t()
+		height = ctypes.c_size_t()
+		format = ctypes.c_int32(desiredFormat.value)
+		data = Lib.__lib.SimdImageLoadFromFile(path.encode('utf-8'), ctypes.byref(stride), ctypes.byref(width), ctypes.byref(height), ctypes.byref(format))
+		return data, stride.value, width.value, height.value, Simd.PixelFormat(format.value)
 	
 ###################################################################################################
 
@@ -472,5 +523,31 @@ class Image():
 	# @return pointer to image pixel data.	
 	def Data(self) -> ctypes.c_void_p :
 		return self.__data
+
+    ## Saves the image to file in given image file format.
+    # @note Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
+    # @param path - a path to output image file.
+    # @param file - a format of output image file. To auto choise format of output file set this parameter to Simd.ImageFile.Undefined.
+    # @param quality - a parameter of compression quality (if file format supports it).
+    # @return result of the operation.
+	def Save(self, path : str, file = Simd.ImageFile.Undefined, quality = 100) -> bool:
+		return Lib.ImageSaveToFile(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format(), file, quality, path)
+	
+	## Loads an image from file.
+    # @param path - a path to input image file.
+    # @param desiredFormat - a desired pixel format of output image. It can be Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, 
+    #                 Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32 or Simd.PixelFormat.Empty (use pixel format of input image file).
+    # @return result of the operation.
+	def Load(self, path : str, desiredFormat = Simd.PixelFormat.Empty) -> bool:
+		self.Clear()
+		data, stride, width, height, format = Lib.ImageLoadFromFile(path, desiredFormat)
+		if data != 0 :
+			self.__width = width
+			self.__height = height
+			self.__stride = stride
+			self.__format = format
+			self.__data = data
+			self.__owner = True
+		return self.__owner
 	
 		
