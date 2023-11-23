@@ -1,4 +1,5 @@
 import argparse
+from mimetypes import init
 import os
 import ctypes
 import pathlib
@@ -8,24 +9,30 @@ import Simd
 
 ###################################################################################################
 
-def PrintInfoTest(simd: Simd.Lib, args) :
-	#print("Simd version: {0}.".format(simd.Version()))
-	#print("CPU model: {0}.".format(simd.CpuDesc(Simd.CpuDesc.Model)))
-	print("{0}\n".format(simd.SysInfo()))
+def PrintInfoTest(args) :
+	#print("Simd version: {0}.".format(Simd.Lib.Version()))
+	#print("CPU model: {0}.".format(Simd.Lib.CpuDesc(Simd.CpuDesc.Model)))
+	print("{0}\n".format(Simd.Lib.SysInfo()))
 
 ###################################################################################################
 
-def GetSetParamsTest(simd: Simd.Lib, args) :
-	threads = simd.GetThreadNumber()
-	mode = simd.GetFastMode()
+def GetSetParamsTest(args) :
+	threads = Simd.Lib.GetThreadNumber()
+	mode = Simd.Lib.GetFastMode()
 	
-	simd.SetThreadNumber(-1)
-	simd.SetFastMode(True)
+	Simd.Lib.SetThreadNumber(-1)
+	Simd.Lib.SetFastMode(True)
 	
-	print("Simd thread number: {0}, fast mode: {1}.".format(simd.GetThreadNumber(), simd.GetFastMode()))
+	print("Simd thread number: {0}, fast mode: {1}. \n".format(Simd.Lib.GetThreadNumber(), Simd.Lib.GetFastMode()))
 	
-	simd.SetFastMode(mode)
-	simd.SetThreadNumber(threads)
+	Simd.Lib.SetFastMode(mode)
+	Simd.Lib.SetThreadNumber(threads)
+	
+###################################################################################################
+
+def ImageTest(args) :
+	image = Simd.Image(Simd.PixelFormat.Bgr24, 120, 90)
+	print("Creates image: {0} {1}x{2}".format(image.Format(), image.Width(), image.Height()))
 
 ###################################################################################################
 
@@ -36,11 +43,13 @@ def main():
 	
 	print("Start testing of Simd Python Wrapper:\n")
 	
-	simd = Simd.Lib(args.bin)
+	Simd.Lib.Init(args.bin)
 	
-	PrintInfoTest(simd, args)
+	PrintInfoTest(args)
 	
-	GetSetParamsTest(simd, args)
+	GetSetParamsTest(args)
+	
+	ImageTest(args)
 	
 	print("\nSimd Python Wrapper test ended successfully!")
 	
