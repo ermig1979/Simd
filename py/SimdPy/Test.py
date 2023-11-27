@@ -37,6 +37,8 @@ def ImageTest(args) :
 	print("Creates image: {0} {1}x{2}, Crc32: {3:X}".format(image.Format(), image.Width(), image.Height(), crc32))
 	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter)
 	center.Save("center.jpg", Simd.ImageFile.Jpeg, 85)
+	resized = Simd.Resized(image, image.Width() // 2, image.Height() // 2)
+	resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
 	
 
 ###################################################################################################

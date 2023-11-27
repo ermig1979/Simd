@@ -323,6 +323,12 @@ class Lib():
 		
 		Lib.__lib.SimdImageLoadFromFile.argtypes = [ ctypes.c_char_p, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_int32) ]
 		Lib.__lib.SimdImageLoadFromFile.restype = ctypes.c_void_p
+		
+		Lib.__lib.SimdResizerInit.argtypes = [ ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.c_int32 ]
+		Lib.__lib.SimdResizerInit.restype = ctypes.c_void_p
+		
+		Lib.__lib.SimdResizerRun.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdResizerRun.restype = None
 	
 	## Gets version of %Simd Library.
 	# @return A string with version.
@@ -390,7 +396,7 @@ class Lib():
     # @note The memory allocated by this function is must be deleted by function Simd.Lib.Free.
 	# @param size - an original size.
     # @param  align - a required alignment.
-	# return a pointer to allocated memory.
+	# @return return a pointer to allocated memory.
 	def Allocate(size : int, align : int) -> ctypes.c_void_p :
 		return Lib.__lib.SimdAllocate(size, align)
 	
@@ -403,14 +409,19 @@ class Lib():
     ## Gets aligned size.
 	# @param size - an original size.
     # @param  align - a required alignment.
-	# return an aligned size.
+	# @return return an aligned size.
 	def Align(size : int, align : int) -> int:
 		return Lib.__lib.SimdAlign(size, align)
 	
     ## Gets alignment required for the most productive work of Simd Library.
-	# return a required alignment.
+	# @return return a required alignment.
 	def Alignment() -> int:
 		return Lib.__lib.SimdAlignment()
+	
+    ## Releases context created with using of Simd Library API.
+	# @param context - a context to be released.
+	def Release(context : ctypes.c_void_p) :
+		Lib.__lib.SimdRelease(context)
 	
 	## Gets number of threads used by %Simd Library to parallelize some algorithms.
 	# @return thread number used by %Simd Library.	
@@ -478,6 +489,28 @@ class Lib():
 		format = ctypes.c_int32(desiredFormat.value)
 		data = Lib.__lib.SimdImageLoadFromFile(path.encode('utf-8'), ctypes.byref(stride), ctypes.byref(width), ctypes.byref(height), ctypes.byref(format))
 		return data, stride.value, width.value, height.value, Simd.PixelFormat(format.value)
+	
+    ## Creates resize context. 
+    # @param srcX - a width of the input image.
+    # @param srcY - a height of the input image.
+    # @param dstX - a width of the output image.
+    # @param dstY - a height of the output image.
+    # @param channels - a channel number of input and output image.
+    # @param type - a type of input and output image channel.
+    # @param method - a method used in order to resize image.
+    # @return a pointer to resize context. On error it returns NULL. This pointer is used in functions ::SimdResizerRun. It must be released with using of function Simd.Release.
+	def ResizerInit(srcX : int, srcY : int, dstX : int, dstY : int, channels : int,  type : Simd.ResizeChannel, method : Simd.ResizeMethod) -> ctypes.c_void_p :
+		return Lib.__lib.SimdResizerInit(srcX, srcY, dstX, dstY, channels, type.value, method.value)
+	
+    ## Performs image resizing.
+    # @param resizer - a resize context. It must be created by function Simd.ResizerInit and released by function Simd.Release.
+    # @param src - a pointer to pixels data of the original input image.
+    # @param srcStride - a row size (in bytes) of the input image.
+    # @param dst - a pointer to pixels data of the resized output image.
+    # @param dstStride - a row size (in bytes) of the output image.
+	def ResizerRun(resizer : ctypes.c_void_p, src : ctypes.c_void_p, srcStride : int, dst : ctypes.c_void_p, dstStride : int) :
+		Lib.__lib.SimdResizerRun(resizer, src, srcStride, dst, dstStride)
+
 	
 ###################################################################################################
 
@@ -645,5 +678,44 @@ class Image():
 		else :
 			return Simd.Image()
 
-	
-		
+###################################################################################################
+
+def PixelFormatToResizeChannel(src) -> ResizeChannel :
+	if src == Simd.PixelFormat.Gray8 : return ResizeChannel.Byte
+	elif src == Simd.PixelFormat.Uv16 : return ResizeChannel.Byte
+	elif src == Simd.PixelFormat.Bgr24 : return ResizeChannel.Byte
+	elif src == Simd.PixelFormat.Bgra32 : return ResizeChannel.Byte
+	elif src == Simd.PixelFormat.Int16 : return ResizeChannel.Short
+	elif src == Simd.PixelFormat.Float : return ResizeChannel.Float
+	elif src == Simd.PixelFormat.Hsv24 : return ResizeChannel.Byte
+	elif src == Simd.PixelFormat.Hsl24 : return ResizeChannel.Byte
+	elif src == Simd.PixelFormat.Rgb24 : return ResizeChannel.Byte
+	elif src == Simd.PixelFormat.Rgba32 : return ResizeChannel.Byte
+	elif src == Simd.PixelFormat.Argb32 : return ResizeChannel.Byte
+	else : raise Exception("Can't {0} convert to Simd.ResizeChannel !".format(src))
+
+##  @ingroup python
+# The function performs image resizing.
+# @param src - an original input image.
+# @param dst - a resized output image.
+# @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
+def Resize(src : Image, dst : Image, method = Simd.ResizeMethod.Bilinear) :
+	if dst.Format() != src.Format() :
+		raise Exception("Incompatible image pixel formats!")
+	resizer = Lib.ResizerInit(src.Width(), src.Height(), dst.Width(), dst.Height(), src.Format().ChannelCount(), Simd.PixelFormatToResizeChannel(src.Format()), method)
+	if resizer == ctypes.c_void_p(0) :
+		raise Exception("Can't create resizer context !")
+	Lib.ResizerRun(resizer, src.Data(), src.Stride(), dst.Data(), dst.Stride())
+	Lib.Release(resizer)
+
+##  @ingroup python
+# The function gets resized image.
+# @param src - an original input image.
+# @param width - a width of output image.
+# @param height - a height of output image.
+# @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
+# @return - resized output image.
+def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bilinear) -> Simd.Image :
+	dst = Image(src.Format(), width, height)
+	Simd.Resize(src, dst, method)
+	return dst

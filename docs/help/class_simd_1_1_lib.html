@@ -84,6 +84,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4e570a23c0d715d7cd30f7588c7be25f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a4e570a23c0d715d7cd30f7588c7be25f">Alignment</a> ()</td></tr>
 <tr class="memdesc:a4e570a23c0d715d7cd30f7588c7be25f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets alignment required for the most productive work of <a class="el" href="namespace_simd.html">Simd</a> Library.  <a href="class_simd_1_1_lib.html#a4e570a23c0d715d7cd30f7588c7be25f">More...</a><br /></td></tr>
 <tr class="separator:a4e570a23c0d715d7cd30f7588c7be25f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14076f67212a4dcda4f8426214918100"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100">Release</a> (ctypes.c_void_p context)</td></tr>
+<tr class="memdesc:a14076f67212a4dcda4f8426214918100"><td class="mdescLeft">&#160;</td><td class="mdescRight">Releases context created with using of <a class="el" href="namespace_simd.html">Simd</a> Library API.  <a href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100">More...</a><br /></td></tr>
+<tr class="separator:a14076f67212a4dcda4f8426214918100"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a152384106d60606872aa59b0e0ae988d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a152384106d60606872aa59b0e0ae988d">GetThreadNumber</a> ()</td></tr>
 <tr class="memdesc:a152384106d60606872aa59b0e0ae988d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets number of threads used by Simd Library to parallelize some algorithms.  <a href="class_simd_1_1_lib.html#a152384106d60606872aa59b0e0ae988d">More...</a><br /></td></tr>
 <tr class="separator:a152384106d60606872aa59b0e0ae988d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -111,6 +114,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aca40ba27a51c5a9e76adfdd5c4d1de6c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#aca40ba27a51c5a9e76adfdd5c4d1de6c">ImageLoadFromFile</a> (str path, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> desiredFormat)</td></tr>
 <tr class="memdesc:aca40ba27a51c5a9e76adfdd5c4d1de6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads an image from file.  <a href="class_simd_1_1_lib.html#aca40ba27a51c5a9e76adfdd5c4d1de6c">More...</a><br /></td></tr>
 <tr class="separator:aca40ba27a51c5a9e76adfdd5c4d1de6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a350582f3c9daf359e34f1aec33ce95"><td class="memItemLeft" align="right" valign="top">ctypes.c_void_p&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a1a350582f3c9daf359e34f1aec33ce95">ResizerInit</a> (int srcX, int srcY, int dstX, int dstY, int channels, <a class="el" href="class_simd_1_1_resize_channel.html">Simd.ResizeChannel</a> type, <a class="el" href="class_simd_1_1_resize_method.html">Simd.ResizeMethod</a> method)</td></tr>
+<tr class="memdesc:a1a350582f3c9daf359e34f1aec33ce95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates resize context.  <a href="class_simd_1_1_lib.html#a1a350582f3c9daf359e34f1aec33ce95">More...</a><br /></td></tr>
+<tr class="separator:a1a350582f3c9daf359e34f1aec33ce95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addd522c6d962766caaffb961dd1fd354"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#addd522c6d962766caaffb961dd1fd354">ResizerRun</a> (ctypes.c_void_p resizer, ctypes.c_void_p src, int srcStride, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:addd522c6d962766caaffb961dd1fd354"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs image resizing.  <a href="class_simd_1_1_lib.html#addd522c6d962766caaffb961dd1fd354">More...</a><br /></td></tr>
+<tr class="separator:addd522c6d962766caaffb961dd1fd354"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A wrapper around Simd Library API. </p>
@@ -288,10 +297,11 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">size</td><td>- an original size. </td></tr>
-    <tr><td class="paramname">align</td><td>- a required alignment. return a pointer to allocated memory. </td></tr>
+    <tr><td class="paramname">align</td><td>- a required alignment. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>return a pointer to allocated memory. </dd></dl>
 
 </div>
 </div>
@@ -352,10 +362,11 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">size</td><td>- an original size. </td></tr>
-    <tr><td class="paramname">align</td><td>- a required alignment. return an aligned size. </td></tr>
+    <tr><td class="paramname">align</td><td>- a required alignment. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>return an aligned size. </dd></dl>
 
 </div>
 </div>
@@ -375,7 +386,33 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets alignment required for the most productive work of <a class="el" href="namespace_simd.html">Simd</a> Library. </p>
-<p >return a required alignment. </p>
+<dl class="section return"><dt>Returns</dt><dd>return a required alignment. </dd></dl>
+
+</div>
+</div>
+<a id="a14076f67212a4dcda4f8426214918100" name="a14076f67212a4dcda4f8426214918100"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14076f67212a4dcda4f8426214918100">&#9670;&nbsp;</a></span>Release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def Release </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>context</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Releases context created with using of <a class="el" href="namespace_simd.html">Simd</a> Library API. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">context</td><td>- a context to be released. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -686,6 +723,137 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a pointer to pixel data, row size in bytes, image width, image height, output pixel format. The output pixel data mast be deleted after use by function <a class="el" href="class_simd_1_1_lib.html#a073521385cd97c6a7b586e1d5dbb4408" title="Frees aligned memory block.">Simd.Lib.Free</a>. </dd></dl>
+
+</div>
+</div>
+<a id="a1a350582f3c9daf359e34f1aec33ce95" name="a1a350582f3c9daf359e34f1aec33ce95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a350582f3c9daf359e34f1aec33ce95">&#9670;&nbsp;</a></span>ResizerInit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> ctypes.c_void_p  ResizerInit </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_resize_channel.html">Simd.ResizeChannel</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_resize_method.html">Simd.ResizeMethod</a>&#160;</td>
+          <td class="paramname"><em>method</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates resize context. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">srcX</td><td>- a width of the input image. </td></tr>
+    <tr><td class="paramname">srcY</td><td>- a height of the input image. </td></tr>
+    <tr><td class="paramname">dstX</td><td>- a width of the output image. </td></tr>
+    <tr><td class="paramname">dstY</td><td>- a height of the output image. </td></tr>
+    <tr><td class="paramname">channels</td><td>- a channel number of input and output image. </td></tr>
+    <tr><td class="paramname">type</td><td>- a type of input and output image channel. </td></tr>
+    <tr><td class="paramname">method</td><td>- a method used in order to resize image. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to resize context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__resizing.html#gaa38558511e560de8645e511740442e83" title="Performs image resizing.">SimdResizerRun</a>. It must be released with using of function Simd.Release. </dd></dl>
+
+</div>
+</div>
+<a id="addd522c6d962766caaffb961dd1fd354" name="addd522c6d962766caaffb961dd1fd354"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addd522c6d962766caaffb961dd1fd354">&#9670;&nbsp;</a></span>ResizerRun()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ResizerRun </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>resizer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs image resizing. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">resizer</td><td>- a resize context. It must be created by function Simd.ResizerInit and released by function Simd.Release. </td></tr>
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size (in bytes) of the input image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of the resized output image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size (in bytes) of the output image. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
