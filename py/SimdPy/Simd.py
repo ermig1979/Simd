@@ -214,6 +214,36 @@ class Position(enum.Enum) :
 	BottomCenter = 7 
 	## A position in the bottom-right corner.
 	BottomRight = 8 
+	
+## @ingroup python
+# Describes resized image channel types.
+class ResizeChannel(enum.Enum) :
+    ## 8-bit integer channel type.
+    Byte = 0
+    ## 16-bit integer channel type.
+    Short = 1
+    ## 32-bit float channel type.
+    Float = 2
+	
+## @ingroup python
+# Describes methods used in order to resize image.
+class ResizeMethod(enum.Enum) :
+    ## Nearest method.
+	Nearest = 0
+    ## Nearest Pytorch compatible method.
+	NearestPytorch = 1
+    ## Bilinear method.
+	Bilinear = 2
+    ## Bilinear Caffe compatible method. It is relevant only for Simd.ResizeChannel.Float (32-bit float channel type).
+	BilinearCaffe = 3
+    ## Bilinear Pytorch compatible method. It is relevant only for Simd.ResizeChannel.Float (32-bit float channel type).
+	BilinearPytorch = 4
+    ## Bicubic method.
+	Bicubic = 5
+    ## Area method.
+	Area = 6
+    ## Area method for previously reduced in 2 times image.
+	AreaFast = 7
 
 ###################################################################################################
 
