@@ -4,6 +4,7 @@ import os
 import ctypes
 import pathlib
 import sys
+import array
 
 import Simd
 
@@ -40,6 +41,22 @@ def ImageTest(args) :
 	resized = Simd.Resized(image, image.Width() // 2, image.Height() // 2)
 	resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
 	
+###################################################################################################
+
+def SynetSetInputTest(args) :
+	print("\nSynetSetInputTest:")
+	width = 128
+	height = 128
+	channels = 3
+	image = Simd.Image()
+	image.Load("city.jpg")
+	resized = Simd.Resized(image, width, height, Simd.ResizeMethod.Area)
+	lower = [0.0, 0.0, 0.0]
+	upper = [1.0, 1.0, 1.0]
+	input = Simd.Lib.Allocate(channels * height * width * 4, Simd.Lib.Alignment())
+	Simd.SynetSetInput(resized, lower, upper, input, channels, Simd.TensorFormat.Nhwc)
+	Simd.Lib.Free(input)
+	
 
 ###################################################################################################
 
@@ -57,6 +74,8 @@ def main():
 	GetSetParamsTest(args)
 	
 	ImageTest(args)
+	
+	SynetSetInputTest(args) 
 	
 	print("\nSimd Python Wrapper test ended successfully!")
 	

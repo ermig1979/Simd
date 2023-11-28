@@ -561,6 +561,9 @@ typedef enum
     SimdTensorData32i, /*!< 32-bit signed integer. */
     SimdTensorData8i, /*!< 8-bit signed integer. */
     SimdTensorData8u, /*!< 8-bit unsigned integer. */
+    SimdTensorData64i, /*!< 64-bit signed integer. */
+    SimdTensorData64u, /*!< 64-bit unsigned integer. */
+    SimdTensorDataBool, /*!< 8-bit Boolean. */
     SimdTensorData16b, /*!< 16-bit BFloat16 (Brain Floating Point). */
     SimdTensorData16f, /*!< 16-bit floating point (Half Precision). */
 } SimdTensorDataType;

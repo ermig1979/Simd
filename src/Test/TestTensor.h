@@ -545,6 +545,9 @@ namespace Test
         case SimdTensorData32i: return "32i";
         case SimdTensorData8i: return "8i";
         case SimdTensorData8u: return "8u";
+        case SimdTensorData64i: return "64i";
+        case SimdTensorData64u: return "64u";
+        case SimdTensorDataBool: return "Bool";
         case SimdTensorData16b: return "16b";
         case SimdTensorData16f: return "16f";
         default: assert(0); return "Assert";

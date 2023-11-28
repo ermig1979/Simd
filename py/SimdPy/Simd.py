@@ -244,6 +244,40 @@ class ResizeMethod(enum.Enum) :
 	Area = 6
     ## Area method for previously reduced in 2 times image.
 	AreaFast = 7
+	
+## @ingroup python
+# 4D-tensor format type.
+class TensorFormat(enum.Enum) :
+	## Unknown tensor format.
+	Unknown = -1 
+	## NCHW (N - batch, C - channels, H - height, W - width) 4D-tensor format of (input/output) image.
+	Nchw = 0  
+	## NHWC (N - batch, H - height, W - width, C - channels) 4D-tensor format of (input/output) image.
+	Nhwc = 1
+	
+## @ingroup python
+# Describes tensor data type.
+class TensorData(enum.Enum) :
+	## Unknown tensor data type.
+	Unknown = -1 
+	## 32-bit floating point (Single Precision).
+	FP32 = 0 
+	## 32-bit signed integer.
+	INT32 = 0 
+	## 8-bit signed integer.
+	INT8 = 1 
+	## 8-bit unsigned integer.
+	UINT8 = 2 
+	## 64-bit signed integer.
+	INT64 = 3 
+	## 64-bit unsigned integer.
+	UINT64 = 4 
+	## 8-bit Boolean.
+	BOOL = 5 
+	## 16-bit BFloat16 (Brain Floating Point).
+	BF16 = 6 
+	## 16-bit floating point (Half Precision).
+	FP16 = 7 
 
 ###################################################################################################
 
@@ -329,6 +363,9 @@ class Lib():
 		
 		Lib.__lib.SimdResizerRun.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdResizerRun.restype = None
+		
+		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdSynetSetInput.restype = None
 	
 	## Gets version of %Simd Library.
 	# @return A string with version.
@@ -719,3 +756,27 @@ def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bil
 	dst = Image(src.Format(), width, height)
 	Simd.Resize(src, dst, method)
 	return dst
+
+##  @ingroup python
+# Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+# @param src - an original input image.
+# @param dst - a resized output image.
+# @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
+	# @param src - an input image. There are following supported pixel format: aSimd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24.
+	# @param lower - an array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+	# @param upper - an array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+	# @param dst - a pointer to the output 32-bit float image tensor.
+	# @param channels - a number of channels in the output image tensor. It can be 1 or 3.
+	# @param format - a format of output image tensor. There are supported following tensor formats: Simd.TensorFormat.Nchw, Simd.TensorFormat.Nhwc.
+def SynetSetInput(src : Image, lower, upper, dst : ctypes.c_void_p, channels : int, format : Simd.TensorFormat) :
+	if src.Format() != PixelFormat.Gray8 and src.Format() != PixelFormat.Bgr24 and src.Format() != PixelFormat.Bgra32 and src.Format() != PixelFormat.Rgb24 :
+		raise Exception("Incompatible image pixel format: {0}!".format(src.Format()))
+	if channels != 1 and channels != 3 :
+		raise Exception("Incompatible channel value: {0} !".format(channels))
+	lo = (ctypes.c_float * len(lower))()
+	for i in range(len(lower)) :
+		lo[i] = lower[i]
+	up = (ctypes.c_float * len(upper))()
+	for i in range(len(upper)) :
+		up[i] = upper[i]
+	Lib._Lib__lib.SimdSynetSetInput(src.Data(), src.Width(), src.Height(), src.Stride(), src.Format().value, lo, up, dst, channels, format.value)
