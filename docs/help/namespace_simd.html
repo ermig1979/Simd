@@ -127,6 +127,9 @@ Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html">View</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure provides storage and manipulation of images.  <a href="struct_simd_1_1_view.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_yuv_type.html">YuvType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Describes YUV format type.  <a href="class_simd_1_1_yuv_type.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -1191,9 +1194,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga0b59b5f4b053026f23dc0054bc92cf58"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_image.html">Simd.Image</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga0b59b5f4b053026f23dc0054bc92cf58">Resized</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, int width, int height, method=<a class="el" href="class_simd_1_1_resize_method.html#a4ca04a83471ed28470ccc779c907efdb">Simd.ResizeMethod.Bilinear</a>)</td></tr>
 <tr class="memdesc:ga0b59b5f4b053026f23dc0054bc92cf58"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function gets resized image.  <a href="group__python.html#ga0b59b5f4b053026f23dc0054bc92cf58">More...</a><br /></td></tr>
 <tr class="separator:ga0b59b5f4b053026f23dc0054bc92cf58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad2c828a2b2693a10ff8c447fe083a995"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#gad2c828a2b2693a10ff8c447fe083a995">SynetSetInput</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, lower, upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> format)</td></tr>
-<tr class="memdesc:gad2c828a2b2693a10ff8c447fe083a995"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__python.html#gad2c828a2b2693a10ff8c447fe083a995">More...</a><br /></td></tr>
-<tr class="separator:gad2c828a2b2693a10ff8c447fe083a995"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2a5563a7b128b11146229648c314b15d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga2a5563a7b128b11146229648c314b15d">SynetSetInput</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> format)</td></tr>
+<tr class="memdesc:ga2a5563a7b128b11146229648c314b15d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__python.html#ga2a5563a7b128b11146229648c314b15d">More...</a><br /></td></tr>
+<tr class="separator:ga2a5563a7b128b11146229648c314b15d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p ><a class="el" href="namespace_simd.html">Simd</a> API C++ wrappers. </p>

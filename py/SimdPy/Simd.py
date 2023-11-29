@@ -278,6 +278,20 @@ class TensorData(enum.Enum) :
 	BF16 = 6 
 	## 16-bit floating point (Half Precision).
 	FP16 = 7 
+	
+## @ingroup python
+# Describes YUV format type. It is uses in YUV to BGR forward and backward conversions.
+class YuvType(enum.Enum) :
+    ## Unknown YUV standard.
+    Unknown = -1  
+    ## Corresponds to BT.601 standard. Uses Kr=0.299, Kb=0.114. Restricts Y to range [16..235], U and V to [16..240].
+    Bt601 = 0
+    ## Corresponds to BT.709 standard. Uses Kr=0.2126, Kb=0.0722. Restricts Y to range [16..235], U and V to [16..240].
+    Bt709 = 1 
+    ## Corresponds to BT.2020 standard. Uses Kr=0.2627, Kb=0.0593. Restricts Y to range [16..235], U and V to [16..240].
+    Bt2020 = 2 
+    ## Corresponds to T-REC-T.871 standard. Uses Kr=0.299, Kb=0.114. Y, U and V use full range [0..255].
+    Trect871 = 3 
 
 ###################################################################################################
 
@@ -547,6 +561,26 @@ class Lib():
     # @param dstStride - a row size (in bytes) of the output image.
 	def ResizerRun(resizer : ctypes.c_void_p, src : ctypes.c_void_p, srcStride : int, dst : ctypes.c_void_p, dstStride : int) :
 		Lib.__lib.SimdResizerRun(resizer, src, srcStride, dst, dstStride)
+		
+	## Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    # @param src - a pointer to pixels data of input image.
+    # @param height - a height of input image.
+    # @param stride - a row size of input image in bytes.
+    # @param width - a width of input image.
+    # @param srcFormat - a pixel format of input image. Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
+	# @param lower - an array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+	# @param upper - an array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+	# @param dst - a pointer to the output 32-bit float image tensor.
+	# @param channels - a number of channels in the output image tensor. It can be 1 or 3.
+	# @param dstFormat - a format of output image tensor. There are supported following tensor formats: Simd.TensorFormat.Nchw, Simd.TensorFormat.Nhwc.
+	def SynetSetInput(src : ctypes.c_void_p, width: int, height: int, stride: int, srcFormat : Simd.PixelFormat, lower : array.array('f'), upper : array.array('f'), dst : ctypes.c_void_p, channels : int, dstFormat : Simd.TensorFormat) :
+		if srcFormat != PixelFormat.Gray8 and srcFormat != PixelFormat.Bgr24 and srcFormat != PixelFormat.Bgra32 and srcFormat != PixelFormat.Rgb24 and srcFormat != PixelFormat.Rgba32 :
+			raise Exception("Incompatible image pixel format: {0}!".format(srcFormat))
+		if channels != 1 and channels != 3 :
+			raise Exception("Incompatible channel value: {0} !".format(channels))
+		lo = (ctypes.c_float * len(lower))(*lower)
+		up = (ctypes.c_float * len(upper))(*upper)
+		Lib.__lib.SimdSynetSetInput(src, width, height, stride, srcFormat.value, lo, up, dst, channels, dstFormat.value)
 
 	
 ###################################################################################################
@@ -759,21 +793,11 @@ def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bil
 
 ##  @ingroup python
 # Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-# @param src - an input image. There are following supported pixel format: aSimd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24.
+# @param src - an input image. There are following supported pixel format: aSimd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
 # @param lower - an array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
 # @param upper - an array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
 # @param dst - a pointer to the output 32-bit float image tensor.
 # @param channels - a number of channels in the output image tensor. It can be 1 or 3.
 # @param format - a format of output image tensor. There are supported following tensor formats: Simd.TensorFormat.Nchw, Simd.TensorFormat.Nhwc.
-def SynetSetInput(src : Image, lower, upper, dst : ctypes.c_void_p, channels : int, format : Simd.TensorFormat) :
-	if src.Format() != PixelFormat.Gray8 and src.Format() != PixelFormat.Bgr24 and src.Format() != PixelFormat.Bgra32 and src.Format() != PixelFormat.Rgb24 :
-		raise Exception("Incompatible image pixel format: {0}!".format(src.Format()))
-	if channels != 1 and channels != 3 :
-		raise Exception("Incompatible channel value: {0} !".format(channels))
-	lo = (ctypes.c_float * len(lower))()
-	for i in range(len(lower)) :
-		lo[i] = lower[i]
-	up = (ctypes.c_float * len(upper))()
-	for i in range(len(upper)) :
-		up[i] = upper[i]
-	Lib._Lib__lib.SimdSynetSetInput(src.Data(), src.Width(), src.Height(), src.Stride(), src.Format().value, lo, up, dst, channels, format.value)
+def SynetSetInput(src : Image, lower : array.array('f'), upper : array.array('f'), dst : ctypes.c_void_p, channels : int, format : Simd.TensorFormat) :
+	Lib.SynetSetInput(src.Data(), src.Width(), src.Height(), src.Stride(), src.Format(), lower, upper, dst, channels, format)

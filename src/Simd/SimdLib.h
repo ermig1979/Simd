@@ -8239,7 +8239,7 @@ extern "C"
         \param [in] width - a width of input image and output image tensor.
         \param [in] height - a height of input image and output image tensor.
         \param [in] stride - a row size of input image.
-        \param [in] srcFormat - a pixel format of input image. There are supported following pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24.
+        \param [in] srcFormat - a pixel format of input image. There are supported following pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
         \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
