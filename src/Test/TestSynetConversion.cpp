@@ -289,7 +289,7 @@ namespace Test
 
         result = result && SynetSetInputAutoTest(3, 112, 96, View::Rgb24, SimdTensorFormatNhwc, f1, f2);
 
-        for (int s = 0; s < 4; ++s)
+        for (int s = 0; s < 5; ++s)
         {
             for (int c = 0; c < 2; ++c)
             {
