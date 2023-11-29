@@ -275,7 +275,8 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         const __m128i K16_BLUE_RED = SIMD_MM_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);
-        const __m128i K16_GREEN_ROUND = SIMD_MM_SET2_EPI16(Base::GREEN_TO_GRAY_WEIGHT, Base::BGR_TO_GRAY_ROUND_TERM);
+        const __m128i K16_GREEN_0 = SIMD_MM_SET2_EPI16(Base::GREEN_TO_GRAY_WEIGHT, 0);
+        const __m128i K32_ROUND_TERM = SIMD_MM_SET1_EPI32(Base::BGR_TO_GRAY_ROUND_TERM);
         const __m128i K8_BGR_TO_BGRA = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
         const __m128i K8_RGB_TO_BGRA = SIMD_MM_SETR_EPI8(0x2, 0x1, 0x0, -1, 0x5, 0x4, 0x3, -1, 0x8, 0x7, 0x6, -1, 0xB, 0xA, 0x9, -1);
 
@@ -288,8 +289,18 @@ namespace Simd
         {
             const __m128i g0a0 = _mm_and_si128(_mm_srli_si128(bgra, 1), K16_00FF);
             const __m128i b0r0 = _mm_and_si128(bgra, K16_00FF);
-            const __m128i weightedSum = _mm_add_epi32(_mm_madd_epi16(g0a0, K16_GREEN_ROUND), _mm_madd_epi16(b0r0, K16_BLUE_RED));
-            return _mm_srli_epi32(weightedSum, Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+            const __m128i weightedSum = _mm_add_epi32(_mm_madd_epi16(g0a0, K16_GREEN_0), _mm_madd_epi16(b0r0, K16_BLUE_RED));
+            return _mm_srli_epi32(_mm_add_epi32(weightedSum, K32_ROUND_TERM), Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+        }
+
+        const __m128i K16_RED_BLUE = SIMD_MM_SET2_EPI16(Base::RED_TO_GRAY_WEIGHT, Base::BLUE_TO_GRAY_WEIGHT);
+
+        SIMD_INLINE __m128i RgbaToGray32(__m128i rgba)
+        {
+            const __m128i g0a0 = _mm_and_si128(_mm_srli_si128(rgba, 1), K16_00FF);
+            const __m128i r0b0 = _mm_and_si128(rgba, K16_00FF);
+            const __m128i weightedSum = _mm_add_epi32(_mm_madd_epi16(g0a0, K16_GREEN_0), _mm_madd_epi16(r0b0, K16_RED_BLUE));
+            return _mm_srli_epi32(_mm_add_epi32(weightedSum, K32_ROUND_TERM), Base::BGR_TO_GRAY_AVERAGING_SHIFT);
         }
 
         template<SimdPixelFormatType format> SIMD_INLINE void SynetSetInput1(const uint8_t * src, __m128 scale, __m128 shift, float * dst);
@@ -309,26 +320,34 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInput1<SimdPixelFormatBgr24>(const uint8_t * src, __m128 scale, __m128 shift, float * dst)
         {
-            StoreScaled<false>(dst + 0 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(src + 0)), K8_BGR_TO_BGRA))), scale, shift);
-            StoreScaled<false>(dst + 1 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(src + 12)), K8_BGR_TO_BGRA))), scale, shift);
-            StoreScaled<false>(dst + 2 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(src + 24)), K8_BGR_TO_BGRA))), scale, shift);
-            StoreScaled<false>(dst + 3 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_srli_si128(Load<false>((__m128i*)(src + 32)), 4), K8_BGR_TO_BGRA))), scale, shift);
+            StoreScaled<false>(dst + 0 * F, BgraToGray32(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 0)), K8_BGR_TO_BGRA)), scale, shift);
+            StoreScaled<false>(dst + 1 * F, BgraToGray32(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 12)), K8_BGR_TO_BGRA)), scale, shift);
+            StoreScaled<false>(dst + 2 * F, BgraToGray32(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 24)), K8_BGR_TO_BGRA)), scale, shift);
+            StoreScaled<false>(dst + 3 * F, BgraToGray32(_mm_shuffle_epi8(_mm_srli_si128(Load<false>((__m128i*)(src + 32)), 4), K8_BGR_TO_BGRA)), scale, shift);
         }
 
         template<> SIMD_INLINE void SynetSetInput1<SimdPixelFormatBgra32>(const uint8_t * src, __m128 scale, __m128 shift, float * dst)
         {
-            StoreScaled<false>(dst + 0 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_and_si128(K32_00FFFFFF, Load<false>((__m128i*)src + 0)))), scale, shift);
-            StoreScaled<false>(dst + 1 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_and_si128(K32_00FFFFFF, Load<false>((__m128i*)src + 1)))), scale, shift);
-            StoreScaled<false>(dst + 2 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_and_si128(K32_00FFFFFF, Load<false>((__m128i*)src + 2)))), scale, shift);
-            StoreScaled<false>(dst + 3 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_and_si128(K32_00FFFFFF, Load<false>((__m128i*)src + 3)))), scale, shift);
+            StoreScaled<false>(dst + 0 * F, BgraToGray32(Load<false>((__m128i*)src + 0)), scale, shift);
+            StoreScaled<false>(dst + 1 * F, BgraToGray32(Load<false>((__m128i*)src + 1)), scale, shift);
+            StoreScaled<false>(dst + 2 * F, BgraToGray32(Load<false>((__m128i*)src + 2)), scale, shift);
+            StoreScaled<false>(dst + 3 * F, BgraToGray32(Load<false>((__m128i*)src + 3)), scale, shift);
         }
 
         template<> SIMD_INLINE void SynetSetInput1<SimdPixelFormatRgb24>(const uint8_t * src, __m128 scale, __m128 shift, float * dst)
         {
-            StoreScaled<false>(dst + 0 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(src + 0)), K8_RGB_TO_BGRA))), scale, shift);
-            StoreScaled<false>(dst + 1 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(src + 12)), K8_RGB_TO_BGRA))), scale, shift);
-            StoreScaled<false>(dst + 2 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(src + 24)), K8_RGB_TO_BGRA))), scale, shift);
-            StoreScaled<false>(dst + 3 * F, BgraToGray32(_mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_srli_si128(Load<false>((__m128i*)(src + 32)), 4), K8_RGB_TO_BGRA))), scale, shift);
+            StoreScaled<false>(dst + 0 * F, BgraToGray32(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 0)), K8_RGB_TO_BGRA)), scale, shift);
+            StoreScaled<false>(dst + 1 * F, BgraToGray32(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 12)), K8_RGB_TO_BGRA)), scale, shift);
+            StoreScaled<false>(dst + 2 * F, BgraToGray32(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 24)), K8_RGB_TO_BGRA)), scale, shift);
+            StoreScaled<false>(dst + 3 * F, BgraToGray32(_mm_shuffle_epi8(_mm_srli_si128(Load<false>((__m128i*)(src + 32)), 4), K8_RGB_TO_BGRA)), scale, shift);
+        }
+
+        template<> SIMD_INLINE void SynetSetInput1<SimdPixelFormatRgba32>(const uint8_t* src, __m128 scale, __m128 shift, float* dst)
+        {
+            StoreScaled<false>(dst + 0 * F, RgbaToGray32(Load<false>((__m128i*)src + 0)), scale, shift);
+            StoreScaled<false>(dst + 1 * F, RgbaToGray32(Load<false>((__m128i*)src + 1)), scale, shift);
+            StoreScaled<false>(dst + 2 * F, RgbaToGray32(Load<false>((__m128i*)src + 2)), scale, shift);
+            StoreScaled<false>(dst + 3 * F, RgbaToGray32(Load<false>((__m128i*)src + 3)), scale, shift);
         }
 
         template<SimdPixelFormatType format, size_t step> void SynetSetInput1(const uint8_t * src, size_t width, size_t height, size_t stride, const float * scale, const float * shift, float * dst)
@@ -410,6 +429,22 @@ namespace Simd
             SynetSetInput1Gray8(BgrToBlue(_rgb), scale[2], shift[2], dst + 2 * channel);
         }
 
+        SIMD_INLINE void SynetSetInputNchw3Rgba32(const uint8_t* src, const __m128* scale, const __m128* shift, float* dst, size_t channel)
+        {
+            __m128i rgba = Load<false>((__m128i*)src);
+            StoreScaled<false>(dst + 0 * channel, _mm_and_si128(_mm_srli_si128(rgba, 2), K32_000000FF), scale[0], shift[0]);
+            StoreScaled<false>(dst + 1 * channel, _mm_and_si128(_mm_srli_si128(rgba, 1), K32_000000FF), scale[1], shift[1]);
+            StoreScaled<false>(dst + 2 * channel, _mm_and_si128(_mm_srli_si128(rgba, 0), K32_000000FF), scale[2], shift[2]);
+        }
+
+        template<> SIMD_INLINE void SynetSetInputNchw3<SimdPixelFormatRgba32>(const uint8_t* src, const __m128* scale, const __m128* shift, float* dst, size_t channel)
+        {
+            SynetSetInputNchw3Rgba32(src + 0 * A, scale, shift, dst + 0 * F, channel);
+            SynetSetInputNchw3Rgba32(src + 1 * A, scale, shift, dst + 1 * F, channel);
+            SynetSetInputNchw3Rgba32(src + 2 * A, scale, shift, dst + 2 * F, channel);
+            SynetSetInputNchw3Rgba32(src + 3 * A, scale, shift, dst + 3 * F, channel);
+        }
+
         template<SimdPixelFormatType format, size_t step> void SynetSetInputNchw3(const uint8_t * src, size_t width, size_t height, size_t stride, const float * scale, const float * shift, float * dst)
         {
             size_t aligned = AlignLo(width, A), channel = width * height;
@@ -471,34 +506,28 @@ namespace Simd
             StoreScaled<false>(dst + 0xB * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr2, 0xC)), scale[2], shift[2]);
         }
 
-        const __m128i K8_BGRA_TO_BGR_00 = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1);
-        const __m128i K8_BGRA_TO_BGR_01 = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x1, 0x2, 0x4);
-        const __m128i K8_BGRA_TO_BGR_10 = SIMD_MM_SETR_EPI8(0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1, -1, -1, -1, -1);
-        const __m128i K8_BGRA_TO_BGR_11 = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9);
-        const __m128i K8_BGRA_TO_BGR_20 = SIMD_MM_SETR_EPI8(0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-        const __m128i K8_BGRA_TO_BGR_21 = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, 0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE);
+        const __m128i K8_BGRA_UNPACK_0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x1, -1, -1, -1, 0x2, -1, -1, -1, 0x4, -1, -1, -1);
+        const __m128i K8_BGRA_UNPACK_1 = SIMD_MM_SETR_EPI8(0x5, -1, -1, -1, 0x6, -1, -1, -1, 0x8, -1, -1, -1, 0x9, -1, -1, -1);
+        const __m128i K8_BGRA_UNPACK_2 = SIMD_MM_SETR_EPI8(0xA, -1, -1, -1, 0xC, -1, -1, -1, 0xD, -1, -1, -1, 0xE, -1, -1, -1);
 
         template<> SIMD_INLINE void SynetSetInputNhwc3<SimdPixelFormatBgra32>(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst)
         {
             __m128i bgra0 = Load<false>((__m128i*)src + 0);
+            StoreScaled<false>(dst + 0x0 * F, _mm_shuffle_epi8(bgra0, K8_BGRA_UNPACK_0), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x1 * F, _mm_shuffle_epi8(bgra0, K8_BGRA_UNPACK_1), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x2 * F, _mm_shuffle_epi8(bgra0, K8_BGRA_UNPACK_2), scale[2], shift[2]);
             __m128i bgra1 = Load<false>((__m128i*)src + 1);
+            StoreScaled<false>(dst + 0x3 * F, _mm_shuffle_epi8(bgra1, K8_BGRA_UNPACK_0), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x4 * F, _mm_shuffle_epi8(bgra1, K8_BGRA_UNPACK_1), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x5 * F, _mm_shuffle_epi8(bgra1, K8_BGRA_UNPACK_2), scale[2], shift[2]);
             __m128i bgra2 = Load<false>((__m128i*)src + 2);
+            StoreScaled<false>(dst + 0x6 * F, _mm_shuffle_epi8(bgra2, K8_BGRA_UNPACK_0), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x7 * F, _mm_shuffle_epi8(bgra2, K8_BGRA_UNPACK_1), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x8 * F, _mm_shuffle_epi8(bgra2, K8_BGRA_UNPACK_2), scale[2], shift[2]);
             __m128i bgra3 = Load<false>((__m128i*)src + 3);
-            __m128i bgr0 = _mm_or_si128(_mm_shuffle_epi8(bgra0, K8_BGRA_TO_BGR_00), _mm_shuffle_epi8(bgra1, K8_BGRA_TO_BGR_01));
-            StoreScaled<false>(dst + 0x0 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr0, 0x0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0x1 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr0, 0x4)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0x2 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr0, 0x8)), scale[2], shift[2]);
-            StoreScaled<false>(dst + 0x3 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr0, 0xC)), scale[0], shift[0]);
-            __m128i bgr1 = _mm_or_si128(_mm_shuffle_epi8(bgra1, K8_BGRA_TO_BGR_10), _mm_shuffle_epi8(bgra2, K8_BGRA_TO_BGR_11));
-            StoreScaled<false>(dst + 0x4 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr1, 0x0)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0x5 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr1, 0x4)), scale[2], shift[2]);
-            StoreScaled<false>(dst + 0x6 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr1, 0x8)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0x7 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr1, 0xC)), scale[1], shift[1]);
-            __m128i bgr2 = _mm_or_si128(_mm_shuffle_epi8(bgra2, K8_BGRA_TO_BGR_20), _mm_shuffle_epi8(bgra3, K8_BGRA_TO_BGR_21));
-            StoreScaled<false>(dst + 0x8 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr2, 0x0)), scale[2], shift[2]);
-            StoreScaled<false>(dst + 0x9 * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr2, 0x4)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0xA * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr2, 0x8)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0xB * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr2, 0xC)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x9 * F, _mm_shuffle_epi8(bgra3, K8_BGRA_UNPACK_0), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0xA * F, _mm_shuffle_epi8(bgra3, K8_BGRA_UNPACK_1), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0xB * F, _mm_shuffle_epi8(bgra3, K8_BGRA_UNPACK_2), scale[2], shift[2]);
         }
 
         const __m128i K8_RGB_UNPACK_0 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x1, -1, -1, -1, 0x0, -1, -1, -1, 0x5, -1, -1, -1);
@@ -523,6 +552,30 @@ namespace Simd
             StoreScaled<false>(dst + 0x9 * F, _mm_shuffle_epi8(bgr3, K8_RGB_UNPACK_0), scale[0], shift[0]);
             StoreScaled<false>(dst + 0xA * F, _mm_shuffle_epi8(bgr3, K8_RGB_UNPACK_1), scale[1], shift[1]);
             StoreScaled<false>(dst + 0xB * F, _mm_shuffle_epi8(bgr3, K8_RGB_UNPACK_2), scale[2], shift[2]);
+        }
+
+        const __m128i K8_RGBA_UNPACK_0 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x1, -1, -1, -1, 0x0, -1, -1, -1, 0x6, -1, -1, -1);
+        const __m128i K8_RGBA_UNPACK_1 = SIMD_MM_SETR_EPI8(0x5, -1, -1, -1, 0x4, -1, -1, -1, 0xA, -1, -1, -1, 0x9, -1, -1, -1);
+        const __m128i K8_RGBA_UNPACK_2 = SIMD_MM_SETR_EPI8(0x8, -1, -1, -1, 0xE, -1, -1, -1, 0xD, -1, -1, -1, 0xC, -1, -1, -1);
+
+        template<> SIMD_INLINE void SynetSetInputNhwc3<SimdPixelFormatRgba32>(const uint8_t* src, const __m128* scale, const __m128* shift, float* dst)
+        {
+            __m128i rgba0 = Load<false>((__m128i*)src + 0);
+            StoreScaled<false>(dst + 0x0 * F, _mm_shuffle_epi8(rgba0, K8_RGBA_UNPACK_0), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x1 * F, _mm_shuffle_epi8(rgba0, K8_RGBA_UNPACK_1), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x2 * F, _mm_shuffle_epi8(rgba0, K8_RGBA_UNPACK_2), scale[2], shift[2]);
+            __m128i rgba1 = Load<false>((__m128i*)src + 1);
+            StoreScaled<false>(dst + 0x3 * F, _mm_shuffle_epi8(rgba1, K8_RGBA_UNPACK_0), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x4 * F, _mm_shuffle_epi8(rgba1, K8_RGBA_UNPACK_1), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x5 * F, _mm_shuffle_epi8(rgba1, K8_RGBA_UNPACK_2), scale[2], shift[2]);
+            __m128i rgba2 = Load<false>((__m128i*)src + 2);
+            StoreScaled<false>(dst + 0x6 * F, _mm_shuffle_epi8(rgba2, K8_RGBA_UNPACK_0), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x7 * F, _mm_shuffle_epi8(rgba2, K8_RGBA_UNPACK_1), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x8 * F, _mm_shuffle_epi8(rgba2, K8_RGBA_UNPACK_2), scale[2], shift[2]);
+            __m128i rgba3 = Load<false>((__m128i*)src + 3);
+            StoreScaled<false>(dst + 0x9 * F, _mm_shuffle_epi8(rgba3, K8_RGBA_UNPACK_0), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0xA * F, _mm_shuffle_epi8(rgba3, K8_RGBA_UNPACK_1), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0xB * F, _mm_shuffle_epi8(rgba3, K8_RGBA_UNPACK_2), scale[2], shift[2]);
         }
 
         template<SimdPixelFormatType format, size_t step> void SynetSetInputNhwc3(const uint8_t * src, size_t width, size_t height, size_t stride, const float * scale, const float * shift, float * dst)
@@ -563,6 +616,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: SynetSetInput1<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
                 case SimdPixelFormatBgra32: SynetSetInput1<SimdPixelFormatBgra32, 4>(src, width, height, stride, scale, lower, dst); return;
                 case SimdPixelFormatRgb24: SynetSetInput1<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                case SimdPixelFormatRgba32: SynetSetInput1<SimdPixelFormatRgba32, 4>(src, width, height, stride, scale, lower, dst); return;
                 default: assert(0);
                 }
                 break;
@@ -576,6 +630,7 @@ namespace Simd
                     case SimdPixelFormatBgr24: SynetSetInputNchw3<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
                     case SimdPixelFormatBgra32: SynetSetInputNchw3<SimdPixelFormatBgra32, 4>(src, width, height, stride, scale, lower, dst); return;
                     case SimdPixelFormatRgb24: SynetSetInputNchw3<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgba32: SynetSetInputNchw3<SimdPixelFormatRgba32, 4>(src, width, height, stride, scale, lower, dst); return;
                     default: assert(0);
                     }
                     break;
@@ -583,9 +638,10 @@ namespace Simd
                     switch (srcFormat)
                     {
                     case SimdPixelFormatGray8: SynetSetInputNhwc3<SimdPixelFormatGray8, 1>(src, width, height, stride, scale, lower, dst); return;
-                    case SimdPixelFormatBgr24: SynetSetInputNhwc3<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); break;
+                    case SimdPixelFormatBgr24: SynetSetInputNhwc3<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
                     case SimdPixelFormatBgra32: SynetSetInputNhwc3<SimdPixelFormatBgra32, 4>(src, width, height, stride, scale, lower, dst); return;
                     case SimdPixelFormatRgb24: SynetSetInputNhwc3<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgba32: SynetSetInputNhwc3<SimdPixelFormatRgba32, 4>(src, width, height, stride, scale, lower, dst); return;
                     default: assert(0);
                     }
                     break;

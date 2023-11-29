@@ -93,6 +93,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga0b59b5f4b053026f23dc0054bc92cf58"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_image.html">Simd.Image</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga0b59b5f4b053026f23dc0054bc92cf58">Resized</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, int width, int height, method=<a class="el" href="class_simd_1_1_resize_method.html#a4ca04a83471ed28470ccc779c907efdb">Simd.ResizeMethod.Bilinear</a>)</td></tr>
 <tr class="memdesc:ga0b59b5f4b053026f23dc0054bc92cf58"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function gets resized image.  <a href="group__python.html#ga0b59b5f4b053026f23dc0054bc92cf58">More...</a><br /></td></tr>
 <tr class="separator:ga0b59b5f4b053026f23dc0054bc92cf58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad2c828a2b2693a10ff8c447fe083a995"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#gad2c828a2b2693a10ff8c447fe083a995">SynetSetInput</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, lower, upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> format)</td></tr>
+<tr class="memdesc:gad2c828a2b2693a10ff8c447fe083a995"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__python.html#gad2c828a2b2693a10ff8c447fe083a995">More...</a><br /></td></tr>
+<tr class="separator:gad2c828a2b2693a10ff8c447fe083a995"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Python Wrapper of Simd Library. </p>
@@ -190,6 +193,71 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>- resized output image. </dd></dl>
+
+</div>
+</div>
+<a id="gad2c828a2b2693a10ff8c447fe083a995" name="gad2c828a2b2693a10ff8c447fe083a995"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad2c828a2b2693a10ff8c447fe083a995">&#9670;&nbsp;</a></span>SynetSetInput()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def SynetSetInput </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>lower</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>upper</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a>&#160;</td>
+          <td class="paramname"><em>format</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- an input image. There are following supported pixel format: aSimd.PixelFormat.Gray8, <a class="el" href="class_simd_1_1_pixel_format.html#a0b1b1a17224566f43dd3427347bdb0dc" title="A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.">Simd.PixelFormat.Bgr24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#ab1b15f83aaa223e4e6b2075aefe522be" title="A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.">Simd.PixelFormat.Bgra32</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a86f519c808ef15faed67904830427970" title="A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.">Simd.PixelFormat.Rgb24</a>. </td></tr>
+    <tr><td class="paramname">lower</td><td>- an array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
+    <tr><td class="paramname">upper</td><td>- an array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image tensor. </td></tr>
+    <tr><td class="paramname">channels</td><td>- a number of channels in the output image tensor. It can be 1 or 3. </td></tr>
+    <tr><td class="paramname">format</td><td>- a format of output image tensor. There are supported following tensor formats: <a class="el" href="class_simd_1_1_tensor_format.html#a0d6eadaeb9b76db3d65a4a0d23546348" title="NCHW (N - batch, C - channels, H - height, W - width) 4D-tensor format of (input/output) image.">Simd.TensorFormat.Nchw</a>, <a class="el" href="class_simd_1_1_tensor_format.html#aff67f159c248dc607e683100ca718db3" title="NHWC (N - batch, H - height, W - width, C - channels) 4D-tensor format of (input/output) image.">Simd.TensorFormat.Nhwc</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

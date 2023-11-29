@@ -283,7 +283,7 @@ namespace Test
     {
         bool result = true;
 
-        View::Format srcFormat[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
+        View::Format srcFormat[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
         size_t channels[2] = { 1, 3 };
         SimdTensorFormatType dstFormat[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
 

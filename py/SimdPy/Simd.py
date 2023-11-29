@@ -759,15 +759,12 @@ def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bil
 
 ##  @ingroup python
 # Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-# @param src - an original input image.
-# @param dst - a resized output image.
-# @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
-	# @param src - an input image. There are following supported pixel format: aSimd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24.
-	# @param lower - an array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
-	# @param upper - an array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
-	# @param dst - a pointer to the output 32-bit float image tensor.
-	# @param channels - a number of channels in the output image tensor. It can be 1 or 3.
-	# @param format - a format of output image tensor. There are supported following tensor formats: Simd.TensorFormat.Nchw, Simd.TensorFormat.Nhwc.
+# @param src - an input image. There are following supported pixel format: aSimd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24.
+# @param lower - an array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+# @param upper - an array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+# @param dst - a pointer to the output 32-bit float image tensor.
+# @param channels - a number of channels in the output image tensor. It can be 1 or 3.
+# @param format - a format of output image tensor. There are supported following tensor formats: Simd.TensorFormat.Nchw, Simd.TensorFormat.Nhwc.
 def SynetSetInput(src : Image, lower, upper, dst : ctypes.c_void_p, channels : int, format : Simd.TensorFormat) :
 	if src.Format() != PixelFormat.Gray8 and src.Format() != PixelFormat.Bgr24 and src.Format() != PixelFormat.Bgra32 and src.Format() != PixelFormat.Rgb24 :
 		raise Exception("Incompatible image pixel format: {0}!".format(src.Format()))

@@ -199,6 +199,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: SynetSetInput1<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
                 case SimdPixelFormatBgra32: SynetSetInput1<SimdPixelFormatBgr24, 4>(src, width, height, stride, scale, lower, dst); return;
                 case SimdPixelFormatRgb24: SynetSetInput1<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                case SimdPixelFormatRgba32: SynetSetInput1<SimdPixelFormatRgb24, 4>(src, width, height, stride, scale, lower, dst); return;
                 default: assert(0);
                 }
                 break;
@@ -212,6 +213,7 @@ namespace Simd
                     case SimdPixelFormatBgr24: SynetSetInputNchw3<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
                     case SimdPixelFormatBgra32: SynetSetInputNchw3<SimdPixelFormatBgr24, 4>(src, width, height, stride, scale, lower, dst); return;
                     case SimdPixelFormatRgb24: SynetSetInputNchw3<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgba32: SynetSetInputNchw3<SimdPixelFormatRgb24, 4>(src, width, height, stride, scale, lower, dst); return;
                     default: assert(0);
                     }
                     break;
@@ -222,6 +224,7 @@ namespace Simd
                     case SimdPixelFormatBgr24: SynetSetInputNhwc3<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
                     case SimdPixelFormatBgra32: SynetSetInputNhwc3<SimdPixelFormatBgr24, 4>(src, width, height, stride, scale, lower, dst); return;
                     case SimdPixelFormatRgb24: SynetSetInputNhwc3<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgba32: SynetSetInputNhwc3<SimdPixelFormatRgb24, 4>(src, width, height, stride, scale, lower, dst); return;
                     default: assert(0);
                     }
                     break;
