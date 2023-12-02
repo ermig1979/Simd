@@ -39,6 +39,7 @@ def ImageTest(args) :
 	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter)
 	center.Save("center.jpg", Simd.ImageFile.Jpeg, 85)
 	resized = Simd.Resized(image, image.Width() // 2, image.Height() // 2)
+	Simd.FillPixel(resized.Region(200, 200, 400, 400), [0, 0, 255])
 	resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
 	
 ###################################################################################################

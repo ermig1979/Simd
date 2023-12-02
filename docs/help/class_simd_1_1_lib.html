@@ -108,6 +108,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae0a39a09c94cfc19437823497fb70bef"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ae0a39a09c94cfc19437823497fb70bef">Crc32c</a> (ctypes.c_void_p src, int size)</td></tr>
 <tr class="memdesc:ae0a39a09c94cfc19437823497fb70bef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 32-bit cyclic redundancy check (CRC32c) for current data.  <a href="class_simd_1_1_lib.html#ae0a39a09c94cfc19437823497fb70bef">More...</a><br /></td></tr>
 <tr class="separator:ae0a39a09c94cfc19437823497fb70bef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac00ff54734904ddd7fabc0d654a8cb34"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac00ff54734904ddd7fabc0d654a8cb34">FillPixel</a> (ctypes.c_void_p dst, int stride, int width, int height, array.array('B') pixel)</td></tr>
+<tr class="memdesc:ac00ff54734904ddd7fabc0d654a8cb34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <a href="class_simd_1_1_lib.html#ac00ff54734904ddd7fabc0d654a8cb34">More...</a><br /></td></tr>
+<tr class="separator:ac00ff54734904ddd7fabc0d654a8cb34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#afbfca070bbcd00e94be3ee1e3577b0fb">ImageSaveToFile</a> (ctypes.c_void_p src, int stride, int width, int height, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> format, <a class="el" href="class_simd_1_1_image_file.html">Simd.ImageFile</a> file, int quality, str path)</td></tr>
 <tr class="memdesc:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves an image to file in given image file format.  <a href="class_simd_1_1_lib.html#afbfca070bbcd00e94be3ee1e3577b0fb">More...</a><br /></td></tr>
 <tr class="separator:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -608,6 +611,64 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>32-bit cyclic redundancy check (CRC32c). </dd></dl>
+
+</div>
+</div>
+<a id="ac00ff54734904ddd7fabc0d654a8cb34" name="ac00ff54734904ddd7fabc0d654a8cb34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac00ff54734904ddd7fabc0d654a8cb34">&#9670;&nbsp;</a></span>FillPixel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def FillPixel </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">array.array('B')&#160;</td>
+          <td class="paramname"><em>pixel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fills image by value of given pixel. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
+    <tr><td class="paramname">stride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramname">pixel</td><td>- an array of unsigned 8-bit integer width pixel channels. Its size is in range [1..4]. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

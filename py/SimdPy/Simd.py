@@ -366,6 +366,18 @@ class Lib():
 		Lib.__lib.SimdCrc32c.argtypes = [ ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdCrc32c.restype = ctypes.c_uint32
 		
+		Lib.__lib.SimdAbsDifference.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t ]
+		Lib.__lib.SimdAbsDifference.restype = None
+		
+		Lib.__lib.SimdAbsDifferenceSum.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint64) ]
+		Lib.__lib.SimdAbsDifferenceSum.restype = None
+		
+		Lib.__lib.SimdAbsDifferenceSumMasked.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint64) ]
+		Lib.__lib.SimdAbsDifferenceSumMasked.restype = None
+		
+		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdFillPixel.restype = None
+
 		Lib.__lib.SimdImageSaveToFile.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.c_int32, ctypes.c_int32, ctypes.c_char_p ]
 		Lib.__lib.SimdImageSaveToFile.restype = ctypes.c_int32
 		
@@ -515,6 +527,17 @@ class Lib():
 	def Crc32c(src : ctypes.c_void_p, size : int) :
 		return Lib.__lib.SimdCrc32c(src, size)
 	
+    ## Fills image by value of given pixel.
+    # @param dst - a pointer to pixels data of output image.
+    # @param stride - a row size of output image in bytes.
+    # @param width - a width of output image.
+    # @param height - a height of output image.
+    # @param pixel - an array of unsigned 8-bit integer width pixel channels. Its size is in range [1..4].
+	def FillPixel(dst : ctypes.c_void_p, stride: int, width: int, height: int, pixel : array.array('B')) :
+		size = len(pixel)
+		if size < 1 or size > 4 :
+			raise Exception("Incompatible pixel size: {0} !".format(size))
+		Lib.__lib.SimdFillPixel(dst, stride, width, height, (ctypes.c_uint8 * size)(*pixel), size)	
     ## Saves an image to file in given image file format.
     # @param src - a pointer to pixels data of input image.
     # @param stride - a row size of input image in bytes.
@@ -681,15 +704,6 @@ class Image():
 	def Data(self) -> ctypes.c_void_p :
 		return self.__data
 
-    ## Saves the image to file in given image file format.
-    # @note Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
-    # @param path - a path to output image file.
-    # @param file - a format of output image file. To auto choise format of output file set this parameter to Simd.ImageFile.Undefined.
-    # @param quality - a parameter of compression quality (if file format supports it).
-    # @return result of the operation.
-	def Save(self, path : str, file = Simd.ImageFile.Undefined, quality = 100) -> bool:
-		return Lib.ImageSaveToFile(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format(), file, quality, path)
-	
 	## Loads an image from file.
     # @param path - a path to input image file.
     # @param desiredFormat - a desired pixel format of output image. It can be Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, 
@@ -706,6 +720,15 @@ class Image():
 			self.__data = data
 			self.__owner = True
 		return self.__owner
+	
+    ## Saves the image to file in given image file format.
+    # @note Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
+    # @param path - a path to output image file.
+    # @param file - a format of output image file. To auto choise format of output file set this parameter to Simd.ImageFile.Undefined.
+    # @param quality - a parameter of compression quality (if file format supports it).
+    # @return result of the operation.
+	def Save(self, path : str, file = Simd.ImageFile.Undefined, quality = 100) -> bool:
+		return Lib.ImageSaveToFile(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format(), file, quality, path)
 	
     ## Creates a new Simd.Image which points to the region of current image bounded by the rectangle with specified coordinates.
     # @param left - a left side of the region.
@@ -764,6 +787,19 @@ def PixelFormatToResizeChannel(src) -> ResizeChannel :
 	elif src == Simd.PixelFormat.Rgba32 : return ResizeChannel.Byte
 	elif src == Simd.PixelFormat.Argb32 : return ResizeChannel.Byte
 	else : raise Exception("Can't {0} convert to Simd.ResizeChannel !".format(src))
+	
+##  @ingroup python
+# Fills image by value of given pixel.
+# @param dst - an output image.
+# @param pixel - an array of unsigned 8-bit integer width pixel channels. Its size is in range [1..4]. 
+def FillPixel(dst : Image, pixel : array.array('B')) :
+	format = dst.Format()
+	if format.ChannelSize() != 1 :
+		raise Exception("FillPixel supports only 8-bits channel image!")
+	size = len(pixel)
+	if size < 1 or size > 4 or size != format.ChannelCount() :
+		raise Exception("Incompatible pixel size {0} and image type {1} !".format(size, format))
+	return Lib.FillPixel(dst.Data(), dst.Stride(), dst.Width(), dst.Height(), pixel)
 
 ##  @ingroup python
 # The function performs image resizing.
