@@ -517,9 +517,7 @@ namespace Simd
                 {
                     __m256 _sqsum = _mm256_setzero_ps();
                     for (s = 0; s < spatialF; s += F, o += F)
-                    {
                         _sqsum = _mm256_add_ps(Square(_mm256_loadu_ps(src + o)), _sqsum);
-                    }
                     float sqsum = Avx::ExtractSum(_sqsum);
                     for (; s < spatial; ++s, ++o)
                         sqsum += Simd::Square(src[o]);
