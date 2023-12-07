@@ -7941,6 +7941,50 @@ extern "C"
     SIMD_API void SimdSynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
 
+    /*! @ingroup synet_normalize
+
+        \fn void SimdSynetNormalizeLayerForwardV4(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
+
+        \short Performs forward propagation of NormalizeLayer (Version 4).
+
+        Algorithm's details:
+        \verbatim
+        for(b = 0; b < batch; ++b)
+        {
+            sum = 0;
+            for (c = 0; c < channels; ++c)
+            {
+                sqsum = 0;
+                for (s = 0; s < spatial; ++s)
+                    sqsum += Square(src[b, c, s]);
+                buf[c] = sqrt(sqsum);
+                sum += buf[c];
+            }
+            for (c = 0; c < channels; ++c)
+            {
+                buf[c] = 1 + scale[c] * buf[c] / (sum / channels + eps);
+                for (s = 0; s < spatial; ++s)
+                    dst[b, c, s] = src[b, c, s] * buf[c] + shift[c];
+            }
+        }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float tensor.
+        \param [in] batch - a batch size of input and output tensor.
+        \param [in] channels - a number of channels in input and output tensor.
+        \param [in] spatial - a spatial size (height*width) of input and output tensor.
+        \param [in] scale - an array with scale parameters. The size of the array is equal to channels.
+        \param [in] shift - an array with shift parameters. The size of the array is equal to channels.
+        \param [in] eps - a pointer to epsilon parameter. It is used to prevent division by zero.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
+        \param [out] buf - a pointer to external temporary buffer. The size of the buffer must be equal to channels. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output 32-bit float tensor.
+    */
+    SIMD_API void SimdSynetNormalizeLayerForwardV4(const float* src, size_t batch, size_t channels, size_t spatial,
+        const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
+
     /*! @ingroup synet_permute
 
         \fn void* SimdSynetPermuteInit(const size_t * shape, const size_t* order, size_t count, SimdTensorDataType type);

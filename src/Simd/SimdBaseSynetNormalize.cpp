@@ -286,6 +286,76 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetNormalizeLayerForwardV4(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst)
+        {
+            float k = 1.0f / float(channels), e = *eps;
+            Array32f _buf;
+            if (buf == NULL)
+            {
+                _buf.Resize(channels);
+                buf = _buf.data;
+            }
+
+            if (format == SimdTensorFormatNchw)
+            {
+                for (size_t b = 0; b < batch; ++b)
+                {
+                    float sum = 0;
+                    for (size_t c = 0, o = 0; c < channels; ++c)
+                    {
+                        float sqsum = 0;
+                        for (size_t s = 0; s < spatial; ++s, ++o)
+                            sqsum += Simd::Square(src[o]);
+                        buf[c] = sqrt(sqsum);
+                        sum += buf[c];
+                    }
+                    float norm = 1.0f / (sum * k + e);
+                    for (size_t c = 0; c < channels; ++c)
+                    {
+                        float alpha = 1.0f + scale[c] * buf[c] * norm;
+                        for (size_t s = 0; s < spatial; ++s)
+                            dst[s] = src[s] * alpha + shift[c];
+                        dst += spatial;
+                        src += spatial;
+                    }
+                }
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                for (size_t b = 0; b < batch; ++b)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                        buf[c] = 0;
+                    for (size_t s = 0, o = 0; s < spatial; ++s)
+                    {
+                        for (size_t c = 0; c < channels; ++c, ++o)
+                            buf[c] += Simd::Square(src[o]);
+                    }
+                    float sum = 0;
+                    for (size_t c = 0; c < channels; ++c)
+                    {
+                        buf[c] = sqrt(buf[c]);
+                        sum += buf[c];
+                    }
+                    float norm = 1.0f / (sum * k + e);
+                    for (size_t c = 0; c < channels; ++c)
+                        buf[c] = 1.0f + scale[c] * buf[c] * norm;
+                    for (size_t s = 0, o = 0; s < spatial; ++s)
+                    {
+                        for (size_t c = 0; c < channels; ++c, ++o)
+                            dst[o] = src[o] * buf[c] + shift[c];
+                    }
+                    src += channels * spatial;
+                    dst += channels * spatial;
+                }
+            }
+            else
+                assert(0);
+        }
     }
 #endif
 }

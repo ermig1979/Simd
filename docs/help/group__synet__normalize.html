@@ -59,6 +59,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga779e9a6224eb7a62a07493c8491db2cd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__normalize.html#ga779e9a6224eb7a62a07493c8491db2cd">SimdSynetNormalizeLayerForwardV3</a> (const float *src, size_t batch, size_t channels, size_t spatial, const float *scale, const float *shift, const float *eps, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, float *buf, float *dst)</td></tr>
 <tr class="memdesc:ga779e9a6224eb7a62a07493c8491db2cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of NormalizeLayer (Version 3).  <a href="group__synet__normalize.html#ga779e9a6224eb7a62a07493c8491db2cd">More...</a><br /></td></tr>
 <tr class="separator:ga779e9a6224eb7a62a07493c8491db2cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga50d1409e56d6bb0bf516b2a964009293"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__normalize.html#ga50d1409e56d6bb0bf516b2a964009293">SimdSynetNormalizeLayerForwardV4</a> (const float *src, size_t batch, size_t channels, size_t spatial, const float *scale, const float *shift, const float *eps, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, float *buf, float *dst)</td></tr>
+<tr class="memdesc:ga50d1409e56d6bb0bf516b2a964009293"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of NormalizeLayer (Version 4).  <a href="group__synet__normalize.html#ga50d1409e56d6bb0bf516b2a964009293">More...</a><br /></td></tr>
+<tr class="separator:ga50d1409e56d6bb0bf516b2a964009293"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions to acceleratе NormalizeLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
@@ -369,6 +372,118 @@ Functions</h2></td></tr>
         for (s = 0; s &lt; spatial; ++s)
             dst[b, c, s] = dst[b, c, s] * norm * scale[c] + shift[c];
     }
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size of input and output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in input and output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size (height*width) of input and output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- an array with scale parameters. The size of the array is equal to channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- an array with shift parameters. The size of the array is equal to channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">eps</td><td>- a pointer to epsilon parameter. It is used to prevent division by zero. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size of the buffer must be equal to channels. Can be NULL (it causes usage of internal buffer). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float tensor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga50d1409e56d6bb0bf516b2a964009293" name="ga50d1409e56d6bb0bf516b2a964009293"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga50d1409e56d6bb0bf516b2a964009293">&#9670;&nbsp;</a></span>SimdSynetNormalizeLayerForwardV4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetNormalizeLayerForwardV4 </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>batch</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>spatial</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>scale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>shift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>eps</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs forward propagation of NormalizeLayer (Version 4). </p>
+<p >Algorithm's details: </p><pre class="fragment">for(b = 0; b &lt; batch; ++b)
+{
+    sum = 0;
+    for (c = 0; c &lt; channels; ++c)
+    {
+        sqsum = 0;
+        for (s = 0; s &lt; spatial; ++s)
+            sqsum += Square(src[b, c, s]);
+        buf[c] = sqrt(sqsum);
+        sum += buf[c];
+    }
+    for (c = 0; c &lt; channels; ++c)
+    {
+        buf[c] = 1 + scale[c] * buf[c] / (sum / channels + eps);
+        for (s = 0; s &lt; spatial; ++s)
+            dst[b, c, s] = src[b, c, s] * buf[c] + shift[c];
+    }
+}
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
