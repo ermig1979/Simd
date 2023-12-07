@@ -507,7 +507,7 @@ namespace Simd
         void NormalizeNchwV4(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, float eps, float* buf, float* dst)
         {
             float k = 1.0f / float(channels);
-            size_t spatialF = AlignLo(spatial, F), s, o;
+            size_t spatialF = AlignLo(spatial, F), s;
             for (size_t b = 0; b < batch; ++b)
             {
                 float sum = 0;
@@ -515,7 +515,7 @@ namespace Simd
                 {
                     __m128 _sqsum = _mm_setzero_ps();
                     for (s = 0; s < spatialF; s += F, o += F)
-                        _sqsum = _mm_add_ps(Square(_mm_loadu_ps(src + o)), _sqsum);
+                        _sqsum = _mm_add_ps(Sse41::Square(_mm_loadu_ps(src + o)), _sqsum);
                     float sqsum = ExtractSum(_sqsum);                    
                     for (; s < spatial; ++s, ++o)
                         sqsum += Simd::Square(src[o]);
@@ -551,9 +551,9 @@ namespace Simd
                 for (size_t s = 0, o = 0; s < spatial; ++s)
                 {
                     for (c = 0; c < channelsF; c += F, o += F)
-                        _mm_storeu_ps(buf + c, _mm_add_ps(Square(_mm_loadu_ps(src + o)), _mm_loadu_ps(buf + c)));
+                        _mm_storeu_ps(buf + c, _mm_add_ps(Sse41::Square(_mm_loadu_ps(src + o)), _mm_loadu_ps(buf + c)));
                     for (; c < channels; c += 1, o += 1)
-                        _mm_store_ss(buf + c, _mm_add_ss(Square(_mm_load_ss(src + o)), _mm_load_ss(buf + c)));
+                        _mm_store_ss(buf + c, _mm_add_ss(Sse41::Square(_mm_load_ss(src + o)), _mm_load_ss(buf + c)));
                 }
                 float sum = 0;
                 for (size_t c = 0; c < channels; ++c)

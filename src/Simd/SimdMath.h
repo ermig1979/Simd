@@ -805,6 +805,11 @@ namespace Simd
 #endif
         }
 
+        SIMD_INLINE __m512 Square(__m512 value)
+        {
+            return _mm512_mul_ps(value, value);
+        }
+
         SIMD_INLINE __m512 Or(const __m512& a, const __m512& b)
         {
 #if defined(__clang__)

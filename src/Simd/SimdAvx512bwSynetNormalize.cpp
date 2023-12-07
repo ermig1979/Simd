@@ -546,9 +546,9 @@ namespace Simd
                     __m512 _sqsum = _mm512_setzero_ps();
                     const float* ps = src + c * spatial;
                     for (s = 0; s < spatialF; s += F)
-                        _sqsum = _mm512_add_ps(Square(_mm512_loadu_ps(ps + s)), _sqsum);
+                        _sqsum = _mm512_add_ps(Avx512bw::Square(_mm512_loadu_ps(ps + s)), _sqsum);
                     if(s < spatial)
-                        _sqsum = _mm512_add_ps(Square(_mm512_maskz_loadu_ps(spatialM, ps + s)), _sqsum);
+                        _sqsum = _mm512_add_ps(Avx512bw::Square(_mm512_maskz_loadu_ps(spatialM, ps + s)), _sqsum);
                     float sqsum = Avx512bw::ExtractSum(_sqsum);
                     buf[c] = sqrt(sqsum);
                     sum += buf[c];
