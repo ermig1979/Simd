@@ -42,7 +42,7 @@ namespace Simd
     const bool NHWC_GEMM_RUNTIME = true;
 #endif
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     SIMD_INLINE bool IsKernel(const SimdConvolutionParameters& p, size_t value)
     {
@@ -94,7 +94,7 @@ namespace Simd
         return (p.padX + p.srcW - (p.kernelX - 1) * p.dilationX - 1) / p.strideX + 1;
     }
 
-    //---------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
 
     struct ConvParam32f : public SimdConvolutionParameters
     {
@@ -212,7 +212,7 @@ namespace Simd
         } 
     };
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     class SynetConvolution32f : public Deletable
     {
@@ -301,7 +301,7 @@ namespace Simd
         mutable String _info;
     };
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace Base
     {
@@ -404,7 +404,7 @@ namespace Simd
         public:
             SynetConvolution32fDirectNhwc(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::DirectNhwc"; }
+            virtual String Desc() const { return Ext() + "::DirectNhwc" + (_param.IsDepthwise() ? "-Depthwise" : "-Default"); }
             virtual void Forward(const float * src, float * buf, float * dst);
 
             static bool Preferable(const ConvParam32f & p);

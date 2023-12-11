@@ -380,6 +380,8 @@ namespace Simd
             }
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t size = p.group;
@@ -554,7 +556,9 @@ namespace Simd
             }
         }
 
-        template<::SimdConvolutionActivationType type>
+        //-------------------------------------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type>
         SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge(const float * src, const ConvParam32f & p, size_t dy, size_t dx, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcC = p.srcC;
