@@ -307,6 +307,8 @@ namespace Simd
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
 
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution32fGemmNN : public SynetConvolution32f
         {
         public:
@@ -326,6 +328,8 @@ namespace Simd
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD, _merge;
         };
 
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution32fGemmNT : public SynetConvolution32f
         {
         public:
@@ -342,6 +346,8 @@ namespace Simd
 
             size_t _M, _N, _K, _batch, _sizeS, _sizeB, _sizeD;
         };
+
+        //-------------------------------------------------------------------------------------------------
 
         class SynetConvolution32fWinograd : public SynetConvolution32f
         {
@@ -378,6 +384,8 @@ namespace Simd
             SetOutput _setOutput;
         };
 
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution32fDirectNchw : public SynetConvolution32f
         {
         public:
@@ -399,6 +407,8 @@ namespace Simd
             ConvolutionBiasActivationPtr _convolutionBiasActivation;
         };
 
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution32fDirectNhwc : public SynetConvolution32f
         {
         public:
@@ -417,6 +427,8 @@ namespace Simd
             ConvolutionBiasActivationPtr _convolutionBiasActivation;
         };
 
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution32fDepthwiseDotProduct : public SynetConvolution32f
         {
         public:
@@ -429,7 +441,30 @@ namespace Simd
 
         protected:
             size_t _count, _size, _batch, _sizeS, _sizeD;
-        }; 
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class SynetConvolution32fNhwcGroupedBlock1x2 : public SynetConvolution32f
+        {
+        public:
+            SynetConvolution32fNhwcGroupedBlock1x2(const ConvParam32f& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::NhwcGroupedBlock1x2"; }
+            virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
+            virtual void Forward(const float* src, float* buf, float* dst);
+
+            static bool Preferable(const ConvParam32f& p);
+
+            typedef void(*ConvolutionPtr)(const float* src, const ConvParam32f& p, const float* weight, const float* bias, const float* params, float* dst);
+
+        protected:
+            size_t _batch, _sizeS, _sizeD;
+            Array32f _rWeight;
+            ConvolutionPtr _convolution;
+        };
+
+        //-------------------------------------------------------------------------------------------------
 
         class SynetConvolution32fNhwcDirect : public SynetConvolution32f
         {
@@ -516,7 +551,7 @@ namespace Simd
             void ReorderWeight(const float* src, float* dst);
         };
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         class SynetConvolution32fBf16Gemm : public SynetConvolution32f
         {
@@ -536,6 +571,8 @@ namespace Simd
             Array16u _weight;
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD;
         };
+
+        //-------------------------------------------------------------------------------------------------
 
         class SynetConvolution32fBf16Nhwc : public SynetConvolution32f
         {
@@ -579,7 +616,7 @@ namespace Simd
             ConvolutionPtr _convolutions[2];
         };
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
@@ -588,6 +625,7 @@ namespace Simd
     namespace Sse41
     {
         void ConvolutionBiasAndActivation(const float* bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float* params, ::SimdBool trans, float* dst);
+
 
         class SynetConvolution32fGemmNN : public Base::SynetConvolution32fGemmNN
         {
