@@ -697,7 +697,7 @@ namespace Simd
             return true;
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
@@ -723,6 +723,8 @@ namespace Simd
                 return new SynetConvolution32fNhwcDirect(param);
             else if (SynetConvolution32fDirectNhwc::Preferable(param))
                 return new SynetConvolution32fDirectNhwc(param);
+            else if (SynetConvolution32fNhwcGroupedBlock1x2::Preferable(param))
+                return new SynetConvolution32fNhwcGroupedBlock1x2(param);
             else
                 return new SynetConvolution32fGemmNN(param);
         }

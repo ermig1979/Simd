@@ -1466,7 +1466,6 @@ namespace Simd
             _batch = p.batch;
             _sizeS = p.srcC * p.srcH * p.srcW;
             _sizeD = p.dstC * p.dstH * p.dstW;
-            _rWeight.Resize(p.kernelY * p.kernelX * p.srcC * p.dstC /p.group);
             _convolution = ConvolutionNhwcGroupedBlock1x2;
         }
 
@@ -1475,6 +1474,7 @@ namespace Simd
             SynetConvolution32f::SetParams(weight, internal, bias, params);
             const ConvParam32f& p = _param;
             size_t size = p.kernelY * p.kernelX * p.srcC;
+            _rWeight.Resize(size * 2);
             const float* src = _weight;
             float* dst0 = _rWeight.data, *dst1 = dst0 + size;
             for (size_t i = 0; i < size; ++i)
@@ -1484,6 +1484,11 @@ namespace Simd
                 src += 2;
             }
             _weight = _rWeight.data;
+            if (_bias == NULL)
+            {
+                _rBias.Resize(p.dstC, true);
+                _bias = _rBias.data;
+            }
         }
 
         void SynetConvolution32fNhwcGroupedBlock1x2::Forward(const float* src, float* buf, float* dst)

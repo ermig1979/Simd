@@ -460,7 +460,7 @@ namespace Simd
 
         protected:
             size_t _batch, _sizeS, _sizeD;
-            Array32f _rWeight;
+            Array32f _rWeight, _rBias;
             ConvolutionPtr _convolution;
         };
 
@@ -626,7 +626,6 @@ namespace Simd
     {
         void ConvolutionBiasAndActivation(const float* bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float* params, ::SimdBool trans, float* dst);
 
-
         class SynetConvolution32fGemmNN : public Base::SynetConvolution32fGemmNN
         {
         public:
@@ -679,6 +678,13 @@ namespace Simd
             virtual void Forward(const float* src, float* buf, float* dst);
         };
 
+        class SynetConvolution32fNhwcGroupedBlock1x2 : public Base::SynetConvolution32fNhwcGroupedBlock1x2
+        {
+        public:
+            SynetConvolution32fNhwcGroupedBlock1x2(const ConvParam32f& p);
+            virtual String Ext() const { return "Sse41"; }
+        };
+
         class SynetConvolution32fNhwcDirect : public Base::SynetConvolution32fNhwcDirect
         {
         public:
@@ -693,7 +699,7 @@ namespace Simd
             static bool Set3r(const ConvParam32f& p, AlgParam& a);
         };
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         class SynetConvolution32fBf16Nhwc : public Base::SynetConvolution32fBf16Nhwc
         {
@@ -703,7 +709,7 @@ namespace Simd
             virtual String Ext() const { return "Sse41"; }
         };
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
