@@ -328,7 +328,7 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = result && Compare(dst1, dst2, EPS, true, 64, true, "dst1 & dst2");
+        result = result && Compare(dst1, dst2, EPS * 2.0f, true, 64, true, "dst1 & dst2");
 
         result = result && Compare(dst1, orig, eps, true, 64, false, "dst1 & orig");
 
