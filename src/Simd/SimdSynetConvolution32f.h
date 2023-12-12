@@ -926,6 +926,13 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
+        class SynetConvolution32fNhwcGroupedBlock1x2 : public Avx2::SynetConvolution32fNhwcGroupedBlock1x2
+        {
+        public:
+            SynetConvolution32fNhwcGroupedBlock1x2(const ConvParam32f& p);
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
         class SynetConvolution32fNhwcDirect : public Avx2::SynetConvolution32fNhwcDirect
         {
         public:
