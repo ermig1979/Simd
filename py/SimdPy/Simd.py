@@ -280,6 +280,29 @@ class TensorData(enum.Enum) :
 	FP16 = 7 
 	
 ## @ingroup python
+# Describes Warp Affine flags. This type used in function Simd.WarpAffineInit.
+class WarpAffineFlags(enum.Flag) :
+	## Default Warp Affine flags.
+    Default = 0 
+	## 8-bit integer channel type.
+    ChannelByte = 0 
+	## Bit mask of channel type.
+    ChannelMask = 1 
+	## Nearest pixel interpolation method.
+    InterpNearest = 0
+	## Bilinear pixel interpolation method.
+    InterpBilinear = 2 
+	## Bit mask of pixel interpolation options.
+    InterpMask = 2 
+	## Nearest pixel interpolation method.
+    BorderConstant = 0
+	## Bilinear pixel interpolation method.
+    BorderTransparent = 4 
+	## Bit mask of pixel interpolation options.
+    BorderMask = 4 
+
+	
+## @ingroup python
 # Describes YUV format type. It is uses in YUV to BGR forward and backward conversions.
 class YuvType(enum.Enum) :
     ## Unknown YUV standard.
