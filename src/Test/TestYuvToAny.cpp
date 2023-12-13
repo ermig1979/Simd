@@ -25,6 +25,8 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
 
+#include "Simd/SimdFrame.hpp"
+
 #include <unordered_set>
 
 namespace Test
@@ -663,6 +665,34 @@ namespace Test
 
         std::vector<int> assignments(2, -1);
         std::unordered_set<int> assigned_detections(assignments.cbegin(), assignments.cend());
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool Yuv420pToRgbV2SpecialTest()
+    {
+        bool result = true;
+
+        String path = ROOT_PATH + "/data/image/city.jpg";
+        View orig;
+        if (!orig.Load(path, View::Bgr24))
+            return false;
+
+        typedef Simd::Frame<Simd::Allocator> Frame;
+
+        Frame bgr(orig.Size(), Frame::Bgr24);
+        Frame yuv(orig.Size(), Frame::Yuv420p);
+        Frame rgb(orig.Size(), Frame::Rgb24);
+
+        Simd::Copy(orig, bgr.planes[0]);
+         
+        Simd::Convert(bgr, yuv);
+        Simd::Convert(yuv, rgb);
+
+        bgr.planes[0].Save("bgr.jpg");
+        rgb.planes[0].Save("rgb.jpg");
 
         return result;
     }
