@@ -428,6 +428,15 @@ class Lib():
 		
 		Lib.__lib.SimdBgraToBgr.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdBgraToBgr.restype = None
+		
+		Lib.__lib.SimdBgraToGray.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdBgraToGray.restype = None
+		
+		Lib.__lib.SimdBgraToRgb.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdBgraToRgb.restype = None
+		
+		Lib.__lib.SimdBgraToRgba.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdBgraToRgba.restype = None
 
 		
 		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
@@ -611,6 +620,36 @@ class Lib():
     # @param dstStride - a row size of output image in bytes.
 	def BgraToBgr(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
 		Lib.__lib.SimdBgraToBgr(src, width, height, srcStride, dst, dstStride)
+		
+    ## Converts 32-bit BGRA image to 8-bit gray image. 
+    # @param src - a pointer to pixels data of input 32-bit BGRA.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 8-bit gray image.
+    # @param dstStride - a row size of output image in bytes.
+	def BgraToGray(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdBgraToGray(src, width, height, srcStride, dst, dstStride)
+		
+    ## Converts 32-bit BGRA image to 24-bit RGB image. Also it can be used for 32-bit RGBA to 24-bit BGR conversion.
+    # @param src - a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 24-bit RGB (or 24-bit BGR) image.
+    # @param dstStride - a row size of output image in bytes.
+	def BgraToRgb(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdBgraToRgb(src, width, height, srcStride, dst, dstStride)
+		
+    ## Converts 32-bit BGRA image to 32-bit RGBA image and back.
+    # @param src - a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 32-bit RGBA (or 32-bit BGRA) image.
+    # @param dstStride - a row size of output image in bytes.
+	def BgraToRgba(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdBgraToRgba(src, width, height, srcStride, dst, dstStride)
 	
     ## Fills image by value of given pixel.
     # @param dst - a pointer to pixels data of output image.
@@ -937,12 +976,22 @@ def Convert(src : Image, dst : Image, alpha = 255) :
 	if not EqualSize(src, dst) :
 		raise Exception("Input and output image has different size!")
 	if sf == PixelFormat.Bgra32 :
-		if df == PixelFormat.Bgr24 :
-			Lib.BgraToBgr(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+		if df == PixelFormat.Gray8 :
+			Lib.BgraToGray(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+		elif df == PixelFormat.Bgr24 :
+			Lib.BgraToBgr(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())		
+		elif df == PixelFormat.Rgb24 :
+			Lib.BgraToRgb(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+		elif df == PixelFormat.Rgba32 :
+			Lib.BgraToRgba(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
 		else :
 			raise Exception("Not implemented!")
 	elif sf == PixelFormat.Rgba32 :
-		if df == PixelFormat.Rgb24 :
+		if df == PixelFormat.Bgr24 :
+			Lib.BgraToRgb(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+		elif df == PixelFormat.Bgra32 :
+			Lib.BgraToRgba(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+		elif df == PixelFormat.Rgb24 :
 			Lib.BgraToBgr(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
 		else :
 			raise Exception("Not implemented!")

@@ -114,6 +114,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2c4c2d3b3b0541fc0bb1eed1b87c3ca9"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a2c4c2d3b3b0541fc0bb1eed1b87c3ca9">BgraToBgr</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:a2c4c2d3b3b0541fc0bb1eed1b87c3ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 24-bit BGR image.  <a href="class_simd_1_1_lib.html#a2c4c2d3b3b0541fc0bb1eed1b87c3ca9">More...</a><br /></td></tr>
 <tr class="separator:a2c4c2d3b3b0541fc0bb1eed1b87c3ca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47a09ba43a29ba70964da56cf6b1bcee"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a47a09ba43a29ba70964da56cf6b1bcee">BgraToGray</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:a47a09ba43a29ba70964da56cf6b1bcee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 8-bit gray image.  <a href="class_simd_1_1_lib.html#a47a09ba43a29ba70964da56cf6b1bcee">More...</a><br /></td></tr>
+<tr class="separator:a47a09ba43a29ba70964da56cf6b1bcee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade42fca75bad58486391b3b011480b66"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ade42fca75bad58486391b3b011480b66">BgraToRgb</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:ade42fca75bad58486391b3b011480b66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 24-bit RGB image.  <a href="class_simd_1_1_lib.html#ade42fca75bad58486391b3b011480b66">More...</a><br /></td></tr>
+<tr class="separator:ade42fca75bad58486391b3b011480b66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f1db928d235ceed9ada1818754fcdeb"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a9f1db928d235ceed9ada1818754fcdeb">BgraToRgba</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:a9f1db928d235ceed9ada1818754fcdeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 32-bit RGBA image and back.  <a href="class_simd_1_1_lib.html#a9f1db928d235ceed9ada1818754fcdeb">More...</a><br /></td></tr>
+<tr class="separator:a9f1db928d235ceed9ada1818754fcdeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac00ff54734904ddd7fabc0d654a8cb34"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac00ff54734904ddd7fabc0d654a8cb34">FillPixel</a> (ctypes.c_void_p dst, int stride, int width, int height, array.array('B') pixel)</td></tr>
 <tr class="memdesc:ac00ff54734904ddd7fabc0d654a8cb34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <a href="class_simd_1_1_lib.html#ac00ff54734904ddd7fabc0d654a8cb34">More...</a><br /></td></tr>
 <tr class="separator:ac00ff54734904ddd7fabc0d654a8cb34"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -749,6 +758,201 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
     <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a47a09ba43a29ba70964da56cf6b1bcee" name="a47a09ba43a29ba70964da56cf6b1bcee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47a09ba43a29ba70964da56cf6b1bcee">&#9670;&nbsp;</a></span>BgraToGray()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def BgraToGray </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 32-bit BGRA image to 8-bit gray image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 32-bit BGRA. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ade42fca75bad58486391b3b011480b66" name="ade42fca75bad58486391b3b011480b66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade42fca75bad58486391b3b011480b66">&#9670;&nbsp;</a></span>BgraToRgb()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def BgraToRgb </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 32-bit BGRA image to 24-bit RGB image. </p>
+<p >Also it can be used for 32-bit RGBA to 24-bit BGR conversion. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 24-bit RGB (or 24-bit BGR) image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9f1db928d235ceed9ada1818754fcdeb" name="a9f1db928d235ceed9ada1818754fcdeb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f1db928d235ceed9ada1818754fcdeb">&#9670;&nbsp;</a></span>BgraToRgba()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def BgraToRgba </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 32-bit BGRA image to 32-bit RGBA image and back. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 32-bit RGBA (or 32-bit BGRA) image. </td></tr>
     <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
   </table>
   </dd>
