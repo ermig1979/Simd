@@ -415,6 +415,12 @@ class Lib():
 		
 		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
 		Lib.__lib.SimdSynetSetInput.restype = None
+		
+		Lib.__lib.SimdWarpAffineInit.argtypes = [ ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_float), ctypes.c_int32, ctypes.c_void_p ]
+		Lib.__lib.SimdWarpAffineInit.restype = ctypes.c_void_p
+		
+		Lib.__lib.SimdWarpAffineRun.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p ]
+		Lib.__lib.SimdWarpAffineRun.restype = None
 	
 	## Gets version of %Simd Library.
 	# @return A string with version.
@@ -627,6 +633,31 @@ class Lib():
 		lo = (ctypes.c_float * len(lower))(*lower)
 		up = (ctypes.c_float * len(upper))(*upper)
 		Lib.__lib.SimdSynetSetInput(src, width, height, stride, srcFormat.value, lo, up, dst, channels, dstFormat.value)
+		
+    ## Creates wrap affine context.
+    # @param srcW - a width of input image.
+    # @param srcH - a height of input image.
+    # @param srcS - a row size (in bytes) of the input image.
+    # @param dstW - a width of output image.
+    # @param dstH - a height of output image.
+    # @param dstS - a row size (in bytes) of the output image.
+    # @param channels - a channel number of input and output image. Its value must be in range [1..4].
+    # @param mat - an array with coefficients of affine warp (2x3 matrix).
+    # @param flags - a flags of algorithm parameters.
+    # @param border - an array with color of border. The size of the array mast be equal to channels.
+    #                 It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL.
+    # @return a pointer to warp affine context. On error it returns NULL.
+    #         This pointer is used in functions Simd.WarpAffineRun.
+    #         It must be released with using of function Simd.Release. 
+	def WarpAffineInit(srcW : int, srcH : int, srcS : int, dstW : int, dstH : int, dstS : int, channels, mat: array.array('f'), flags : Simd.WarpAffineFlags, border: array.array('B')) -> ctypes.c_void_p :
+		return Lib.__lib.SimdWarpAffineInit(srcW, srcH, srcS, dstW, dstH, dstS, channels, (ctypes.c_float * len(mat))(*mat), flags.value, (ctypes.c_byte * len(border))(*border))
+	
+    ## Performs warp affine for current image.
+    # @param context - a warp affine context. It must be created by function Simd.WarpAffineInit and released by function Simd.Release.
+    # @param src - a pointer to pixels data of the original input image.
+    # @param dst - a pointer to pixels data of the filtered output image.
+	def WarpAffineRun(context : ctypes.c_void_p, src : ctypes.c_void_p, dst : ctypes.c_void_p) :
+		Lib.__lib.SimdWarpAffineRun(context, src, dst)
 
 	
 ###################################################################################################
@@ -860,3 +891,37 @@ def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bil
 # @param format - a format of output image tensor. There are supported following tensor formats: Simd.TensorFormat.Nchw, Simd.TensorFormat.Nhwc.
 def SynetSetInput(src : Image, lower : array.array('f'), upper : array.array('f'), dst : ctypes.c_void_p, channels : int, format : Simd.TensorFormat) :
 	Lib.SynetSetInput(src.Data(), src.Width(), src.Height(), src.Stride(), src.Format(), lower, upper, dst, channels, format)
+	
+##  @ingroup python
+# The function gets resized image.
+# @param src - an original input image.
+# @param width - a width of output image.
+# @param height - a height of output image.
+# @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
+# @return - resized output image.
+def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bilinear) -> Simd.Image :
+	dst = Image(src.Format(), width, height)
+	Simd.Resize(src, dst, method)
+	return dst
+
+##  @ingroup python
+# Performs warp affine for current image.
+# @param src - an input image to warp affine.
+# @param mat - a pointer to 2x3 matrix with coefficients of affine warp.
+# @param dst - a background input/output image.
+# @param flags - a flags of algorithm parameters. By default is equal to Simd.WarpAffineFlags.ChannelByte | Simd.WarpAffineFlags.InterpBilinear | Simd.WarpAffineFlags.BorderConstant.
+# @param  border - an array with color of border. The size of the array must be equal to channels.
+#                  It parameter is actual for Simd.WarpAffineFlags.BorderConstant flag. 
+def WarpAffine(src : Image, mat: array.array('f'), dst : Image, flags = (Simd.WarpAffineFlags.ChannelByte | Simd.WarpAffineFlags.InterpBilinear | Simd.WarpAffineFlags.BorderConstant), border = array.array('B', [])) :
+	if src.Format() != dst.Format() or src.Format().ChannelSize() != 1 :
+		raise Exception("Uncompartible image format for Warp Affine!")
+	if (flags & Simd.WarpAffineFlags.ChannelMask) != Simd.WarpAffineFlags.ChannelByte :
+		raise Exception("Uncompartible Warp Affine flag!")
+	
+	context = Lib.WarpAffineInit(src.Width(), src.Height(), src.Stride(), dst.Width(), dst.Height(), dst.Stride(), src.Format().ChannelCount(), mat, flags, border)
+	if context == ctypes.c_void_p(0) :
+		raise Exception("Can't create Warp Affine context !")
+	
+	Lib.WarpAffineRun(context, src.Data(), dst.Data());
+	Lib.Release(context);
+

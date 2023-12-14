@@ -224,7 +224,7 @@ if (context)
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a channel number of input and output image. Its value must be in range [1..4]. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>- a pointer to 2x3 matrix with coefficients of affine warp. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>- a flags of algorithm parameters. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">border</td><td>- a pointer to to the array with color of border. The size of the array mast be equal to channels. It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">border</td><td>- a pointer to to the array with color of border. The size of the array must be equal to channels. It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL. </td></tr>
   </table>
   </dd>
 </dl>
@@ -329,7 +329,7 @@ if (context)
     <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>- a pointer to 2x3 matrix with coefficients of affine warp. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- an output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>- a flags of algorithm parameters. By default is equal to <a class="el" href="group__warp__affine.html#gga18ec670b06abd539fb8b7f7183065200a81e68b2fe30123c7dc30fe64e42a2879">SimdWarpAffineChannelByte</a> | <a class="el" href="group__warp__affine.html#gga18ec670b06abd539fb8b7f7183065200a98b264063ddb20c56ee5dd9bc8440f34">SimdWarpAffineInterpBilinear</a> | <a class="el" href="group__warp__affine.html#gga18ec670b06abd539fb8b7f7183065200a8efc4d657e8d81c53586181d25825984">SimdWarpAffineBorderConstant</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">border</td><td>- a pointer to to the array with color of border. The size of the array mast be equal to channels. It parameter is actual for SimdWarpAffineBorderConstant flag. By default is equal to NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">border</td><td>- a pointer to to the array with color of border. The size of the array must be equal to channels. It parameter is actual for SimdWarpAffineBorderConstant flag. By default is equal to NULL. </td></tr>
   </table>
   </dd>
 </dl>

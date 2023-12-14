@@ -34,19 +34,40 @@ def GetSetParamsTest(args) :
 	Simd.Lib.SetThreadNumber(threads)
 	print("OK.")
 	
+	
 ###################################################################################################
 
-def ImageTest(args) :
-	print("\nImageTest: ", end="")
+def ImagePaintTest(args) :
+	print("\nImagePaintTest: ", end="")
 	image = Simd.Image(Simd.PixelFormat.Bgr24, 120, 90)
 	image.Load("city.jpg")
 	crc32 = Simd.Lib.Crc32(image.Data(), image.Height() * image.Stride())
 	print("Creates image: {0} {1}x{2}, Crc32: {3:X}. ".format(image.Format(), image.Width(), image.Height(), crc32), end="")
-	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter)
-	center.Save("center.jpg", Simd.ImageFile.Jpeg, 85)
-	resized = Simd.Resized(image, image.Width() // 2, image.Height() // 2)
-	Simd.FillPixel(resized.Region(200, 200, 400, 400), [0, 0, 255])
+	Simd.FillPixel(image.Region(100, 100, 200, 200), [0, 0, 255])
+	Simd.FillPixel(image.RegionAt(300, 300, Simd.Position.MiddleCenter), [0, 255, 0])
+	image.Save("painted.jpg")
+	print("OK.")
+	
+###################################################################################################
+
+def ImageResizeTest(args) :
+	print("\nImageResizeTest: ", end="")
+	image = Simd.Image()
+	image.Load("city.jpg")
+	resized = Simd.Resized(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.Area)
 	resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
+	print("OK.")
+	
+###################################################################################################
+
+def ImageWarpAffineTest(args) :
+	print("\nImageWarpAffineTest: ", end="")
+	image = Simd.Image(Simd.PixelFormat.Bgr24, 120, 90)
+	image.Load("city.jpg")
+	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter)
+	mat = [ 0.7, -0.7, float(image.Width() / 4), 0.7, 0.7, float(-image.Width() / 4)]
+	Simd.WarpAffine(center, mat, image, Simd.WarpAffineFlags.ChannelByte | Simd.WarpAffineFlags.InterpBilinear | Simd.WarpAffineFlags.BorderTransparent)
+	image.Save("warp_affine.jpg")
 	print("OK.")
 	
 ###################################################################################################
@@ -81,7 +102,11 @@ def main():
 	
 	GetSetParamsTest(args)
 	
-	ImageTest(args)
+	ImagePaintTest(args)
+	
+	ImageResizeTest(args)
+	
+	ImageWarpAffineTest(args)
 	
 	SynetSetInputTest(args) 
 	

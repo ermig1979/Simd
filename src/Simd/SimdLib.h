@@ -8647,7 +8647,7 @@ extern "C"
         \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
         \param [in] mat - a pointer to 2x3 matrix with coefficients of affine warp.
         \param [in] flags - a flags of algorithm parameters.
-        \param [in] border - a pointer to to the array with color of border. The size of the array mast be equal to channels.
+        \param [in] border - a pointer to to the array with color of border. The size of the array must be equal to channels.
                              It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL.
         \return a pointer to warp affine context. On error it returns NULL.
                 This pointer is used in functions ::SimdWarpAffineRun.

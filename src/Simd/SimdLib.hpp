@@ -4620,7 +4620,7 @@ namespace Simd
         \param [in] mat - a pointer to 2x3 matrix with coefficients of affine warp.
         \param [in, out] dst - an output image.
         \param [in] flags - a flags of algorithm parameters. By default is equal to ::SimdWarpAffineChannelByte | ::SimdWarpAffineInterpBilinear | ::SimdWarpAffineBorderConstant.
-        \param [in] border - a pointer to to the array with color of border. The size of the array mast be equal to channels.
+        \param [in] border - a pointer to to the array with color of border. The size of the array must be equal to channels.
                              It parameter is actual for SimdWarpAffineBorderConstant flag. By default is equal to NULL.
     */
     template<template<class> class A> SIMD_INLINE void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, 
