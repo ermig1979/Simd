@@ -398,6 +398,16 @@ class Lib():
 		Lib.__lib.SimdAbsDifferenceSumMasked.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint64) ]
 		Lib.__lib.SimdAbsDifferenceSumMasked.restype = None
 		
+		Lib.__lib.SimdAbsDifferenceSums3x3.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint64) ]
+		Lib.__lib.SimdAbsDifferenceSums3x3.restype = None
+		
+		Lib.__lib.SimdAbsDifferenceSums3x3Masked.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint64) ]
+		Lib.__lib.SimdAbsDifferenceSums3x3Masked.restype = None
+		
+		Lib.__lib.SimdAbsGradientSaturatedSum.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdAbsGradientSaturatedSum.restype = None
+
+		
 		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdFillPixel.restype = None
 
@@ -556,6 +566,16 @@ class Lib():
 	def Crc32c(src : ctypes.c_void_p, size : int) :
 		return Lib.__lib.SimdCrc32c(src, size)
 	
+    ## Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image.
+    # @param src - a pointer to pixels data of input 8-bit gray image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 8-bit gray image.
+    # @param dstStride - a row size of output image in bytes.
+	def AbsGradientSaturatedSum(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdAbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride)
+	
     ## Fills image by value of given pixel.
     # @param dst - a pointer to pixels data of output image.
     # @param stride - a row size of output image in bytes.
@@ -567,6 +587,7 @@ class Lib():
 		if size < 1 or size > 4 :
 			raise Exception("Incompatible pixel size: {0} !".format(size))
 		Lib.__lib.SimdFillPixel(dst, stride, width, height, (ctypes.c_uint8 * size)(*pixel), size)	
+		
     ## Saves an image to file in given image file format.
     # @param src - a pointer to pixels data of input image.
     # @param stride - a row size of input image in bytes.
@@ -843,6 +864,19 @@ def PixelFormatToResizeChannel(src) -> ResizeChannel :
 	else : raise Exception("Can't {0} convert to Simd.ResizeChannel !".format(src))
 	
 ##  @ingroup python
+# Gets 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image.
+# @param src - an input 8-bit gray image.
+# @param dst - an output 8-bit gray image with sum of absolute gradient. Can be empty.
+# @return - output 8-bit gray image with sum of absolute gradient.
+def AbsGradientSaturatedSum(src : Image, dst = Image()) -> Image :
+	if src.Format() != Simd.PixelFormat.Gray8 :
+		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Gray8!".format(src.Format()))
+	if dst.Format() != Simd.PixelFormat.Gray8 :
+		dst.Recreate(src.Format(), src.Width(), src.Height())
+	Lib.AbsGradientSaturatedSum(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+	return dst
+	
+##  @ingroup python
 # Fills image by value of given pixel.
 # @param dst - an output image.
 # @param pixel - an array of unsigned 8-bit integer width pixel channels. Its size is in range [1..4]. 
@@ -876,7 +910,7 @@ def Resize(src : Image, dst : Image, method = Simd.ResizeMethod.Bilinear) :
 # @param height - a height of output image.
 # @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
 # @return - resized output image.
-def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bilinear) -> Simd.Image :
+def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bilinear) -> Image :
 	dst = Image(src.Format(), width, height)
 	Simd.Resize(src, dst, method)
 	return dst

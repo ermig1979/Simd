@@ -93,13 +93,16 @@ Data Structures</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:gab43671019734353c7a2e947d86707655"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#gab43671019734353c7a2e947d86707655">AbsGradientSaturatedSum</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, dst=<a class="el" href="class_simd_1_1_image.html">Image</a>())</td></tr>
+<tr class="memdesc:gab43671019734353c7a2e947d86707655"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image.  <a href="group__python.html#gab43671019734353c7a2e947d86707655">More...</a><br /></td></tr>
+<tr class="separator:gab43671019734353c7a2e947d86707655"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga59de6a8f11d2ed07991c39cae95274dc"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga59de6a8f11d2ed07991c39cae95274dc">FillPixel</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> dst, array.array('B') pixel)</td></tr>
 <tr class="memdesc:ga59de6a8f11d2ed07991c39cae95274dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <a href="group__python.html#ga59de6a8f11d2ed07991c39cae95274dc">More...</a><br /></td></tr>
 <tr class="separator:ga59de6a8f11d2ed07991c39cae95274dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga774022c8ef06d19ea7d46c858a0fd9d4"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga774022c8ef06d19ea7d46c858a0fd9d4">Resize</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, <a class="el" href="class_simd_1_1_image.html">Image</a> dst, method=<a class="el" href="class_simd_1_1_resize_method.html#a4ca04a83471ed28470ccc779c907efdb">Simd.ResizeMethod.Bilinear</a>)</td></tr>
 <tr class="memdesc:ga774022c8ef06d19ea7d46c858a0fd9d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function performs image resizing.  <a href="group__python.html#ga774022c8ef06d19ea7d46c858a0fd9d4">More...</a><br /></td></tr>
 <tr class="separator:ga774022c8ef06d19ea7d46c858a0fd9d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga74cde159f9e639da4755d5f731c86664"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_image.html">Simd.Image</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga74cde159f9e639da4755d5f731c86664">Resized</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, int width, int height, method=<a class="el" href="class_simd_1_1_resize_method.html#a4ca04a83471ed28470ccc779c907efdb">Simd.ResizeMethod.Bilinear</a>)</td></tr>
+<tr class="memitem:ga74cde159f9e639da4755d5f731c86664"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga74cde159f9e639da4755d5f731c86664">Resized</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, int width, int height, method=<a class="el" href="class_simd_1_1_resize_method.html#a4ca04a83471ed28470ccc779c907efdb">Simd.ResizeMethod.Bilinear</a>)</td></tr>
 <tr class="memdesc:ga74cde159f9e639da4755d5f731c86664"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function gets resized image.  <a href="group__python.html#ga74cde159f9e639da4755d5f731c86664">More...</a><br /></td></tr>
 <tr class="separator:ga74cde159f9e639da4755d5f731c86664"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2a5563a7b128b11146229648c314b15d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga2a5563a7b128b11146229648c314b15d">SynetSetInput</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> format)</td></tr>
@@ -112,6 +115,44 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Python Wrapper of Simd Library. </p>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="gab43671019734353c7a2e947d86707655" name="gab43671019734353c7a2e947d86707655"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab43671019734353c7a2e947d86707655">&#9670;&nbsp;</a></span>AbsGradientSaturatedSum()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> <a class="el" href="class_simd_1_1_image.html">Image</a>  AbsGradientSaturatedSum </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>dst</em> = <code><a class="el" href="class_simd_1_1_image.html">Image</a>()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- an output 8-bit gray image with sum of absolute gradient. Can be empty. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- output 8-bit gray image with sum of absolute gradient. </dd></dl>
+
+</div>
+</div>
 <a id="ga59de6a8f11d2ed07991c39cae95274dc" name="ga59de6a8f11d2ed07991c39cae95274dc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga59de6a8f11d2ed07991c39cae95274dc">&#9670;&nbsp;</a></span>FillPixel()</h2>
 

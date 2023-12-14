@@ -108,6 +108,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae0a39a09c94cfc19437823497fb70bef"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ae0a39a09c94cfc19437823497fb70bef">Crc32c</a> (ctypes.c_void_p src, int size)</td></tr>
 <tr class="memdesc:ae0a39a09c94cfc19437823497fb70bef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 32-bit cyclic redundancy check (CRC32c) for current data.  <a href="class_simd_1_1_lib.html#ae0a39a09c94cfc19437823497fb70bef">More...</a><br /></td></tr>
 <tr class="separator:ae0a39a09c94cfc19437823497fb70bef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac94ec4a3f86066810c790d83c9b48be9"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac94ec4a3f86066810c790d83c9b48be9">AbsGradientSaturatedSum</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:ac94ec4a3f86066810c790d83c9b48be9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image.  <a href="class_simd_1_1_lib.html#ac94ec4a3f86066810c790d83c9b48be9">More...</a><br /></td></tr>
+<tr class="separator:ac94ec4a3f86066810c790d83c9b48be9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac00ff54734904ddd7fabc0d654a8cb34"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac00ff54734904ddd7fabc0d654a8cb34">FillPixel</a> (ctypes.c_void_p dst, int stride, int width, int height, array.array('B') pixel)</td></tr>
 <tr class="memdesc:ac00ff54734904ddd7fabc0d654a8cb34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <a href="class_simd_1_1_lib.html#ac00ff54734904ddd7fabc0d654a8cb34">More...</a><br /></td></tr>
 <tr class="separator:ac00ff54734904ddd7fabc0d654a8cb34"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -617,6 +620,71 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>32-bit cyclic redundancy check (CRC32c). </dd></dl>
+
+</div>
+</div>
+<a id="ac94ec4a3f86066810c790d83c9b48be9" name="ac94ec4a3f86066810c790d83c9b48be9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac94ec4a3f86066810c790d83c9b48be9">&#9670;&nbsp;</a></span>AbsGradientSaturatedSum()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def AbsGradientSaturatedSum </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

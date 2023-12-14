@@ -34,7 +34,6 @@ def GetSetParamsTest(args) :
 	Simd.Lib.SetThreadNumber(threads)
 	print("OK.")
 	
-	
 ###################################################################################################
 
 def ImagePaintTest(args) :
@@ -46,6 +45,16 @@ def ImagePaintTest(args) :
 	Simd.FillPixel(image.Region(100, 100, 200, 200), [0, 0, 255])
 	Simd.FillPixel(image.RegionAt(300, 300, Simd.Position.MiddleCenter), [0, 255, 0])
 	image.Save("painted.jpg")
+	print("OK.")
+	
+###################################################################################################
+
+def ImageAbsGradientSaturatedSumTest(args) :
+	print("\nImageAbsGradientSaturatedSumTest: ", end="")
+	image = Simd.Image()
+	image.Load("city.jpg", Simd.PixelFormat.Gray8)
+	agss = Simd.AbsGradientSaturatedSum(image)
+	agss.Save("AbsGradientSaturatedSum.jpg")
 	print("OK.")
 	
 ###################################################################################################
@@ -103,6 +112,8 @@ def main():
 	GetSetParamsTest(args)
 	
 	ImagePaintTest(args)
+	
+	ImageAbsGradientSaturatedSumTest(args)
 	
 	ImageResizeTest(args)
 	
