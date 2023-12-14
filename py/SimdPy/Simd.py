@@ -437,6 +437,18 @@ class Lib():
 		
 		Lib.__lib.SimdBgraToRgba.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdBgraToRgba.restype = None
+		
+		
+		Lib.__lib.SimdBgrToBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8 ]
+		Lib.__lib.SimdBgrToBgra.restype = None
+		
+		
+		Lib.__lib.SimdBgrToGray.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdBgrToGray.restype = None
+		
+		
+		Lib.__lib.SimdCopy.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdCopy.restype = None
 
 		
 		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
@@ -650,6 +662,38 @@ class Lib():
     # @param dstStride - a row size of output image in bytes.
 	def BgraToRgba(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
 		Lib.__lib.SimdBgraToRgba(src, width, height, srcStride, dst, dstStride)
+		
+    ## Converts 24-bit BGR to 32-bit BGRA image image. Also it can be used for 24-bit RGB to 32-bit RGBA conversion.
+    # @param src - a pointer to pixels data of input 24-bit BGR (or 24-bit RGB) image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 32-bit BGRA (or 32-bit RGBA) image.
+    # @param dstStride - a row size of output image in bytes.
+    # @param alpha - a value of alpha channel. By default it is equal to 255.
+	def BgrToBgra(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, alpha = 255) :
+		Lib.__lib.SimdBgrToBgra(src, width, height, srcStride, dst, dstStride, alpha)
+		
+    ## Converts 24-bit BGR image to 8-bit gray image. 
+    # @param src - a pointer to pixels data of input 24-bit BGR.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 8-bit gray image.
+    # @param dstStride - a row size of output image in bytes.
+	def BgrToGray(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdBgrToGray(src, width, height, srcStride, dst, dstStride)
+		
+    ## Copies an image.
+    # @param src - a pointer to pixels data of input image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param pixelSize - a pixel size of input/output image.
+    # @param dst - a pointer to pixels data of output image.
+    # @param dstStride - a row size of output image in bytes.
+	def Copy(src : ctypes.c_void_p, srcStride: int, width: int, height: int, pixelSize: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdCopy(src, srcStride, width, height, pixelSize, dst, dstStride)
 	
     ## Fills image by value of given pixel.
     # @param dst - a pointer to pixels data of output image.
@@ -962,6 +1006,19 @@ def AbsGradientSaturatedSum(src : Image, dst = Image()) -> Image :
 	return dst
 
 ## @ingroup python
+# Copies an image.
+# @param src - an input image.
+# @param dst - an output image. Can be empty.
+# @return - output copied image.
+def Copy(src : Image, dst = Image()) -> Image :
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(src.Format(), src.Width(), src.Height())
+	if not Compatible(src, dst) :
+		raise Exception("Input and output images are incompatible!")
+	Lib.Copy(src.Data(), src.Stride(), src.Width(), src.Height(), src.Format().PixelSize(), dst.Data(), dst.Stride())
+	return dst
+
+## @ingroup python
 # Converts format of input image to output image.
 # @param src - an input image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format.
 # @param dst - an output image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format.
@@ -975,7 +1032,17 @@ def Convert(src : Image, dst : Image, alpha = 255) :
 		raise Exception("Unsupported output pixel format {0}!".format(df))
 	if not EqualSize(src, dst) :
 		raise Exception("Input and output image has different size!")
-	if sf == PixelFormat.Bgra32 :
+	if src.Format() == dst.Format() :
+		Copy(src, dst)
+		return
+	if sf == PixelFormat.Bgr24 :
+		if df == PixelFormat.Gray8 :
+			Lib.BgrToGray(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+		elif df == PixelFormat.Bgra32 :
+			Lib.BgrToBgra(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), alpha)		
+		else :
+			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+	elif sf == PixelFormat.Bgra32 :
 		if df == PixelFormat.Gray8 :
 			Lib.BgraToGray(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
 		elif df == PixelFormat.Bgr24 :
@@ -985,7 +1052,12 @@ def Convert(src : Image, dst : Image, alpha = 255) :
 		elif df == PixelFormat.Rgba32 :
 			Lib.BgraToRgba(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
 		else :
-			raise Exception("Not implemented!")
+			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+	elif sf == PixelFormat.Rgb24 :
+		if df == PixelFormat.Rgba32 :
+			Lib.BgrToBgra(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), alpha)		
+		else :
+			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 	elif sf == PixelFormat.Rgba32 :
 		if df == PixelFormat.Bgr24 :
 			Lib.BgraToRgb(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
@@ -994,9 +1066,9 @@ def Convert(src : Image, dst : Image, alpha = 255) :
 		elif df == PixelFormat.Rgb24 :
 			Lib.BgraToBgr(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
 		else :
-			raise Exception("Not implemented!")
+			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 	else :
-		raise Exception("Not implemented!")
+		raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 	
 ## @ingroup python
 # Get converted image in given format.
@@ -1008,7 +1080,7 @@ def Converted(src : Image, format : PixelFormat, alpha = 255) -> Image :
 	dst = Image(format, src.Width(), src.Height())
 	Convert(src, dst, alpha)
 	return dst
-	
+
 ##  @ingroup python
 # Fills image by value of given pixel.
 # @param dst - an output image.
