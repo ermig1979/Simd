@@ -59,6 +59,16 @@ def ImageAbsGradientSaturatedSumTest(args) :
 	
 ###################################################################################################
 
+def ImageConvertTest(args) :
+	print("\nImageConvertTest: ", end="")
+	image = Simd.Image()
+	image.Load("city.jpg", Simd.PixelFormat.Bgra32)
+	converted = Simd.Converted(image, Simd.PixelFormat.Bgr24)
+	converted.Save("converted.jpg", Simd.ImageFile.Jpeg, 85)
+	print("OK.")
+	
+###################################################################################################
+
 def ImageResizeTest(args) :
 	print("\nImageResizeTest: ", end="")
 	image = Simd.Image()
@@ -115,6 +125,8 @@ def main():
 	
 	ImageAbsGradientSaturatedSumTest(args)
 	
+	ImageConvertTest(args)
+
 	ImageResizeTest(args)
 	
 	ImageWarpAffineTest(args)

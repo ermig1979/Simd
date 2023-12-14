@@ -96,6 +96,12 @@ Functions</h2></td></tr>
 <tr class="memitem:gab43671019734353c7a2e947d86707655"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#gab43671019734353c7a2e947d86707655">AbsGradientSaturatedSum</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, dst=<a class="el" href="class_simd_1_1_image.html">Image</a>())</td></tr>
 <tr class="memdesc:gab43671019734353c7a2e947d86707655"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image.  <a href="group__python.html#gab43671019734353c7a2e947d86707655">More...</a><br /></td></tr>
 <tr class="separator:gab43671019734353c7a2e947d86707655"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga99390bc8beedd49adc1b1f1da955333b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga99390bc8beedd49adc1b1f1da955333b">Convert</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, <a class="el" href="class_simd_1_1_image.html">Image</a> dst, alpha=255)</td></tr>
+<tr class="memdesc:ga99390bc8beedd49adc1b1f1da955333b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts format of input image to output image.  <a href="group__python.html#ga99390bc8beedd49adc1b1f1da955333b">More...</a><br /></td></tr>
+<tr class="separator:ga99390bc8beedd49adc1b1f1da955333b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga369549231f68afaeafa28cf349ef3933"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga369549231f68afaeafa28cf349ef3933">Converted</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, <a class="el" href="class_simd_1_1_pixel_format.html">PixelFormat</a> format, alpha=255)</td></tr>
+<tr class="memdesc:ga369549231f68afaeafa28cf349ef3933"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get converted image in given format.  <a href="group__python.html#ga369549231f68afaeafa28cf349ef3933">More...</a><br /></td></tr>
+<tr class="separator:ga369549231f68afaeafa28cf349ef3933"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga59de6a8f11d2ed07991c39cae95274dc"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga59de6a8f11d2ed07991c39cae95274dc">FillPixel</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> dst, array.array('B') pixel)</td></tr>
 <tr class="memdesc:ga59de6a8f11d2ed07991c39cae95274dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <a href="group__python.html#ga59de6a8f11d2ed07991c39cae95274dc">More...</a><br /></td></tr>
 <tr class="separator:ga59de6a8f11d2ed07991c39cae95274dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -150,6 +156,95 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>- output 8-bit gray image with sum of absolute gradient. </dd></dl>
+
+</div>
+</div>
+<a id="ga99390bc8beedd49adc1b1f1da955333b" name="ga99390bc8beedd49adc1b1f1da955333b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga99390bc8beedd49adc1b1f1da955333b">&#9670;&nbsp;</a></span>Convert()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def Convert </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>alpha</em> = <code>255</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts format of input image to output image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- an input image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format. </td></tr>
+    <tr><td class="paramname">dst</td><td>- an output image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format. </td></tr>
+    <tr><td class="paramname">alpha</td><td>- a value of output alpha channel (optional). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga369549231f68afaeafa28cf349ef3933" name="ga369549231f68afaeafa28cf349ef3933"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga369549231f68afaeafa28cf349ef3933">&#9670;&nbsp;</a></span>Converted()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> <a class="el" href="class_simd_1_1_image.html">Image</a>  Converted </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_pixel_format.html">PixelFormat</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>alpha</em> = <code>255</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get converted image in given format. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- an input image in Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32 format. </td></tr>
+    <tr><td class="paramname">format</td><td>- a format of output image. It can be Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32. </td></tr>
+    <tr><td class="paramname">alpha</td><td>- a value of output alpha channel (optional). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- converted output image in given format. </dd></dl>
 
 </div>
 </div>

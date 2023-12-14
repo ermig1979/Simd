@@ -338,7 +338,7 @@ class Lib():
 		path = str(pathlib.Path(dir).absolute() / name)
 		if not os.path.isfile(path):
 			raise Exception("Binary file '{0}' is not exist!".format(path))
-
+		
 		Lib.__lib = ctypes.CDLL(path)
 		
 		Lib.__lib.SimdVersion.argtypes = []
@@ -370,7 +370,7 @@ class Lib():
 		
 		Lib.__lib.SimdGetThreadNumber.argtypes = []
 		Lib.__lib.SimdGetThreadNumber.restype = ctypes.c_size_t 
-
+		
 		Lib.__lib.SimdSetThreadNumber.argtypes = [ ctypes.c_size_t ]
 		Lib.__lib.SimdSetThreadNumber.restype = None 
 		
@@ -382,10 +382,10 @@ class Lib():
 		
 		Lib.__lib.SimdSetFastMode.argtypes = [ ctypes.c_bool ]
 		Lib.__lib.SimdSetFastMode.restype = None
-
+		
 		Lib.__lib.SimdCrc32.argtypes = [ ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdCrc32.restype = ctypes.c_uint32
-
+		
 		Lib.__lib.SimdCrc32c.argtypes = [ ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdCrc32c.restype = ctypes.c_uint32
 		
@@ -404,27 +404,53 @@ class Lib():
 		Lib.__lib.SimdAbsDifferenceSums3x3Masked.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint64) ]
 		Lib.__lib.SimdAbsDifferenceSums3x3Masked.restype = None
 		
-		Lib.__lib.SimdAbsGradientSaturatedSum.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdAbsGradientSaturatedSum.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdAbsGradientSaturatedSum.restype = None
+		
+		Lib.__lib.SimdAddFeatureDifference.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint16, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdAddFeatureDifference.restype = None
+		
+		Lib.__lib.SimdAlphaBlending.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdAlphaBlending.restype = None
+		
+		Lib.__lib.SimdAlphaBlending2x.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdAlphaBlending2x.restype = None
+
+		Lib.__lib.SimdAlphaBlendingBgraToYuv420p.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdAlphaBlendingBgraToYuv420p.restype = None
+
+		Lib.__lib.SimdAlphaBlendingUniform.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdAlphaBlendingUniform.restype = None
+
+		Lib.__lib.SimdAlphaFilling.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdAlphaFilling.restype = None
+		
+		
+		Lib.__lib.SimdBgraToBgr.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdBgraToBgr.restype = None
 
 		
 		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdFillPixel.restype = None
 
+		
 		Lib.__lib.SimdImageSaveToFile.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.c_int32, ctypes.c_int32, ctypes.c_char_p ]
 		Lib.__lib.SimdImageSaveToFile.restype = ctypes.c_int32
 		
 		Lib.__lib.SimdImageLoadFromFile.argtypes = [ ctypes.c_char_p, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_int32) ]
 		Lib.__lib.SimdImageLoadFromFile.restype = ctypes.c_void_p
+
 		
 		Lib.__lib.SimdResizerInit.argtypes = [ ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.c_int32 ]
 		Lib.__lib.SimdResizerInit.restype = ctypes.c_void_p
 		
 		Lib.__lib.SimdResizerRun.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdResizerRun.restype = None
+
 		
 		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
 		Lib.__lib.SimdSynetSetInput.restype = None
+
 		
 		Lib.__lib.SimdWarpAffineInit.argtypes = [ ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_float), ctypes.c_int32, ctypes.c_void_p ]
 		Lib.__lib.SimdWarpAffineInit.restype = ctypes.c_void_p
@@ -575,6 +601,16 @@ class Lib():
     # @param dstStride - a row size of output image in bytes.
 	def AbsGradientSaturatedSum(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
 		Lib.__lib.SimdAbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride)
+		
+    ## Converts 32-bit BGRA image to 24-bit BGR image. Also it can be used for 32-bit RGBA to 24-bit RGB conversion.
+    # @param src - a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image.
+    # @param dstStride - a row size of output image in bytes.
+	def BgraToBgr(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdBgraToBgr(src, width, height, srcStride, dst, dstStride)
 	
     ## Fills image by value of given pixel.
     # @param dst - a pointer to pixels data of output image.
@@ -863,7 +899,15 @@ def PixelFormatToResizeChannel(src) -> ResizeChannel :
 	elif src == Simd.PixelFormat.Argb32 : return ResizeChannel.Byte
 	else : raise Exception("Can't {0} convert to Simd.ResizeChannel !".format(src))
 	
-##  @ingroup python
+def Compatible(a : Image, b : Image) -> bool :
+	return a.Format() == b.Format() and a.Width() == b.Width() and a.Height() == b.Height()
+
+def EqualSize(a : Image, b : Image) -> bool :
+	return a.Width() == b.Width() and a.Height() == b.Height()
+
+###################################################################################################
+	
+## @ingroup python
 # Gets 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image.
 # @param src - an input 8-bit gray image.
 # @param dst - an output 8-bit gray image with sum of absolute gradient. Can be empty.
@@ -871,9 +915,49 @@ def PixelFormatToResizeChannel(src) -> ResizeChannel :
 def AbsGradientSaturatedSum(src : Image, dst = Image()) -> Image :
 	if src.Format() != Simd.PixelFormat.Gray8 :
 		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Gray8!".format(src.Format()))
-	if dst.Format() != Simd.PixelFormat.Gray8 :
+	if dst.Format() == Simd.PixelFormat.Empty :
 		dst.Recreate(src.Format(), src.Width(), src.Height())
+	if not Compatible(src, dst) :
+		raise Exception("Input and output images are incompatible!")
 	Lib.AbsGradientSaturatedSum(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+	return dst
+
+## @ingroup python
+# Converts format of input image to output image.
+# @param src - an input image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format.
+# @param dst - an output image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format.
+# @param alpha - a value of output alpha channel (optional).
+def Convert(src : Image, dst : Image, alpha = 255) :
+	sf = src.Format()
+	if sf != PixelFormat.Gray8 and sf != PixelFormat.Bgr24 and sf != PixelFormat.Bgra32 and sf != PixelFormat.Rgb24 and sf != PixelFormat.Rgba32 :
+		raise Exception("Unsupported input pixel format {0}!".format(sf))
+	df = dst.Format()
+	if df != PixelFormat.Gray8 and df != PixelFormat.Bgr24 and df != PixelFormat.Bgra32 and df != PixelFormat.Rgb24 and df != PixelFormat.Rgba32 :
+		raise Exception("Unsupported output pixel format {0}!".format(df))
+	if not EqualSize(src, dst) :
+		raise Exception("Input and output image has different size!")
+	if sf == PixelFormat.Bgra32 :
+		if df == PixelFormat.Bgr24 :
+			Lib.BgraToBgr(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+		else :
+			raise Exception("Not implemented!")
+	elif sf == PixelFormat.Rgba32 :
+		if df == PixelFormat.Rgb24 :
+			Lib.BgraToBgr(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
+		else :
+			raise Exception("Not implemented!")
+	else :
+		raise Exception("Not implemented!")
+	
+## @ingroup python
+# Get converted image in given format.
+# @param src - an input image in Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32 format.
+# @param format - a format of output image. It can be Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32.
+# @param alpha - a value of output alpha channel (optional).
+# @return - converted output image in given format.
+def Converted(src : Image, format : PixelFormat, alpha = 255) -> Image :
+	dst = Image(format, src.Width(), src.Height())
+	Convert(src, dst, alpha)
 	return dst
 	
 ##  @ingroup python
