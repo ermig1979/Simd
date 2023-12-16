@@ -831,7 +831,7 @@ namespace Simd
             //case 6: return CosineDistance<6>;
             //case 7: return CosineDistance<7>;
             case 8: return CosineDistance<8>;
-            default: Base::GetCosineDistance(depth);
+            default: return Base::GetCosineDistance(depth);
             }
         }
 
