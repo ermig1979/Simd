@@ -62,7 +62,7 @@ def ImageAbsGradientSaturatedSumTest(args) :
 def ImageConvertTest(args) :
 	print("\nImageConvertTest: ", end="")
 	image = Simd.Image()
-	image.Load("city.jpg", Simd.PixelFormat.Bgr24)
+	image.Load("city.jpg", Simd.PixelFormat.Rgba32)
 	converted = Simd.Converted(image, Simd.PixelFormat.Gray8)
 	converted.Save("converted.jpg", Simd.ImageFile.Jpeg, 85)
 	print("OK.")
