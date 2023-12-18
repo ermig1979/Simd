@@ -54,6 +54,26 @@ class CpuInfo(enum.Enum) :
 	VSX = 15
 	## Enabling of NEON CPU extensions (ARM specific).
 	NEON = 16
+
+## @ingroup python
+# Describes frame format type. It is used in Simd.Frame.
+class FrameFormat(enum.Enum) :	
+	## An undefined pixel format.
+	Empty = 0
+	## Two planes (8-bit full size Y plane, 16-bit interlived half size UV plane) NV12 pixel format.
+	Nv12 = 1
+	## Three planes (8-bit full size Y plane, 8-bit half size U plane, 8-bit half size V plane) YUV420P pixel format.
+	Yuv420p = 2
+	## One plane 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.
+	Bgra32 = 3
+	## One plane 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.
+	Bgr24 = 4
+	## One plane 8-bit gray pixel format.
+	Gray8 = 5
+	## One plane 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.
+	Rgb24 = 6
+	## One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.
+	Rgba3 = 7
 	
 ## @ingroup python
 # Describes formats of image file. It is used in functions Simd.ImageSaveToMemory and Simd.ImageSaveToFile.
@@ -438,6 +458,15 @@ class Lib():
 		Lib.__lib.SimdBgraToRgba.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdBgraToRgba.restype = None
 		
+		Lib.__lib.SimdBgraToYuv420pV2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdBgraToYuv420pV2.restype = None
+		
+		Lib.__lib.SimdBgraToYuv422pV2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdBgraToYuv422pV2.restype = None
+
+		Lib.__lib.SimdBgraToYuv444pV2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdBgraToYuv444pV2.restype = None
+
 		
 		Lib.__lib.SimdBgrToBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8 ]
 		Lib.__lib.SimdBgrToBgra.restype = None
@@ -676,6 +705,23 @@ class Lib():
     # @param dstStride - a row size of output image in bytes.
 	def BgraToRgba(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
 		Lib.__lib.SimdBgraToRgba(src, width, height, srcStride, dst, dstStride)
+		
+    ## Converts 32-bit BGRA image to YUV420P.
+    # The input BGRA and output Y images must have the same width and height.
+    # The output U and V images must have the same width and height (half size relative to Y component).
+    # @param src - a pointer to pixels data of input 32-bit BGRA image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param y - a pointer to pixels data of output 8-bit image with Y color plane.
+    # @param yStride - a row size of the y image.
+    # @param u - a pointer to pixels data of output 8-bit image with U color plane.
+    # @param uStride - a row size of the u image.
+    # @param v - a pointer to pixels data of output 8-bit image with V color plane.
+    # @param vStride - a row size of the v image.
+    # @param yuvType - a type of output YUV image (see descriprion of Simd.YuvType).
+	def BgraToYuv420p(src : ctypes.c_void_p, srcStride: int, width: int, height: int, y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, yuvType = Simd.YuvType.Bt601) :
+		Lib.__lib.SimdBgraToYuv420pV2(src, srcStride, width, height, y, yStride, u, uStride, v, vStride, yuvType.value)
 		
     ## Converts 24-bit BGR to 32-bit BGRA image image. Also it can be used for 24-bit RGB to 32-bit RGBA conversion.
     # @param src - a pointer to pixels data of input 24-bit BGR (or 24-bit RGB) image.

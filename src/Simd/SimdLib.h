@@ -1828,7 +1828,7 @@ extern "C"
         \short Converts 32-bit BGRA image to YUV420P.
 
         The input BGRA and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have the same width and height (half size relative to Y component).
 
         \note This function has a C++ wrapper Simd::BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
