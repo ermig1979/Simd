@@ -49,6 +49,18 @@ def ImagePaintTest(args) :
 	
 ###################################################################################################
 
+def ImageFrameTest(args) :
+	print("\nImageFrameTest: ", end="")
+	image = Simd.Image()
+	image.Load("city.jpg")
+	frame = Simd.ImageFrame(Simd.FrameFormat.Rgb24, image.Width(), image.Height())
+	Simd.Copy(image, frame.Planes()[0])
+	#resized = Simd.Resized(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.Area)
+	#resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
+	print("OK.")
+	
+###################################################################################################
+
 def ImageAbsGradientSaturatedSumTest(args) :
 	print("\nImageAbsGradientSaturatedSumTest: ", end="")
 	image = Simd.Image()
@@ -83,7 +95,7 @@ def ImageWarpAffineTest(args) :
 	print("\nImageWarpAffineTest: ", end="")
 	image = Simd.Image(Simd.PixelFormat.Bgr24, 120, 90)
 	image.Load("city.jpg")
-	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter)
+	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter).Clone()
 	mat = [ 0.7, -0.7, float(image.Width() / 4), 0.7, 0.7, float(-image.Width() / 4)]
 	Simd.WarpAffine(center, mat, image, Simd.WarpAffineFlags.ChannelByte | Simd.WarpAffineFlags.InterpBilinear | Simd.WarpAffineFlags.BorderTransparent)
 	image.Save("warp_affine.jpg")
@@ -120,6 +132,8 @@ def main():
 	PrintInfoTest(args)
 	
 	GetSetParamsTest(args)
+	
+	ImageFrameTest(args)
 	
 	ImagePaintTest(args)
 	

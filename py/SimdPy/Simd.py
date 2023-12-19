@@ -73,7 +73,7 @@ class FrameFormat(enum.Enum) :
 	## One plane 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.
 	Rgb24 = 6
 	## One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.
-	Rgba3 = 7
+	Rgba32 = 7
 	
 ## @ingroup python
 # Describes formats of image file. It is used in functions Simd.ImageSaveToMemory and Simd.ImageSaveToFile.
@@ -928,7 +928,7 @@ class Image():
 	def __del__(self) :
 		self.Clear()
 
-	## Recreates the imagee.
+	## Recreates the image.
 	# @param format - a new image pixel format.
 	# @param width - a new image width.
 	# @param height - a new image height.	
@@ -961,6 +961,15 @@ class Image():
 		self.__stride = stride
 		self.__format = format
 		self.__data = data
+		
+	## Get copy of the image.
+	# @return cloned image.
+	def Clone(self) :
+		clone = Image()
+		if self.Format() != Simd.PixelFormat.Empty :
+			clone.Recreate(self.Format(), self.Width(), self.Height())
+			Lib.Copy(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format().PixelSize(), clone.Data(), clone.Stride())
+		return clone
 
 	## Clears image.
 	# Releases image pixel data, sets to zero all fields.	
@@ -1066,6 +1075,91 @@ class Image():
 			return self.Region(self.Width() - width, self.Height() - height, self.Width(), self.Height())
 		else :
 			return Simd.Image()
+		
+###################################################################################################
+
+## @ingroup python
+# The ImageFrame class provides storage and manipulation of frames (multiplanar images).
+class ImageFrame():
+	## Creates a new frame.
+	# @param format - a frame format.
+	# @param width - a frame width.
+	# @param height - a frame height.
+	# @param timestamp - a timestamp of created frame.
+	def __init__(self, format = Simd.FrameFormat.Empty, width = 0, height = 0, timestamp = 0.0) :
+		self.Clear()
+		self.Recreate(format, width, height)
+		self.__timestamp = timestamp
+		
+	## Recreates the imagee.
+	# @param format - a new image pixel format.
+	# @param width - a new image width.
+	# @param height - a new image height.	
+	def Recreate(self, format : Simd.FrameFormat, width : int, height : int) :
+		if format == self.__format and width == self.__width and height == self.__height :
+			return
+		self.__format = format
+		self.__width = width
+		self.__height = height
+		for plane in self.__planes :
+			plane.Clear() 
+		if format == Simd.FrameFormat.Nv12 :
+			if divmod(width, 2) != 0 or divmod(height, 2) != 0 :
+				raise Exception("Width: {0} and Height: {1} must be even for NV12!".format(width, height))
+			self.__planes[0].Recreate(Simd.PixelFormat.Gray8, width, height)
+			self.__planes[1].Recreate(Simd.PixelFormat.Uv16, width // 2, height // 2)
+		elif format == Simd.FrameFormat.Yuv420p :
+			if divmod(width, 2) != 0 or divmod(height, 2) != 0 :
+				raise Exception("Width: {0} and Height: {1} must be even for YUV420P!".format(width, height))
+			self.__planes[0].Recreate(Simd.PixelFormat.Gray8, width, height)
+			self.__planes[1].Recreate(Simd.PixelFormat.Gray8, width // 2, height // 2)
+			self.__planes[2].Recreate(Simd.PixelFormat.Gray8, width // 2, height // 2)
+		elif format == Simd.FrameFormat.Bgra32 :
+			self.__planes[0].Recreate(Simd.PixelFormat.Bgra32, width, height)
+		elif format == Simd.FrameFormat.Bgr24 :
+			self.__planes[0].Recreate(Simd.PixelFormat.Bgr24, width, height)
+		elif format == Simd.FrameFormat.Gray8 :
+			self.__planes[0].Recreate(Simd.PixelFormat.Gray8, width, height)
+		elif format == Simd.FrameFormat.Rgb24 :
+			self.__planes[0].Recreate(Simd.PixelFormat.Rgb24, width, height)
+		elif format == Simd.FrameFormat.Rgba32 :
+			self.__planes[0].Recreate(Simd.PixelFormat.Rgba32, width, height)
+		else :
+			raise Exception("Unsupported {0} frame format!".format(format))
+			
+	## Clears frame.
+	# Releases plane images, sets to zero all fields.	
+	def Clear(self) :
+		self.__width = 0
+		self.__height = 0
+		self.__format = Simd.FrameFormat.Empty
+		self.__timestamp = 0.0
+		self.__planes = [ Image(), Image(), Image(), Image() ]
+	
+	## Gets frame format.
+	# @return frame format.	
+	def Format(self) -> Simd.FrameFormat :
+		return self.__format	
+	
+	## Gets frame width.
+	# @return frame width.	
+	def Width(self) -> int :
+		return self.__width
+	
+	## Gets frame height.
+	# @return frame height.	
+	def Height(self) -> int :
+		return self.__height
+	
+	## Gets frame timestamp.
+	# @return frame timestamp.	
+	def Data(self) -> float :
+		return self.__data
+	
+	## Gets plane images.
+	# @return plane images.	
+	def Planes(self)  :
+		return self.__planes
 
 ###################################################################################################
 
