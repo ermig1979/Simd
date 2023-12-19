@@ -478,6 +478,15 @@ class Lib():
 		
 		Lib.__lib.SimdBgrToRgb.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdBgrToRgb.restype = None
+		
+		Lib.__lib.SimdBgrToYuv420pV2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdBgrToYuv420pV2.restype = None
+		
+		Lib.__lib.SimdBgrToYuv422pV2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdBgrToYuv422pV2.restype = None
+
+		Lib.__lib.SimdBgrToYuv444pV2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdBgrToYuv444pV2.restype = None
 
 		
 		Lib.__lib.SimdCopy.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
@@ -490,6 +499,13 @@ class Lib():
 		
 		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdFillPixel.restype = None
+		
+		
+		Lib.__lib.SimdGrayToBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8 ]
+		Lib.__lib.SimdGrayToBgra.restype = None
+		
+		Lib.__lib.SimdGrayToBgr.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdGrayToBgr.restype = None
 
 		
 		Lib.__lib.SimdImageSaveToFile.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.c_int32, ctypes.c_int32, ctypes.c_char_p ]
@@ -762,6 +778,23 @@ class Lib():
 	def BgrToRgb(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
 		Lib.__lib.SimdBgrToRgb(src, width, height, srcStride, dst, dstStride)
 		
+    ## Converts 24-bit BGR image to YUV420P.
+    # The input BGR and output Y images must have the same width and height.
+    # The output U and V images must have the same width and height (half size relative to Y component).
+    # @param src - a pointer to pixels data of input 24-bit BGR image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param y - a pointer to pixels data of output 8-bit image with Y color plane.
+    # @param yStride - a row size of the y image.
+    # @param u - a pointer to pixels data of output 8-bit image with U color plane.
+    # @param uStride - a row size of the u image.
+    # @param v - a pointer to pixels data of output 8-bit image with V color plane.
+    # @param vStride - a row size of the v image.
+    # @param yuvType - a type of output YUV image (see descriprion of Simd.YuvType).
+	def BgrToYuv420p(src : ctypes.c_void_p, srcStride: int, width: int, height: int, y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, yuvType = Simd.YuvType.Bt601) :
+		Lib.__lib.SimdBgrToYuv420pV2(src, srcStride, width, height, y, yStride, u, uStride, v, vStride, yuvType.value)
+		
     ## Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.
     # All images must have the same width and height.
     # This function used for NV12 to YUV420P conversion.
@@ -798,6 +831,27 @@ class Lib():
 		if size < 1 or size > 4 :
 			raise Exception("Incompatible pixel size: {0} !".format(size))
 		Lib.__lib.SimdFillPixel(dst, stride, width, height, (ctypes.c_uint8 * size)(*pixel), size)	
+		
+    ## Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.
+    # @param src - a pointer to pixels data of input 8-bit gray.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 32-bit BGRA (or 32-bit RGBA) image.
+    # @param dstStride - a row size of output image in bytes.
+    # @param alpha - a value of alpha channel. By default it is equal to 255.
+	def GrayToBgra(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, alpha = 255) :
+		Lib.__lib.SimdGrayToBgra(src, width, height, srcStride, dst, dstStride, alpha)
+		
+    ## Converts 8-bit gray image to 24-bit BGR (24-bit RGB) image and back. 
+    # @param src - a pointer to pixels data of input 8-bit gray image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image.
+    # @param dstStride - a row size of output image in bytes.
+	def GrayToBgr(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdGrayToBgr(src, width, height, srcStride, dst, dstStride)
 		
     ## Saves an image to file in given image file format.
     # @param src - a pointer to pixels data of input image.
@@ -1142,7 +1196,18 @@ class Image():
 		if self.Format() == dst.Format() :
 			self.Copy(dst)
 			return
-		if sf == PixelFormat.Bgr24 :
+		if sf == PixelFormat.Gray8 :
+			if df == PixelFormat.Bgr24 :
+				Lib.GrayToBgr(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())
+			elif df == PixelFormat.Bgra32 :
+				Lib.GrayToBgra(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride(), alpha)		
+			elif df == PixelFormat.Rgb24 :
+				Lib.GrayToBgr(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())		
+			elif df == PixelFormat.Rgba32 :
+				Lib.GrayToBgra(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride(), alpha)		
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == PixelFormat.Bgr24 :
 			if df == PixelFormat.Bgra32 :
 				Lib.BgrToBgra(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride(), alpha)		
 			elif df == PixelFormat.Gray8 :
@@ -1170,7 +1235,7 @@ class Image():
 			elif df == PixelFormat.Bgra32 :
 				Lib.RgbToBgra(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride(), alpha)		
 			elif df == PixelFormat.Gray8 :
-				Lib.RgbToGray8(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())	
+				Lib.RgbToGray(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())	
 			elif df == PixelFormat.Rgba32 :
 				Lib.BgrToBgra(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride(), alpha)		
 			else :
@@ -1198,6 +1263,17 @@ class Image():
 		dst = Image(format, self.Width(), self.Height())
 		self.Convert(dst, alpha)
 		return dst
+	
+	## Fills image by value of given pixel.
+	# @param pixel - an array of unsigned 8-bit integer with pixel channels. Its size is in range [1..4]. 
+	def Fill(self, pixel : array.array('B')) :
+		fmt = self.Format()
+		if fmt.ChannelSize() != 1 :
+			raise Exception("Image.Fill supports only 8-bits channel image!")
+		size = len(pixel)
+		if size < 1 or size > 4 or size != fmt.ChannelCount() :
+			raise Exception("Incompatible pixel size {0} and image type {1} !".format(size, fmt))
+		Lib.FillPixel(self.Data(), self.Stride(), self.Width(), self.Height(), pixel)
 		
 ###################################################################################################
 
@@ -1326,18 +1402,63 @@ class ImageFrame():
 		if sf == FrameFormat.Nv12 :
 			if df == FrameFormat.Yuv420p :
 				sp[0].Copy(dp[0])
-				Lib.DeinterleaveUv(sp[1], dp[1], dp[2])
+				Lib.DeinterleaveUv(sp[1].Data(), sp[1].Stride(), sp[1].Width(), sp[1].Height(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride())
+			elif df == FrameFormat.Gray8 :
+				sp[0].Copy(dp[0])
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		elif sf == FrameFormat.Yuv420p :
 			if df == FrameFormat.Nv12 :
 				sp[0].Copy(dp[0])
-				Lib.InterleaveUv(sp[1], sp[2], dp[1])
+				Lib.InterleaveUv(sp[1].Data(), sp[1].Stride(), sp[2].Data(), sp[2].Stride(), sp[1].Width(), sp[1].Height(), dp[1].Data(), dp[1].Stride())
+			elif df == FrameFormat.Gray8 :
+				sp[0].Copy(dp[0])
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		elif sf == FrameFormat.Bgra32 :
-			if df == FrameFormat.Yuv420p :
+			if df == FrameFormat.Nv12 :
+				u = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
+				v = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
+				Lib.BgraToYuv420p(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), u.Data(), u.Stride(), v.Data(), v.Stride(), yuvType)
+				Lib.InterleaveUv(u.Data(), u.Stride(), v.Data(), v.Stride(), u.Width(), u.Height(), dp[1].Data(), dp[1].Stride())
+			elif df == FrameFormat.Yuv420p :
 				Lib.BgraToYuv420p(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride(), yuvType)
+			elif df == FrameFormat.Bgr24 or df == FrameFormat.Gray8 or df == FrameFormat.Rgb24 or df == FrameFormat.Rgba32:
+				sp[0].Convert(dp[0], alpha)
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == FrameFormat.Bgr24 :
+			if df == FrameFormat.Nv12 :
+				u = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
+				v = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
+				Lib.BgrToYuv420p(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), u.Data(), u.Stride(), v.Data(), v.Stride(), yuvType)
+				Lib.InterleaveUv(u.Data(), u.Stride(), v.Data(), v.Stride(), u.Width(), u.Height(), dp[1].Data(), dp[1].Stride())
+			elif df == FrameFormat.Yuv420p :
+				Lib.BgrToYuv420p(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride(), yuvType)
+			elif df == FrameFormat.Bgra32 or df == FrameFormat.Gray8 or df == FrameFormat.Rgb24 or df == FrameFormat.Rgba32:
+				sp[0].Convert(dp[0], alpha)
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == FrameFormat.Gray8 :
+			if df == FrameFormat.Nv12 :
+				sp[0].Copy(dp[0])
+				dp[1].Fill([128, 128])
+			elif df == FrameFormat.Yuv420p :
+				sp[0].Copy(dp[0])
+				dp[1].Fill([128])
+				dp[2].Fill([128])
+			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Rgb24 or df == FrameFormat.Rgba32:
+				sp[0].Convert(dp[0], alpha)
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == FrameFormat.Rgb24 :
+			if df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Gray8 or df == FrameFormat.Rgba32:
+				sp[0].Convert(dp[0], alpha)
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == FrameFormat.Rgba32 :
+			if df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Gray8 or df == FrameFormat.Rgb24:
+				sp[0].Convert(dp[0], alpha)
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		else :
@@ -1385,19 +1506,6 @@ def AbsGradientSaturatedSum(src : Image, dst = Image()) -> Image :
 		raise Exception("Input and output images are incompatible!")
 	Lib.AbsGradientSaturatedSum(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
 	return dst
-
-##  @ingroup python
-# Fills image by value of given pixel.
-# @param dst - an output image.
-# @param pixel - an array of unsigned 8-bit integer width pixel channels. Its size is in range [1..4]. 
-def FillPixel(dst : Image, pixel : array.array('B')) :
-	format = dst.Format()
-	if format.ChannelSize() != 1 :
-		raise Exception("FillPixel supports only 8-bits channel image!")
-	size = len(pixel)
-	if size < 1 or size > 4 or size != format.ChannelCount() :
-		raise Exception("Incompatible pixel size {0} and image type {1} !".format(size, format))
-	return Lib.FillPixel(dst.Data(), dst.Stride(), dst.Width(), dst.Height(), pixel)
 
 ##  @ingroup python
 # The function performs image resizing.

@@ -135,6 +135,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a824729a6d180b5e9b83d28c7d04d177a" id="r_a824729a6d180b5e9b83d28c7d04d177a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a824729a6d180b5e9b83d28c7d04d177a">BgrToRgb</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:a824729a6d180b5e9b83d28c7d04d177a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to 24-bit RGB image and back.  <br /></td></tr>
 <tr class="separator:a824729a6d180b5e9b83d28c7d04d177a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28c9ea4030a0d9d0d6fae5b88b4f2be0" id="r_a28c9ea4030a0d9d0d6fae5b88b4f2be0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a28c9ea4030a0d9d0d6fae5b88b4f2be0">BgrToYuv420p</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p y, int yStride, ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride, yuvType=<a class="el" href="class_simd_1_1_yuv_type.html#a26ef3db27e9bc1edf0d91e5c6cfa64e7">Simd.YuvType.Bt601</a>)</td></tr>
+<tr class="memdesc:a28c9ea4030a0d9d0d6fae5b88b4f2be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to YUV420P.  <br /></td></tr>
+<tr class="separator:a28c9ea4030a0d9d0d6fae5b88b4f2be0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b8ddf2741f2fece467e1cf2650b160a" id="r_a4b8ddf2741f2fece467e1cf2650b160a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a4b8ddf2741f2fece467e1cf2650b160a">DeinterleaveUv</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride)</td></tr>
 <tr class="memdesc:a4b8ddf2741f2fece467e1cf2650b160a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.  <br /></td></tr>
 <tr class="separator:a4b8ddf2741f2fece467e1cf2650b160a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -144,6 +147,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a50a8e235591577598f249e8031ef0b19" id="r_a50a8e235591577598f249e8031ef0b19"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a50a8e235591577598f249e8031ef0b19">FillPixel</a> (ctypes.c_void_p dst, int stride, int width, int height, array.array('B') pixel)</td></tr>
 <tr class="memdesc:a50a8e235591577598f249e8031ef0b19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <br /></td></tr>
 <tr class="separator:a50a8e235591577598f249e8031ef0b19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90470b3b394d0d513827b0e733651019" id="r_a90470b3b394d0d513827b0e733651019"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a90470b3b394d0d513827b0e733651019">GrayToBgra</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride, alpha=255)</td></tr>
+<tr class="memdesc:a90470b3b394d0d513827b0e733651019"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.  <br /></td></tr>
+<tr class="separator:a90470b3b394d0d513827b0e733651019"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa03cd0e31771ee225d76ba40c5a446b0" id="r_aa03cd0e31771ee225d76ba40c5a446b0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#aa03cd0e31771ee225d76ba40c5a446b0">GrayToBgr</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:aa03cd0e31771ee225d76ba40c5a446b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray image to 24-bit BGR (24-bit RGB) image and back.  <br /></td></tr>
+<tr class="separator:aa03cd0e31771ee225d76ba40c5a446b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbfca070bbcd00e94be3ee1e3577b0fb" id="r_afbfca070bbcd00e94be3ee1e3577b0fb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#afbfca070bbcd00e94be3ee1e3577b0fb">ImageSaveToFile</a> (ctypes.c_void_p src, int stride, int width, int height, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> format, <a class="el" href="class_simd_1_1_image_file.html">Simd.ImageFile</a> file, int quality, str path)</td></tr>
 <tr class="memdesc:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves an image to file in given image file format.  <br /></td></tr>
 <tr class="separator:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1292,6 +1301,106 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a28c9ea4030a0d9d0d6fae5b88b4f2be0" name="a28c9ea4030a0d9d0d6fae5b88b4f2be0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28c9ea4030a0d9d0d6fae5b88b4f2be0">&#9670;&#160;</a></span>BgrToYuv420p()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">BgrToYuv420p </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>yStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>uStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>vStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>yuvType</em> = <code><a class="el" href="class_simd_1_1_yuv_type.html#a26ef3db27e9bc1edf0d91e5c6cfa64e7">Simd.YuvType.Bt601</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 24-bit BGR image to YUV420P. </p>
+<p>The input BGR and output Y images must have the same width and height. The output U and V images must have the same width and height (half size relative to Y component). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 24-bit BGR image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">y</td><td>- a pointer to pixels data of output 8-bit image with Y color plane. </td></tr>
+    <tr><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
+    <tr><td class="paramname">u</td><td>- a pointer to pixels data of output 8-bit image with U color plane. </td></tr>
+    <tr><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
+    <tr><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
+    <tr><td class="paramname">yuvType</td><td>- a type of output YUV image (see descriprion of <a class="el" href="class_simd_1_1_yuv_type.html" title="Describes YUV format type.">Simd.YuvType</a>). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a4b8ddf2741f2fece467e1cf2650b160a" name="a4b8ddf2741f2fece467e1cf2650b160a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4b8ddf2741f2fece467e1cf2650b160a">&#9670;&#160;</a></span>DeinterleaveUv()</h2>
 
@@ -1495,6 +1604,143 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">width</td><td>- a width of output image. </td></tr>
     <tr><td class="paramname">height</td><td>- a height of output image. </td></tr>
     <tr><td class="paramname">pixel</td><td>- an array of unsigned 8-bit integer width pixel channels. Its size is in range [1..4]. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a90470b3b394d0d513827b0e733651019" name="a90470b3b394d0d513827b0e733651019"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90470b3b394d0d513827b0e733651019">&#9670;&#160;</a></span>GrayToBgra()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">GrayToBgra </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>alpha</em> = <code>255</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 32-bit BGRA (or 32-bit RGBA) image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">alpha</td><td>- a value of alpha channel. By default it is equal to 255. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa03cd0e31771ee225d76ba40c5a446b0" name="aa03cd0e31771ee225d76ba40c5a446b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa03cd0e31771ee225d76ba40c5a446b0">&#9670;&#160;</a></span>GrayToBgr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">GrayToBgr </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 8-bit gray image to 24-bit BGR (24-bit RGB) image and back. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
   </table>
   </dd>
 </dl>

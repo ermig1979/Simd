@@ -42,8 +42,8 @@ def ImagePaintTest(args) :
 	image.Load("city.jpg")
 	crc32 = Simd.Lib.Crc32(image.Data(), image.Height() * image.Stride())
 	print("Creates image: {0} {1}x{2}, Crc32: {3:X}. ".format(image.Format(), image.Width(), image.Height(), crc32), end="")
-	Simd.FillPixel(image.Region(100, 100, 200, 200), [0, 0, 255])
-	Simd.FillPixel(image.RegionAt(300, 300, Simd.Position.MiddleCenter), [0, 255, 0])
+	image.Region(100, 100, 200, 200).Fill([0, 0, 255])
+	image.RegionAt(300, 300, Simd.Position.MiddleCenter).Fill([0, 255, 0])
 	image.Save("painted.jpg")
 	print("OK.")
 	
@@ -51,14 +51,17 @@ def ImagePaintTest(args) :
 
 def ImageFrameTest(args) :
 	print("\nImageFrameTest: ", end="")
+	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32]
+	formats = [Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32]
 	image = Simd.Image()
-	image.Load("city.jpg", Simd.PixelFormat.Bgra32)
-	frame = Simd.ImageFrame(Simd.FrameFormat.Bgra32, image.Width(), image.Height())
+	image.Load("city.jpg", Simd.PixelFormat.Rgb24)
+	frame = Simd.ImageFrame(Simd.FrameFormat.Rgb24, image.Width(), image.Height())
 	frame.Planes()[0] = image.Copy();
-	copy = frame.Copy()
-	yuv = frame.Converted(Simd.FrameFormat.Yuv420p)
-	#resized = Simd.Resized(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.Area)
-	#resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
+	for i in range(len(formats)) :
+		frameI = frame.Converted(formats[i])
+		for j in range(len(formats)) :
+			frameJ = frameI.Converted(formats[j])
+			#frameJ.Save("converted_image_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
 	print("OK.")
 	
 ###################################################################################################
@@ -75,10 +78,14 @@ def ImageAbsGradientSaturatedSumTest(args) :
 
 def ConvertImageTest(args) :
 	print("\nConvertImageTest: ", end="")
-	image = Simd.Image()
-	image.Load("city.jpg", Simd.PixelFormat.Rgba32)
-	converted = image.Converted(Simd.PixelFormat.Gray8)
-	converted.Save("converted.jpg", Simd.ImageFile.Jpeg, 85)
+	formats = [Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32]
+	orig = Simd.Image()
+	orig.Load("city.jpg")
+	for i in range(len(formats)) :
+		imgI = orig.Converted(formats[i])
+		for j in range(len(formats)) :
+			imgJ = imgI.Converted(formats[j])
+			#imgJ.Save("converted_image_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
 	print("OK.")
 	
 ###################################################################################################
