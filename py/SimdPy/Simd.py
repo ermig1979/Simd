@@ -961,16 +961,19 @@ class Image():
 		self.__stride = stride
 		self.__format = format
 		self.__data = data
-		
-	## Get copy of the image.
-	# @return cloned image.
-	def Clone(self) :
-		clone = Image()
-		if self.Format() != Simd.PixelFormat.Empty :
-			clone.Recreate(self.Format(), self.Width(), self.Height())
-			Lib.Copy(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format().PixelSize(), clone.Data(), clone.Stride())
-		return clone
+	
+	## Check if current and other image have the same size and pixel format.
+	# @param other - other image.
+	# @return result of checking.
+	def Compatible(self, other) -> bool :
+		return self.Format() == other.Format() and self.Width() == other.Width() and self.Height() == other.Height()
 
+	## Check if current and other image have the same size.
+	# @param other - other image.
+	# @return result of checking.
+	def EqualSize(self, other) -> bool :
+		return self.Width() == other.Width() and self.Height() == other.Height()
+		
 	## Clears image.
 	# Releases image pixel data, sets to zero all fields.	
 	def Clear(self) :
@@ -1076,6 +1079,90 @@ class Image():
 		else :
 			return Simd.Image()
 		
+	## Copies current image.
+	# @param dst - an output image. It can be empty.
+	# @return copied image.
+	def Copy(self, dst = None) :
+		if dst == None :
+			dst = Image(self.Format(), self.Width(), self.Height())
+		if not self.Compatible(dst) :
+			raise Exception("Current and output images are incompatible!")
+		Lib.Copy(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format().PixelSize(), dst.Data(), dst.Stride())
+		return dst
+	
+	## Converts current image to output image.
+	# Current image must be in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format.
+	# @param dst - an output image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format.
+	# @param alpha - a value of output alpha channel (optional).
+	def Convert(self, dst, alpha = 255) :
+		sf = self.Format()
+		if sf != PixelFormat.Gray8 and sf != PixelFormat.Bgr24 and sf != PixelFormat.Bgra32 and sf != PixelFormat.Rgb24 and sf != PixelFormat.Rgba32 :
+			raise Exception("Unsupported current pixel format {0}!".format(sf))
+		df = dst.Format()
+		if df != PixelFormat.Gray8 and df != PixelFormat.Bgr24 and df != PixelFormat.Bgra32 and df != PixelFormat.Rgb24 and df != PixelFormat.Rgba32 :
+			raise Exception("Unsupported output pixel format {0}!".format(df))
+		if not self.EqualSize(dst) :
+			raise Exception("Current and output image have different size!")
+		if self.Format() == dst.Format() :
+			self.Copy(dst)
+			return
+		if sf == PixelFormat.Bgr24 :
+			if df == PixelFormat.Bgra32 :
+				Lib.BgrToBgra(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride(), alpha)		
+			elif df == PixelFormat.Gray8 :
+				Lib.BgrToGray(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())
+			elif df == PixelFormat.Rgb24 :
+				Lib.BgrToRgb(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())		
+			elif df == PixelFormat.Rgba32 :
+				Lib.RgbToBgra(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride(), alpha)		
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == PixelFormat.Bgra32 :
+			if df == PixelFormat.Gray8 :
+				Lib.BgraToGray(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())
+			elif df == PixelFormat.Bgr24 :
+				Lib.BgraToBgr(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())		
+			elif df == PixelFormat.Rgb24 :
+				Lib.BgraToRgb(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())
+			elif df == PixelFormat.Rgba32 :
+				Lib.BgraToRgba(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == PixelFormat.Rgb24 :
+			if df == PixelFormat.Bgr24 :
+				Lib.BgrToRgb(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())	
+			elif df == PixelFormat.Bgra32 :
+				Lib.RgbToBgra(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride(), alpha)		
+			elif df == PixelFormat.Gray8 :
+				Lib.RgbToGray8(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())	
+			elif df == PixelFormat.Rgba32 :
+				Lib.BgrToBgra(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride(), alpha)		
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == PixelFormat.Rgba32 :
+			if df == PixelFormat.Bgr24 :
+				Lib.BgraToRgb(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())
+			elif df == PixelFormat.Bgra32 :
+				Lib.BgraToRgba(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())
+			elif df == PixelFormat.Gray8 :
+				Lib.RgbaToGray(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())	
+			elif df == PixelFormat.Rgb24 :
+				Lib.BgraToBgr(self.Data(), self.Stride(), self.Width(), self.Height(), dst.Data(), dst.Stride())
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		else :
+			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		
+	## Gets converted current image in given format.
+	# Current image must be in Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32 format.
+	# @param format - a format of output image. It can be Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32.
+	# @param alpha - a value of output alpha channel (optional).
+	# @return - converted output image in given format.
+	def Converted(self, format : PixelFormat, alpha = 255) :
+		dst = Image(format, self.Width(), self.Height())
+		self.Convert(dst, alpha)
+		return dst
+		
 ###################################################################################################
 
 ## @ingroup python
@@ -1090,7 +1177,16 @@ class ImageFrame():
 		self.Clear()
 		self.Recreate(format, width, height)
 		self.__timestamp = timestamp
-		
+			
+	## Clears frame.
+	# Releases plane images, sets to zero all fields.	
+	def Clear(self) :
+		self.__width = 0
+		self.__height = 0
+		self.__format = Simd.FrameFormat.Empty
+		self.__timestamp = 0.0
+		self.__planes = [ Image(), Image(), Image(), Image() ]
+	
 	## Recreates the imagee.
 	# @param format - a new image pixel format.
 	# @param width - a new image width.
@@ -1104,12 +1200,12 @@ class ImageFrame():
 		for plane in self.__planes :
 			plane.Clear() 
 		if format == Simd.FrameFormat.Nv12 :
-			if divmod(width, 2) != 0 or divmod(height, 2) != 0 :
+			if width % 2 != 0 or height % 2 != 0 :
 				raise Exception("Width: {0} and Height: {1} must be even for NV12!".format(width, height))
 			self.__planes[0].Recreate(Simd.PixelFormat.Gray8, width, height)
 			self.__planes[1].Recreate(Simd.PixelFormat.Uv16, width // 2, height // 2)
 		elif format == Simd.FrameFormat.Yuv420p :
-			if divmod(width, 2) != 0 or divmod(height, 2) != 0 :
+			if width % 2 != 0 or height % 2 != 0 :
 				raise Exception("Width: {0} and Height: {1} must be even for YUV420P!".format(width, height))
 			self.__planes[0].Recreate(Simd.PixelFormat.Gray8, width, height)
 			self.__planes[1].Recreate(Simd.PixelFormat.Gray8, width // 2, height // 2)
@@ -1126,15 +1222,6 @@ class ImageFrame():
 			self.__planes[0].Recreate(Simd.PixelFormat.Rgba32, width, height)
 		else :
 			raise Exception("Unsupported {0} frame format!".format(format))
-			
-	## Clears frame.
-	# Releases plane images, sets to zero all fields.	
-	def Clear(self) :
-		self.__width = 0
-		self.__height = 0
-		self.__format = Simd.FrameFormat.Empty
-		self.__timestamp = 0.0
-		self.__planes = [ Image(), Image(), Image(), Image() ]
 	
 	## Gets frame format.
 	# @return frame format.	
@@ -1160,6 +1247,63 @@ class ImageFrame():
 	# @return plane images.	
 	def Planes(self)  :
 		return self.__planes
+	
+	## Check if current and other image frame have the same size and pixel format.
+	# @param other - other image frame.
+	# @return result of checking.
+	def Compatible(self, other) -> bool :
+		return self.Format() == other.Format() and self.Width() == other.Width() and self.Height() == other.Height()
+
+	## Check if current and other image frame have the same size.
+	# @param other - other image frame.
+	# @return result of checking.
+	def EqualSize(self, other) -> bool :
+		return self.Width() == other.Width() and self.Height() == other.Height()
+	
+	## Copies current image frame.
+	# @param dst - an output image frame. It can be empty.
+	# @return copied image frame.
+	def Copy(self, dst = None) :
+		if dst == None :
+			dst = ImageFrame(self.Format(), self.Width(), self.Height())
+		if not self.Compatible(dst) :
+			raise Exception("Current and output images are incompatible!")
+		for p in range(len(self.__planes)) :
+			self.Planes()[p].Copy(dst.Planes()[p])
+		dst.__timestamp = self.__timestamp
+		return dst
+	
+	## Converts current image frame to output image frame.
+	# @param dst - an output image frame.
+	# @param alpha - a value of output alpha channel (optional).
+    # @param yuvType - a type of output YUV image (optional).
+	def Convert(self, dst, alpha = 255, yuvType = YuvType.Bt601) :
+		sf = self.Format()
+		df = dst.Format()
+		if not self.EqualSize(dst) :
+			raise Exception("Current and output image frame have different size!")
+		if sf == df :
+			self.Copy(dst)
+			return
+		sp = self.Planes()
+		dp = dst.Planes()
+		if sf == FrameFormat.Bgra32 :
+			if df == FrameFormat.Yuv420p :
+				Lib.BgraToYuv420p(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride(), yuvType)
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		else :
+			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		
+	## Gets converted current image frame in given format.
+	# @param format - a format of output image frame.
+	# @param alpha - a value of output alpha channel (optional).
+    # @param yuvType - a type of output YUV image (optional).
+	# @return - converted output image frame in given format.
+	def Converted(self, format : FrameFormat, alpha = 255, yuvType = YuvType.Bt601) :
+		dst = ImageFrame(format, self.Width(), self.Height())
+		self.Convert(dst, alpha, yuvType)
+		return dst
 
 ###################################################################################################
 
@@ -1176,12 +1320,6 @@ def PixelFormatToResizeChannel(src) -> ResizeChannel :
 	elif src == Simd.PixelFormat.Rgba32 : return ResizeChannel.Byte
 	elif src == Simd.PixelFormat.Argb32 : return ResizeChannel.Byte
 	else : raise Exception("Can't {0} convert to Simd.ResizeChannel !".format(src))
-	
-def Compatible(a : Image, b : Image) -> bool :
-	return a.Format() == b.Format() and a.Width() == b.Width() and a.Height() == b.Height()
-
-def EqualSize(a : Image, b : Image) -> bool :
-	return a.Width() == b.Width() and a.Height() == b.Height()
 
 ###################################################################################################
 	
@@ -1195,97 +1333,9 @@ def AbsGradientSaturatedSum(src : Image, dst = Image()) -> Image :
 		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Gray8!".format(src.Format()))
 	if dst.Format() == Simd.PixelFormat.Empty :
 		dst.Recreate(src.Format(), src.Width(), src.Height())
-	if not Compatible(src, dst) :
+	if not src.Compatible(dst) :
 		raise Exception("Input and output images are incompatible!")
 	Lib.AbsGradientSaturatedSum(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
-	return dst
-
-## @ingroup python
-# Copies an image.
-# @param src - an input image.
-# @param dst - an output image. Can be empty.
-# @return - output copied image.
-def Copy(src : Image, dst = Image()) -> Image :
-	if dst.Format() == Simd.PixelFormat.Empty :
-		dst.Recreate(src.Format(), src.Width(), src.Height())
-	if not Compatible(src, dst) :
-		raise Exception("Input and output images are incompatible!")
-	Lib.Copy(src.Data(), src.Stride(), src.Width(), src.Height(), src.Format().PixelSize(), dst.Data(), dst.Stride())
-	return dst
-
-## @ingroup python
-# Converts format of input image to output image.
-# @param src - an input image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format.
-# @param dst - an output image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format.
-# @param alpha - a value of output alpha channel (optional).
-def Convert(src : Image, dst : Image, alpha = 255) :
-	sf = src.Format()
-	if sf != PixelFormat.Gray8 and sf != PixelFormat.Bgr24 and sf != PixelFormat.Bgra32 and sf != PixelFormat.Rgb24 and sf != PixelFormat.Rgba32 :
-		raise Exception("Unsupported input pixel format {0}!".format(sf))
-	df = dst.Format()
-	if df != PixelFormat.Gray8 and df != PixelFormat.Bgr24 and df != PixelFormat.Bgra32 and df != PixelFormat.Rgb24 and df != PixelFormat.Rgba32 :
-		raise Exception("Unsupported output pixel format {0}!".format(df))
-	if not EqualSize(src, dst) :
-		raise Exception("Input and output image has different size!")
-	if src.Format() == dst.Format() :
-		Copy(src, dst)
-		return
-	if sf == PixelFormat.Bgr24 :
-		if df == PixelFormat.Bgra32 :
-			Lib.BgrToBgra(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), alpha)		
-		elif df == PixelFormat.Gray8 :
-			Lib.BgrToGray(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
-		elif df == PixelFormat.Rgb24 :
-			Lib.BgrToRgb(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())		
-		elif df == PixelFormat.Rgba32 :
-			Lib.RgbToBgra(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), alpha)		
-		else :
-			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
-	elif sf == PixelFormat.Bgra32 :
-		if df == PixelFormat.Gray8 :
-			Lib.BgraToGray(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
-		elif df == PixelFormat.Bgr24 :
-			Lib.BgraToBgr(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())		
-		elif df == PixelFormat.Rgb24 :
-			Lib.BgraToRgb(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
-		elif df == PixelFormat.Rgba32 :
-			Lib.BgraToRgba(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
-		else :
-			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
-	elif sf == PixelFormat.Rgb24 :
-		if df == PixelFormat.Bgr24 :
-			Lib.BgrToRgb(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())	
-		elif df == PixelFormat.Bgra32 :
-			Lib.RgbToBgra(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), alpha)		
-		elif df == PixelFormat.Gray8 :
-			Lib.RgbToGray8(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())	
-		elif df == PixelFormat.Rgba32 :
-			Lib.BgrToBgra(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), alpha)		
-		else :
-			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
-	elif sf == PixelFormat.Rgba32 :
-		if df == PixelFormat.Bgr24 :
-			Lib.BgraToRgb(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
-		elif df == PixelFormat.Bgra32 :
-			Lib.BgraToRgba(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
-		elif df == PixelFormat.Gray8 :
-			Lib.RgbaToGray(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())	
-		elif df == PixelFormat.Rgb24 :
-			Lib.BgraToBgr(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride())
-		else :
-			raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
-	else :
-		raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
-	
-## @ingroup python
-# Get converted image in given format.
-# @param src - an input image in Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32 format.
-# @param format - a format of output image. It can be Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32.
-# @param alpha - a value of output alpha channel (optional).
-# @return - converted output image in given format.
-def Converted(src : Image, format : PixelFormat, alpha = 255) -> Image :
-	dst = Image(format, src.Width(), src.Height())
-	Convert(src, dst, alpha)
 	return dst
 
 ##  @ingroup python
@@ -1338,18 +1388,6 @@ def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bil
 def SynetSetInput(src : Image, lower : array.array('f'), upper : array.array('f'), dst : ctypes.c_void_p, channels : int, format : Simd.TensorFormat) :
 	Lib.SynetSetInput(src.Data(), src.Width(), src.Height(), src.Stride(), src.Format(), lower, upper, dst, channels, format)
 	
-##  @ingroup python
-# The function gets resized image.
-# @param src - an original input image.
-# @param width - a width of output image.
-# @param height - a height of output image.
-# @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
-# @return - resized output image.
-def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bilinear) -> Simd.Image :
-	dst = Image(src.Format(), width, height)
-	Simd.Resize(src, dst, method)
-	return dst
-
 ##  @ingroup python
 # Performs warp affine for current image.
 # @param src - an input image to warp affine.

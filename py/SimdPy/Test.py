@@ -52,9 +52,11 @@ def ImagePaintTest(args) :
 def ImageFrameTest(args) :
 	print("\nImageFrameTest: ", end="")
 	image = Simd.Image()
-	image.Load("city.jpg")
-	frame = Simd.ImageFrame(Simd.FrameFormat.Rgb24, image.Width(), image.Height())
-	Simd.Copy(image, frame.Planes()[0])
+	image.Load("city.jpg", Simd.PixelFormat.Bgra32)
+	frame = Simd.ImageFrame(Simd.FrameFormat.Bgra32, image.Width(), image.Height())
+	frame.Planes()[0] = image.Copy();
+	copy = frame.Copy()
+	yuv = frame.Converted(Simd.FrameFormat.Yuv420p)
 	#resized = Simd.Resized(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.Area)
 	#resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
 	print("OK.")
@@ -71,11 +73,11 @@ def ImageAbsGradientSaturatedSumTest(args) :
 	
 ###################################################################################################
 
-def ImageConvertTest(args) :
-	print("\nImageConvertTest: ", end="")
+def ConvertImageTest(args) :
+	print("\nConvertImageTest: ", end="")
 	image = Simd.Image()
 	image.Load("city.jpg", Simd.PixelFormat.Rgba32)
-	converted = Simd.Converted(image, Simd.PixelFormat.Gray8)
+	converted = image.Converted(Simd.PixelFormat.Gray8)
 	converted.Save("converted.jpg", Simd.ImageFile.Jpeg, 85)
 	print("OK.")
 	
@@ -95,7 +97,7 @@ def ImageWarpAffineTest(args) :
 	print("\nImageWarpAffineTest: ", end="")
 	image = Simd.Image(Simd.PixelFormat.Bgr24, 120, 90)
 	image.Load("city.jpg")
-	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter).Clone()
+	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter).Copy()
 	mat = [ 0.7, -0.7, float(image.Width() / 4), 0.7, 0.7, float(-image.Width() / 4)]
 	Simd.WarpAffine(center, mat, image, Simd.WarpAffineFlags.ChannelByte | Simd.WarpAffineFlags.InterpBilinear | Simd.WarpAffineFlags.BorderTransparent)
 	image.Save("warp_affine.jpg")
@@ -133,15 +135,15 @@ def main():
 	
 	GetSetParamsTest(args)
 	
-	ImageFrameTest(args)
-	
 	ImagePaintTest(args)
 	
 	ImageAbsGradientSaturatedSumTest(args)
 	
-	ImageConvertTest(args)
+	ConvertImageTest(args)
 
 	ImageResizeTest(args)
+	
+	ImageFrameTest(args)
 	
 	ImageWarpAffineTest(args)
 	

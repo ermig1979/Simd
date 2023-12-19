@@ -57,12 +57,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5590db7a77d68e6722ce6225e70867e1" id="r_a5590db7a77d68e6722ce6225e70867e1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#a5590db7a77d68e6722ce6225e70867e1">__init__</a> (self, format=<a class="el" href="class_simd_1_1_frame_format.html#a059be79f78c5d38e42123c35e5f8528c">Simd.FrameFormat.Empty</a>, width=0, height=0, timestamp=0.0)</td></tr>
 <tr class="memdesc:a5590db7a77d68e6722ce6225e70867e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new frame.  <br /></td></tr>
 <tr class="separator:a5590db7a77d68e6722ce6225e70867e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf07a4599b2043dee9d4fd46978efdbf" id="r_abf07a4599b2043dee9d4fd46978efdbf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#abf07a4599b2043dee9d4fd46978efdbf">Recreate</a> (self, <a class="el" href="class_simd_1_1_frame_format.html">Simd.FrameFormat</a> format, int width, int height)</td></tr>
-<tr class="memdesc:abf07a4599b2043dee9d4fd46978efdbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recreates the imagee.  <br /></td></tr>
-<tr class="separator:abf07a4599b2043dee9d4fd46978efdbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af90114b2280410b0c68aebc6241b3f0f" id="r_af90114b2280410b0c68aebc6241b3f0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#af90114b2280410b0c68aebc6241b3f0f">Clear</a> (self)</td></tr>
 <tr class="memdesc:af90114b2280410b0c68aebc6241b3f0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears frame.  <br /></td></tr>
 <tr class="separator:af90114b2280410b0c68aebc6241b3f0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf07a4599b2043dee9d4fd46978efdbf" id="r_abf07a4599b2043dee9d4fd46978efdbf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#abf07a4599b2043dee9d4fd46978efdbf">Recreate</a> (self, <a class="el" href="class_simd_1_1_frame_format.html">Simd.FrameFormat</a> format, int width, int height)</td></tr>
+<tr class="memdesc:abf07a4599b2043dee9d4fd46978efdbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recreates the imagee.  <br /></td></tr>
+<tr class="separator:abf07a4599b2043dee9d4fd46978efdbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9cdc2ac011f752e929d4fbee711eeb52" id="r_a9cdc2ac011f752e929d4fbee711eeb52"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_frame_format.html">Simd.FrameFormat</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#a9cdc2ac011f752e929d4fbee711eeb52">Format</a> (self)</td></tr>
 <tr class="memdesc:a9cdc2ac011f752e929d4fbee711eeb52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets frame format.  <br /></td></tr>
 <tr class="separator:a9cdc2ac011f752e929d4fbee711eeb52"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -78,6 +78,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2a617e1ef6c1d4be1089929d637ac072" id="r_a2a617e1ef6c1d4be1089929d637ac072"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#a2a617e1ef6c1d4be1089929d637ac072">Planes</a> (self)</td></tr>
 <tr class="memdesc:a2a617e1ef6c1d4be1089929d637ac072"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets plane images.  <br /></td></tr>
 <tr class="separator:a2a617e1ef6c1d4be1089929d637ac072"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa29f56bce2c98bbffba40d24b33fc4bf" id="r_aa29f56bce2c98bbffba40d24b33fc4bf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#aa29f56bce2c98bbffba40d24b33fc4bf">Compatible</a> (self, other)</td></tr>
+<tr class="memdesc:aa29f56bce2c98bbffba40d24b33fc4bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if current and other image frame have the same size and pixel format.  <br /></td></tr>
+<tr class="separator:aa29f56bce2c98bbffba40d24b33fc4bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad362f1f0a29e0a5586e99ade5879cc8d" id="r_ad362f1f0a29e0a5586e99ade5879cc8d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#ad362f1f0a29e0a5586e99ade5879cc8d">EqualSize</a> (self, other)</td></tr>
+<tr class="memdesc:ad362f1f0a29e0a5586e99ade5879cc8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if current and other image frame have the same size.  <br /></td></tr>
+<tr class="separator:ad362f1f0a29e0a5586e99ade5879cc8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7ed44ff996e83f1f09b5a9529ea7ca2" id="r_af7ed44ff996e83f1f09b5a9529ea7ca2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#af7ed44ff996e83f1f09b5a9529ea7ca2">Copy</a> (self, dst=None)</td></tr>
+<tr class="memdesc:af7ed44ff996e83f1f09b5a9529ea7ca2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies current image frame.  <br /></td></tr>
+<tr class="separator:af7ed44ff996e83f1f09b5a9529ea7ca2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac666cb2d250c836a90c7d2a11b84062b" id="r_ac666cb2d250c836a90c7d2a11b84062b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#ac666cb2d250c836a90c7d2a11b84062b">Convert</a> (self, dst, alpha=255, yuvType=<a class="el" href="class_simd_1_1_yuv_type.html#a26ef3db27e9bc1edf0d91e5c6cfa64e7">YuvType.Bt601</a>)</td></tr>
+<tr class="memdesc:ac666cb2d250c836a90c7d2a11b84062b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts current image frame to output image frame.  <br /></td></tr>
+<tr class="separator:ac666cb2d250c836a90c7d2a11b84062b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83016d648d1702abd28a9abefed270f5" id="r_a83016d648d1702abd28a9abefed270f5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#a83016d648d1702abd28a9abefed270f5">Converted</a> (self, <a class="el" href="class_simd_1_1_frame_format.html">FrameFormat</a> format, alpha=255, yuvType=<a class="el" href="class_simd_1_1_yuv_type.html#a26ef3db27e9bc1edf0d91e5c6cfa64e7">YuvType.Bt601</a>)</td></tr>
+<tr class="memdesc:a83016d648d1702abd28a9abefed270f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets converted current image frame in given format.  <br /></td></tr>
+<tr class="separator:a83016d648d1702abd28a9abefed270f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The ImageFrame class provides storage and manipulation of frames (multiplanar images). </p>
@@ -140,6 +155,28 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="af90114b2280410b0c68aebc6241b3f0f" name="af90114b2280410b0c68aebc6241b3f0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af90114b2280410b0c68aebc6241b3f0f">&#9670;&#160;</a></span>Clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Clear </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Clears frame. </p>
+<p>Releases plane images, sets to zero all fields. <br  />
+ </p>
+
+</div>
+</div>
 <a id="abf07a4599b2043dee9d4fd46978efdbf" name="abf07a4599b2043dee9d4fd46978efdbf"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abf07a4599b2043dee9d4fd46978efdbf">&#9670;&#160;</a></span>Recreate()</h2>
 
@@ -188,28 +225,6 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="af90114b2280410b0c68aebc6241b3f0f" name="af90114b2280410b0c68aebc6241b3f0f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af90114b2280410b0c68aebc6241b3f0f">&#9670;&#160;</a></span>Clear()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Clear </td>
-          <td>(</td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>self</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Clears frame. </p>
-<p>Releases plane images, sets to zero all fields. <br  />
- </p>
 
 </div>
 </div>
@@ -320,6 +335,218 @@ Public Member Functions</h2></td></tr>
 <p>Gets plane images. </p>
 <dl class="section return"><dt>Returns</dt><dd>plane images. <br  />
  </dd></dl>
+
+</div>
+</div>
+<a id="aa29f56bce2c98bbffba40d24b33fc4bf" name="aa29f56bce2c98bbffba40d24b33fc4bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa29f56bce2c98bbffba40d24b33fc4bf">&#9670;&#160;</a></span>Compatible()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool  Compatible </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>other</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check if current and other image frame have the same size and pixel format. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td>- other image frame. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>result of checking. </dd></dl>
+
+</div>
+</div>
+<a id="ad362f1f0a29e0a5586e99ade5879cc8d" name="ad362f1f0a29e0a5586e99ade5879cc8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad362f1f0a29e0a5586e99ade5879cc8d">&#9670;&#160;</a></span>EqualSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool  EqualSize </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>other</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check if current and other image frame have the same size. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td>- other image frame. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>result of checking. </dd></dl>
+
+</div>
+</div>
+<a id="af7ed44ff996e83f1f09b5a9529ea7ca2" name="af7ed44ff996e83f1f09b5a9529ea7ca2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7ed44ff996e83f1f09b5a9529ea7ca2">&#9670;&#160;</a></span>Copy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Copy </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>dst</em> = <code>None</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copies current image frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- an output image frame. It can be empty. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>copied image frame. </dd></dl>
+
+</div>
+</div>
+<a id="ac666cb2d250c836a90c7d2a11b84062b" name="ac666cb2d250c836a90c7d2a11b84062b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac666cb2d250c836a90c7d2a11b84062b">&#9670;&#160;</a></span>Convert()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Convert </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>alpha</em> = <code>255</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>yuvType</em> = <code><a class="el" href="class_simd_1_1_yuv_type.html#a26ef3db27e9bc1edf0d91e5c6cfa64e7">YuvType.Bt601</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts current image frame to output image frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- an output image frame. </td></tr>
+    <tr><td class="paramname">alpha</td><td>- a value of output alpha channel (optional). </td></tr>
+    <tr><td class="paramname">yuvType</td><td>- a type of output YUV image (optional). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a83016d648d1702abd28a9abefed270f5" name="a83016d648d1702abd28a9abefed270f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83016d648d1702abd28a9abefed270f5">&#9670;&#160;</a></span>Converted()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Converted </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_frame_format.html">FrameFormat</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>alpha</em> = <code>255</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>yuvType</em> = <code><a class="el" href="class_simd_1_1_yuv_type.html#a26ef3db27e9bc1edf0d91e5c6cfa64e7">YuvType.Bt601</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets converted current image frame in given format. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">format</td><td>- a format of output image frame. </td></tr>
+    <tr><td class="paramname">alpha</td><td>- a value of output alpha channel (optional). </td></tr>
+    <tr><td class="paramname">yuvType</td><td>- a type of output YUV image (optional). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- converted output image frame in given format. </dd></dl>
 
 </div>
 </div>

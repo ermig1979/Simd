@@ -66,9 +66,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aef6cb83711dcafa8ce9bf02a57d496e7" id="r_aef6cb83711dcafa8ce9bf02a57d496e7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#aef6cb83711dcafa8ce9bf02a57d496e7">FromExternal</a> (self, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> format, int width, int height, int stride, ctypes.c_void_p data)</td></tr>
 <tr class="memdesc:aef6cb83711dcafa8ce9bf02a57d496e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recreates a new image on the base of external image.  <br /></td></tr>
 <tr class="separator:aef6cb83711dcafa8ce9bf02a57d496e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2fee65aca1c71c751441eaafc090e022" id="r_a2fee65aca1c71c751441eaafc090e022"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#a2fee65aca1c71c751441eaafc090e022">Clone</a> (self)</td></tr>
-<tr class="memdesc:a2fee65aca1c71c751441eaafc090e022"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get copy of the image.  <br /></td></tr>
-<tr class="separator:a2fee65aca1c71c751441eaafc090e022"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa29f56bce2c98bbffba40d24b33fc4bf" id="r_aa29f56bce2c98bbffba40d24b33fc4bf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#aa29f56bce2c98bbffba40d24b33fc4bf">Compatible</a> (self, other)</td></tr>
+<tr class="memdesc:aa29f56bce2c98bbffba40d24b33fc4bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if current and other image have the same size and pixel format.  <br /></td></tr>
+<tr class="separator:aa29f56bce2c98bbffba40d24b33fc4bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad362f1f0a29e0a5586e99ade5879cc8d" id="r_ad362f1f0a29e0a5586e99ade5879cc8d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#ad362f1f0a29e0a5586e99ade5879cc8d">EqualSize</a> (self, other)</td></tr>
+<tr class="memdesc:ad362f1f0a29e0a5586e99ade5879cc8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if current and other image have the same size.  <br /></td></tr>
+<tr class="separator:ad362f1f0a29e0a5586e99ade5879cc8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af90114b2280410b0c68aebc6241b3f0f" id="r_af90114b2280410b0c68aebc6241b3f0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#af90114b2280410b0c68aebc6241b3f0f">Clear</a> (self)</td></tr>
 <tr class="memdesc:af90114b2280410b0c68aebc6241b3f0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears image.  <br /></td></tr>
 <tr class="separator:af90114b2280410b0c68aebc6241b3f0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -99,6 +102,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2acddd3f78416d4461260af47a8aae4d" id="r_a2acddd3f78416d4461260af47a8aae4d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#a2acddd3f78416d4461260af47a8aae4d">RegionAt</a> (self, int width, int height, <a class="el" href="class_simd_1_1_position.html">Simd.Position</a> position)</td></tr>
 <tr class="memdesc:a2acddd3f78416d4461260af47a8aae4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Simd.Image</a> which points to the region of current image with given size at current position.  <br /></td></tr>
 <tr class="separator:a2acddd3f78416d4461260af47a8aae4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7ed44ff996e83f1f09b5a9529ea7ca2" id="r_af7ed44ff996e83f1f09b5a9529ea7ca2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#af7ed44ff996e83f1f09b5a9529ea7ca2">Copy</a> (self, dst=None)</td></tr>
+<tr class="memdesc:af7ed44ff996e83f1f09b5a9529ea7ca2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies current image.  <br /></td></tr>
+<tr class="separator:af7ed44ff996e83f1f09b5a9529ea7ca2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34c37361ffcf136d7a748417710683d1" id="r_a34c37361ffcf136d7a748417710683d1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#a34c37361ffcf136d7a748417710683d1">Convert</a> (self, dst, alpha=255)</td></tr>
+<tr class="memdesc:a34c37361ffcf136d7a748417710683d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts current image to output image.  <br /></td></tr>
+<tr class="separator:a34c37361ffcf136d7a748417710683d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a198c1a32128be2f21792517ee90a549f" id="r_a198c1a32128be2f21792517ee90a549f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#a198c1a32128be2f21792517ee90a549f">Converted</a> (self, <a class="el" href="class_simd_1_1_pixel_format.html">PixelFormat</a> format, alpha=255)</td></tr>
+<tr class="memdesc:a198c1a32128be2f21792517ee90a549f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets converted current image in given format.  <br /></td></tr>
+<tr class="separator:a198c1a32128be2f21792517ee90a549f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The Image class provides storage and manipulation of images. </p>
@@ -318,24 +330,77 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a2fee65aca1c71c751441eaafc090e022" name="a2fee65aca1c71c751441eaafc090e022"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2fee65aca1c71c751441eaafc090e022">&#9670;&#160;</a></span>Clone()</h2>
+<a id="aa29f56bce2c98bbffba40d24b33fc4bf" name="aa29f56bce2c98bbffba40d24b33fc4bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa29f56bce2c98bbffba40d24b33fc4bf">&#9670;&#160;</a></span>Compatible()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Clone </td>
+          <td class="memname"> bool  Compatible </td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>self</em></td><td>)</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>other</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Get copy of the image. </p>
-<dl class="section return"><dt>Returns</dt><dd>cloned image. </dd></dl>
+<p>Check if current and other image have the same size and pixel format. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td>- other image. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>result of checking. </dd></dl>
+
+</div>
+</div>
+<a id="ad362f1f0a29e0a5586e99ade5879cc8d" name="ad362f1f0a29e0a5586e99ade5879cc8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad362f1f0a29e0a5586e99ade5879cc8d">&#9670;&#160;</a></span>EqualSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool  EqualSize </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>other</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check if current and other image have the same size. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td>- other image. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>result of checking. </dd></dl>
 
 </div>
 </div>
@@ -673,6 +738,130 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Simd.Image</a> which points to the subregion of current image. </dd></dl>
+
+</div>
+</div>
+<a id="af7ed44ff996e83f1f09b5a9529ea7ca2" name="af7ed44ff996e83f1f09b5a9529ea7ca2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7ed44ff996e83f1f09b5a9529ea7ca2">&#9670;&#160;</a></span>Copy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Copy </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>dst</em> = <code>None</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copies current image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- an output image. It can be empty. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>copied image. </dd></dl>
+
+</div>
+</div>
+<a id="a34c37361ffcf136d7a748417710683d1" name="a34c37361ffcf136d7a748417710683d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34c37361ffcf136d7a748417710683d1">&#9670;&#160;</a></span>Convert()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Convert </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>alpha</em> = <code>255</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts current image to output image. </p>
+<p>Current image must be in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- an output image in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format. </td></tr>
+    <tr><td class="paramname">alpha</td><td>- a value of output alpha channel (optional). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a198c1a32128be2f21792517ee90a549f" name="a198c1a32128be2f21792517ee90a549f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a198c1a32128be2f21792517ee90a549f">&#9670;&#160;</a></span>Converted()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Converted </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_pixel_format.html">PixelFormat</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>alpha</em> = <code>255</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets converted current image in given format. </p>
+<p>Current image must be in Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32 format. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">format</td><td>- a format of output image. It can be Gray8, BGR-24, BGRA-32, RGB-24 or RGBA32. </td></tr>
+    <tr><td class="paramname">alpha</td><td>- a value of output alpha channel (optional). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- converted output image in given format. </dd></dl>
 
 </div>
 </div>
