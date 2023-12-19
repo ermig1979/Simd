@@ -135,6 +135,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a824729a6d180b5e9b83d28c7d04d177a" id="r_a824729a6d180b5e9b83d28c7d04d177a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a824729a6d180b5e9b83d28c7d04d177a">BgrToRgb</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:a824729a6d180b5e9b83d28c7d04d177a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to 24-bit RGB image and back.  <br /></td></tr>
 <tr class="separator:a824729a6d180b5e9b83d28c7d04d177a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b8ddf2741f2fece467e1cf2650b160a" id="r_a4b8ddf2741f2fece467e1cf2650b160a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a4b8ddf2741f2fece467e1cf2650b160a">DeinterleaveUv</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride)</td></tr>
+<tr class="memdesc:a4b8ddf2741f2fece467e1cf2650b160a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.  <br /></td></tr>
+<tr class="separator:a4b8ddf2741f2fece467e1cf2650b160a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a855a64d0b8e41c869442052d19a7bb83" id="r_a855a64d0b8e41c869442052d19a7bb83"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a855a64d0b8e41c869442052d19a7bb83">Copy</a> (ctypes.c_void_p src, int srcStride, int width, int height, int pixelSize, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:a855a64d0b8e41c869442052d19a7bb83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies an image.  <br /></td></tr>
 <tr class="separator:a855a64d0b8e41c869442052d19a7bb83"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -147,6 +150,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae6cb96360f3d7244d01f7f9e90690c7a" id="r_ae6cb96360f3d7244d01f7f9e90690c7a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ae6cb96360f3d7244d01f7f9e90690c7a">ImageLoadFromFile</a> (str path, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> desiredFormat)</td></tr>
 <tr class="memdesc:ae6cb96360f3d7244d01f7f9e90690c7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads an image from file.  <br /></td></tr>
 <tr class="separator:ae6cb96360f3d7244d01f7f9e90690c7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10b5feb547ea9cd6ae40f5cc7c610ae6" id="r_a10b5feb547ea9cd6ae40f5cc7c610ae6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a10b5feb547ea9cd6ae40f5cc7c610ae6">InterleaveUv</a> (ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride, int width, int height, ctypes.c_void_p uv, int uvStride)</td></tr>
+<tr class="memdesc:a10b5feb547ea9cd6ae40f5cc7c610ae6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interleaves separate 8-bit U and V planar images into 16-bit UV interleaved image.  <br /></td></tr>
+<tr class="separator:a10b5feb547ea9cd6ae40f5cc7c610ae6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a48d23c2a6632d9b6861f800ad40281" id="r_a1a48d23c2a6632d9b6861f800ad40281"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a1a48d23c2a6632d9b6861f800ad40281">RgbToBgra</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride, alpha=255)</td></tr>
 <tr class="memdesc:a1a48d23c2a6632d9b6861f800ad40281"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit RGB to 32-bit BGRA image image.  <br /></td></tr>
 <tr class="separator:a1a48d23c2a6632d9b6861f800ad40281"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1286,6 +1292,85 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a4b8ddf2741f2fece467e1cf2650b160a" name="a4b8ddf2741f2fece467e1cf2650b160a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b8ddf2741f2fece467e1cf2650b160a">&#9670;&#160;</a></span>DeinterleaveUv()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">DeinterleaveUv </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>uStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>vStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images. </p>
+<p>All images must have the same width and height. This function used for NV12 to YUV420P conversion. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 16-bit UV image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">u</td><td>- a pointer to pixels data of output 8-bit image with U color plane. </td></tr>
+    <tr><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
+    <tr><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a855a64d0b8e41c869442052d19a7bb83" name="a855a64d0b8e41c869442052d19a7bb83"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a855a64d0b8e41c869442052d19a7bb83">&#9670;&#160;</a></span>Copy()</h2>
 
@@ -1531,6 +1616,85 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a pointer to pixel data, row size in bytes, image width, image height, output pixel format. The output pixel data mast be deleted after use by function <a class="el" href="class_simd_1_1_lib.html#aa56c8dbbef27c6ab9950a3defcad7f08" title="Frees aligned memory block.">Simd.Lib.Free</a>. </dd></dl>
+
+</div>
+</div>
+<a id="a10b5feb547ea9cd6ae40f5cc7c610ae6" name="a10b5feb547ea9cd6ae40f5cc7c610ae6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10b5feb547ea9cd6ae40f5cc7c610ae6">&#9670;&#160;</a></span>InterleaveUv()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">InterleaveUv </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>uStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>vStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>uv</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>uvStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Interleaves separate 8-bit U and V planar images into 16-bit UV interleaved image. </p>
+<p>All images must have the same width and height. This function used for YUV420P to NV12 conversion. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">u</td><td>- a pointer to pixels data of input 8-bit image with U color plane. </td></tr>
+    <tr><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
+    <tr><td class="paramname">v</td><td>- a pointer to pixels data of input 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">uv</td><td>- a pointer to pixels data of output 16-bit UV image. </td></tr>
+    <tr><td class="paramname">uvStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

@@ -482,6 +482,10 @@ class Lib():
 		
 		Lib.__lib.SimdCopy.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdCopy.restype = None
+		
+		
+		Lib.__lib.SimdDeinterleaveUv.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdDeinterleaveUv.restype = None
 
 		
 		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
@@ -494,6 +498,10 @@ class Lib():
 		Lib.__lib.SimdImageLoadFromFile.argtypes = [ ctypes.c_char_p, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_int32) ]
 		Lib.__lib.SimdImageLoadFromFile.restype = ctypes.c_void_p
 		
+
+		Lib.__lib.SimdInterleaveUv.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdInterleaveUv.restype = None
+
 		
 		Lib.__lib.SimdRgbToBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8 ]
 		Lib.__lib.SimdRgbToBgra.restype = None
@@ -754,6 +762,20 @@ class Lib():
 	def BgrToRgb(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
 		Lib.__lib.SimdBgrToRgb(src, width, height, srcStride, dst, dstStride)
 		
+    ## Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.
+    # All images must have the same width and height.
+    # This function used for NV12 to YUV420P conversion.
+    # @param src - a pointer to pixels data of input 16-bit UV image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param u - a pointer to pixels data of output 8-bit image with U color plane.
+    # @param uStride - a row size of the u image.
+    # @param v - a pointer to pixels data of output 8-bit image with V color plane.
+    # @param vStride - a row size of the v image.
+	def DeinterleaveUv(src : ctypes.c_void_p, srcStride: int, width: int, height: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int) :
+		Lib.__lib.SimdDeinterleaveUv(src, srcStride, width, height, u, uStride, v, vStride)
+		
     ## Copies an image.
     # @param src - a pointer to pixels data of input image.
     # @param srcStride - a row size of input image in bytes.
@@ -802,6 +824,20 @@ class Lib():
 		format = ctypes.c_int32(desiredFormat.value)
 		data = Lib.__lib.SimdImageLoadFromFile(path.encode('utf-8'), ctypes.byref(stride), ctypes.byref(width), ctypes.byref(height), ctypes.byref(format))
 		return data, stride.value, width.value, height.value, Simd.PixelFormat(format.value)
+	
+    ## Interleaves separate 8-bit U and V planar images into 16-bit UV interleaved image.
+    # All images must have the same width and height.
+    # This function used for YUV420P to NV12 conversion.
+    # @param u - a pointer to pixels data of input 8-bit image with U color plane.
+    # @param uStride - a row size of the u image.
+    # @param v - a pointer to pixels data of input 8-bit image with V color plane.
+    # @param vStride - a row size of the v image.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param uv - a pointer to pixels data of output 16-bit UV image.
+    # @param uvStride - a row size of output image in bytes.
+	def InterleaveUv(u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, uv : ctypes.c_void_p, uvStride: int) :
+		Lib.__lib.SimdInterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride)
 	
     ## Converts 24-bit RGB to 32-bit BGRA image image. Also it can be used for 24-bit BGR to 32-bit RGBA conversion.
     # @param src - a pointer to pixels data of input 24-bit RGB (or 24-bit BGR) image.
@@ -1287,7 +1323,19 @@ class ImageFrame():
 			return
 		sp = self.Planes()
 		dp = dst.Planes()
-		if sf == FrameFormat.Bgra32 :
+		if sf == FrameFormat.Nv12 :
+			if df == FrameFormat.Yuv420p :
+				sp[0].Copy(dp[0])
+				Lib.DeinterleaveUv(sp[1], dp[1], dp[2])
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == FrameFormat.Yuv420p :
+			if df == FrameFormat.Nv12 :
+				sp[0].Copy(dp[0])
+				Lib.InterleaveUv(sp[1], sp[2], dp[1])
+			else :
+				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
+		elif sf == FrameFormat.Bgra32 :
 			if df == FrameFormat.Yuv420p :
 				Lib.BgraToYuv420p(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride(), yuvType)
 			else :
