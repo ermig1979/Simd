@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar,
+* Copyright (c) 2011-2023 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -345,11 +345,11 @@ namespace Test
 
         result = result && AnyToAnyAutoTest(View::Gray8, View::Gray8, FUNC_N(Simd::Base::GrayToY), FUNC_N(SimdGrayToY));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
-//            result = result && AnyToAnyAutoTest(View::Gray8, View::Gray8, FUNC_N(Simd::Sse41::GrayToY), FUNC_N(SimdGrayToY));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToAnyAutoTest(View::Gray8, View::Gray8, FUNC_N(Simd::Sse41::GrayToY), FUNC_N(SimdGrayToY));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
 //            result = result && AnyToAnyAutoTest(View::Gray8, View::Gray8, FUNC_N(Simd::Avx2::GrayToY), FUNC_N(SimdGrayToY));
@@ -461,11 +461,11 @@ namespace Test
 
         result = result && AnyToAnyAutoTest(View::Gray8, View::Gray8, FUNC_N(Simd::Base::YToGray), FUNC_N(SimdYToGray));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
-//            result = result && AnyToAnyAutoTest(View::Gray8, View::Gray8, FUNC_N(Simd::Sse41::YToGray), FUNC_N(SimdYToGray));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToAnyAutoTest(View::Gray8, View::Gray8, FUNC_N(Simd::Sse41::YToGray), FUNC_N(SimdYToGray));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
 //            result = result && AnyToAnyAutoTest(View::Gray8, View::Gray8, FUNC_N(Simd::Avx2::YToGray), FUNC_N(SimdYToGray));

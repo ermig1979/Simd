@@ -53,6 +53,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41GrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41HogLite.cpp" />
@@ -140,6 +141,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Winograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Winograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Winograd3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41YToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgraV2.cpp" />
@@ -176,6 +178,7 @@
     <ClInclude Include="..\..\src\Simd\SimdGather.h" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGrayToY.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoadJpeg.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
@@ -202,6 +205,7 @@
     <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdShuffle.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdStream.h" />

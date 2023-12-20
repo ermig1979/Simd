@@ -3076,11 +3076,11 @@ SIMD_API void SimdGrayToY(const uint8_t * gray, size_t grayStride, size_t width,
 //        Avx2::GrayToY(gray, grayStride, width, height, y, yStride);
 //    else
 //#endif
-//#ifdef SIMD_SSE41_ENABLE
-//    if(Sse41::Enable && width >= Sse41::A)
-//        Sse41::GrayToY(gray, grayStride, width, height, y, yStride);
-//    else
-//#endif
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::GrayToY(gray, grayStride, width, height, y, yStride);
+    else
+#endif
 //#ifdef SIMD_NEON_ENABLE
 //    if (Neon::Enable && width >= Neon::A)
 //        Neon::GrayToY(gray, grayStride, width, height, y, yStride);
@@ -7571,11 +7571,11 @@ SIMD_API void SimdYToGray(const uint8_t* y, size_t yStride, size_t width, size_t
     //        Avx2::YToGray(y, yStride, width, height, gray, grayStride);
     //    else
     //#endif
-    //#ifdef SIMD_SSE41_ENABLE
-    //    if(Sse41::Enable && width >= Sse41::A)
-    //        Sse41::YToGray(y, yStride, width, height, gray, grayStride);
-    //    else
-    //#endif
+    #ifdef SIMD_SSE41_ENABLE
+        if(Sse41::Enable && width >= Sse41::A)
+            Sse41::YToGray(y, yStride, width, height, gray, grayStride);
+        else
+    #endif
     //#ifdef SIMD_NEON_ENABLE
     //    if (Neon::Enable && width >= Neon::A)
     //        Neon::YToGray(y, yStride, width, height, gray, grayStride);

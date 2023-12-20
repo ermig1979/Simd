@@ -30,6 +30,7 @@
 #include "Simd/SimdUnpack.h"
 #include "Simd/SimdLog.h"
 #include "Simd/SimdLoad.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {
@@ -40,12 +41,12 @@ namespace Simd
         const int Y2G_LO = 0;
         const int Y2G_HI = 255;
 
-        const int G2Y_SHIFT = 13;
+        const int G2Y_SHIFT = 8;
         const int G2Y_RANGE = 1 << G2Y_SHIFT;
         const int G2Y_ROUND = 1 << (G2Y_SHIFT - 1);
         const int G2Y_SCALE = int(G2Y_RANGE * (G2Y_HI - G2Y_LO) / (Y2G_HI - Y2G_LO) + 0.5f);
 
-        const int Y2G_SHIFT = 14;
+        const int Y2G_SHIFT = 8;
         const int Y2G_RANGE = 1 << Y2G_SHIFT;
         const int Y2G_ROUND = 1 << (Y2G_SHIFT - 1);
         const int Y2G_SCALE = int(Y2G_RANGE * (Y2G_HI - Y2G_LO) / (G2Y_HI - G2Y_LO) + 0.5f);
@@ -65,6 +66,39 @@ namespace Simd
             return RestrictRange(g, Y2G_LO, Y2G_HI);
         }
     }
+
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
+    {
+        SIMD_INLINE __m128i GrayToY(__m128i g)
+        {
+            static const __m128i G2Y_SCALE = SIMD_MM_SET1_EPI16(Base::G2Y_SCALE);
+            static const __m128i G2Y_ROUND = SIMD_MM_SET1_EPI16(Base::G2Y_ROUND);
+            static const __m128i G2Y_LO = SIMD_MM_SET1_EPI8(Base::G2Y_LO);
+            static const __m128i G2Y_HI = SIMD_MM_SET1_EPI8(Base::G2Y_HI);
+            __m128i g0 = UnpackU8<0>(g);
+            __m128i g1 = UnpackU8<1>(g);
+            __m128i y0 = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(g0, G2Y_SCALE), G2Y_ROUND), Base::G2Y_SHIFT);
+            __m128i y1 = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(g1, G2Y_SCALE), G2Y_ROUND), Base::G2Y_SHIFT);
+            __m128i y = _mm_packus_epi16(y0, y1);
+            return _mm_min_epu8(_mm_adds_epu8(y, G2Y_LO), G2Y_HI);
+        }
+
+        SIMD_INLINE __m128i YToGray(__m128i y)
+        {
+            static const __m128i Y2G_SCALE = SIMD_MM_SET1_EPI16(Base::Y2G_SCALE);
+            static const __m128i Y2G_ROUND = SIMD_MM_SET1_EPI16(Base::Y2G_ROUND);
+            static const __m128i G2Y_LO = SIMD_MM_SET1_EPI8(Base::G2Y_LO);
+            static const __m128i G2Y_HI = SIMD_MM_SET1_EPI8(Base::G2Y_HI);
+            y = _mm_subs_epu8(_mm_min_epu8(y, G2Y_HI), G2Y_LO);
+            __m128i y0 = UnpackU8<0>(y);
+            __m128i y1 = UnpackU8<1>(y);
+            __m128i g0 = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(y0, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
+            __m128i g1 = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(y1, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
+            return _mm_packus_epi16(g0, g1);
+        }
+    }
+#endif
 }
 
 #endif//__SimdGrayToY_h__
