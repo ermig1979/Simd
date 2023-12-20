@@ -47,6 +47,7 @@
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGrayToY.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoadJpeg.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoadPng.h" />
@@ -135,6 +136,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseGemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseGrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseHogLite.cpp" />
@@ -207,6 +209,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseWinograd3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseYToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToHsl.cpp" />

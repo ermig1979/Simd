@@ -3821,6 +3821,25 @@ extern "C"
     SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride,
         uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
+    /*! @ingroup gray_conversion
+
+        \fn SimdGrayToY(const uint8_t* gray, size_t width, size_t height, size_t grayStride, uint8_t* y, size_t yStride);
+
+        \short Converts 8-bit gray image to 8-bit Y-plane of YUV.
+
+        All images must have the same width and height.
+
+        \note This function has C++ wrappers: Simd::GrayToY(const View<A>& gray, View<A>& y).
+
+        \param [in] gray - a pointer to pixels data of input 8-bit gray image.
+        \param [in] grayStride - a row size of the gray image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] y - a pointer to pixels data of output 8-bit Y plane of YUV image.
+        \param [in] yStride - a row size of the y image.
+    */
+    SIMD_API void SimdGrayToY(const uint8_t* gray, size_t grayStride, size_t width, size_t height, uint8_t* y, size_t yStride);
+
     /*! @ingroup histogram
 
         \fn void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram);
@@ -9061,6 +9080,25 @@ extern "C"
         \param [in] trans - a flag of transposed data.
     */
     SIMD_API void SimdWinogradKernel3x3Block4x4SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+
+    /*! @ingroup yuv_conversion
+
+        \fn SimdYToGray(const uint8_t* y, size_t width, size_t height, size_t yStride, uint8_t* gray, size_t grayStride);
+
+        \short Converts 8-bit Y-plane of YUV to 8-bit gray image.
+
+        All images must have the same width and height.
+
+        \note This function has C++ wrappers: Simd::YToGray(const View<A>& y, View<A>& gray).
+
+        \param [in] y - a pointer to pixels data of input 8-bit Y plane of YUV image.
+        \param [in] yStride - a row size of the y image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] gray - a pointer to pixels data of output 8-bit gray image.
+        \param [in] grayStride - a row size of the gray image.
+    */
+    SIMD_API void SimdYToGray(const uint8_t* y, size_t yStride, size_t width, size_t height, uint8_t* gray, size_t grayStride);
 
     /*! @ingroup yuv_conversion
 

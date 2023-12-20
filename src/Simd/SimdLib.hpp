@@ -2185,6 +2185,26 @@ namespace Simd
         SimdGrayToBgra(gray.data, gray.width, gray.height, gray.stride, rgba.data, rgba.stride, alpha);
     }
 
+    /*! @ingroup gray_conversion
+
+        \fn void GrayToY(const View<A>& gray, View<A>& y)
+
+        \short Converts 8-bit gray image to 8-bit Y plane of YUV image.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdGrayToY.
+
+        \param [in] gray - an input 8-bit gray image.
+        \param [out] y - an output 8-bit Y plane of YUV image.
+    */
+    template<template<class> class A> SIMD_INLINE void GrayToY(const View<A>& gray, View<A>& y)
+    {
+        assert(Compatible(gray, y) && gray.format == View<A>::Gray8);
+
+        SimdGrayToY(gray.data, gray.stride, gray.width, gray.height, y.data, y.stride);
+    }
+
     /*! @ingroup histogram
 
         \fn void AbsSecondDerivativeHistogram(const View<A>& src, size_t step, size_t indent, uint32_t * histogram)
@@ -4660,6 +4680,26 @@ namespace Simd
         dst[0] = (float)A11; dst[1] = (float)A12; dst[2] = (float)b1;
         dst[3] = (float)A21; dst[4] = (float)A22; dst[5] = (float)b2;
         return valid;
+    }
+
+    /*! @ingroup yuv_conversion
+
+        \fn void YToGray(const View<A>& y, View<A>& gray)
+
+        \short Converts 8-bit Y plane of YUV image to 8-bit gray image.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdYToGray.
+
+        \param [in] y - an input 8-bit Y plane of YUV image.
+        \param [out] gray - an output 8-bit gray image.
+    */
+    template<template<class> class A> SIMD_INLINE void YToGray(const View<A>& y, View<A>& gray)
+    {
+        assert(Compatible(y, gray) && y.format == View<A>::Gray8);
+
+        SimdYToGray(y.data, y.stride, y.width, y.height, gray.data, gray.stride);
     }
 
     /*! @ingroup yuv_conversion

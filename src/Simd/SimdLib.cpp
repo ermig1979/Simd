@@ -3063,6 +3063,32 @@ SIMD_API void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, 
         Base::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
 }
 
+SIMD_API void SimdGrayToY(const uint8_t * gray, size_t grayStride, size_t width, size_t height, uint8_t * y, size_t yStride)
+{
+    SIMD_EMPTY();
+//#ifdef SIMD_AVX512BW_ENABLE
+//    if (Avx512bw::Enable)
+//        Avx512bw::GrayToY(gray, grayStride, width, height, y, yStride);
+//    else
+//#endif
+//#ifdef SIMD_AVX2_ENABLE
+//    if(Avx2::Enable && width >= Avx2::A)
+//        Avx2::GrayToY(gray, grayStride, width, height, y, yStride);
+//    else
+//#endif
+//#ifdef SIMD_SSE41_ENABLE
+//    if(Sse41::Enable && width >= Sse41::A)
+//        Sse41::GrayToY(gray, grayStride, width, height, y, yStride);
+//    else
+//#endif
+//#ifdef SIMD_NEON_ENABLE
+//    if (Neon::Enable && width >= Neon::A)
+//        Neon::GrayToY(gray, grayStride, width, height, y, yStride);
+//    else
+//#endif
+        Base::GrayToY(gray, grayStride, width, height, y, yStride);
+}
+
 SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram)
 {
     SIMD_EMPTY();
@@ -7530,6 +7556,32 @@ SIMD_API void SimdWinogradKernel3x3Block4x4SetOutput(const float * src, size_t s
 #else
     assert(0);
 #endif
+}
+
+SIMD_API void SimdYToGray(const uint8_t* y, size_t yStride, size_t width, size_t height, uint8_t* gray, size_t grayStride)
+{
+    SIMD_EMPTY();
+    //#ifdef SIMD_AVX512BW_ENABLE
+    //    if (Avx512bw::Enable)
+    //        Avx512bw::YToGray(y, yStride, width, height, gray, grayStride);
+    //    else
+    //#endif
+    //#ifdef SIMD_AVX2_ENABLE
+    //    if(Avx2::Enable && width >= Avx2::A)
+    //        Avx2::YToGray(y, yStride, width, height, gray, grayStride);
+    //    else
+    //#endif
+    //#ifdef SIMD_SSE41_ENABLE
+    //    if(Sse41::Enable && width >= Sse41::A)
+    //        Sse41::YToGray(y, yStride, width, height, gray, grayStride);
+    //    else
+    //#endif
+    //#ifdef SIMD_NEON_ENABLE
+    //    if (Neon::Enable && width >= Neon::A)
+    //        Neon::YToGray(y, yStride, width, height, gray, grayStride);
+    //    else
+    //#endif
+        Base::YToGray(y, yStride, width, height, gray, grayStride);
 }
 
 SIMD_API void SimdYuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,

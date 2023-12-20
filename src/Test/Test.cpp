@@ -96,9 +96,11 @@ namespace Test
     TEST_ADD_GROUP_A0(BgrToHsv);
     TEST_ADD_GROUP_A0(BgrToRgb);
     TEST_ADD_GROUP_A0(GrayToBgr);
+    TEST_ADD_GROUP_A0(GrayToY);
     TEST_ADD_GROUP_A0(Int16ToGray);
     TEST_ADD_GROUP_A0(RgbToGray);
     TEST_ADD_GROUP_A0(RgbaToGray);
+    TEST_ADD_GROUP_A0(YToGray);
     TEST_ADD_GROUP_0S(ConvertImage);
 
     TEST_ADD_GROUP_A0(BgraToBayer);

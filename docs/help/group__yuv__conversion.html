@@ -74,6 +74,9 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ga6634a06bb8f858e5236daceaed34a9c6"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#ga6634a06bb8f858e5236daceaed34a9c6">SimdYToGray</a> (const uint8_t *y, size_t yStride, size_t width, size_t height, uint8_t *gray, size_t grayStride)</td></tr>
+<tr class="memdesc:ga6634a06bb8f858e5236daceaed34a9c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit Y-plane of YUV to 8-bit gray image.  <a href="group__yuv__conversion.html#ga6634a06bb8f858e5236daceaed34a9c6">More...</a><br /></td></tr>
+<tr class="separator:ga6634a06bb8f858e5236daceaed34a9c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga912dc55b4a53227c228b8ee9ba25c14c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#ga912dc55b4a53227c228b8ee9ba25c14c">SimdYuva420pToBgra</a> (const uint8_t *y, size_t yStride, const uint8_t *u, size_t uStride, const uint8_t *v, size_t vStride, const uint8_t *a, size_t aStride, size_t width, size_t height, uint8_t *bgra, size_t bgraStride)</td></tr>
 <tr class="memdesc:ga912dc55b4a53227c228b8ee9ba25c14c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUVA420P image to 32-bit BGRA image.  <a href="group__yuv__conversion.html#ga912dc55b4a53227c228b8ee9ba25c14c">More...</a><br /></td></tr>
 <tr class="separator:ga912dc55b4a53227c228b8ee9ba25c14c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -122,6 +125,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga645b92da63fb7e67bbfa3c59fbcc909b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#ga645b92da63fb7e67bbfa3c59fbcc909b">SimdYuv420pToUyvy422</a> (const uint8_t *y, size_t yStride, const uint8_t *u, size_t uStride, const uint8_t *v, size_t vStride, size_t width, size_t height, uint8_t *uyvy, size_t uyvyStride)</td></tr>
 <tr class="memdesc:ga645b92da63fb7e67bbfa3c59fbcc909b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV420P to 16-bit UYVY422 image.  <a href="group__yuv__conversion.html#ga645b92da63fb7e67bbfa3c59fbcc909b">More...</a><br /></td></tr>
 <tr class="separator:ga645b92da63fb7e67bbfa3c59fbcc909b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaea3f71dd2c3dbef1a90d03acafda80f2"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:gaea3f71dd2c3dbef1a90d03acafda80f2"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#gaea3f71dd2c3dbef1a90d03acafda80f2">YToGray</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;gray)</td></tr>
+<tr class="memdesc:gaea3f71dd2c3dbef1a90d03acafda80f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit Y plane of YUV image to 8-bit gray image.  <a href="group__yuv__conversion.html#gaea3f71dd2c3dbef1a90d03acafda80f2">More...</a><br /></td></tr>
+<tr class="separator:gaea3f71dd2c3dbef1a90d03acafda80f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf5dac1cb6f329170ec3f251a773dd6a1"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gaf5dac1cb6f329170ec3f251a773dd6a1"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#gaf5dac1cb6f329170ec3f251a773dd6a1">Yuva420pToBgra</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra)</td></tr>
 <tr class="memdesc:gaf5dac1cb6f329170ec3f251a773dd6a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUVA420P image to 32-bit BGRA image.  <a href="group__yuv__conversion.html#gaf5dac1cb6f329170ec3f251a773dd6a1">More...</a><br /></td></tr>
@@ -214,6 +221,73 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ga6634a06bb8f858e5236daceaed34a9c6" name="ga6634a06bb8f858e5236daceaed34a9c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6634a06bb8f858e5236daceaed34a9c6">&#9670;&#160;</a></span>SimdYToGray()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SimdYToGray </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>yStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>gray</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>grayStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 8-bit Y-plane of YUV to 8-bit gray image. </p>
+<p >All images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::YToGray(const View&lt;A&gt;&amp; y, View&lt;A&gt;&amp; gray).</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- a pointer to pixels data of input 8-bit Y plane of YUV image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">gray</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ga912dc55b4a53227c228b8ee9ba25c14c" name="ga912dc55b4a53227c228b8ee9ba25c14c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga912dc55b4a53227c228b8ee9ba25c14c">&#9670;&#160;</a></span>SimdYuva420pToBgra()</h2>
 
@@ -1846,6 +1920,45 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">uyvy</td><td>- a pointer to pixels data of output 16-bit UYVY422 image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">uyvyStride</td><td>- a row size of the UYVY422 image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gaea3f71dd2c3dbef1a90d03acafda80f2" name="gaea3f71dd2c3dbef1a90d03acafda80f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaea3f71dd2c3dbef1a90d03acafda80f2">&#9670;&#160;</a></span>YToGray()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YToGray </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>gray</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 8-bit Y plane of YUV image to 8-bit gray image. </p>
+<p >All images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__yuv__conversion.html#ga6634a06bb8f858e5236daceaed34a9c6" title="Converts 8-bit Y-plane of YUV to 8-bit gray image.">SimdYToGray</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- an input 8-bit Y plane of YUV image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">gray</td><td>- an output 8-bit gray image. </td></tr>
   </table>
   </dd>
 </dl>
