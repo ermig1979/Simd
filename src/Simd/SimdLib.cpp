@@ -3066,11 +3066,11 @@ SIMD_API void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, 
 SIMD_API void SimdGrayToY(const uint8_t * gray, size_t grayStride, size_t width, size_t height, uint8_t * y, size_t yStride)
 {
     SIMD_EMPTY();
-//#ifdef SIMD_AVX512BW_ENABLE
-//    if (Avx512bw::Enable)
-//        Avx512bw::GrayToY(gray, grayStride, width, height, y, yStride);
-//    else
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::GrayToY(gray, grayStride, width, height, y, yStride);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GrayToY(gray, grayStride, width, height, y, yStride);
@@ -7561,11 +7561,11 @@ SIMD_API void SimdWinogradKernel3x3Block4x4SetOutput(const float * src, size_t s
 SIMD_API void SimdYToGray(const uint8_t* y, size_t yStride, size_t width, size_t height, uint8_t* gray, size_t grayStride)
 {
     SIMD_EMPTY();
-//#ifdef SIMD_AVX512BW_ENABLE
-//    if (Avx512bw::Enable)
-//        Avx512bw::YToGray(y, yStride, width, height, gray, grayStride);
-//    else
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::YToGray(y, yStride, width, height, gray, grayStride);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::YToGray(y, yStride, width, height, gray, grayStride);

@@ -51,6 +51,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHogLite.cpp" />
@@ -134,6 +135,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgra.cpp" />
@@ -171,6 +173,7 @@
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGrayToY.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSaveJpeg.h" />
@@ -197,6 +200,7 @@
     <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdShuffle.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdStream.h" />
