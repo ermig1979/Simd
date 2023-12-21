@@ -73,7 +73,7 @@ def ImagePaintTest(args) :
 def ImageFrameTest(args) :
 	print("\nImageFrameTest: ", end="")
 	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32]
-	formats = [Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32]
+	#formats = [Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32]
 	image = Simd.Image()
 	image.Load("city.jpg", Simd.PixelFormat.Rgb24)
 	frame = Simd.ImageFrame(Simd.FrameFormat.Rgb24, image.Width(), image.Height())
