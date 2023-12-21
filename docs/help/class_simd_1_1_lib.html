@@ -153,6 +153,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8c6af635a62423b1580283e5442fd8b7"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a8c6af635a62423b1580283e5442fd8b7">GrayToBgr</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:a8c6af635a62423b1580283e5442fd8b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray image to 24-bit BGR (24-bit RGB) image and back.  <a href="class_simd_1_1_lib.html#a8c6af635a62423b1580283e5442fd8b7">More...</a><br /></td></tr>
 <tr class="separator:a8c6af635a62423b1580283e5442fd8b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fe73e37b1e3c3b324ec923ca27823c8"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a1fe73e37b1e3c3b324ec923ca27823c8">GrayToY</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:a1fe73e37b1e3c3b324ec923ca27823c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray image to 8-bit Y-plane of YUV image.  <a href="class_simd_1_1_lib.html#a1fe73e37b1e3c3b324ec923ca27823c8">More...</a><br /></td></tr>
+<tr class="separator:a1fe73e37b1e3c3b324ec923ca27823c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#afbfca070bbcd00e94be3ee1e3577b0fb">ImageSaveToFile</a> (ctypes.c_void_p src, int stride, int width, int height, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> format, <a class="el" href="class_simd_1_1_image_file.html">Simd.ImageFile</a> file, int quality, str path)</td></tr>
 <tr class="memdesc:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves an image to file in given image file format.  <a href="class_simd_1_1_lib.html#afbfca070bbcd00e94be3ee1e3577b0fb">More...</a><br /></td></tr>
 <tr class="separator:afbfca070bbcd00e94be3ee1e3577b0fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,6 +189,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a146c37b89379b422bc1a048fb5c09913"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a146c37b89379b422bc1a048fb5c09913">WarpAffineRun</a> (ctypes.c_void_p context, ctypes.c_void_p src, ctypes.c_void_p dst)</td></tr>
 <tr class="memdesc:a146c37b89379b422bc1a048fb5c09913"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs warp affine for current image.  <a href="class_simd_1_1_lib.html#a146c37b89379b422bc1a048fb5c09913">More...</a><br /></td></tr>
 <tr class="separator:a146c37b89379b422bc1a048fb5c09913"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6b8d525827319e632db5e365477f7d3"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ad6b8d525827319e632db5e365477f7d3">YToGray</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:ad6b8d525827319e632db5e365477f7d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit Y-plane of YUV image to 8-bit gray image.  <a href="class_simd_1_1_lib.html#ad6b8d525827319e632db5e365477f7d3">More...</a><br /></td></tr>
+<tr class="separator:ad6b8d525827319e632db5e365477f7d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab038efe41da2002e13e9614a88ab9b66"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ab038efe41da2002e13e9614a88ab9b66">Yuv420pToBgr</a> (ctypes.c_void_p y, int yStride, ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride, int width, int height, ctypes.c_void_p dst, int dstStride, yuvType=<a class="el" href="class_simd_1_1_yuv_type.html#a26ef3db27e9bc1edf0d91e5c6cfa64e7">Simd.YuvType.Bt601</a>)</td></tr>
 <tr class="memdesc:ab038efe41da2002e13e9614a88ab9b66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV420P image to 24-bit BGR.  <a href="class_simd_1_1_lib.html#ab038efe41da2002e13e9614a88ab9b66">More...</a><br /></td></tr>
 <tr class="separator:ab038efe41da2002e13e9614a88ab9b66"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1756,6 +1762,71 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a1fe73e37b1e3c3b324ec923ca27823c8" name="a1fe73e37b1e3c3b324ec923ca27823c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fe73e37b1e3c3b324ec923ca27823c8">&#9670;&#160;</a></span>GrayToY()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def GrayToY </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 8-bit gray image to 8-bit Y-plane of YUV image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit Y-plane of YUV image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="afbfca070bbcd00e94be3ee1e3577b0fb" name="afbfca070bbcd00e94be3ee1e3577b0fb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afbfca070bbcd00e94be3ee1e3577b0fb">&#9670;&#160;</a></span>ImageSaveToFile()</h2>
 
@@ -2511,6 +2582,71 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">context</td><td>- a warp affine context. It must be created by function Simd.WarpAffineInit and released by function Simd.Release. </td></tr>
     <tr><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to pixels data of the filtered output image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad6b8d525827319e632db5e365477f7d3" name="ad6b8d525827319e632db5e365477f7d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6b8d525827319e632db5e365477f7d3">&#9670;&#160;</a></span>YToGray()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def YToGray </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 8-bit Y-plane of YUV image to 8-bit gray image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit Y-plane of YUV image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
   </table>
   </dd>
 </dl>
