@@ -75,6 +75,7 @@ namespace Simd
         View<A> planes[PLANE_COUNT_MAX];/*!< \brief Planes of the frame. */
         bool flipped; /*!< \brief A flag of vertically flipped image (false - frame point (0, 0) is placed at top left corner of the frame, true - frame point (0, 0) is placed at bottom left corner of the frame. */
         double timestamp; /*!< \brief A timestamp of the frame. */
+        const SimdYuvType yuvType; /*!< \brief A YUV format type. */ 
 
         /*!
             Creates a new empty Frame structure.
@@ -129,8 +130,9 @@ namespace Simd
             \param [in] format_ - a pixel format of created frame.
             \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
             \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
+            \param [in] yuvType_ - a YUV format type of created frame. It is equal to ::SimdYuvUnknown by default.
         */
-        Frame(size_t width_, size_t height_, Format format_, bool flipped_ = false, double timestamp_ = 0);
+        Frame(size_t width_, size_t height_, Format format_, bool flipped_ = false, double timestamp_ = 0, SimdYuvType yuvType_ = SimdYuvUnknown);
 
         /*!
             Creates a new Frame structure with specified width, height and pixel format.
@@ -139,8 +141,9 @@ namespace Simd
             \param [in] format_ - a pixel format of created frame.
             \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
             \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
+            \param [in] yuvType_ - a YUV format type of created frame. It is equal to ::SimdYuvUnknown by default.
         */
-        Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_ = false, double timestamp_ = 0);
+        Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_ = false, double timestamp_ = 0, SimdYuvType yuvType_ = SimdYuvUnknown);
 
         /*!
             Creates a new Frame structure with specified width, height and pixel format around external buffers.
@@ -156,9 +159,10 @@ namespace Simd
             \param [in] stride2 - a row size of third image plane.
             \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
             \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
+            \param [in] yuvType_ - a YUV format type of created frame. It is equal to ::SimdYuvUnknown by default.
         */
         Frame(size_t width_, size_t height_, Format format_, uint8_t * data0, size_t stride0,
-            uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, bool flipped_ = false, double timestamp_ = 0);
+            uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, bool flipped_ = false, double timestamp_ = 0, SimdYuvType yuvType_ = SimdYuvUnknown);
 
         /*!
             A Frame destructor.
@@ -221,16 +225,18 @@ namespace Simd
             \param [in] width_ - a width of re-created frame.
             \param [in] height_ - a height of re-created frame.
             \param [in] format_ - a pixel format of re-created frame.
+            \param [in] yuvType_ - a YUV format type of re-created frame. It is equal to ::SimdYuvUnknown by default.
         */
-        void Recreate(size_t width_, size_t height_, Format format_);
+        void Recreate(size_t width_, size_t height_, Format format_, SimdYuvType yuvType_ = SimdYuvUnknown);
 
         /*!
             Re-creates a Frame structure with specified width, height and pixel format.
 
             \param [in] size - a size (width and height) of re-created frame.
             \param [in] format_ - a pixel format of re-created frame.
+            \param [in] yuvType_ - a YUV format type of re-created frame. It is equal to ::SimdYuvUnknown by default.
         */
-        void Recreate(const Point<ptrdiff_t> & size, Format format_);
+        void Recreate(const Point<ptrdiff_t> & size, Format format_, SimdYuvType yuvType_ = SimdYuvUnknown);
 
         /*!
             Creates a new Frame structure which points to the region of current frame bounded by the rectangle with specified coordinates.
@@ -407,7 +413,7 @@ namespace Simd
     */
     template <template<class> class A> void Convert(const Frame<A> & src, Frame<A> & dst);
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     // struct Frame implementation:
 
@@ -417,6 +423,7 @@ namespace Simd
         , format(None)
         , flipped(false)
         , timestamp(0)
+        , yuvType(SimdYuvUnknown)
     {
     }
 
@@ -426,6 +433,7 @@ namespace Simd
         , format(frame.format)
         , flipped(frame.flipped)
         , timestamp(frame.timestamp)
+        , yuvType(frame.yuvType)
     {
         for (size_t i = 0, n = PlaneCount(); i < n; ++i)
             planes[i] = frame.planes[i];
@@ -438,6 +446,7 @@ namespace Simd
         , format(None)
         , flipped(false)
         , timestamp(0)
+        , yuvType(SimdYuvUnknown)
     {
         Swap(frame);
     }
@@ -449,6 +458,7 @@ namespace Simd
         , format(None)
         , flipped(flipped_)
         , timestamp(timestamp_)
+        , yuvType(SimdYuvUnknown)
     {
         switch (view.format)
         {
@@ -470,6 +480,7 @@ namespace Simd
         , format(None)
         , flipped(flipped_)
         , timestamp(timestamp_)
+        , yuvType(SimdYuvUnknown)
     {
         switch (view.format)
         {
@@ -485,33 +496,36 @@ namespace Simd
     }
 #endif
 
-    template <template<class> class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, bool flipped_, double timestamp_)
+    template <template<class> class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, bool flipped_, double timestamp_, SimdYuvType yuvType_)
         : width(0)
         , height(0)
         , format(None)
         , flipped(flipped_)
         , timestamp(timestamp_)
+        , yuvType(SimdYuvUnknown)
     {
-        Recreate(width_, height_, format_);
+        Recreate(width_, height_, format_, yuvType_);
     }
 
-    template <template<class> class A> SIMD_INLINE Frame<A>::Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_, double timestamp_)
+    template <template<class> class A> SIMD_INLINE Frame<A>::Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_, double timestamp_, SimdYuvType yuvType_)
         : width(0)
         , height(0)
         , format(None)
         , flipped(flipped_)
         , timestamp(timestamp_)
+        , yuvType(SimdYuvUnknown)
     {
-        Recreate(size, format_);
+        Recreate(size, format_, yuvType_);
     }
 
     template <template<class> class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, uint8_t * data0, size_t stride0,
-        uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, bool flipped_, double timestamp_)
+        uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, bool flipped_, double timestamp_, SimdYuvType yuvType_)
         : width(width_)
         , height(height_)
         , format(format_)
         , flipped(flipped_)
         , timestamp(timestamp_)
+        , yuvType(yuvType_)
     {
         switch (format)
         {
@@ -521,27 +535,41 @@ namespace Simd
             assert((width & 1) == 0 && (height & 1) == 0);
             planes[0] = View<A>(width, height, stride0, View<A>::Gray8, data0);
             planes[1] = View<A>(width / 2, height / 2, stride1, View<A>::Uv16, data1);
+            if(yuvType == SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvBt601;
             break;
         case Yuv420p:
             assert((width & 1) == 0 && (height & 1) == 0);
             planes[0] = View<A>(width, height, stride0, View<A>::Gray8, data0);
             planes[1] = View<A>(width / 2, height / 2, stride1, View<A>::Gray8, data1);
             planes[2] = View<A>(width / 2, height / 2, stride2, View<A>::Gray8, data2);
+            if (yuvType == SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvBt601;
             break;
         case Bgra32:
             planes[0] = View<A>(width, height, stride0, View<A>::Bgra32, data0);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         case Bgr24:
             planes[0] = View<A>(width, height, stride0, View<A>::Bgr24, data0);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         case Gray8:
             planes[0] = View<A>(width, height, stride0, View<A>::Gray8, data0);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         case Rgb24:
             planes[0] = View<A>(width, height, stride0, View<A>::Rgb24, data0);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         case Rgba32:
             planes[0] = View<A>(width, height, stride0, View<A>::Rgba32, data0);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         default:
             assert(0);
@@ -554,7 +582,7 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE Frame<A> * Frame<A>::Clone() const
     {
-        Frame<A> * clone = new Frame<A>(width, height, format, flipped, timestamp);
+        Frame<A> * clone = new Frame<A>(width, height, format, flipped, timestamp, yuvType);
         Copy(*this, *clone);
         return clone;
     }
@@ -576,7 +604,7 @@ namespace Simd
                                         buffer.planes[0].data, buffer.planes[0].stride,
                                         buffer.planes[1].data, buffer.planes[1].stride,
                                         buffer.planes[2].data, buffer.planes[2].stride,
-                                        flipped, timestamp);
+                                        flipped, timestamp, yuvType);
         Copy(*this, *clone);
         return clone;
     }
@@ -590,6 +618,7 @@ namespace Simd
             *(Format*)&format = frame.format;
             flipped = frame.flipped;
             timestamp = frame.timestamp;
+            *(SimdYuvType*)&yuvType = frame.yuvType;
             for (size_t i = 0, n = PlaneCount(); i < n; ++i)
                 planes[i] = frame.planes[i];
         }
@@ -614,11 +643,12 @@ namespace Simd
         return *this;
     }
 
-    template <template<class> class A> SIMD_INLINE void Frame<A>::Recreate(size_t width_, size_t height_, Format format_)
+    template <template<class> class A> SIMD_INLINE void Frame<A>::Recreate(size_t width_, size_t height_, Format format_, SimdYuvType yuvType_)
     {
         *(size_t*)&width = width_;
         *(size_t*)&height = height_;
         *(Format*)&format = format_;
+        *(SimdYuvType*)&yuvType = yuvType_;
 
         for (size_t i = 0; i < PLANE_COUNT_MAX; ++i)
             planes[i].Recreate(0, 0, View<A>::None);
@@ -631,36 +661,50 @@ namespace Simd
             assert((width & 1) == 0 && (height & 1) == 0);
             planes[0].Recreate(width, height, View<A>::Gray8);
             planes[1].Recreate(width / 2, height / 2, View<A>::Uv16);
+            if (yuvType == SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvBt601;
             break;
         case Yuv420p:
             assert((width & 1) == 0 && (height & 1) == 0);
             planes[0].Recreate(width, height, View<A>::Gray8);
             planes[1].Recreate(width / 2, height / 2, View<A>::Gray8);
             planes[2].Recreate(width / 2, height / 2, View<A>::Gray8);
+            if (yuvType == SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvBt601;
             break;
         case Bgra32:
             planes[0].Recreate(width, height, View<A>::Bgra32);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         case Bgr24:
             planes[0].Recreate(width, height, View<A>::Bgr24);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         case Gray8:
             planes[0].Recreate(width, height, View<A>::Gray8);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         case Rgb24:
             planes[0].Recreate(width, height, View<A>::Rgb24);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         case Rgba32:
             planes[0].Recreate(width, height, View<A>::Rgba32);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         default:
             assert(0);
         }
     }
 
-    template <template<class> class A> SIMD_INLINE void Frame<A>::Recreate(const Point<ptrdiff_t> & size, Format format_)
+    template <template<class> class A> SIMD_INLINE void Frame<A>::Recreate(const Point<ptrdiff_t> & size, Format format_, SimdYuvType yuvType_)
     {
-        Recreate(size.x, size.y, format_);
+        Recreate(size.x, size.y, format_, yuvType_);
     }
 
     template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Region(const ptrdiff_t & left, const ptrdiff_t & top, const ptrdiff_t & right, const ptrdiff_t & bottom) const
@@ -692,6 +736,7 @@ namespace Simd
             *(Format*)&frame.format = format;
             frame.flipped = flipped;
             frame.timestamp = timestamp;
+            *(SimdYuvType*)&frame.yuvType = yuvType;
 
             frame.planes[0] = planes[0].Region(left, top, right, bottom);
 
@@ -735,6 +780,7 @@ namespace Simd
         *(Format*)&frame.format = format;
         frame.timestamp = timestamp;
         frame.flipped = !flipped;
+        *(SimdYuvType*)&frame.yuvType = yuvType;
         for (size_t i = 0, n = PlaneCount(); i < n; ++i)
             frame.planes[i] = planes[i].Flipped();
         return frame;
@@ -788,6 +834,7 @@ namespace Simd
         *(Format*)&format = None;
         flipped = false;
         timestamp = 0;
+        *(SimdYuvType*)&yuvType = SimdYuvUnknown;
     }
 
     template <template<class> class A> SIMD_INLINE void Frame<A>::Swap(Frame<A>& other)
@@ -799,6 +846,7 @@ namespace Simd
         std::swap((Format&)format, (Format&)other.format);
         std::swap(flipped, other.flipped);
         std::swap(timestamp, other.timestamp);
+        std::swap((SimdYuvType&)yuvType, (SimdYuvType&)other.yuvType);
     }
 
     template <template<class> class A> SIMD_INLINE bool Frame<A>::Owner() const
@@ -829,7 +877,7 @@ namespace Simd
         typedef typename Frame<A>::Format Format;
 
         return
-            (a.width == b.width && a.height == b.height && a.format == (Format)b.format && a.flipped == b.flipped);
+            (a.width == b.width && a.height == b.height && a.format == (Format)b.format && a.flipped == b.flipped && a.yuvType == b.yuvType);
     }
 
     template <template<class> class A, template<class> class B> SIMD_INLINE void Copy(const Frame<A> & src, Frame<B> & dst)
@@ -859,6 +907,7 @@ namespace Simd
             switch (dst.format)
             {
             case Frame<A>::Yuv420p:
+                assert(src.yuvType == dst.yuvType);
                 Copy(src.planes[0], dst.planes[0]);
                 DeinterleaveUv(src.planes[1], dst.planes[1], dst.planes[2]);
                 break;
@@ -866,24 +915,27 @@ namespace Simd
             {
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
                 DeinterleaveUv(src.planes[1], u, v);
-                Yuv420pToBgra(src.planes[0], u, v, dst.planes[0]);
+                Yuv420pToBgra(src.planes[0], u, v, dst.planes[0], src.yuvType);
                 break;
             }
             case Frame<A>::Bgr24:
             {
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
                 DeinterleaveUv(src.planes[1], u, v);
-                Yuv420pToBgr(src.planes[0], u, v, dst.planes[0]);
+                Yuv420pToBgr(src.planes[0], u, v, dst.planes[0], src.yuvType);
                 break;
             }
             case Frame<A>::Gray8:
-                Copy(src.planes[0], dst.planes[0]);
+                if (src.yuvType == SimdYuvTrect871)
+                    Copy(src.planes[0], dst.planes[0]);
+                else
+                    YToGray(src.planes[0], dst.planes[0]);
                 break;
             case Frame<A>::Rgb24:
             {
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
                 DeinterleaveUv(src.planes[1], u, v);
-                Yuv420pToRgb(src.planes[0], u, v, dst.planes[0]);
+                Yuv420pToRgb(src.planes[0], u, v, dst.planes[0], src.yuvType);
                 break;
             }
             case Frame<A>::Rgba32:
@@ -891,7 +943,7 @@ namespace Simd
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
                 DeinterleaveUv(src.planes[1], u, v);
                 View<A> bgr(src.Size(), View<A>::Bgr24);
-                Yuv420pToBgr(src.planes[0], u, v, bgr);
+                Yuv420pToBgr(src.planes[0], u, v, bgr, src.yuvType);
                 BgrToRgba(bgr, dst.planes[0]);
                 break;
             }
@@ -904,25 +956,29 @@ namespace Simd
             switch (dst.format)
             {
             case Frame<A>::Nv12:
+                assert(src.yuvType == dst.yuvType);
                 Copy(src.planes[0], dst.planes[0]);
                 InterleaveUv(src.planes[1], src.planes[2], dst.planes[1]);
                 break;
             case Frame<A>::Bgra32:
-                Yuv420pToBgra(src.planes[0], src.planes[1], src.planes[2], dst.planes[0]);
+                Yuv420pToBgra(src.planes[0], src.planes[1], src.planes[2], dst.planes[0], src.yuvType);
                 break;
             case Frame<A>::Bgr24:
-                Yuv420pToBgr(src.planes[0], src.planes[1], src.planes[2], dst.planes[0]);
+                Yuv420pToBgr(src.planes[0], src.planes[1], src.planes[2], dst.planes[0], src.yuvType);
                 break;
             case Frame<A>::Gray8:
-                Copy(src.planes[0], dst.planes[0]);
+                if (src.yuvType == SimdYuvTrect871)
+                    Copy(src.planes[0], dst.planes[0]);
+                else
+                    YToGray(src.planes[0], dst.planes[0]);
                 break;
             case Frame<A>::Rgb24:
-                Yuv420pToRgb(src.planes[0], src.planes[1], src.planes[2], dst.planes[0]);
+                Yuv420pToRgb(src.planes[0], src.planes[1], src.planes[2], dst.planes[0], src.yuvType);
                 break;
             case Frame<A>::Rgba32:
             {
                 View<A> bgr(src.Size(), View<A>::Bgr24);
-                Yuv420pToBgr(src.planes[0], src.planes[1], src.planes[2], bgr);
+                Yuv420pToBgr(src.planes[0], src.planes[1], src.planes[2], bgr, src.yuvType);
                 BgrToRgba(bgr, dst.planes[0]);
                 break;
             }
@@ -937,12 +993,12 @@ namespace Simd
             case Frame<A>::Nv12:
             {
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
-                BgraToYuv420p(src.planes[0], dst.planes[0], u, v);
+                BgraToYuv420p(src.planes[0], dst.planes[0], u, v, dst.yuvType);
                 InterleaveUv(u, v, dst.planes[1]);
                 break;
             }
             case Frame<A>::Yuv420p:
-                BgraToYuv420p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2]);
+                BgraToYuv420p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
                 break;
             case Frame<A>::Bgr24:
                 BgraToBgr(src.planes[0], dst.planes[0]);
@@ -967,12 +1023,12 @@ namespace Simd
             case Frame<A>::Nv12:
             {
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
-                BgrToYuv420p(src.planes[0], dst.planes[0], u, v);
+                BgrToYuv420p(src.planes[0], dst.planes[0], u, v, dst.yuvType);
                 InterleaveUv(u, v, dst.planes[1]);
                 break;
             }
             case Frame<A>::Yuv420p:
-                BgrToYuv420p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2]);
+                BgrToYuv420p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
                 break;
             case Frame<A>::Bgra32:
                 BgrToBgra(src.planes[0], dst.planes[0]);
@@ -995,11 +1051,17 @@ namespace Simd
             switch (dst.format)
             {
             case Frame<A>::Nv12:
-                Copy(src.planes[0], dst.planes[0]);
+                if (dst.yuvType == SimdYuvTrect871)
+                    Copy(src.planes[0], dst.planes[0]);
+                else
+                    GrayToY(src.planes[0], dst.planes[0]);
                 Fill(dst.planes[1], 128);
                 break;
             case Frame<A>::Yuv420p:
-                Copy(src.planes[0], dst.planes[0]);
+                if (dst.yuvType == SimdYuvTrect871)
+                    Copy(src.planes[0], dst.planes[0]);
+                else
+                    GrayToY(src.planes[0], dst.planes[0]);
                 Fill(dst.planes[1], 128);
                 Fill(dst.planes[2], 128);
                 break;
@@ -1028,7 +1090,7 @@ namespace Simd
                 View<A> bgr(src.Size(), View<A>::Bgr24);
                 RgbToBgr(src.planes[0], bgr);
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
-                BgrToYuv420p(bgr, dst.planes[0], u, v);
+                BgrToYuv420p(bgr, dst.planes[0], u, v, dst.yuvType);
                 InterleaveUv(u, v, dst.planes[1]);
                 break;
             }
@@ -1036,7 +1098,7 @@ namespace Simd
             {
                 View<A> bgr(src.Size(), View<A>::Bgr24);
                 RgbToBgr(src.planes[0], bgr);
-                BgrToYuv420p(bgr, dst.planes[0], dst.planes[1], dst.planes[2]);
+                BgrToYuv420p(bgr, dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
                 break;
             }
             case Frame<A>::Bgra32:
@@ -1064,7 +1126,7 @@ namespace Simd
                 View<A> bgr(src.Size(), View<A>::Bgr24);
                 RgbaToBgr(src.planes[0], bgr);
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
-                BgrToYuv420p(bgr, dst.planes[0], u, v);
+                BgrToYuv420p(bgr, dst.planes[0], u, v, dst.yuvType);
                 InterleaveUv(u, v, dst.planes[1]);
                 break;
             }
@@ -1072,7 +1134,7 @@ namespace Simd
             {
                 View<A> bgr(src.Size(), View<A>::Bgr24);
                 RgbaToBgr(src.planes[0], bgr);
-                BgrToYuv420p(bgr, dst.planes[0], dst.planes[1], dst.planes[2]);
+                BgrToYuv420p(bgr, dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
                 break;
             }
             case Frame<A>::Bgra32:
