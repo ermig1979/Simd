@@ -99,6 +99,39 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        SIMD_INLINE __m256i GrayToY(__m256i g)
+        {
+            static const __m256i G2Y_SCALE = SIMD_MM256_SET1_EPI16(Base::G2Y_SCALE);
+            static const __m256i G2Y_ROUND = SIMD_MM256_SET1_EPI16(Base::G2Y_ROUND);
+            static const __m256i G2Y_LO = SIMD_MM256_SET1_EPI8(Base::G2Y_LO);
+            static const __m256i G2Y_HI = SIMD_MM256_SET1_EPI8(Base::G2Y_HI);
+            __m256i g0 = UnpackU8<0>(g);
+            __m256i g1 = UnpackU8<1>(g);
+            __m256i y0 = _mm256_srli_epi16(_mm256_add_epi16(_mm256_mullo_epi16(g0, G2Y_SCALE), G2Y_ROUND), Base::G2Y_SHIFT);
+            __m256i y1 = _mm256_srli_epi16(_mm256_add_epi16(_mm256_mullo_epi16(g1, G2Y_SCALE), G2Y_ROUND), Base::G2Y_SHIFT);
+            __m256i y = _mm256_packus_epi16(y0, y1);
+            return _mm256_min_epu8(_mm256_adds_epu8(y, G2Y_LO), G2Y_HI);
+        }
+
+        SIMD_INLINE __m256i YToGray(__m256i y)
+        {
+            static const __m256i Y2G_SCALE = SIMD_MM256_SET1_EPI16(Base::Y2G_SCALE);
+            static const __m256i Y2G_ROUND = SIMD_MM256_SET1_EPI16(Base::Y2G_ROUND);
+            static const __m256i G2Y_LO = SIMD_MM256_SET1_EPI8(Base::G2Y_LO);
+            static const __m256i G2Y_HI = SIMD_MM256_SET1_EPI8(Base::G2Y_HI);
+            y = _mm256_subs_epu8(_mm256_min_epu8(y, G2Y_HI), G2Y_LO);
+            __m256i y0 = UnpackU8<0>(y);
+            __m256i y1 = UnpackU8<1>(y);
+            __m256i g0 = _mm256_srli_epi16(_mm256_add_epi16(_mm256_mullo_epi16(y0, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
+            __m256i g1 = _mm256_srli_epi16(_mm256_add_epi16(_mm256_mullo_epi16(y1, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
+            return _mm256_packus_epi16(g0, g1);
+        }
+    }
+#endif
 }
 
 #endif//__SimdGrayToY_h__

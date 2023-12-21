@@ -47,6 +47,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2HogLite.cpp" />
@@ -127,6 +128,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2UyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2UyvyToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2WarpAffine.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2YToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgraV2.cpp" />
@@ -164,6 +166,7 @@
     <ClInclude Include="..\..\src\Simd\SimdGather.h" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGrayToY.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSaveJpeg.h" />
@@ -191,6 +194,7 @@
     <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdShuffle.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdStream.h" />
