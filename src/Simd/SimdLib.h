@@ -519,10 +519,14 @@ typedef enum
 {
     /*! Gets absolute value for every point of input tensor. */
     SimdSynetUnaryOperation32fAbs,
+    /*! Gets ceil for every point of input tensor. */
+    SimdSynetUnaryOperation32fCeil,
     /*! Gets erf (error function) for every point of input tensor. */
     SimdSynetUnaryOperation32fErf,
     /*! Gets exponent for every point of input tensor. */
     SimdSynetUnaryOperation32fExp,
+    /*! Gets floor for every point of input tensor. */
+    SimdSynetUnaryOperation32fFloor,
     /*! Gets logarithm for every point of input tensor. */
     SimdSynetUnaryOperation32fLog,
     /*! Gets negative for every point of input tensor. */

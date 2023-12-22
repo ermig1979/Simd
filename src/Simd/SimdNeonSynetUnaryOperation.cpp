@@ -43,6 +43,17 @@ namespace Simd
             return vabsq_f32(value);
         }
 
+        template<> SIMD_INLINE float32x4_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fCeil>(float32x4_t value)
+        {
+#ifdef SIMD_ARM64_ENABLE
+            return vrndpq_f32(value);
+#else
+            float32x4_t fiv = vcvtq_f32_s32(vcvtq_s32_f32(value));
+            uint32x4_t mask = vcltq_f32(fiv, value);
+            return vaddq_f32(fiv, vbslq_f32(mask, vdupq_n_f32(1.0f), vdupq_n_f32(0.0f)));
+#endif
+        }
+
         template<> SIMD_INLINE float32x4_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf>(float32x4_t value)
         {
             return Erf<1>(value);
@@ -51,6 +62,17 @@ namespace Simd
         template<> SIMD_INLINE float32x4_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp>(float32x4_t value)
         {
             return Exponent(value);
+        }
+
+        template<> SIMD_INLINE float32x4_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fFloor>(float32x4_t value)
+        {
+#ifdef SIMD_ARM64_ENABLE
+            return vrndmq_f32(value);
+#else
+            float32x4_t fiv = vcvtq_f32_s32(vcvtq_s32_f32(value));
+            uint32x4_t mask = vcgtq_f32(fiv, value);
+            return vsubq_f32(fiv, vbslq_f32(mask, vdupq_n_f32(1.0f), vdupq_n_f32(0.0f)));
+#endif
         }
 
         template<> SIMD_INLINE float32x4_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fLog>(float32x4_t value)
@@ -116,8 +138,10 @@ namespace Simd
             switch (type)
             {
             case SimdSynetUnaryOperation32fAbs: SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fErf: SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fCeil: SynetUnaryOperation32f<SimdSynetUnaryOperation32fCeil, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fExp: SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fErf: SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fFloor: SynetUnaryOperation32f<SimdSynetUnaryOperation32fFloor, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fLog: SynetUnaryOperation32f<SimdSynetUnaryOperation32fLog, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fNeg: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNeg, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fNot: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNot, align>(src, size, dst); break;

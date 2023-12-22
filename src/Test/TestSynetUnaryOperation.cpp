@@ -39,10 +39,14 @@ namespace Test
         {
         case SimdSynetUnaryOperation32fAbs:
             return "Abs";
+        case SimdSynetUnaryOperation32fCeil:
+            return "Ceil";
         case SimdSynetUnaryOperation32fErf:
             return "Erf";
         case SimdSynetUnaryOperation32fExp:
             return "Exp";
+        case SimdSynetUnaryOperation32fFloor:
+            return "Floor";
         case SimdSynetUnaryOperation32fLog:
             return "Log";
         case SimdSynetUnaryOperation32fNeg:
