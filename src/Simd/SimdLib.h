@@ -9093,7 +9093,7 @@ extern "C"
 
         All images must have the same width and height.
 
-        \note This function has C++ wrappers: Simd::YToGray(const View<A>& y, View<A>& gray).
+        \note This function has C++ wrappers: Simd::YToGray(const View& y, View& gray).
 
         \param [in] y - a pointer to pixels data of input 8-bit Y plane of YUV image.
         \param [in] yStride - a row size of the y image.
@@ -9113,7 +9113,7 @@ extern "C"
         The input Y, A and output BGRA images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component).
 
-        \note This function has a C++ wrappers: Simd::Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A> & a, View<A>& bgra).
+        \note This function has a C++ wrappers: Simd::Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -9138,6 +9138,8 @@ extern "C"
         \short Converts YUVA444P image to 32-bit BGRA image.
 
         The input Y, U, V, A and output BGRA images must have the same width and height.
+
+        \note This function has a C++ wrappers: Simd::Yuva444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
