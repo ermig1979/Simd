@@ -508,6 +508,7 @@ namespace Test
     TEST_ADD_GROUP_A0(Yuv420pToUyvy422);
 
     TEST_ADD_GROUP_A0(Yuva420pToBgra);
+    TEST_ADD_GROUP_A0(Yuva422pToBgraV2);
     TEST_ADD_GROUP_A0(Yuva444pToBgraV2);
     TEST_ADD_GROUP_A0(Yuv444pToBgra);
     TEST_ADD_GROUP_A0(Yuv444pToBgraV2);
