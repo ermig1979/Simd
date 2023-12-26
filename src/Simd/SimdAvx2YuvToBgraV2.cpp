@@ -40,17 +40,82 @@ namespace Simd
             const __m256i ra8 = _mm256_or_si256(r16, _mm256_slli_si256(a16, 1));
             __m256i bgra0 = _mm256_unpacklo_epi16(bg8, ra8);
             __m256i bgra1 = _mm256_unpackhi_epi16(bg8, ra8);
-            Permute2x128(bgra0, bgra1);
             _mm256_storeu_si256(bgra + 0, bgra0);
             _mm256_storeu_si256(bgra + 1, bgra1);
         }
 
+        template <class T> SIMD_INLINE void Yuva422pToBgraV2(const uint8_t* y, __m256i u, __m256i v, const uint8_t* a, uint8_t* bgra)
+        {
+            static const __m256i K32_PERMUTE = SIMD_MM256_SETR_EPI32(0, 2, 4, 6, 1, 3, 5, 7);
+            __m256i y0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)y + 0), K32_PERMUTE);
+            __m256i u0 = _mm256_permutevar8x32_epi32(UnpackU8<0>(u, u), K32_PERMUTE);
+            __m256i v0 = _mm256_permutevar8x32_epi32(UnpackU8<0>(v, v), K32_PERMUTE);
+            __m256i a0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)a + 0), K32_PERMUTE);
+            YuvaToBgra16<T>(UnpackY<T, 0>(y0), UnpackUV<T, 0>(u0), UnpackUV<T, 0>(v0), UnpackU8<0>(a0), (__m256i*)bgra + 0);
+            YuvaToBgra16<T>(UnpackY<T, 1>(y0), UnpackUV<T, 1>(u0), UnpackUV<T, 1>(v0), UnpackU8<1>(a0), (__m256i*)bgra + 2);
+            __m256i y1 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)y + 1), K32_PERMUTE);
+            __m256i u1 = _mm256_permutevar8x32_epi32(UnpackU8<1>(u, u), K32_PERMUTE);
+            __m256i v1 = _mm256_permutevar8x32_epi32(UnpackU8<1>(v, v), K32_PERMUTE);
+            __m256i a1 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)a + 1), K32_PERMUTE);
+            YuvaToBgra16<T>(UnpackY<T, 0>(y1), UnpackUV<T, 0>(u1), UnpackUV<T, 0>(v1), UnpackU8<0>(a1), (__m256i*)bgra + 4);
+            YuvaToBgra16<T>(UnpackY<T, 1>(y1), UnpackUV<T, 1>(u1), UnpackUV<T, 1>(v1), UnpackU8<1>(a1), (__m256i*)bgra + 6);
+        }
+
+        template <class T> void Yuva422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride,
+            const uint8_t* v, size_t vStride, const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride)
+        {
+            assert((width % 2 == 0) && (width >= DA));
+
+            size_t widthDA = AlignLo(width, DA);
+            size_t tail = width - widthDA;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t colUV = 0, colYA = 0, colBgra = 0; colYA < widthDA; colYA += DA, colUV += A, colBgra += OA)
+                {
+                    __m256i u_ = LoadPermuted<false>((__m256i*)(u + colUV));
+                    __m256i v_ = LoadPermuted<false>((__m256i*)(v + colUV));
+
+                    Yuva422pToBgraV2<T>(y + colYA, u_, v_, a + colYA, bgra + colBgra);
+                }
+                if (tail)
+                {
+                    size_t offset = width - DA;
+                    __m256i u_ = LoadPermuted<false>((__m256i*)(u + offset / 2));
+                    __m256i v_ = LoadPermuted<false>((__m256i*)(v + offset / 2));
+                    Yuva422pToBgraV2<T>(y + offset, u_, v_, a + offset, bgra + 4 * offset);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                a += aStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void Yuva422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuva422pToBgraV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt709: Yuva422pToBgraV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt2020: Yuva422pToBgraV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvTrect871: Yuva422pToBgraV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+
         template <class T> SIMD_INLINE void Yuva444pToBgraV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const uint8_t* a, uint8_t* bgra)
         {
-            __m256i _y = LoadPermuted<false>((__m256i*)y);
-            __m256i _u = LoadPermuted<false>((__m256i*)u);
-            __m256i _v = LoadPermuted<false>((__m256i*)v);
-            __m256i _a = LoadPermuted<false>((__m256i*)a);
+            static const __m256i K32_PERMUTE = SIMD_MM256_SETR_EPI32(0, 2, 4, 6, 1, 3, 5, 7);
+            __m256i _y = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)y), K32_PERMUTE);
+            __m256i _u = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)u), K32_PERMUTE);
+            __m256i _v = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)v), K32_PERMUTE);
+            __m256i _a = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)a), K32_PERMUTE);
             YuvaToBgra16<T>(UnpackY<T, 0>(_y), UnpackUV<T, 0>(_u), UnpackUV<T, 0>(_v), UnpackU8<0>(_a), (__m256i*)bgra + 0);
             YuvaToBgra16<T>(UnpackY<T, 1>(_y), UnpackUV<T, 1>(_u), UnpackUV<T, 1>(_v), UnpackU8<1>(_a), (__m256i*)bgra + 2);
         }
