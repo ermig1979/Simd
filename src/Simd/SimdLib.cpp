@@ -7625,11 +7625,11 @@ SIMD_API void SimdYuva420pToBgraV2(const uint8_t* y, size_t yStride, const uint8
 //        Avx2::Yuva420pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
 //    else
 //#endif
-//#ifdef SIMD_SSE41_ENABLE
-//    if (Sse41::Enable && width >= Sse41::DA)
-//        Sse41::Yuva420pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
-//    else
-//#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuva420pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
+    else
+#endif
 //#ifdef SIMD_NEON_ENABLE
 //    if (Neon::Enable && width >= Neon::DA)
 //        Neon::Yuva420pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);

@@ -41,6 +41,74 @@ namespace Simd
             _mm_storeu_si128(bgra + 1, _mm_unpackhi_epi16(bg8, ra8));
         }
 
+        template <class T, int part> SIMD_INLINE void Yuva420pToBgraV2(const uint8_t* y0, const uint8_t* y1, __m128i u, __m128i v, const uint8_t* a0, const uint8_t* a1, uint8_t* bgra0, uint8_t* bgra1)
+        {
+            __m128i y00 = _mm_loadu_si128((__m128i*)y0 + part);
+            __m128i a00 = _mm_loadu_si128((__m128i*)a0 + part);
+            __m128i y10 = _mm_loadu_si128((__m128i*)y1 + part);
+            __m128i a10 = _mm_loadu_si128((__m128i*)a1 + part);
+            __m128i u0 = UnpackUV<T, 0>(u);
+            __m128i v0 = UnpackUV<T, 0>(v);
+            YuvaToBgra16<T>(UnpackY<T, 0>(y00), u0, v0, UnpackU8<0>(a00), (__m128i*)bgra0 + 4 * part + 0);
+            YuvaToBgra16<T>(UnpackY<T, 0>(y10), u0, v0, UnpackU8<0>(a10), (__m128i*)bgra1 + 4 * part + 0);
+            __m128i u1 = UnpackUV<T, 1>(u);
+            __m128i v1 = UnpackUV<T, 1>(v);
+            YuvaToBgra16<T>(UnpackY<T, 1>(y00), u1, v1, UnpackU8<1>(a00), (__m128i*)bgra0 + 4 * part + 2);
+            YuvaToBgra16<T>(UnpackY<T, 1>(y10), u1, v1, UnpackU8<1>(a10), (__m128i*)bgra1 + 4 * part + 2);
+        }
+
+        template <class T> SIMD_INLINE void Yuva420pToBgraV2(const uint8_t* y0, size_t yStride, const uint8_t* u, const uint8_t* v, const uint8_t* a0, size_t aStride, uint8_t* bgra0, size_t bgraStride)
+        {
+            const uint8_t* y1 = y0 + yStride;
+            const uint8_t* a1 = a0 + aStride;
+            uint8_t* bgra1 = bgra0 + bgraStride;
+            __m128i _u = _mm_loadu_si128((__m128i*)u);
+            __m128i _v = _mm_loadu_si128((__m128i*)v);
+            Yuva420pToBgraV2<T, 0>(y0, y1, UnpackU8<0>(_u, _u), UnpackU8<0>(_v, _v), a0, a1, bgra0, bgra1);
+            Yuva420pToBgraV2<T, 1>(y0, y1, UnpackU8<1>(_u, _u), UnpackU8<1>(_v, _v), a0, a1, bgra0, bgra1);
+        }
+
+        template <class T> void Yuva420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride,
+            const uint8_t* v, size_t vStride, const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
+
+            width /= 2;
+            size_t widthA = AlignLo(width, A);
+            size_t tail = width - widthA;
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t col = 0; col < widthA; col += A)
+                    Yuva420pToBgraV2<T>(y + 2 * col, yStride, u + col, v + col, a + 2 * col, aStride, bgra + 8 * col, bgraStride);
+                if (tail)
+                {
+                    size_t col = width - A;
+                    Yuva420pToBgraV2<T>(y + 2 * col, yStride, u + col, v + col, a + 2 * col, aStride, bgra + 8 * col, bgraStride);
+                }
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                a += 2 * aStride;
+                bgra += 2 * bgraStride;
+            }
+        }
+
+        void Yuva420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuva420pToBgraV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt709: Yuva420pToBgraV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt2020: Yuva420pToBgraV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvTrect871: Yuva420pToBgraV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <class T> SIMD_INLINE void Yuva422pToBgraV2(const uint8_t* y, __m128i u, __m128i v, const uint8_t* a, uint8_t* bgra)
         {
             __m128i y0 = _mm_loadu_si128((__m128i*)y + 0);
