@@ -852,6 +852,16 @@ namespace Simd
             bgr.val[2] = PackSaturatedI16(YuvToRed<T>(yLo, vLo), YuvToRed<T>(yHi, vHi));
         }
 
+        template <class T> SIMD_INLINE void YuvToBgra(uint8x16_t y, uint8x16_t u, uint8x16_t v, uint8x16_t a, uint8x16x4_t& bgra)
+        {
+            int16x8_t yLo = UnpackY<T, 0>(y), uLo = UnpackUV<T, 0>(u), vLo = UnpackUV<T, 0>(v);
+            int16x8_t yHi = UnpackY<T, 1>(y), uHi = UnpackUV<T, 1>(u), vHi = UnpackUV<T, 1>(v);
+            bgra.val[0] = PackSaturatedI16(YuvToBlue<T>(yLo, uLo), YuvToBlue<T>(yHi, uHi));
+            bgra.val[1] = PackSaturatedI16(YuvToGreen<T>(yLo, uLo, vLo), YuvToGreen<T>(yHi, uHi, vHi));
+            bgra.val[2] = PackSaturatedI16(YuvToRed<T>(yLo, vLo), YuvToRed<T>(yHi, vHi));
+            bgra.val[3] = a;
+        }
+
         template <class T> SIMD_INLINE void YuvToRgb(uint8x16_t y, uint8x16_t u, uint8x16_t v, uint8x16x3_t& rgb)
         {
             int16x8_t yLo = UnpackY<T, 0>(y), uLo = UnpackUV<T, 0>(u), vLo = UnpackUV<T, 0>(v);

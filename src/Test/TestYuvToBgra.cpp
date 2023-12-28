@@ -204,10 +204,10 @@ namespace Test
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx512bw::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Neon::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
-//#endif 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Neon::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
+#endif 
 
         return result;
     }
@@ -233,10 +233,10 @@ namespace Test
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx512bw::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Neon::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
-//#endif 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Neon::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
+#endif 
 
         return result;
     }
