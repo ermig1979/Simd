@@ -35,15 +35,79 @@ namespace Simd
             __m512i b = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, YuvToBlue<T>(y, u));
             __m512i g = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, YuvToGreen<T>(y, u, v));
             __m512i r = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, YuvToRed<T>(y, v));
+            __m512i _a = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, a);
             __m512i bg0 = UnpackU8<0>(b, g);
             __m512i bg1 = UnpackU8<1>(b, g);
-            __m512i ra0 = UnpackU8<0>(r, a);
-            __m512i ra1 = UnpackU8<1>(r, a);
+            __m512i ra0 = UnpackU8<0>(r, _a);
+            __m512i ra1 = UnpackU8<1>(r, _a);
             Store<false, mask>(bgra + 0 * A, UnpackU16<0>(bg0, ra0), tails[0]);
             Store<false, mask>(bgra + 1 * A, UnpackU16<1>(bg0, ra0), tails[1]);
             Store<false, mask>(bgra + 2 * A, UnpackU16<0>(bg1, ra1), tails[2]);
             Store<false, mask>(bgra + 3 * A, UnpackU16<1>(bg1, ra1), tails[3]);
         }
+
+        template <class T, bool mask> SIMD_INLINE void Yuva420pToBgraV2(const uint8_t* y0, size_t yStride, const uint8_t* u, const uint8_t* v, 
+            const uint8_t* a0, size_t aStride, uint8_t* bgra0, size_t bgraStride, const __mmask64* tails)
+        {
+            const uint8_t* y1 = y0 + yStride;
+            const uint8_t* a1 = a0 + aStride;
+            uint8_t* bgra1 = bgra0 + bgraStride;
+            __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<false, mask>(u, tails[0])));
+            __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<false, mask>(v, tails[0])));
+            __m512i u0 = UnpackU8<0>(_u, _u);
+            __m512i v0 = UnpackU8<0>(_v, _v);
+            YuvToBgra<T, mask>(Load<false, mask>(y0 + 0, tails[1]), u0, v0, Load<false, mask>(a0 + 0, tails[1]), bgra0 + 00, tails + 3);
+            YuvToBgra<T, mask>(Load<false, mask>(y1 + 0, tails[1]), u0, v0, Load<false, mask>(a1 + 0, tails[1]), bgra1 + 00, tails + 3);
+            __m512i u1 = UnpackU8<1>(_u, _u);
+            __m512i v1 = UnpackU8<1>(_v, _v);
+            YuvToBgra<T, mask>(Load<false, mask>(y0 + A, tails[1]), u1, v1, Load<false, mask>(a0 + A, tails[1]), bgra0 + QA, tails + 7);
+            YuvToBgra<T, mask>(Load<false, mask>(y1 + A, tails[1]), u1, v1, Load<false, mask>(a1 + A, tails[1]), bgra1 + QA, tails + 7);
+        }
+
+        template <class T> void Yuva420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0));
+
+            width /= 2;
+            size_t alignedWidth = AlignLo(width, A);
+            size_t tail = width - alignedWidth;
+            __mmask64 tailMasks[11];
+            tailMasks[0] = TailMask64(tail);
+            for (size_t i = 0; i < 2; ++i)
+                tailMasks[1 + i] = TailMask64(tail * 2 - A * i);
+            for (size_t i = 0; i < 8; ++i)
+                tailMasks[3 + i] = TailMask64(tail * 8 - A * i);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                size_t col = 0;
+                for (; col < alignedWidth; col += A)
+                    Yuva420pToBgraV2<T, false>(y + col * 2, yStride, u + col, v + col, a + col * 2, aStride, bgra + col * 8, bgraStride, tailMasks);
+                if (col < width)
+                    Yuva420pToBgraV2<T, true>(y + col * 2, yStride, u + col, v + col, a + col * 2, aStride, bgra + col * 8, bgraStride, tailMasks);
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                a += 2 * aStride;
+                bgra += 2 * bgraStride;
+            }
+        }
+
+        void Yuva420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuva420pToBgraV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt709: Yuva420pToBgraV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt2020: Yuva420pToBgraV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvTrect871: Yuva420pToBgraV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <class T, bool mask> SIMD_INLINE void Yuva422pToBgraV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const uint8_t* a, uint8_t* bgra, const __mmask64* tails)
         {
@@ -53,8 +117,8 @@ namespace Simd
             __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<false, mask>(v, tails[0])));
             __m512i v0 = UnpackU8<0>(_v, _v);
             __m512i v1 = UnpackU8<1>(_v, _v);
-            YuvToBgra<T, mask>(Load<false, mask>(y + 0, tails[1]), u0, v0, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<false, mask>(a + 0, tails[1]))), bgra + 00, tails + 3);
-            YuvToBgra<T, mask>(Load<false, mask>(y + A, tails[2]), u1, v1, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<false, mask>(a + A, tails[2]))), bgra + QA, tails + 7);
+            YuvToBgra<T, mask>(Load<false, mask>(y + 0, tails[1]), u0, v0, Load<false, mask>(a + 0, tails[1]), bgra + 00, tails + 3);
+            YuvToBgra<T, mask>(Load<false, mask>(y + A, tails[2]), u1, v1, Load<false, mask>(a + A, tails[2]), bgra + QA, tails + 7);
         }
 
         template <class T> void Yuva422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,

@@ -199,10 +199,10 @@ namespace Test
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx2::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx512bw::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
-//#endif 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx512bw::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
+#endif 
 
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
