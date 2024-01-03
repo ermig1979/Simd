@@ -27,6 +27,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -782,16 +783,32 @@ namespace Simd
                     if (cn == 1)
                     {
                         __m256 _1 = _mm256_set1_ps(1.0f);
-                        for (; dx < rsa; dx += Avx::F)
+                        if (Avx2::SlowGather)
                         {
-                            __m256i idx = Avx2::LoadPermuted<true>((__m256i*)(_ix.data + dx));
-                            __m256 s0145 = _mm256_castpd_ps(_mm256_i32gather_pd((double*)ps, _mm256_extracti128_si256(idx, 0), 4));
-                            __m256 s2367 = _mm256_castpd_ps(_mm256_i32gather_pd((double*)ps, _mm256_extracti128_si256(idx, 1), 4));
-                            __m256 fx1 = _mm256_load_ps(_ax.data + dx);
-                            __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                            __m256 s0 = _mm256_shuffle_ps(s0145, s2367, 0x88);
-                            __m256 s1 = _mm256_shuffle_ps(s0145, s2367, 0xDD);
-                            _mm256_store_ps(pb + dx, _mm256_fmadd_ps(s0, fx0, _mm256_mul_ps(s1, fx1)));
+                            for (; dx < rsa; dx += Avx::F)
+                            {
+                                __m256 s0145 = Avx::Load(ps + _ix[dx + 0], ps + _ix[dx + 1], ps + _ix[dx + 4], ps + _ix[dx + 5]);
+                                __m256 s2367 = Avx::Load(ps + _ix[dx + 2], ps + _ix[dx + 3], ps + _ix[dx + 6], ps + _ix[dx + 7]);
+                                __m256 fx1 = _mm256_load_ps(_ax.data + dx);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                __m256 m0 = _mm256_mul_ps(fx0, _mm256_shuffle_ps(s0145, s2367, 0x88));
+                                __m256 m1 = _mm256_mul_ps(fx1, _mm256_shuffle_ps(s0145, s2367, 0xDD));
+                                _mm256_store_ps(pb + dx, _mm256_add_ps(m0, m1));
+                            }
+                        }
+                        else
+                        {
+                            for (; dx < rsa; dx += Avx::F)
+                            {
+                                __m256i idx = Avx2::LoadPermuted<true>((__m256i*)(_ix.data + dx));
+                                __m256 s0145 = _mm256_castpd_ps(_mm256_i32gather_pd((double*)ps, _mm256_extracti128_si256(idx, 0), 4));
+                                __m256 s2367 = _mm256_castpd_ps(_mm256_i32gather_pd((double*)ps, _mm256_extracti128_si256(idx, 1), 4));
+                                __m256 fx1 = _mm256_load_ps(_ax.data + dx);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                __m256 s0 = _mm256_shuffle_ps(s0145, s2367, 0x88);
+                                __m256 s1 = _mm256_shuffle_ps(s0145, s2367, 0xDD);
+                                _mm256_store_ps(pb + dx, _mm256_fmadd_ps(s0, fx0, _mm256_mul_ps(s1, fx1)));
+                            }
                         }
                         for (; dx < rsh; dx += Sse41::F)
                         {
@@ -826,7 +843,7 @@ namespace Simd
                             _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
                         }
                     }
-                    else
+                    else if (Avx2::SlowGather)
                     {
                         __m256 _1 = _mm256_set1_ps(1.0f);
                         __m256i _cn = _mm256_set1_epi32((int)cn);
