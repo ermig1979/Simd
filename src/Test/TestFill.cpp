@@ -511,9 +511,9 @@ namespace Test
             result = result && Fill32fAutoTest(FUNC_32F(Simd::Sse41::Fill32f), FUNC_32F(SimdFill32f));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx::Fill32f), FUNC_32F(SimdFill32f));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx2::Fill32f), FUNC_32F(SimdFill32f));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
