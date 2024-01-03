@@ -40,6 +40,7 @@ namespace Simd
                 Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::BMI1) &&
                 Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::BMI2) &&
                 Base::CheckBit(1, 0, Cpuid::Ecx, Cpuid::OSXSAVE) &&
+                Base::CheckBit(1, 0, Cpuid::Ecx, Cpuid::AVX) &&
                 Base::CheckBit(1, 0, Cpuid::Ecx, Cpuid::FMA) &&
                 Base::CheckBit(1, 0, Cpuid::Ecx, Cpuid::F16C);
         }

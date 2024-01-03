@@ -470,11 +470,6 @@ namespace Test
             result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Sse41::CosineDistance32f), FUNC_F(SimdCosineDistance32f));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx::CosineDistance32f), FUNC_F(SimdCosineDistance32f));
-#endif 
-
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx2::CosineDistance32f), FUNC_F(SimdCosineDistance32f));

@@ -2931,7 +2931,7 @@ SIMD_API void SimdCosineDistance32f(const float * a, const float * b, size_t siz
 {
     SIMD_EMPTY();
     typedef void(*SimdCosineDistance32fPtr) (const float * a, const float * b, size_t size, float * distance);
-    const static SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC5(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC4(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdCosineDistance32f(a, b, size, distance);
 }

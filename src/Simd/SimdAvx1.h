@@ -33,8 +33,6 @@ namespace Simd
     {
         void Fill32f(float * dst, size_t size, const float * value);
 
-        void CosineDistance32f(const float * a, const float * b, size_t size, float * distance);
-
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
