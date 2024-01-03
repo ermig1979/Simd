@@ -23,3 +23,4 @@ cd ~-
 UpdateCopyrights ../../src/Simd
 UpdateCopyrights ../../src/Test
 UpdateCopyrights ../../src/Use
+UpdateCopyrights ../../py/SimdPy

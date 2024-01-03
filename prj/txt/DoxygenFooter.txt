@@ -2,7 +2,7 @@
   <ul>
     <li class="footer">Generated for Simd Library by
     <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="$relpath^doxygen.png" alt="doxygen"/></a> $doxygenversion </li>
+    Doxygen</a> $doxygenversion </li>
   </ul>
 </div></div></div></div></div></div>
 </td> </tr> </table>
