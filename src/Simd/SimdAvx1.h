@@ -35,30 +35,6 @@ namespace Simd
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
-        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
-
-        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
-        void NeuralAddVector(const float * src, size_t size, float * dst);
-
-        void NeuralAddValue(const float * value, float * dst, size_t size);
-
-        void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-
-        void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
-
         void NeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         void NeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
@@ -82,8 +58,6 @@ namespace Simd
         void NeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
         void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-        void NeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         void NeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight,
             size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
