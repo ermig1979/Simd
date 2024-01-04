@@ -321,6 +321,15 @@ namespace Simd
         public:
             ResizerShortBilinear(const ResParam& param);
         };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerFloatBilinear : public Base::ResizerFloatBilinear
+        {
+            virtual void Run(const float* src, size_t srcStride, float* dst, size_t dstStride);
+        public:
+            ResizerFloatBilinear(const ResParam& param);
+        };
         
         //-------------------------------------------------------------------------------------------------
 
@@ -437,7 +446,7 @@ namespace Simd
             ResizerShortBilinear(const ResParam& param);
         };
 
-        class ResizerFloatBilinear : public Base::ResizerFloatBilinear
+        class ResizerFloatBilinear : public Sse41::ResizerFloatBilinear
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
         public:

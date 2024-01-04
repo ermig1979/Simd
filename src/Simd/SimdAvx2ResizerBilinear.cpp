@@ -746,7 +746,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         ResizerFloatBilinear::ResizerFloatBilinear(const ResParam & param)
-            : Base::ResizerFloatBilinear(param)
+            : Sse41::ResizerFloatBilinear(param)
         {
         }
 
