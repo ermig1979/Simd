@@ -178,7 +178,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseStatistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseStatisticMoments.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseStretchGray2x2.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdBaseSvm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetAdd.cpp" />

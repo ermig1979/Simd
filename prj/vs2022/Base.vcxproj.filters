@@ -187,9 +187,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseStretchGray2x2.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSvm.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynet.cpp">
       <Filter>Base</Filter>
     </ClCompile>
