@@ -381,22 +381,6 @@ namespace Simd
     }
 #endif //SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE    
-    namespace Avx
-    {
-        class ResizerFloatBilinear : public Base::ResizerFloatBilinear
-        {
-            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
-        public:
-            ResizerFloatBilinear(const ResParam & param);
-        };
-
-        //-------------------------------------------------------------------------------------------------
-
-        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
-    }
-#endif //SIMD_AVX_ENABLE 
-
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {

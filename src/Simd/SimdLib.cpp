@@ -4998,7 +4998,7 @@ SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t ds
 {
     SIMD_EMPTY();
     typedef void*(*SimdResizerInitPtr) (size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
-    const static SimdResizerInitPtr simdResizerInit = SIMD_FUNC5(ResizerInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdResizerInitPtr simdResizerInit = SIMD_FUNC4(ResizerInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
 }

@@ -55,7 +55,7 @@ namespace Simd
             else if (param.IsByteArea1x1())
                 return new ResizerByteArea1x1(param);
             else
-                return Avx::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+                return Sse41::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }
     }
 #endif //SIMD_AVX2_ENABLE 
