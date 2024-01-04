@@ -27,6 +27,7 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdEnable.h"
 
 namespace Simd
 {
@@ -410,6 +411,8 @@ namespace Simd
             }
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         namespace HogLiteFeatureFilterDetail
         {
             template <int size> struct Feature
@@ -655,6 +658,8 @@ namespace Simd
             featureFilter.Run(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         namespace HogLiteFeatureResizerDetail
         {
             template <int size> struct Feature
@@ -685,7 +690,6 @@ namespace Simd
                 }
             };
         }
-
 
         class HogLiteFeatureResizer
         {
@@ -783,6 +787,8 @@ namespace Simd
             featureResizer.Run(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template <bool align> SIMD_INLINE void StoreHorizontalSums(float * ptr, __m256 * sums)
         {
             __m256 hsum = _mm256_hadd_ps(_mm256_hadd_ps(sums[0], sums[1]), _mm256_hadd_ps(sums[2], sums[3]));
@@ -863,6 +869,8 @@ namespace Simd
             else
                 HogLiteCompressFeatures<false>(src, srcStride, width, height, pca, dst, dstStride);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         class HogLiteSeparableFilter
         {
@@ -991,6 +999,8 @@ namespace Simd
             HogLiteSeparableFilter filter;
             filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         __m256i K32_TAIL_MASK = SIMD_MM256_SETR_EPI32(-1, -1, -1, -1, -1, -1, -1, 0);
 

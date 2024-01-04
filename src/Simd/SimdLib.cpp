@@ -3366,11 +3366,6 @@ SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, siz
         Avx2::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
     else
 #endif
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable)
-        Avx::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable)
         Sse41::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
@@ -3395,11 +3390,6 @@ SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, siz
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
         Avx2::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
-    else
-#endif
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable)
-        Avx::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
@@ -3428,11 +3418,6 @@ SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, s
         Avx2::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
     else
 #endif
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable)
-        Avx::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable)
         Sse41::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
@@ -3457,11 +3442,6 @@ SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, si
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && srcWidth >= hSize - 1 + Avx2::F)
         Avx2::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
-    else
-#endif
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && srcWidth >= hSize - 1 + Avx::F)
-        Avx::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
