@@ -397,6 +397,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYToGray.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvaToBgraV2.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">

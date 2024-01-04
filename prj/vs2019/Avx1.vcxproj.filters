@@ -10,9 +10,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1Neural.cpp">
       <Filter>Avx1</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SquaredDifferenceSum.cpp">
-      <Filter>Avx1</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx1Svm.cpp">
       <Filter>Avx1</Filter>
     </ClCompile>

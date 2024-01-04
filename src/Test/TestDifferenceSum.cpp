@@ -402,9 +402,9 @@ namespace Test
             result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Sse41::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx2::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
@@ -436,9 +436,9 @@ namespace Test
             result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Sse41::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Avx::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Avx2::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
