@@ -6014,15 +6014,6 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
         Base::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 }
 
-SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum)
-{
-    SIMD_EMPTY();
-    typedef void(*SimdSvmSumLinearPtr) (const float* x, const float* svs, const float* weights, size_t length, size_t count, float* sum);
-    const static SimdSvmSumLinearPtr simdSvmSumLinear = SIMD_FUNC5(SvmSumLinear, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
-
-    simdSvmSumLinear(x, svs, weights, length, count, sum);
-}
-
 SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
     SIMD_EMPTY();

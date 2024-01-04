@@ -374,8 +374,6 @@ namespace Test
 
     TEST_ADD_GROUP_A0(StretchGray2x2);
 
-    TEST_ADD_GROUP_A0(SvmSumLinear);
-
 #if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A0(SynetAddBias);
     TEST_ADD_GROUP_A0(SynetAdd8i);

@@ -6748,33 +6748,6 @@ extern "C"
     SIMD_API void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    /*! @ingroup svm
-
-        \fn void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
-
-        \short It is a part of linear SVM (Support Vector Machine) prediction algorithm.
-
-        Algorithm's details:
-        \verbatim
-        sum = 0;
-        for(i = 0; i < count; ++i)
-            for(j = 0; j < length; ++j)
-                sum += x[j]*svs[j][i]*weight[i];
-        \endverbatim
-
-        \note The array with support vectors must has following structure: svs[length][count].
-
-        \warning This functionality is deprecated and can be removed in the future.
-
-        \param [in] x - a vector of features which need to predict with using SVM.
-        \param [in] svs - an array with support vectors.
-        \param [in] weights - a weight coefficient of each support vector.
-        \param [in] length - a length of these current and support vectors.
-        \param [in] count - a count of support vectors.
-        \param [out] sum - a pointer to result sum.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
-
     /*! @ingroup synet_other
 
         \fn void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);

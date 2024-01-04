@@ -380,11 +380,6 @@
 */
 
 /*! @ingroup functions
-    @defgroup svm SVM
-    \short Support Vector Machine's functions.
-*/
-
-/*! @ingroup functions
     @defgroup neural Neural Network
     \short Artificial Neural Network's functions for accelerating of Simd::Neural.
 */

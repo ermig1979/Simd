@@ -10,9 +10,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxSquaredDifferenceSum.cpp">
       <Filter>Vsx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVsxSvm.cpp">
-      <Filter>Vsx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVsxYuvToHue.cpp">
       <Filter>Vsx</Filter>
     </ClCompile>

@@ -163,9 +163,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonStretchGray2x2.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSvm.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp">
       <Filter>Neon</Filter>
     </ClCompile>

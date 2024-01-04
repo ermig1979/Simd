@@ -511,8 +511,6 @@ namespace Simd
         void StretchGray2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-        void SvmSumLinear(const float* x, const float* svs, const float* weights, size_t length, size_t count, float* sum);
-
         void SynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
             uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 

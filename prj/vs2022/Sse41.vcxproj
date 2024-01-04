@@ -93,7 +93,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41StatisticMoments.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41StretchGray2x2.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41Svm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd.cpp" />

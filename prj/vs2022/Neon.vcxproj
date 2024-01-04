@@ -96,7 +96,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonStatistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonStatisticMoments.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonStretchGray2x2.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonSvm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp" />

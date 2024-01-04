@@ -46,7 +46,7 @@ namespace Simd
             Store<false, mask>(bgra + 3 * A, UnpackU16<1>(bg1, ra1), tails[3]);
         }
 
-        template <class T, bool mask> SIMD_INLINE void Yuva420pToBgraV2(const uint8_t* y0, size_t yStride, const uint8_t* u, const uint8_t* v,
+        template <class T, bool mask> SIMD_YUV_TO_BGR_INLINE void Yuva420pToBgraV2(const uint8_t* y0, size_t yStride, const uint8_t* u, const uint8_t* v,
             const uint8_t* a0, size_t aStride, uint8_t* bgra0, size_t bgraStride, const __mmask64* tails)
         {
             const uint8_t* y1 = y0 + yStride;
@@ -109,7 +109,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template <class T, bool mask> SIMD_INLINE void Yuva422pToBgraV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const uint8_t* a, uint8_t* bgra, const __mmask64* tails)
+        template <class T, bool mask> SIMD_YUV_TO_BGR_INLINE void Yuva422pToBgraV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const uint8_t* a, uint8_t* bgra, const __mmask64* tails)
         {
             __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<false, mask>(u, tails[0])));
             __m512i u0 = UnpackU8<0>(_u, _u);
@@ -179,7 +179,7 @@ namespace Simd
             _mm512_mask_storeu_epi32(bgra + 1, __mmask16(tail >> 1 * 16), bgra1);
         }
 
-        template <class T> SIMD_INLINE void Yuva444pToBgraV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const uint8_t* a, uint8_t* bgra, __mmask64 tail = __mmask64(-1))
+        template <class T> SIMD_YUV_TO_BGR_INLINE void Yuva444pToBgraV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const uint8_t* a, uint8_t* bgra, __mmask64 tail = __mmask64(-1))
         {
             __m512i _y = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_maskz_loadu_epi8(tail, y));
             __m512i _u = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_maskz_loadu_epi8(tail, u));
