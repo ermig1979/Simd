@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdConversion.h"
 #include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
