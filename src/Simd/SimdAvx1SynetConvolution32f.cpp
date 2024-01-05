@@ -26,6 +26,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx1.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdGemm.h"
 
 namespace Simd
@@ -39,7 +40,7 @@ namespace Simd
             if (activation == ::SimdConvolutionActivationIdentity)
             {
                 if (bias)
-                    SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
+                    Sse41::SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
             }
             else if (activation == ::SimdConvolutionActivationRelu)
             {

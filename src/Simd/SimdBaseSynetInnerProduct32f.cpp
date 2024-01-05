@@ -31,7 +31,7 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-    Base::PerformanceMeasurer * SynetInnerProduct32f::Perf(const String& func)
+    Base::PerformanceMeasurer * SynetInnerProduct32f::Perf(const char* func)
     {
         if (_perf == NULL)
             _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
