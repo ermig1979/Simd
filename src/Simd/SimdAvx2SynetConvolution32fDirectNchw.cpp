@@ -181,7 +181,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHswish>(__m256 value, const __m256 * params)
         {
-            return Avx2::SynetHswish32f(value, params[0], params[1]);
+            return Avx::SynetHswish32f(value, params[0], params[1]);
         }
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationMish>(__m256 value, const __m256* params)

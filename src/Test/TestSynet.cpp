@@ -337,9 +337,9 @@ namespace Test
             result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Sse41::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Avx::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Avx2::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE

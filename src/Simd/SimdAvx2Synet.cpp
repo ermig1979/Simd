@@ -586,6 +586,132 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type)
+        {
+            if (format == SimdTensorFormatNchw)
+                Base::SynetShuffleLayerForward(src0, src1, channels0, channels1, spatial, dst0, dst1, format, type);
+            else if (format == SimdTensorFormatNhwc)
+            {
+                size_t channels = (channels0 + channels1) / 2;
+                size_t channels0F = AlignLo(channels0, F);
+                size_t channels0DF = AlignLo(channels0, DF);
+                size_t channels1F = AlignLo(channels1, F);
+                size_t channels1DF = AlignLo(channels1, DF);
+                if (type == 0)
+                {
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t cd = 0, cs0 = 0, cs1 = 0;
+                        for (; cs0 < channels0DF; cs0 += DF, cd += F)
+                        {
+                            __m256 s0 = _mm256_loadu_ps(src0 + cs0 + 0);
+                            __m256 s1 = _mm256_loadu_ps(src0 + cs0 + F);
+                            __m256 p0 = _mm256_permute2f128_ps(s0, s1, 0x20);
+                            __m256 p1 = _mm256_permute2f128_ps(s0, s1, 0x31);
+                            _mm256_storeu_ps(dst0 + cd, _mm256_shuffle_ps(p0, p1, 0x88));
+                            _mm256_storeu_ps(dst1 + cd, _mm256_shuffle_ps(p0, p1, 0xDD));
+                        }
+                        for (; cs0 < channels0F; cs0 += F, cd += HF)
+                        {
+                            __m128 s0 = _mm_loadu_ps(src0 + cs0 + 00);
+                            __m128 s1 = _mm_loadu_ps(src0 + cs0 + HF);
+                            _mm_storeu_ps(dst0 + cd, _mm_shuffle_ps(s0, s1, 0x88));
+                            _mm_storeu_ps(dst1 + cd, _mm_shuffle_ps(s0, s1, 0xDD));
+                        }
+                        for (; cs0 < channels0; cs0 += 2, cd += 1)
+                        {
+                            dst0[cd] = src0[cs0 + 0];
+                            dst1[cd] = src0[cs0 + 1];
+                        }
+                        for (; cs1 < channels1DF; cs1 += DF, cd += F)
+                        {
+                            __m256 s0 = _mm256_loadu_ps(src1 + cs1 + 0);
+                            __m256 s1 = _mm256_loadu_ps(src1 + cs1 + F);
+                            __m256 p0 = _mm256_permute2f128_ps(s0, s1, 0x20);
+                            __m256 p1 = _mm256_permute2f128_ps(s0, s1, 0x31);
+                            _mm256_storeu_ps(dst0 + cd, _mm256_shuffle_ps(p0, p1, 0x88));
+                            _mm256_storeu_ps(dst1 + cd, _mm256_shuffle_ps(p0, p1, 0xDD));
+                        }
+                        for (; cs1 < channels1F; cs1 += F, cd += HF)
+                        {
+                            __m128 s0 = _mm_loadu_ps(src1 + cs1 + 00);
+                            __m128 s1 = _mm_loadu_ps(src1 + cs1 + HF);
+                            _mm_storeu_ps(dst0 + cd, _mm_shuffle_ps(s0, s1, 0x88));
+                            _mm_storeu_ps(dst1 + cd, _mm_shuffle_ps(s0, s1, 0xDD));
+                        }
+                        for (; cs1 < channels1; cs1 += 2, cd += 1)
+                        {
+                            dst0[cd] = src1[cs1 + 0];
+                            dst1[cd] = src1[cs1 + 1];
+                        }
+                        src0 += channels0;
+                        src1 += channels1;
+                        dst0 += channels;
+                        dst1 += channels;
+                    }
+                }
+                else if (type == 1)
+                {
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t cs = 0, cd0 = 0, cd1 = 0;
+                        for (; cd0 < channels0DF; cd0 += DF, cs += F)
+                        {
+                            __m256 s0 = _mm256_loadu_ps(src0 + cs);
+                            __m256 s1 = _mm256_loadu_ps(src1 + cs);
+                            __m256 u0 = _mm256_unpacklo_ps(s0, s1);
+                            __m256 u1 = _mm256_unpackhi_ps(s0, s1);
+                            _mm256_storeu_ps(dst0 + cd0 + 0, _mm256_permute2f128_ps(u0, u1, 0x20));
+                            _mm256_storeu_ps(dst0 + cd0 + F, _mm256_permute2f128_ps(u0, u1, 0x31));
+                        }
+                        for (; cd0 < channels0F; cd0 += F, cs += HF)
+                        {
+                            __m128 s0 = _mm_loadu_ps(src0 + cs);
+                            __m128 s1 = _mm_loadu_ps(src1 + cs);
+                            _mm_storeu_ps(dst0 + cd0 + 00, _mm_unpacklo_ps(s0, s1));
+                            _mm_storeu_ps(dst0 + cd0 + HF, _mm_unpackhi_ps(s0, s1));
+                        }
+                        for (; cd0 < channels0; cd0 += 2, cs += 1)
+                        {
+                            dst0[cd0 + 0] = src0[cs];
+                            dst0[cd0 + 1] = src1[cs];
+                        }
+                        for (; cd1 < channels1DF; cd1 += DF, cs += F)
+                        {
+                            __m256 s0 = _mm256_loadu_ps(src0 + cs);
+                            __m256 s1 = _mm256_loadu_ps(src1 + cs);
+                            __m256 u0 = _mm256_unpacklo_ps(s0, s1);
+                            __m256 u1 = _mm256_unpackhi_ps(s0, s1);
+                            _mm256_storeu_ps(dst1 + cd1 + 0, _mm256_permute2f128_ps(u0, u1, 0x20));
+                            _mm256_storeu_ps(dst1 + cd1 + F, _mm256_permute2f128_ps(u0, u1, 0x31));
+                        }
+                        for (; cd1 < channels1F; cd1 += F, cs += HF)
+                        {
+                            __m128 s0 = _mm_loadu_ps(src0 + cs);
+                            __m128 s1 = _mm_loadu_ps(src1 + cs);
+                            _mm_storeu_ps(dst1 + cd1 + 00, _mm_unpacklo_ps(s0, s1));
+                            _mm_storeu_ps(dst1 + cd1 + HF, _mm_unpackhi_ps(s0, s1));
+                        }
+                        for (; cd1 < channels1; cd1 += 2, cs += 1)
+                        {
+                            dst1[cd1 + 0] = src0[cs];
+                            dst1[cd1 + 1] = src1[cs];
+                        }
+                        src0 += channels;
+                        src1 += channels;
+                        dst0 += channels0;
+                        dst1 += channels1;
+                    }
+                }
+                else
+                    assert(0);
+            }
+            else
+                assert(0);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

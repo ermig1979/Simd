@@ -83,7 +83,7 @@ namespace Simd
                 else
                 {
                     float slope = 0;
-                    SynetRelu32f(dst, size*count, &slope, dst);
+                    Sse41::SynetRelu32f(dst, size*count, &slope, dst);
                 }
             }
             else if (activation == ::SimdConvolutionActivationLeakyRelu)
@@ -125,7 +125,7 @@ namespace Simd
                     }
                 }
                 else
-                    SynetRelu32f(dst, size*count, &slope, dst);
+                    Sse41::SynetRelu32f(dst, size*count, &slope, dst);
             }
             else if (activation == ::SimdConvolutionActivationRestrictRange)
             {
@@ -168,7 +168,7 @@ namespace Simd
                     }
                 }
                 else
-                    SynetRestrictRange32f(dst, size*count, &lower, &upper, dst);
+                    Sse41::SynetRestrictRange32f(dst, size*count, &lower, &upper, dst);
             }
             else if (activation == ::SimdConvolutionActivationPrelu)
             {
@@ -250,7 +250,7 @@ namespace Simd
                     }
                 }
                 else
-                    Avx::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
+                    Sse41::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
             }
             else if (activation == ::SimdConvolutionActivationHswish)
             {
@@ -293,7 +293,7 @@ namespace Simd
                     }
                 }
                 else
-                    SynetHswish32f(dst, count * size, &shift, &scale, dst);
+                    Sse41::SynetHswish32f(dst, count * size, &shift, &scale, dst);
             }
             else if (activation == ::SimdConvolutionActivationHardSigmoid)
             {
@@ -336,7 +336,7 @@ namespace Simd
                     }
                 }
                 else
-                    SynetHardSigmoid32f(dst, count * size, &scale, &shift, dst);
+                    Sse41::SynetHardSigmoid32f(dst, count * size, &scale, &shift, dst);
             }
             else
             {

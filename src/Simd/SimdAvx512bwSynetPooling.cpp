@@ -212,7 +212,7 @@ namespace Simd
                     return;
                 }
             }
-            Avx::SynetPoolingAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
+            Avx2::SynetPoolingAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
         }
 
         //-----------------------------------------------------------------------------------------
