@@ -12,7 +12,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx1Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Gemm32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1NeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetAdd.cpp" />
