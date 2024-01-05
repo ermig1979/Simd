@@ -109,9 +109,9 @@ namespace Test
             result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Sse41::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Avx::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Avx2::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
@@ -210,9 +210,9 @@ namespace Test
             result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Sse41::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Avx::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Avx2::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
@@ -311,9 +311,9 @@ namespace Test
             result = result && SynetFusedLayerForward2AutoTest(FUNC_FLF2(Simd::Sse41::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward2AutoTest(FUNC_FLF2(Simd::Avx::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetFusedLayerForward2AutoTest(FUNC_FLF2(Simd::Avx2::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
@@ -411,9 +411,9 @@ namespace Test
             result = result && SynetFusedLayerForward3AutoTest(FUNC_FLF3(Simd::Sse41::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward3AutoTest(FUNC_FLF3(Simd::Avx::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetFusedLayerForward3AutoTest(FUNC_FLF3(Simd::Avx2::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
@@ -510,9 +510,9 @@ namespace Test
             result = result && SynetFusedLayerForward4AutoTest(FUNC_FLF4(Simd::Sse41::SynetFusedLayerForward4), FUNC_FLF4(SimdSynetFusedLayerForward4));
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward4AutoTest(FUNC_FLF4(Simd::Avx::SynetFusedLayerForward4), FUNC_FLF4(SimdSynetFusedLayerForward4));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetFusedLayerForward4AutoTest(FUNC_FLF4(Simd::Avx2::SynetFusedLayerForward4), FUNC_FLF4(SimdSynetFusedLayerForward4));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
@@ -610,9 +610,9 @@ namespace Test
             result = result && SynetFusedLayerForward8AutoTest(FUNC_FLF8(Simd::Sse41::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward8AutoTest(FUNC_FLF8(Simd::Avx::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetFusedLayerForward8AutoTest(FUNC_FLF8(Simd::Avx2::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
@@ -721,9 +721,9 @@ namespace Test
             result = result && SynetFusedLayerForward9AutoTest(FUNC_FLF9(Simd::Sse41::SynetFusedLayerForward9), FUNC_FLF9(SimdSynetFusedLayerForward9));
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward9AutoTest(FUNC_FLF9(Simd::Avx::SynetFusedLayerForward9), FUNC_FLF9(SimdSynetFusedLayerForward9));
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetFusedLayerForward9AutoTest(FUNC_FLF9(Simd::Avx2::SynetFusedLayerForward9), FUNC_FLF9(SimdSynetFusedLayerForward9));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE

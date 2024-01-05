@@ -21,7 +21,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect2r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect3r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetDeconvolution32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetFused.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fCd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fCdc.cpp" />

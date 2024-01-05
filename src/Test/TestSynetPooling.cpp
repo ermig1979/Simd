@@ -91,7 +91,7 @@ namespace Test
                 ss << "[" << p.srcC << "x" << p.srcH << "x" << p.srcW;
                 ss << "-" << p.kernelY << "x" << p.kernelX;
                 ss << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padY) << "-" << p.excludePad;
-                ss << "-" << (p.format == SimdTensorFormatNhwc ? "1" : "0");
+                ss << "-" << (p.format == SimdTensorFormatNhwc ? "1" : "0") << "]";
                 desc = ss.str();
             }
 
