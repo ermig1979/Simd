@@ -178,8 +178,8 @@ jobs:
       run: cmake ./prj/cmake -B build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TARGET="x86_64" -DSIMD_GET_VERSION=OFF -DSIMD_TEST_FLAGS="-march=native"
 
     - name: Build
-      run: cmake --build build --config ${{matrix.build_type}} --parallel2
+      run: cmake --build build --config ${{matrix.build_type}} --parallel4
 
     - name: Test
       working-directory: build
-      run: ./Test.exe "-r=.." -m=a -tt=2 -ts=10
+      run: ./Test.exe "-r=.." -m=a -tt=-1 -ts=10

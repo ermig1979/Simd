@@ -609,16 +609,16 @@ namespace Simd
                 if (_blockY == 4 && _blockX == 4)
                 {
                     SetBlock(4, 4);
-                    _setFilter = Avx::WinogradKernel2x2Block4x4SetFilter;
-                    _setInput = Avx::WinogradKernel2x2Block4x4SetInput;
-                    _setOutput = Avx::WinogradKernel2x2Block4x4SetOutput;
+                    _setFilter = Sse41::WinogradKernel2x2Block4x4SetFilter;
+                    _setInput = Sse41::WinogradKernel2x2Block4x4SetInput;
+                    _setOutput = Sse41::WinogradKernel2x2Block4x4SetOutput;
                 }
                 else if (_blockY == 2 && _blockX == 2)
                 {
                     SetBlock(2, 2);
-                    _setFilter = Avx::WinogradKernel2x2Block2x2SetFilter;
-                    _setInput = Avx::WinogradKernel2x2Block2x2SetInput;
-                    _setOutput = Avx::WinogradKernel2x2Block2x2SetOutput;
+                    _setFilter = Sse41::WinogradKernel2x2Block2x2SetFilter;
+                    _setInput = Sse41::WinogradKernel2x2Block2x2SetInput;
+                    _setOutput = Sse41::WinogradKernel2x2Block2x2SetOutput;
                 }
                 else
                     assert(0);

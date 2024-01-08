@@ -30,8 +30,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX_ENABLE) && defined(SIMD_SYNET_ENABLE)    
-    namespace Avx
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
+    namespace Avx2
     {
         SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter(const __m256 src[4], float* dst, size_t stride)
         {
@@ -74,7 +74,7 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel2x2Block2x2SetInput8Store(const __m256* src, float* dst, size_t stride)
         {
@@ -222,7 +222,7 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel2x2Block2x2SetOutputLoad9(const float* src, size_t stride, __m256* dst)
         {
@@ -319,7 +319,7 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel2x2Block4x4SetFilterRow(const __m256* t, float* dst, size_t stride)
         {
@@ -390,7 +390,7 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel2x2Block4x4SetInputStoreRow(const __m256 tmp[5], float* dst, size_t stride)
         {
@@ -593,7 +593,7 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel2x2Block4x4SetOutputGetRow(const __m256* s, __m256* d)
         {

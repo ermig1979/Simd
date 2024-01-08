@@ -648,16 +648,16 @@ namespace Simd
                 if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 256)
                 {
                     SetBlock(4, 4);
-                    _setFilter = Avx::WinogradKernel2x2Block4x4SetFilter;
-                    _setInput = Avx::WinogradKernel2x2Block4x4SetInput;
-                    _setOutput = Avx::WinogradKernel2x2Block4x4SetOutput;
+                    _setFilter = Avx2::WinogradKernel2x2Block4x4SetFilter;
+                    _setInput = Avx2::WinogradKernel2x2Block4x4SetInput;
+                    _setOutput = Avx2::WinogradKernel2x2Block4x4SetOutput;
                 }
                 else
                 {
                     SetBlock(2, 2);
-                    _setFilter = Avx::WinogradKernel2x2Block2x2SetFilter;
-                    _setInput = Avx::WinogradKernel2x2Block2x2SetInput;
-                    _setOutput = Avx::WinogradKernel2x2Block2x2SetOutput;
+                    _setFilter = Avx2::WinogradKernel2x2Block2x2SetFilter;
+                    _setInput = Avx2::WinogradKernel2x2Block2x2SetInput;
+                    _setOutput = Avx2::WinogradKernel2x2Block2x2SetOutput;
                 }
             }
             else if (p.kernelY == 3 && p.kernelX == 3)
