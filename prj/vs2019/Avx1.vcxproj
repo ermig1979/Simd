@@ -12,19 +12,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx1Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Gemm32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fDirectNchw.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fDirectNhwc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect2f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect2r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect3r.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetDeconvolution32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetInnerProduct32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fCd.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fCdc.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fDc.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetScale.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />

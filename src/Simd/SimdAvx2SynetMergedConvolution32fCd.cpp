@@ -466,7 +466,7 @@ namespace Simd
 		//---------------------------------------------------------------------
 
 		SynetMergedConvolution32fCd::SynetMergedConvolution32fCd(const MergConvParam32f& p)
-			: Avx::SynetMergedConvolution32fCd(p)
+			: Sse41::SynetMergedConvolution32fCd(p)
 		{
 			SynetMergedConvolution32fCdc::Set(_param, 0, 0, _convolution);
 			SynetMergedConvolution32fCd::Set(_param, 1, 1, _convolution);

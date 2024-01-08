@@ -127,11 +127,6 @@ namespace Test
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Sse41::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Avx::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
-#endif 
-
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Avx2::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));

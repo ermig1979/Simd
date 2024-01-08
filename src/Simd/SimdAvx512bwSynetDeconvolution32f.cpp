@@ -63,7 +63,7 @@ namespace Simd
             assert(p.trans && p.group == 1);
             if (p.IsPad(0) && p.IsDilation(1) && p.kernelY == p.strideX && p.kernelX == p.strideX)
             {
-                Avx::SynetDeconvolution32fGemmNN::RowToImg(src, dst);
+                Avx2::SynetDeconvolution32fGemmNN::RowToImg(src, dst);
                 return;
             }
             else

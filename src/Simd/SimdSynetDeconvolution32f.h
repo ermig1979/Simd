@@ -268,41 +268,17 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX_ENABLE    
-    namespace Avx
-    {
-        class SynetDeconvolution32fGemmNN : public Sse41::SynetDeconvolution32fGemmNN
-        {
-        public:
-            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
-            virtual String Ext() const { return "Avx"; }
-
-        protected:
-            virtual void RowToImg(const float* src, float* dst);
-        };
-
-        class SynetDeconvolution32fNhwcDirect2x2 : public Sse41::SynetDeconvolution32fNhwcDirect2x2
-        {
-        public:
-            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);
-            virtual String Ext() const { return "Avx"; }
-        };
-
-        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
-    }
-#endif//SIMD_AVX_ENABLE
-
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class SynetDeconvolution32fGemmNN : public Avx::SynetDeconvolution32fGemmNN
+        class SynetDeconvolution32fGemmNN : public Sse41::SynetDeconvolution32fGemmNN
         {
         public:
             SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
             virtual String Ext() const { return "Avx2"; }
         };
 
-        class SynetDeconvolution32fNhwcDirect2x2 : public Avx::SynetDeconvolution32fNhwcDirect2x2
+        class SynetDeconvolution32fNhwcDirect2x2 : public Sse41::SynetDeconvolution32fNhwcDirect2x2
         {
         public:
             SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);

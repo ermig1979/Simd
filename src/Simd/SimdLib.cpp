@@ -6151,7 +6151,7 @@ SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutio
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC5(SynetDeconvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC4(SynetDeconvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
     
     return simdSynetDeconvolution32fInit(batch, params, compatibility);
 #else
@@ -6220,7 +6220,7 @@ SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const floa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetEltwiseLayerForwardPtr) (float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
-    const static SimdSynetEltwiseLayerForwardPtr simdSynetEltwiseLayerForward = SIMD_FUNC5(SynetEltwiseLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetEltwiseLayerForwardPtr simdSynetEltwiseLayerForward = SIMD_FUNC4(SynetEltwiseLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetEltwiseLayerForward(src, weight, count, size, type, dst);
 #else
@@ -6413,7 +6413,7 @@ SIMD_API void* SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t o
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetInnerProduct32fInitPtr) (size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
-    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC5(SynetInnerProduct32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC4(SynetInnerProduct32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetInnerProduct32fInit(batch, input, output, transpose, activation);
 #else
@@ -6460,7 +6460,7 @@ SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float *
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetInnerProductLayerForwardPtr) (const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
-    const static SimdSynetInnerProductLayerForwardPtr simdSynetInnerProductLayerForward = SIMD_FUNC5(SynetInnerProductLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetInnerProductLayerForwardPtr simdSynetInnerProductLayerForward = SIMD_FUNC4(SynetInnerProductLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetInnerProductLayerForward(src, weight, bias, count, size, dst);
 #else
@@ -6499,7 +6499,7 @@ SIMD_API void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvol
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetMergedConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetMergedConvolution32fInitPtr simdSynetMergedConvolution32fInit = SIMD_FUNC7(SynetMergedConvolution32fInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetMergedConvolution32fInitPtr simdSynetMergedConvolution32fInit = SIMD_FUNC6(SynetMergedConvolution32fInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
 #else
@@ -6831,7 +6831,7 @@ SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, c
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetScaleLayerForwardPtr) (const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC4(SynetScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
 #else

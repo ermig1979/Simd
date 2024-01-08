@@ -196,11 +196,6 @@ namespace Test
             result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Sse41::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Avx::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
-#endif 
-
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Avx2::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
@@ -295,11 +290,6 @@ namespace Test
         if (Simd::Sse41::Enable)
             result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Sse41::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
 #endif 
-
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Avx::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
-#endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)

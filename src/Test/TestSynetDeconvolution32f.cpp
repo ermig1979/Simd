@@ -181,11 +181,6 @@ namespace Test
             result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Sse41::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
-#endif 
-
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx2::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));

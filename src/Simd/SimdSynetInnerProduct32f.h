@@ -193,33 +193,10 @@ namespace Simd
     }
 #endif//SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE    
-    namespace Avx
-    {
-        class SynetInnerProduct32fGemm : public Sse41::SynetInnerProduct32fGemm
-        {
-        public:
-            SynetInnerProduct32fGemm(const InnerProductParam32f& p);
-
-            virtual String Ext() const { return "Avx"; }
-        };
-
-        class SynetInnerProduct32fProd : public Sse41::SynetInnerProduct32fProd
-        {
-        public:
-            SynetInnerProduct32fProd(const InnerProductParam32f& p);
-
-            virtual String Ext() const { return "Avx"; }
-        };
-
-        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
-    }
-#endif//SIMD_AVX_ENABLE
-
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class SynetInnerProduct32fGemm : public Avx::SynetInnerProduct32fGemm
+        class SynetInnerProduct32fGemm : public Sse41::SynetInnerProduct32fGemm
         {
         public:
             SynetInnerProduct32fGemm(const InnerProductParam32f& p);
@@ -227,7 +204,7 @@ namespace Simd
             virtual String Ext() const { return "Avx2"; }
         };
 
-        class SynetInnerProduct32fProd : public Avx::SynetInnerProduct32fProd
+        class SynetInnerProduct32fProd : public Sse41::SynetInnerProduct32fProd
         {
         public:
             SynetInnerProduct32fProd(const InnerProductParam32f& p);

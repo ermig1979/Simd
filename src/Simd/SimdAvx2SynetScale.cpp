@@ -882,7 +882,7 @@ namespace Simd
             for (size_t b = 0; b < p.batch; ++b)
             {
                 if(Base::FmaAvoid(p.compatibility) && p.format == SimdTensorFormatNchw)
-                    Avx::SynetScaleLayerForward(src, _scale.data, _shift.data, p.channels, 1, p.spatial, dst, p.format, p.compatibility);
+                    Sse41::SynetScaleLayerForward(src, _scale.data, _shift.data, p.channels, 1, p.spatial, dst, p.format, p.compatibility);
                 else
                     Avx2::SynetScaleLayerForward(src, _scale.data, _shift.data, p.channels, 1, p.spatial, dst, p.format, p.compatibility);
                 src += p.channels * p.spatial;
