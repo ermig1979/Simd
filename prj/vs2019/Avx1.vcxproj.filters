@@ -43,9 +43,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fDirectNhwc.cpp">
       <Filter>Avx1</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd1.cpp">
-      <Filter>Avx1</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd2.cpp">
       <Filter>Avx1</Filter>
     </ClCompile>

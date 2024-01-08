@@ -25,7 +25,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fCdc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fDc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetScale.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd3.cpp" />
   </ItemGroup>

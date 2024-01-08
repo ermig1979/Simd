@@ -39,7 +39,222 @@ namespace Simd
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
             size_t aligned = trans ? AlignLo(count, F) : AlignLo(size, F);
-            if (activation == ::SimdConvolutionActivationElu)
+            if (activation == ::SimdConvolutionActivationIdentity)
+            {
+                if (bias)
+                    SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
+            }
+            else if (activation == ::SimdConvolutionActivationRelu)
+            {
+                if (bias)
+                {
+                    __m256 _0 = _mm256_set1_ps(0.0f);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 _dst = _mm256_loadu_ps(dst + i);
+                                __m256 _bias = _mm256_loadu_ps(bias + i);
+                                _mm256_storeu_ps(dst + i, _mm256_max_ps(_0, _mm256_add_ps(_dst, _bias)));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Simd::Max(0.0f, dst[i] + bias[i]);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 _dst = _mm256_loadu_ps(dst + j);
+                                _mm256_storeu_ps(dst + j, _mm256_max_ps(_0, _mm256_add_ps(_dst, _bias)));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Simd::Max(0.0f, dst[j] + bias[i]);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                {
+                    float slope = 0;
+                    SynetRelu32f(dst, size * count, &slope, dst);
+                }
+            }
+            else if (activation == ::SimdConvolutionActivationLeakyRelu)
+            {
+                float slope = params[0];
+                if (bias)
+                {
+                    __m256 _slope = _mm256_set1_ps(slope);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
+                                _mm256_storeu_ps(dst + i, Avx::SynetRelu32f(value, _slope));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetRelu32f(dst[i] + bias[i], slope);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
+                                _mm256_storeu_ps(dst + j, Avx::SynetRelu32f(value, _slope));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetRelu32f(dst[j] + bias[i], slope);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetRelu32f(dst, size * count, &slope, dst);
+            }
+            else if (activation == ::SimdConvolutionActivationRestrictRange)
+            {
+                float lower = params[0];
+                float upper = params[1];
+                if (bias)
+                {
+                    __m256 _lower = _mm256_set1_ps(lower);
+                    __m256 _upper = _mm256_set1_ps(upper);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
+                                _mm256_storeu_ps(dst + i, _mm256_min_ps(_mm256_max_ps(_lower, value), _upper));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Simd::RestrictRange(dst[i] + bias[i], lower, upper);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
+                                _mm256_storeu_ps(dst + j, _mm256_min_ps(_mm256_max_ps(_lower, value), _upper));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Simd::RestrictRange(dst[j] + bias[i], lower, upper);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetRestrictRange32f(dst, size * count, &lower, &upper, dst);
+            }
+            else if (activation == ::SimdConvolutionActivationPrelu)
+            {
+                if (bias)
+                {
+                    if (trans)
+                    {
+                        if (count == 1 || count == 2 || count == 4 || count == 8)
+                        {
+                            __m256 _bias, _slope;
+                            if (count == 1)
+                            {
+                                _bias = _mm256_set1_ps(bias[0]);
+                                _slope = _mm256_set1_ps(params[0]);
+                            }
+                            else if (count == 2)
+                            {
+                                _bias = _mm256_setr_ps(bias[0], bias[1], bias[0], bias[1], bias[0], bias[1], bias[0], bias[1]);
+                                _slope = _mm256_setr_ps(params[0], params[1], params[0], params[1], params[0], params[1], params[0], params[1]);
+                            }
+                            else if (count == 4)
+                            {
+                                _bias = _mm256_setr_ps(bias[0], bias[1], bias[2], bias[3], bias[0], bias[1], bias[2], bias[3]);
+                                _slope = _mm256_setr_ps(params[0], params[1], params[2], params[3], params[0], params[1], params[2], params[3]);
+                            }
+                            else if (count == 8)
+                            {
+                                _bias = _mm256_setr_ps(bias[0], bias[1], bias[2], bias[3], bias[4], bias[5], bias[6], bias[7]);
+                                _slope = _mm256_setr_ps(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+                            }
+                            else
+                                assert(0);
+                            size_t n = size * count, nF = AlignLo(n, F), i = 0;
+                            for (; i < nF; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _bias);
+                                _mm256_storeu_ps(dst + i, Avx::SynetRelu32f(value, _slope));
+                            }
+                            dst += nF;
+                            for (size_t j = nF / count; j < size; ++j)
+                            {
+                                for (size_t i = 0; i < count; ++i)
+                                    dst[i] = Base::SynetRelu32f(dst[i] + bias[i], params[i]);
+                                dst += count;
+                            }
+                        }
+                        else
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                            {
+                                size_t i = 0;
+                                for (; i < aligned; i += F)
+                                {
+                                    __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
+                                    _mm256_storeu_ps(dst + i, Avx::SynetRelu32f(value, _mm256_loadu_ps(params + i)));
+                                }
+                                for (; i < count; ++i)
+                                    dst[i] = Base::SynetRelu32f(dst[i] + bias[i], params[i]);
+                                dst += count;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            __m256 _slope = _mm256_set1_ps(params[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
+                                _mm256_storeu_ps(dst + j, Avx::SynetRelu32f(value, _slope));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetRelu32f(dst[j] + bias[i], params[i]);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
+            }
+            else if (activation == ::SimdConvolutionActivationElu)
             {
                 float alpha = params[0];
                 if (bias)
@@ -78,7 +293,50 @@ namespace Simd
                     }
                 }
                 else
-                    SynetElu32f(dst, size*count, &alpha, dst);
+                    SynetElu32f(dst, size * count, &alpha, dst);
+                    }
+            else if (activation == ::SimdConvolutionActivationHswish)
+            {
+                float shift = params[0];
+                float scale = params[1];
+                if (bias)
+                {
+                    __m256 _shift = _mm256_set1_ps(shift);
+                    __m256 _scale = _mm256_set1_ps(scale);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(Load<false>(dst + i), Load<false>(bias + i));
+                                Avx::Store<false>(dst + i, Avx::SynetHswish32f(value, _shift, _scale));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetHswish32f(dst[i] + bias[i], shift, scale);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(Load<false>(dst + j), _bias);
+                                Avx::Store<false>(dst + j, Avx::SynetHswish32f(value, _shift, _scale));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetHswish32f(dst[j] + bias[i], shift, scale);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetHswish32f(dst, count * size, &shift, &scale, dst);
             }
             else if (activation == ::SimdConvolutionActivationMish)
             {
@@ -120,6 +378,49 @@ namespace Simd
                 }
                 else
                     SynetMish32f(dst, size * count, &threshold, dst);
+            }
+            else if (activation == ::SimdConvolutionActivationHardSigmoid)
+            {
+                float scale = params[0];
+                float shift = params[1];
+                if (bias)
+                {
+                    __m256 _scale = _mm256_set1_ps(scale);
+                    __m256 _shift = _mm256_set1_ps(shift);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(Load<false>(dst + i), Load<false>(bias + i));
+                                Avx::Store<false>(dst + i, Avx::SynetHardSigmoid32f(value, _scale, _shift));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetHardSigmoid32f(dst[i] + bias[i], scale, shift);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(Load<false>(dst + j), _bias);
+                                Avx::Store<false>(dst + j, Avx::SynetHardSigmoid32f(value, _scale, _shift));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetHardSigmoid32f(dst[j] + bias[i], scale, shift);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetHardSigmoid32f(dst, count * size, &scale, &shift, dst);
             }
             else if (activation == ::SimdConvolutionActivationSwish)
             {
@@ -205,8 +506,7 @@ namespace Simd
                 Avx::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
         }
 
-        //---------------------------------------------------------------------
-
+        //-------------------------------------------------------------------------------------------------
 
         SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f & p)
             : Avx::SynetConvolution32fGemmNN(p)
@@ -311,16 +611,16 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
             : Avx::SynetConvolution32fGemmNT(p)
         {
             _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNT, "Avx2"));
-            _biasAndActivation = Avx::ConvolutionBiasAndActivation;
+            _biasAndActivation = Avx2::ConvolutionBiasAndActivation;
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
             : Avx::SynetConvolution32fWinograd(p)
@@ -329,18 +629,18 @@ namespace Simd
             {
                 {
                     SetBlock(1, 4);
-                    _setFilter = Avx::WinogradKernel1x3Block1x4SetFilter;
-                    _setInput = Avx::WinogradKernel1x3Block1x4SetInput;
-                    _setOutput = Avx::WinogradKernel1x3Block1x4SetOutput;
+                    _setFilter = Avx2::WinogradKernel1x3Block1x4SetFilter;
+                    _setInput = Avx2::WinogradKernel1x3Block1x4SetInput;
+                    _setOutput = Avx2::WinogradKernel1x3Block1x4SetOutput;
                 }
             }
             else if (p.kernelY == 1 && p.kernelX == 5)
             {
                 {
                     SetBlock(1, 4);
-                    _setFilter = Avx::WinogradKernel1x5Block1x4SetFilter;
-                    _setInput = Avx::WinogradKernel1x5Block1x4SetInput;
-                    _setOutput = Avx::WinogradKernel1x5Block1x4SetOutput;
+                    _setFilter = Avx2::WinogradKernel1x5Block1x4SetFilter;
+                    _setInput = Avx2::WinogradKernel1x5Block1x4SetInput;
+                    _setOutput = Avx2::WinogradKernel1x5Block1x4SetOutput;
                 }
             }
             else if (p.kernelY == 2 && p.kernelX == 2)

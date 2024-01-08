@@ -27,7 +27,7 @@
 #include "Simd/SimdSet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdAvx1.h"
+#include "Simd/SimdAvx2.h"
 #include "Simd/SimdWinograd.h"
 
 namespace Simd
@@ -268,7 +268,7 @@ namespace Simd
         {
             if (trans ? false : (dstWidth < 16))
             {
-                Avx::WinogradKernel1x3Block1x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                Avx2::WinogradKernel1x3Block1x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
                 return;
             }
             size_t tileW = (dstWidth + 3) / 4;
