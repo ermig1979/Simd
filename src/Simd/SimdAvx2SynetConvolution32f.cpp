@@ -665,23 +665,23 @@ namespace Simd
                 if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 256)
                 {
                     SetBlock(4, 4);
-                    _setFilter = Avx::WinogradKernel3x3Block4x4SetFilter;
-                    _setInput = Avx::WinogradKernel3x3Block4x4SetInput;
-                    _setOutput = Avx::WinogradKernel3x3Block4x4SetOutput;
+                    _setFilter = Avx2::WinogradKernel3x3Block4x4SetFilter;
+                    _setInput = Avx2::WinogradKernel3x3Block4x4SetInput;
+                    _setOutput = Avx2::WinogradKernel3x3Block4x4SetOutput;
                 }
                 else if (p.trans && p.srcH >= 6 && p.srcW >= 6 && p.srcH * p.srcW * p.batch >= 144 && p.dstH % 3 == 0 && p.dstW % 3 == 0)
                 {
                     SetBlock(3, 3);
-                    _setFilter = Avx::WinogradKernel3x3Block3x3SetFilter;
-                    _setInput = Avx::WinogradKernel3x3Block3x3SetInput;
-                    _setOutput = Avx::WinogradKernel3x3Block3x3SetOutput;
+                    _setFilter = Avx2::WinogradKernel3x3Block3x3SetFilter;
+                    _setInput = Avx2::WinogradKernel3x3Block3x3SetInput;
+                    _setOutput = Avx2::WinogradKernel3x3Block3x3SetOutput;
                 }
                 else
                 {
                     SetBlock(2, 2);
-                    _setFilter = Avx::WinogradKernel3x3Block2x2SetFilter;
-                    _setInput = Avx::WinogradKernel3x3Block2x2SetInput;
-                    _setOutput = Avx::WinogradKernel3x3Block2x2SetOutput;
+                    _setFilter = Avx2::WinogradKernel3x3Block2x2SetFilter;
+                    _setInput = Avx2::WinogradKernel3x3Block2x2SetInput;
+                    _setOutput = Avx2::WinogradKernel3x3Block2x2SetOutput;
                 }
             }
             else

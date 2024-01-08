@@ -27,7 +27,7 @@
 #include "Simd/SimdSet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdAvx1.h"
+#include "Simd/SimdAvx2.h"
 #include "Simd/SimdWinograd.h"
 #include "Simd/SimdInterleave.h"
 #include "Simd/SimdDeinterleave.h"
@@ -261,7 +261,7 @@ namespace Simd
             SimdBool pad = padY > 0 ? SimdTrue : SimdFalse;
             if (trans ? (false) : (srcHeight < 4 || srcWidth < 4))
             {
-                Avx::WinogradKernel3x3Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+                Avx2::WinogradKernel3x3Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
                 return;
             }
             size_t dstH = pad ? srcHeight : srcHeight - 2;
@@ -794,7 +794,7 @@ namespace Simd
             SimdBool pad = padY > 0 ? SimdTrue : SimdFalse;
             if (trans ? (false) : (srcHeight < 5 || srcWidth < 5))
             {
-                Avx::WinogradKernel3x3Block3x3SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+                Avx2::WinogradKernel3x3Block3x3SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
                 return;
             }
             size_t dstH = pad ? srcHeight : srcHeight - 2;
@@ -975,7 +975,7 @@ namespace Simd
         {
             if (trans ? (false) : (dstHeight < 4 || dstWidth < 16))
             {
-                Avx::WinogradKernel3x3Block3x3SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                Avx2::WinogradKernel3x3Block3x3SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
                 return;
             }
             size_t tileH = (dstHeight + 2) / 3;
@@ -1291,7 +1291,7 @@ namespace Simd
         {
             if (trans ? (false) : (srcHeight < 6 || srcWidth < 14))
             {
-                Avx::WinogradKernel3x3Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+                Avx2::WinogradKernel3x3Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
                 return;
             }
             if (trans)
@@ -1572,7 +1572,7 @@ namespace Simd
         {
             if (trans ? (false) : (dstHeight < 4 || dstWidth < 16))
             {
-                Avx::WinogradKernel3x3Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                Avx2::WinogradKernel3x3Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
                 return;
             }
             size_t tileH = (dstHeight + 3) / 4;

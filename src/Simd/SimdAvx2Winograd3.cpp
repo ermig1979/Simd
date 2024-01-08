@@ -30,8 +30,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX_ENABLE) && defined(SIMD_SYNET_ENABLE)    
-    namespace Avx
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
+    namespace Avx2
     {
         SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter8t(const float* src, float* dst, size_t stride)
         {
@@ -98,10 +98,10 @@ namespace Simd
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetInputLoad8n(const float * src, __m256 * dst)
         {
-            __m256 a0 = Load<false>(src + 0, src + 8);
-            __m256 a1 = Load<false>(src + 2, src + 10);
-            __m256 a2 = Load<false>(src + 4, src + 12);
-            __m256 a3 = Load<false>(src + 6, src + 14);
+            __m256 a0 = Avx::Load<false>(src + 0, src + 8);
+            __m256 a1 = Avx::Load<false>(src + 2, src + 10);
+            __m256 a2 = Avx::Load<false>(src + 4, src + 12);
+            __m256 a3 = Avx::Load<false>(src + 6, src + 14);
             dst[0] = _mm256_shuffle_ps(a0, a2, 0x88);
             dst[1] = _mm256_shuffle_ps(a0, a2, 0xDD);
             dst[2] = _mm256_shuffle_ps(a1, a3, 0x88);
@@ -110,10 +110,10 @@ namespace Simd
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetInputLoad8n(const float * src, __m256 * dst, PadType pad)
         {
-            __m256 a0 = Set(pad == PadNose1 ? Sse41::LoadPadZeroNose1(src + 0) : _mm_loadu_ps(src + 0), _mm_loadu_ps(src + 8));
-            __m256 a1 = Load<false>(src + 2, src + 10);
-            __m256 a2 = Load<false>(src + 4, src + 12);
-            __m256 a3 = Set(_mm_loadu_ps(src + 6), pad == PadTail2 ? Sse41::LoadPadZeroTail2(src + 14) : (pad == PadTail1 ? Sse41::LoadPadZeroTail1(src + 14) : _mm_loadu_ps(src + 14)));
+            __m256 a0 = Avx::Set(pad == PadNose1 ? Sse41::LoadPadZeroNose1(src + 0) : _mm_loadu_ps(src + 0), _mm_loadu_ps(src + 8));
+            __m256 a1 = Avx::Load<false>(src + 2, src + 10);
+            __m256 a2 = Avx::Load<false>(src + 4, src + 12);
+            __m256 a3 = Avx::Set(_mm_loadu_ps(src + 6), pad == PadTail2 ? Sse41::LoadPadZeroTail2(src + 14) : (pad == PadTail1 ? Sse41::LoadPadZeroTail1(src + 14) : _mm_loadu_ps(src + 14)));
             dst[0] = _mm256_shuffle_ps(a0, a2, 0x88);
             dst[1] = _mm256_shuffle_ps(a0, a2, 0xDD);
             dst[2] = _mm256_shuffle_ps(a1, a3, 0x88);
@@ -441,7 +441,7 @@ namespace Simd
             if (lastCol)
                 _mm256_storeu_ps(dst + 8, d[1]);
             else
-                StoreMasked<false>(dst + 8, d[1], mask);
+                Avx::StoreMasked<false>(dst + 8, d[1], mask);
             if (lastRow)
             {
                 dst += dstStride;
@@ -449,7 +449,7 @@ namespace Simd
                 if (lastCol)
                     _mm256_storeu_ps(dst + 8, d[3]);
                 else
-                    StoreMasked<false>(dst + 8, d[3], mask);
+                    Avx::StoreMasked<false>(dst + 8, d[3], mask);
             }
         }
 

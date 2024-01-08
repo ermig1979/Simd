@@ -131,6 +131,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2WarpAffine.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Winograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Winograd2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Winograd3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgra.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h" />
     <ClInclude Include="..\..\src\Simd\SimdWarpAffineCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdWinograd.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
