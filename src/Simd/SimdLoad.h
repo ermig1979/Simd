@@ -113,42 +113,39 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
     {
-        template <bool align> SIMD_INLINE __m256 Load(const float * p);
+        template <bool align> SIMD_INLINE __m256 Load(const float* p);
 
-        template <> SIMD_INLINE __m256 Load<false>(const float * p)
+        template <> SIMD_INLINE __m256 Load<false>(const float* p)
         {
             return _mm256_loadu_ps(p);
         }
 
-        template <> SIMD_INLINE __m256 Load<true>(const float * p)
+        template <> SIMD_INLINE __m256 Load<true>(const float* p)
         {
+#ifdef _MSC_VER
+            return _mm256_castsi256_ps(_mm256_load_si256((__m256i*)p));
+#else
             return _mm256_load_ps(p);
+#endif
         }
 
-        template<bool align> SIMD_INLINE __m256 Load(const float * p0, const float * p1)
+        template<bool align> SIMD_INLINE __m256 Load(const float* p0, const float* p1)
         {
             return _mm256_insertf128_ps(_mm256_castps128_ps256(Sse41::Load<align>(p0)), Sse41::Load<align>(p1), 1);
         }
 
-        SIMD_INLINE __m256 Load(const float * p0, const float * p1, const float * p2, const float * p3)
+        SIMD_INLINE __m256 Load(const float* p0, const float* p1, const float* p2, const float* p3)
         {
             return _mm256_insertf128_ps(_mm256_castps128_ps256(Sse41::Load(p0, p1)), Sse41::Load(p2, p3), 1);
         }
 
-        SIMD_INLINE __m256 Load(const float * ptr, __m256i mask)
+        SIMD_INLINE __m256 Load(const float* ptr, __m256i mask)
         {
             return _mm256_maskload_ps(ptr, mask);
         }
-    }
-#endif//SIMD_AVX_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE
-    namespace Avx2
-    {
-        using namespace Avx;
 
         template <bool align> SIMD_INLINE __m256i Load(const __m256i * p);
 
@@ -254,22 +251,6 @@ namespace Simd
             __m128i secondHi = LoadHalfAfterLast<step>(firstHi);
             second = _mm256_inserti128_si256(_mm256_castsi128_si256(secondLo), secondHi, 0x1);
         }
-
-        template <bool align> SIMD_INLINE __m256 Load(const float * p);
-
-        template <> SIMD_INLINE __m256 Load<false>(const float * p)
-        {
-            return _mm256_loadu_ps(p);
-        }
-
-        template <> SIMD_INLINE __m256 Load<true>(const float * p)
-        {
-#ifdef _MSC_VER
-            return _mm256_castsi256_ps(_mm256_load_si256((__m256i*)p));
-#else
-            return _mm256_load_ps(p);
-#endif
-        }
     }
 #endif//SIMD_AVX2_ENABLE
 
@@ -309,7 +290,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE __m512 Load(const float* p0, const float* p1)
         {
-            return _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(Avx::Load<align>(p0))), _mm256_castps_pd(Avx::Load<align>(p1)), 1));
+            return _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(Avx2::Load<align>(p0))), _mm256_castps_pd(Avx2::Load<align>(p1)), 1));
         }
 
         template<bool align> SIMD_INLINE __m512 Load(const float* p0, const float* p1, const float* p2, const float* p3)

@@ -233,11 +233,11 @@ namespace Simd
                 size_t alignedSize = AlignLo(hf.size, DF), i = 0;
                 for (; i < alignedSize; i += DF)
                 {
-                    Avx::Store<true>(hf.data + i + 0, _mm256_mul_ps(_k, _mm256_cvtepi32_ps(Load<true>((__m256i*)(hi.data + i + 0)))));
-                    Avx::Store<true>(hf.data + i + F, _mm256_mul_ps(_k, _mm256_cvtepi32_ps(Load<true>((__m256i*)(hi.data + i + F)))));
+                    Store<true>(hf.data + i + 0, _mm256_mul_ps(_k, _mm256_cvtepi32_ps(Load<true>((__m256i*)(hi.data + i + 0)))));
+                    Store<true>(hf.data + i + F, _mm256_mul_ps(_k, _mm256_cvtepi32_ps(Load<true>((__m256i*)(hi.data + i + F)))));
                 }
                 for (; i < hf.size; i += F)
-                    Avx::Store<true>(hf.data + i, _mm256_mul_ps(_k, _mm256_cvtepi32_ps(Load<true>((__m256i*)(hi.data + i)))));
+                    Store<true>(hf.data + i, _mm256_mul_ps(_k, _mm256_cvtepi32_ps(Load<true>((__m256i*)(hi.data + i)))));
                 hi.Clear();
 
                 const float * h = hf.data;
@@ -271,18 +271,18 @@ namespace Simd
                 float * dst = _nb.data;
                 for (size_t x = 0; x < _fx; x += 6, dst += 3 * F)
                 {
-                    __m256 s0 = Avx::Load<false>(src0 + x);
-                    __m256 s1 = Avx::Load<false>(src1 + x);
-                    __m256 s2 = Avx::Load<false>(src2 + x);
+                    __m256 s0 = Load<false>(src0 + x);
+                    __m256 s1 = Load<false>(src1 + x);
+                    __m256 s2 = Load<false>(src2 + x);
                     __m256 v0 = _mm256_add_ps(s0, s1);
                     __m256 v1 = _mm256_add_ps(s1, s2);
                     __m256 h0 = _mm256_add_ps(v0, Alignr<1>(v0, Permute4x64<0xEE>(v0)));
                     __m256 h1 = _mm256_add_ps(v1, Alignr<1>(v1, Permute4x64<0xEE>(v1)));
                     __m256 h0p = _mm256_permutevar8x32_ps(h0, K32_PERMUTE_BN_0);
                     __m256 h1p = _mm256_permutevar8x32_ps(h1, K32_PERMUTE_BN_0);
-                    Avx::Store<true>(dst + 0 * F, _mm256_unpacklo_ps(h1p, h0p));
-                    Avx::Store<true>(dst + 1 * F, _mm256_unpackhi_ps(h1p, h0p));
-                    Avx::Store<true>(dst + 2 * F, _mm256_unpacklo_ps(_mm256_permutevar8x32_ps(h1, K32_PERMUTE_BN_1), _mm256_permutevar8x32_ps(h0, K32_PERMUTE_BN_1)));
+                    Store<true>(dst + 0 * F, _mm256_unpacklo_ps(h1p, h0p));
+                    Store<true>(dst + 1 * F, _mm256_unpackhi_ps(h1p, h0p));
+                    Store<true>(dst + 2 * F, _mm256_unpacklo_ps(_mm256_permutevar8x32_ps(h1, K32_PERMUTE_BN_1), _mm256_permutevar8x32_ps(h0, K32_PERMUTE_BN_1)));
                 }
             }
 
@@ -316,16 +316,16 @@ namespace Simd
                     __m256 t = _mm256_setzero_ps();
                     __m256 f[4];
                     const float * src = hf + x * FQ;
-                    __m256 s0 = Avx::Load<false>(src + 0 * HQ, src + 2 * HQ);
-                    __m256 s1 = Avx::Load<false>(src + 1 * HQ, src + 3 * HQ);
+                    __m256 s0 = Load<false>(src + 0 * HQ, src + 2 * HQ);
+                    __m256 s1 = Load<false>(src + 1 * HQ, src + 3 * HQ);
                     f[0] = Features07(n, s0, t);
                     f[1] = Features07(n, s1, t);
                     f[2] = Features8B(n, _mm256_add_ps(s0, s1));
                     f[3] = _mm256_mul_ps(t, _02357);
-                    Avx::Store<false>(dst + 0 * F, _mm256_permute2f128_ps(f[0], f[1], 0x20));
-                    Avx::Store<false>(dst + 1 * F, _mm256_permute2f128_ps(f[2], f[3], 0x20));
-                    Avx::Store<false>(dst + 2 * F, _mm256_permute2f128_ps(f[0], f[1], 0x31));
-                    Avx::Store<false>(dst + 3 * F, _mm256_permute2f128_ps(f[2], f[3], 0x31));
+                    Store<false>(dst + 0 * F, _mm256_permute2f128_ps(f[0], f[1], 0x20));
+                    Store<false>(dst + 1 * F, _mm256_permute2f128_ps(f[2], f[3], 0x20));
+                    Store<false>(dst + 2 * F, _mm256_permute2f128_ps(f[0], f[1], 0x31));
+                    Store<false>(dst + 3 * F, _mm256_permute2f128_ps(f[2], f[3], 0x31));
                 }
                 for (; x < _fx; ++x, nb += 4)
                 {
@@ -496,18 +496,18 @@ namespace Simd
         {
             template<bool align> SIMD_INLINE void ProductSum1x1(const float * src, const float * filter, __m256 & sum)
             {
-                __m256 _src = Avx::Load<align>(src);
-                __m256 _filter = Avx::Load<align>(filter);
+                __m256 _src = Load<align>(src);
+                __m256 _filter = Load<align>(filter);
                 sum = _mm256_add_ps(sum, _mm256_mul_ps(_src, _filter));
             }
 
             template<bool align, size_t step> SIMD_INLINE void ProductSum1x4(const float * src, const float * filter, __m256 * sums)
             {
-                __m256 _filter = Avx::Load<align>(filter);
-                sums[0] = _mm256_fmadd_ps(Avx::Load<align>(src + 0 * step), _filter, sums[0]);
-                sums[1] = _mm256_fmadd_ps(Avx::Load<align>(src + 1 * step), _filter, sums[1]);
-                sums[2] = _mm256_fmadd_ps(Avx::Load<align>(src + 2 * step), _filter, sums[2]);
-                sums[3] = _mm256_fmadd_ps(Avx::Load<align>(src + 3 * step), _filter, sums[3]);
+                __m256 _filter = Load<align>(filter);
+                sums[0] = _mm256_fmadd_ps(Load<align>(src + 0 * step), _filter, sums[0]);
+                sums[1] = _mm256_fmadd_ps(Load<align>(src + 1 * step), _filter, sums[1]);
+                sums[2] = _mm256_fmadd_ps(Load<align>(src + 2 * step), _filter, sums[2]);
+                sums[3] = _mm256_fmadd_ps(Load<align>(src + 3 * step), _filter, sums[3]);
             }
 
             template <bool align, size_t featureSize> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterWidth, size_t filterHeight, float * dst, size_t dstStride)
@@ -671,7 +671,7 @@ namespace Simd
             {
                 template <bool align> static SIMD_INLINE void Interpolate(const float * src0, const float * src1, const __m256 k[2][2], float * dst)
                 {
-                    Avx::Store<align>(dst + 0 * F, _mm256_add_ps(
+                    Store<align>(dst + 0 * F, _mm256_add_ps(
                         _mm256_fmadd_ps(Load<align>(src0 + 0 * F), k[0][0], _mm256_mul_ps(Load<align>(src0 + 1 * F), k[0][1])),
                         _mm256_fmadd_ps(Load<align>(src1 + 0 * F), k[1][0], _mm256_mul_ps(Load<align>(src1 + 1 * F), k[1][1]))));
                 }
@@ -681,10 +681,10 @@ namespace Simd
             {
                 template <bool align> static SIMD_INLINE void Interpolate(const float * src0, const float * src1, const __m256 k[2][2], float * dst)
                 {
-                    Avx::Store<align>(dst + 0 * F, _mm256_add_ps(
+                    Store<align>(dst + 0 * F, _mm256_add_ps(
                         _mm256_fmadd_ps(Load<align>(src0 + 0 * F), k[0][0], _mm256_mul_ps(Load<align>(src0 + 2 * F), k[0][1])),
                         _mm256_fmadd_ps(Load<align>(src1 + 0 * F), k[1][0], _mm256_mul_ps(Load<align>(src1 + 2 * F), k[1][1]))));
-                    Avx::Store<align>(dst + 1 * F, _mm256_add_ps(
+                    Store<align>(dst + 1 * F, _mm256_add_ps(
                         _mm256_fmadd_ps(Load<align>(src0 + 1 * F), k[0][0], _mm256_mul_ps(Load<align>(src0 + 3 * F), k[0][1])),
                         _mm256_fmadd_ps(Load<align>(src1 + 1 * F), k[1][0], _mm256_mul_ps(Load<align>(src1 + 3 * F), k[1][1]))));
                 }
@@ -888,18 +888,18 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE void FilterHx1(const float * src, const float * filter, __m256 & sum)
             {
-                __m256 _src = Avx::Load<align>(src);
-                __m256 _filter = Avx::Load<align>(filter);
+                __m256 _src = Load<align>(src);
+                __m256 _filter = Load<align>(filter);
                 sum = _mm256_fmadd_ps(_src, _filter, sum);
             }
 
             template<bool align, size_t step> static SIMD_INLINE void FilterHx4(const float * src, const float * filter, __m256 * sums)
             {
-                __m256 _filter = Avx::Load<align>(filter);
-                sums[0] = _mm256_fmadd_ps(Avx::Load<align>(src + 0 * step), _filter, sums[0]);
-                sums[1] = _mm256_fmadd_ps(Avx::Load<align>(src + 1 * step), _filter, sums[1]);
-                sums[2] = _mm256_fmadd_ps(Avx::Load<align>(src + 2 * step), _filter, sums[2]);
-                sums[3] = _mm256_fmadd_ps(Avx::Load<align>(src + 3 * step), _filter, sums[3]);
+                __m256 _filter = Load<align>(filter);
+                sums[0] = _mm256_fmadd_ps(Load<align>(src + 0 * step), _filter, sums[0]);
+                sums[1] = _mm256_fmadd_ps(Load<align>(src + 1 * step), _filter, sums[1]);
+                sums[2] = _mm256_fmadd_ps(Load<align>(src + 2 * step), _filter, sums[2]);
+                sums[3] = _mm256_fmadd_ps(Load<align>(src + 3 * step), _filter, sums[3]);
             }
 
             template <bool align, size_t step> void FilterH(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
@@ -941,8 +941,8 @@ namespace Simd
             {
                 __m256 sum = _mm256_setzero_ps();
                 for (size_t i = 0; i < size; ++i, src += stride)
-                    sum = _mm256_fmadd_ps(Avx::Load<srcAlign>(src), filter[i], sum);
-                Avx::Update<update, dstAlign>(dst, Masked<masked && update != UpdateSet>(sum, mask));
+                    sum = _mm256_fmadd_ps(Load<srcAlign>(src), filter[i], sum);
+                Update<update, dstAlign>(dst, Masked<masked && update != UpdateSet>(sum, mask));
             }
 
             template <UpdateType update, bool align> void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)

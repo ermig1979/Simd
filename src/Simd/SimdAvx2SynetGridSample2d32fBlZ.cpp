@@ -52,8 +52,8 @@ namespace Simd
             const __m256i _padW = _mm256_set1_epi32(padW);
             for (; d < dstS8; d += 8)
             {
-                __m256 xy0 = _mm256_fmadd_ps(Avx::Load<false>(grd + 0, grd + 8), a, b);
-                __m256 xy1 = _mm256_fmadd_ps(Avx::Load<false>(grd + 4, grd + 12), a, b);
+                __m256 xy0 = _mm256_fmadd_ps(Load<false>(grd + 0, grd + 8), a, b);
+                __m256 xy1 = _mm256_fmadd_ps(Load<false>(grd + 4, grd + 12), a, b);
                 __m256 x = _mm256_shuffle_ps(xy0, xy1, 0x88);
                 __m256 y = _mm256_shuffle_ps(xy0, xy1, 0xDD);
                 __m256 xf = _mm256_round_ps(x, _MM_FROUND_FLOOR);
@@ -106,12 +106,12 @@ namespace Simd
             {
                 int i0 = idx[d + 0], i1 = idx[d + 1], i2 = idx[d + 2], i3 = idx[d + 3];
                 int i4 = idx[d + 4], i5 = idx[d + 5], i6 = idx[d + 6], i7 = idx[d + 7];
-                __m256 p0 = Avx::Load(pad0 + i0, pad0 + i1, pad0 + i4, pad0 + i5);
-                __m256 p1 = Avx::Load(pad0 + i2, pad0 + i3, pad0 + i6, pad0 + i7);
+                __m256 p0 = Load(pad0 + i0, pad0 + i1, pad0 + i4, pad0 + i5);
+                __m256 p1 = Load(pad0 + i2, pad0 + i3, pad0 + i6, pad0 + i7);
                 __m256 p00 = _mm256_shuffle_ps(p0, p1, 0x88);
                 __m256 p01 = _mm256_shuffle_ps(p0, p1, 0xDD);
-                p0 = Avx::Load(pad1 + i0, pad1 + i1, pad1 + i4, pad1 + i5);
-                p1 = Avx::Load(pad1 + i2, pad1 + i3, pad1 + i6, pad1 + i7);
+                p0 = Load(pad1 + i0, pad1 + i1, pad1 + i4, pad1 + i5);
+                p1 = Load(pad1 + i2, pad1 + i3, pad1 + i6, pad1 + i7);
                 __m256 p10 = _mm256_shuffle_ps(p0, p1, 0x88);
                 __m256 p11 = _mm256_shuffle_ps(p0, p1, 0xDD);
                 __m256 dy1 = _mm256_loadu_ps(dy + d);

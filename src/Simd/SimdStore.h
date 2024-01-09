@@ -121,17 +121,19 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
     {
-        template <bool align> SIMD_INLINE void Store(float * p, __m256 a);
+        using namespace Avx;
 
-        template <> SIMD_INLINE void Store<false>(float * p, __m256 a)
+        template <bool align> SIMD_INLINE void Store(float* p, __m256 a);
+
+        template <> SIMD_INLINE void Store<false>(float* p, __m256 a)
         {
             _mm256_storeu_ps(p, a);
         }
 
-        template <> SIMD_INLINE void Store<true>(float * p, __m256 a)
+        template <> SIMD_INLINE void Store<true>(float* p, __m256 a)
         {
             _mm256_store_ps(p, a);
         }
@@ -144,13 +146,13 @@ namespace Simd
                 ptr[i] = buf[i];
         }
 
-        template <bool align> SIMD_INLINE void Store(float * p0, float * p1, __m256 a)
+        template <bool align> SIMD_INLINE void Store(float* p0, float* p1, __m256 a)
         {
             Sse41::Store<align>(p0, _mm256_extractf128_ps(a, 0));
             Sse41::Store<align>(p1, _mm256_extractf128_ps(a, 1));
         }
 
-        template <bool align> SIMD_INLINE void StoreMasked(float * p, __m256 value, __m256 mask)
+        template <bool align> SIMD_INLINE void StoreMasked(float* p, __m256 value, __m256 mask)
         {
             __m256 old = Load<align>(p);
             Store<align>(p, _mm256_blendv_ps(old, value, mask));
@@ -177,13 +179,6 @@ namespace Simd
             for (size_t i = 0; i < size; ++i)
                 ptr[i * step] = buf[i];
         }
-    }
-#endif
-
-#ifdef SIMD_AVX2_ENABLE
-    namespace Avx2
-    {
-        using namespace Avx;
 
         template <bool align> SIMD_INLINE void Store(__m256i * p, __m256i a);
 
@@ -281,8 +276,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store(float* p0, float* p1, __m512 a)
         {
-            Avx::Store<align>(p0, _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a), 0)));
-            Avx::Store<align>(p1, _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a), 1)));
+            Store<align>(p0, _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a), 0)));
+            Store<align>(p1, _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a), 1)));
         }
 
         template <bool align> SIMD_INLINE void Store(float* p0, float* p1, float* p2, float* p3, __m512 a)

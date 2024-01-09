@@ -321,16 +321,16 @@ namespace Simd
                     __m256 t = _mm256_setzero_ps();
                     __m256 f[4];
                     const float * src = hf + x * FQ;
-                    __m256 s0 = Avx::Load<false>(src + 0 * HQ, src + 2 * HQ);
-                    __m256 s1 = Avx::Load<false>(src + 1 * HQ, src + 3 * HQ);
+                    __m256 s0 = Avx2::Load<false>(src + 0 * HQ, src + 2 * HQ);
+                    __m256 s1 = Avx2::Load<false>(src + 1 * HQ, src + 3 * HQ);
                     f[0] = Features07(n, s0, t);
                     f[1] = Features07(n, s1, t);
                     f[2] = Features8B(n, _mm256_add_ps(s0, s1));
                     f[3] = _mm256_mul_ps(t, _02357);
-                    Avx::Store<false>(dst + 0 * Avx2::F, _mm256_permute2f128_ps(f[0], f[1], 0x20));
-                    Avx::Store<false>(dst + 1 * Avx2::F, _mm256_permute2f128_ps(f[2], f[3], 0x20));
-                    Avx::Store<false>(dst + 2 * Avx2::F, _mm256_permute2f128_ps(f[0], f[1], 0x31));
-                    Avx::Store<false>(dst + 3 * Avx2::F, _mm256_permute2f128_ps(f[2], f[3], 0x31));
+                    Avx2::Store<false>(dst + 0 * Avx2::F, _mm256_permute2f128_ps(f[0], f[1], 0x20));
+                    Avx2::Store<false>(dst + 1 * Avx2::F, _mm256_permute2f128_ps(f[2], f[3], 0x20));
+                    Avx2::Store<false>(dst + 2 * Avx2::F, _mm256_permute2f128_ps(f[0], f[1], 0x31));
+                    Avx2::Store<false>(dst + 3 * Avx2::F, _mm256_permute2f128_ps(f[2], f[3], 0x31));
                 }
                 for (; x < _fx; ++x, nb += 4)
                 {
@@ -427,44 +427,44 @@ namespace Simd
 
             template<bool align> SIMD_INLINE void ProductSum1x1(const float * src, const float * filter, __m256 & sum)
             {
-                __m256 _src = Avx::Load<align>(src);
-                __m256 _filter = Avx::Load<align>(filter);
+                __m256 _src = Avx2::Load<align>(src);
+                __m256 _filter = Avx2::Load<align>(filter);
                 sum = _mm256_add_ps(sum, _mm256_mul_ps(_src, _filter));
             }
 
             template<bool align, size_t step> SIMD_INLINE void ProductSum1x4(const float * src, const float * filter, __m256 * sums)
             {
-                __m256 _filter = Avx::Load<align>(filter);
-                sums[0] = _mm256_fmadd_ps(Avx::Load<align>(src + 0 * step), _filter, sums[0]);
-                sums[1] = _mm256_fmadd_ps(Avx::Load<align>(src + 1 * step), _filter, sums[1]);
-                sums[2] = _mm256_fmadd_ps(Avx::Load<align>(src + 2 * step), _filter, sums[2]);
-                sums[3] = _mm256_fmadd_ps(Avx::Load<align>(src + 3 * step), _filter, sums[3]);
+                __m256 _filter = Avx2::Load<align>(filter);
+                sums[0] = _mm256_fmadd_ps(Avx2::Load<align>(src + 0 * step), _filter, sums[0]);
+                sums[1] = _mm256_fmadd_ps(Avx2::Load<align>(src + 1 * step), _filter, sums[1]);
+                sums[2] = _mm256_fmadd_ps(Avx2::Load<align>(src + 2 * step), _filter, sums[2]);
+                sums[3] = _mm256_fmadd_ps(Avx2::Load<align>(src + 3 * step), _filter, sums[3]);
             }
 
             template<bool align> SIMD_INLINE void ProductSum1x4x8(const float * src, const float * filter, __m512 * sums)
             {
-                __m512 _filter = _mm512_broadcast_f32x8(Avx::Load<align>(filter));
+                __m512 _filter = _mm512_broadcast_f32x8(Avx2::Load<align>(filter));
                 sums[0] = _mm512_fmadd_ps(Load<align>(src + 0 * F), _filter, sums[0]);
                 sums[1] = _mm512_fmadd_ps(Load<align>(src + 1 * F), _filter, sums[1]);
             }
 
             template <bool align> static SIMD_INLINE void ProductSum4x4x8(const float * src, const float * filter, __m512 * sums)
             {
-                __m512 filter0 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 0 * HF));
+                __m512 filter0 = _mm512_broadcast_f32x8(Avx2::Load<align>(filter + 0 * HF));
                 __m512 src0 = Load<align>(src + 0 * HF);
                 __m512 src2 = Load<align>(src + 2 * HF);
                 sums[0] = _mm512_fmadd_ps(src0, filter0, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src2, filter0, sums[1]);
-                __m512 filter2 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 2 * HF));
+                __m512 filter2 = _mm512_broadcast_f32x8(Avx2::Load<align>(filter + 2 * HF));
                 __m512 src4 = Load<align>(src + 4 * HF);
                 sums[0] = _mm512_fmadd_ps(src2, filter2, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src4, filter2, sums[1]);
-                __m512 filter1 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 1 * HF));
+                __m512 filter1 = _mm512_broadcast_f32x8(Avx2::Load<align>(filter + 1 * HF));
                 __m512 src1 = Alignr<8>(src0, src2);
                 __m512 src3 = Alignr<8>(src2, src4);
                 sums[0] = _mm512_fmadd_ps(src1, filter1, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src3, filter1, sums[1]);
-                __m512 filter3 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 3 * HF));
+                __m512 filter3 = _mm512_broadcast_f32x8(Avx2::Load<align>(filter + 3 * HF));
                 __m512 src5 = Load<false>(src + 5 * HF);
                 sums[0] = _mm512_fmadd_ps(src3, filter3, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src5, filter3, sums[1]);
@@ -832,9 +832,9 @@ namespace Simd
                         __m256 k11 = _mm256_mul_ps(_mm512_castps512_ps256(ky1), kx1);
                         const float * pSrc0 = pSrc + _ix[colDst];
                         const float * pSrc1 = pSrc0 + srcStride;
-                        Avx::Store<align>(pDst, _mm256_add_ps(
-                            _mm256_fmadd_ps(Avx::Load<align>(pSrc0), k00, _mm256_mul_ps(Avx::Load<align>(pSrc0 + Avx2::F), k01)),
-                            _mm256_fmadd_ps(Avx::Load<align>(pSrc1), k10, _mm256_mul_ps(Avx::Load<align>(pSrc1 + Avx2::F), k11))));
+                        Avx2::Store<align>(pDst, _mm256_add_ps(
+                            _mm256_fmadd_ps(Avx2::Load<align>(pSrc0), k00, _mm256_mul_ps(Avx2::Load<align>(pSrc0 + Avx2::F), k01)),
+                            _mm256_fmadd_ps(Avx2::Load<align>(pSrc1), k10, _mm256_mul_ps(Avx2::Load<align>(pSrc1 + Avx2::F), k11))));
                     }
                 }
             }
@@ -938,7 +938,7 @@ namespace Simd
                     sums[1] = _mm512_fmadd_ps(Broadcast<3>(src1), _pca[7], sums[1]);
                     sums[0] = _mm512_add_ps(sums[0], sums[1]);
                     sums[0] = _mm512_add_ps(sums[0], Alignr<8>(sums[0], _mm512_setzero_ps()));
-                    Avx::Store<align>(d, _mm512_castps512_ps256(sums[0]));
+                    Avx2::Store<align>(d, _mm512_castps512_ps256(sums[0]));
                     s += 16;
                     d += 8;
                 }
@@ -972,18 +972,18 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE void FilterHx1x8(const float * src, const float * filter, __m256 & sum)
             {
-                __m256 _src = Avx::Load<align>(src);
-                __m256 _filter = Avx::Load<align>(filter);
+                __m256 _src = Avx2::Load<align>(src);
+                __m256 _filter = Avx2::Load<align>(filter);
                 sum = _mm256_fmadd_ps(_src, _filter, sum);
             }
 
             template<bool align> static SIMD_INLINE void FilterHx4x8(const float * src, const float * filter, __m256 * sums)
             {
-                __m256 _filter = Avx::Load<align>(filter);
-                sums[0] = _mm256_fmadd_ps(Avx::Load<align>(src + 0 * Avx::F), _filter, sums[0]);
-                sums[1] = _mm256_fmadd_ps(Avx::Load<align>(src + 1 * Avx::F), _filter, sums[1]);
-                sums[2] = _mm256_fmadd_ps(Avx::Load<align>(src + 2 * Avx::F), _filter, sums[2]);
-                sums[3] = _mm256_fmadd_ps(Avx::Load<align>(src + 3 * Avx::F), _filter, sums[3]);
+                __m256 _filter = Avx2::Load<align>(filter);
+                sums[0] = _mm256_fmadd_ps(Avx2::Load<align>(src + 0 * Avx::F), _filter, sums[0]);
+                sums[1] = _mm256_fmadd_ps(Avx2::Load<align>(src + 1 * Avx::F), _filter, sums[1]);
+                sums[2] = _mm256_fmadd_ps(Avx2::Load<align>(src + 2 * Avx::F), _filter, sums[2]);
+                sums[3] = _mm256_fmadd_ps(Avx2::Load<align>(src + 3 * Avx::F), _filter, sums[3]);
             }
 
             template <bool align> void FilterHx8o(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)

@@ -45,11 +45,6 @@ namespace Simd
             return sizeof(__m256i);
         else
 #endif
-#ifdef SIMD_AVX_ENABLE
-        if (Avx::Enable)
-            return sizeof(__m256);
-        else
-#endif
 #ifdef SIMD_SSE41_ENABLE
         if (Sse41::Enable)
             return sizeof(__m128i);

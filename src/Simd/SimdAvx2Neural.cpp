@@ -39,8 +39,8 @@ namespace Simd
         {
             __m256 d = _mm256_mul_ps(Load<align>(delta), norm);
             __m256 _gradient = _mm256_add_ps(Load<align>(gradient), _mm256_mul_ps(d, d));
-            Avx::Store<align>(gradient, _gradient);
-            Avx::Store<align>(weight, _mm256_sub_ps(Load<align>(weight), _mm256_mul_ps(_mm256_mul_ps(alpha, d), _mm256_rsqrt_ps(_mm256_add_ps(_gradient, epsilon)))));
+            Store<align>(gradient, _gradient);
+            Store<align>(weight, _mm256_sub_ps(Load<align>(weight), _mm256_mul_ps(_mm256_mul_ps(alpha, d), _mm256_rsqrt_ps(_mm256_add_ps(_gradient, epsilon)))));
         }
 
         template <bool align> SIMD_INLINE void AdaptiveGradientUpdate(const float* delta, size_t offset, const __m256& norm, const __m256& alpha, const __m256& epsilon, float* gradient, float* weight)
@@ -91,7 +91,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AddVector(const float* src, float* dst)
         {
-            Avx::Store<align>(dst, _mm256_add_ps(Load<align>(dst), Load<align>(src)));
+            Store<align>(dst, _mm256_add_ps(Load<align>(dst), Load<align>(src)));
         }
 
         template <bool align> SIMD_INLINE void AddVector(const float* src, size_t aligned, size_t partial, size_t full, float* dst)
@@ -124,7 +124,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AddValue(const __m256& value, float* dst)
         {
-            Avx::Store<align>(dst, _mm256_add_ps(Load<align>(dst), value));
+            Store<align>(dst, _mm256_add_ps(Load<align>(dst), value));
         }
 
         template <bool align> SIMD_INLINE void AddValue(const float* value, float* dst, size_t aligned, size_t partial, size_t full)
@@ -292,7 +292,7 @@ namespace Simd
             {
                 __m256 _src = Load<align>(src + i);
                 __m256 _dst = Load<align>(dst + i);
-                Avx::Store<align>(dst + i, _mm256_mul_ps(_mm256_mul_ps(_dst, _slope), _mm256_mul_ps(_mm256_sub_ps(_1, _src), _src)));
+                Store<align>(dst + i, _mm256_mul_ps(_mm256_mul_ps(_dst, _slope), _mm256_mul_ps(_mm256_sub_ps(_1, _src), _src)));
             }
             for (; i < size; ++i)
                 dst[i] *= slope[0] * Base::DerivativeSigmoid(src[i]);
@@ -318,7 +318,7 @@ namespace Simd
             {
                 __m256 _src = Load<align>(src + i);
                 __m256 _dst = Load<align>(dst + i);
-                Avx::Store<align>(dst + i, _mm256_mul_ps(_mm256_mul_ps(_dst, _slope), _mm256_sub_ps(_1, _mm256_mul_ps(_src, _src))));
+                Store<align>(dst + i, _mm256_mul_ps(_mm256_mul_ps(_dst, _slope), _mm256_sub_ps(_1, _mm256_mul_ps(_src, _src))));
             }
             for (; i < size; ++i)
                 dst[i] *= slope[0] * Base::DerivativeTanh(src[i]);
@@ -346,7 +346,7 @@ namespace Simd
             {
                 __m256 mask = _mm256_cmp_ps(Load<align>(src + i), _0, _CMP_GT_OS);
                 __m256 _dst = Load<align>(dst + i);
-                Avx::Store<align>(dst + i, _mm256_mul_ps(_mm256_blendv_ps(_s, _1, mask), _dst));
+                Store<align>(dst + i, _mm256_mul_ps(_mm256_blendv_ps(_s, _1, mask), _dst));
             }
             for (; i < size; ++i)
                 dst[i] *= src[i] > 0 ? 1.0f : s;
@@ -381,7 +381,7 @@ namespace Simd
                 __m256 mask = _mm256_cmp_ps(_src, _0, _CMP_GT_OS);
                 __m256 exp = _mm256_blendv_ps(series, _mm256_rcp_ps(series), mask);
                 __m256 sigmoid = _mm256_rcp_ps(_mm256_add_ps(_1, exp));
-                Avx::Store<align>(dst + i, sigmoid);
+                Store<align>(dst + i, sigmoid);
             }
             for (; i < size; ++i)
                 dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
@@ -408,7 +408,7 @@ namespace Simd
             __m256 e32 = _mm256_mul_ps(e16, e16);
             __m256 e64 = _mm256_mul_ps(e32, e32);
             __m256 sigmoid = _mm256_rcp_ps(_mm256_fmadd_ps(e64, e64, o));
-            Avx::Store<align>(dst, sigmoid);
+            Store<align>(dst, sigmoid);
         }
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst)
@@ -461,7 +461,7 @@ namespace Simd
                 __m256 ne = _mm256_rcp_ps(pe);
                 __m256 absTanh = _mm256_mul_ps(_mm256_sub_ps(pe, ne), _mm256_rcp_ps(_mm256_add_ps(pe, ne)));
                 __m256 tanh = _mm256_xor_ps(absTanh, _mm256_and_ps(_0, _mm256_cmp_ps(_0, _src, _CMP_GT_OS)));
-                Avx::Store<align>(dst + i, tanh);
+                Store<align>(dst + i, tanh);
             }
             for (; i < size; ++i)
                 dst[i] = Base::RoughTanh(src[i] * slope[0]);
@@ -488,7 +488,7 @@ namespace Simd
             Pow pow;
             size_t i = 0;
             for (; i < alignedSize; i += F)
-                Avx::Store<align>(dst + i, pow(Avx::Load<align>(src + i), _e));
+                Store<align>(dst + i, pow(Load<align>(src + i), _e));
             for (; i < size; ++i)
                 dst[i] = Base::Pow(src[i], e);
         }
@@ -505,7 +505,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m256 Pooling1x1Max3x1Body(const float * src)
         {
-            return _mm256_max_ps(_mm256_max_ps(Avx::Load<false>(src - 1), Avx::Load<align>(src)), Avx::Load<false>(src + 1));
+            return _mm256_max_ps(_mm256_max_ps(Load<false>(src - 1), Load<align>(src)), Load<false>(src + 1));
         }
 
         template <bool align> SIMD_INLINE void Pooling1x1Max3x3Body(const float * src, size_t stride, float * dst)
@@ -513,23 +513,23 @@ namespace Simd
             __m256 src0 = Pooling1x1Max3x1Body<align>(src - stride);
             __m256 src1 = Pooling1x1Max3x1Body<align>(src);
             __m256 src2 = Pooling1x1Max3x1Body<align>(src + stride);
-            Avx::Store<align>(dst, _mm256_max_ps(_mm256_max_ps(src0, src1), src2));
+            Store<align>(dst, _mm256_max_ps(_mm256_max_ps(src0, src1), src2));
         }
 
         template <bool align> SIMD_INLINE void Pooling1x1Max3x2Body(const float * src, size_t stride, float * dst)
         {
             __m256 src0 = Pooling1x1Max3x1Body<align>(src);
             __m256 src1 = Pooling1x1Max3x1Body<align>(src + stride);
-            Avx::Store<align>(dst, _mm256_max_ps(src0, src1));
+            Store<align>(dst, _mm256_max_ps(src0, src1));
         }
 
         __m256i K32_PERMUTE_NOSE = SIMD_MM256_SETR_EPI32(0, 0, 1, 2, 3, 4, 5, 6);
 
         template <bool align> SIMD_INLINE __m256 Pooling1x1Max3x1Nose(const float * src)
         {
-            __m256 src1 = Avx::Load<align>(src);
+            __m256 src1 = Load<align>(src);
             __m256 src0 = _mm256_permutevar8x32_ps(src1, K32_PERMUTE_NOSE);
-            __m256 src2 = Avx::Load<false>(src + 1);
+            __m256 src2 = Load<false>(src + 1);
             return _mm256_max_ps(_mm256_max_ps(src0, src1), src2);
         }
 
@@ -538,21 +538,21 @@ namespace Simd
             __m256 src0 = Pooling1x1Max3x1Nose<align>(src - stride);
             __m256 src1 = Pooling1x1Max3x1Nose<align>(src);
             __m256 src2 = Pooling1x1Max3x1Nose<align>(src + stride);
-            Avx::Store<align>(dst, _mm256_max_ps(_mm256_max_ps(src0, src1), src2));
+            Store<align>(dst, _mm256_max_ps(_mm256_max_ps(src0, src1), src2));
         }
         template <bool align> SIMD_INLINE void Pooling1x1Max3x2Nose(const float * src, size_t stride, float * dst)
         {
             __m256 src0 = Pooling1x1Max3x1Nose<align>(src);
             __m256 src1 = Pooling1x1Max3x1Nose<align>(src + stride);
-            Avx::Store<align>(dst, _mm256_max_ps(src0, src1));
+            Store<align>(dst, _mm256_max_ps(src0, src1));
         }
 
         __m256i K32_PERMUTE_TAIL = SIMD_MM256_SETR_EPI32(1, 2, 3, 4, 5, 6, 7, 7);
 
         template <bool align> SIMD_INLINE __m256 Pooling1x1Max3x1Tail(const float * src)
         {
-            __m256 src0 = Avx::Load<false>(src - 1);
-            __m256 src1 = Avx::Load<align>(src);
+            __m256 src0 = Load<false>(src - 1);
+            __m256 src1 = Load<align>(src);
             __m256 src2 = _mm256_permutevar8x32_ps(src1, K32_PERMUTE_TAIL);
             return _mm256_max_ps(_mm256_max_ps(src0, src1), src2);
         }
@@ -562,13 +562,13 @@ namespace Simd
             __m256 src0 = Pooling1x1Max3x1Tail<align>(src - stride);
             __m256 src1 = Pooling1x1Max3x1Tail<align>(src);
             __m256 src2 = Pooling1x1Max3x1Tail<align>(src + stride);
-            Avx::Store<align>(dst, _mm256_max_ps(_mm256_max_ps(src0, src1), src2));
+            Store<align>(dst, _mm256_max_ps(_mm256_max_ps(src0, src1), src2));
         }
         template <bool align> SIMD_INLINE void Pooling1x1Max3x2Tail(const float * src, size_t stride, float * dst)
         {
             __m256 src0 = Pooling1x1Max3x1Tail<align>(src);
             __m256 src1 = Pooling1x1Max3x1Tail<align>(src + stride);
-            Avx::Store<align>(dst, _mm256_max_ps(src0, src1));
+            Store<align>(dst, _mm256_max_ps(src0, src1));
         }
 
         template <bool align> void NeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
@@ -636,11 +636,11 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Avx::Store<align>(dst + (col >> 1), Pooling2x2Max2x2<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2x2<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Avx::Store<false>(dst + (col >> 1), Pooling2x2Max2x2<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2x2<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
@@ -650,11 +650,11 @@ namespace Simd
             if (height - heightEven)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Avx::Store<align>(dst + (col >> 1), Pooling2x2Max2<align>(src + col));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2<align>(src + col));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Avx::Store<false>(dst + (col >> 1), Pooling2x2Max2<false>(src + col));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2<false>(src + col));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = src[widthEven];
@@ -688,7 +688,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m256 Pooling2x2Max1x3(const float * src, size_t stride)
         {
-            return _mm256_max_ps(_mm256_max_ps(Avx::Load<align>(src), Avx::Load<align>(src + stride)), Avx::Load<align>(src + 2 * stride));
+            return _mm256_max_ps(_mm256_max_ps(Load<align>(src), Load<align>(src + stride)), Load<align>(src + 2 * stride));
         }
 
         SIMD_INLINE __m256 PermuteFor2x2(__m256 a)
@@ -711,7 +711,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m256 Pooling2x2Max1x2(const float * src, size_t stride)
         {
-            return _mm256_max_ps(Avx::Load<align>(src), Avx::Load<align>(src + stride));
+            return _mm256_max_ps(Load<align>(src), Load<align>(src + stride));
         }
 
         template <bool align> SIMD_INLINE __m256 Pooling2x2Max3x2(const float * src, size_t stride)
@@ -737,11 +737,11 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Avx::Store<align>(dst + (col >> 1), Pooling2x2Max3x3<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max3x3<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Avx::Store<false>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Max2x3(src + widthEven, srcStride);
@@ -751,11 +751,11 @@ namespace Simd
             if (height - heightEven)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Avx::Store<align>(dst + (col >> 1), Pooling2x2Max3x2<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max3x2<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Avx::Store<false>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Max2x2(src + widthEven, srcStride);
@@ -775,8 +775,8 @@ namespace Simd
         template <bool align> SIMD_INLINE void UpdateWeights(const float* x, const __m256& a, const __m256& b, float* d, float* w)
         {
             __m256 _d = _mm256_add_ps(_mm256_mul_ps(a, Load<align>(d)), _mm256_mul_ps(b, Load<align>(x)));
-            Avx::Store<align>(d, _d);
-            Avx::Store<align>(w, _mm256_add_ps(Load<align>(w), _d));
+            Store<align>(d, _d);
+            Store<align>(w, _mm256_add_ps(Load<align>(w), _d));
         }
 
         template <bool align> SIMD_INLINE void UpdateWeights(const float* x, size_t offset, const __m256& a, const __m256& b, float* d, float* w)

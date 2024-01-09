@@ -195,11 +195,11 @@ namespace Simd
     namespace Avx2
     {
         using namespace Avx;
-#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug    
-        using Avx::F;
-        using Avx::DF;
-        using Avx::QF;
-#endif
+
+        const size_t F = sizeof(__m256) / sizeof(float);
+        const size_t DF = 2 * F;
+        const size_t QF = 4 * F;
+        const size_t HF = F / 2;
 
         const size_t A = sizeof(__m256i);
         const size_t DA = 2 * A;

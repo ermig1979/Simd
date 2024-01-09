@@ -82,7 +82,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdAvx512vnni.h"
@@ -131,9 +130,6 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
     case SimdCpuInfoRam: return Cpu::RAM_SIZE;
 #ifdef SIMD_SSE41_ENABLE
     case SimdCpuInfoSse41: return Sse41::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_AVX_ENABLE
-    case SimdCpuInfoAvx: return Avx::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_AVX2_ENABLE
     case SimdCpuInfoAvx2: return Avx2::Enable ? 1 : 0;

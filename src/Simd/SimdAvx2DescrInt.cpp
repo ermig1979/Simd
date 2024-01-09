@@ -76,7 +76,7 @@ namespace Simd
         {
             size_t count2 = AlignLo(count, 2), i = 0;
             for (; i < count2; i += 2, src += 2, dst += 8)
-                _mm256_storeu_ps(dst, Avx::Load<false>((float*)src[0], (float*)src[1]));
+                _mm256_storeu_ps(dst, Load<false>((float*)src[0], (float*)src[1]));
             for (; i < count; ++i, src += 1, dst += 4)
                 _mm_storeu_ps(dst, _mm_loadu_ps((float*)src[0]));
         }
@@ -88,10 +88,10 @@ namespace Simd
             size_t count8 = AlignLo(count, 8), count4 = AlignLo(count, 4), i = 0;
             for (; i < count8; i += 8, src += 8, dst += 8)
             {
-                __m256 s0 = Avx::Load<false>((float*)src[0], (float*)src[4]);
-                __m256 s1 = Avx::Load<false>((float*)src[1], (float*)src[5]);
-                __m256 s2 = Avx::Load<false>((float*)src[2], (float*)src[6]);
-                __m256 s3 = Avx::Load<false>((float*)src[3], (float*)src[7]);
+                __m256 s0 = Load<false>((float*)src[0], (float*)src[4]);
+                __m256 s1 = Load<false>((float*)src[1], (float*)src[5]);
+                __m256 s2 = Load<false>((float*)src[2], (float*)src[6]);
+                __m256 s3 = Load<false>((float*)src[3], (float*)src[7]);
                 __m256 s00 = _mm256_unpacklo_ps(s0, s2);
                 __m256 s01 = _mm256_unpacklo_ps(s1, s3);
                 __m256 s10 = _mm256_unpackhi_ps(s0, s2);

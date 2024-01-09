@@ -243,7 +243,6 @@ namespace Test
         T simd;
         T base;
         T sse41;
-        T avx;
         T avx2;
         T avx512bw;
         T avx512vnni;
@@ -287,8 +286,6 @@ namespace Test
             AddToFunction(src, dst.base, enable.base);
         if (desc.find("Simd::Sse41::") != std::string::npos)
             AddToFunction(src, dst.sse41, enable.sse41);
-        if (desc.find("Simd::Avx::") != std::string::npos)
-            AddToFunction(src, dst.avx, enable.avx);
         if (desc.find("Simd::Avx2::") != std::string::npos)
             AddToFunction(src, dst.avx2, enable.avx2);
         if (desc.find("Simd::Avx512bw::") != std::string::npos)
@@ -323,12 +320,11 @@ namespace Test
         Add(s.simd, d.simd);
         if (enable.base) Add(Cond(s.base, s.simd), d.base);
         if (enable.sse41) Add(Cond(s.sse41, s.base), d.sse41);
-        if (enable.avx) Add(Cond(s.avx, Cond(s.sse41, s.base)), d.avx);
-        if (enable.avx2) Add(Cond(s.avx2, Cond(s.avx, Cond(s.sse41, s.base))), d.avx2);
-        if (enable.avx512bw) Add(Cond(s.avx512bw, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, s.base)))), d.avx512bw);
-        if (enable.avx512vnni) Add(Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, s.base))))), d.avx512vnni);
-        if (enable.avx512bf16) Add(Cond(s.avx512bf16, Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, s.base)))))), d.avx512bf16);
-        if (enable.amx) Add(Cond(s.amx, Cond(s.avx512bf16, Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, s.base))))))), d.amx);
+        if (enable.avx2) Add(Cond(s.avx2, Cond(s.sse41, s.base)), d.avx2);
+        if (enable.avx512bw) Add(Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base))), d.avx512bw);
+        if (enable.avx512vnni) Add(Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base)))), d.avx512vnni);
+        if (enable.avx512bf16) Add(Cond(s.avx512bf16, Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base))))), d.avx512bf16);
+        if (enable.amx) Add(Cond(s.amx, Cond(s.avx512bf16, Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base)))))), d.amx);
         if (enable.vmx) Add(Cond(s.vmx, s.base), d.vmx);
         if (enable.vsx) Add(Cond(s.vsx, Cond(s.vmx, s.base)), d.vsx);
         if (enable.neon) Add(Cond(s.neon, s.base), d.neon);
@@ -407,8 +403,8 @@ namespace Test
 
         FunctionStatisticMap functions;
         CommonStatistic common;
-        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false};
-        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5b", "A5" },{ "Vnni", "Vn" },{ "Bf16", "Bf" },{ "Amx", "Am" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "Ne" } };
+        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false};
+        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse41", "S4" },{ "Avx2", "A2" },{ "Avx5b", "A5" },{ "Vnni", "Vn" },{ "Bf16", "Bf" },{ "Amx", "Am" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "Ne" } };
         double timeMax = 0;
         for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
@@ -477,8 +473,7 @@ namespace Test
         info << (SimdCpuInfo(SimdCpuInfoAvx512bf16) ? " AVX-512BF16" : "");
         info << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? " AVX-512VNNI" : "");
         info << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? " AVX-512BW AVX-512F" : "");
-        info << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA" : "");
-        info << (SimdCpuInfo(SimdCpuInfoAvx) ? " AVX" : "");
+        info << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA AVX" : "");
         info << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3 SSE2 SSE" : "");
         info << (SimdCpuInfo(SimdCpuInfoVmx) ? " Altivec" : "");
         info << (SimdCpuInfo(SimdCpuInfoVsx) ? " VSX" : "");

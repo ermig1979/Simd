@@ -29,7 +29,6 @@
 #include "Simd/SimdErf.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdAvx1.h"
 #include "Simd/SimdSynet.h"
 
 namespace Simd

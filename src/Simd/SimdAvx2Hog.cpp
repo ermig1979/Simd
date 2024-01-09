@@ -88,7 +88,7 @@ namespace Simd
                 bestIndex = _mm256_blendv_epi8(bestIndex, buffer.neg[i], _mm256_castps_si256(mask));
             }
             Store<align>((__m256i*)(buffer.index + col), bestIndex);
-            Avx::Store<align>(buffer.value + col, Avx::Sqrt<0>(_mm256_fmadd_ps(dx, dx, _mm256_mul_ps(dy, dy))));
+            Store<align>(buffer.value + col, Avx::Sqrt<0>(_mm256_fmadd_ps(dx, dx, _mm256_mul_ps(dy, dy))));
         }
 
         template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m256i & t, const __m256i & l, const __m256i & r, const __m256i & b, Buffer & buffer, size_t col)
@@ -194,7 +194,7 @@ namespace Simd
                 bestIndex = _mm256_andnot_si256(_mm256_cmpeq_epi32(bestIndex, K32_18), bestIndex);
 
                 Store<align>((__m256i*)(buffer.index + col), bestIndex);
-                Avx::Store<align>(buffer.value + col, Avx::Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
+                Store<align>(buffer.value + col, Avx::Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
             }
 
             template <int part> SIMD_INLINE __m256 CovertDifference(const __m128i & a, const __m128i & b)
@@ -315,18 +315,18 @@ namespace Simd
                         for (size_t i = 0; i < 16; i += F)
                         {
                             const float * s = src + i * 4;
-                            __m256 a0 = Avx::Load<true>(s + 0x00, s + 0x10);
-                            __m256 a1 = Avx::Load<true>(s + 0x04, s + 0x14);
-                            __m256 a2 = Avx::Load<true>(s + 0x08, s + 0x18);
-                            __m256 a3 = Avx::Load<true>(s + 0x0C, s + 0x1C);
+                            __m256 a0 = Load<true>(s + 0x00, s + 0x10);
+                            __m256 a1 = Load<true>(s + 0x04, s + 0x14);
+                            __m256 a2 = Load<true>(s + 0x08, s + 0x18);
+                            __m256 a3 = Load<true>(s + 0x0C, s + 0x1C);
                             __m256 b0 = _mm256_unpacklo_ps(a0, a2);
                             __m256 b1 = _mm256_unpackhi_ps(a0, a2);
                             __m256 b2 = _mm256_unpacklo_ps(a1, a3);
                             __m256 b3 = _mm256_unpackhi_ps(a1, a3);
-                            Avx::Store<false>(h0[0] + i, _mm256_add_ps(Avx::Load<false>(h0[0] + i), _mm256_unpacklo_ps(b0, b2)));
-                            Avx::Store<false>(h0[1] + i, _mm256_add_ps(Avx::Load<false>(h0[1] + i), _mm256_unpackhi_ps(b0, b2)));
-                            Avx::Store<false>(h1[0] + i, _mm256_add_ps(Avx::Load<false>(h1[0] + i), _mm256_unpacklo_ps(b1, b3)));
-                            Avx::Store<false>(h1[1] + i, _mm256_add_ps(Avx::Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
+                            Store<false>(h0[0] + i, _mm256_add_ps(Load<false>(h0[0] + i), _mm256_unpacklo_ps(b0, b2)));
+                            Store<false>(h0[1] + i, _mm256_add_ps(Load<false>(h0[1] + i), _mm256_unpackhi_ps(b0, b2)));
+                            Store<false>(h1[0] + i, _mm256_add_ps(Load<false>(h1[0] + i), _mm256_unpacklo_ps(b1, b3)));
+                            Store<false>(h1[1] + i, _mm256_add_ps(Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
                         }
                         for (size_t i = 16; i < 18; ++i)
                         {
@@ -476,7 +476,7 @@ namespace Simd
                 bestIndex = _mm256_andnot_si256(_mm256_cmpeq_epi32(bestIndex, _Q2), bestIndex);
 
                 Store<align>((__m256i*)(_index.data + col), bestIndex);
-                Avx::Store<align>(_value.data + col, Avx::Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
+                Store<align>(_value.data + col, Avx::Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
             }
 
             template <int part> SIMD_INLINE __m256 ConvertDifference(const __m128i & a, const __m128i & b)
@@ -530,18 +530,18 @@ namespace Simd
                     for (size_t i = 0; i < 16; i += F)
                     {
                         const float * s = src + i * 4;
-                        __m256 a0 = Avx::Load<true>(s + 0x00, s + 0x10);
-                        __m256 a1 = Avx::Load<true>(s + 0x04, s + 0x14);
-                        __m256 a2 = Avx::Load<true>(s + 0x08, s + 0x18);
-                        __m256 a3 = Avx::Load<true>(s + 0x0C, s + 0x1C);
+                        __m256 a0 = Load<true>(s + 0x00, s + 0x10);
+                        __m256 a1 = Load<true>(s + 0x04, s + 0x14);
+                        __m256 a2 = Load<true>(s + 0x08, s + 0x18);
+                        __m256 a3 = Load<true>(s + 0x0C, s + 0x1C);
                         __m256 b0 = _mm256_unpacklo_ps(a0, a2);
                         __m256 b1 = _mm256_unpackhi_ps(a0, a2);
                         __m256 b2 = _mm256_unpacklo_ps(a1, a3);
                         __m256 b3 = _mm256_unpackhi_ps(a1, a3);
-                        Avx::Store<false>(h0[0] + i, _mm256_add_ps(Avx::Load<false>(h0[0] + i), _mm256_unpacklo_ps(b0, b2)));
-                        Avx::Store<false>(h0[1] + i, _mm256_add_ps(Avx::Load<false>(h0[1] + i), _mm256_unpackhi_ps(b0, b2)));
-                        Avx::Store<false>(h1[0] + i, _mm256_add_ps(Avx::Load<false>(h1[0] + i), _mm256_unpacklo_ps(b1, b3)));
-                        Avx::Store<false>(h1[1] + i, _mm256_add_ps(Avx::Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
+                        Store<false>(h0[0] + i, _mm256_add_ps(Load<false>(h0[0] + i), _mm256_unpacklo_ps(b0, b2)));
+                        Store<false>(h0[1] + i, _mm256_add_ps(Load<false>(h0[1] + i), _mm256_unpackhi_ps(b0, b2)));
+                        Store<false>(h1[0] + i, _mm256_add_ps(Load<false>(h1[0] + i), _mm256_unpacklo_ps(b1, b3)));
+                        Store<false>(h1[1] + i, _mm256_add_ps(Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
                     }
                     __m128 * ps = (__m128*)src;
                     __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), Sse41::Load(h0[0] + 16, h0[1] + 16));
@@ -699,18 +699,18 @@ namespace Simd
         SIMD_INLINE void HogDeinterleave(const float * src, size_t count, float ** dst, size_t offset, size_t i)
         {
             src += i;
-            __m256 a0 = Avx::Load<false>(src + 0 * count, src + 4 * count);
-            __m256 a1 = Avx::Load<false>(src + 1 * count, src + 5 * count);
-            __m256 a2 = Avx::Load<false>(src + 2 * count, src + 6 * count);
-            __m256 a3 = Avx::Load<false>(src + 3 * count, src + 7 * count);
+            __m256 a0 = Load<false>(src + 0 * count, src + 4 * count);
+            __m256 a1 = Load<false>(src + 1 * count, src + 5 * count);
+            __m256 a2 = Load<false>(src + 2 * count, src + 6 * count);
+            __m256 a3 = Load<false>(src + 3 * count, src + 7 * count);
             __m256 b0 = _mm256_unpacklo_ps(a0, a2);
             __m256 b1 = _mm256_unpackhi_ps(a0, a2);
             __m256 b2 = _mm256_unpacklo_ps(a1, a3);
             __m256 b3 = _mm256_unpackhi_ps(a1, a3);
-            Avx::Store<false>(dst[i + 0] + offset, _mm256_unpacklo_ps(b0, b2));
-            Avx::Store<false>(dst[i + 1] + offset, _mm256_unpackhi_ps(b0, b2));
-            Avx::Store<false>(dst[i + 2] + offset, _mm256_unpacklo_ps(b1, b3));
-            Avx::Store<false>(dst[i + 3] + offset, _mm256_unpackhi_ps(b1, b3));
+            Store<false>(dst[i + 0] + offset, _mm256_unpacklo_ps(b0, b2));
+            Store<false>(dst[i + 1] + offset, _mm256_unpackhi_ps(b0, b2));
+            Store<false>(dst[i + 2] + offset, _mm256_unpacklo_ps(b1, b3));
+            Store<false>(dst[i + 3] + offset, _mm256_unpackhi_ps(b1, b3));
         }
 
         void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
@@ -750,17 +750,17 @@ namespace Simd
         {
             template <int add, bool end> SIMD_INLINE void Set(float * dst, const __m256 & value, const __m256 & mask)
             {
-                Avx::Store<false>(dst, value);
+                Store<false>(dst, value);
             }
 
             template <> SIMD_INLINE void Set<1, false>(float * dst, const __m256 & value, const __m256 & mask)
             {
-                Avx::Store<false>(dst, _mm256_add_ps(Avx::Load<false>(dst), value));
+                Store<false>(dst, _mm256_add_ps(Load<false>(dst), value));
             }
 
             template <> SIMD_INLINE void Set<1, true>(float * dst, const __m256 & value, const __m256 & mask)
             {
-                Avx::Store<false>(dst, _mm256_add_ps(Avx::Load<false>(dst), _mm256_and_ps(value, mask)));
+                Store<false>(dst, _mm256_add_ps(Load<false>(dst), _mm256_and_ps(value, mask)));
             }
         }
 
@@ -782,8 +782,8 @@ namespace Simd
             {
                 __m256 sum = _mm256_setzero_ps();
                 for (size_t i = 0; i < size; ++i)
-                    sum = _mm256_fmadd_ps(Avx::Load<false>(src + i), filter[i], sum);
-                Avx::Store<align>(dst, sum);
+                    sum = _mm256_fmadd_ps(Load<false>(src + i), filter[i], sum);
+                Store<align>(dst, sum);
             }
 
             void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
@@ -807,9 +807,9 @@ namespace Simd
 
             template <bool align> SIMD_INLINE void FilterRows_10(const float * src, const __m256 * filter, float * dst)
             {
-                __m256  src0 = Avx::Load<false>(src + 0);
-                __m256  src4 = Avx::Load<false>(src + 4);
-                __m256  src8 = Avx::Load<false>(src + 8);
+                __m256  src0 = Load<false>(src + 0);
+                __m256  src4 = Load<false>(src + 4);
+                __m256  src8 = Load<false>(src + 8);
                 __m256 sum0 = _mm256_mul_ps(src0, filter[0]);
                 __m256 sum1 = _mm256_mul_ps(Alignr<1>(src0, src4), filter[1]);
                 sum0 = _mm256_fmadd_ps(Alignr<2>(src0, src4), filter[2], sum0);
@@ -819,8 +819,8 @@ namespace Simd
                 sum0 = _mm256_fmadd_ps(Alignr<2>(src4, src8), filter[6], sum0);
                 sum1 = _mm256_fmadd_ps(Alignr<3>(src4, src8), filter[7], sum1);
                 sum0 = _mm256_fmadd_ps(src8, filter[8], sum0);
-                sum1 = _mm256_fmadd_ps(Avx::Load<false>(src + 9), filter[9], sum1);
-                Avx::Store<align>(dst, _mm256_add_ps(sum0, sum1));
+                sum1 = _mm256_fmadd_ps(Load<false>(src + 9), filter[9], sum1);
+                Store<align>(dst, _mm256_add_ps(sum0, sum1));
             }
 
             void FilterRows_10(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, float * dst, size_t dstStride)
@@ -846,7 +846,7 @@ namespace Simd
             {
                 __m256 sum = _mm256_setzero_ps();
                 for (size_t i = 0; i < size; ++i, src += stride)
-                    sum = _mm256_fmadd_ps(Avx::Load<!end>(src), filter[i], sum);
+                    sum = _mm256_fmadd_ps(Load<!end>(src), filter[i], sum);
                 HogSeparableFilter_Detail::Set<add, end>(dst, sum, mask);
             }
 
@@ -856,10 +856,10 @@ namespace Simd
                 for (size_t i = 0; i < size; ++i, src += stride)
                 {
                     __m256 f = filter[i];
-                    sums[0] = _mm256_fmadd_ps(Avx::Load<!end>(src + 0 * F), f, sums[0]);
-                    sums[1] = _mm256_fmadd_ps(Avx::Load<!end>(src + 1 * F), f, sums[1]);
-                    sums[2] = _mm256_fmadd_ps(Avx::Load<!end>(src + 2 * F), f, sums[2]);
-                    sums[3] = _mm256_fmadd_ps(Avx::Load<!end>(src + 3 * F), f, sums[3]);
+                    sums[0] = _mm256_fmadd_ps(Load<!end>(src + 0 * F), f, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(Load<!end>(src + 1 * F), f, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(Load<!end>(src + 2 * F), f, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(Load<!end>(src + 3 * F), f, sums[3]);
                 }
                 HogSeparableFilter_Detail::Set<add, end>(dst + 0 * F, sums[0], mask);
                 HogSeparableFilter_Detail::Set<add, end>(dst + 1 * F, sums[1], mask);

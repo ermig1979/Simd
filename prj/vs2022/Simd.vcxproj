@@ -108,9 +108,6 @@
     <ProjectReference Include="AmxBf16.vcxproj">
       <Project>{3e68d81a-dbc0-47b4-912b-7c9efce28b6f}</Project>
     </ProjectReference>
-    <ProjectReference Include="Avx1.vcxproj">
-      <Project>{d6e29b9b-ee2d-4339-8417-dcadc283884f}</Project>
-    </ProjectReference>
     <ProjectReference Include="Avx2.vcxproj">
       <Project>{4c82474f-3b9a-4b92-ac74-2434ca1d5064}</Project>
     </ProjectReference>

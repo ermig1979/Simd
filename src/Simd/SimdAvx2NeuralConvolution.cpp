@@ -46,16 +46,16 @@ namespace Simd
                 size_t col = 0;
                 for (; col < alignedWidth; col += F)
                 {
-                    __m256 _dst = Avx::Load<align>(dst + col);
+                    __m256 _dst = Load<align>(dst + col);
                     _dst = _mm256_add_ps(_dst, Convolution<coreX, coreY>::template Forward<align>(src + col, srcStride, _weights));
-                    Avx::Store<align>(dst + col, _dst);
+                    Store<align>(dst + col, _dst);
                 }
                 if (width - alignedWidth)
                 {
                     size_t col = width - F;
-                    __m256 _dst = Avx::Load<false>(dst + col);
+                    __m256 _dst = Load<false>(dst + col);
                     _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution<coreX, coreY>::template Forward<false>(src + col, srcStride, _weights)));
-                    Avx::Store<false>(dst + col, _dst);
+                    Store<false>(dst + col, _dst);
                 }
                 src += srcStride;
                 dst += dstStride;
@@ -145,16 +145,16 @@ namespace Simd
                 buffer.Update(row <= height - coreY ? src : NULL);
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
-                    __m256 _dst = Avx::Load<align>(dst + col);
+                    __m256 _dst = Load<align>(dst + col);
                     _dst = _mm256_add_ps(_dst, Convolution<coreX, coreY>::template Backward<true>(buffer, col, _weights));
-                    Avx::Store<align>(dst + col, _dst);
+                    Store<align>(dst + col, _dst);
                 }
                 if (width - alignedWidth)
                 {
                     size_t col = width - F;
-                    __m256 _dst = Avx::Load<false>(dst + col);
+                    __m256 _dst = Load<false>(dst + col);
                     _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution<coreX, coreY>::template Backward<false>(buffer, col, _weights)));
-                    Avx::Store<false>(dst + col, _dst);
+                    Store<false>(dst + col, _dst);
                 }
                 src += srcStride;
                 dst += dstStride;
@@ -211,13 +211,13 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
-                    __m256 _dst = Avx::Load<align>(dst + col);
+                    __m256 _dst = Load<align>(dst + col);
                     Convolution<coreX, coreY>::template Sum<align>(src + col, srcStride, _dst, _sums);
                 }
                 if (alignedWidth < width)
                 {
                     size_t col = width - F;
-                    __m256 _dst = _mm256_and_ps(tailMask, Avx::Load<false>(dst + col));
+                    __m256 _dst = _mm256_and_ps(tailMask, Load<false>(dst + col));
                     Convolution<coreX, coreY>::template Sum<false>(src + col, srcStride, _dst, _sums);
                 }
                 src += srcStride;
@@ -352,15 +352,15 @@ namespace Simd
 
                 template <bool align> static SIMD_INLINE void Kernel1x4x8(const __m256 & a, size_t K, const float * b, __m256 * sums)
                 {
-                    sums[0] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 0 * K), sums[0]);
-                    sums[1] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 1 * K), sums[1]);
-                    sums[2] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 2 * K), sums[2]);
-                    sums[3] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 3 * K), sums[3]);
+                    sums[0] = _mm256_fmadd_ps(a, Load<align>(b + 0 * K), sums[0]);
+                    sums[1] = _mm256_fmadd_ps(a, Load<align>(b + 1 * K), sums[1]);
+                    sums[2] = _mm256_fmadd_ps(a, Load<align>(b + 2 * K), sums[2]);
+                    sums[3] = _mm256_fmadd_ps(a, Load<align>(b + 3 * K), sums[3]);
                 }
 
                 template <bool align> static SIMD_INLINE void Kernel1x1x8(const __m256 & a, const float * b, __m256 & sum)
                 {
-                    sum = _mm256_fmadd_ps(a, Avx::Load<align>(b), sum);
+                    sum = _mm256_fmadd_ps(a, Load<align>(b), sum);
                 }
 
                 SIMD_INLINE void Add4ExtractedSums(const __m256 * src, float * dst)
@@ -373,19 +373,19 @@ namespace Simd
                 template <bool align> static SIMD_INLINE void Kernel3x4x8(const __m256 * a, size_t K, const float * b, __m256 * sums)
                 {
                     __m256 _b;
-                    _b = Avx::Load<align>(b + 0 * K);
+                    _b = Load<align>(b + 0 * K);
                     sums[0x0] = _mm256_fmadd_ps(a[0], _b, sums[0x0]);
                     sums[0x4] = _mm256_fmadd_ps(a[1], _b, sums[0x4]);
                     sums[0x8] = _mm256_fmadd_ps(a[2], _b, sums[0x8]);
-                    _b = Avx::Load<align>(b + 1 * K);
+                    _b = Load<align>(b + 1 * K);
                     sums[0x1] = _mm256_fmadd_ps(a[0], _b, sums[0x1]);
                     sums[0x5] = _mm256_fmadd_ps(a[1], _b, sums[0x5]);
                     sums[0x9] = _mm256_fmadd_ps(a[2], _b, sums[0x9]);
-                    _b = Avx::Load<align>(b + 2 * K);
+                    _b = Load<align>(b + 2 * K);
                     sums[0x2] = _mm256_fmadd_ps(a[0], _b, sums[0x2]);
                     sums[0x6] = _mm256_fmadd_ps(a[1], _b, sums[0x6]);
                     sums[0xA] = _mm256_fmadd_ps(a[2], _b, sums[0xA]);
-                    _b = Avx::Load<align>(b + 3 * K);
+                    _b = Load<align>(b + 3 * K);
                     sums[0x3] = _mm256_fmadd_ps(a[0], _b, sums[0x3]);
                     sums[0x7] = _mm256_fmadd_ps(a[1], _b, sums[0x7]);
                     sums[0xB] = _mm256_fmadd_ps(a[2], _b, sums[0xB]);
@@ -393,7 +393,7 @@ namespace Simd
 
                 template <bool align> static SIMD_INLINE void Kernel3x1x8(const __m256 * a, const float * b, __m256 * sums)
                 {
-                    __m256 _b = Avx::Load<align>(b);
+                    __m256 _b = Load<align>(b);
                     sums[0x0] = _mm256_fmadd_ps(a[0], _b, sums[0x0]);
                     sums[0x1] = _mm256_fmadd_ps(a[1], _b, sums[0x1]);
                     sums[0x2] = _mm256_fmadd_ps(a[2], _b, sums[0x2]);
@@ -421,17 +421,17 @@ namespace Simd
                             __m256 _a[3];
                             for (size_t k = 0; k < K8; k += 8)
                             {
-                                _a[0] = Avx::Load<false>(pa + k + 0 * K);
-                                _a[1] = Avx::Load<false>(pa + k + 1 * K);
-                                _a[2] = Avx::Load<false>(pa + k + 2 * K);
+                                _a[0] = Load<false>(pa + k + 0 * K);
+                                _a[1] = Load<false>(pa + k + 1 * K);
+                                _a[2] = Load<false>(pa + k + 2 * K);
                                 Kernel3x4x8<align>(_a, K, pb + k, sums);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
-                                _a[0] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 0 * K));
-                                _a[1] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 1 * K));
-                                _a[2] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 2 * K));
+                                _a[0] = _mm256_and_ps(tailMask, Load<false>(pa + k + 0 * K));
+                                _a[1] = _mm256_and_ps(tailMask, Load<false>(pa + k + 1 * K));
+                                _a[2] = _mm256_and_ps(tailMask, Load<false>(pa + k + 2 * K));
                                 Kernel3x4x8<false>(_a, K, pb + k, sums);
                             }
                             Add4ExtractedSums(sums + 0, pc + j + 0 * N);
@@ -445,17 +445,17 @@ namespace Simd
                             __m256 _a[3];
                             for (size_t k = 0; k < K8; k += 8)
                             {
-                                _a[0] = Avx::Load<false>(pa + k + 0 * K);
-                                _a[1] = Avx::Load<false>(pa + k + 1 * K);
-                                _a[2] = Avx::Load<false>(pa + k + 2 * K);
+                                _a[0] = Load<false>(pa + k + 0 * K);
+                                _a[1] = Load<false>(pa + k + 1 * K);
+                                _a[2] = Load<false>(pa + k + 2 * K);
                                 Kernel3x1x8<align>(_a, pb + k, sums);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
-                                _a[0] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 0 * K));
-                                _a[1] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 1 * K));
-                                _a[2] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 2 * K));
+                                _a[0] = _mm256_and_ps(tailMask, Load<false>(pa + k + 0 * K));
+                                _a[1] = _mm256_and_ps(tailMask, Load<false>(pa + k + 1 * K));
+                                _a[2] = _mm256_and_ps(tailMask, Load<false>(pa + k + 2 * K));
                                 Kernel3x1x8<false>(_a, pb + k, sums);
                             }
                             pc[j + 0 * N] += Avx::ExtractSum(sums[0]);
@@ -474,13 +474,13 @@ namespace Simd
                             __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
                             for (size_t k = 0; k < K8; k += 8)
                             {
-                                __m256 _a = Avx::Load<false>(pa + k);
+                                __m256 _a = Load<false>(pa + k);
                                 Kernel1x4x8<align>(_a, K, pb + k, sums);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
-                                __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));
+                                __m256 _a = _mm256_and_ps(tailMask, Load<false>(pa + k));
                                 Kernel1x4x8<false>(_a, K, pb + k, sums);
                             }
                             Add4ExtractedSums(sums + 0, pc + j);
@@ -491,13 +491,13 @@ namespace Simd
                             __m256 sum = _mm256_setzero_ps();
                             for (size_t k = 0; k < K8; k += 8)
                             {
-                                __m256 _a = Avx::Load<false>(pa + k);
+                                __m256 _a = Load<false>(pa + k);
                                 Kernel1x1x8<align>(_a, pb + k, sum);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
-                                __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));
+                                __m256 _a = _mm256_and_ps(tailMask, Load<false>(pa + k));
                                 Kernel1x1x8<false>(_a, pb + k, sum);
                             }
                             pc[j] += Avx::ExtractSum(sum);
@@ -527,10 +527,10 @@ namespace Simd
                             for (; k < K8; k += 8)
                             {
                                 const float * ps = src + k;
-                                __m256 s0 = Avx::Load<false>(ps + 0 * K);
-                                __m256 s1 = Avx::Load<false>(ps + 1 * K);
-                                __m256 s2 = Avx::Load<false>(ps + 2 * K);
-                                __m256 s3 = Avx::Load<false>(ps + 3 * K);
+                                __m256 s0 = Load<false>(ps + 0 * K);
+                                __m256 s1 = Load<false>(ps + 1 * K);
+                                __m256 s2 = Load<false>(ps + 2 * K);
+                                __m256 s3 = Load<false>(ps + 3 * K);
                                 __m256 s00 = _mm256_unpacklo_ps(s0, s2);
                                 __m256 s01 = _mm256_unpacklo_ps(s1, s3);
                                 __m256 s10 = _mm256_unpackhi_ps(s0, s2);
@@ -539,10 +539,10 @@ namespace Simd
                                 __m256 d1 = _mm256_unpackhi_ps(s00, s01);
                                 __m256 d2 = _mm256_unpacklo_ps(s10, s11);
                                 __m256 d3 = _mm256_unpackhi_ps(s10, s11);
-                                Avx::Store<false>(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
-                                Avx::Store<false>(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
-                                Avx::Store<false>(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
-                                Avx::Store<false>(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
+                                Store<false>(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
+                                Store<false>(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
+                                Store<false>(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
+                                Store<false>(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
                                 dst += 32;
                             }
                             for (; k < K4; k += 4)
@@ -671,9 +671,9 @@ namespace Simd
                                 for (size_t k = 0; k < K; ++k)
                                 {
                                     const float * psrc = src + k * N;
-                                    Avx::Store<false>(dst + 0x00, Avx::Load<false>(psrc + 0x00));
-                                    Avx::Store<false>(dst + 0x08, Avx::Load<false>(psrc + 0x08));
-                                    Avx::Store<false>(dst + 0x10, Avx::Load<false>(psrc + 0x10));
+                                    Store<false>(dst + 0x00, Load<false>(psrc + 0x00));
+                                    Store<false>(dst + 0x08, Load<false>(psrc + 0x08));
+                                    Store<false>(dst + 0x10, Load<false>(psrc + 0x10));
                                     dst += 24;
                                 }
                             }
@@ -702,8 +702,8 @@ namespace Simd
                                 for (size_t k = 0; k < K; ++k)
                                 {
                                     const float * psrc = src + k*N;
-                                    Avx::Store<false>(dst + 0, Avx::Load<false>(psrc + 0));
-                                    Avx::Store<false>(dst + 8, Avx::Load<false>(psrc + 8));
+                                    Store<false>(dst + 0, Load<false>(psrc + 0));
+                                    Store<false>(dst + 8, Load<false>(psrc + 8));
                                     dst += 16;
                                 }
                             }
@@ -743,7 +743,7 @@ namespace Simd
 
                 SIMD_INLINE void AddSum(__m256 sum, float * dst)
                 {
-                    Avx::Store<false>(dst, _mm256_add_ps(Load<false>(dst), sum));
+                    Store<false>(dst, _mm256_add_ps(Load<false>(dst), sum));
                 }
 
                 SIMD_INLINE void AddSums8(const __m256 * sums, size_t size, const float * mask, float * dst, size_t stride)
@@ -1114,7 +1114,7 @@ namespace Simd
                         __m256 _dst[8];
                         float * pdst = dst;
                         for (size_t row = 0; row < 8; ++row, pdst += 8)
-                            _dst[row] = Avx::Load<align>(pdst);
+                            _dst[row] = Load<align>(pdst);
                         if (kernelY < 4)
                         {
                             __m256 _weight[kernelX*kernelY];
@@ -1150,7 +1150,7 @@ namespace Simd
                             }
                         }
                         for (size_t row = 0; row < 8; ++row, dst += 8)
-                            Avx::Store<align>(dst, _dst[row]);
+                            Store<align>(dst, _dst[row]);
                     }
                 }
 
@@ -1180,14 +1180,14 @@ namespace Simd
                                 {
                                     __m256 _dst = Load<align>(pdst + col);
                                     _dst = _mm256_add_ps(_dst, Convolution<kernelX, kernelY>::template Forward<align>(psrc + col, srcWidth, _weight));
-                                    Avx::Store<align>(pdst + col, _dst);
+                                    Store<align>(pdst + col, _dst);
                                 }
                                 if (dstWidth - alignedWidth)
                                 {
                                     size_t col = dstWidth - F;
                                     __m256 _dst = Load<false>(pdst + col);
                                     _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution<kernelX, kernelY>::template Forward<false>(psrc + col, srcWidth, _weight)));
-                                    Avx::Store<false>(pdst + col, _dst);
+                                    Store<false>(pdst + col, _dst);
                                 }
                                 psrc += srcWidth;
                                 pdst += dstWidth;

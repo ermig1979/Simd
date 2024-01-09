@@ -555,5 +555,5 @@ namespace Simd
             }
         }
     }
-#endif// SIMD_AVX_ENABLE
+#endif
 }

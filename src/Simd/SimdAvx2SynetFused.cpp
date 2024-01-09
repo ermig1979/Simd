@@ -39,13 +39,13 @@ namespace Simd
             __m256 _bias = Load<align>(bias + offset);
             __m256 x = _mm256_add_ps(Load<align>(src + offset), _bias);
             __m256 _scale = Load<align>(scale + offset);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(_mm256_mul_ps(_mm256_sub_ps(x, _mm256_andnot_ps(sign, x)), _scale), _mm256_max_ps(_mm256_setzero_ps(), x)));
+            Store<align>(dst + offset, _mm256_add_ps(_mm256_mul_ps(_mm256_sub_ps(x, _mm256_andnot_ps(sign, x)), _scale), _mm256_max_ps(_mm256_setzero_ps(), x)));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward0(const float * src, __m256 bias, __m256 scale, __m256 sign, float * dst, size_t offset)
         {
             __m256 x = _mm256_add_ps(Load<align>(src + offset), bias);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(_mm256_mul_ps(_mm256_sub_ps(x, _mm256_andnot_ps(sign, x)), scale), _mm256_max_ps(_mm256_setzero_ps(), x)));
+            Store<align>(dst + offset, _mm256_add_ps(_mm256_mul_ps(_mm256_sub_ps(x, _mm256_andnot_ps(sign, x)), scale), _mm256_max_ps(_mm256_setzero_ps(), x)));
         }
 
         template <bool align> void SynetFusedLayerForward0Nchw(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
@@ -144,13 +144,13 @@ namespace Simd
             __m256 x = _mm256_add_ps(Load<align>(src + offset), _bias0);
             __m256 _scale1 = Load<align>(scale1 + offset);
             __m256 _bias1 = Load<align>(bias1 + offset);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(_mm256_max_ps(_mm256_setzero_ps(), _mm256_sub_ps(_mm256_setzero_ps(), x)), _scale1), _bias1), _mm256_max_ps(_mm256_setzero_ps(), x)));
+            Store<align>(dst + offset, _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(_mm256_max_ps(_mm256_setzero_ps(), _mm256_sub_ps(_mm256_setzero_ps(), x)), _scale1), _bias1), _mm256_max_ps(_mm256_setzero_ps(), x)));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward1(const float * src, __m256 bias0, __m256 scale1, __m256 bias1, float * dst, size_t offset)
         {
             __m256 x = _mm256_add_ps(Load<align>(src + offset), bias0);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(_mm256_max_ps(_mm256_setzero_ps(), _mm256_sub_ps(_mm256_setzero_ps(), x)), scale1), bias1), _mm256_max_ps(_mm256_setzero_ps(), x)));
+            Store<align>(dst + offset, _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(_mm256_max_ps(_mm256_setzero_ps(), _mm256_sub_ps(_mm256_setzero_ps(), x)), scale1), bias1), _mm256_max_ps(_mm256_setzero_ps(), x)));
         }
 
         template <bool align> void SynetFusedLayerForward1Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst)
@@ -248,14 +248,14 @@ namespace Simd
             __m256 _scale = Load<align>(scale + offset);
             __m256 _bias = Load<align>(bias + offset);
             __m256 x = _mm256_add_ps(_mm256_mul_ps(_src, _scale), _bias);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), x), _mm256_mul_ps(_mm256_min_ps(_mm256_setzero_ps(), x), slope)));
+            Store<align>(dst + offset, _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), x), _mm256_mul_ps(_mm256_min_ps(_mm256_setzero_ps(), x), slope)));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward2(const float * src, __m256 scale, __m256 bias, __m256 slope, float * dst, size_t offset)
         {
             __m256 _src = Load<align>(src + offset);
             __m256 x = _mm256_add_ps(_mm256_mul_ps(_src, scale), bias);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), x), _mm256_mul_ps(_mm256_min_ps(_mm256_setzero_ps(), x), slope)));
+            Store<align>(dst + offset, _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), x), _mm256_mul_ps(_mm256_min_ps(_mm256_setzero_ps(), x), slope)));
         }
 
         template <bool align> void SynetFusedLayerForward2Nchw(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst)
@@ -355,7 +355,7 @@ namespace Simd
             __m256 _scale = Load<align>(scale + offset);
             __m256 pos = _mm256_max_ps(_mm256_setzero_ps(), x);
             __m256 neg = _mm256_min_ps(_mm256_setzero_ps(), x);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(_scale, neg)));
+            Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(_scale, neg)));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward3(const float * src, __m256 bias, __m256 scale, float * dst, size_t offset)
@@ -363,7 +363,7 @@ namespace Simd
             __m256 x = _mm256_add_ps(Load<align>(src + offset), bias);
             __m256 pos = _mm256_max_ps(_mm256_setzero_ps(), x);
             __m256 neg = _mm256_min_ps(_mm256_setzero_ps(), x);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(scale, neg)));
+            Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(scale, neg)));
         }
 
         template <bool align> void SynetFusedLayerForward3Nchw(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
@@ -457,15 +457,15 @@ namespace Simd
         template <bool align> SIMD_INLINE void SynetFusedLayerForward4(const float * src, const float * bias0, __m256 scale1, __m256 bias1, float * dst0, float * dst1, size_t offset)
         {
             __m256 x = _mm256_add_ps(Load<align>(src + offset), Load<align>(bias0 + offset));
-            Avx::Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), x));
-            Avx::Store<align>(dst1 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(bias1, _mm256_mul_ps(scale1, x))));
+            Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), x));
+            Store<align>(dst1 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(bias1, _mm256_mul_ps(scale1, x))));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward4(const float * src, __m256 bias0, __m256 scale1, __m256 bias1, float * dst0, float * dst1, size_t offset)
         {
             __m256 x = _mm256_add_ps(Load<align>(src + offset), bias0);
-            Avx::Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), x));
-            Avx::Store<align>(dst1 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(bias1, _mm256_mul_ps(scale1, x))));
+            Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), x));
+            Store<align>(dst1 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(bias1, _mm256_mul_ps(scale1, x))));
         }
 
         template <bool align> void SynetFusedLayerForward4Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst0)
@@ -565,12 +565,12 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, float * dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, _mm256_add_ps(Load<align>(src0 + offset), _mm256_mul_ps(Load<align>(src1 + offset), Load<align>(src2 + offset))));
+            Store<align>(dst + offset, _mm256_add_ps(Load<align>(src0 + offset), _mm256_mul_ps(Load<align>(src1 + offset), Load<align>(src2 + offset))));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward8(const float * src0, const float * src1, const __m256 & src2, float * dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, _mm256_add_ps(Load<align>(src0 + offset), _mm256_mul_ps(Load<align>(src1 + offset), src2)));
+            Store<align>(dst + offset, _mm256_add_ps(Load<align>(src0 + offset), _mm256_mul_ps(Load<align>(src1 + offset), src2)));
         }
 
         template <bool align> void SynetFusedLayerForward8Nchw(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
@@ -665,27 +665,27 @@ namespace Simd
         template <bool align> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const float * scale, const float * bias, float * dst0, float * dst1, size_t offset)
         {
             __m256 _src = Load<align>(src + offset);
-            Avx::Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(_mm256_mul_ps(_src, Load<align>(scale + offset)), Load<align>(bias + offset))));
-            Avx::Store<align>(dst1 + offset, _src);
+            Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(_mm256_mul_ps(_src, Load<align>(scale + offset)), Load<align>(bias + offset))));
+            Store<align>(dst1 + offset, _src);
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const float * scale, const float * bias, float * dst0, size_t offset)
         {
             __m256 _src = Load<align>(src + offset);
-            Avx::Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(_mm256_mul_ps(_src, Load<align>(scale + offset)), Load<align>(bias + offset))));
+            Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(_mm256_mul_ps(_src, Load<align>(scale + offset)), Load<align>(bias + offset))));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const __m256 & scale, const __m256 & bias, float * dst0, float * dst1, size_t offset)
         {
             __m256 _src = Load<align>(src + offset);
-            Avx::Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(_mm256_mul_ps(_src, scale), bias)));
-            Avx::Store<align>(dst1 + offset, _src);
+            Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(_mm256_mul_ps(_src, scale), bias)));
+            Store<align>(dst1 + offset, _src);
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const __m256 & scale, const __m256 & bias, float * dst0, size_t offset)
         {
             __m256 _src = Load<align>(src + offset);
-            Avx::Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(_mm256_mul_ps(_src, scale), bias)));
+            Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(_mm256_mul_ps(_src, scale), bias)));
         }
 
         template<bool align> void SynetFusedLayerForward9Nchw(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)

@@ -255,7 +255,6 @@ typedef enum
     SimdCpuInfoCacheL3, /*!< A size of level 3 cache. */
     SimdCpuInfoRam, /*!< A size of physical RAM. */
     SimdCpuInfoSse41, /*!< Availability of SSE4.1 (x86). */
-    SimdCpuInfoAvx, /*!< Availability of AVX (x86). */
     SimdCpuInfoAvx2, /*!< Availability of AVX2 (x86). */
     SimdCpuInfoAvx512bw, /*!< Availability of AVX-512BW (x86). */
     SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */

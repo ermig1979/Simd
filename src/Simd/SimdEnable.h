@@ -37,15 +37,6 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
-    {
-        bool GetEnable();
-
-        const bool Enable = GetEnable();
-    }
-#endif
-
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
@@ -129,12 +120,6 @@ namespace Simd
 #define SIMD_SSE41_FUNC(func) Simd::Sse41::Enable ? Simd::Sse41::func : 
 #else
 #define SIMD_SSE41_FUNC(func) 
-#endif
-
-#ifdef SIMD_AVX_ENABLE
-#define SIMD_AVX_FUNC(func) Simd::Avx::Enable ? Simd::Avx::func : 
-#else
-#define SIMD_AVX_FUNC(func)
 #endif
 
 #ifdef SIMD_AVX2_ENABLE

@@ -96,8 +96,8 @@ namespace Simd
     }
 #endif//SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
     {
         template <bool align> SIMD_INLINE void Copy(const float * src, float * dst)
         {

@@ -37,13 +37,13 @@ namespace Simd
     {
         template <bool align, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, __m256 scale, __m256 shift, __m256i upper, uint8_t* dst)
         {
-            __m256i i32 = _mm256_cvtps_epi32(Fmadd<nofma>(Avx::Load<align>(src), scale, shift));
+            __m256i i32 = _mm256_cvtps_epi32(Fmadd<nofma>(Load<align>(src), scale, shift));
             *((int64_t*)dst) = Extract64i<0>(_mm256_min_epu8(_mm256_packus_epi16(PackI32ToI16(i32, K_ZERO), K_ZERO), upper));
         }
 
         template <bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, __m256 scale, __m256 shift, __m256i upper, uint8_t* dst, const __m256i & tail)
         {
-            __m256i i32 = _mm256_cvtps_epi32(Fmadd<nofma>(Avx::Load(src, tail), scale, shift));
+            __m256i i32 = _mm256_cvtps_epi32(Fmadd<nofma>(Load(src, tail), scale, shift));
             *((int64_t*)dst) = Extract64i<0>(_mm256_min_epu8(_mm256_packus_epi16(PackI32ToI16(i32, K_ZERO), K_ZERO), upper));
         }
 
@@ -100,9 +100,9 @@ namespace Simd
                     {
                         size_t c = 0;
                         for (; c < channelsF; c += F)
-                            SynetConvert32fTo8u<align, nofma>(src + c, Avx::Load<align>(scale + c), Avx::Load<align>(shift + c), _upper, dst + c);
+                            SynetConvert32fTo8u<align, nofma>(src + c, Load<align>(scale + c), Load<align>(shift + c), _upper, dst + c);
                         if (c < channels)
-                            SynetConvert32fTo8u<nofma>(src + c, Avx::Load(scale + c, tail), Avx::Load(shift + c, tail), _upper, dst + c, tail);
+                            SynetConvert32fTo8u<nofma>(src + c, Load(scale + c, tail), Load(shift + c, tail), _upper, dst + c, tail);
                         src += channels;
                         dst += channels;
                     }
@@ -110,9 +110,9 @@ namespace Simd
                     {
                         size_t c = 0;
                         for (; c < channelsF; c += F)
-                            SynetConvert32fTo8u<align, notail>(src + c, Avx::Load<align>(scale + c), Avx::Load<align>(shift + c), _upper, dst + c);
+                            SynetConvert32fTo8u<align, notail>(src + c, Load<align>(scale + c), Load<align>(shift + c), _upper, dst + c);
                         if (c < channels)
-                            SynetConvert32fTo8u<notail>(src + c, Avx::Load(scale + c, tail), Avx::Load(shift + c, tail), _upper, dst + c, tail);
+                            SynetConvert32fTo8u<notail>(src + c, Load(scale + c, tail), Load(shift + c, tail), _upper, dst + c, tail);
                         src += channels;
                         dst += channels;
                     }
@@ -141,12 +141,12 @@ namespace Simd
                 for (size_t c = 0; c < 3; ++c)
                     _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
 
-            __m256 _scale0 = Avx::Load<false>(_scale + 0 * F);
-            __m256 _scale1 = Avx::Load<false>(_scale + 1 * F);
-            __m256 _scale2 = Avx::Load<false>(_scale + 2 * F);
-            __m256 _shift0 = Avx::Load<false>(_shift + 0 * F);
-            __m256 _shift1 = Avx::Load<false>(_shift + 1 * F);
-            __m256 _shift2 = Avx::Load<false>(_shift + 2 * F);
+            __m256 _scale0 = Load<false>(_scale + 0 * F);
+            __m256 _scale1 = Load<false>(_scale + 1 * F);
+            __m256 _scale2 = Load<false>(_scale + 2 * F);
+            __m256 _shift0 = Load<false>(_shift + 0 * F);
+            __m256 _shift1 = Load<false>(_shift + 1 * F);
+            __m256 _shift2 = Load<false>(_shift + 2 * F);
 
             for (size_t b = 0; b < batch; ++b)
             {
@@ -340,7 +340,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void StoreScaled(float * ptr, __m256i value32, __m256 scale, __m256 shift)
         {
-            Avx::Store<align>(ptr, _mm256_fmadd_ps(_mm256_cvtepi32_ps(value32), scale, shift));
+            Store<align>(ptr, _mm256_fmadd_ps(_mm256_cvtepi32_ps(value32), scale, shift));
         }
 
         const __m256i K16_BLUE_RED = SIMD_MM256_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);

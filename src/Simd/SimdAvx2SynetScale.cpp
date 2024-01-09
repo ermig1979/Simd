@@ -26,7 +26,6 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdSynetScale8i.h"
@@ -39,10 +38,10 @@ namespace Simd
     {
         template <bool align, bool nofma> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, float * dst, size_t offset)
         {
-            __m256 _src = Avx::Load<align>(src + offset);
-            __m256 _scale = Avx::Load<align>(scale + offset);
-            __m256 _bias = Avx::Load<align>(bias + offset);
-            Avx::Store<align>(dst + offset, Fmadd<nofma>(_src, _scale, _bias));
+            __m256 _src = Load<align>(src + offset);
+            __m256 _scale = Load<align>(scale + offset);
+            __m256 _bias = Load<align>(bias + offset);
+            Store<align>(dst + offset, Fmadd<nofma>(_src, _scale, _bias));
         }
 
         template <bool nofma> SIMD_INLINE void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, float* dst, size_t offset, __m256i tail)
@@ -55,13 +54,13 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float* src, const float* scale, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, _mm256_mul_ps(Avx::Load<align>(src + offset), Avx::Load<align>(scale + offset)));
+            Store<align>(dst + offset, _mm256_mul_ps(Load<align>(src + offset), Load<align>(scale + offset)));
         }
 
         template <bool align, bool nofma> SIMD_INLINE void SynetScaleLayerForward(const float* src, const __m256& scale, const __m256& bias, float* dst, size_t offset)
         {
-            __m256 _src = Avx::Load<align>(src + offset);
-            Avx::Store<align>(dst + offset, Fmadd<nofma>(_src, scale, bias));
+            __m256 _src = Load<align>(src + offset);
+            Store<align>(dst + offset, Fmadd<nofma>(_src, scale, bias));
         }
 
         template <bool nofma> SIMD_INLINE void SynetScaleLayerForward(const float * src, const __m256 & scale, const __m256 & bias, float * dst, size_t offset, __m256i tail)
@@ -72,7 +71,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const __m256 & scale, float * dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, _mm256_mul_ps(Avx::Load<align>(src + offset), scale));
+            Store<align>(dst + offset, _mm256_mul_ps(Load<align>(src + offset), scale));
         }
 
         template <bool align, bool nofma> void SynetScaleLayerForwardNchw(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst)
@@ -542,14 +541,14 @@ namespace Simd
         template <bool nofma> SIMD_INLINE void ScaleNchwDF(const uint8_t* src, __m256 scale, __m256 shift, float* dst, size_t offset)
         {
             __m128i s0 = Sse41::Load<false>((__m128i*)(src + offset));
-            Avx::Store<false>(dst + offset + 0, Fmadd<nofma>(Cvt8uTo32f<0>(s0), scale, shift));
-            Avx::Store<false>(dst + offset + F, Fmadd<nofma>(Cvt8uTo32f<1>(s0), scale, shift));
+            Store<false>(dst + offset + 0, Fmadd<nofma>(Cvt8uTo32f<0>(s0), scale, shift));
+            Store<false>(dst + offset + F, Fmadd<nofma>(Cvt8uTo32f<1>(s0), scale, shift));
         }
 
         template <bool nofma> SIMD_INLINE void ScaleNchwF(const uint8_t* src, __m256 scale, __m256 shift, float* dst, size_t offset)
         {
             __m128i s0 = _mm_loadl_epi64((__m128i*)(src + offset));
-            Avx::Store<false>(dst + offset + 0, Fmadd<nofma>(Cvt8uTo32f<0>(s0), scale, shift));
+            Store<false>(dst + offset + 0, Fmadd<nofma>(Cvt8uTo32f<0>(s0), scale, shift));
         }
 
         template <bool nofma> void ScaleNchw(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, float* dst)
@@ -579,7 +578,7 @@ namespace Simd
 
         template<int part, bool align, bool nofma> SIMD_INLINE void ScaleNhwcF(__m128i value, const float* scale, const float* shift, float* dst)
         {
-            return Avx::Store<false>(dst + part * F, Fmadd<nofma>(Cvt8uTo32f<part>(value), Avx::Load<align>(scale + part * F), Avx::Load<align>(shift + part * F)));
+            return Store<false>(dst + part * F, Fmadd<nofma>(Cvt8uTo32f<part>(value), Load<align>(scale + part * F), Load<align>(shift + part * F)));
         }
 
         template <bool align, bool nofma> SIMD_INLINE void ScaleNhwcDF(const uint8_t* src, const float* scale, const float* shift, float* dst, size_t offset)
@@ -631,7 +630,7 @@ namespace Simd
         template <bool nofma> SIMD_INLINE void ScaleNhwc3(const uint8_t* src, __m256 scale, __m256 shift, float* dst, size_t offset)
         {
             __m128i s0 = _mm_loadl_epi64((__m128i*)(src + offset));
-            Avx::Store<false>(dst + offset, Fmadd<nofma>(Cvt8uTo32f<0>(s0), scale, shift));
+            Store<false>(dst + offset, Fmadd<nofma>(Cvt8uTo32f<0>(s0), scale, shift));
         }
 
         template <bool nofma> void ScaleNhwc3(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t spatial, float* dst)

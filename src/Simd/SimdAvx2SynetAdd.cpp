@@ -26,7 +26,6 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPow.h"
@@ -192,12 +191,12 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetAddBias(const float * bias, float * dst)
         {
-            Avx::Store<align>(dst, _mm256_add_ps(Load<align>(dst), Load<align>(bias)));
+            Store<align>(dst, _mm256_add_ps(Load<align>(dst), Load<align>(bias)));
         }
 
         template <bool align> SIMD_INLINE void SynetAddBias(__m256 bias, float * dst)
         {
-            Avx::Store<align>(dst, _mm256_add_ps(Load<align>(dst), bias));
+            Store<align>(dst, _mm256_add_ps(Load<align>(dst), bias));
         }
 
         template <bool align> void SynetAddBiasNchw(const float * bias, size_t channels, size_t spatial, float * dst)

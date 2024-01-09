@@ -26,7 +26,6 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPow.h"
@@ -58,7 +57,7 @@ namespace Simd
 
         template <SimdSynetEltwiseOperationType type, bool align> SIMD_INLINE void SynetEltwiseLayerForward(const float* src0, const float* src1, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, SynetEltwiseLayerForward<type>(Load<align>(src0 + offset), Load<align>(src1 + offset)));
+            Store<align>(dst + offset, SynetEltwiseLayerForward<type>(Load<align>(src0 + offset), Load<align>(src1 + offset)));
         }
 
         template <SimdSynetEltwiseOperationType type, bool align> void SynetEltwiseLayerForward(float const* const* src, size_t count, size_t size, float* dst)
@@ -105,12 +104,12 @@ namespace Simd
 
         template <bool align> void SynetEltwiseLayerForwardSum(const float* src0, const __m256& weight0, const float* src1, const __m256& weight1, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, _mm256_fmadd_ps(Load<align>(src0 + offset), weight0, _mm256_mul_ps(Load<align>(src1 + offset), weight1)));
+            Store<align>(dst + offset, _mm256_fmadd_ps(Load<align>(src0 + offset), weight0, _mm256_mul_ps(Load<align>(src1 + offset), weight1)));
         }
 
         template <bool align> void SynetEltwiseLayerForwardSum(const float* src, const __m256& weight, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, _mm256_fmadd_ps(Load<align>(src + offset), weight, Load<align>(dst + offset)));
+            Store<align>(dst + offset, _mm256_fmadd_ps(Load<align>(src + offset), weight, Load<align>(dst + offset)));
         }
 
         template <bool align> void SynetEltwiseLayerForwardSum(float const* const* src, const float* weight, size_t count, size_t size, float* dst)
@@ -582,8 +581,8 @@ namespace Simd
                 size_t s = 0;
                 for (; s < aligned; s += F)
                 {
-                    __m256 _pos = Avx::Load<align>(pos + s);
-                    Avx::Store<true>(sum.data + s, _mm256_add_ps(Avx::Load<true>(sum.data + s), _mm256_mul_ps(_pos, _pos)));
+                    __m256 _pos = Load<align>(pos + s);
+                    Store<true>(sum.data + s, _mm256_add_ps(Load<true>(sum.data + s), _mm256_mul_ps(_pos, _pos)));
                 }
                 for (; s < spatial; ++s)
                     sum[s] += Simd::Square(pos[s]);
@@ -595,13 +594,13 @@ namespace Simd
                 size_t s = 0;
                 for (; s < aligned; s += F)
                 {
-                    __m256 _pos = Avx::Load<align>(pos + s);
-                    __m256 _neg = Avx::Load<align>(neg + s);
-                    __m256 _sum = Avx::Load<true>(sum.data + s);
+                    __m256 _pos = Load<align>(pos + s);
+                    __m256 _neg = Load<align>(neg + s);
+                    __m256 _sum = Load<true>(sum.data + s);
                     _sum = _mm256_add_ps(_sum, _mm256_sub_ps(_mm256_mul_ps(_pos, _pos), _mm256_mul_ps(_neg, _neg)));
-                    __m256 _src = Avx::Load<align>(src + s);
-                    Avx::Store<true>(sum.data + s, _sum);
-                    Avx::Store<align>(dst + s, _mm256_mul_ps(_src, pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, _sum)), k2)));
+                    __m256 _src = Load<align>(src + s);
+                    Store<true>(sum.data + s, _sum);
+                    Store<align>(dst + s, _mm256_mul_ps(_src, pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, _sum)), k2)));
                 }
                 for (; s < spatial; ++s)
                 {
@@ -631,16 +630,16 @@ namespace Simd
             size_t aligned = AlignLo(channels - half, F);
             for (size_t s = 0; s < spatial; ++s)
             {
-                Avx::Store<align>(dst + 0, _mm256_mul_ps(Avx::Load<align>(src + 0), pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, NoseSquareSum(src + 0))), k2)));
+                Store<align>(dst + 0, _mm256_mul_ps(Load<align>(src + 0), pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, NoseSquareSum(src + 0))), k2)));
                 for (size_t c = F; c < aligned; c += F)
-                    Avx::Store<align>(dst + c, _mm256_mul_ps(Avx::Load<align>(src + c), pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, BodySquareSum(src + c))), k2)));
+                    Store<align>(dst + c, _mm256_mul_ps(Load<align>(src + c), pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, BodySquareSum(src + c))), k2)));
                 if (aligned != channels - half)
                 {
                     size_t c = channels - half - F;
-                    Avx::Store<false>(dst + c, _mm256_mul_ps(Avx::Load<false>(src + c), pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, BodySquareSum(src + c))), k2)));
+                    Store<false>(dst + c, _mm256_mul_ps(Load<false>(src + c), pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, BodySquareSum(src + c))), k2)));
                 }
                 size_t c = channels - F;
-                Avx::Store<false>(dst + c, _mm256_mul_ps(Avx::Load<false>(src + c), pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, TailSquareSum(src + c))), k2)));
+                Store<false>(dst + c, _mm256_mul_ps(Load<false>(src + c), pow(_mm256_add_ps(k0, _mm256_mul_ps(k1, TailSquareSum(src + c))), k2)));
                 src += channels;
                 dst += channels;
             }

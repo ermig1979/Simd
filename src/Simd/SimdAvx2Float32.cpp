@@ -32,7 +32,7 @@ namespace Simd
     {
         template <bool align> SIMD_INLINE __m256i Float32ToUint8(const float * src, const __m256 & lower, const __m256 & upper, const __m256 & boost)
         {
-            return _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_sub_ps(_mm256_min_ps(_mm256_max_ps(Avx::Load<align>(src), lower), upper), lower), boost));
+            return _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_sub_ps(_mm256_min_ps(_mm256_max_ps(Load<align>(src), lower), upper), lower), boost));
         }
 
         template <bool align> SIMD_INLINE void Float32ToUint8(const float * src, const __m256 & lower, const __m256 & upper, const __m256 & boost, uint8_t * dst)
@@ -77,8 +77,8 @@ namespace Simd
         template <bool align> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m256 & lower, const __m256 & boost, float * dst)
         {
             __m128i _src = Sse41::Load<align>((__m128i*)src);
-            Avx::Store<align>(dst + 0, Uint8ToFloat32(_src, lower, boost));
-            Avx::Store<align>(dst + F, Uint8ToFloat32(_mm_srli_si128(_src, 8), lower, boost));
+            Store<align>(dst + 0, Uint8ToFloat32(_src, lower, boost));
+            Store<align>(dst + F, Uint8ToFloat32(_mm_srli_si128(_src, 8), lower, boost));
         }
 
         template <bool align> void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)

@@ -508,7 +508,7 @@ namespace Simd
                     {
                         for (; dx < rs6; dx += 6)
                         {
-                            __m256 fx1 = Avx::Load<false>(_ax.data + dx, _ax.data + dx + 3);
+                            __m256 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 3);
                             __m256 fx0 = _mm256_sub_ps(_1, fx1);
                             _mm256_storeu_ps(pb + dx, BilColS3(ps, _ix.data + dx, fx0, fx1));
                         }
@@ -704,12 +704,12 @@ namespace Simd
                 {
                     for (; dx < rs12; dx += 12)
                     {
-                        __m256 fx01 = Avx::Load<false>(_ax.data + dx + 0, _ax.data + dx + 3);
+                        __m256 fx01 = Load<false>(_ax.data + dx + 0, _ax.data + dx + 3);
                         __m256 fx00 = _mm256_sub_ps(_1, fx01);
                         __m256 m00 = _mm256_mul_ps(BilColS3(ps0, _ix.data + dx, fx00, fx01), _fy0);
                         __m256 m01 = _mm256_mul_ps(BilColS3(ps1, _ix.data + dx, fx00, fx01), _fy1);
                         __m256i i0 = _mm256_cvttps_epi32(_mm256_add_ps(m00, m01));
-                        __m256 fx11 = Avx::Load<false>(_ax.data + dx + 6, _ax.data + dx + 9);
+                        __m256 fx11 = Load<false>(_ax.data + dx + 6, _ax.data + dx + 9);
                         __m256 fx10 = _mm256_sub_ps(_1, fx11);
                         __m256 m10 = _mm256_mul_ps(BilColS3(ps0, _ix.data + dx + 6, fx10, fx11), _fy0);
                         __m256 m11 = _mm256_mul_ps(BilColS3(ps1, _ix.data + dx + 6, fx10, fx11), _fy1);
@@ -718,7 +718,7 @@ namespace Simd
                     }
                     for (; dx < rs6; dx += 6)
                     {
-                        __m256 fx1 = Avx::Load<false>(_ax.data + dx, _ax.data + dx + 3);
+                        __m256 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 3);
                         __m256 fx0 = _mm256_sub_ps(_1, fx1);
                         __m256 m0 = _mm256_mul_ps(BilColS3(ps0, _ix.data + dx, fx0, fx1), _fy0);
                         __m256 m1 = _mm256_mul_ps(BilColS3(ps1, _ix.data + dx, fx0, fx1), _fy1);
@@ -840,8 +840,8 @@ namespace Simd
                         {
                             for (; dx < rsa; dx += Avx::F)
                             {
-                                __m256 s0145 = Avx::Load(ps + _ix[dx + 0], ps + _ix[dx + 1], ps + _ix[dx + 4], ps + _ix[dx + 5]);
-                                __m256 s2367 = Avx::Load(ps + _ix[dx + 2], ps + _ix[dx + 3], ps + _ix[dx + 6], ps + _ix[dx + 7]);
+                                __m256 s0145 = Load(ps + _ix[dx + 0], ps + _ix[dx + 1], ps + _ix[dx + 4], ps + _ix[dx + 5]);
+                                __m256 s2367 = Load(ps + _ix[dx + 2], ps + _ix[dx + 3], ps + _ix[dx + 6], ps + _ix[dx + 7]);
                                 __m256 fx1 = _mm256_load_ps(_ax.data + dx);
                                 __m256 fx0 = _mm256_sub_ps(_1, fx1);
                                 __m256 m0 = _mm256_mul_ps(fx0, _mm256_shuffle_ps(s0145, s2367, 0x88));
@@ -881,11 +881,11 @@ namespace Simd
                         size_t rs6 = AlignLoAny(rs3, 6);
                         for (; dx < rs6; dx += 6)
                         {
-                            __m256 s0 = Avx::Load<false>(ps + _ix[dx + 0] + 0, ps + _ix[dx + 3] + 0);
-                            __m256 s1 = Avx::Load<false>(ps + _ix[dx + 0] + 3, ps + _ix[dx + 3] + 3);
-                            __m256 fx1 = Avx::Load<false>(_ax.data + dx + 0, _ax.data + dx + 3);
+                            __m256 s0 = Load<false>(ps + _ix[dx + 0] + 0, ps + _ix[dx + 3] + 0);
+                            __m256 s1 = Load<false>(ps + _ix[dx + 0] + 3, ps + _ix[dx + 3] + 3);
+                            __m256 fx1 = Load<false>(_ax.data + dx + 0, _ax.data + dx + 3);
                             __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                            Avx::Store<false>(pb + dx + 0, pb + dx + 3, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
+                            Store<false>(pb + dx + 0, pb + dx + 3, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
                         }
                         for (; dx < rs3; dx += 3)
                         {

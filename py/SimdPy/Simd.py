@@ -57,24 +57,22 @@ class CpuInfo(enum.Enum) :
 	RAM = 6
 	## Enabling of SSE, SSE2, SSE3, SSSE3, SSE4.1 CPU extensions (x86 specific).
 	SSE41 = 7
-	## Enabling of AVX CPU extensions (x86 specific).
-	AVX = 8
 	## Enabling of AVX2, FMA CPU extensions (x86 specific).
-	AVX2 = 9
+	AVX2 = 8
 	## Enabling of AVX-512F, AVX-512BW CPU extensions (x86 specific).
-	AVX512BW = 10
+	AVX512BW = 9
 	## Enabling of AVX-512VNNI CPU extensions (x86 specific).
-	AVX512VNNI = 11
+	AVX512VNNI = 10
 	## Enabling of AVX-512BF16 CPU extensions (x86 specific).
-	AVX512BF16 = 12
+	AVX512BF16 = 11
 	## Enabling of AMX CPU extensions (x86 specific).
-	AMX = 13
+	AMX = 12
 	## Enabling of VMX (Altivec) CPU extensions (PowerPC specific).
-	VMX = 14
+	VMX = 13
 	## Enabling of VSX (Power 7) CPU extensions (PowerPC specific).
-	VSX = 15
+	VSX = 14
 	## Enabling of NEON CPU extensions (ARM specific).
-	NEON = 16
+	NEON = 15
 
 ## @ingroup python
 # Describes frame format type. It is used in Simd.Frame.
@@ -661,9 +659,7 @@ class Lib():
 		if Lib.CpuInfo(Simd.CpuInfo.AVX512BW) > 0 :
 			info += " AVX-512BW AVX-512F"
 		if Lib.CpuInfo(Simd.CpuInfo.AVX2) > 0 :
-			info += " AVX2 FMA"
-		if Lib.CpuInfo(Simd.CpuInfo.AVX) > 0 :
-			info += " AVX"
+			info += " AVX2 FMA AVX"
 		if Lib.CpuInfo(Simd.CpuInfo.SSE41) > 0 :
 			info += " SSE4.1 SSSE3 SSE3 SSE2 SSE"
 		if Lib.CpuInfo(Simd.CpuInfo.NEON) > 0 :

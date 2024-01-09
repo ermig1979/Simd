@@ -60,8 +60,7 @@
  <li>Replace AVX optimizations to AVX2 for ResizerFloatBilinear class.</li>
  <li>Replace AVX optimizations to AVX2 for function SquaredDifferenceSum32f.</li>
  <li>Replace AVX optimizations to AVX2 for function SquaredDifferenceKahanSum32f.</li>
- <l
-i>Replace AVX optimizations to AVX2 for function HogLiteFilterFeatures.</li>
+ <li>Replace AVX optimizations to AVX2 for function HogLiteFilterFeatures.</li>
  <li>Replace AVX optimizations to AVX2 for function HogLiteResizeFeatures.</li>
  <li>Replace AVX optimizations to AVX2 for function HogLiteCompressFeatures.</li>
  <li>Replace AVX optimizations to AVX2 for function HogLiteFilterSeparable.</li>
@@ -157,6 +156,7 @@ i>Replace AVX optimizations to AVX2 for function HogLiteFilterFeatures.</li>
 <h5>Removing</h5>
 <ul>
  <li>Base implementation, SSE4.1, AVX, AVX-512BW, NEON, VSX optimizations of function SvmSumLinear.</li>
+ <li>Stopping separate support of AVX extension (only together with AVX2).</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -170,6 +170,14 @@ i>Replace AVX optimizations to AVX2 for function HogLiteFilterFeatures.</li>
 <ul>
  <li>Parallelization of Github actions script for MSBuild.</li>
  <li>Parallelization of Github actions script for CMake.</li>
+</ul>
+<h5>Removing</h5>
+<ul>
+ <li>Avx1 project for MSVS-2022.</li>
+ <li>Avx1 project for MSVS-2019.</li>
+ <li>Avx1 project for MSVS-2015.</li>
+ <li>Avx1 project for MSVS-2017.</li>
+ <li>Avx1 project for CMake.</li>
 </ul>
 
 <a href="#HOME">Home</a>

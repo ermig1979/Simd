@@ -1249,10 +1249,10 @@ namespace Simd
                             for (; k < K8; k += 8)
                             {
                                 const float* ps = src + k;
-                                __m256 s0 = Avx::Load<false>(ps + 0 * K);
-                                __m256 s1 = Avx::Load<false>(ps + 1 * K);
-                                __m256 s2 = Avx::Load<false>(ps + 2 * K);
-                                __m256 s3 = Avx::Load<false>(ps + 3 * K);
+                                __m256 s0 = Avx2::Load<false>(ps + 0 * K);
+                                __m256 s1 = Avx2::Load<false>(ps + 1 * K);
+                                __m256 s2 = Avx2::Load<false>(ps + 2 * K);
+                                __m256 s3 = Avx2::Load<false>(ps + 3 * K);
                                 __m256 s00 = _mm256_unpacklo_ps(s0, s2);
                                 __m256 s01 = _mm256_unpacklo_ps(s1, s3);
                                 __m256 s10 = _mm256_unpackhi_ps(s0, s2);
@@ -1261,10 +1261,10 @@ namespace Simd
                                 __m256 d1 = _mm256_unpackhi_ps(s00, s01);
                                 __m256 d2 = _mm256_unpacklo_ps(s10, s11);
                                 __m256 d3 = _mm256_unpackhi_ps(s10, s11);
-                                Avx::Store<false>(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
-                                Avx::Store<false>(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
-                                Avx::Store<false>(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
-                                Avx::Store<false>(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
+                                Avx2::Store<false>(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
+                                Avx2::Store<false>(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
+                                Avx2::Store<false>(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
+                                Avx2::Store<false>(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
                                 dst += 32;
                             }
                             for (; k < K4; k += 4)
@@ -1721,7 +1721,7 @@ namespace Simd
                         __m256 _dst[8];
                         float* pdst = dst;
                         for (size_t row = 0; row < 8; ++row, pdst += 8)
-                            _dst[row] = Avx::Load<align>(pdst);
+                            _dst[row] = Avx2::Load<align>(pdst);
                         if (kernelY < 4)
                         {
                             for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
@@ -1755,7 +1755,7 @@ namespace Simd
                             }
                         }
                         for (size_t row = 0; row < 8; ++row, dst += 8)
-                            Avx::Store<align>(dst, _dst[row]);
+                            Avx2::Store<align>(dst, _dst[row]);
                     }
                 }
 

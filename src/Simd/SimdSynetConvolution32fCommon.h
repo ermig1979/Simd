@@ -333,124 +333,6 @@ namespace Simd
     }
 #endif//SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE    
-    namespace Avx
-    {
-        template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 Activate(__m256 value, const __m256 * params, size_t index);
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationIdentity>(__m256 value, const __m256 * params, size_t index)
-        {
-            return value;
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRelu>(__m256 value, const __m256 * params, size_t index)
-        {
-            return _mm256_max_ps(_mm256_setzero_ps(), value);
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationLeakyRelu>(__m256 value, const __m256 * params, size_t index)
-        {
-            return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(params[0], _mm256_min_ps(_mm256_setzero_ps(), value)));
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRestrictRange>(__m256 value, const __m256 * params, size_t index)
-        {
-            return _mm256_min_ps(_mm256_max_ps(params[0], value), params[1]);
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationPrelu>(__m256 value, const __m256 * params, size_t index)
-        {
-            return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(params[index], _mm256_min_ps(_mm256_setzero_ps(), value)));
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHswish>(__m256 value, const __m256 * params, size_t index)
-        {
-            return Avx::SynetHswish32f(value, params[0], params[1]);
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHardSigmoid>(__m256 value, const __m256* params, size_t index)
-        {
-            return Avx::SynetHardSigmoid32f(value, params[0], params[1]);
-        }
-
-        //---------------------------------------------------------------------
-
-        template <TermType term> struct Term
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params);
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params, size_t tail);
-        };
-
-        template <> struct Term<TermLast>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
-            {
-                _mm256_storeu_ps(ptr, Activate<type>(_mm256_add_ps(value, bias[index]), params, index));
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params, size_t tail)
-            {
-                float tmp[F];
-                _mm256_storeu_ps(tmp, Activate<type>(_mm256_add_ps(value, bias[index]), params, index));
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template <> struct Term<TermInterim>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
-            {
-                _mm256_storeu_ps(ptr, value);
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params, size_t tail)
-            {
-                float tmp[F];
-                _mm256_storeu_ps(tmp, value);
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m256 val0, const __m256* bias, const __m256* params)
-        {
-            Term<term>::template Save<type, 0>(dst, val0, bias, params);
-        }
-
-        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m256 val0, const __m256* bias, const __m256* params, size_t tail)
-        {
-            Term<term>::template Save<type, 0>(dst, val0, bias, params, tail);
-        }
-
-        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m256 val0, __m256 val1, const __m256* bias, const __m256* params)
-        {
-            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
-            Term<term>::template Save<type, 1>(dst + F, val1, bias, params);
-        }
-
-        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m256 val0, __m256 val1, const __m256* bias, const __m256* params, size_t tail)
-        {
-            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
-            Term<term>::template Save<type, 1>(dst + F, val1, bias, params, tail);
-        }
-
-        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, __m256 val0, __m256 val1, __m256 val2, const __m256* bias, const __m256* params)
-        {
-            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
-            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
-            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params);
-        }
-
-        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, __m256 val0, __m256 val1, __m256 val2, const __m256* bias, const __m256* params, size_t tail)
-        {
-            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
-            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
-            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, tail);
-        }
-    }
-#endif//SIMD_AVX_ENABLE
-
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
@@ -488,7 +370,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHswish>(__m256 value, const float* params, size_t offset)
         {
-            return Avx::SynetHswish32f(value, _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]));
+            return SynetHswish32f(value, _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]));
         }
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationMish>(__m256 value, const float* params, size_t offset)
@@ -498,7 +380,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHardSigmoid>(__m256 value, const float* params, size_t offset)
         {
-            return Avx::SynetHardSigmoid32f(value, _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]));
+            return SynetHardSigmoid32f(value, _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]));
         }
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationSwish>(__m256 value, const float* params, size_t offset)
@@ -547,7 +429,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHswish>(__m256 value, const __m256 * params, size_t index)
         {
-            return Avx::SynetHswish32f(value, params[0], params[1]);
+            return SynetHswish32f(value, params[0], params[1]);
         }
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationMish>(__m256 value, const __m256* params, size_t index)
@@ -557,7 +439,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHardSigmoid>(__m256 value, const __m256* params, size_t index)
         {
-            return Avx::SynetHardSigmoid32f(value, params[0], params[1]);
+            return SynetHardSigmoid32f(value, params[0], params[1]);
         }
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationSwish>(__m256 value, const __m256* params, size_t index)

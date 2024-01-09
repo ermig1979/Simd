@@ -380,8 +380,8 @@ namespace Simd
     }
 #endif//SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
     {
         SIMD_INLINE __m256 SynetHardSigmoid32f(__m256 value, __m256 scale, __m256 shift)
         {
@@ -398,13 +398,8 @@ namespace Simd
             __m256 positive = _mm256_max_ps(_mm256_setzero_ps(), value);
             __m256 negative = _mm256_min_ps(_mm256_setzero_ps(), value);
             return _mm256_add_ps(positive, _mm256_mul_ps(slope, negative));
-        }
-    }
-#endif//SIMD_AVX_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE
-    namespace Avx2
-    {
+        }        
+        
         SIMD_INLINE __m256i Set4(const uint8_t* src)
         {
             return _mm256_set1_epi32(*(int32_t*)src);

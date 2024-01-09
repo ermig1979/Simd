@@ -10,18 +10,11 @@ set_source_files_properties(${SIMD_BASE_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_
 file(GLOB_RECURSE SIMD_SSE41_SRC ${SIMD_ROOT}/src/Simd/SimdSse41*.cpp)
 set_source_files_properties(${SIMD_SSE41_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2")
 
-file(GLOB_RECURSE SIMD_AVX1_SRC ${SIMD_ROOT}/src/Simd/SimdAvx1*.cpp)
-if ((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-	set_source_files_properties(${SIMD_AVX1_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx")
-else()
-	set_source_files_properties(${SIMD_AVX1_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store")
-endif()
-
 file(GLOB_RECURSE SIMD_AVX2_SRC ${SIMD_ROOT}/src/Simd/SimdAvx2*.cpp)
 if ((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-	set_source_files_properties(${SIMD_AVX2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma -mf16c -mbmi -mbmi2 -mlzcnt")
+	set_source_files_properties(${SIMD_AVX2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx -mavx2 -mfma -mf16c -mbmi -mbmi2 -mlzcnt")
 else()
-	set_source_files_properties(${SIMD_AVX2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma -mf16c -mbmi -mbmi2 -mlzcnt -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store")
+	set_source_files_properties(${SIMD_AVX2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx -mavx2 -mfma -mf16c -mbmi -mbmi2 -mlzcnt -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store")
 endif()
 
 set(SIMD_LIB_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma")

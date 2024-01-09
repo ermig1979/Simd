@@ -34,7 +34,7 @@ namespace Simd
     {
         template<bool align> SIMD_INLINE void Float32ToFloat16(const float * src, uint16_t * dst)
         {
-            Sse41::Store<align>((__m128i*)dst, _mm256_cvtps_ph(Avx::Load<align>(src), 0));
+            Sse41::Store<align>((__m128i*)dst, _mm256_cvtps_ph(Load<align>(src), 0));
         }
 
         template <bool align> void Float32ToFloat16(const float * src, size_t size, uint16_t * dst)
@@ -70,7 +70,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst)
         {
-            Avx::Store<align>(dst, _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)src)));
+            Store<align>(dst, _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)src)));
         }
 
         template <bool align> void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)

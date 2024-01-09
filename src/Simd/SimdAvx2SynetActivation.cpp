@@ -37,7 +37,7 @@ namespace Simd
     {
         template<bool align> SIMD_INLINE void SynetElu32f(const float * src, const Avx2::Exp & exp, __m256 alpha, float * dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, exp.Elu(Avx::Load<align>(src + offset), alpha));
+            Store<align>(dst + offset, exp.Elu(Load<align>(src + offset), alpha));
         }
 
         template<bool align> void SynetElu32f(const float * src, size_t size, const float * alpha, float * dst)
@@ -73,8 +73,8 @@ namespace Simd
         template<bool align> SIMD_INLINE void SynetHardSigmoid32f(const float* src, __m256 scale, __m256 shift, float* dst, size_t offset)
         {
             __m256 _src = Load<align>(src + offset);
-            __m256 _dst = Avx::SynetHardSigmoid32f(_src, scale, shift);
-            Avx::Store<align>(dst + offset, _dst);
+            __m256 _dst = SynetHardSigmoid32f(_src, scale, shift);
+            Store<align>(dst + offset, _dst);
         }
 
         template<bool align> void SynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
@@ -110,7 +110,7 @@ namespace Simd
         template<bool align> SIMD_INLINE void SynetHswish32f(const float* src, __m256 shift, __m256 scale, float* dst, size_t offset)
         {
             __m256 value = Load<align>(src + offset);
-            Avx::Store<align>(dst + offset, _mm256_mul_ps(_mm256_mul_ps(_mm256_max_ps(_mm256_add_ps(_mm256_min_ps(value, shift), shift), _mm256_setzero_ps()), scale), value));
+            Store<align>(dst + offset, _mm256_mul_ps(_mm256_mul_ps(_mm256_max_ps(_mm256_add_ps(_mm256_min_ps(value, shift), shift), _mm256_setzero_ps()), scale), value));
         }
 
         template<bool align> void SynetHswish32f(const float* src, size_t size, const float* shift, const float* scale, float* dst)
@@ -145,7 +145,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetGelu32f(const float* src, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, Gelu(Avx::Load<align>(src + offset)));
+            Store<align>(dst + offset, Gelu(Load<align>(src + offset)));
         }
 
         template<bool align> void SynetGelu32f(const float* src, size_t size, float* dst)
@@ -181,7 +181,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetMish32f(const float* src, __m256 threshold, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, Mish(Avx::Load<align>(src + offset), threshold));
+            Store<align>(dst + offset, Mish(Load<align>(src + offset), threshold));
         }
 
         template<bool align> void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
@@ -222,7 +222,7 @@ namespace Simd
             __m256 _slope = Load<align>(slope + offset);
             __m256 pos = _mm256_max_ps(_mm256_setzero_ps(), _src);
             __m256 neg = _mm256_min_ps(_mm256_setzero_ps(), _src);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(_slope, neg)));
+            Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(_slope, neg)));
         }
 
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float* src, __m256 slope, float* dst, size_t offset)
@@ -230,7 +230,7 @@ namespace Simd
             __m256 _src = Load<align>(src + offset);
             __m256 pos = _mm256_max_ps(_mm256_setzero_ps(), _src);
             __m256 neg = _mm256_min_ps(_mm256_setzero_ps(), _src);
-            Avx::Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(slope, neg)));
+            Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(slope, neg)));
         }
 
         template <bool align> void SynetPreluLayerForwardNchw(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
@@ -322,7 +322,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetRelu32f(const float* src, __m256 slope, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, Avx::SynetRelu32f(Load<align>(src + offset), slope));
+            Store<align>(dst + offset, SynetRelu32f(Load<align>(src + offset), slope));
         }
 
         template<bool align> void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
@@ -371,13 +371,13 @@ namespace Simd
             size_t i = 0;
             for (; i < sizeQF; i += QF)
             {
-                Avx::Store<align>(dst + i + 0 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 0 * F)), _max));
-                Avx::Store<align>(dst + i + 1 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 1 * F)), _max));
-                Avx::Store<align>(dst + i + 2 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 2 * F)), _max));
-                Avx::Store<align>(dst + i + 3 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 3 * F)), _max));
+                Store<align>(dst + i + 0 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 0 * F)), _max));
+                Store<align>(dst + i + 1 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 1 * F)), _max));
+                Store<align>(dst + i + 2 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 2 * F)), _max));
+                Store<align>(dst + i + 3 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 3 * F)), _max));
             }
             for (; i < sizeF; i += F)
-                Avx::Store<align>(dst + i, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i)), _max));
+                Store<align>(dst + i, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i)), _max));
             for (; i < size; ++i)
                 dst[i] = Simd::RestrictRange(src[i], min, max);
         }
@@ -394,7 +394,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetSigmoid32f(const float* src, const Avx2::Exp& exp, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, exp.Sigmoid(Avx::Load<align>(src + offset)));
+            Store<align>(dst + offset, exp.Sigmoid(Load<align>(src + offset)));
         }
 
         template<bool align> void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
@@ -431,7 +431,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetSoftplus32f(const float* src, __m256 beta, __m256 threshold, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, Softplus(Avx::Load<align>(src + offset), beta, threshold));
+            Store<align>(dst + offset, Softplus(Load<align>(src + offset), beta, threshold));
         }
 
         template<bool align> void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
@@ -466,7 +466,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetSwish32f(const float* src, const Avx2::Exp& exp, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, exp.Swish(Avx::Load<align>(src + offset)));
+            Store<align>(dst + offset, exp.Swish(Load<align>(src + offset)));
         }
 
         template<bool align> void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
@@ -503,7 +503,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetTanh32f(const float* src, const Avx2::Exp& exp, float* dst, size_t offset)
         {
-            Avx::Store<align>(dst + offset, exp.Tanh(Avx::Load<align>(src + offset)));
+            Store<align>(dst + offset, exp.Tanh(Load<align>(src + offset)));
         }
 
         template<bool align> void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
