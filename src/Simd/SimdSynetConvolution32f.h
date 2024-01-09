@@ -743,15 +743,6 @@ namespace Simd
             virtual String Ext() const { return "Avx"; }
         };
 
-        class SynetConvolution32fDirectNchw : public Sse41::SynetConvolution32fDirectNchw
-        {
-        public:
-            SynetConvolution32fDirectNchw(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx"; }
-        protected:
-            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
-        };
-
         class SynetConvolution32fDirectNhwc : public Sse41::SynetConvolution32fDirectNhwc
         {
         public:
@@ -761,14 +752,6 @@ namespace Simd
             static bool Preferable(const ConvParam32f & p);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
-        };
-
-        class SynetConvolution32fDepthwiseDotProduct : public Sse41::SynetConvolution32fDepthwiseDotProduct
-        {
-        public:
-            SynetConvolution32fDepthwiseDotProduct(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx"; }
-            virtual void Forward(const float * src, float * buf, float * dst);
         };
 
         class SynetConvolution32fNhwcDirect : public Sse41::SynetConvolution32fNhwcDirect
@@ -819,7 +802,7 @@ namespace Simd
             virtual String Ext() const { return "Avx2"; }
         };
 
-        class SynetConvolution32fDirectNchw : public Avx::SynetConvolution32fDirectNchw
+        class SynetConvolution32fDirectNchw : public Sse41::SynetConvolution32fDirectNchw
         {
         public:
             SynetConvolution32fDirectNchw(const ConvParam32f & p);
@@ -835,6 +818,14 @@ namespace Simd
             virtual String Ext() const { return "Avx2"; }
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+        };
+
+        class SynetConvolution32fDepthwiseDotProduct : public Sse41::SynetConvolution32fDepthwiseDotProduct
+        {
+        public:
+            SynetConvolution32fDepthwiseDotProduct(const ConvParam32f& p);
+            virtual String Ext() const { return "Avx2"; }
+            virtual void Forward(const float* src, float* buf, float* dst);
         };
 
         class SynetConvolution32fNhwcGroupedBlock1x2 : public Sse41::SynetConvolution32fNhwcGroupedBlock1x2

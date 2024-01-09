@@ -850,8 +850,8 @@ namespace Simd
                 else
                     return new Base::SynetConvolution32fBf16Gemm(param);
             }
-            else if (Avx::SynetConvolution32fDepthwiseDotProduct::Preferable(param))
-                return new Avx::SynetConvolution32fDepthwiseDotProduct(param);
+            else if (Avx2::SynetConvolution32fDepthwiseDotProduct::Preferable(param))
+                return new Avx2::SynetConvolution32fDepthwiseDotProduct(param);
             else if (SynetConvolution32fWinograd::Preferable(param))
                 return new SynetConvolution32fWinograd(param);
             else if (SynetConvolution32fGemmNT::Preferable(param))
