@@ -205,14 +205,6 @@ namespace Test
 
     TEST_ADD_GROUP_0S(FontDraw);
 
-    TEST_ADD_GROUP_A0(EdgeBackgroundGrowRangeSlow);
-    TEST_ADD_GROUP_A0(EdgeBackgroundGrowRangeFast);
-    TEST_ADD_GROUP_A0(EdgeBackgroundIncrementCount);
-    TEST_ADD_GROUP_A0(EdgeBackgroundAdjustRange);
-    TEST_ADD_GROUP_A0(EdgeBackgroundAdjustRangeMasked);
-    TEST_ADD_GROUP_A0(EdgeBackgroundShiftRange);
-    TEST_ADD_GROUP_A0(EdgeBackgroundShiftRangeMasked);
-
     TEST_ADD_GROUP_A0(Fill);
     TEST_ADD_GROUP_A0(FillFrame);
     TEST_ADD_GROUP_A0(FillBgra);

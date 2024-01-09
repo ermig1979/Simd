@@ -55,9 +55,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Detection.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2EdgeBackground.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>

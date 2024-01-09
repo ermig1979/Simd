@@ -41,7 +41,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntDec.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntEnc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDetection.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwEdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat32.cpp" />

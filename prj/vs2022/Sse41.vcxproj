@@ -42,7 +42,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41EdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Float16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Float32.cpp" />

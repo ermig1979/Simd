@@ -58,9 +58,6 @@
     <ClCompile Include="..\..\src\Test\TestDrawing.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestEdgeBackground.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestFill.cpp">
       <Filter>Test</Filter>
     </ClCompile>

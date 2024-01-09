@@ -85,7 +85,6 @@
     <ClCompile Include="..\..\src\Test\TestDetection.cpp" />
     <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />
-    <ClCompile Include="..\..\src\Test\TestEdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Test\TestFile.cpp" />
     <ClCompile Include="..\..\src\Test\TestFill.cpp" />
     <ClCompile Include="..\..\src\Test\TestFilter.cpp" />

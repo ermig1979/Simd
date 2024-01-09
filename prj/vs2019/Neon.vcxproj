@@ -52,7 +52,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonDescrIntDec.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDescrIntEnc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDetection.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonEdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonFloat32.cpp" />

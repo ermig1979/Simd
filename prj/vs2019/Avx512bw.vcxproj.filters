@@ -61,9 +61,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDetection.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwEdgeBackground.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFill.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>

@@ -64,9 +64,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonDetection.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonEdgeBackground.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonFill.cpp">
       <Filter>Neon</Filter>
     </ClCompile>

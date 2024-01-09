@@ -79,9 +79,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseEdgeBackground.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp">
       <Filter>Base</Filter>
     </ClCompile>

@@ -49,9 +49,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxDeinterleave.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxEdgeBackground.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxFill.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>

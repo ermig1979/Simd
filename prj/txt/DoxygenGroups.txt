@@ -369,11 +369,6 @@
     \short Functions for background updating.
 */
 
-/*! @ingroup motion_detection
-    @defgroup edge_background Edge Background Updating
-    \short Functions for edge background updating.
-*/
-
 /*! @ingroup functions
     @defgroup hog HOG (Histogram of Oriented Gradients)
     \short Functions for extraction and processing of HOG features.
