@@ -609,11 +609,11 @@ namespace Simd
             kernelTM = GemmKernelMx8nn;
             kernelTT = GemmKernelMx8nn;
 #endif
-            GemmNN::PackA packA = NULL;// K*M > 1024 * 1024 ? Avx::GemmPackA : NULL;
+            GemmNN::PackA packA = NULL;// K*M > 1024 * 1024 ? Avx2::GemmPackA : NULL;
             L1 = N > 4096 ? Base::AlgCacheL2() : Base::AlgCacheL1();
             L2 = N > 4096 ? Base::AlgCacheL3() : Base::AlgCacheL2();
             GemmNN gemmNN(M, N, K, microM, microN, L1, L2, Base::AlgCacheL3(), 
-                kernelMM, kernelMT, kernelTM, kernelTT, packA, Avx::GemmPackB, Avx::GemmScaleC, NULL);
+                kernelMM, kernelMT, kernelTM, kernelTT, packA, Avx2::GemmPackB, Avx2::GemmScaleC, NULL);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
 
@@ -1199,10 +1199,10 @@ namespace Simd
 
             typedef Simd::GemmNT<float, F> GemmNT;
 #ifdef SIMD_X64_ENABLE
-            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx::GemmScaleC,
+            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx2::GemmScaleC,
                 Kernel1x1x8nt, Kernel1x4x8nt, Kernel2x1x8nt, Kernel2x4x8nt, Kernel3x1x8nt, Kernel3x4x8nt, NULL, NULL);
 #else
-            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Sse41::GemmScaleC,
+            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx2::GemmScaleC,
                 Kernel1x1x8nt, Kernel1x4x8nt, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
             gemmNT.Run(alpha, A, lda, B, ldb, beta, C, ldc);

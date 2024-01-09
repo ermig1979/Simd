@@ -675,11 +675,6 @@ namespace Test
             result = result && SynetConvolution32fForwardAutoTest(4 * EPS, FUNC_C(Simd::Sse41::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
-#endif 
-
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx2::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));

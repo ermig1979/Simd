@@ -1308,7 +1308,7 @@ namespace Simd
                 kernelTT = Avx512bw::GetGemmTail(M % microM, tail);
             }
 #endif
-            GemmNN::PackA packA = (microM > 6 && M*N*K > 700*700*700) ? Avx::GemmPackA : NULL;
+            GemmNN::PackA packA = (microM > 6 && M*N*K > 700*700*700) ? Avx2::GemmPackA : NULL;
             GemmNN gemmNN(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), 
                 kernelMM, kernelMT, kernelTM, kernelTT, packA, Avx512bw::GemmPackB, Avx512bw::GemmScaleC, TailMask16);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
@@ -1457,7 +1457,7 @@ namespace Simd
 
         size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
         {
-            if (N > Avx::F)
+            if (N > Avx2::F)
             {
                 Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);
                 return gemm.BufferSize();
@@ -1468,7 +1468,7 @@ namespace Simd
 
         void Gemm32fNNcbReorderB(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility)
         {
-            if (N > Avx::F)
+            if (N > Avx2::F)
             {
                 Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);
                 gemm.ReorderB(B, N, pB);
@@ -1480,7 +1480,7 @@ namespace Simd
         void Gemm32fNNcbRun(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility)
         {
             //SIMD_PERF_BEGF(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K), M * N * K * 2);
-            if (N > Avx::F)
+            if (N > Avx2::F)
             {
                 Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);
                 gemm.Run(A, K, pB, C, N);

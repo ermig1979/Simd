@@ -11,11 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx1Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1Gemm32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect2f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect2r.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect3r.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />

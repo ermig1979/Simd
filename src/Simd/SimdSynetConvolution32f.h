@@ -715,50 +715,6 @@ namespace Simd
     }
 #endif//SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE    
-    namespace Avx
-    {
-        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, ::SimdBool trans, float * dst);
-
-        class SynetConvolution32fGemmNN : public Sse41::SynetConvolution32fGemmNN
-        {
-        public:
-            SynetConvolution32fGemmNN(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx"; }
-        protected:
-            virtual void ImgToRow(const float * src, float * dst);
-        };
-
-        class SynetConvolution32fGemmNT : public Sse41::SynetConvolution32fGemmNT
-        {
-        public:
-            SynetConvolution32fGemmNT(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx"; }
-        };
-
-        class SynetConvolution32fWinograd : public Sse41::SynetConvolution32fWinograd
-        {
-        public:
-            SynetConvolution32fWinograd(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx"; }
-        };
-
-        class SynetConvolution32fNhwcDirect : public Sse41::SynetConvolution32fNhwcDirect
-        {
-        public:
-            SynetConvolution32fNhwcDirect(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx"; }
-        private:
-            static bool Set2f(const ConvParam32f& p, OldConvolutionPtr& convolution);
-            static bool SetRt(const ConvParam32f& p, AlgParam& a);
-            static bool Set2r(const ConvParam32f& p, AlgParam& a);
-            static bool Set3r(const ConvParam32f& p, AlgParam& a);
-        };
-
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
-    }
-#endif//SIMD_AVX_ENABLE
-
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
@@ -766,7 +722,11 @@ namespace Simd
         void NhwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB);
         size_t NhwcBufferSize(size_t M, size_t N, size_t K);
 
-        class SynetConvolution32fGemmNN : public Avx::SynetConvolution32fGemmNN
+        void ConvolutionBiasAndActivation(const float* bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float* params, ::SimdBool trans, float* dst);
+
+        //-----------------------------------------------------------------------------------------
+
+        class SynetConvolution32fGemmNN : public Sse41::SynetConvolution32fGemmNN
         {
         public:
             SynetConvolution32fGemmNN(const ConvParam32f & p);
@@ -777,14 +737,14 @@ namespace Simd
             Array32i _index, _nose, _tail, _start;
         };
 
-        class SynetConvolution32fGemmNT : public Avx::SynetConvolution32fGemmNT
+        class SynetConvolution32fGemmNT : public Sse41::SynetConvolution32fGemmNT
         {
         public:
             SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Avx2"; }
         };
 
-        class SynetConvolution32fWinograd : public Avx::SynetConvolution32fWinograd
+        class SynetConvolution32fWinograd : public Sse41::SynetConvolution32fWinograd
         {
         public:
             SynetConvolution32fWinograd(const ConvParam32f & p);
@@ -824,7 +784,7 @@ namespace Simd
             virtual String Ext() const { return "Avx2"; }
         };
 
-        class SynetConvolution32fNhwcDirect : public Avx::SynetConvolution32fNhwcDirect
+        class SynetConvolution32fNhwcDirect : public Sse41::SynetConvolution32fNhwcDirect
         {
         public:
             SynetConvolution32fNhwcDirect(const ConvParam32f & p);

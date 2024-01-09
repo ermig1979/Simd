@@ -504,13 +504,13 @@ namespace Simd
                     SynetGelu32f(dst, size * count, dst);
             }
             else
-                Avx::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
+                Sse41::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
         }
 
         //-------------------------------------------------------------------------------------------------
 
         SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f & p)
-            : Avx::SynetConvolution32fGemmNN(p)
+            : Sse41::SynetConvolution32fGemmNN(p)
         {
             _index.Resize(F);
             for (size_t i = 0; i < F; ++i)
@@ -615,7 +615,7 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
-            : Avx::SynetConvolution32fGemmNT(p)
+            : Sse41::SynetConvolution32fGemmNT(p)
         {
             _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNT, "Avx2"));
             _biasAndActivation = Avx2::ConvolutionBiasAndActivation;
@@ -624,7 +624,7 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
-            : Avx::SynetConvolution32fWinograd(p)
+            : Sse41::SynetConvolution32fWinograd(p)
         {
             if (p.kernelY == 1 && p.kernelX == 3)
             {
@@ -771,7 +771,7 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
-            : Avx::SynetConvolution32fNhwcDirect(p)
+            : Sse41::SynetConvolution32fNhwcDirect(p)
         {
             if (p.dstC <= Sse41::F)
                 return;

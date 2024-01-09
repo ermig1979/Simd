@@ -628,7 +628,7 @@ namespace Simd
                 _nhwcRun = Avx512bw::Gemm32fNNcbRun;
                 _nhwcReorderB = Avx512bw::Gemm32fNNcbReorderB;
             }
-            _biasAndActivation = _N > Avx::F ? Avx512bw::ConvolutionBiasAndActivation : Avx::ConvolutionBiasAndActivation;
+            _biasAndActivation = _N > Avx::F ? Avx512bw::ConvolutionBiasAndActivation : Avx2::ConvolutionBiasAndActivation;
         }
 
         void SynetConvolution32fGemmNN::ImgToCol(const float* src, float* dst)

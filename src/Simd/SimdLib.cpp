@@ -2988,7 +2988,7 @@ typedef void(*SimdGemm32fPtr) (size_t M, size_t N, size_t K, const float * alpha
 SIMD_API void SimdGemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
 {
     SIMD_EMPTY();
-    const static SimdGemm32fPtr simdGemm32fNN = SIMD_FUNC5(Gemm32fNN, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdGemm32fPtr simdGemm32fNN = SIMD_FUNC4(Gemm32fNN, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdGemm32fNN(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 }
@@ -2996,7 +2996,7 @@ SIMD_API void SimdGemm32fNN(size_t M, size_t N, size_t K, const float * alpha, c
 SIMD_API void SimdGemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
 {
     SIMD_EMPTY();
-    const static SimdGemm32fPtr simdGemm32fNT = SIMD_FUNC5(Gemm32fNT, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdGemm32fPtr simdGemm32fNT = SIMD_FUNC4(Gemm32fNT, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdGemm32fNT(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 }
@@ -6013,7 +6013,7 @@ SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionP
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC7(SynetConvolution32fInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC6(SynetConvolution32fInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetConvolution32fInit(batch, params, compatibility);
 #else
