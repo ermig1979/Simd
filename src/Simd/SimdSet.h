@@ -54,24 +54,19 @@ namespace Simd
     }
 #endif// SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
     {
         SIMD_INLINE __m256 Set(__m128 a0, __m128 a1)
         {
             return _mm256_insertf128_ps(_mm256_castps128_ps256(a0), a1, 1);
-        }
+}
 
         SIMD_INLINE __m256 Set(__m128 a)
         {
             return _mm256_insertf128_ps(_mm256_castps128_ps256(a), a, 1);
         }
-    }
-#endif// SIMD_AVX_ENABLE
 
-#ifdef SIMD_AVX2_ENABLE
-    namespace Avx2
-    {
         SIMD_INLINE __m256i SetInt8(char a0, char a1)
         {
             return _mm256_unpacklo_epi8(_mm256_set1_epi8(a0), _mm256_set1_epi8(a1));

@@ -41,11 +41,7 @@
 #include <cmath>
 #include <limits>
 
-#if defined(SIMD_SSE41_DISABLE) && !defined(SIMD_AVX_DISABLE)
-#define SIMD_AVX_DISABLE
-#endif
-
-#if defined(SIMD_AVX_DISABLE) && !defined(SIMD_AVX2_DISABLE)
+#if defined(SIMD_SSE41_DISABLE) && !defined(SIMD_AVX2_DISABLE)
 #define SIMD_AVX2_DISABLE
 #endif
 
@@ -103,10 +99,6 @@
 
 #if !defined(SIMD_SSE41_DISABLE) && _MSC_VER >= 1500
 #define SIMD_SSE41_ENABLE
-#endif
-
-#if !defined(SIMD_AVX_DISABLE) && _MSC_FULL_VER >= 160040219
-#define SIMD_AVX_ENABLE
 #endif
 
 #if !defined(SIMD_AVX2_DISABLE) && _MSC_VER >= 1700
@@ -213,11 +205,7 @@
 #define SIMD_SSE41_ENABLE
 #endif
 
-#if !defined(SIMD_AVX_DISABLE) && defined(__AVX__)
-#define SIMD_AVX_ENABLE
-#endif
-
-#if !defined(SIMD_AVX2_DISABLE) && defined(__AVX2__)
+#if !defined(SIMD_AVX2_DISABLE) && defined(__AVX__) && defined(__AVX2__)
 #define SIMD_AVX2_ENABLE
 #endif
 
@@ -290,7 +278,7 @@
 #include <nmmintrin.h>
 #endif
 
-#if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE) \
+#if defined(SIMD_AVX2_ENABLE) \
     || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE) \
     || defined(SIMD_AMXBF16_ENABLE)
 #include <immintrin.h>
@@ -312,7 +300,7 @@
 
 #if defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE) || defined(SIMD_AMXBF16_ENABLE)
 #define SIMD_ALIGN 64
-#elif defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
+#elif defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
 #elif defined(SIMD_SSE41_ENABLE) \
     || defined(SIMD_VMX_ENABLE) || defined(SIMD_VSX_ENABLE) \

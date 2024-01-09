@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -809,7 +809,7 @@ namespace Simd
             size_t rs = _param.dstW * cn;
             float * pbx[2] = { _bx[0].data, _bx[1].data };
             int32_t prev = -2;
-            size_t rsa = AlignLo(rs, Avx::F);
+            size_t rsa = AlignLo(rs, F);
             size_t rsh = AlignLo(rs, Sse41::F);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
@@ -838,7 +838,7 @@ namespace Simd
                         __m256 _1 = _mm256_set1_ps(1.0f);
                         if (Avx2::SlowGather)
                         {
-                            for (; dx < rsa; dx += Avx::F)
+                            for (; dx < rsa; dx += F)
                             {
                                 __m256 s0145 = Load(ps + _ix[dx + 0], ps + _ix[dx + 1], ps + _ix[dx + 4], ps + _ix[dx + 5]);
                                 __m256 s2367 = Load(ps + _ix[dx + 2], ps + _ix[dx + 3], ps + _ix[dx + 6], ps + _ix[dx + 7]);
@@ -851,7 +851,7 @@ namespace Simd
                         }
                         else
                         {
-                            for (; dx < rsa; dx += Avx::F)
+                            for (; dx < rsa; dx += F)
                             {
                                 __m256i idx = Avx2::LoadPermuted<true>((__m256i*)(_ix.data + dx));
                                 __m256 s0145 = _mm256_castpd_ps(_mm256_i32gather_pd((double*)ps, _mm256_extracti128_si256(idx, 0), 4));
@@ -900,7 +900,7 @@ namespace Simd
                     {
                         __m256 _1 = _mm256_set1_ps(1.0f);
                         __m256i _cn = _mm256_set1_epi32((int)cn);
-                        for (; dx < rsa; dx += Avx::F)
+                        for (; dx < rsa; dx += F)
                         {
                             __m256i i0 = _mm256_load_si256((__m256i*)(_ix.data + dx));
                             __m256i i1 = _mm256_add_epi32(i0, _cn);
@@ -922,7 +922,7 @@ namespace Simd
                 size_t dx = 0;
                 __m256 _fy0 = _mm256_set1_ps(fy0);
                 __m256 _fy1 = _mm256_set1_ps(fy1);
-                for (; dx < rsa; dx += Avx::F)
+                for (; dx < rsa; dx += F)
                 {
                     __m256 b0 = _mm256_load_ps(pbx[0] + dx);
                     __m256 b1 = _mm256_load_ps(pbx[1] + dx);

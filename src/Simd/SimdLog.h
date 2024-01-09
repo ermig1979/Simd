@@ -78,8 +78,8 @@ namespace Simd
     }
 #endif //SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
     {
         SIMD_INLINE void Log(const __m256 & value, const std::string & name)
         {
@@ -87,13 +87,6 @@ namespace Simd
             _mm256_storeu_ps(buffer, value);
             Simd::Log<float>(buffer, F, name);
         }
-    }
-#endif //SIMD_AVX_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE
-    namespace Avx2
-    {
-        using Avx::Log;
 
         template<class T> SIMD_INLINE void Log(const __m256i & value, const std::string & name)
         {

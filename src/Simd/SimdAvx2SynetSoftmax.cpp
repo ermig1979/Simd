@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -105,9 +105,9 @@ namespace Simd
             if (aligned < outer)
             {
                 size_t tail = outer - aligned;
-                buf[0] = Avx::Gather<3>(src + 0, tail);
-                buf[1] = Avx::Gather<3>(src + 1, tail);
-                buf[2] = Avx::Gather<3>(src + 2, tail);
+                buf[0] = Gather<3>(src + 0, tail);
+                buf[1] = Gather<3>(src + 1, tail);
+                buf[2] = Gather<3>(src + 2, tail);
                 SynetSoftmaxLayerForward31(exp, buf);
                 Scater<3>(dst + 0, buf[0], tail);
                 Scater<3>(dst + 1, buf[1], tail);

@@ -45,7 +45,7 @@ namespace Simd
                     __m256 _src = _mm256_loadu_ps(src + i);
                     _sum = _mm256_fmadd_ps(_src, _src, _sum);
                 }
-                float sum = Avx::ExtractSum(_sum);
+                float sum = ExtractSum(_sum);
                 for (; i < size; ++i)
                     sum += Simd::Square(src[i]);
                 float k0 = 1.0f / ::sqrt(sum + eps);
@@ -127,7 +127,7 @@ namespace Simd
                     __m256 _src = _mm256_loadu_ps(src + i);
                     _sum = _mm256_fmadd_ps(_src, _src, _sum);
                 }
-                float sum = Avx::ExtractSum(_sum);
+                float sum = ExtractSum(_sum);
                 for (; i < size; ++i)
                     sum += Simd::Square(src[i]);
                 __m256 _k = _mm256_set1_ps(1.0f / ::sqrt(sum + eps));
@@ -158,7 +158,7 @@ namespace Simd
                         __m256 _src = _mm256_loadu_ps(src + c);
                         _sum = _mm256_fmadd_ps(_src, _src, _sum);
                     }
-                    float sum = Avx::ExtractSum(_sum);
+                    float sum = ExtractSum(_sum);
                     for (; c < channels; ++c)
                         sum += Simd::Square(src[c]);
                     __m256 _k = _mm256_set1_ps(1.0f / ::sqrt(sum + eps));
@@ -309,7 +309,7 @@ namespace Simd
                     __m256 _sum = _mm256_setzero_ps();
                     for (c = 0; c < channelsF; c += F)
                         _sum = _mm256_add_ps(_mm256_loadu_ps(src + c), _sum);
-                    float sum = Avx::ExtractSum(_sum);
+                    float sum = ExtractSum(_sum);
                     for (; c < channels; ++c)
                         sum += src[c];
                     __m256 mean = _mm256_set1_ps(sum * k);
@@ -324,7 +324,7 @@ namespace Simd
                         __m256 _dst = _mm256_loadu_ps(dst + c);
                         _sqsum = _mm256_fmadd_ps(_dst, _dst, _sqsum);
                     }
-                    float sqsum = Avx::ExtractSum(_sqsum);
+                    float sqsum = ExtractSum(_sqsum);
                     for (; c < channels; ++c)
                         sqsum += Simd::Square(dst[c]);
                     __m256 norm = _mm256_set1_ps(1.0f / ::sqrt(sqsum * k + eps));
@@ -363,7 +363,7 @@ namespace Simd
                     __m256 _sum = _mm256_setzero_ps();
                     for (s = 0; s < spatialF; s += F)
                         _sum = _mm256_add_ps(_mm256_loadu_ps(src + s), _sum);
-                    float sum = Avx::ExtractSum(_sum);
+                    float sum = ExtractSum(_sum);
                     for (; s < spatial; ++s)
                         sum += src[s];
                     __m256 mean = _mm256_set1_ps(sum * k);
@@ -375,7 +375,7 @@ namespace Simd
                     __m256 _sqsum = _mm256_setzero_ps();
                     for (s = 0; s < spatialF; s += F)
                         _sqsum = _mm256_add_ps(Square(_mm256_loadu_ps(dst + s)), _sqsum);
-                    float sqsum = Avx::ExtractSum(_sqsum);
+                    float sqsum = ExtractSum(_sqsum);
                     for (; s < spatial; ++s)
                         sqsum += Simd::Square(dst[s]);
                     __m256 norm = _mm256_set1_ps(1.0f / ::sqrt(sqsum * k + eps));
@@ -517,8 +517,8 @@ namespace Simd
                 {
                     __m256 _sqsum = _mm256_setzero_ps();
                     for (s = 0; s < spatialF; s += F, o += F)
-                        _sqsum = _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src + o)), _sqsum);
-                    float sqsum = Avx::ExtractSum(_sqsum);
+                        _sqsum = _mm256_add_ps(Square(_mm256_loadu_ps(src + o)), _sqsum);
+                    float sqsum = ExtractSum(_sqsum);
                     for (; s < spatial; ++s, ++o)
                         sqsum += Simd::Square(src[o]);
                     buf[c] = sqrt(sqsum);
@@ -553,7 +553,7 @@ namespace Simd
                 for (size_t s = 0, o = 0; s < spatial; ++s)
                 {
                     for (c = 0; c < channelsF; c += F, o += F)
-                        _mm256_storeu_ps(buf + c, _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src + o)), _mm256_loadu_ps(buf + c)));
+                        _mm256_storeu_ps(buf + c, _mm256_add_ps(Square(_mm256_loadu_ps(src + o)), _mm256_loadu_ps(buf + c)));
                     for (; c < channels; c += 1, o += 1)
                         _mm_store_ss(buf + c, _mm_add_ss(Sse41::Square(_mm_load_ss(src + o)), _mm_load_ss(buf + c)));
                 }

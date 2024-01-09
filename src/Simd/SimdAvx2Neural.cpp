@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -174,7 +174,7 @@ namespace Simd
         template <bool inversion, bool align, bool stream> void Convert(const uint8_t * src, const __m256 & _1_255, float * dst)
         {
             __m128i _src = Invert<inversion>(_mm_loadl_epi64((__m128i*)src));
-            Avx::Stream<align, stream>(dst, _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_src)), _1_255));
+            Stream<align, stream>(dst, _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_src)), _1_255));
         }
 
         template <bool inversion, bool align, bool stream> void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
@@ -254,7 +254,7 @@ namespace Simd
                 }
                 for (; i < partialAlignedSize; i += F)
                     NeuralProductSum<align>(a, b, i, sums[0]);
-                *sum += Avx::ExtractSum(sums[0]);
+                *sum += ExtractSum(sums[0]);
             }
             for (; i < size; ++i)
                 *sum += a[i] * b[i];

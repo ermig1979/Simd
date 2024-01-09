@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -143,7 +143,7 @@ namespace Simd
                 __m256 _d = _mm256_and_ps(_mm256_sub_ps(_a, _b), mask);
                 sums[0] = _mm256_fmadd_ps(_d, _d, sums[0]);
             }
-            *sum = Avx::ExtractSum(sums[0]);
+            *sum = ExtractSum(sums[0]);
         }
 
         void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum)
@@ -201,7 +201,7 @@ namespace Simd
                 _ab[0] = _mm256_fmadd_ps(a0, b0, _ab[0]);
                 _bb[0] = _mm256_fmadd_ps(b0, b0, _bb[0]);
             }
-            float aa = Avx::ExtractSum(_aa[0]), ab = Avx::ExtractSum(_ab[0]), bb = Avx::ExtractSum(_bb[0]);
+            float aa = ExtractSum(_aa[0]), ab = ExtractSum(_ab[0]), bb = ExtractSum(_bb[0]);
             *distance = 1.0f - ab / ::sqrt(aa*bb);
         }
 
@@ -245,7 +245,7 @@ namespace Simd
                     sums[2] = _mm256_fmadd_ps(a2, a2, sums[2]);
                     sums[3] = _mm256_fmadd_ps(a3, a3, sums[3]);
                 }
-                _mm_storeu_ps(squares + i, Avx::Extract4Sums(sums));
+                _mm_storeu_ps(squares + i, Extract4Sums(sums));
             }
             for (; i < M; i += 1)
             {
@@ -261,7 +261,7 @@ namespace Simd
                     __m256 a = _mm256_and_ps(mask, _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)(A[i] + k))));
                     sum = _mm256_fmadd_ps(a, a, sum);
                 }
-                squares[i] = Avx::ExtractSum(sum);
+                squares[i] = ExtractSum(sum);
             }
         }
 
@@ -335,9 +335,9 @@ namespace Simd
             }
             __m128 _bb = _mm_loadu_ps(bb);
             __m128 _1 = _mm_set1_ps(1.0f);
-            _mm_storeu_ps(distances + 0 * stride, _mm_sub_ps(_1, _mm_div_ps(Avx::Extract4Sums(c00, c01, c02, c03), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))))));
-            _mm_storeu_ps(distances + 1 * stride, _mm_sub_ps(_1, _mm_div_ps(Avx::Extract4Sums(c10, c11, c12, c13), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[1]))))));
-            _mm_storeu_ps(distances + 2 * stride, _mm_sub_ps(_1, _mm_div_ps(Avx::Extract4Sums(c20, c21, c22, c23), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[2]))))));
+            _mm_storeu_ps(distances + 0 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c00, c01, c02, c03), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))))));
+            _mm_storeu_ps(distances + 1 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c10, c11, c12, c13), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[1]))))));
+            _mm_storeu_ps(distances + 2 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c20, c21, c22, c23), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[2]))))));
         }
 
         static void MicroCosineDistances3x1(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
@@ -369,9 +369,9 @@ namespace Simd
                 a0 = _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)(A[2] + k)));
                 c20 = _mm256_fmadd_ps(a0, b0, c20);
             }
-            distances[0 * stride] = 1.0f - Avx::ExtractSum(c00) / sqrt(bb[0] * aa[0]);
-            distances[1 * stride] = 1.0f - Avx::ExtractSum(c10) / sqrt(bb[0] * aa[1]);
-            distances[2 * stride] = 1.0f - Avx::ExtractSum(c20) / sqrt(bb[0] * aa[2]);
+            distances[0 * stride] = 1.0f - ExtractSum(c00) / sqrt(bb[0] * aa[0]);
+            distances[1 * stride] = 1.0f - ExtractSum(c10) / sqrt(bb[0] * aa[1]);
+            distances[2 * stride] = 1.0f - ExtractSum(c20) / sqrt(bb[0] * aa[2]);
         }
 
         static void MicroCosineDistances1x4(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
@@ -410,7 +410,7 @@ namespace Simd
             }
             __m128 _bb = _mm_loadu_ps(bb);
             __m128 _1 = _mm_set1_ps(1.0f);
-            _mm_storeu_ps(distances + 0 * stride, _mm_sub_ps(_1, _mm_div_ps(Avx::Extract4Sums(c00, c01, c02, c03), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))))));
+            _mm_storeu_ps(distances + 0 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c00, c01, c02, c03), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))))));
         }
 
         static void MacroCosineDistances(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)

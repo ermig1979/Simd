@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -169,7 +169,7 @@ namespace Simd
                 }
                 for (; i < partialAlignedSize; i += 8)
                     SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
-                *sum += Avx::ExtractSum(sums[0]);
+                *sum += ExtractSum(sums[0]);
             }
             for (; i < size; ++i)
                 *sum += Simd::Square(a[i] - b[i]);
@@ -221,7 +221,7 @@ namespace Simd
                 }
                 for (; i < partialAlignedSize; i += 8)
                     SquaredDifferenceKahanSum32f<align>(a, b, i, sums[0], corrections[0]);
-                *sum += Avx::ExtractSum(_mm256_add_ps(_mm256_add_ps(sums[0], sums[1]), _mm256_add_ps(sums[2], sums[3])));
+                *sum += ExtractSum(_mm256_add_ps(_mm256_add_ps(sums[0], sums[1]), _mm256_add_ps(sums[2], sums[3])));
             }
             for (; i < size; ++i)
                 *sum += Simd::Square(a[i] - b[i]);

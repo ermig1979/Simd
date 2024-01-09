@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -505,12 +505,12 @@ namespace Simd
                         const float * pFilter = filter;
                         for (size_t filterRow = 0; filterRow < filterHeight; ++filterRow)
                         {
-                            for (size_t filterCol = 0; filterCol < filterStride; filterCol += Avx::F)
+                            for (size_t filterCol = 0; filterCol < filterStride; filterCol += Avx2::F)
                                 ProductSum1x1<align>(pSrc + filterCol, pFilter + filterCol, sum);
                             pSrc += srcStride;
                             pFilter += filterStride;
                         }
-                        dst[dstCol] = Avx::ExtractSum(sum);
+                        dst[dstCol] = Avx2::ExtractSum(sum);
                     }
                     dst += dstStride;
                 }
@@ -560,12 +560,12 @@ namespace Simd
                             const float * pFilter = filter;
                             for (size_t filterRow = 0; filterRow < filterHeight; ++filterRow)
                             {
-                                for (size_t filterCol = 0; filterCol < filterStride; filterCol += Avx::F)
+                                for (size_t filterCol = 0; filterCol < filterStride; filterCol += Avx2::F)
                                     ProductSum1x1<align>(pSrc + filterCol, pFilter + filterCol, sum);
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
-                            dst[dstCol] = Avx::ExtractSum(sum);
+                            dst[dstCol] = Avx2::ExtractSum(sum);
                         }
                         else
                             dst[dstCol] = -FLT_MAX;
@@ -980,10 +980,10 @@ namespace Simd
             template<bool align> static SIMD_INLINE void FilterHx4x8(const float * src, const float * filter, __m256 * sums)
             {
                 __m256 _filter = Avx2::Load<align>(filter);
-                sums[0] = _mm256_fmadd_ps(Avx2::Load<align>(src + 0 * Avx::F), _filter, sums[0]);
-                sums[1] = _mm256_fmadd_ps(Avx2::Load<align>(src + 1 * Avx::F), _filter, sums[1]);
-                sums[2] = _mm256_fmadd_ps(Avx2::Load<align>(src + 2 * Avx::F), _filter, sums[2]);
-                sums[3] = _mm256_fmadd_ps(Avx2::Load<align>(src + 3 * Avx::F), _filter, sums[3]);
+                sums[0] = _mm256_fmadd_ps(Avx2::Load<align>(src + 0 * Avx2::F), _filter, sums[0]);
+                sums[1] = _mm256_fmadd_ps(Avx2::Load<align>(src + 1 * Avx2::F), _filter, sums[1]);
+                sums[2] = _mm256_fmadd_ps(Avx2::Load<align>(src + 2 * Avx2::F), _filter, sums[2]);
+                sums[3] = _mm256_fmadd_ps(Avx2::Load<align>(src + 3 * Avx2::F), _filter, sums[3]);
             }
 
             template <bool align> void FilterHx8o(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
@@ -997,17 +997,17 @@ namespace Simd
                     {
                         __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
                         const float * s = src + col * step;
-                        for (size_t i = 0; i < size; i += Avx::F)
+                        for (size_t i = 0; i < size; i += Avx2::F)
                             FilterHx4x8<align>(s + i, filter + i, sums);
-                        Sse41::Store<true>(dst + col, Avx::Extract4Sums(sums));
+                        Sse41::Store<true>(dst + col, Avx2::Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {
                         __m256 sum = _mm256_setzero_ps();
                         const float * s = src + col * step;
-                        for (size_t i = 0; i < size; i += Avx::F)
+                        for (size_t i = 0; i < size; i += Avx2::F)
                             FilterHx1x8<align>(s + i, filter + i, sum);
-                        dst[col] = Avx::ExtractSum(sum);
+                        dst[col] = Avx2::ExtractSum(sum);
                     }
                     src += srcStride;
                     dst += dstStride;
@@ -1042,9 +1042,9 @@ namespace Simd
                     {
                         __m256 sum = _mm256_setzero_ps();
                         const float * s = src + col * step;
-                        for (size_t i = 0; i < size; i += Avx::F)
+                        for (size_t i = 0; i < size; i += Avx2::F)
                             FilterHx1x8<align>(s + i, filter + i, sum);
-                        dst[col] = Avx::ExtractSum(sum);
+                        dst[col] = Avx2::ExtractSum(sum);
                     }
                     src += srcStride;
                     dst += dstStride;

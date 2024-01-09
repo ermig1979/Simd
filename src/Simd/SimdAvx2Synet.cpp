@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -243,7 +243,7 @@ namespace Simd
                 w0 = _mm256_and_ps(tail, _mm256_loadu_ps(W0 + k));
                 d00 = _mm256_fmadd_ps(s0, w0, d00);
             }
-            D[0] = Avx::ExtractSum(d00) + B[0];
+            D[0] = ExtractSum(d00) + B[0];
         }
 
         void SynetInnerProductLayerForward4(const float * S0, const float * W, const float * B, size_t K, float * D)
@@ -319,7 +319,7 @@ namespace Simd
                 w0 = _mm256_and_ps(tail, _mm256_loadu_ps(W3 + k + 0 * F));
                 d30 = _mm256_fmadd_ps(s0, w0, d30);
             }
-            _mm_storeu_ps(D, _mm_add_ps(Avx::Extract4Sums(d00, d10, d20, d30), _mm_loadu_ps(B)));
+            _mm_storeu_ps(D, _mm_add_ps(Extract4Sums(d00, d10, d20, d30), _mm_loadu_ps(B)));
         }
 
         void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
@@ -551,20 +551,20 @@ namespace Simd
 
         SIMD_INLINE __m256 NoseSquareSum(const float * src)
         {
-            return _mm256_add_ps(_mm256_add_ps(Avx::Square(LoadAtEdge<-2>(src)), Avx::Square(LoadAtEdge<-1>(src))),
-                _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src)), _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src + 1)), Avx::Square(_mm256_loadu_ps(src + 2)))));
+            return _mm256_add_ps(_mm256_add_ps(Square(LoadAtEdge<-2>(src)), Square(LoadAtEdge<-1>(src))),
+                _mm256_add_ps(Square(_mm256_loadu_ps(src)), _mm256_add_ps(Square(_mm256_loadu_ps(src + 1)), Square(_mm256_loadu_ps(src + 2)))));
         }
 
         SIMD_INLINE __m256 BodySquareSum(const float * src)
         {
-            return _mm256_add_ps(_mm256_add_ps(Avx::Square(_mm256_loadu_ps(src - 2)), Avx::Square(_mm256_loadu_ps(src - 1))),
-                _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src)), _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src + 1)), Avx::Square(_mm256_loadu_ps(src + 2)))));
+            return _mm256_add_ps(_mm256_add_ps(Square(_mm256_loadu_ps(src - 2)), Square(_mm256_loadu_ps(src - 1))),
+                _mm256_add_ps(Square(_mm256_loadu_ps(src)), _mm256_add_ps(Square(_mm256_loadu_ps(src + 1)), Square(_mm256_loadu_ps(src + 2)))));
         }
 
         SIMD_INLINE __m256 TailSquareSum(const float * src)
         {
-            return _mm256_add_ps(_mm256_add_ps(Avx::Square(LoadAtEdge<2>(src)), Avx::Square(LoadAtEdge<1>(src))),
-                _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src)), _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src - 1)), Avx::Square(_mm256_loadu_ps(src - 2)))));
+            return _mm256_add_ps(_mm256_add_ps(Square(LoadAtEdge<2>(src)), Square(LoadAtEdge<1>(src))),
+                _mm256_add_ps(Square(_mm256_loadu_ps(src)), _mm256_add_ps(Square(_mm256_loadu_ps(src - 1)), Square(_mm256_loadu_ps(src - 2)))));
         }
 
         template<bool align> void SynetLrnLayerCrossChannelsNchw(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst)

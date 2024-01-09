@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -88,7 +88,7 @@ namespace Simd
                 bestIndex = _mm256_blendv_epi8(bestIndex, buffer.neg[i], _mm256_castps_si256(mask));
             }
             Store<align>((__m256i*)(buffer.index + col), bestIndex);
-            Store<align>(buffer.value + col, Avx::Sqrt<0>(_mm256_fmadd_ps(dx, dx, _mm256_mul_ps(dy, dy))));
+            Store<align>(buffer.value + col, Sqrt<0>(_mm256_fmadd_ps(dx, dx, _mm256_mul_ps(dy, dy))));
         }
 
         template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m256i & t, const __m256i & l, const __m256i & r, const __m256i & b, Buffer & buffer, size_t col)
@@ -194,7 +194,7 @@ namespace Simd
                 bestIndex = _mm256_andnot_si256(_mm256_cmpeq_epi32(bestIndex, K32_18), bestIndex);
 
                 Store<align>((__m256i*)(buffer.index + col), bestIndex);
-                Store<align>(buffer.value + col, Avx::Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
+                Store<align>(buffer.value + col, Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
             }
 
             template <int part> SIMD_INLINE __m256 CovertDifference(const __m128i & a, const __m128i & b)
@@ -476,7 +476,7 @@ namespace Simd
                 bestIndex = _mm256_andnot_si256(_mm256_cmpeq_epi32(bestIndex, _Q2), bestIndex);
 
                 Store<align>((__m256i*)(_index.data + col), bestIndex);
-                Store<align>(_value.data + col, Avx::Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
+                Store<align>(_value.data + col, Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
             }
 
             template <int part> SIMD_INLINE __m256 ConvertDifference(const __m128i & a, const __m128i & b)

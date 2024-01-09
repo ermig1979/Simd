@@ -86,8 +86,8 @@ namespace Simd
     }
 #endif//SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
     {
         SIMD_INLINE float ExtractValue(__m256 a, int i)
         {
@@ -113,13 +113,8 @@ namespace Simd
         {
             __m256 b = _mm256_hadd_ps(_mm256_hadd_ps(a0, a1), _mm256_hadd_ps(a2, a3));
             return _mm_add_ps(_mm256_castps256_ps128(b), _mm256_extractf128_ps(b, 1));
-        }
-    }
-#endif//SIMD_AVX_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE
-    namespace Avx2
-    {
+        }        
+        
         template <class T> SIMD_INLINE T Extract(__m256i a, size_t index)
         {
             const size_t size = A / sizeof(T);

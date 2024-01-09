@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -723,7 +723,7 @@ namespace Simd
                     }
                     else
                     {
-                        __m256 mask0 = Avx::LeftNotZero32f(n - 0 * F);
+                        __m256 mask0 = LeftNotZero32f(n - 0 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float* b = B + k * ldb;
@@ -746,8 +746,8 @@ namespace Simd
                     }
                     else
                     {
-                        __m256 mask0 = Avx::LeftNotZero32f(n - 0 * F);
-                        __m256 mask1 = Avx::LeftNotZero32f(n - 1 * F);
+                        __m256 mask0 = LeftNotZero32f(n - 0 * F);
+                        __m256 mask1 = LeftNotZero32f(n - 1 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float* b = B + k * ldb;
@@ -772,9 +772,9 @@ namespace Simd
                     }
                     else
                     {
-                        __m256 mask0 = Avx::LeftNotZero32f(n - 0 * F);
-                        __m256 mask1 = Avx::LeftNotZero32f(n - 1 * F);
-                        __m256 mask2 = Avx::LeftNotZero32f(n - 2 * F);
+                        __m256 mask0 = LeftNotZero32f(n - 0 * F);
+                        __m256 mask1 = LeftNotZero32f(n - 1 * F);
+                        __m256 mask2 = LeftNotZero32f(n - 2 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float* b = B + k * ldb;
@@ -944,7 +944,7 @@ namespace Simd
                 b0 = _mm256_loadu_ps(B0 + k);
                 c00 = _mm256_fmadd_ps(a0, b0, c00);
             }
-            C[0] += alpha * Avx::ExtractSum(c00);
+            C[0] += alpha * ExtractSum(c00);
         }
 
         static SIMD_NOINLINE void Kernel1x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
@@ -1017,8 +1017,8 @@ namespace Simd
                 c00 = _mm256_fmadd_ps(a0, b0, c00);
                 c10 = _mm256_fmadd_ps(a1, b0, c10);
             }
-            C[0 * ldc] += alpha * Avx::ExtractSum(c00);
-            C[1 * ldc] += alpha * Avx::ExtractSum(c10);
+            C[0 * ldc] += alpha * ExtractSum(c00);
+            C[1 * ldc] += alpha * ExtractSum(c10);
         }
 
         static SIMD_NOINLINE void Kernel2x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
@@ -1113,9 +1113,9 @@ namespace Simd
                 c10 = _mm256_fmadd_ps(a1, b0, c10);
                 c20 = _mm256_fmadd_ps(a2, b0, c20);
             }
-            C[0 * ldc] += alpha * Avx::ExtractSum(c00);
-            C[1 * ldc] += alpha * Avx::ExtractSum(c10);
-            C[2 * ldc] += alpha * Avx::ExtractSum(c20);
+            C[0 * ldc] += alpha * ExtractSum(c00);
+            C[1 * ldc] += alpha * ExtractSum(c10);
+            C[2 * ldc] += alpha * ExtractSum(c20);
         }
 
         static SIMD_NOINLINE void Kernel3x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)

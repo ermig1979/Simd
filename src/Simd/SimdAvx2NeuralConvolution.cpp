@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -227,7 +227,7 @@ namespace Simd
             for (; i < n; i += F)
                 Add8ExtractedSums(_sums + i, sums + i);
             for (; i < coreX*coreY; ++i)
-                sums[i] += Avx::ExtractSum(_sums[i]);
+                sums[i] += ExtractSum(_sums[i]);
         }
 
         void NeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
@@ -458,9 +458,9 @@ namespace Simd
                                 _a[2] = _mm256_and_ps(tailMask, Load<false>(pa + k + 2 * K));
                                 Kernel3x1x8<false>(_a, pb + k, sums);
                             }
-                            pc[j + 0 * N] += Avx::ExtractSum(sums[0]);
-                            pc[j + 1 * N] += Avx::ExtractSum(sums[1]);
-                            pc[j + 2 * N] += Avx::ExtractSum(sums[2]);
+                            pc[j + 0 * N] += ExtractSum(sums[0]);
+                            pc[j + 1 * N] += ExtractSum(sums[1]);
+                            pc[j + 2 * N] += ExtractSum(sums[2]);
                         }
                     }
                     for (; i < M; ++i)
@@ -500,7 +500,7 @@ namespace Simd
                                 __m256 _a = _mm256_and_ps(tailMask, Load<false>(pa + k));
                                 Kernel1x1x8<false>(_a, pb + k, sum);
                             }
-                            pc[j] += Avx::ExtractSum(sum);
+                            pc[j] += ExtractSum(sum);
                         }
                     }
                 }

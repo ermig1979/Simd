@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -533,7 +533,7 @@ namespace Simd
                             pSrc += srcStride;
                             pFilter += filterStride;
                         }
-                        _mm_storeu_ps(dst + dstCol, Avx::Extract4Sums(sums));
+                        _mm_storeu_ps(dst + dstCol, Extract4Sums(sums));
                     }
                     for (; dstCol < dstWidth; ++dstCol)
                     {
@@ -547,7 +547,7 @@ namespace Simd
                             pSrc += srcStride;
                             pFilter += filterStride;
                         }
-                        dst[dstCol] = Avx::ExtractSum(sum);
+                        dst[dstCol] = ExtractSum(sum);
                     }
                     dst += dstStride;
                 }
@@ -582,7 +582,7 @@ namespace Simd
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
-                            _mm_storeu_ps(dst + dstCol, _mm_blendv_ps(_min, Avx::Extract4Sums(sums), _mask));
+                            _mm_storeu_ps(dst + dstCol, _mm_blendv_ps(_min, Extract4Sums(sums), _mask));
                         }
                     }
                     for (; dstCol < dstWidth; ++dstCol)
@@ -599,7 +599,7 @@ namespace Simd
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
-                            dst[dstCol] = Avx::ExtractSum(sum);
+                            dst[dstCol] = ExtractSum(sum);
                         }
                         else
                             dst[dstCol] = -FLT_MAX;
@@ -914,7 +914,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx4<align, step>(s + i, filter + i, sums);
-                        Sse41::Store<true>(dst + col, Avx::Extract4Sums(sums));
+                        Sse41::Store<true>(dst + col, Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {
@@ -922,7 +922,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx1<align>(s + i, filter + i, sum);
-                        dst[col] = Avx::ExtractSum(sum);
+                        dst[col] = ExtractSum(sum);
                     }
                     src += srcStride;
                     dst += dstStride;

@@ -26,8 +26,6 @@
 
 //#define SIMD_SSE41_DISABLE
 
-//#define SIMD_AVX_DISABLE
-
 //#define SIMD_AVX2_DISABLE
 
 //#define SIMD_AVX512BW_DISABLE

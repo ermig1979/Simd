@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -110,10 +110,10 @@ namespace Simd
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetInputLoad8n(const float * src, __m256 * dst, PadType pad)
         {
-            __m256 a0 = Avx::Set(pad == PadNose1 ? Sse41::LoadPadZeroNose1(src + 0) : _mm_loadu_ps(src + 0), _mm_loadu_ps(src + 8));
+            __m256 a0 = Set(pad == PadNose1 ? Sse41::LoadPadZeroNose1(src + 0) : _mm_loadu_ps(src + 0), _mm_loadu_ps(src + 8));
             __m256 a1 = Load<false>(src + 2, src + 10);
             __m256 a2 = Load<false>(src + 4, src + 12);
-            __m256 a3 = Avx::Set(_mm_loadu_ps(src + 6), pad == PadTail2 ? Sse41::LoadPadZeroTail2(src + 14) : (pad == PadTail1 ? Sse41::LoadPadZeroTail1(src + 14) : _mm_loadu_ps(src + 14)));
+            __m256 a3 = Set(_mm_loadu_ps(src + 6), pad == PadTail2 ? Sse41::LoadPadZeroTail2(src + 14) : (pad == PadTail1 ? Sse41::LoadPadZeroTail1(src + 14) : _mm_loadu_ps(src + 14)));
             dst[0] = _mm256_shuffle_ps(a0, a2, 0x88);
             dst[1] = _mm256_shuffle_ps(a0, a2, 0xDD);
             dst[2] = _mm256_shuffle_ps(a1, a3, 0x88);

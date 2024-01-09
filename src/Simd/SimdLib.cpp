@@ -4066,7 +4066,7 @@ SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t wi
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx::F)
+    if (Avx2::Enable && width >= Avx2::F)
         Avx2::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
     else
 #endif

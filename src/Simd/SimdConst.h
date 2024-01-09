@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar,
+* Copyright (c) 2011-2024 Yermalayeu Ihar,
 *               2014-2015 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -181,21 +181,9 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX_ENABLE    
-    namespace Avx
-    {
-        const size_t F = sizeof(__m256) / sizeof(float);
-        const size_t DF = 2 * F;
-        const size_t QF = 4 * F;
-        const size_t HF = F / 2;
-    }
-#endif
-
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        using namespace Avx;
-
         const size_t F = sizeof(__m256) / sizeof(float);
         const size_t DF = 2 * F;
         const size_t QF = 4 * F;

@@ -519,13 +519,13 @@ namespace Simd
     }
 #endif// SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
     {
         SIMD_INLINE __m256 Square(__m256 value)
         {
             return _mm256_mul_ps(value, value);
-        }
+    }
 
         template<bool fast> __m256 Rcp(__m256 value);
 
@@ -580,21 +580,21 @@ namespace Simd
             return _mm256_hadd_ps(_mm256_permute2f128_ps(a, b, 0x20), _mm256_permute2f128_ps(a, b, 0x31));
         }
 
-        SIMD_INLINE void Add8ExtractedSums(const __m256 * src, float * dst)
+        SIMD_INLINE void Add8ExtractedSums(const __m256* src, float* dst)
         {
             __m256 lo = PermutedHorizontalAdd(PermutedHorizontalAdd(src[0], src[1]), PermutedHorizontalAdd(src[2], src[3]));
             __m256 hi = PermutedHorizontalAdd(PermutedHorizontalAdd(src[4], src[5]), PermutedHorizontalAdd(src[6], src[7]));
             _mm256_storeu_ps(dst, _mm256_add_ps(_mm256_loadu_ps(dst), PermutedHorizontalAdd(lo, hi)));
         }
 
-        template <bool condition> SIMD_INLINE __m256 Masked(const __m256 & value, const __m256 & mask);
+        template <bool condition> SIMD_INLINE __m256 Masked(const __m256& value, const __m256& mask);
 
-        template <> SIMD_INLINE __m256 Masked<false>(const __m256 & value, const __m256 & mask)
+        template <> SIMD_INLINE __m256 Masked<false>(const __m256& value, const __m256& mask)
         {
             return value;
         }
 
-        template <> SIMD_INLINE __m256 Masked<true>(const __m256 & value, const __m256 & mask)
+        template <> SIMD_INLINE __m256 Masked<true>(const __m256& value, const __m256& mask)
         {
             return _mm256_and_ps(value, mask);
         }
@@ -608,15 +608,6 @@ namespace Simd
         {
             Sse41::MinVal32f(_mm_min_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
         }
-    }
-#endif//SIMD_AVX_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE
-    namespace Avx2
-    {
-#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug     
-        using Avx::RightNotZero32f;
-#endif
 
         SIMD_INLINE __m256 Not(__m256 value)
         {
@@ -1141,12 +1132,12 @@ namespace Simd
 
         SIMD_INLINE void MaxVal32f(__m512 src, float& dst)
         {
-            Avx::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
+            Avx2::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
         }
 
         SIMD_INLINE void MinVal32f(__m512 src, float& dst)
         {
-            Avx::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
+            Avx2::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
         }
     }
 #endif //SIMD_AVX512BW_ENABLE

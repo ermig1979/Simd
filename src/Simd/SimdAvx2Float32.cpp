@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -143,7 +143,7 @@ namespace Simd
                 _ab[0] = _mm256_fmadd_ps(a0, b0, _ab[0]);
                 _bb[0] = _mm256_fmadd_ps(b0, b0, _bb[0]);
             }
-            float aa = Avx::ExtractSum(_aa[0]), ab = Avx::ExtractSum(_ab[0]), bb = Avx::ExtractSum(_bb[0]);
+            float aa = ExtractSum(_aa[0]), ab = ExtractSum(_ab[0]), bb = ExtractSum(_bb[0]);
             for (; i < size; ++i)
             {
                 float _a = a[i];

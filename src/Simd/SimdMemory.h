@@ -245,25 +245,18 @@ namespace Simd
     }
 #endif// SIMD_SSE41_ENABLE
 
-#ifdef SIMD_AVX_ENABLE
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
     {
         SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m256))
         {
             return Simd::Aligned(size, align);
         }
 
-        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(__m256))
+        SIMD_INLINE bool Aligned(const void* ptr, size_t align = sizeof(__m256))
         {
             return Simd::Aligned(ptr, align);
         }
-    }
-#endif// SIMD_AVX_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE
-    namespace Avx2
-    {
-        using Avx::Aligned;
     }
 #endif// SIMD_AVX2_ENABLE
 

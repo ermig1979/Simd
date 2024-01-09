@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ namespace Simd
         void ConvolutionBiasAndActivation(const float* bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float* params, ::SimdBool trans, float* dst)
         {
 #ifdef SIMD_MSVS2017_WIN32_RELEASE_COMPILER_ERROR
-            Avx::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
+            Avx2::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
 #else
             size_t aligned = AlignLo(trans ? count : size, F);
             __mmask16 tail = __mmask16(-1) >> (F + aligned - (trans ? count : size));
@@ -628,7 +628,7 @@ namespace Simd
                 _nhwcRun = Avx512bw::Gemm32fNNcbRun;
                 _nhwcReorderB = Avx512bw::Gemm32fNNcbReorderB;
             }
-            _biasAndActivation = _N > Avx::F ? Avx512bw::ConvolutionBiasAndActivation : Avx2::ConvolutionBiasAndActivation;
+            _biasAndActivation = _N > Avx2::F ? Avx512bw::ConvolutionBiasAndActivation : Avx2::ConvolutionBiasAndActivation;
         }
 
         void SynetConvolution32fGemmNN::ImgToCol(const float* src, float* dst)
@@ -803,7 +803,7 @@ namespace Simd
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
             : Avx2::SynetConvolution32fNhwcDirect(p)
         {
-            if (p.dstC <= Avx::F)
+            if (p.dstC <= Avx2::F)
                 return;
             //_old.enable = true;
             if (_old.enable)
