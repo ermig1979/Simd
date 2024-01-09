@@ -36,7 +36,7 @@ namespace Simd
     namespace Avx2
     {
         SynetConvolution32fDirectNhwc::SynetConvolution32fDirectNhwc(const ConvParam32f & p)
-            : Avx::SynetConvolution32fDirectNhwc(p)
+            : Sse41::SynetConvolution32fDirectNhwc(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -991,7 +991,7 @@ namespace Simd
                 case ::SimdConvolutionActivationGelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationGelu>(p); break;
                 }
             }
-            return func ? func : Avx::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();
+            return func ? func : Sse41::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();
         };
     }
 #endif//SIMD_AVX2_ENABLE

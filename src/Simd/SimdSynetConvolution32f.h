@@ -743,17 +743,6 @@ namespace Simd
             virtual String Ext() const { return "Avx"; }
         };
 
-        class SynetConvolution32fDirectNhwc : public Sse41::SynetConvolution32fDirectNhwc
-        {
-        public:
-            SynetConvolution32fDirectNhwc(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx"; }
-        
-            static bool Preferable(const ConvParam32f & p);
-        protected:
-            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
-        };
-
         class SynetConvolution32fNhwcDirect : public Sse41::SynetConvolution32fNhwcDirect
         {
         public:
@@ -811,7 +800,7 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class SynetConvolution32fDirectNhwc : public Avx::SynetConvolution32fDirectNhwc
+        class SynetConvolution32fDirectNhwc : public Sse41::SynetConvolution32fDirectNhwc
         {
         public:
             SynetConvolution32fDirectNhwc(const ConvParam32f & p);
