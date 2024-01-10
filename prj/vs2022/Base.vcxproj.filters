@@ -112,9 +112,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseIntegral.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseInterference.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseInterleave.cpp">
       <Filter>Base</Filter>
     </ClCompile>

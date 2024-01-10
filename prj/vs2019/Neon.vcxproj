@@ -69,7 +69,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonImageSavePng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonInt16ToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonInterference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonInterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonLaplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonLbp.cpp" />

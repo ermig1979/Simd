@@ -43,7 +43,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxHistogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxInterference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxInterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxLaplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxLbp.cpp" />

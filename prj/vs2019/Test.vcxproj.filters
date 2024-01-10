@@ -106,9 +106,6 @@
     <ClCompile Include="..\..\src\Test\TestIntegral.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestInterference.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestInterleave.cpp">
       <Filter>Test</Filter>
     </ClCompile>

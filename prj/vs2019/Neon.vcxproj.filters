@@ -91,9 +91,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonInt16ToGray.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonInterference.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonInterleave.cpp">
       <Filter>Neon</Filter>
     </ClCompile>

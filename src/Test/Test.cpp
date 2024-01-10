@@ -274,11 +274,6 @@ namespace Test
 
     TEST_ADD_GROUP_A0(Integral);
 
-    TEST_ADD_GROUP_A0(InterferenceIncrement);
-    TEST_ADD_GROUP_A0(InterferenceIncrementMasked);
-    TEST_ADD_GROUP_A0(InterferenceDecrement);
-    TEST_ADD_GROUP_A0(InterferenceDecrementMasked);
-
     TEST_ADD_GROUP_A0(InterleaveUv);
     TEST_ADD_GROUP_A0(InterleaveBgr);
     TEST_ADD_GROUP_A0(InterleaveBgra);

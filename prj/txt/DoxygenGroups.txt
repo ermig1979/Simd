@@ -360,11 +360,6 @@
 */
 
 /*! @ingroup motion_detection
-    @defgroup interference Interference Detection
-    \short Functions for detection of interference in motion detection algorithm.
-*/
-
-/*! @ingroup motion_detection
     @defgroup background Background Updating
     \short Functions for background updating.
 */

@@ -63,7 +63,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Int16ToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41Interference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Interleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Lbp.cpp" />

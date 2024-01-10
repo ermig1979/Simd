@@ -60,7 +60,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSavePng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwInt16ToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwIntegral.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwInterference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwInterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwLaplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwLbp.cpp" />
