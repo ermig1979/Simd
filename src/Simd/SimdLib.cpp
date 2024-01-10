@@ -1176,37 +1176,6 @@ SIMD_API void SimdBgraToRgba(const uint8_t* bgra, size_t width, size_t height, s
         Base::BgraToRgba(bgra, width, height, bgraStride, rgba, rgbaStride);
 }
 
-SIMD_API void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::DA)
-        Avx2::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if(Sse41::Enable && width >= Sse41::DA)
-        Sse41::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::DA)
-        Vmx::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::DA)
-        Neon::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-        Base::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-}
-
 SIMD_API void SimdBgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
     uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
 {
@@ -1232,37 +1201,6 @@ SIMD_API void SimdBgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t
     else
 #endif
         Base::BgraToYuv420pV2(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
-}
-
-SIMD_API void SimdBgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::DA)
-        Avx2::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if(Sse41::Enable && width >= Sse41::DA)
-        Sse41::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::DA)
-        Vmx::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::DA)
-        Neon::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-        Base::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
 }
 
 SIMD_API void SimdBgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
@@ -1292,37 +1230,6 @@ SIMD_API void SimdBgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t
         Base::BgraToYuv422pV2(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
 }
 
-SIMD_API void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::BgraToYuv444p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
-        Avx2::BgraToYuv444p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if(Sse41::Enable && width >= Sse41::A)
-        Sse41::BgraToYuv444p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BgraToYuv444p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::BgraToYuv444p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
-        Base::BgraToYuv444p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-}
-
 SIMD_API void SimdBgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, 
     uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
 {
@@ -1348,33 +1255,6 @@ SIMD_API void SimdBgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t
     else
 #endif
         Base::BgraToYuv444pV2(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, yuvType);
-}
-
-SIMD_API void SimdBgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, 
-    uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::BgraToYuva420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::DA)
-        Avx2::BgraToYuva420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::DA)
-        Sse41::BgraToYuva420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::DA)
-        Neon::BgraToYuva420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
-    else
-#endif
-        Base::BgraToYuva420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
 }
 
 SIMD_API void SimdBgraToYuva420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,

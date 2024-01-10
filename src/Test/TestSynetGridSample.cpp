@@ -154,8 +154,10 @@ namespace Test
         bool result = true;
 
         result = result && SynetGridSample2dAutoTest(Shp(8, 32, 20, 20), Shp(8, 300, 4, 2), f1, f2);
+#ifdef NDEBUG
         result = result && SynetGridSample2dAutoTest(Shp(8, 32, 40, 40), Shp(8, 300, 4, 2), f1, f2);
         result = result && SynetGridSample2dAutoTest(Shp(8, 32, 80, 80), Shp(8, 300, 4, 2), f1, f2);
+#endif
 
         return result;
     }

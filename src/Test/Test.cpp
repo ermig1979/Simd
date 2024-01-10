@@ -110,11 +110,8 @@ namespace Test
     TEST_ADD_GROUP_A0(GrayToBgra);
     TEST_ADD_GROUP_A0(RgbToBgra);
 
-    TEST_ADD_GROUP_A0(BgraToYuv420p);
     TEST_ADD_GROUP_A0(BgraToYuv420pV2);
-    TEST_ADD_GROUP_A0(BgraToYuv422p);
     TEST_ADD_GROUP_A0(BgraToYuv422pV2);
-    TEST_ADD_GROUP_A0(BgraToYuv444p);
     TEST_ADD_GROUP_A0(BgraToYuv444pV2);
     TEST_ADD_GROUP_A0(BgrToYuv420p);
     TEST_ADD_GROUP_A0(BgrToYuv420pV2);
@@ -123,7 +120,6 @@ namespace Test
     TEST_ADD_GROUP_A0(BgrToYuv444p);
     TEST_ADD_GROUP_A0(BgrToYuv444pV2);
     TEST_ADD_GROUP_A0(Uyvy422ToYuv420p);
-    TEST_ADD_GROUP_A0(BgraToYuva420p);
     TEST_ADD_GROUP_A0(BgraToYuva420pV2);
 
     TEST_ADD_GROUP_A0(BackgroundGrowRangeSlow);

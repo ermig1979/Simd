@@ -23,7 +23,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgraToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgraToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBgra.cpp" />

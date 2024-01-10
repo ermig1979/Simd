@@ -25,9 +25,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxBgraToGray.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgraToYuv.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxBgrToBayer.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>

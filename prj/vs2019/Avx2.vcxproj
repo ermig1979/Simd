@@ -22,7 +22,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2BFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToGray.cpp" />

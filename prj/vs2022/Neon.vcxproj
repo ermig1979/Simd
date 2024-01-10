@@ -34,7 +34,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBgra.cpp" />

@@ -165,11 +165,6 @@
     \short Functions for BGRA-32 image conversions.
 */
 
-/*! @ingroup bgra_conversion
-    @defgroup bgra_conversion_old Old API 
-    \short Old deprecated functions for BGRA-32 image conversions.
-*/
-
 /*! @ingroup conversion
     @defgroup gray_conversion Gray-8 
     \short Functions for Gray-8 image conversions.

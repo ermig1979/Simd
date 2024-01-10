@@ -34,9 +34,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToGray.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToYuv.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBayer.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
