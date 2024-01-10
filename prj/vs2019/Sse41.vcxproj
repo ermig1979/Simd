@@ -108,7 +108,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect1x1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirectAny.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetDeconvolution32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetFused.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample2d32fBlZ.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct32f.cpp" />

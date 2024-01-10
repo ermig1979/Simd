@@ -182,44 +182,6 @@ namespace Simd
             return src >= 0.0f ? src : alpha * (::exp(src) - 1.0f);
         }
 
-        SIMD_INLINE float SynetFusedLayerForward0(float x, float s)
-        {
-            return (x - Simd::Abs(x))*s + Simd::Max(0.0f, x);
-        }
-
-        SIMD_INLINE float SynetFusedLayerForward1(float x, float s, float b)
-        {
-            return Simd::Max(0.0f, -x)*s + b + Simd::Max(0.0f, x);
-        }
-
-        SIMD_INLINE float SynetFusedLayerForward2(float src, float scale, float bias, float slope)
-        {
-            float x = src * scale + bias;
-            return Simd::Max(0.0f, x) + Simd::Min(0.0f, x)*slope;
-        }
-
-        SIMD_INLINE float SynetFusedLayerForward3(float x, float s)
-        {
-            return Simd::Max(0.0f, x) + Simd::Min(x, 0.0f) * s;
-        }
-
-        SIMD_INLINE void SynetFusedLayerForward4(float src, float bias0, float scale1, float bias1, float * dst0, float * dst1)
-        {
-            float x = src + bias0;
-            dst0[0] = Simd::Max(0.0f, x);
-            dst1[0] = Simd::Max(0.0f, x*scale1 + bias1);
-        }
-
-        SIMD_INLINE float SynetFusedLayerForward8(float src0, float src1, float src2)
-        {
-            return src0 + src1 * src2;
-        }
-
-        SIMD_INLINE float SynetFusedLayerForward9(float src, float scale, float bias)
-        {
-            return Simd::Max(0.0f, src * scale + bias);
-        }
-
         SIMD_INLINE float SynetHardSigmoid32f(float value, float scale, float shift)
         {
             return Simd::Max(0.0f, Simd::Min(value * scale + shift, 1.0f));

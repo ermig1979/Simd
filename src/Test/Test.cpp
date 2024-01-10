@@ -391,14 +391,6 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetDeconvolution32fForward);
 
-    TEST_ADD_GROUP_A0(SynetFusedLayerForward0);
-    TEST_ADD_GROUP_A0(SynetFusedLayerForward1);
-    TEST_ADD_GROUP_A0(SynetFusedLayerForward2);
-    TEST_ADD_GROUP_A0(SynetFusedLayerForward3);
-    TEST_ADD_GROUP_A0(SynetFusedLayerForward4);
-    TEST_ADD_GROUP_A0(SynetFusedLayerForward8);
-    TEST_ADD_GROUP_A0(SynetFusedLayerForward9);
-
     TEST_ADD_GROUP_A0(SynetGridSample2d);
 
     TEST_ADD_GROUP_A0(SynetInnerProduct32fForward);

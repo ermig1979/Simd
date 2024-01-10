@@ -157,9 +157,6 @@
     <ClCompile Include="..\..\src\Test\TestSynetDeconvolution32f.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetFused.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution32f.cpp">
       <Filter>Test</Filter>
     </ClCompile>

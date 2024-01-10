@@ -199,9 +199,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetDeconvolution32f.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetFused.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution32f.cpp">
       <Filter>Base</Filter>
     </ClCompile>

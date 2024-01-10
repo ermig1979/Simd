@@ -532,20 +532,6 @@ namespace Simd
         void SynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
             const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
 
-        void SynetFusedLayerForward0(const float* src, const float* bias, const float* scale, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
-
-        void SynetFusedLayerForward1(const float* src, const float* bias0, const float* scale1, const float* bias1, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
-
-        void SynetFusedLayerForward2(const float* src, const float* scale, const float* bias, size_t channels, size_t spatial, const float* slope, float* dst, SimdTensorFormatType format);
-
-        void SynetFusedLayerForward3(const float* src, const float* bias, const float* scale, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
-
-        void SynetFusedLayerForward4(const float* src, const float* bias0, const float* scale1, const float* bias1, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
-
-        void SynetFusedLayerForward8(const float* src0, const float* src1, const float* src2, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
-
-        void SynetFusedLayerForward9(const float* src0, const float* src1, const float* scale, const float* bias, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format);
-
         void SynetGelu32f(const float* src, size_t size, float* dst);
 
         void SynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility);
