@@ -46,9 +46,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuv.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp">
       <Filter>Neon</Filter>
     </ClCompile>

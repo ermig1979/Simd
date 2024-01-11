@@ -32,7 +32,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxBgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBgrToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp" />
