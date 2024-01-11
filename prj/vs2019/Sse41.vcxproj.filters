@@ -124,9 +124,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Interleave.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgr.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>

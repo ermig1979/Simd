@@ -180,11 +180,6 @@
     \short Functions for YUV image conversions.
 */
 
-/*! @ingroup yuv_conversion
-    @defgroup yuv_conversion_old Old API 
-    \short Old deprecated functions for YUV image conversions.
-*/
-
 /*! @ingroup conversion
     @defgroup interleave_conversion Interleave
     \short Functions to intereleave planar images.

@@ -275,10 +275,13 @@ namespace Test
         SimdSynetCompatibilityType cP = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaUse);
         SimdSynetCompatibilityType cN = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaUse);
 
-        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(2, 3, 30007, s, d, f, cN, 1, 1), f1, f2);
-        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 255, 1005, s, d, f, cP, 1, 0), f1, f2);
 #ifdef NDEBUG
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(2, 3, 30007, s, d, f, cN, 1, 1), f1, f2);
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 255, 1005, s, d, f, cP, 1, 0), f1, f2);        
         result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 65, 1603, s, d, f, cN, 0, 1), f1, f2);
+#else
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(2, 3, 3007, s, d, f, cN, 1, 1), f1, f2);
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 25, 1005, s, d, f, cP, 1, 0), f1, f2);
 #endif
 
         return result;
