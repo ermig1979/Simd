@@ -124,9 +124,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwReorder.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizeBilinear.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizer.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>

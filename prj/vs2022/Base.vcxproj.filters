@@ -154,9 +154,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseReorder.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseResizeBilinear.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseResizer.cpp">
       <Filter>Base</Filter>
     </ClCompile>

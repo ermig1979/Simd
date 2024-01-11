@@ -72,7 +72,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwReorder.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerArea.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerBicubic.cpp" />

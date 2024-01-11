@@ -321,11 +321,8 @@ namespace Test
     TEST_ADD_GROUP_A0(Reorder32bit);
     TEST_ADD_GROUP_A0(Reorder64bit);
 
-    TEST_ADD_GROUP_AS(ResizeBilinear);
     TEST_ADD_GROUP_A0(Resizer);
     TEST_ADD_GROUP_0S(ResizeYuv420p);
-    TEST_ADD_GROUP_0S(ResizeAreaGray);
-    TEST_ADD_GROUP_0S(ResizeArea);
 
     TEST_ADD_GROUP_A0(SegmentationShrinkRegion);
     TEST_ADD_GROUP_A0(SegmentationFillSingleHoles);

@@ -1067,7 +1067,7 @@ namespace Simd
             {
                 model.roiMask.Recreate(model.frameSize, model.levelCount);
                 if (_model.mask.format == View::Gray8)
-                    Simd::ResizeBilinear(_model.mask, model.roiMask[0]);
+                    Simd::Resize(_model.mask, model.roiMask[0]);
                 else
                 {
                     Simd::Fill(model.roiMask, Motion::Model::EMPTY);

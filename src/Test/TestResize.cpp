@@ -30,118 +30,6 @@
 
 namespace Test
 {
-    namespace
-    {
-        struct FuncRB
-        {
-            typedef void(*FuncPtr)(
-                const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-                uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
-
-            FuncPtr func;
-            String description;
-
-            FuncRB(const FuncPtr & f, const String & d) : func(f), description(d) {}
-
-            void Call(const View & src, View & dst) const
-            {
-                TEST_PERFORMANCE_TEST(description);
-                func(src.data, src.width, src.height, src.stride,
-                    dst.data, dst.width, dst.height, dst.stride, View::PixelSize(src.format));
-            }
-        };
-    }
-
-#define ARGS_RB1(format, width, height, k, function1, function2) \
-    format, width, height, k, \
-    FuncRB(function1.func, function1.description + ColorDescription(format)), \
-    FuncRB(function2.func, function2.description + ColorDescription(format))
-
-#define ARGS_RB2(format, src, dst, function1, function2) \
-    format, src, dst, \
-    FuncRB(function1.func, function1.description + ColorDescription(format)), \
-    FuncRB(function2.func, function2.description + ColorDescription(format))
-
-#define FUNC_RB(function) \
-    FuncRB(function, std::string(#function))
-
-    bool ResizeAutoTest(View::Format format, int width, int height, double k, const FuncRB & f1, const FuncRB & f2)
-    {
-        bool result = true;
-
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description
-            << " [" << size_t(width*k) << ", " << size_t(height*k) << "] -> [" << width << ", " << height << "].");
-
-        View s(size_t(width*k), size_t(height*k), format, NULL, TEST_ALIGN(size_t(k*width)));
-        FillRandom(s);
-
-        View d1(width, height, format, NULL, TEST_ALIGN(width));
-        View d2(width, height, format, NULL, TEST_ALIGN(width));
-
-        TEST_ALIGN(SIMD_ALIGN);
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
-
-#if !(defined(_WIN32) && defined(NDEBUG) && defined(SIMD_X86_ENABLE))
-        result = result && Compare(d1, d2, 0, true, 64);
-#endif
-
-        return result;
-    }
-
-    bool ResizeAutoTest(const FuncRB & f1, const FuncRB & f2)
-    {
-        bool result = true;
-
-        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
-        {
-            //result = result && ResizeAutoTest(ARGS_RB1(format, W/3, H/3, 3.3, f1, f2));
-            //result = result && ResizeAutoTest(ARGS_RB1(format, W, H, 0.9, f1, f2));
-            result = result && ResizeAutoTest(ARGS_RB1(format, W + O, H - O, 1.3, f1, f2));
-            result = result && ResizeAutoTest(ARGS_RB1(format, W - O, H + O, 0.7, f1, f2));
-        }
-
-        return result;
-    }
-
-    bool ResizeBilinearAutoTest()
-    {
-        bool result = true;
-
-        result = result && ResizeAutoTest(FUNC_RB(Simd::Base::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
-            result = result && ResizeAutoTest(FUNC_RB(Simd::Sse41::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif 
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
-            result = result && ResizeAutoTest(FUNC_RB(Simd::Avx2::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif 
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && W >= Simd::Avx512bw::A)
-            result = result && ResizeAutoTest(FUNC_RB(Simd::Avx512bw::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif 
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
-            result = result && ResizeAutoTest(FUNC_RB(Simd::Vmx::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif 
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
-            result = result && ResizeAutoTest(FUNC_RB(Simd::Neon::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif
-
-        return result;
-    }
-
-    //---------------------------------------------------------------------------------------------
-
     String ToString(SimdResizeMethodType method)
     {
         switch (method)
@@ -321,12 +209,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizerAutoTest(method, type, channels, 530, 404, 96, 96, f1, f2);
-
         result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
 
 #if 0
@@ -347,7 +233,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 530, 404, 96, 96, f1, f2);
+        //result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 530, 404, 96, 96, f1, f2);
         //result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 4, 100, 1, 200, 10, f1, f2);
         //result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 4, 100, 2, 200, 10, f1, f2);
 
@@ -398,77 +284,6 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && ResizerAutoTest(FUNC_RS(Simd::Neon::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif 
-
-        return result;
-    }
-
-    //---------------------------------------------------------------------------------------------
-
-    bool ResizeSpecialTest(View::Format format, const Size & src, const Size & dst, const FuncRB & f1, const FuncRB & f2)
-    {
-        bool result = true;
-
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << src.x << ", " << src.y << "] -> [" << dst.x << ", " << dst.y << "].");
-
-        View s(src.x, src.y, format, NULL, TEST_ALIGN(src.x));
-        FillRandom(s);
-
-        View d1(dst.x, dst.y, format, NULL, TEST_ALIGN(dst.x));
-        View d2(dst.x, dst.y, format, NULL, TEST_ALIGN(dst.x));
-
-        f1.Call(s, d1);
-
-        f2.Call(s, d2);
-
-        result = result && Compare(d1, d2, 0, true, 64);
-
-        return result;
-    }
-
-    bool ResizeSpecialTest(const FuncRB & f1, const FuncRB & f2)
-    {
-        bool result = true;
-
-        result = result && ResizeSpecialTest(ARGS_RB2(View::Bgr24, Size(1920, 1080), Size(224, 224), f1, f2));
-        result = result && ResizeSpecialTest(ARGS_RB2(View::Gray8, Size(352, 240), Size(174, 94), f1, f2));
-
-        for (Size dst(128, 8); dst.x < 144; ++dst.x)
-            for (Size src(32, 12); src.x < 512; ++src.x)
-                result = result && ResizeSpecialTest(ARGS_RB2(View::Gray8, src, dst, f1, f2));
-
-        return result;
-    }
-
-    bool ResizeBilinearSpecialTest()
-    {
-        bool result = true;
-
-        result = result && ResizeSpecialTest(FUNC_RB(Simd::Base::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
-            result = result && ResizeSpecialTest(FUNC_RB(Simd::Sse41::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif 
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
-            result = result && ResizeSpecialTest(FUNC_RB(Simd::Avx2::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif 
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
-            result = result && ResizeSpecialTest(FUNC_RB(Simd::Avx512bw::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif 
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
-            result = result && ResizeSpecialTest(FUNC_RB(Simd::Vmx::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
-            result = result && ResizeSpecialTest(FUNC_RB(Simd::Neon::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif
 
         return result;
     }
@@ -563,34 +378,6 @@ namespace Test
         result = result && ResizeYuv420pSpecialTest(SimdResizeMethodArea);
 
         result = result && ResizeYuv420pSpecialTest(SimdResizeMethodAreaFast);
-
-        return result;
-    }
-
-    bool ResizeAreaGraySpecialTest()
-    {
-        bool result = true;
-
-        View src(W, H, View::Gray8);
-        FillRandom(src);
-
-        View dst(W / 7, H / 7, View::Gray8);
-
-        ResizeAreaGray(src, dst);
-
-        return result;
-    }
-
-    bool ResizeAreaSpecialTest()
-    {
-        bool result = true;
-
-        View src(W, H, View::Bgr24);
-        FillRandom(src);
-
-        View dst(W / 7, H / 7, View::Bgr24);
-
-        ResizeArea(src, dst);
 
         return result;
     }

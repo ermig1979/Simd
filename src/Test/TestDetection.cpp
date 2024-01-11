@@ -71,7 +71,7 @@ namespace Test
                     size_t s = (obj.width * (large ? 3 : 2) + Random((int)obj.width)*(large ? 7 : 1)) / 10;
 
                     View resized(s, s, View::Gray8);
-                    Simd::ResizeBilinear(obj, resized);
+                    Simd::Resize(obj, resized);
 
                     std::vector<uint8_t> profile(s, 255);
                     for (size_t i = 0, n = s / 4; i < n; ++i)
@@ -89,7 +89,7 @@ namespace Test
             View _obj = obj.Region(obj.Size() * 5 / 7, View::MiddleCenter);
             size_t size = 64;
             View _dst = dst.Region(Size(size, size), View::MiddleCenter);
-            Simd::ResizeBilinear(_obj, _dst);
+            Simd::Resize(_obj, _dst);
         }
 
         return dst;

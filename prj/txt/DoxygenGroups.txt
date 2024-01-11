@@ -264,10 +264,6 @@
     @defgroup resizing Resizing
     \short Functions for image resizing.
 */
-/*! @ingroup resizing
-    @defgroup resizing_old Old API 
-    \short Old deprecated functions for image resizing.
-*/
 
 /*! @ingroup functions
     @defgroup shifting Shifting
