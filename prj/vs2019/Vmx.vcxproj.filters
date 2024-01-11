@@ -118,9 +118,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxYuvToBgr.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxYuvToBgra.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>

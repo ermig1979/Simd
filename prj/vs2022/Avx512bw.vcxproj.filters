@@ -163,9 +163,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgr.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgra.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>

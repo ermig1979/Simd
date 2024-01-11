@@ -477,15 +477,11 @@ namespace Test
     TEST_ADD_GROUP_AS(Yuv420pToRgbV2);
     TEST_ADD_GROUP_A0(Yuv420pToUyvy422);
 
-    TEST_ADD_GROUP_A0(Yuva420pToBgra);
     TEST_ADD_GROUP_A0(Yuva420pToBgraV2);
     TEST_ADD_GROUP_A0(Yuva422pToBgraV2);
     TEST_ADD_GROUP_A0(Yuva444pToBgraV2);
-    TEST_ADD_GROUP_A0(Yuv444pToBgra);
     TEST_ADD_GROUP_A0(Yuv444pToBgraV2);
-    TEST_ADD_GROUP_A0(Yuv422pToBgra);
     TEST_ADD_GROUP_A0(Yuv422pToBgraV2);
-    TEST_ADD_GROUP_A0(Yuv420pToBgra);
     TEST_ADD_GROUP_A0(Yuv420pToBgraV2);
 
     class Task

@@ -61,7 +61,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxStretchGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxYuvToBgr.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxYuvToBgra.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />

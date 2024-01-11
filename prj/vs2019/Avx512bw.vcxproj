@@ -133,7 +133,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvaToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgr.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgrV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToUyvy.cpp" />

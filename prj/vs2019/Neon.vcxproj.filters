@@ -193,9 +193,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgr.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCdc.cpp">
       <Filter>Neon</Filter>
     </ClCompile>

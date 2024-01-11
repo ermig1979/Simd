@@ -21,42 +21,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdConversion.h"
 #include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
     namespace Base
     {
-        SIMD_INLINE void Yuva422pToBgra(const uint8_t * y, int u, int v, const uint8_t * a, uint8_t * bgra)
-        {
-            YuvToBgra(y[0], u, v, a[0], bgra + 0);
-            YuvToBgra(y[1], u, v, a[1], bgra + 4);
-        }
-
-        void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
-        {
-            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
-
-            for (size_t row = 0; row < height; row += 2)
-            {
-                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < width; colY += 2, colUV++, colBgra += 8)
-                {
-                    int u_ = u[colUV];
-                    int v_ = v[colUV];
-                    Yuva422pToBgra(y + colY, u_, v_, a + colY, bgra + colBgra);
-                    Yuva422pToBgra(y + yStride + colY, u_, v_, a + aStride + colY, bgra + bgraStride + colBgra);
-                }
-                y += 2 * yStride;
-                u += uStride;
-                v += vStride;
-                a += 2 * aStride;
-                bgra += 2 * bgraStride;
-            }
-        }
-        //-------------------------------------------------------------------------------------------------
-
         template <class YuvType> SIMD_INLINE void Yuva420pToBgra(const uint8_t* y, int u, int v, const uint8_t* a, uint8_t* bgra)
         {
             YuvToBgra<YuvType>(y[0], u, v, a[0], bgra + 0);
@@ -166,65 +136,6 @@ namespace Simd
             case SimdYuvTrect871: Yuva444pToBgraV2<Trect871>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
             default:
                 assert(0);
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        SIMD_INLINE void Yuv422pToBgra(const uint8_t *y, int u, int v, int alpha, uint8_t * bgra)
-        {
-            YuvToBgra(y[0], u, v, alpha, bgra + 0);
-            YuvToBgra(y[1], u, v, alpha, bgra + 4);
-        }
-
-        void Yuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
-        {
-            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
-
-            for (size_t row = 0; row < height; row += 2)
-            {
-                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < width; colY += 2, colUV++, colBgra += 8)
-                {
-                    int u_ = u[colUV];
-                    int v_ = v[colUV];
-                    Yuv422pToBgra(y + colY, u_, v_, alpha, bgra + colBgra);
-                    Yuv422pToBgra(y + yStride + colY, u_, v_, alpha, bgra + bgraStride + colBgra);
-                }
-                y += 2 * yStride;
-                u += uStride;
-                v += vStride;
-                bgra += 2 * bgraStride;
-            }
-        }
-
-        void Yuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
-        {
-            assert((width % 2 == 0) && (width >= 2));
-
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < width; colY += 2, colUV++, colBgra += 8)
-                    Yuv422pToBgra(y + colY, u[colUV], v[colUV], alpha, bgra + colBgra);
-                y += yStride;
-                u += uStride;
-                v += vStride;
-                bgra += bgraStride;
-            }
-        }
-
-        void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
-        {
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0, colBgra = 0; col < width; col++, colBgra += 4)
-                    YuvToBgra(y[col], u[col], v[col], alpha, bgra + colBgra);
-                y += yStride;
-                u += uStride;
-                v += vStride;
-                bgra += bgraStride;
             }
         }
 
