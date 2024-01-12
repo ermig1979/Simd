@@ -31,10 +31,6 @@ namespace Simd
 #ifdef SIMD_VSX_ENABLE
     namespace Vsx
     {
-        void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
-
-        void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
-
         void Yuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
             size_t width, size_t height, uint8_t * hue, size_t hueStride);
 

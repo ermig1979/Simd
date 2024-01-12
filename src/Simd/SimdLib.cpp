@@ -4963,7 +4963,7 @@ SIMD_API void SimdSquaredDifferenceSum32f(const float * a, const float * b, size
 {
     SIMD_EMPTY();
     typedef void (* SimdSquaredDifferenceSum32fPtr) (const float * a, const float * b, size_t size, float * sum);
-    const static SimdSquaredDifferenceSum32fPtr simdSquaredDifferenceSum32f = SIMD_FUNC5(SquaredDifferenceSum32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+    const static SimdSquaredDifferenceSum32fPtr simdSquaredDifferenceSum32f = SIMD_FUNC4(SquaredDifferenceSum32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSquaredDifferenceSum32f(a, b, size, sum);
 }
@@ -4972,7 +4972,7 @@ SIMD_API void SimdSquaredDifferenceKahanSum32f(const float * a, const float * b,
 {
     SIMD_EMPTY();
     typedef void (* SimdSquaredDifferenceKahanSum32fPtr) (const float * a, const float * b, size_t size, float * sum);
-    const static SimdSquaredDifferenceKahanSum32fPtr simdSquaredDifferenceKahanSum32f = SIMD_FUNC5(SquaredDifferenceKahanSum32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+    const static SimdSquaredDifferenceKahanSum32fPtr simdSquaredDifferenceKahanSum32f = SIMD_FUNC4(SquaredDifferenceKahanSum32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSquaredDifferenceKahanSum32f(a, b, size, sum);
 }
