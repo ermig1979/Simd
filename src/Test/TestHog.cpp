@@ -105,11 +105,6 @@ namespace Test
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Avx512bw::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if (Simd::Vsx::Enable && W >= Simd::Vsx::A + 2)
-            result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Vsx::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W >= Simd::Neon::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Neon::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));

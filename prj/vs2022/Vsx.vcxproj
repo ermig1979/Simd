@@ -22,7 +22,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdVsxCpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVsxHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxNeural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxYuvToHue.cpp" />
