@@ -69,10 +69,8 @@ class CpuInfo(enum.Enum) :
 	AMX = 12
 	## Enabling of VMX (Altivec) CPU extensions (PowerPC specific).
 	VMX = 13
-	## Enabling of VSX (Power 7) CPU extensions (PowerPC specific).
-	VSX = 14
 	## Enabling of NEON CPU extensions (ARM specific).
-	NEON = 15
+	NEON = 14
 
 ## @ingroup python
 # Describes frame format type. It is used in Simd.Frame.
@@ -664,8 +662,6 @@ class Lib():
 			info += " SSE4.1 SSSE3 SSE3 SSE2 SSE"
 		if Lib.CpuInfo(Simd.CpuInfo.NEON) > 0 :
 			info += " NEON"
-		if Lib.CpuInfo(Simd.CpuInfo.VSX) > 0 :
-			info += " VSX"
 		if Lib.CpuInfo(Simd.CpuInfo.VMX) > 0 :
 			info += " Altivec"
 		return info

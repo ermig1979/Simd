@@ -662,12 +662,12 @@ namespace Simd
             if (p.Is1x1() || a.mode)
             {
                 convolutions[TermLast] = ConvolutionBf16NhwcGemm_2<TermLast, type>;
-                convolutions[TermInterim] = ConvolutionBf16NhwcGemm_2<TermInterim, type>;
+                convolutions[TermInterim] = ConvolutionBf16NhwcGemm_2<TermInterim, SimdConvolutionActivationIdentity>;
             }
             else
             {
                 convolutions[TermLast] = ConvolutionBf16NhwcConv_2<TermLast, type>;
-                convolutions[TermInterim] = ConvolutionBf16NhwcConv_2<TermInterim, type>;
+                convolutions[TermInterim] = ConvolutionBf16NhwcConv_2<TermInterim, SimdConvolutionActivationIdentity>;
             }
         }
 

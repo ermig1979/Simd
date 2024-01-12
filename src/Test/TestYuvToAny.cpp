@@ -137,11 +137,6 @@ namespace Test
             result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Avx512bw::Yuv444pToHue), FUNC(SimdYuv444pToHue));
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if (Simd::Vsx::Enable)
-            result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Vsx::Yuv444pToHue), FUNC(SimdYuv444pToHue));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Neon::Yuv444pToHue), FUNC(SimdYuv444pToHue), MAX_DIFFERECE);
@@ -169,11 +164,6 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::DA)
             result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Avx512bw::Yuv420pToHue), FUNC(SimdYuv420pToHue));
-#endif
-
-#ifdef SIMD_VSX_ENABLE
-        if (Simd::Vsx::Enable)
-            result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Vsx::Yuv420pToHue), FUNC(SimdYuv420pToHue));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

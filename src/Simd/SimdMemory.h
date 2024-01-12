@@ -304,13 +304,6 @@ namespace Simd
     }
 #endif// SIMD_VMX_ENABLE
 
-#ifdef SIMD_VSX_ENABLE
-    namespace Vsx
-    {
-        using Vmx::Aligned;
-    }
-#endif// SIMD_VSX_ENABLE
-
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {

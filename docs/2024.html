@@ -156,7 +156,7 @@
 <h5>Removing</h5>
 <ul>
  <li>Base implementation, SSE4.1, AVX, AVX-512BW, NEON, VSX optimizations of function SvmSumLinear.</li>
- <li>Stopping separate support of AVX extension (only together with AVX2).</li>
+ <li>Stopping of separate support of AVX extension (only together with AVX2).</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON, VMX optimizations of function EdgeBackgroundGrowRangeSlow.</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON, VMX optimizations of function EdgeBackgroundGrowRangeFast.</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON, VMX optimizations of function EdgeBackgroundIncrementCount.</li>
@@ -201,6 +201,9 @@
  <li>VSX optimizations of function NeuralRoughSigmoid.</li>
  <li>VSX optimizations of function SquaredDifferenceSum32f.</li>
  <li>VSX optimizations of function SquaredDifferenceKahanSum32f.</li>
+ <li>VSX optimizations of function Yuv420pToHue.</li>
+ <li>VSX optimizations of function Yuv444pToHue.</li>
+ <li>Stopping of support of VSX(Power7) extension.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -258,6 +261,11 @@
  <li>Avx1 project for MSVS-2015.</li>
  <li>Avx1 project for MSVS-2017.</li>
  <li>Avx1 project for CMake.</li>
+ <li>Vsx project for MSVS-2022.</li>
+ <li>Vsx project for MSVS-2019.</li>
+ <li>Vsx project for MSVS-2015.</li>
+ <li>Vsx project for MSVS-2017.</li>
+ <li>Vsx project for CMake.</li>
 </ul>
 
 <a href="#HOME">Home</a>

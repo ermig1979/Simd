@@ -88,7 +88,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAvx512bf16.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdVmx.h"
-#include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
 
 #if !defined(SIMD_VERSION)
@@ -148,9 +147,6 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 #endif
 #ifdef SIMD_VMX_ENABLE
     case SimdCpuInfoVmx: return Vmx::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_VSX_ENABLE
-    case SimdCpuInfoVsx: return Vsx::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_NEON_ENABLE
     case SimdCpuInfoNeon: return Neon::Enable ? 1 : 0;
@@ -7116,11 +7112,6 @@ SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t 
         Sse41::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
-#ifdef SIMD_VSX_ENABLE
-    if(Vsx::Enable && width >= Vsx::DA)
-        Vsx::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::DA)
         Neon::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
@@ -7146,11 +7137,6 @@ SIMD_API void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t 
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-    else
-#endif
-#ifdef SIMD_VSX_ENABLE
-    if(Vsx::Enable && width >= Vsx::A)
-        Vsx::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

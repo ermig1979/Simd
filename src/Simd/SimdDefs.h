@@ -61,10 +61,6 @@
 #define SIMD_AMXBF16_DISABLE
 #endif
 
-#if defined(SIMD_VMX_DISABLE) && !defined(SIMD_VSX_DISABLE)
-#define SIMD_VSX_DISABLE
-#endif
-
 #if !defined(SIMD_SYNET_DISABLE)
 #define SIMD_SYNET_ENABLE
 #endif
@@ -235,10 +231,6 @@
 #define SIMD_VMX_ENABLE
 #endif
 
-#if !defined(SIMD_VSX_DISABLE) && defined(__VSX__)
-#define SIMD_VSX_ENABLE
-#endif
-
 #endif//defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE)
 
 #if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
@@ -284,7 +276,7 @@
 #include <immintrin.h>
 #endif
 
-#if defined(SIMD_VMX_ENABLE) || defined(SIMD_VSX_ENABLE)
+#if defined(SIMD_VMX_ENABLE)
 #include <altivec.h>
 #include <vec_types.h>
 #ifdef __cplusplus
@@ -303,7 +295,7 @@
 #elif defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
 #elif defined(SIMD_SSE41_ENABLE) \
-    || defined(SIMD_VMX_ENABLE) || defined(SIMD_VSX_ENABLE) \
+    || defined(SIMD_VMX_ENABLE) \
 	|| defined(SIMD_NEON_ENABLE)
 #define SIMD_ALIGN 16
 #elif defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM64_ENABLE)

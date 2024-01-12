@@ -476,7 +476,6 @@ namespace Test
         info << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA AVX" : "");
         info << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3 SSE2 SSE" : "");
         info << (SimdCpuInfo(SimdCpuInfoVmx) ? " Altivec" : "");
-        info << (SimdCpuInfo(SimdCpuInfoVsx) ? " VSX" : "");
         info << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
         info << ".";
 

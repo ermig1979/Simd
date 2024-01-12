@@ -38,8 +38,6 @@
 
 //#define SIMD_VMX_DISABLE
 
-//#define SIMD_VSX_DISABLE
-
 //#define SIMD_NEON_DISABLE
 
 //#define SIMD_NEON_FP16_DISABLE

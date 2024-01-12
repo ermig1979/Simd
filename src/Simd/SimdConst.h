@@ -696,15 +696,6 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_VSX_ENABLE    
-    namespace Vsx
-    {
-        using namespace Vmx;
-
-        const v128_f32 K_0_0f = SIMD_VEC_SET1_PS(0.0f);
-    }
-#endif
-
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
