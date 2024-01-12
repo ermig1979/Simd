@@ -3532,11 +3532,6 @@ SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t wi
         Sse41::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
     else
 #endif
-#ifdef SIMD_VSX_ENABLE
-    if (Vsx::Enable && width >= Vsx::A)
-        Vsx::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
@@ -3549,7 +3544,7 @@ SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size
 {
     SIMD_EMPTY();
     typedef void(*SimdNeuralProductSumPtr) (const float * a, const float * b, size_t size, float * sum);
-    const static SimdNeuralProductSumPtr simdNeuralProductSum = SIMD_FUNC5(NeuralProductSum, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralProductSumPtr simdNeuralProductSum = SIMD_FUNC4(NeuralProductSum, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralProductSum(a, b, size, sum);
 }
@@ -3585,7 +3580,7 @@ SIMD_API void SimdNeuralRoughSigmoid(const float * src, size_t size, const float
 {
     SIMD_EMPTY();
     typedef void(*SimdNeuralRoughSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralRoughSigmoidPtr simdNeuralRoughSigmoid = SIMD_FUNC5(NeuralRoughSigmoid, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralRoughSigmoidPtr simdNeuralRoughSigmoid = SIMD_FUNC4(NeuralRoughSigmoid, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralRoughSigmoid(src, size, slope, dst);
 }

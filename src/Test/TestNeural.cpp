@@ -117,14 +117,6 @@ namespace Test
         }
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if (Simd::Vsx::Enable)
-        {
-            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
-            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
-        }
-#endif
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
         {
@@ -209,11 +201,6 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Avx512bw::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
-#endif
-
-#ifdef SIMD_VSX_ENABLE
-        if (Simd::Vsx::Enable)
-            result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Vsx::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -551,11 +538,6 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512bw::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
-#endif
-
-#ifdef SIMD_VSX_ENABLE
-        if (Simd::Vsx::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Vsx::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
