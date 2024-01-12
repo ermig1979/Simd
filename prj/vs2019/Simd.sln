@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30001.183
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34018.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test.vcxproj", "{423128F2-9D4E-408D-9123-49CE57A32B0A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simd", "Simd.vcxproj", "{C809D7A3-6C52-4E36-8582-00CED929317D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Base", "Base.vcxproj", "{1622C4EF-06A4-4DAA-9631-5D71B32858A2}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vsx", "Vsx.vcxproj", "{E3BE9FD8-D69D-4B04-B719-C475D868C5EB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vmx", "Vmx.vcxproj", "{A88B854A-FCF9-484A-BDA2-E27F1EC3A0A9}"
 EndProject

@@ -132,9 +132,6 @@
     <ProjectReference Include="Vmx.vcxproj">
       <Project>{a88b854a-fcf9-484a-bda2-e27f1ec3a0a9}</Project>
     </ProjectReference>
-    <ProjectReference Include="Vsx.vcxproj">
-      <Project>{e3be9fd8-d69d-4b04-b719-c475d868c5eb}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
