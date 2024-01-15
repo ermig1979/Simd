@@ -21,7 +21,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdVmxAbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxAlphaBlending.cpp" />

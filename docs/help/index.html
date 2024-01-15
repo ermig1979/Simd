@@ -45,7 +45,7 @@ $(function() {
 <div class="textblock"><h1><a class="anchor" id="s0"></a>
 Introduction</h1>
 <p >The <b>Simd Library</b> is a free open source image processing library and machine learning, designed for C and C++ programmers. It provides many useful high performance algorithms for image processing and machine learning such as: pixel format conversion, image scaling and filtration, extraction of statistic information from images, motion detection, object detection (HAAR and LBP classifier cascades) and classification, neural network.</p>
-<p >The algorithms are optimized with using of different SIMD CPU extensions. In particular the library supports following CPU extensions: SSE, AVX, AVX-512 and AMX for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC, NEON for ARM.</p>
+<p >The algorithms are optimized with using of different SIMD CPU extensions. In particular the library supports following CPU extensions: SSE, AVX, AVX-512 and AMX for x86/x64, VMX(Altivec) for PowerPC, NEON for ARM.</p>
 <p >The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, MSVS, G++ and Clang compilers, MSVS project and CMake build systems.</p>
 <h1><a class="anchor" id="s1"></a>
 Library folder's structure</h1>
@@ -53,6 +53,7 @@ Library folder's structure</h1>
 <li><code>simd/src/Simd/</code> - contains source codes of the library.</li>
 <li><code>simd/src/Test/</code> - contains test framework of the library.</li>
 <li><code>simd/src/Use/</code> - contains the use examples of the library.</li>
+<li><code>simd/py/SimdPy/</code> - contains Python wrapper of the library.</li>
 <li><code>simd/prj/vs2015/</code> - contains project files of Microsoft Visual Studio 2015.</li>
 <li><code>simd/prj/vs2017/</code> - contains project files of Microsoft Visual Studio 2017.</li>
 <li><code>simd/prj/vs2019/</code> - contains project files of Microsoft Visual Studio 2019.</li>
