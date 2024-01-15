@@ -248,7 +248,7 @@ namespace Simd
                     sums[2] = vmlaq_f32(sums[2], a2, a2);
                     sums[3] = vmlaq_f32(sums[3], a3, a3);
                 }
-                Store<false>(squares + i, Extract4Sums(sums));
+                Store<false>(squares + i, Extract4Sums32f(sums));
             }
             for (; i < M; i += 1)
             {
@@ -375,12 +375,12 @@ namespace Simd
             }
             float32x4_t _bb = Load<false>(bb);
             float32x4_t _1 = vdupq_n_f32(1.0f);
-            Store<false>(distances + 0 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[0]))), Extract4Sums(c00, c01, c02, c03)));
-            Store<false>(distances + 1 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[1]))), Extract4Sums(c10, c11, c12, c13)));
-            Store<false>(distances + 2 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[2]))), Extract4Sums(c20, c21, c22, c23)));
-            Store<false>(distances + 3 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[3]))), Extract4Sums(c30, c31, c32, c33)));
-            Store<false>(distances + 4 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[4]))), Extract4Sums(c40, c41, c42, c43)));
-            Store<false>(distances + 5 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[5]))), Extract4Sums(c50, c51, c52, c53)));
+            Store<false>(distances + 0 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[0]))), Extract4Sums32f(c00, c01, c02, c03)));
+            Store<false>(distances + 1 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[1]))), Extract4Sums32f(c10, c11, c12, c13)));
+            Store<false>(distances + 2 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[2]))), Extract4Sums32f(c20, c21, c22, c23)));
+            Store<false>(distances + 3 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[3]))), Extract4Sums32f(c30, c31, c32, c33)));
+            Store<false>(distances + 4 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[4]))), Extract4Sums32f(c40, c41, c42, c43)));
+            Store<false>(distances + 5 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[5]))), Extract4Sums32f(c50, c51, c52, c53)));
         }
 
         static void MicroCosineDistances6x1(size_t K, const uint16_t* const* A, const uint16_t* const* B, const float* aa, const float* bb, float* distances, size_t stride)
@@ -499,9 +499,9 @@ namespace Simd
             }
             float32x4_t _bb = Load<false>(bb);
             float32x4_t _1 = vdupq_n_f32(1.0f);
-            Store<false>(distances + 0 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[0]))), Extract4Sums(c00, c01, c02, c03)));
-            Store<false>(distances + 1 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[1]))), Extract4Sums(c10, c11, c12, c13)));
-            Store<false>(distances + 2 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[2]))), Extract4Sums(c20, c21, c22, c23)));
+            Store<false>(distances + 0 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[0]))), Extract4Sums32f(c00, c01, c02, c03)));
+            Store<false>(distances + 1 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[1]))), Extract4Sums32f(c10, c11, c12, c13)));
+            Store<false>(distances + 2 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[2]))), Extract4Sums32f(c20, c21, c22, c23)));
         }
 
         static void MicroCosineDistances3x1(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
@@ -575,7 +575,7 @@ namespace Simd
             }
             float32x4_t _bb = Load<false>(bb);
             float32x4_t _1 = vdupq_n_f32(1.0f);
-            Store<false>(distances + 0 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[0]))), Extract4Sums(c00, c01, c02, c03)));
+            Store<false>(distances + 0 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[0]))), Extract4Sums32f(c00, c01, c02, c03)));
         }
 
         static void MicroCosineDistances1x1(size_t K, const uint16_t* const* A, const uint16_t* const* B, const float* aa, const float* bb, float* distances, size_t stride)

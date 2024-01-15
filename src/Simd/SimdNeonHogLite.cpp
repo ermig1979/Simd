@@ -408,7 +408,7 @@ namespace Simd
                             pSrc += srcStride;
                             pFilter += filterStride;
                         }
-                        Store<false>(dst + dstCol, Extract4Sums(sums));
+                        Store<false>(dst + dstCol, Extract4Sums32f(sums));
                     }
                     for (; dstCol < dstWidth; ++dstCol)
                     {
@@ -454,7 +454,7 @@ namespace Simd
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
-                            Store<false>(dst + dstCol, vbslq_f32(_mask, Extract4Sums(sums), _min));
+                            Store<false>(dst + dstCol, vbslq_f32(_mask, Extract4Sums32f(sums), _min));
                         }
                     }
                     for (; dstCol < dstWidth; ++dstCol)
@@ -686,7 +686,7 @@ namespace Simd
                             sums[2] = vmlaq_f32(sums[2], _s, Load<align>(p + j + 32));
                             sums[3] = vmlaq_f32(sums[3], _s, Load<align>(p + j + 48));
                         }
-                        Store<align>(d + i, Extract4Sums(sums));
+                        Store<align>(d + i, Extract4Sums32f(sums));
                     }
                     s += 16;
                     d += 8;
@@ -747,7 +747,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx4<align, step>(s + i, filter + i, sums);
-                        Store<true>(dst + col, Extract4Sums(sums));
+                        Store<true>(dst + col, Extract4Sums32f(sums));
                     }
                     for (; col < width; ++col)
                     {

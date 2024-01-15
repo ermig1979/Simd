@@ -57,7 +57,7 @@ namespace Simd
                     _h = vmlaq_s32(_h, d1, _i);
                     _i = vsubq_s32(_i, _4);
                 }
-                int l = ExtractSum32s(_l), h = ExtractSum32s(_h);
+                int l = ExtractSum32i(_l), h = ExtractSum32i(_h);
                 for (; i < n; ++i)
                 {
                     l += data[b + i];

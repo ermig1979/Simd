@@ -206,10 +206,10 @@ namespace Simd
                 ab23 = vpadalq_u16(ab23, vmulq_u16(a2, b0));
                 ab33 = vpadalq_u16(ab33, vmulq_u16(a3, b0));
             }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
-            float32x4_t ab2 = vcvtq_f32_u32(Extract4Sums(ab20, ab21, ab22, ab23));
-            float32x4_t ab3 = vcvtq_f32_u32(Extract4Sums(ab30, ab31, ab32, ab33));
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums32u(ab00, ab01, ab02, ab03));
+            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums32u(ab10, ab11, ab12, ab13));
+            float32x4_t ab2 = vcvtq_f32_u32(Extract4Sums32u(ab20, ab21, ab22, ab23));
+            float32x4_t ab3 = vcvtq_f32_u32(Extract4Sums32u(ab30, ab31, ab32, ab33));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
             DecodeCosineDistances1x4(A[2], B, ab2, distances + 2 * stride);
@@ -315,10 +315,10 @@ namespace Simd
                 ab23 = vpadalq_u16(ab23, vmull_u8(a2, b0));
                 ab33 = vpadalq_u16(ab33, vmull_u8(a3, b0));
             }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
-            float32x4_t ab2 = vcvtq_f32_u32(Extract4Sums(ab20, ab21, ab22, ab23));
-            float32x4_t ab3 = vcvtq_f32_u32(Extract4Sums(ab30, ab31, ab32, ab33));
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums32u(ab00, ab01, ab02, ab03));
+            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums32u(ab10, ab11, ab12, ab13));
+            float32x4_t ab2 = vcvtq_f32_u32(Extract4Sums32u(ab20, ab21, ab22, ab23));
+            float32x4_t ab3 = vcvtq_f32_u32(Extract4Sums32u(ab30, ab31, ab32, ab33));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
             DecodeCosineDistances1x4(A[2], B, ab2, distances + 2 * stride);
@@ -424,10 +424,10 @@ namespace Simd
                 ab23 = vpadalq_u16(ab23, vmull_u8(a2, b0));
                 ab33 = vpadalq_u16(ab33, vmull_u8(a3, b0));
             }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
-            float32x4_t ab2 = vcvtq_f32_u32(Extract4Sums(ab20, ab21, ab22, ab23));
-            float32x4_t ab3 = vcvtq_f32_u32(Extract4Sums(ab30, ab31, ab32, ab33));
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums32u(ab00, ab01, ab02, ab03));
+            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums32u(ab10, ab11, ab12, ab13));
+            float32x4_t ab2 = vcvtq_f32_u32(Extract4Sums32u(ab20, ab21, ab22, ab23));
+            float32x4_t ab3 = vcvtq_f32_u32(Extract4Sums32u(ab30, ab31, ab32, ab33));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
             DecodeCosineDistances1x4(A[2], B, ab2, distances + 2 * stride);
@@ -490,8 +490,8 @@ namespace Simd
                 ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
                 ab13 = vpadalq_u16(ab13, vmulq_u16(a1, b0));
             }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums32u(ab00, ab01, ab02, ab03));
+            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums32u(ab10, ab11, ab12, ab13));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
         }
@@ -559,8 +559,8 @@ namespace Simd
                 ab03 = vpadalq_u16(ab03, vmull_u8(a0, b0));
                 ab13 = vpadalq_u16(ab13, vmull_u8(a1, b0));
             }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums32u(ab00, ab01, ab02, ab03));
+            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums32u(ab10, ab11, ab12, ab13));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
         }
@@ -628,8 +628,8 @@ namespace Simd
                 ab03 = vpadalq_u16(ab03, vmull_u8(a0, b0));
                 ab13 = vpadalq_u16(ab13, vmull_u8(a1, b0));
             }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
-            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums(ab10, ab11, ab12, ab13));
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums32u(ab00, ab01, ab02, ab03));
+            float32x4_t ab1 = vcvtq_f32_u32(Extract4Sums32u(ab10, ab11, ab12, ab13));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
             DecodeCosineDistances1x4(A[1], B, ab1, distances + 1 * stride);
         }
@@ -675,7 +675,7 @@ namespace Simd
                 b0 = CvtTo16<bits>(LoadLast8<bits>(B[3] + o));
                 ab03 = vpadalq_u16(ab03, vmulq_u16(a0, b0));
             }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums32u(ab00, ab01, ab02, ab03));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
@@ -724,7 +724,7 @@ namespace Simd
                 b0 = Half<0>(Cvt4To8(LoadLast8<4>(B[3] + o)));
                 ab03 = vpadalq_u16(ab03, vmull_u8(a0, b0));
             }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums32u(ab00, ab01, ab02, ab03));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 
@@ -773,7 +773,7 @@ namespace Simd
                 b0 = LoadHalf<false>(B[3] + o);
                 ab03 = vpadalq_u16(ab03, vmull_u8(a0, b0));
             }
-            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums(ab00, ab01, ab02, ab03));
+            float32x4_t ab0 = vcvtq_f32_u32(Extract4Sums32u(ab00, ab01, ab02, ab03));
             DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);
         }
 

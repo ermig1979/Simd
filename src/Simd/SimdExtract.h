@@ -287,7 +287,7 @@ namespace Simd
             return vgetq_lane_u32(a, 0) + vgetq_lane_u32(a, 1) + vgetq_lane_u32(a, 2) + vgetq_lane_u32(a, 3);
         }
 
-        SIMD_INLINE int32_t ExtractSum32s(const int32x4_t& a)
+        SIMD_INLINE int32_t ExtractSum32i(const int32x4_t& a)
         {
             return vgetq_lane_s32(a, 0) + vgetq_lane_s32(a, 1) + vgetq_lane_s32(a, 2) + vgetq_lane_s32(a, 3);
         }
@@ -307,7 +307,7 @@ namespace Simd
             return vgetq_lane_f32(a, 0) + vgetq_lane_f32(a, 1) + vgetq_lane_f32(a, 2) + vgetq_lane_f32(a, 3);
         }
 
-        SIMD_INLINE float32x4_t Extract4Sums(const float32x4_t a[4])
+        SIMD_INLINE float32x4_t Extract4Sums32f(const float32x4_t a[4])
         {
             float32x4x2_t b0 = vzipq_f32(a[0], a[2]);
             float32x4x2_t b1 = vzipq_f32(a[1], a[3]);
@@ -316,7 +316,7 @@ namespace Simd
             return vaddq_f32(vaddq_f32(c0.val[0], c0.val[1]), vaddq_f32(c1.val[0], c1.val[1]));
         }
 
-        SIMD_INLINE float32x4_t Extract4Sums(const float32x4_t & a0, const float32x4_t & a1, const float32x4_t & a2, const float32x4_t & a3)
+        SIMD_INLINE float32x4_t Extract4Sums32f(const float32x4_t & a0, const float32x4_t & a1, const float32x4_t & a2, const float32x4_t & a3)
         {
             float32x4x2_t b0 = vzipq_f32(a0, a2);
             float32x4x2_t b1 = vzipq_f32(a1, a3);
@@ -325,7 +325,7 @@ namespace Simd
             return vaddq_f32(vaddq_f32(c0.val[0], c0.val[1]), vaddq_f32(c1.val[0], c1.val[1]));
         }
 
-        SIMD_INLINE uint32x4_t Extract4Sums(const uint32x4_t& a0, const uint32x4_t& a1, const uint32x4_t& a2, const uint32x4_t& a3)
+        SIMD_INLINE uint32x4_t Extract4Sums32u(const uint32x4_t& a0, const uint32x4_t& a1, const uint32x4_t& a2, const uint32x4_t& a3)
         {
             uint32x4x2_t b0 = vzipq_u32(a0, a2);
             uint32x4x2_t b1 = vzipq_u32(a1, a3);
