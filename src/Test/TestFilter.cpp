@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -162,11 +162,6 @@ namespace Test
         if (Simd::Avx512bw::Enable && W - 1 >= Simd::Avx512bw::A)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif 
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
-#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)
@@ -659,11 +654,6 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::Laplace), FUNC_G(SimdLaplace));
 #endif
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::Laplace), FUNC_G(SimdLaplace));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::Laplace), FUNC_G(SimdLaplace));
@@ -692,11 +682,6 @@ namespace Test
         if (Simd::Avx512bw::Enable && W - 1 >= Simd::Avx512bw::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 #endif 
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
-#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)

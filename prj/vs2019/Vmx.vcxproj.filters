@@ -13,12 +13,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxHistogram.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxLaplace.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxMeanFilter3x3.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxMedianFilter.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>

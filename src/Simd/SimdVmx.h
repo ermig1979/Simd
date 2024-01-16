@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -85,14 +85,6 @@ namespace Simd
 
         void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t * histogram);
-
-        void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void LaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
-
-        void MeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
         void MedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride);

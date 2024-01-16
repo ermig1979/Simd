@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *               2016-2016 Sintegrial Technologies.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy

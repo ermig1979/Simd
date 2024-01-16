@@ -3139,11 +3139,6 @@ SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, s
         Sse41::Laplace(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::Laplace(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::A)
         Neon::Laplace(src, srcStride, width, height, dst, dstStride);
@@ -3170,11 +3165,6 @@ SIMD_API void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width
         Sse41::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::A)
         Neon::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
@@ -3199,11 +3189,6 @@ SIMD_API void SimdLaplaceAbsSum(const uint8_t * src, size_t stride, size_t width
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width > Sse41::A)
         Sse41::LaplaceAbsSum(src, stride, width, height, sum);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::LaplaceAbsSum(src, stride, width, height, sum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3256,11 +3241,6 @@ SIMD_API void SimdMeanFilter3x3(const uint8_t * src, size_t srcStride, size_t wi
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && (width - 1)*channelCount >= Sse41::A)
         Sse41::MeanFilter3x3(src, srcStride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if (Vmx::Enable && (width - 1)*channelCount >= Vmx::A)
-        Vmx::MeanFilter3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

@@ -748,11 +748,6 @@ namespace Test
             result = result && SumAutoTest(FUNC4(Simd::Avx512bw::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
-            result = result && SumAutoTest(FUNC4(Simd::Vmx::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
-#endif
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Neon::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
