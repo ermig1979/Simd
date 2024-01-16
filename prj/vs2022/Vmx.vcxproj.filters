@@ -7,19 +7,10 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxBinarization.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxConditional.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxDeinterleave.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxHistogram.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxInterleave.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxLaplace.cpp">

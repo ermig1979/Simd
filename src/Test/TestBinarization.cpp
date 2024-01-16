@@ -115,11 +115,6 @@ namespace Test
             result = result && BinarizationAutoTest(FUNC_B(Simd::Avx512bw::Binarization), FUNC_B(SimdBinarization));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
-            result = result && BinarizationAutoTest(FUNC_B(Simd::Vmx::Binarization), FUNC_B(SimdBinarization));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && BinarizationAutoTest(FUNC_B(Simd::Neon::Binarization), FUNC_B(SimdBinarization));
@@ -128,7 +123,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -220,11 +215,6 @@ namespace Test
             result = result && AveragingBinarizationAutoTest(FUNC_AB(Simd::Avx512bw::AveragingBinarization), FUNC_AB(SimdAveragingBinarization));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
-            result = result && AveragingBinarizationAutoTest(FUNC_AB(Simd::Vmx::AveragingBinarization), FUNC_AB(SimdAveragingBinarization));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AveragingBinarizationAutoTest(FUNC_AB(Simd::Neon::AveragingBinarization), FUNC_AB(SimdAveragingBinarization));
@@ -233,7 +223,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
 
     namespace
     {

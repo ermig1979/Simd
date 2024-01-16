@@ -1473,11 +1473,6 @@ SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t wid
         Sse41::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
@@ -1504,11 +1499,6 @@ SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, s
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -1816,11 +1806,6 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3072,11 +3057,6 @@ SIMD_API void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t 
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if (Vmx::Enable && width >= Vmx::A)
-        Vmx::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

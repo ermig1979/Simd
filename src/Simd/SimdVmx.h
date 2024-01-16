@@ -62,13 +62,6 @@ namespace Simd
         void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
-        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
-
-        void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
-            uint8_t * dst, size_t dstStride, SimdCompareType compareType);
-
         void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
             uint8_t value, SimdCompareType compareType, uint32_t * count);
 
@@ -87,15 +80,11 @@ namespace Simd
         void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
-        void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
-
         void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
         void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t * histogram);
-
-        void InterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride);
 
         void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
