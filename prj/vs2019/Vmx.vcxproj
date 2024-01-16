@@ -22,12 +22,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdVmxAddFeatureDifference.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxAlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgraToBayer.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBgraToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBinarization.cpp" />
