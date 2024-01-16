@@ -105,11 +105,6 @@ namespace Test
             result = result && StretchGrayAutoTest(FUNC(Simd::Avx512bw::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
-            result = result && StretchGrayAutoTest(FUNC(Simd::Vmx::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && StretchGrayAutoTest(FUNC(Simd::Neon::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);

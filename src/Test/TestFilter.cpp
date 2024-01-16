@@ -333,11 +333,6 @@ namespace Test
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
-#endif
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));

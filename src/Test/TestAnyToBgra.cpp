@@ -130,11 +130,6 @@ namespace Test
             result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Avx512bw::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
-            result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Vmx::GrayToBgra), FUNC(SimdGrayToBgra));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Neon::GrayToBgra), FUNC(SimdGrayToBgra));

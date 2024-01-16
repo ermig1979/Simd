@@ -16,15 +16,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxDeinterleave.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxGaussianBlur3x3.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxGrayToBgr.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxGrayToBgra.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxHistogram.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
@@ -71,9 +62,6 @@
       <Filter>Vmx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxStretchGray2x2.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxTexture.cpp">

@@ -2460,11 +2460,6 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
         Sse41::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && (width - 1)*channelCount >= Vmx::A)
-        Vmx::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
         Neon::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
@@ -2524,11 +2519,6 @@ SIMD_API void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, s
         Sse41::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
@@ -2553,11 +2543,6 @@ SIMD_API void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, 
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -5271,11 +5256,6 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && srcWidth >= Sse41::A)
         Sse41::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && srcWidth >= Vmx::A)
-        Vmx::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

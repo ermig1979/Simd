@@ -27,9 +27,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxDeinterleave.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxGaussianBlur3x3.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxGrayToBgr.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxInterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxLaplace.cpp" />
@@ -46,7 +43,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxSobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxStretchGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
