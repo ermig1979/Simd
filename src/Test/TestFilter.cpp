@@ -422,11 +422,6 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Avx512bw::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Vmx::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Neon::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
@@ -455,11 +450,6 @@ namespace Test
         if (Simd::Avx512bw::Enable && W - 2 >= Simd::Avx512bw::A)
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Avx512bw::LbpEstimate), FUNC_G(SimdLbpEstimate));
 #endif
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 2 >= Simd::Vmx::A)
-            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Vmx::LbpEstimate), FUNC_G(SimdLbpEstimate));
-#endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 2 >= Simd::Neon::A)

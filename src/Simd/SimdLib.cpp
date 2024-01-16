@@ -405,11 +405,6 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
         Sse41::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
@@ -2160,11 +2155,6 @@ SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t hei
         Sse41::FillBgr(dst, stride, width, height, blue, green, red);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::FillBgr(dst, stride, width, height, blue, green, red);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::FillBgr(dst, stride, width, height, blue, green, red);
@@ -2189,11 +2179,6 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::F)
         Sse41::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::F)
-        Vmx::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3320,11 +3305,6 @@ SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t widt
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A + 2)
         Sse41::LbpEstimate(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A + 2)
-        Vmx::LbpEstimate(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
