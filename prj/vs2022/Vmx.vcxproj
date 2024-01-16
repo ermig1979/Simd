@@ -23,9 +23,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdVmxAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgraToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToBgra.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp" />

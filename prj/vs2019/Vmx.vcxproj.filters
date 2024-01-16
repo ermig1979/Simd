@@ -7,15 +7,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgraToGray.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToBgra.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToGray.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxBinarization.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
