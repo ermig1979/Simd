@@ -25,12 +25,10 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxSobel.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxTexture.cpp" />
   </ItemGroup>

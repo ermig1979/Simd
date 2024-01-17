@@ -80,12 +80,6 @@ namespace Simd
         void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
-        void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
-
-        void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
-            size_t step, size_t indent, uint32_t * histogram);
-
         void MedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
@@ -136,12 +130,6 @@ namespace Simd
 
         void ContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
-
-        void SquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-            size_t width, size_t height, uint64_t * sum);
-
-        void SquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-            const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
         void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
             uint8_t * min, uint8_t * max, uint8_t * average);

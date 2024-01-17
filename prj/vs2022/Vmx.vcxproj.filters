@@ -10,9 +10,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxConditional.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxHistogram.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxMedianFilter.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
@@ -23,9 +20,6 @@
       <Filter>Vmx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxSobel.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxSquaredDifferenceSum.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp">

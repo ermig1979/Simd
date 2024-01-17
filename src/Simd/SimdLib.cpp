@@ -2582,11 +2582,6 @@ SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width,
         Sse41::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A + 2*indent)
-        Vmx::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A + 2 * indent)
         Neon::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
@@ -2618,11 +2613,6 @@ SIMD_API void SimdHistogramMasked(const uint8_t *src, size_t srcStride, size_t w
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4734,11 +4724,6 @@ SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const u
         Sse41::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
@@ -4764,11 +4749,6 @@ SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, c
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
