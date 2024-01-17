@@ -433,11 +433,6 @@ SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride
         Sse41::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
@@ -3862,11 +3857,6 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
         Sse41::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width*channelCount >= Vmx::A)
-        Vmx::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width*channelCount >= Neon::A)
         Neon::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
@@ -3894,11 +3884,6 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
         Sse41::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::HA)
-        Vmx::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::HA)
         Neon::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
@@ -3923,11 +3908,6 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::VectorProduct(vertical, horizontal, dst, stride, width, height);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::VectorProduct(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

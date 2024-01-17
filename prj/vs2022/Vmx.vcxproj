@@ -21,12 +21,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdVmxAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxMedianFilter.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxSobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp" />
