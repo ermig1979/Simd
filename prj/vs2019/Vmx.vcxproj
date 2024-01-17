@@ -32,9 +32,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray5x5.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxReorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxSegmentation.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxSobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp" />

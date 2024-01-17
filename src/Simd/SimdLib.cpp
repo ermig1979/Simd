@@ -4136,11 +4136,6 @@ SIMD_API void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
         Sse41::Reorder16bit(src, size, dst);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && size >= Vmx::A)
-        Vmx::Reorder16bit(src, size, dst);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && size >= Neon::A)
         Neon::Reorder16bit(src, size, dst);
@@ -4167,11 +4162,6 @@ SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
         Sse41::Reorder32bit(src, size, dst);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && size >= Vmx::A)
-        Vmx::Reorder32bit(src, size, dst);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && size >= Neon::A)
         Neon::Reorder32bit(src, size, dst);
@@ -4196,11 +4186,6 @@ SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && size >= Sse41::A)
         Sse41::Reorder64bit(src, size, dst);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && size >= Vmx::A)
-        Vmx::Reorder64bit(src, size, dst);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4457,12 +4442,6 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable)
         Sse41::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
-        shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable)
-        Vmx::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
 #endif

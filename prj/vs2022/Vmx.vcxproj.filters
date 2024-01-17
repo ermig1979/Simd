@@ -31,13 +31,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray5x5.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxReorder.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxSegmentation.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxShiftBilinear.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxSobel.cpp">

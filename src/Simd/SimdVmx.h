@@ -118,12 +118,6 @@ namespace Simd
         void ReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
-        void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
-
-        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
-
-        void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
-
         void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 
         void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
@@ -134,10 +128,6 @@ namespace Simd
 
         void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
-
-        void ShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
-            const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
-            size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
 
         void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
