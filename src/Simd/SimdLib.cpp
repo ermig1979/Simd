@@ -3254,11 +3254,6 @@ SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, si
         Sse41::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && (width - 1)*channelCount >= Vmx::A)
-        Vmx::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
         Neon::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
@@ -3283,11 +3278,6 @@ SIMD_API void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, si
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && (width - 2)*channelCount >= Sse41::A)
         Sse41::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && (width - 2)*channelCount >= Vmx::A)
-        Vmx::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3316,11 +3306,6 @@ SIMD_API void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, s
         Sse41::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && (width - 1)*channelCount >= Vmx::A)
-        Vmx::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
         Neon::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
@@ -3345,11 +3330,6 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && (width - 2)*channelCount >= Sse41::A)
         Sse41::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && (width - 2)*channelCount >= Vmx::A)
-        Vmx::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
