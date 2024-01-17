@@ -4009,11 +4009,6 @@ SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcH
         Sse41::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && srcWidth >= Vmx::DA)
-        Vmx::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && srcWidth >= Neon::DA)
         Neon::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
@@ -4039,11 +4034,6 @@ SIMD_API void SimdReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcH
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && srcWidth >= Sse41::A)
         Sse41::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && srcWidth >= Vmx::DA)
-        Vmx::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4073,11 +4063,6 @@ SIMD_API void SimdReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcH
         Sse41::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && srcWidth > Vmx::DA)
-        Vmx::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && srcWidth > Neon::DA)
         Neon::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
@@ -4103,11 +4088,6 @@ SIMD_API void SimdReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcH
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && srcWidth >= Sse41::A)
         Sse41::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && srcWidth >= Vmx::DA)
-        Vmx::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

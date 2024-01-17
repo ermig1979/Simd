@@ -106,18 +106,6 @@ namespace Simd
 
         void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
 
-        void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
-        void ReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
-
-        void ReduceGray4x4(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
-        void ReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
-
         void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 
         void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);

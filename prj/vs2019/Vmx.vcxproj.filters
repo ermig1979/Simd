@@ -19,18 +19,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxOperation.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray2x2.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray3x3.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray4x4.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray5x5.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxSegmentation.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
