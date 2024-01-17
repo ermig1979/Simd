@@ -4237,11 +4237,6 @@ SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t 
         Sse41::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
@@ -4266,11 +4261,6 @@ SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, siz
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width > Sse41::A + 2)
         Sse41::SegmentationFillSingleHoles(mask, stride, width, height, index);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A + 2)
-        Vmx::SegmentationFillSingleHoles(mask, stride, width, height, index);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4304,12 +4294,6 @@ SIMD_API void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parent
         difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A + 1)
-        Vmx::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,
-        difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A + 1)
         Neon::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,
@@ -4337,11 +4321,6 @@ SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, 
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A && *right - *left >= (ptrdiff_t)Sse41::A)
         Sse41::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A && *right - *left >= (ptrdiff_t)Vmx::A)
-        Vmx::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
