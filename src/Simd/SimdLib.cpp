@@ -1530,11 +1530,6 @@ SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t 
         Sse41::ConditionalCount8u(src, stride, width, height, value, compareType, count);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::ConditionalCount8u(src, stride, width, height, value, compareType, count);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ConditionalCount8u(src, stride, width, height, value, compareType, count);
@@ -1560,11 +1555,6 @@ SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::HA)
         Sse41::ConditionalCount16i(src, stride, width, height, value, compareType, count);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::HA)
-        Vmx::ConditionalCount16i(src, stride, width, height, value, compareType, count);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -1594,11 +1584,6 @@ SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t w
         Sse41::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
@@ -1624,11 +1609,6 @@ SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, si
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -1658,11 +1638,6 @@ SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcSt
         Sse41::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A + 2)
-        Vmx::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A + 2)
         Neon::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
@@ -1687,11 +1662,6 @@ SIMD_API void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t 
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if (Vmx::Enable && width >= Vmx::A)
-        Vmx::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
