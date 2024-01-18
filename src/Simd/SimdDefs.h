@@ -167,7 +167,7 @@
 #define SIMD_X64_ENABLE
 #endif
 
-#if defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN) || defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__)
+#if (defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)) || (defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__))
 #define SIMD_BIG_ENDIAN
 #elif defined(__GLIBC__) || (defined(__GNUC__) && !defined(__llvm__) && !defined(__MINGW32__) && !defined(__FreeBSD__) && defined(__BYTE_ORDER__))
   #include <endian.h>
@@ -177,14 +177,6 @@
 #elif defined(__sparc) || defined(__sparc__) || defined(_POWER) || defined(__powerpc__) || defined(__ppc__) ||         \
     defined(__hpux) || defined(_MIPSEB) || defined(_POWER) || defined(__s390__)
   #define SIMD_BIG_ENDIAN
-#endif
-
-#ifdef __powerpc__
-#define SIMD_PPC_ENABLE
-#endif
-
-#ifdef __powerpc64__
-#define SIMD_PPC64_ENABLE
 #endif
 
 #if defined __arm__
@@ -224,14 +216,6 @@
 #endif
 
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
-
-#if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE)
-
-#if !defined(SIMD_VMX_DISABLE) && defined(__ALTIVEC__)
-#define SIMD_VMX_ENABLE
-#endif
-
-#endif//defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE)
 
 #if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 
@@ -276,16 +260,6 @@
 #include <immintrin.h>
 #endif
 
-#if defined(SIMD_VMX_ENABLE)
-#include <altivec.h>
-#include <vec_types.h>
-#ifdef __cplusplus
-#undef vector
-#undef pixel
-#undef bool
-#endif
-#endif
-
 #if defined(SIMD_NEON_ENABLE)
 #include <arm_neon.h>
 #endif
@@ -295,10 +269,9 @@
 #elif defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
 #elif defined(SIMD_SSE41_ENABLE) \
-    || defined(SIMD_VMX_ENABLE) \
 	|| defined(SIMD_NEON_ENABLE)
 #define SIMD_ALIGN 16
-#elif defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#elif defined (SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
 #define SIMD_ALIGN 8
 #else
 #define SIMD_ALIGN 4

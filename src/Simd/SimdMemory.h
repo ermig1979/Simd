@@ -289,21 +289,6 @@ namespace Simd
     }
 #endif// SIMD_AVX512BW_ENABLE
 
-#ifdef SIMD_VMX_ENABLE
-    namespace Vmx
-    {
-        SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(vec_uchar16))
-        {
-            return Simd::Aligned(size, align);
-        }
-
-        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(vec_uchar16))
-        {
-            return Simd::Aligned(ptr, align);
-        }
-    }
-#endif// SIMD_VMX_ENABLE
-
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {

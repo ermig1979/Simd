@@ -26,10 +26,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
-    <ClInclude Include="..\..\src\Simd\SimdAmx.h" />
     <ClInclude Include="..\..\src\Simd\SimdAmxBf16.h" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
-    <ClInclude Include="..\..\src\Simd\SimdAvx1.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h" />
@@ -81,7 +79,6 @@
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdShift.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSsse3.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
@@ -99,8 +96,6 @@
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h" />
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
-    <ClInclude Include="..\..\src\Simd\SimdVmx.h" />
-    <ClInclude Include="..\..\src\Simd\SimdVsx.h" />
     <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h" />
     <ClInclude Include="..\..\src\Simd\SimdXml.hpp" />
   </ItemGroup>
@@ -128,9 +123,6 @@
     </ProjectReference>
     <ProjectReference Include="Sse41.vcxproj">
       <Project>{50073d4b-e2ef-4fa5-9868-380c4a4dae0c}</Project>
-    </ProjectReference>
-    <ProjectReference Include="Vmx.vcxproj">
-      <Project>{a88b854a-fcf9-484a-bda2-e27f1ec3a0a9}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

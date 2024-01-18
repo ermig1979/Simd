@@ -86,15 +86,6 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_VMX_ENABLE
-    namespace Vmx
-    {
-        bool GetEnable();
-
-        const bool Enable = GetEnable();
-    }
-#endif
-
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
@@ -141,12 +132,6 @@ namespace Simd
 #define SIMD_AMXBF16_FUNC(func) Simd::AmxBf16::Enable ? Simd::AmxBf16::func : 
 #else
 #define SIMD_AMXBF16_FUNC(func)
-#endif
-
-#ifdef SIMD_VMX_ENABLE
-#define SIMD_VMX_FUNC(func) Simd::Vmx::Enable ? Simd::Vmx::func : 
-#else
-#define SIMD_VMX_FUNC(func)
 #endif
 
 #ifdef SIMD_NEON_ENABLE

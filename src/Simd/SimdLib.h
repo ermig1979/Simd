@@ -260,7 +260,6 @@ typedef enum
     SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */
     SimdCpuInfoAvx512bf16, /*!< Availability of AVX-512BF16 (x86). */
     SimdCpuInfoAmx, /*!< Availability of AMX (x86). */
-    SimdCpuInfoVmx, /*!< Availability of VMX or Altivec (PowerPC). */
     SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
 } SimdCpuInfoType;
 
@@ -790,7 +789,6 @@ extern "C"
             std::cout << "AVX-512VNNI: " << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? "Yes" : "No") << std::endl;
             std::cout << "AVX-512BF16: " << (SimdCpuInfo(SimdCpuInfoAvx512bf16) ? "Yes" : "No") << std::endl;
             std::cout << "AMX: " << (SimdCpuInfo(SimdCpuInfoAmx) ? "Yes" : "No") << std::endl;
-            std::cout << "PowerPC-Altivec: " << (SimdCpuInfo(SimdCpuInfoVmx) ? "Yes" : "No") << std::endl;
             std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
             return 0;
         }

@@ -141,61 +141,6 @@ namespace Simd
     }
 #endif// SIMD_AVX512BW_ENABLE
 
-#ifdef SIMD_VMX_ENABLE
-    namespace Vmx
-    {
-        SIMD_INLINE v128_u8 SetU8(uint8_t a)
-        {
-            SIMD_ALIGNED(16) uint8_t t[16];
-            t[0] = a;
-            return vec_splat(vec_ld(0, t), 0);
-        }
-
-        SIMD_INLINE v128_u16 SetU16(uint16_t a)
-        {
-            SIMD_ALIGNED(16) uint16_t t[8];
-            t[0] = a;
-            return vec_splat(vec_ld(0, t), 0);
-        }
-
-        SIMD_INLINE v128_s16 SetI16(int16_t a)
-        {
-            SIMD_ALIGNED(16) int16_t t[8];
-            t[0] = a;
-            return vec_splat(vec_ld(0, t), 0);
-        }
-
-        SIMD_INLINE v128_s16 SetI16(int16_t a, int16_t b)
-        {
-            SIMD_ALIGNED(16) int16_t t[8];
-            t[0] = a;
-            t[1] = b;
-            return (v128_s16)vec_splat((v128_u32)vec_ld(0, t), 0);
-        }
-
-        SIMD_INLINE v128_u32 SetU32(uint32_t a)
-        {
-            SIMD_ALIGNED(16) uint32_t t[4];
-            t[0] = a;
-            return vec_splat(vec_ld(0, t), 0);
-        }
-
-        SIMD_INLINE v128_s32 SetI32(int32_t a)
-        {
-            SIMD_ALIGNED(16) int32_t t[4];
-            t[0] = a;
-            return vec_splat(vec_ld(0, t), 0);
-        }
-
-        SIMD_INLINE v128_f32 SetF32(float a)
-        {
-            SIMD_ALIGNED(16) float t[4];
-            t[0] = a;
-            return vec_splat(vec_ld(0, t), 0);
-        }
-    }
-#endif// SIMD_VMX_ENABLE
-
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {

@@ -87,7 +87,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAvx512vnni.h"
 #include "Simd/SimdAvx512bf16.h"
 #include "Simd/SimdAmxBf16.h"
-#include "Simd/SimdVmx.h"
 #include "Simd/SimdNeon.h"
 
 #if !defined(SIMD_VERSION)
@@ -144,9 +143,6 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 #endif
 #ifdef SIMD_AMX_ENABLE
     case SimdCpuInfoAmx: return Amx::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_VMX_ENABLE
-    case SimdCpuInfoVmx: return Vmx::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_NEON_ENABLE
     case SimdCpuInfoNeon: return Neon::Enable ? 1 : 0;

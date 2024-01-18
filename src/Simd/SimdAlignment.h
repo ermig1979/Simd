@@ -50,16 +50,6 @@ namespace Simd
             return sizeof(__m128i);
         else
 #endif
-#ifdef SIMD_VSX_ENABLE
-        if (Vsx::Enable)
-            return sizeof(__vector uint8_t);
-        else
-#endif
-#ifdef SIMD_VMX_ENABLE
-        if (Vmx::Enable)
-            return sizeof(__vector uint8_t);
-        else
-#endif
 #ifdef SIMD_NEON_ENABLE
         if (Neon::Enable)
             return sizeof(uint8x16_t);

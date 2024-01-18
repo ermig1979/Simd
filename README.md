@@ -4,11 +4,11 @@ Introduction
 The [Simd Library](http://ermig1979.github.io/Simd) is a free open source image processing and machine learning library, designed for C and C++ programmers. 
 It provides many useful high performance algorithms for image processing such as: 
 pixel format conversion, image scaling and filtration, extraction of statistic information from images, motion detection,
-object detection (HAAR and LBP classifier cascades) and classification, neural network.
+object detection and classification, neural network.
 
 The algorithms are optimized with using of different SIMD CPU extensions. 
 In particular the library supports following CPU extensions: 
-SSE, AVX, AVX-512 and AMX for x86/x64, VMX(Altivec) for PowerPC (big-endian), NEON for ARM.
+SSE, AVX, AVX-512 and AMX for x86/x64, NEON for ARM.
 
 The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. 
 The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, 
@@ -65,7 +65,7 @@ Files of CMake build systems are placed in the directory:
 
 `simd/prj/cmake/`
 	
-The library can be built for x86/x64, PowerPC(64, big-endian) and ARM(32/64) platforms using the G++ or Clang compilers.
+The library can be built for x86/x64, ARM(32/64) platforms using the G++ or Clang compilers.
 Using the native compiler (g++) for the current platform is simple:
 
 	mkdir build
@@ -73,15 +73,8 @@ Using the native compiler (g++) for the current platform is simple:
 	cmake ../prj/cmake -DSIMD_TOOLCHAIN="" -DSIMD_TARGET=""
 	make
 	
-To build the library for PowerPC(64, big-endian) and ARM(32/64) platforms you can also use a toolchain for cross compilation.
-There is an example of using for PowerPC (64 bit, big-endian):
-
-	mkdir build
-	cd build
-	cmake ../prj/cmake -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DSIMD_TARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
-	make
-
-For ARM (32 bit):
+To build the library for ARM(32/64) platform you can also use a toolchain for cross compilation.
+There is an example of using for ARM (32 bit):
 
 	mkdir build
 	cd build

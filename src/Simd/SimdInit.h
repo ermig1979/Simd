@@ -506,7 +506,7 @@ namespace Simd
 
 #endif//defined(SIMD_AVX512BW_ENABLE)
 
-#if defined(SIMD_VMX_ENABLE) || (defined(SIMD_NEON_ENABLE) && defined(__GNUC__))
+#if defined(SIMD_NEON_ENABLE) && defined(__GNUC__)
 
 #define SIMD_VEC_SET1_EPI8(a) \
     {a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a}
@@ -580,7 +580,7 @@ namespace Simd
 #define SIMD_VEC_SETR_PI64(a) \
     {a}
 
-#endif//defined(SIMD_VMX_ENABLE) || (defined(SIMD_NEON_ENABLE) && defined(__GNUC__))
+#endif//defined(SIMD_NEON_ENABLE) && defined(__GNUC__)
 
 #if defined(_MSC_VER) && defined(SIMD_NEON_ENABLE)
 
