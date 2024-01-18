@@ -21,7 +21,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp" />
   </ItemGroup>
   <ItemGroup>

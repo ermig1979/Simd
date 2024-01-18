@@ -641,11 +641,6 @@ SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStr
         Sse41::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
@@ -671,11 +666,6 @@ SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStr
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -706,11 +696,6 @@ SIMD_API void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueSt
         Sse41::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
@@ -739,12 +724,6 @@ SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride,
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
-        hiCount, hiCountStride, hiValue, hiValueStride, threshold);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
     else
 #endif
@@ -781,12 +760,6 @@ SIMD_API void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountS
         hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
-        hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
@@ -816,11 +789,6 @@ SIMD_API void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride
         Sse41::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
@@ -848,11 +816,6 @@ SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t value
         Sse41::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
@@ -878,11 +841,6 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
