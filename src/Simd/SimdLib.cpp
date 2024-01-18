@@ -6084,11 +6084,6 @@ SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t sr
         Sse41::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
@@ -6114,11 +6109,6 @@ SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -6148,11 +6138,6 @@ SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride,
         Sse41::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
@@ -6178,11 +6163,6 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if (Vmx::Enable && width >= Vmx::A)
-        Vmx::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

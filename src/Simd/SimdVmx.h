@@ -115,18 +115,6 @@ namespace Simd
         void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
         void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
-
-        void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
-
-        void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
-
-        void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            int shift, uint8_t * dst, size_t dstStride);
-
-        void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t boost, uint8_t * dst, size_t dstStride);
     }
 #endif// SIMD_VMX_ENABLE
 }

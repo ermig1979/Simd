@@ -13,9 +13,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxTexture.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>

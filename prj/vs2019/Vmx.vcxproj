@@ -26,7 +26,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxSobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />

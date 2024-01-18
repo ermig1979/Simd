@@ -119,11 +119,6 @@ namespace Test
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Avx512bw::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
-            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Vmx::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Neon::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
@@ -216,11 +211,6 @@ namespace Test
             result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Avx512bw::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
-            result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Vmx::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Neon::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
@@ -304,11 +294,6 @@ namespace Test
         if (Simd::Avx512bw::Enable)
             result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Avx512bw::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
-            result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Vmx::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
-#endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
@@ -403,11 +388,6 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Avx512bw::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
-#endif 
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
-            result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Vmx::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
