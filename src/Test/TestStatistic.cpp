@@ -680,11 +680,6 @@ namespace Test
             result = result && SumAutoTest(FUNC4(Simd::Avx512bw::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
-            result = result && SumAutoTest(FUNC4(Simd::Vmx::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
-#endif
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Neon::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
@@ -713,11 +708,6 @@ namespace Test
         if (Simd::Avx512bw::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Avx512bw::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 #endif 
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
-            result = result && SumAutoTest(FUNC4(Simd::Vmx::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
-#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)

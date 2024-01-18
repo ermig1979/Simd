@@ -4352,11 +4352,6 @@ SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, s
         Sse41::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::SobelDx(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::A)
         Neon::SobelDx(src, srcStride, width, height, dst, dstStride);
@@ -4381,11 +4376,6 @@ SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width > Sse41::A)
         Sse41::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4414,11 +4404,6 @@ SIMD_API void SimdSobelDxAbsSum(const uint8_t * src, size_t stride, size_t width
         Sse41::SobelDxAbsSum(src, stride, width, height, sum);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::SobelDxAbsSum(src, stride, width, height, sum);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::A)
         Neon::SobelDxAbsSum(src, stride, width, height, sum);
@@ -4443,11 +4428,6 @@ SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, s
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width > Sse41::A)
         Sse41::SobelDy(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::SobelDy(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4476,11 +4456,6 @@ SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width
         Sse41::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::A)
         Neon::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
@@ -4507,11 +4482,6 @@ SIMD_API void SimdSobelDyAbsSum(const uint8_t * src, size_t stride, size_t width
         Sse41::SobelDyAbsSum(src, stride, width, height, sum);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::SobelDyAbsSum(src, stride, width, height, sum);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::A)
         Neon::SobelDyAbsSum(src, stride, width, height, sum);
@@ -4536,11 +4506,6 @@ SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t w
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width > Sse41::A)
         Sse41::ContourMetrics(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::ContourMetrics(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4570,11 +4535,6 @@ SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, si
         Sse41::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
     else
 #endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::A)
         Neon::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
@@ -4599,11 +4559,6 @@ SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t w
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width > Sse41::A)
         Sse41::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A)
-        Vmx::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

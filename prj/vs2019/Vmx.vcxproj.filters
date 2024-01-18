@@ -4,9 +4,6 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdVmxSobel.cpp">
-      <Filter>Vmx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>

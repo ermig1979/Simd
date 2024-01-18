@@ -58,26 +58,6 @@ namespace Simd
         void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
-        void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void SobelDxAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
-
-        void SobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
-
-        void ContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void ContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
-
-        void ContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
-
         void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
             uint8_t * min, uint8_t * max, uint8_t * average);
 

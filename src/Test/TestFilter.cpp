@@ -464,11 +464,6 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDx), FUNC_G(SimdSobelDx));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::SobelDx), FUNC_G(SimdSobelDx));
-#endif 
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDx), FUNC_G(SimdSobelDx));
@@ -497,11 +492,6 @@ namespace Test
         if (Simd::Avx512bw::Enable && W - 1 >= Simd::Avx512bw::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 #endif 
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
-#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)
@@ -532,11 +522,6 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDy), FUNC_G(SimdSobelDy));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::SobelDy), FUNC_G(SimdSobelDy));
-#endif
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDy), FUNC_G(SimdSobelDy));
@@ -566,11 +551,6 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
-#endif
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
@@ -599,11 +579,6 @@ namespace Test
         if (Simd::Avx512bw::Enable && W - 1 >= Simd::Avx512bw::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::ContourMetrics), FUNC_G(SimdContourMetrics));
 #endif 
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W - 1 >= Simd::Vmx::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::ContourMetrics), FUNC_G(SimdContourMetrics));
-#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W - 1 >= Simd::Neon::A)

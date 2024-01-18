@@ -105,11 +105,6 @@ namespace Test
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx512bw::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W > Simd::Vmx::A)
-            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Vmx::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
-#endif
-
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W > Simd::Neon::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Neon::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
@@ -193,11 +188,6 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx512bw::ContourAnchors), FUNC_A(SimdContourAnchors));
-#endif 
-
-#ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable && W > Simd::Vmx::A)
-            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Vmx::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
