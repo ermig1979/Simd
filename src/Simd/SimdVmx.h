@@ -57,26 +57,6 @@ namespace Simd
 
         void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
-
-        void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
-            uint8_t * min, uint8_t * max, uint8_t * average);
-
-        void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
-            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
-
-        void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
-
-        void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
-
-        void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
-
-        void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
-
-        void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
-
-        void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
-
-        void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
     }
 #endif// SIMD_VMX_ENABLE
 }

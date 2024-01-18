@@ -23,7 +23,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
