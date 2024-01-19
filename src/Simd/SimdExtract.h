@@ -264,21 +264,6 @@ namespace Simd
     }
 #endif//SIMD_AVX512BW_ENABLE
 
-#ifdef SIMD_VMX_ENABLE
-    namespace Vmx
-    {
-        SIMD_INLINE uint32_t ExtractSum(v128_u32 a)
-        {
-            return vec_extract(a, 0) + vec_extract(a, 1) + vec_extract(a, 2) + vec_extract(a, 3);
-        }
-
-        SIMD_INLINE float ExtractSum(v128_f32 a)
-        {
-            return vec_extract(a, 0) + vec_extract(a, 1) + vec_extract(a, 2) + vec_extract(a, 3);
-        }
-    }
-#endif// SIMD_VMX_ENABLE
-
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {

@@ -109,7 +109,7 @@ namespace Simd
         const char* VendorId();
 #endif
 
-#if defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
+#if defined(__GNUC__) && (defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
         bool CheckBit(int at, int bit);
 #endif
 

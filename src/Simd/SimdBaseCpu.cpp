@@ -50,7 +50,7 @@
 #include <cpuid.h>
 #endif
 
-#if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 #include <fcntl.h>
 #if !defined(__APPLE__)
 #include <sys/auxv.h>
@@ -104,7 +104,7 @@ namespace Simd
         }
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
-#if defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)) && !defined(__APPLE__)
+#if defined(__GNUC__) && (defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)) && !defined(__APPLE__)
         bool CheckBit(int at, int bit)
         {
             bool result = false;
@@ -130,7 +130,7 @@ namespace Simd
             ::close(file);
             return result;
         }
-#endif//defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)) && !defined(__APPLE__)
+#endif//defined(__GNUC__) && (defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)) && !defined(__APPLE__)
 
 #ifdef SIMD_CPP_2011_ENABLE
         size_t CpuThreadNumber()
