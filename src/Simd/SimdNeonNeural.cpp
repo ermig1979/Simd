@@ -95,7 +95,7 @@ namespace Simd
                 NeuralConvert<false>(src, srcStride, width, height, dst, dstStride);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t offset, float32x4_t & sum)
         {
@@ -141,7 +141,7 @@ namespace Simd
                 NeuralProductSum<false>(a, b, size, sum);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
         {
@@ -153,7 +153,7 @@ namespace Simd
                 AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void AddVector(const float * src, float * dst)
         {
@@ -221,40 +221,7 @@ namespace Simd
                 AddValue<false>(value, dst, aligned, partial, size);
         }
 
-        template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-            size_t alignedSize = Simd::AlignLo(size, F);
-            float32x4_t _slope = vdupq_n_f32(*slope);
-            float32x4_t _0 = vdupq_n_f32(-0.0f);
-            float32x4_t _1 = vdupq_n_f32(1.0f);
-            float32x4_t _a = vdupq_n_f32(0.5417f);
-            float32x4_t _b = vdupq_n_f32(0.1460f);
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-            {
-                float32x4_t _src = Load<align>(src + i);
-                float32x4_t x = vabsq_f32(vmulq_f32(_src, _slope));
-                float32x4_t x2 = vmulq_f32(x, x);
-                float32x4_t x4 = vmulq_f32(x2, x2);
-                float32x4_t series = vaddq_f32(vmlaq_f32(_1, x2, _a), vmlaq_f32(x, x4, _b));
-                uint32x4_t mask = vcgtq_f32(_src, _0);
-                float32x4_t exp = vbslq_f32(mask, Reciprocal<1>(series), series);
-                float32x4_t sigmoid = Reciprocal<1>(vaddq_f32(_1, exp));
-                Store<align>(dst + i, sigmoid);
-            }
-            for (; i < size; ++i)
-                dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
-        }
-
-        void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralRoughSigmoid<true>(src, size, slope, dst);
-            else
-                NeuralRoughSigmoid<false>(src, size, slope, dst);
-        }
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, const float32x4_t & k, const float32x4_t & o, const float32x4_t & m, float * dst)
         {
@@ -301,6 +268,8 @@ namespace Simd
                 NeuralRoughSigmoid2<false>(src, size, slope, dst);
         }
 
+        //-------------------------------------------------------------------------------------------------
+        
         template <bool align> SIMD_INLINE void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
             if (align)
@@ -327,6 +296,8 @@ namespace Simd
                 NeuralDerivativeSigmoid<false>(src, size, slope, dst);
         }
 
+        //-------------------------------------------------------------------------------------------------
+        
         template <bool align> SIMD_INLINE void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             if (align)
@@ -362,6 +333,8 @@ namespace Simd
                 NeuralRoughTanh<false>(src, size, slope, dst);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template <bool align> SIMD_INLINE void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             if (align)
@@ -388,6 +361,8 @@ namespace Simd
                 NeuralDerivativeTanh<false>(src, size, slope, dst);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template<bool align> void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
         {
             if (align)
@@ -411,6 +386,8 @@ namespace Simd
             else
                 NeuralPow<false>(src, size, exponent, dst);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
         {
@@ -439,6 +416,8 @@ namespace Simd
             else
                 NeuralDerivativeRelu<false>(src, size, slope, dst);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void UpdateWeights(const float * x, const float32x4_t & a, const float32x4_t & b, float * d, float * w)
         {
@@ -489,6 +468,7 @@ namespace Simd
                 NeuralUpdateWeights<false>(x, size, *a, *b, d, w);
         }
 
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, const float32x4_t & norm, const float32x4_t & alpha, const float32x4_t & epsilon, float * gradient, float * weight)
         {
@@ -541,6 +521,8 @@ namespace Simd
             else
                 NeuralAdaptiveGradientUpdate<false>(delta, size, batch, alpha, epsilon, gradient, weight);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE float32x4_t Pooling1x1Max3x1Body(const float * src)
         {

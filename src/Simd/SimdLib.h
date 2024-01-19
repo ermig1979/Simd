@@ -4380,34 +4380,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates rough sigmoid for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        x = abs(src[i]*slope);
-        e = 1 + x + x*x*0.5417 + x*x*x*x*0.1460;
-        dst[i] = 1 / (1 + (src[i] > 0 ? 1 / e : e));
-        \endverbatim
-        It is approximate way (maximal absolute error is 0.002294 (~0.23%) ) of sigmoid function (::SimdSynetSigmoid32f) calculation:
-        \verbatim
-        dst[i] = 1/(1 + exp(-slope*src[i]));
-        \endverbatim
-
-        \note This function is used in Simd::Neural::Function.
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdNeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst);
 
         \short Calculates rough sigmoid for 32-bit float array.

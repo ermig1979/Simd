@@ -87,7 +87,7 @@ namespace Simd
                 NeuralAdaptiveGradientUpdate<false>(delta, size, batch, alpha, epsilon, gradient, weight);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void NeuralAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst)
         {
@@ -99,7 +99,7 @@ namespace Simd
                 AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void AddVector(const float* src, float* dst)
         {
@@ -132,7 +132,7 @@ namespace Simd
                 AddVector<false>(src, aligned, partial, size, dst);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void AddValue(const __m128& value, float* dst)
         {
@@ -169,7 +169,7 @@ namespace Simd
                 AddValue<false>(value, dst, aligned, partial, size);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool inversion> __m128i Invert(__m128i value);
 
@@ -651,44 +651,7 @@ namespace Simd
                 NeuralProductSum<false>(a, b, size, sum);
         }
 
-        //-----------------------------------------------------------------------------------------
-
-        template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float* src, size_t size, const float* slope, float* dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-            size_t alignedSize = Simd::AlignLo(size, F);
-            __m128 _slope = _mm_set1_ps(*slope);
-            __m128 _0 = _mm_set1_ps(-0.0f);
-            __m128 _1 = _mm_set1_ps(1.0f);
-            __m128 _a = _mm_set1_ps(0.5417f);
-            __m128 _b = _mm_set1_ps(0.1460f);
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-            {
-                __m128 _src = Load<align>(src + i);
-                __m128 x = _mm_andnot_ps(_0, _mm_mul_ps(_src, _slope));
-                __m128 x2 = _mm_mul_ps(x, x);
-                __m128 x4 = _mm_mul_ps(x2, x2);
-                __m128 series = _mm_add_ps(_mm_add_ps(_1, x), _mm_add_ps(_mm_mul_ps(x2, _a), _mm_mul_ps(x4, _b)));
-                __m128 mask = _mm_cmpgt_ps(_src, _0);
-                __m128 exp = _mm_or_ps(_mm_and_ps(_mm_rcp_ps(series), mask), _mm_andnot_ps(mask, series));
-                __m128 sigmoid = _mm_rcp_ps(_mm_add_ps(_1, exp));
-                Store<align>(dst + i, sigmoid);
-            }
-            for (; i < size; ++i)
-                dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
-        }
-
-        void NeuralRoughSigmoid(const float* src, size_t size, const float* slope, float* dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralRoughSigmoid<true>(src, size, slope, dst);
-            else
-                NeuralRoughSigmoid<false>(src, size, slope, dst);
-        }
-
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float* src, const __m128& k, const __m128& o, const __m128& m, float* dst)
         {
@@ -735,7 +698,7 @@ namespace Simd
                 NeuralRoughSigmoid2<false>(src, size, slope, dst);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralRoughTanh(const float* src, size_t size, const float* slope, float* dst)
         {

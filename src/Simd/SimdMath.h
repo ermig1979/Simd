@@ -186,14 +186,6 @@ namespace Simd
             return DivideBy16<compensation>(s0[x0] + 2 * s0[x1] + s0[x2] + (s1[x0] + 2 * s1[x1] + s1[x2]) * 2 + s2[x0] + 2 * s2[x1] + s2[x2]);
         }
 
-        SIMD_INLINE float RoughSigmoid(float value) // maximal absolute error 0.002294
-        {
-            float x = ::fabs(value);
-            float x2 = x*x;
-            float e = 1.0f + x + x2*0.5417f + x2*x2*0.1460f;
-            return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));
-        }
-
         SIMD_INLINE float RoughSigmoid2(float value) // maximal absolute error 0.001721
         {
             float e1 = Simd::Max(1.0f - value*0.0078125f, 0.5f);

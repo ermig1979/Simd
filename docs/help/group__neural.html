@@ -53,9 +53,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga9fe43a24843547138f4cb8321820bbdc"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc">SimdNeuralConvert</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, float *dst, size_t dstStride, int inversion)</td></tr>
 <tr class="memdesc:ga9fe43a24843547138f4cb8321820bbdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 8-bit gray image to the 32-bit float array.  <a href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc">More...</a><br /></td></tr>
 <tr class="separator:ga9fe43a24843547138f4cb8321820bbdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga6c4dda1f0bf9943ce0287db9f8a0c8d4"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga6c4dda1f0bf9943ce0287db9f8a0c8d4">SimdNeuralRoughSigmoid</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
-<tr class="memdesc:ga6c4dda1f0bf9943ce0287db9f8a0c8d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates rough sigmoid for 32-bit float array.  <a href="group__neural.html#ga6c4dda1f0bf9943ce0287db9f8a0c8d4">More...</a><br /></td></tr>
-<tr class="separator:ga6c4dda1f0bf9943ce0287db9f8a0c8d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa7dd6ebad69e6da8ba084eec3a75cc1f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#gaa7dd6ebad69e6da8ba084eec3a75cc1f">SimdNeuralRoughSigmoid2</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
 <tr class="memdesc:gaa7dd6ebad69e6da8ba084eec3a75cc1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates rough sigmoid for 32-bit float array.  <a href="group__neural.html#gaa7dd6ebad69e6da8ba084eec3a75cc1f">More...</a><br /></td></tr>
 <tr class="separator:gaa7dd6ebad69e6da8ba084eec3a75cc1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -217,63 +214,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">inversion</td><td>- a flag of color inversion. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga6c4dda1f0bf9943ce0287db9f8a0c8d4" name="ga6c4dda1f0bf9943ce0287db9f8a0c8d4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga6c4dda1f0bf9943ce0287db9f8a0c8d4">&#9670;&#160;</a></span>SimdNeuralRoughSigmoid()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdNeuralRoughSigmoid </td>
-          <td>(</td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>size</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>slope</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Calculates rough sigmoid for 32-bit float array. </p>
-<p >All arrays must have the same size.</p>
-<p >For every element: </p><pre class="fragment">x = abs(src[i]*slope);
-e = 1 + x + x*x*0.5417 + x*x*x*x*0.1460;
-dst[i] = 1 / (1 + (src[i] &gt; 0 ? 1 / e : e));
-</pre><p> It is approximate way (maximal absolute error is 0.002294 (~0.23%) ) of sigmoid function (<a class="el" href="group__synet__activation.html#ga7c3b2e316df7f6820b1e7067e74924e8" title="This function is used for forward propagation of SigmoidLayer.">SimdSynetSigmoid32f</a>) calculation: </p><pre class="fragment">dst[i] = 1/(1 + exp(-slope*src[i]));
-</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="struct_simd_1_1_neural_1_1_function.html" title="Activation Function structure.">Simd::Neural::Function</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input array. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the slope parameter. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output array. </td></tr>
   </table>
   </dd>
 </dl>
