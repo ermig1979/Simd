@@ -279,14 +279,7 @@ namespace Simd
 
             static SIMD_INLINE void SoftmaxFunction(const float * src, size_t size, float * dst)
             {
-                float max = -FLT_MAX;
-                for (size_t i = 0; i < size; ++i)
-                    max = std::max(max, src[i]);
-                float sum = 0;
-                for (size_t i = 0; i < size; ++i)
-                    sum += ::exp(src[i] - max);
-                for (size_t i = 0; i < size; ++i)
-                    dst[i] = ::exp(src[i] - max) / sum;
+                ::SimdSynetSoftmaxLayerForward(src, 1, size, 1, dst);
             }
 
             static SIMD_INLINE void SoftmaxDerivative(const float * src, size_t size, float * dst)

@@ -1269,11 +1269,11 @@ class Image():
 	def Region(self, left: int, top : int, right : int, bottom : int) :
 		if self.Data() == ctypes.c_void_p(0) or right <= left or bottom <= top :
 			return Simd.Image()
-		left = min(max(left, 0), self.Width());
-		top = min(max(top, 0), self.Height());
-		right = min(max(right, 0), self.Width());
-		bottom = min(max(bottom, 0), self.Height());
-		return Simd.Image(self.Format(), right - left, bottom - top, 0, self.Stride(), self.Data() + top * self.Stride() + left * self.Format().PixelSize());
+		left = min(max(left, 0), self.Width())
+		top = min(max(top, 0), self.Height())
+		right = min(max(right, 0), self.Width())
+		bottom = min(max(bottom, 0), self.Height())
+		return Simd.Image(self.Format(), right - left, bottom - top, 0, self.Stride(), self.Data() + top * self.Stride() + left * self.Format().PixelSize())
 	
     ## Creates a new Simd.Image which points to the region of current image with given size at current position.
     # @param width - a width of the region.
@@ -1294,7 +1294,7 @@ class Image():
 		elif position == Position.MiddleRight:
 			return self.Region(self.Width() - width, (self.Height() - height) // 2, self.Width(), (self.Height() + height) // 2)
 		elif position == Position.BottomLeft:
-			return self.Region(0, self.Height() - height, width, self.Height());
+			return self.Region(0, self.Height() - height, width, self.Height())
 		elif position == Position.BottomCenter:
 			return self.Region((self.Width() - width) // 2, self.Height() - height, (self.Width() + width) // 2, self.Height())
 		elif position == Position.BottomRight:
@@ -1580,7 +1580,7 @@ class ImageFrame():
 				if sy == Simd.YuvType.Trect871 :
 					sp[0].Copy(dp[0])
 				else :
-					Lib.YToGray(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride());
+					Lib.YToGray(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		elif sf == FrameFormat.Yuv420p :
@@ -1604,7 +1604,7 @@ class ImageFrame():
 				if sy == Simd.YuvType.Trect871 :
 					sp[0].Copy(dp[0])
 				else :
-					Lib.YToGray(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride());
+					Lib.YToGray(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		elif sf == FrameFormat.Bgra32 :
@@ -1636,13 +1636,13 @@ class ImageFrame():
 				if dy == Simd.YuvType.Trect871 :
 					sp[0].Copy(dp[0])
 				else :
-					Lib.GrayToY(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride());
+					Lib.GrayToY(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 				dp[1].Fill([128, 128])
 			elif df == FrameFormat.Yuv420p :
 				if dy == Simd.YuvType.Trect871 :
 					sp[0].Copy(dp[0])
 				else :
-					Lib.GrayToY(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride());
+					Lib.GrayToY(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 				dp[1].Fill([128])
 				dp[2].Fill([128])
 			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Rgb24 or df == FrameFormat.Rgba32:
@@ -1778,6 +1778,6 @@ def WarpAffine(src : Image, mat: array.array('f'), dst : Image, flags = (Simd.Wa
 	if context == ctypes.c_void_p(0) :
 		raise Exception("Can't create Warp Affine context !")
 	
-	Lib.WarpAffineRun(context, src.Data(), dst.Data());
-	Lib.Release(context);
+	Lib.WarpAffineRun(context, src.Data(), dst.Data())
+	Lib.Release(context)
 
