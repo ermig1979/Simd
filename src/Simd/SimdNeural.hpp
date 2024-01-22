@@ -130,7 +130,7 @@ namespace Simd
                     \verbatim
                     df(y) = 1 - y*y;
                     \endverbatim
-                    See implementation details: ::SimdNeuralRoughTanh and ::SimdNeuralDerivativeTanh.
+                    See implementation details: ::SimdNeuralTanh32f and ::SimdNeuralDerivativeTanh.
                 */
                 Tanh,
                 /*! Sigmoid:
@@ -232,7 +232,7 @@ namespace Simd
             static SIMD_INLINE void TanhFunction(const float * src, size_t size, float * dst)
             {
                 const float slope = 1.0f;
-                ::SimdNeuralRoughTanh(src, size, &slope, dst);
+                ::SimdSynetTanh32f(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void TanhDerivative(const float * src, size_t size, float * dst)

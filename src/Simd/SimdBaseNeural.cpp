@@ -126,13 +126,6 @@ namespace Simd
                 dst[i] *= s*DerivativeSigmoid(src[i]);
         }
 
-        void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
-        {
-            float s = slope[0];
-            for (size_t i = 0; i < size; ++i)
-                dst[i] = RoughTanh(src[i] * s);
-        }
-
         void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];

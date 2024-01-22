@@ -692,56 +692,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <bool align, bool mask> SIMD_INLINE void NeuralRoughTanh(const float* src, const __m512& _0, const __m512& _1,
-            const __m512& a, const __m512& b, const __m512& slope, float* dst, __mmask16 m = -1)
-        {
-            __m512 _src = Load<align, mask>(src, m);
-            __m512 x = AndNot(_0, _mm512_mul_ps(_src, slope));
-            __m512 x2 = _mm512_mul_ps(x, x);
-            __m512 x4 = _mm512_mul_ps(x2, x2);
-            __m512 pe = _mm512_add_ps(_mm512_fmadd_ps(x2, a, _1), _mm512_fmadd_ps(x4, b, x));
-            __m512 ne = Rcp14(pe);
-            __m512 absTanh = _mm512_mul_ps(_mm512_sub_ps(pe, ne), Rcp14(_mm512_add_ps(pe, ne)));
-            __m512 tanh = Xor(absTanh, AndMaskZ(_0, _0, _mm512_cmp_ps_mask(_0, _src, _CMP_GT_OS)));
-            Store<align, mask>(dst, tanh, m);
-        }
-
-        template <bool align> SIMD_INLINE void NeuralRoughTanh(const float* src, size_t size, const float* slope, float* dst)
-        {
-            __m512 _slope = _mm512_set1_ps(*slope);
-            __m512 _0 = _mm512_set1_ps(-0.0f);
-            __m512 _1 = _mm512_set1_ps(1.0f);
-            __m512 _a = _mm512_set1_ps(0.5658f);
-            __m512 _b = _mm512_set1_ps(0.1430f);
-            size_t i = 0;
-            size_t partialAlignedSize = Simd::AlignLo(size, F);
-            size_t fullAlignedSize = Simd::AlignLo(size, QF);
-            for (; i < fullAlignedSize; i += QF)
-            {
-                NeuralRoughTanh<align, false>(src + i + 0 * F, _0, _1, _a, _b, _slope, dst + i + 0 * F);
-                NeuralRoughTanh<align, false>(src + i + 1 * F, _0, _1, _a, _b, _slope, dst + i + 1 * F);
-                NeuralRoughTanh<align, false>(src + i + 2 * F, _0, _1, _a, _b, _slope, dst + i + 2 * F);
-                NeuralRoughTanh<align, false>(src + i + 3 * F, _0, _1, _a, _b, _slope, dst + i + 3 * F);
-            }
-            for (; i < partialAlignedSize; i += F)
-                NeuralRoughTanh<align, false>(src + i, _0, _1, _a, _b, _slope, dst + i);
-            if (i < size)
-            {
-                __mmask16 tailMask = __mmask16(-1) >> (F + i - size);
-                NeuralRoughTanh<align, true>(src + i, _0, _1, _a, _b, _slope, dst + i, tailMask);
-            }
-        }
-
-        void NeuralRoughTanh(const float* src, size_t size, const float* slope, float* dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralRoughTanh<true>(src, size, slope, dst);
-            else
-                NeuralRoughTanh<false>(src, size, slope, dst);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         template <bool align, bool mask> SIMD_INLINE void NeuralUpdateWeights(const float* x, const __m512& a, const __m512& b, float* d, float* w, __mmask16 m)
         {
             __m512 _x = Load<align, mask>(x, m);

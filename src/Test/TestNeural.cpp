@@ -519,35 +519,6 @@ namespace Test
         return result;
     }
 
-    bool NeuralRoughTanhAutoTest()
-    {
-        bool result = true;
-
-        result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Base::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
-
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Sse41::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
-#endif 
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx2::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
-#endif
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512bw::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
-#endif
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Neon::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
-#endif
-
-        return result;
-    }
-
     bool NeuralPowAutoTest(float error, bool relative, const FuncAF & f1, const FuncAF & f2)
     {
         bool result = true;

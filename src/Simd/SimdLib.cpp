@@ -3335,15 +3335,6 @@ SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const 
     simdNeuralDerivativeSigmoid(src, size, slope, dst);
 }
 
-SIMD_API void SimdNeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
-{
-    SIMD_EMPTY();
-    typedef void(*SimdNeuralRoughTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralRoughTanhPtr simdNeuralRoughTanh = SIMD_FUNC4(NeuralRoughTanh, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
-
-    simdNeuralRoughTanh(src, size, slope, dst);
-}
-
 SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
 {
     SIMD_EMPTY();

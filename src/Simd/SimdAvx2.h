@@ -326,8 +326,6 @@ namespace Simd
 
         void NeuralDerivativeSigmoid(const float* src, size_t size, const float* slope, float* dst);
 
-        void NeuralRoughTanh(const float* src, size_t size, const float* slope, float* dst);
-
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst);
 
         void NeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
