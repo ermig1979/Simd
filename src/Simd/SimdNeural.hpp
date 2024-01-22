@@ -140,7 +140,7 @@ namespace Simd
                     \verbatim
                     df(y) = (1 - y)*y;
                     \endverbatim
-                    See implementation details: ::SimdNeuralRoughSigmoid2 and ::SimdNeuralDerivativeSigmoid.
+                    See implementation details: ::SimdSynetSigmoid32f and ::SimdNeuralDerivativeSigmoid.
                 */
                 Sigmoid,
                 /*! ReLU (Rectified Linear Unit):
@@ -244,7 +244,7 @@ namespace Simd
             static SIMD_INLINE void SigmoidFunction(const float * src, size_t size, float * dst)
             {
                 const float slope = 1.0f;
-                ::SimdNeuralRoughSigmoid2(src, size, &slope, dst);
+                ::SimdSynetSigmoid32f(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void SigmoidDerivative(const float * src, size_t size, float * dst)

@@ -692,55 +692,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <bool align, bool mask> SIMD_INLINE void NeuralRoughSigmoid2(const float* src, const __m512& k,
-            const __m512& _1, const __m512& _05, float* dst, __mmask16 m = -1)
-        {
-            __m512 _src = Load<align, mask>(src, m);
-            __m512 e1 = _mm512_max_ps(_05, _mm512_fmadd_ps(_src, k, _1));
-            __m512 e2 = _mm512_mul_ps(e1, e1);
-            __m512 e4 = _mm512_mul_ps(e2, e2);
-            __m512 e8 = _mm512_mul_ps(e4, e4);
-            __m512 e16 = _mm512_mul_ps(e8, e8);
-            __m512 e32 = _mm512_mul_ps(e16, e16);
-            __m512 e64 = _mm512_mul_ps(e32, e32);
-            __m512 sigmoid = Rcp14(_mm512_fmadd_ps(e64, e64, _1));
-            Store<align, mask>(dst, sigmoid, m);
-        }
-
-        template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float* src, size_t size, const float* slope, float* dst)
-        {
-            size_t partialAlignedSize = Simd::AlignLo(size, F);
-            size_t fullAlignedSize = Simd::AlignLo(size, QF);
-            __m512 _k = _mm512_set1_ps(-(*slope) * 0.0078125f);
-            __m512 _1 = _mm512_set1_ps(1.0f);
-            __m512 _05 = _mm512_set1_ps(0.5f);
-            size_t i = 0;
-            for (; i < fullAlignedSize; i += QF)
-            {
-                NeuralRoughSigmoid2<align, true>(src + i + 0 * F, _k, _1, _05, dst + i + 0 * F);
-                NeuralRoughSigmoid2<align, true>(src + i + 1 * F, _k, _1, _05, dst + i + 1 * F);
-                NeuralRoughSigmoid2<align, true>(src + i + 2 * F, _k, _1, _05, dst + i + 2 * F);
-                NeuralRoughSigmoid2<align, true>(src + i + 3 * F, _k, _1, _05, dst + i + 3 * F);
-            }
-            for (; i < partialAlignedSize; i += F)
-                NeuralRoughSigmoid2<align, true>(src + i, _k, _1, _05, dst + i);
-            if (i < size)
-            {
-                __mmask16 tailMask = __mmask16(-1) >> (F + i - size);
-                NeuralRoughSigmoid2<align, true>(src + i, _k, _1, _05, dst + i, tailMask);
-            }
-        }
-
-        void NeuralRoughSigmoid2(const float* src, size_t size, const float* slope, float* dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralRoughSigmoid2<true>(src, size, slope, dst);
-            else
-                NeuralRoughSigmoid2<false>(src, size, slope, dst);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         template <bool align, bool mask> SIMD_INLINE void NeuralRoughTanh(const float* src, const __m512& _0, const __m512& _1,
             const __m512& a, const __m512& b, const __m512& slope, float* dst, __mmask16 m = -1)
         {

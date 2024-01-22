@@ -3326,15 +3326,6 @@ SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t siz
     simdNeuralAddVectorMultipliedByValue(src, size, value, dst);
 }
 
-SIMD_API void SimdNeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst)
-{
-    SIMD_EMPTY();
-    typedef void(*SimdNeuralRoughSigmoid2Ptr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralRoughSigmoid2Ptr simdNeuralRoughSigmoid2 = SIMD_FUNC4(NeuralRoughSigmoid2, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
-
-    simdNeuralRoughSigmoid2(src, size, slope, dst);
-}
-
 SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
 {
     SIMD_EMPTY();
