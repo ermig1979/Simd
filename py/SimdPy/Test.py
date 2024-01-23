@@ -25,8 +25,20 @@ import ctypes
 import pathlib
 import sys
 import array
+import numpy
 
 import Simd
+
+###################################################################################################
+
+def LoadTestImage(args, fmt = Simd.PixelFormat.Rgb24) -> Simd.Image :
+	if not os.path.isdir(args.root):
+		raise Exception("Project root directory '{0}' is not exist!".format(args.root))
+	path = "{0}/data/image/city.jpg".format(args.root)
+	image = Simd.Image()
+	if not image.Load(path, fmt) :
+		raise Exception("Can't load image '{0}' in {1} format!".format(path, fmt))
+	return image
 
 ###################################################################################################
 
@@ -52,8 +64,7 @@ def GetSetParamsTest(args) :
 ###################################################################################################
 
 def ImagePaintTest(args) :
-	image = Simd.Image(Simd.PixelFormat.Bgr24, 120, 90)
-	image.Load("city.jpg")
+	image = LoadTestImage(args)
 	crc32 = Simd.Lib.Crc32(image.Data(), image.Height() * image.Stride())
 	print("Creates image: {0} {1}x{2}, Crc32: {3:X}. ".format(image.Format(), image.Width(), image.Height(), crc32), end="")
 	image.Region(100, 100, 200, 200).Fill([0, 0, 255])
@@ -64,9 +75,7 @@ def ImagePaintTest(args) :
 
 def ImageFrameTest(args) :
 	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32]
-	#formats = [Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32]
-	image = Simd.Image()
-	image.Load("city.jpg", Simd.PixelFormat.Rgb24)
+	image = LoadTestImage(args)
 	frame = Simd.ImageFrame(Simd.FrameFormat.Rgb24, image.Width(), image.Height())
 	frame.Planes()[0] = image.Copy()
 	for i in range(len(formats)) :
@@ -78,8 +87,7 @@ def ImageFrameTest(args) :
 ###################################################################################################
 
 def ImageAbsGradientSaturatedSumTest(args) :
-	image = Simd.Image()
-	image.Load("city.jpg", Simd.PixelFormat.Gray8)
+	image = LoadTestImage(args, Simd.PixelFormat.Gray8)
 	agss = Simd.AbsGradientSaturatedSum(image)
 	agss.Save("AbsGradientSaturatedSum.jpg")
 	
@@ -87,8 +95,7 @@ def ImageAbsGradientSaturatedSumTest(args) :
 
 def ConvertImageTest(args) :
 	formats = [Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32]
-	orig = Simd.Image()
-	orig.Load("city.jpg")
+	orig = LoadTestImage(args)
 	for i in range(len(formats)) :
 		imgI = orig.Converted(formats[i])
 		for j in range(len(formats)) :
@@ -98,16 +105,14 @@ def ConvertImageTest(args) :
 ###################################################################################################
 
 def ImageResizeTest(args) :
-	image = Simd.Image()
-	image.Load("city.jpg")
+	image = LoadTestImage(args)
 	resized = Simd.Resized(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.Area)
 	resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
 	
 ###################################################################################################
 
 def ImageWarpAffineTest(args) :
-	image = Simd.Image(Simd.PixelFormat.Bgr24, 120, 90)
-	image.Load("city.jpg")
+	image = LoadTestImage(args)
 	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter).Copy()
 	mat = [ 0.7, -0.7, float(image.Width() / 4), 0.7, 0.7, float(-image.Width() / 4)]
 	Simd.WarpAffine(center, mat, image, Simd.WarpAffineFlags.ChannelByte | Simd.WarpAffineFlags.InterpBilinear | Simd.WarpAffineFlags.BorderTransparent)
@@ -116,8 +121,12 @@ def ImageWarpAffineTest(args) :
 ###################################################################################################
 
 def ImageToNumpyArrayTest(args) :
-	image = Simd.Image()
-	image.Load("city.jpg")
+	image = LoadTestImage(args)
+	array = image.CopyToNumpyArray()
+	copy = Simd.Image(image.Format(), image.Width(), image.Height(), 0, image.Width()* image.Format().PixelSize(), array.ctypes.data)
+	#print(array.shape())
+	copy.Save("numpy.array.jpg")
+
 	
 ###################################################################################################
 
@@ -125,8 +134,7 @@ def SynetSetInputTest(args) :
 	width = 128
 	height = 128
 	channels = 3
-	image = Simd.Image()
-	image.Load("city.jpg")
+	image = LoadTestImage(args)
 	resized = Simd.Resized(image, width, height, Simd.ResizeMethod.Area)
 	lower = [0.0, 0.0, 0.0]
 	upper = [1.0, 1.0, 1.0]
@@ -186,6 +194,7 @@ def RunTests(args, tests) :
 def main():
 	parser = argparse.ArgumentParser(prog="Simd", description="Simd Python Wrapper.")
 	parser.add_argument("-b", "--bin", help="Directory with binary files.", required=False, type=str, default=".")
+	parser.add_argument("-r", "--root", help="Simd Library root directory.", required=False, type=str, default=".")
 	parser.add_argument("-i", "--include", help="Include tests filter.", required=False, default=[], action="append")
 	parser.add_argument("-e", "--exclude", help="Exclude tests filter.", required=False, default=[], action="append")
 	args = parser.parse_args()

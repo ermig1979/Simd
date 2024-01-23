@@ -13,7 +13,7 @@
     <Name>SimdPy</Name>
     <RootNamespace>simple</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>-i=Numpy</CommandLineArguments>
+    <CommandLineArguments>-r=../../../.. -i=Numpy</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>

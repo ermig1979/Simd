@@ -130,7 +130,7 @@ namespace Simd
                     \verbatim
                     df(y) = 1 - y*y;
                     \endverbatim
-                    See implementation details: ::SimdNeuralTanh32f and ::SimdNeuralDerivativeTanh.
+                    See implementation details: ::SimdSynetTanh32f and ::SimdNeuralDerivativeTanh.
                 */
                 Tanh,
                 /*! Sigmoid:

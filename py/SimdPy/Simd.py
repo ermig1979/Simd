@@ -28,6 +28,8 @@ import sys
 import array
 import enum
 
+import numpy
+
 Simd = sys.modules[__name__]
 
 ###################################################################################################
@@ -1407,6 +1409,18 @@ class Image():
 		if size < 1 or size > 4 or size != fmt.ChannelCount() :
 			raise Exception("Incompatible pixel size {0} and image type {1} !".format(size, fmt))
 		Lib.FillPixel(self.Data(), self.Stride(), self.Width(), self.Height(), pixel)
+	
+	## Copy image to output numpy.array.
+	# @param dst - an output numpy.array with image copy.
+	# @return - output numpy.array with image copy. 
+	def CopyToNumpyArray(self, dst = None) :
+		if (dst == None) or (not dst.shape == [self.Height(), self.Width(), self.Format().PixelSize()]) :
+			dst = numpy.empty([self.Height(), self.Width(), self.Format().PixelSize()], dtype = numpy.ubyte)
+		size = self.Width() * self.Format().PixelSize()
+		for y in range(self.Height()) :
+			ctypes.memmove(dst.ctypes.data + size * y, self.Data() + y * self.Stride(), size)
+		return dst
+		
 		
 ###################################################################################################
 
