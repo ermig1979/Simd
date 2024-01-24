@@ -378,7 +378,9 @@ class Lib():
 	## Initializes Simd.Lib class (loads %Simd Library binaries).
 	# @note This method must be called before any using of this class.
 	# @param dir - a directory with %Simd Library binaries (Simd.dll or libSimd.so).
-	def Init(dir: str):
+	def Init(dir = ""):
+		if dir == "" :
+			dir = pathlib.Path(__file__).parent.resolve()
 		if not os.path.isdir(dir):
 			raise Exception("Directory '{0}' with binaries is not exist!".format(dir))
 		name : str

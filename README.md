@@ -107,8 +107,9 @@ There are addition build parameters:
 * `SIMD_RUNTIME` - Enable of runtime faster algorithm choise. It is switched on by default.
 * `SIMD_TEST_FLAGS` - Addition compiler flags to build test framework.
 * `SIMD_OPENCV` - Use OpenCV in test framework. It is switched off by default.
-* `SIMD_INSTALL` -  Enabling of install target. It is switched on by default.
-* `SIMD_UNINSTALL` -  Enabling of uninstall target. It is switched on by default.
+* `SIMD_INSTALL` - Enabling of install target. It is switched on by default.
+* `SIMD_UNINSTALL` - Enabling of uninstall target. It is switched on by default.
+* `SIMD_PYTHON` - Enabling of Simd Python wrapper. It is switched on by default.
 
 Using the library
 =================

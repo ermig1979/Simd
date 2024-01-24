@@ -187,13 +187,13 @@ def RunTests(args, tests) :
 		test(args)
 		print("OK.")
 	
-	print("\nSimd Python Wrapper test ended successfully!")
+	print("\nSimd Python Wrapper test ended successfully!\n")
 
 ###################################################################################################
 
 def main():
 	parser = argparse.ArgumentParser(prog="Simd", description="Simd Python Wrapper.")
-	parser.add_argument("-b", "--bin", help="Directory with binary files.", required=False, type=str, default=".")
+	parser.add_argument("-b", "--bin", help="Directory with binary files.", required=False, type=str, default="")
 	parser.add_argument("-r", "--root", help="Simd Library root directory.", required=False, type=str, default=".")
 	parser.add_argument("-i", "--include", help="Include tests filter.", required=False, default=[], action="append")
 	parser.add_argument("-e", "--exclude", help="Exclude tests filter.", required=False, default=[], action="append")
