@@ -170,10 +170,10 @@ endif()
 
 if(SIMD_PYTHON)
 	add_custom_command(TARGET Simd POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy 
-		${SIMD_ROOT}/py/SimdPy/Simd.py ${CMAKE_CURRENT_BINARY_DIR})
+		${SIMD_ROOT}/py/SimdPy/Simd.py ${CMAKE_BINARY_DIR})
 	if(SIMD_TEST)
 		add_custom_command(TARGET Test POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy 
-			${SIMD_ROOT}/py/SimdPy/Test.py ${CMAKE_CURRENT_BINARY_DIR})
+			${SIMD_ROOT}/py/SimdPy/Test.py ${CMAKE_BINARY_DIR})
 	endif()
 endif()
 
