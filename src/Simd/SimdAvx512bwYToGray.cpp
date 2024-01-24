@@ -38,7 +38,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < widthA; col += A)
-                    _mm512_storeu_epi8(gray + col, YToGray(_mm512_loadu_epi8(y + col)));
+                    _mm512_storeu_si512(gray + col, YToGray(_mm512_loadu_si512(y + col)));
                 if (col < width)
                     _mm512_mask_storeu_epi8(gray + col, tail, YToGray(_mm512_maskz_loadu_epi8(tail, y + col)));
                 y += yStride;

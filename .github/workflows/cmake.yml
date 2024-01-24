@@ -7,29 +7,6 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build_and_test_x86_x64:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        build_type: [Debug, Release]
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Host properties
-      run: lscpu
-
-    - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_AVX512VNNI=ON -DSIMD_TEST_FLAGS="-march=native"
-
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
-
   build_arm_cross:
     runs-on: ubuntu-latest
 
@@ -100,11 +77,12 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
 
-  build_and_test_gcc_13:
+  build_and_test_gcc:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
+        gcc_version: [10, 11, 13]
         build_type: [Debug, Release]
 
     steps:
@@ -114,10 +92,10 @@ jobs:
       run: lscpu
 
     - name: Install toolchain
-      run: sudo apt-get -y install g++-13
+      run: sudo apt-get -y install g++-${{matrix.gcc_version}}
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-13" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_TEST_FLAGS="-march=native"
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=ON -DSIMD_TEST_FLAGS="-march=native"
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)

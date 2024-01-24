@@ -53,6 +53,8 @@
  <li>MSVS compiler bug in file SimdAvx512bwYuvToBgraV2.</li>
  <li>Linux, GCC-13 - crash in function SimdSynetInnerProduct32fForward.</li>
  <li>MSVS compiler bug (Cmake, Windows for ARM64) with functions Extract4Sums.</li>
+ <li>GCC-9/10 - compiler error in AVX-512BW optimization of function YToGray.</li>
+ <li>GCC-9/10 - compiler error in AVX-512BW optimization of function GrayToY.</li>
 </ul>
 <h5>Replacing</h5>
 <ul>
@@ -357,6 +359,7 @@
 <h5>New features</h5>
 <ul>
  <li>SIMD_PYTHON CMake option.</li>
+ <li>build_and_test_gcc section in Github actions script for CMake supports different GCC versions (10, 11, 13).</li>
 </ul>
 <h5>Improving</h5>
 <ul>
