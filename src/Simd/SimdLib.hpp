@@ -2237,29 +2237,6 @@ namespace Simd
         SimdHogExtractFeatures(src.data, src.stride, src.width, src.height, features);
     }
 
-    /*! @ingroup hog
-
-        \fn void HogLiteExtractFeatures(const View<A> & src, size_t cell, float * features, size_t featuresStride)
-
-        \short Extracts lite HOG features for 8-bit gray image.
-
-        Extracts lite (for 8 directions) HOG features 8-bit gray image. 16 features are extracted for 8x8 or 4x4 cell size and 2x2 block size.
-
-        \note This function is a C++ wrapper for function ::SimdHogLiteExtractFeatures.
-
-        \param [in] src - an input 8-bit gray image. Its width and height must be a multiple of cell and greater or equal to cell*3.
-        \param [in] cell - a size of cell. It must be 4 or 8.
-        \param [out] features - a pointer to buffer with features. Array must has size grater or equal to (height/cell - 2)*featuresStride.
-        \param [in] featuresStride - a row size of the buffer with features. It must be grater or equal to (width/cell - 2)*16.
-    */
-    template<template<class> class A> SIMD_INLINE void HogLiteExtractFeatures(const View<A> & src, size_t cell, float * features, size_t featuresStride)
-    {
-        assert((cell == 4 || cell == 8) && featuresStride >= (src.width / cell - 2) * 16);
-        assert(src.format == View<A>::Gray8 && src.width >= cell * 3 && src.height >= cell * 3);
-
-        SimdHogLiteExtractFeatures(src.data, src.stride, src.width, src.height, cell, features, featuresStride);
-    }
-
     /*! @ingroup other_conversion
 
         \fn void Int16ToGray(const View<A> & src, View<A> & dst)

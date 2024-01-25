@@ -255,14 +255,6 @@ namespace Test
     TEST_ADD_GROUP_A0(HogDeinterleave);
     TEST_ADD_GROUP_A0(HogFilterSeparable);
 
-    TEST_ADD_GROUP_A0(HogLiteExtractFeatures);
-    TEST_ADD_GROUP_A0(HogLiteFilterFeatures);
-    TEST_ADD_GROUP_A0(HogLiteResizeFeatures);
-    TEST_ADD_GROUP_A0(HogLiteCompressFeatures);
-    TEST_ADD_GROUP_A0(HogLiteFilterSeparable);
-    TEST_ADD_GROUP_A0(HogLiteFindMax7x7);
-    TEST_ADD_GROUP_A0(HogLiteCreateMask);
-
     TEST_ADD_GROUP_0S(ImageMatcher);
 
     TEST_ADD_GROUP_A0(Integral);

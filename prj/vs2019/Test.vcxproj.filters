@@ -97,9 +97,6 @@
     <ClCompile Include="..\..\src\Test\TestHog.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestHogLite.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestImageMatcher.cpp">
       <Filter>Test</Filter>
     </ClCompile>

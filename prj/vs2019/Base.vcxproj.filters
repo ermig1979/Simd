@@ -103,9 +103,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseHog.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseHogLite.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseInt16ToGray.cpp">
       <Filter>Base</Filter>
     </ClCompile>

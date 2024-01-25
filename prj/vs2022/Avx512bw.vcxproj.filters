@@ -76,9 +76,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHogLite.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwInt16ToGray.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>

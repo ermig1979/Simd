@@ -79,9 +79,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonHogLite.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonInt16ToGray.cpp">
       <Filter>Neon</Filter>
     </ClCompile>

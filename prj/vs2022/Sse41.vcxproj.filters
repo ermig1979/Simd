@@ -7,9 +7,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41HogLite.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
