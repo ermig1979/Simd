@@ -1729,7 +1729,7 @@ def PixelFormatToResizeChannel(src) -> ResizeChannel :
 # @param src - an input 8-bit gray image.
 # @param dst - an output 8-bit gray image with sum of absolute gradient. Can be empty.
 # @return - output 8-bit gray image with sum of absolute gradient.
-def AbsGradientSaturatedSum(src : Image, dst = Image()) -> Image :
+def AbsGradientSaturatedSum(src : Image, dst : Image) -> Image :
 	if src.Format() != Simd.PixelFormat.Gray8 :
 		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Gray8!".format(src.Format()))
 	if dst.Format() == Simd.PixelFormat.Empty :

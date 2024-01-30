@@ -88,7 +88,7 @@ def ImageFrameTest(args) :
 
 def ImageAbsGradientSaturatedSumTest(args) :
 	image = LoadTestImage(args, Simd.PixelFormat.Gray8)
-	agss = Simd.AbsGradientSaturatedSum(image)
+	agss = Simd.AbsGradientSaturatedSum(image, Simd.Image())
 	agss.Save("AbsGradientSaturatedSum.jpg")
 	
 ###################################################################################################
