@@ -141,8 +141,8 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 #ifdef SIMD_AVX512BF16_ENABLE
     case SimdCpuInfoAvx512bf16: return Avx512bf16::Enable ? 1 : 0;
 #endif
-#ifdef SIMD_AMX_ENABLE
-    case SimdCpuInfoAmx: return Amx::Enable ? 1 : 0;
+#ifdef SIMD_AMXBF16_ENABLE
+    case SimdCpuInfoAmxBf16: return AmxBf16::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_NEON_ENABLE
     case SimdCpuInfoNeon: return Neon::Enable ? 1 : 0;

@@ -59,7 +59,7 @@ class CpuInfo(enum.Enum) :
 	RAM = 6
 	## Enabling of SSE, SSE2, SSE3, SSSE3, SSE4.1 CPU extensions (x86 specific).
 	SSE41 = 7
-	## Enabling of AVX2, FMA CPU extensions (x86 specific).
+	## Enabling of AVX, AVX2, FMA CPU extensions (x86 specific).
 	AVX2 = 8
 	## Enabling of AVX-512F, AVX-512BW CPU extensions (x86 specific).
 	AVX512BW = 9
@@ -67,8 +67,8 @@ class CpuInfo(enum.Enum) :
 	AVX512VNNI = 10
 	## Enabling of AVX-512BF16 CPU extensions (x86 specific).
 	AVX512BF16 = 11
-	## Enabling of AMX CPU extensions (x86 specific).
-	AMX = 12
+	## Enabling of AMX-BF16, AMX-INT8 CPU extensions (x86 specific).
+	AMXBF16 = 12
 	## Enabling of NEON CPU extensions (ARM specific).
 	NEON = 13
 
@@ -651,7 +651,7 @@ class Lib():
 		info += ", RAM: {:.1f} GB".format(Lib.CpuInfo(Simd.CpuInfo.RAM) / 1024 / 1024 / 1024)
 		info += "; Available SIMD:"
 		if Lib.CpuInfo(Simd.CpuInfo.AMX) > 0 :
-			info += " AMX"
+			info += " AMX-BF16 AMX-INT8"
 		if Lib.CpuInfo(Simd.CpuInfo.AVX512BF16) > 0 :
 			info += " AVX-512VBF16"
 		if Lib.CpuInfo(Simd.CpuInfo.AVX512VNNI) > 0 :

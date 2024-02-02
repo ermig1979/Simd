@@ -254,12 +254,12 @@ typedef enum
     SimdCpuInfoCacheL2, /*!< A size of level 2 cache. */
     SimdCpuInfoCacheL3, /*!< A size of level 3 cache. */
     SimdCpuInfoRam, /*!< A size of physical RAM. */
-    SimdCpuInfoSse41, /*!< Availability of SSE4.1 (x86). */
-    SimdCpuInfoAvx2, /*!< Availability of AVX2 (x86). */
-    SimdCpuInfoAvx512bw, /*!< Availability of AVX-512BW (x86). */
+    SimdCpuInfoSse41, /*!< Availability of SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2 (x86). */
+    SimdCpuInfoAvx2, /*!< Availability of AVX, FMA, AVX2 (x86). */
+    SimdCpuInfoAvx512bw, /*!< Availability of AVX-512F, AVX-512BW (x86). */
     SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */
     SimdCpuInfoAvx512bf16, /*!< Availability of AVX-512BF16 (x86). */
-    SimdCpuInfoAmx, /*!< Availability of AMX (x86). */
+    SimdCpuInfoAmxBf16, /*!< Availability of AMX-BF16, AMX-INT8 (x86). */
     SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
 } SimdCpuInfoType;
 
