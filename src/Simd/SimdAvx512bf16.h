@@ -33,6 +33,6 @@ namespace Simd
     {
         void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst);
     }
-#endif// SIMD_AVX512VNNI_ENABLE
+#endif
 }
 #endif

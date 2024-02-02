@@ -623,6 +623,7 @@ namespace Test
 #endif
 #if 1 
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 16, 16, 128, _1, _1, _1, _0, _0, 1, aId, tT), bf16, f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 16, 16, 128, _1, _1, _1, _0, _0, 1, aId, tT), fp32, f1, f2);
 #endif
 #else
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 29, 29, 98, _7, _1, _2, _3, _3, 49, a, t), c, f1, f2);
