@@ -461,7 +461,7 @@ namespace Test
         info << ", L3: " << ToString(double(SimdCpuInfo(SimdCpuInfoCacheL3) / 1024) / 1024, 1, false) << " MB";
         info << ", RAM: " << ToString(double(SimdCpuInfo(SimdCpuInfoRam)) / 1024 / 1024 / 1024, 1, false) << " GB";
         info << "; SIMD:";
-        info << (SimdCpuInfo(SimdCpuInfoAmx) ? " AMX" : "");
+        info << (SimdCpuInfo(SimdCpuInfoAmxBf16) ? " AMX-BF16 AMX-INT8" : "");
         info << (SimdCpuInfo(SimdCpuInfoAvx512bf16) ? " AVX-512BF16" : "");
         info << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? " AVX-512VNNI" : "");
         info << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? " AVX-512BW AVX-512F" : "");
