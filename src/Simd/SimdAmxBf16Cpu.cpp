@@ -28,6 +28,18 @@
 #include <windows.h>
 #endif
 
+#if defined(__linux__)
+#include <unistd.h>
+#include <sys/syscall.h>
+
+#define ARCH_GET_XCOMP_PERM     0x1022
+#define ARCH_REQ_XCOMP_PERM     0x1023
+#define XFEATURE_XTILECFG       17
+#define XFEATURE_XTILEDATA      18
+#endif
+
+#include <iostream>
+
 namespace Simd
 {
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AMX_EMULATE) && defined(SIMD_AVX512BW_ENABLE))
@@ -67,8 +79,10 @@ namespace Simd
             {
                 return false;
             }
+#elif defined(__linux__)
+            return syscall(SYS_arch_prctl, ARCH_REQ_XCOMP_PERM, XFEATURE_XTILEDATA) == 0;
 #else
-            return true;
+            return false;
 #endif
         }
 
