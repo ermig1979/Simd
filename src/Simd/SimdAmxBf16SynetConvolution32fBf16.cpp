@@ -77,6 +77,7 @@ namespace Simd
                 tail.colsb[4] = uint16_t(tailC * 2);
                 tail.colsb[5] = uint16_t(tailC * 2);
             }
+            _tile_loadconfig(&body);
             if (zero)
             {
                 _tile_zero(0);
@@ -86,7 +87,6 @@ namespace Simd
             }
             else
             {
-                _tile_loadconfig(&body);
                 _tile_loadd(0, dst + 0, strideD);
                 _tile_loadd(1, dst + F, strideD);
                 _tile_loadd(2, dst + 16 * dD + 0, strideD);
@@ -168,6 +168,7 @@ namespace Simd
                 tail.rows[7] = uint8_t(tailC / 2);
                 tail.colsb[4] = uint16_t(tailC * 2);
             }
+            _tile_loadconfig(&body);
             if (zero)
             {
                 _tile_zero(0);
@@ -175,7 +176,6 @@ namespace Simd
             }
             else
             {
-                _tile_loadconfig(&body);
                 _tile_loadd(0, dst + 0, strideD);
                 _tile_loadd(1, dst + F, strideD);
             }
@@ -247,6 +247,7 @@ namespace Simd
                 tail.colsb[4] = uint16_t(tailC * 2);
                 tail.colsb[5] = uint16_t(tailC * 2);
             }
+            _tile_loadconfig(&body);
             if (zero)
             {
                 _tile_zero(0);
@@ -254,7 +255,6 @@ namespace Simd
             }
             else
             {
-                _tile_loadconfig(&body);
                 _tile_loadd(0, dst + 0, strideD);
                 _tile_loadd(2, dst + 16 * dD + 0, strideD);
             }
@@ -319,13 +319,13 @@ namespace Simd
                 tail.rows[6] = uint8_t(tailC / 2);
                 tail.colsb[4] = uint16_t(tailC * 2);
             }
+            _tile_loadconfig(&body);
             if (zero)
             {
                 _tile_zero(0);
             }
             else
             {
-                _tile_loadconfig(&body);
                 _tile_loadd(0, dst + 0, strideD);
             }
             for (size_t ky = 0; ky < kY; ++ky)

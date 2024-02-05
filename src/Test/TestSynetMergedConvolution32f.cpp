@@ -342,7 +342,7 @@ namespace Test
 
 #if defined(NDEBUG)
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
 #else
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);

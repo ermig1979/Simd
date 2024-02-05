@@ -247,7 +247,7 @@ namespace Test
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 5000, 30, 30, 400, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 2000, 30, 30, 64, _1, _1, _1, _0, _0, 1, aLr, t1, u8, f32), 1, c, f1, f2);
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 256, 16, 16, 128, _1, _1, _1, _0, _0, 1, aGe, t1, u8, f32), 1, c, f1, f2);
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 512, 64, 64, 512, _1, _1, _1, _0, _0, 1, aGe, t1, u8, f32), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 512, 32, 32, 256, _1, _1, _1, _0, _0, 1, aRe, t1, u8, f32), 1, c, f1, f2);
 #endif
 #else
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 2000, 30, 30, 64, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
