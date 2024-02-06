@@ -600,15 +600,15 @@ namespace Simd
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float* src, float* buf, float* dst);
 
+            static bool Preferable(const ConvParam32f& p);
+
             struct AlgParam
             {
-                size_t K, M, microD, macroD, macroH, microK, macroK;
+                size_t K, M, microD, macroD, macroH, microK, macroK, bufK;
                 size_t batch;
             };
 
-            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t micK, size_t macK, uint16_t* tmp, uint16_t* dst);
-
-            typedef void(*GemmPtr)(const uint16_t* src, const ConvParam32f& p, size_t dstC, size_t dstH,
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, size_t dstC, size_t dstH,
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
 
         protected:
@@ -618,8 +618,7 @@ namespace Simd
             virtual void Convert(const float* src, size_t yBeg, size_t yEnd, uint16_t* tmp, uint16_t* dst);
 
             AlgParam _alg;
-            //ConvertPtr _convert;
-            GemmPtr _gemm[2];
+            ConvolutionPtr _convolutions[2];
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -750,6 +749,14 @@ namespace Simd
         };
 
         //-------------------------------------------------------------------------------------------------
+
+        class SynetConvolution32fBf16NhwcGemm : public Base::SynetConvolution32fBf16NhwcGemm
+        {
+        public:
+            SynetConvolution32fBf16NhwcGemm(const ConvParam32f& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
 
         class SynetConvolution32fBf16NhwcOld : public Base::SynetConvolution32fBf16NhwcOld
         {

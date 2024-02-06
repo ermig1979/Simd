@@ -303,13 +303,14 @@ namespace Simd
             a.K = p.srcC * p.kernelY * p.kernelX;
             a.microK = microK;
             a.microD = microD;
-            a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD / 2, a.microK), a.microK, AlignHi(a.K, a.microK));
+            a.bufK = AlignHi(a.K, a.microK);
+            a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD / 2, a.microK), a.microK, a.bufK);
             a.batch = 1;
-            size_t matSize = a.M * AlignHi(a.K, a.microK) * 2;
-            if (matSize * 2 <= L2 && p.batch > 1)
+            size_t bufSize = a.M * a.bufK * 2;
+            if (bufSize * 2 <= L2 && p.batch > 1)
             {
                 for (size_t batch = 1; batch <= p.batch; ++batch)
-                    if (p.batch % batch == 0 && batch * matSize <= L2)
+                    if (p.batch % batch == 0 && batch * bufSize <= L2)
                         a.batch = batch;
             }
             a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH * a.batch);
@@ -320,7 +321,7 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            return (a.batch * a.M + 1) * AlignHiAny(a.K, a.microK) / 2;
+            return (a.batch * a.M + 1) * a.bufK / 2;
         }
 
         void SynetConvolution32fBf16NhwcGemm::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
@@ -336,8 +337,8 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            Array16u buffer(a.macroD * a.K);
-            _weight.Resize(AlignHiAny(a.K, a.microK) * AlignHiAny(p.dstC, a.microD));
+            Array16u buffer(a.macroD * a.bufK);
+            _weight.Resize(a.bufK * AlignHiAny(p.dstC, a.microD));
             uint16_t* dst = _weight.data;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
@@ -369,7 +370,7 @@ namespace Simd
                         }
                     }
                 }
-                if (macroD == p.dstC && a.macroK >= a.K)
+                if (macroD == p.dstC && a.macroK == a.bufK)
                     _weight.Swap(buffer);
                 else
                 {
@@ -398,13 +399,13 @@ namespace Simd
             const uint16_t* weight = _weight.data;
             const float* bias = _bias.data, * params = _params.data;
             size_t dstH = p.dstH * a.batch;
-            uint16_t* tmp = buf + (a.batch * a.M) * AlignHiAny(a.K, a.microK);
+            uint16_t* tmp = buf + (a.batch * a.M) * a.bufK;
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
                 for (size_t mak = 0; mak < a.K; mak += a.macroK)
                 {
-                    size_t macroK = Simd::Min(a.K, mak + a.macroK) - mak;
+                    size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
                     for (size_t yBeg = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
@@ -421,11 +422,11 @@ namespace Simd
                             else
                                 Convert(src, yBeg, yEnd, tmp, buf + offs);
                         }
-                        if (mak + macroK == a.K)
-                            _gemm[TermLast](buf + offs, p, macroD, yEnd - yBeg, macroK, macroK == a.K ? 1 : 0,
+                        if (mak + macroK == a.bufK)
+                            _convolutions[TermLast](buf + offs, p, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 1 : 0,
                                 weight, bias, params, dst + yBeg * p.dstW * p.dstC);
                         else
-                            _gemm[TermInterim](buf + offs, p, macroD, yEnd - yBeg, macroK, mak == 0 ? 1 : 0,
+                            _convolutions[TermInterim](buf + offs, p, macroD, yEnd - yBeg, macroK, mak == 0 ? 1 : 0,
                                 weight, bias, params, dst + yBeg * p.dstW * p.dstC);
                         yBeg = yEnd;
                     }
@@ -442,7 +443,7 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            size_t gap = AlignHiAny(a.K, a.microK) - a.K;
+            size_t gap = a.bufK - a.K;
             for (size_t dy = yBeg; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx)
@@ -479,6 +480,11 @@ namespace Simd
                         *(dst++) = 0;
                 }
             }
+        }
+
+        bool SynetConvolution32fBf16NhwcGemm::Preferable(const ConvParam32f& p)
+        {
+            return p.trans != 0 && p.group == 1;
         }
 
         //-------------------------------------------------------------------------------------------------
