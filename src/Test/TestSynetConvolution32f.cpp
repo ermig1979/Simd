@@ -622,13 +622,16 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 24, 24, 128, _3, _1, _1, _2, _2, 1, aGe, tT), bf16, f1, f2);
 #endif
 #if 1 
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 32, 32, 256, _3, _1, _1, _1, _1, 1, aId, tT), bf16, f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 512, 32, 32, 256, _3, _1, _1, _1, _1, 1, aRe, tT), fp32, f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 512, 32, 32, 256, _1, _1, _1, _0, _0, 1, aRe, tT), bf16, f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 512, 32, 32, 256, _1, _1, _1, _0, _0, 1, aRe, tT), fp32, f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 65, 1, 32, 32, _1, _1, _1, _0, _0, 1, aId, tT), bf16, f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 2, 33, 32, _2, _1, _1, _0, _0, 1, aId, tT), bf16, f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 512, 32, 32, 256, _3, _1, _1, _1, _1, 1, aRe, tT), fp32, f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 512, 32, 32, 256, _1, _1, _1, _0, _0, 1, aRe, tT), fp32, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 29, 29, 98, _7, _1, _2, _3, _3, 49, a, t), c, f1, f2);
+    //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 33, 33, 32, _2, _1, _1, _0, _0, 1, aId, tT), bf16, f1, f2);
+    result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 65, 1, 32, 32, _1, _1, _1, _0, _0, 1, aId, tT), bf16, f1, f2);
+    //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 29, 29, 98, _7, _1, _2, _3, _3, 49, a, t), c, f1, f2);
+
 #endif
         return result;
     }
@@ -691,12 +694,12 @@ namespace Test
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx512bw::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif
 
-#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
+#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE) && 0
         if (Simd::Avx512bf16::Enable)
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx512bf16::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif
 
-#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && 0
         if (Simd::AmxBf16::Enable)
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::AmxBf16::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif

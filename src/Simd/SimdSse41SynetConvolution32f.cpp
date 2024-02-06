@@ -706,9 +706,9 @@ namespace Simd
                 return NULL;
             else if (Base::Bf16Soft(compatibility))
             {
-                if(Base::SynetConvolution32fBf16Nhwc::Preferable(param))
-                    return new SynetConvolution32fBf16Nhwc(param);
-                else
+                //if(Base::SynetConvolution32fBf16Nhwc::Preferable(param))
+                //    return new SynetConvolution32fBf16Nhwc(param);
+                //else
                     return new Base::SynetConvolution32fBf16Gemm(param);
             }
             else if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))

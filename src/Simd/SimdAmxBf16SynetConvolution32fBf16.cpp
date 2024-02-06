@@ -33,7 +33,7 @@
 
 namespace Simd
 {
-#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE) && 0
     namespace AmxBf16
     {
         typedef Base::SynetConvolution32fBf16Nhwc::AlgParam AlgParam;
@@ -97,7 +97,7 @@ namespace Simd
                 for (size_t kx = 0; kx < kX; ++kx)
                 {
                     size_t sc = 0, offs = ky * dY + kx * dX;
-                    _tile_loadconfig(&body);
+                    //_tile_loadconfig(&body);
                     for (;sc < srcC32; sc += 32)
                     {
                         _tile_loadd(4, src0 + offs + sc, strideS);
@@ -433,7 +433,7 @@ namespace Simd
             size_t srcC32 = AlignLo(srcC, 32);
             int dD = (int)p.dstC, strideS = (int)srcC * 2, strideW = 128, strideD = dD * 4;
             const uint16_t* src1 = src0 + srcC * 16, *weight1 = weight0 + 32;
-
+            std::cout << "Gemm_2x2: srcC = " << srcC << std::endl << std::flush;
             TileConf conf;
             conf.rows[0] = 16;
             conf.rows[1] = 16;
@@ -479,14 +479,20 @@ namespace Simd
                 _tile_dpbf16ps(2, 5, 6);
                 _tile_dpbf16ps(3, 5, 7);
             }
+            _tile_stored(0, dst + 0, strideD);
+            std::cout << "dst[0]:" << dst[0] << std::endl << std::flush;
             if(sc < srcC)
             {
+                std::cout << "Tile at " << sc << std::endl << std::flush;
+                std::cout << "Start row:" << (int)conf.startRow << std::endl << std::flush;
                 size_t tailC = AlignHi(srcC - sc, 2);
                 conf.rows[6] = uint8_t(tailC / 2);
                 conf.rows[7] = uint8_t(tailC / 2);
                 conf.colsb[4] = uint16_t(tailC * 2);
                 conf.colsb[5] = uint16_t(tailC * 2);
                 _tile_loadconfig(&conf);
+                _tile_stored(0, dst + 0, strideD);
+                std::cout << "dst[0]:" << dst[0] << std::endl << std::flush;
 
                 _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
@@ -501,6 +507,8 @@ namespace Simd
             _tile_stored(1, dst + F, strideD);
             _tile_stored(2, dst + 16 * dD + 0, strideD);
             _tile_stored(3, dst + 16 * dD + F, strideD);
+            _tile_release();
+            std::cout << "dst[0]:" << dst[0] << std::endl << std::flush;
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC - F);

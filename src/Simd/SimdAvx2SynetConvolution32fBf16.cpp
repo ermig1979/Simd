@@ -33,17 +33,18 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE) 
     namespace Avx2
     {
-        typedef Base::SynetConvolution32fBf16Nhwc::AlgParam AlgParam;
-        typedef Base::SynetConvolution32fBf16Nhwc::ConvertPtr Convert;
-        typedef Base::SynetConvolution32fBf16Nhwc::ConvolutionPtr Convolution;
+        typedef Base::SynetConvolution32fBf16NhwcOld::AlgParam AlgParam;
+        typedef Base::SynetConvolution32fBf16NhwcOld::ConvertPtr Convert;
+        typedef Base::SynetConvolution32fBf16NhwcOld::ConvolutionPtr Convolution;
 
         //-----------------------------------------------------------------------------------------
 
-        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
+        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst)
         {
             ptrdiff_t beg = yBeg * p.strideY - p.padY;
             ptrdiff_t end = (yEnd - 1) * p.strideY - p.padY + p.kernelY * p.dilationY;
             src += Max<ptrdiff_t>(0, beg) * p.srcW * p.srcC;
+            size_t srcCD = Simd::AlignHi(srcC, micC);
             size_t srcC16 = Simd::AlignLo(srcC, 16);
             size_t srcC8 = Simd::AlignLo(srcC, 8);
             size_t srcC4 = Simd::AlignLo(srcC, 4);
@@ -52,21 +53,21 @@ namespace Simd
             {
                 if ((size_t)sy >= p.srcH)
                 {
-                    memset(dst, 0, srcW * srcC * 2);
-                    dst += srcW * srcC;
+                    memset(dst, 0, srcW * srcCD * 2);
+                    dst += srcW * srcCD;
                 }
                 else
                 {
                     if (p.padX)
                     {
-                        memset(dst, 0, p.padX * srcC * 2);
-                        dst += p.padX * srcC;
+                        memset(dst, 0, p.padX * srcCD * 2);
+                        dst += p.padX * srcCD;
                     }
-                    if (p.srcC == srcC)
+                    if (p.srcC == srcCD)
                     {
-                        Float32ToBFloat16(src, srcC * p.srcW, dst);
-                        src += srcC * p.srcW;
-                        dst += srcC * p.srcW;
+                        Float32ToBFloat16(src, srcCD * p.srcW, dst);
+                        src += srcCD * p.srcW;
+                        dst += srcCD * p.srcW;
                     }
                     else
                     {
@@ -92,22 +93,24 @@ namespace Simd
                             }
                             for (; sc < srcC; ++sc)
                                 dst[sc] = Base::Float32ToBFloat16(src[sc]);
+                            for (; sc < srcCD; ++sc)
+                                dst[sc] = 0;
                             src += p.srcC;
-                            dst += srcC;
+                            dst += srcCD;
                         }
                     }
                     if (p.padW)
                     {
-                        memset(dst, 0, p.padW * srcC * 2);
-                        dst += p.padW * srcC;
+                        memset(dst, 0, p.padW * srcCD * 2);
+                        dst += p.padW * srcCD;
                     }
                 }
             }
         }
 
-        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
+        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst)
         {
-            size_t srcCh2 = AlignHi(srcC, 2);
+            size_t srcCD = Simd::AlignHi(srcC, micC);
             size_t srcC16 = Simd::AlignLo(srcC, 16);
             size_t srcC8 = Simd::AlignLo(srcC, 8);
             size_t srcC4 = Simd::AlignLo(srcC, 4);
@@ -146,21 +149,21 @@ namespace Simd
                                     }
                                     for (; sc < srcC; ++sc)
                                         dst[sc] = Base::Float32ToBFloat16(ps[sc]);
-                                    if (sc < srcCh2)
+                                    for (; sc < srcCD; ++sc)
                                         dst[sc] = 0;
-                                    dst += srcCh2;
+                                    dst += srcCD;
                                 }
                                 else
                                 {
-                                    memset(dst, 0, srcCh2 * 2);
-                                    dst += srcCh2;
+                                    memset(dst, 0, srcCD * 2);
+                                    dst += srcCD;
                                 }
                             }
                         }
                         else
                         {
-                            memset(dst, 0, p.kernelX * srcCh2 * 2);
-                            dst += p.kernelX * srcCh2;
+                            memset(dst, 0, p.kernelX * srcCD * 2);
+                            dst += p.kernelX * srcCD;
                         }
                     }
                 }
@@ -671,10 +674,10 @@ namespace Simd
             }
         }
 
-        SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f & p)
-            : Sse41::SynetConvolution32fBf16Nhwc(p)
+        SynetConvolution32fBf16NhwcOld::SynetConvolution32fBf16NhwcOld(const ConvParam32f & p)
+            : Sse41::SynetConvolution32fBf16NhwcOld(p)
         {
-            SetAlgParam(F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(F * 2, 5, F * 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_alg.mode)
                 _convert = ConvolutionBf16NhwcConvertGemm;
             else
