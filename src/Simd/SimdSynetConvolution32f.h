@@ -604,18 +604,20 @@ namespace Simd
 
             struct AlgParam
             {
-                size_t K, M, microD, macroD, macroH, microK, macroK, bufK;
-                size_t batch;
+                size_t batch, K, M;
+                size_t microD, microM, microK;
+                size_t macroD, macroH, macroK;
+                size_t bufD, bufM, bufK;
             };
 
             typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, size_t dstC, size_t dstH,
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
 
         protected:
-            void SetAlgParam(size_t microD, size_t microHW, size_t microC, size_t L1, size_t L2, size_t L3);
+            void SetAlgParam(size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
             void SetWeight(const float* weight);
             void Forward(const float* src, uint16_t* buf, float* dst);
-            virtual void Convert(const float* src, size_t yBeg, size_t yEnd, uint16_t* tmp, uint16_t* dst);
+            virtual void Convert(const float* src, size_t yBeg, size_t yEnd, uint16_t* dst);
 
             AlgParam _alg;
             ConvolutionPtr _convolutions[2];

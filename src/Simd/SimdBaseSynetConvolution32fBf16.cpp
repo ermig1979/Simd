@@ -301,8 +301,10 @@ namespace Simd
 
             a.M = p.dstW * p.dstH;
             a.K = p.srcC * p.kernelY * p.kernelX;
-            a.microK = microK;
             a.microD = microD;
+            a.microM = microM;
+            a.microK = microK;
+            a.bufD = AlignHiAny(p.dstC, a.microD);
             a.bufK = AlignHi(a.K, a.microK);
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD / 2, a.microK), a.microK, a.bufK);
             a.batch = 1;
@@ -313,15 +315,15 @@ namespace Simd
                     if (p.batch % batch == 0 && batch * bufSize <= L2)
                         a.batch = batch;
             }
+            a.bufM = a.batch * a.M;
             a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH * a.batch);
-            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
+            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, a.bufD);
         }
 
         size_t SynetConvolution32fBf16NhwcGemm::ExternalBufferSize() const
         {
-            const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            return (a.batch * a.M + 1) * a.bufK / 2;
+            return (a.bufM + 1) * a.bufK / 2;
         }
 
         void SynetConvolution32fBf16NhwcGemm::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
@@ -337,44 +339,36 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            Array16u buffer(a.macroD * a.bufK);
-            _weight.Resize(a.bufK * AlignHiAny(p.dstC, a.microD));
-            uint16_t* dst = _weight.data;
-            for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
+            Array16u buffer(a.bufD * a.bufK, true);
+            uint16_t* buf = buffer.data;
+            for (size_t k = 0; k < a.K; k += 2)
             {
-                size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
-                uint16_t* buf = buffer.data;
-                for (size_t mid = 0; mid < macroD; mid += a.microD)
+                for (size_t d = 0; d < p.dstC; ++d)
                 {
-                    for (size_t ky = 0; ky < p.kernelY; ++ky)
+                    *(buf++) = Float32ToBFloat16(weight[d]);
+                    *(buf++) = k + 1 < a.K ? Float32ToBFloat16(weight[d + p.dstC]) : 0;
+                }
+                buf += 2 * (a.bufD - p.dstC);
+                weight += 2 * p.dstC;
+            }
+            _weight.Resize(a.bufK * a.bufD, true);
+            size_t bufK = a.bufK / 2, macK = a.macroK / 2, bufD = a.bufD * 2, macD = a.macroD * 2, micD = a.microD * 2;
+            const uint16_t * src = buffer.data;
+            uint16_t* dst = _weight.data;
+            for (size_t mad = 0; mad < bufD; mad += macD)
+            {
+                size_t macroD = Simd::Min(bufD, mad + macD) - mad;
+                for (size_t mak = 0; mak < bufK; mak += macK)
+                {
+                    size_t macroK = Simd::Min(bufK, mak + macK) - mak;
+                    for (size_t mid = 0; mid < macroD; mid += micD)
                     {
-                        for (size_t kx = 0; kx < p.kernelX; ++kx)
+                        for (size_t k = 0; k < macroK; ++k)
                         {
-                            for (size_t c = 0; c < p.srcC; c += 2)
-                            {
-                                const float* src = weight + ((ky * p.kernelX + kx) * p.srcC + c) * p.dstC + mad + mid;
-                                for (size_t d = 0; d < a.microD; ++d)
-                                {
-                                    if (mad + mid + d < p.dstC)
-                                    {
-                                        *(buf++) = Float32ToBFloat16(src[d]);
-                                        *(buf++) = c + 1 < p.srcC ? Float32ToBFloat16(src[p.dstC + d]) : 0;
-                                    }
-                                    else
-                                    {
-                                        *(buf++) = 0;
-                                        *(buf++) = 0;
-                                    }
-                                }
-                            }
+                            memcpy(dst, src + (mak + k) * bufD + mad + mid, micD * 2);
+                            dst += micD;
                         }
                     }
-                }
-                if (macroD == p.dstC && a.macroK == a.bufK)
-                    _weight.Swap(buffer);
-                else
-                {
-
                 }
             }
         }
@@ -399,7 +393,6 @@ namespace Simd
             const uint16_t* weight = _weight.data;
             const float* bias = _bias.data, * params = _params.data;
             size_t dstH = p.dstH * a.batch;
-            uint16_t* tmp = buf + (a.batch * a.M) * a.bufK;
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
@@ -409,7 +402,7 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                        size_t offs = 0;// yBeg* p.dstW* a.macroK;
+                        size_t offs = mak * a.bufM + yBeg * p.dstW * macroK;
                         if (dc == 0 && mak == 0)
                         {
                             if (a.batch > 1)
@@ -417,10 +410,10 @@ namespace Simd
                                 size_t dS = p.srcH * p.srcW * p.srcC;
                                 size_t dB = p.dstH * p.dstW * macroK;
                                 for (size_t b = 0; b < a.batch; ++b)
-                                   Convert(src + b * dS, 0, p.dstH, tmp, buf + b * dB);
+                                   Convert(src + b * dS, 0, p.dstH, buf + b * dB);
                             }
                             else
-                                Convert(src, yBeg, yEnd, tmp, buf + offs);
+                                Convert(src, yBeg, yEnd, buf);
                         }
                         if (mak + macroK == a.bufK)
                             _convolutions[TermLast](buf + offs, p, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 1 : 0,
@@ -430,7 +423,7 @@ namespace Simd
                                 weight, bias, params, dst + yBeg * p.dstW * p.dstC);
                         yBeg = yEnd;
                     }
-                    weight += AlignHi(macroK, a.microK) * AlignHiAny(macroD, a.microD);
+                    weight += macroK * macroD;
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
@@ -439,15 +432,17 @@ namespace Simd
             }
         }
 
-        void SynetConvolution32fBf16NhwcGemm::Convert(const float* src, size_t yBeg, size_t yEnd, uint16_t* tmp, uint16_t* dst)
+        void SynetConvolution32fBf16NhwcGemm::Convert(const float* src, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
+            uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
-            for (size_t dy = yBeg; dy < yEnd; ++dy)
+            for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
             {
-                for (size_t dx = 0; dx < p.dstW; ++dx)
+                for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
+                    uint16_t* row = a.macroK < a.bufK ? buf : dst + dr * a.bufK;
                     for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
@@ -460,24 +455,32 @@ namespace Simd
                                 {
                                     const float* ps = src + (sy * p.srcW + sx) * p.srcC;
                                     for (size_t sc = 0; sc < p.srcC; ++sc)
-                                        dst[sc] = Base::Float32ToBFloat16(ps[sc]);
-                                    dst += p.srcC;
+                                        row[sc] = Base::Float32ToBFloat16(ps[sc]);
+                                    row += p.srcC;
                                 }
                                 else
                                 {
-                                    memset(dst, 0, p.srcC * 2);
-                                    dst += p.srcC;
+                                    memset(row, 0, p.srcC * 2);
+                                    row += p.srcC;
                                 }
                             }
                         }
                         else
                         {
-                            memset(dst, 0, p.kernelX * p.srcC * 2);
-                            dst += p.kernelX * p.srcC;
+                            memset(row, 0, p.kernelX * p.srcC * 2);
+                            row += p.kernelX * p.srcC;
                         }
                     }
                     for (size_t g = 0; g < gap; ++g)
-                        *(dst++) = 0;
+                        *(row++) = 0;
+                    if (a.macroK < a.bufK)
+                    {
+                        for (size_t mak = 0; mak < a.bufK; mak += a.macroK)
+                        {
+                            size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
+                            memcpy(dst + mak * a.bufM + dr * macroK, buf + mak, macroK * 2);
+                        }
+                    }
                 }
             }
         }
