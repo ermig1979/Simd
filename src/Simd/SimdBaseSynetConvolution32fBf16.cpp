@@ -283,6 +283,9 @@ namespace Simd
         SynetConvolution32fBf16NhwcGemm::SynetConvolution32fBf16NhwcGemm(const ConvParam32f& p)
             : SynetConvolution32fBf16Nhwc(p)
         {
+            _convert = 0;
+            _convolutions[0] = 0;
+            _convolutions[1] = 0;
         }
 
         String SynetConvolution32fBf16NhwcGemm::Desc() const
@@ -410,10 +413,10 @@ namespace Simd
                                 size_t dS = p.srcH * p.srcW * p.srcC;
                                 size_t dB = p.dstH * p.dstW * macroK;
                                 for (size_t b = 0; b < a.batch; ++b)
-                                   Convert(src + b * dS, 0, p.dstH, buf + b * dB);
+                                   _convert(src + b * dS, p, a, 0, p.dstH, buf + b * dB);
                             }
                             else
-                                Convert(src, yBeg, yEnd, buf);
+                                _convert(src, p, a, yBeg, yEnd, buf);
                         }
                         if (mak + macroK == a.bufK)
                             _convolutions[TermLast](buf + offs, p, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 1 : 0,
@@ -423,65 +426,12 @@ namespace Simd
                                 weight, bias, params, dst + yBeg * p.dstW * p.dstC);
                         yBeg = yEnd;
                     }
-                    weight += macroK * macroD;
+                    weight += AlignHi(macroK, a.microK) * AlignHiAny(macroD, a.microD);
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
                     params += macroD;
                 dst += macroD;
-            }
-        }
-
-        void SynetConvolution32fBf16NhwcGemm::Convert(const float* src, size_t yBeg, size_t yEnd, uint16_t* dst)
-        {
-            const ConvParam32f& p = _param;
-            const AlgParam& a = _alg;
-            uint16_t* buf = dst + a.bufM * a.bufK;
-            size_t gap = a.bufK - a.K;
-            for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
-            {
-                for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
-                {
-                    uint16_t* row = a.macroK < a.bufK ? buf : dst + dr * a.bufK;
-                    for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
-                    {
-                        size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
-                        if (sy < p.srcH)
-                        {
-                            for (size_t kx = 0; kx < p.kernelX; kx++)
-                            {
-                                size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
-                                if (sx < p.srcW)
-                                {
-                                    const float* ps = src + (sy * p.srcW + sx) * p.srcC;
-                                    for (size_t sc = 0; sc < p.srcC; ++sc)
-                                        row[sc] = Base::Float32ToBFloat16(ps[sc]);
-                                    row += p.srcC;
-                                }
-                                else
-                                {
-                                    memset(row, 0, p.srcC * 2);
-                                    row += p.srcC;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            memset(row, 0, p.kernelX * p.srcC * 2);
-                            row += p.kernelX * p.srcC;
-                        }
-                    }
-                    for (size_t g = 0; g < gap; ++g)
-                        *(row++) = 0;
-                    if (a.macroK < a.bufK)
-                    {
-                        for (size_t mak = 0; mak < a.bufK; mak += a.macroK)
-                        {
-                            size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-                            memcpy(dst + mak * a.bufM + dr * macroK, buf + mak, macroK * 2);
-                        }
-                    }
-                }
             }
         }
 

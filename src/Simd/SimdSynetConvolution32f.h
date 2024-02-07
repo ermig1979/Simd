@@ -610,6 +610,8 @@ namespace Simd
                 size_t bufD, bufM, bufK;
             };
 
+            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+
             typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, size_t dstC, size_t dstH,
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
 
@@ -617,9 +619,9 @@ namespace Simd
             void SetAlgParam(size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
             void SetWeight(const float* weight);
             void Forward(const float* src, uint16_t* buf, float* dst);
-            virtual void Convert(const float* src, size_t yBeg, size_t yEnd, uint16_t* dst);
 
             AlgParam _alg;
+            ConvertPtr _convert;
             ConvolutionPtr _convolutions[2];
         };
 
@@ -856,6 +858,14 @@ namespace Simd
         };
 
         //-----------------------------------------------------------------------------------------
+
+        class SynetConvolution32fBf16NhwcGemm : public Sse41::SynetConvolution32fBf16NhwcGemm
+        {
+        public:
+            SynetConvolution32fBf16NhwcGemm(const ConvParam32f& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
 
         class SynetConvolution32fBf16NhwcOld : public Sse41::SynetConvolution32fBf16NhwcOld
         {
