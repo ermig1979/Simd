@@ -164,5 +164,11 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution32fBf16NhwcGemm.cpp">
       <Filter>AmxBf16</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16BFloat16.cpp">
+      <Filter>AmxBf16</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution32fBf16Depthwise.cpp">
+      <Filter>AmxBf16</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

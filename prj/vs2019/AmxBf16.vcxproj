@@ -50,6 +50,7 @@
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16BFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution32fBf16.cpp" />
@@ -58,6 +59,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution8iDirect1x1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution8iDirectAny.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution32fBf16.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution32fBf16Depthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution32fBf16Input.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution32fBf16Output.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution8i.cpp" />

@@ -107,6 +107,11 @@ namespace Test
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx512bf16::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
 
+#if defined(SIMD_AMXBF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
+        if (Simd::AmxBf16::Enable)
+            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::AmxBf16::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Neon::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));

@@ -25,6 +25,7 @@
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
 #include "Simd/SimdAvx512bf16.h"
+#include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -32,12 +33,20 @@ namespace Simd
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)
 	namespace AmxBf16
 	{
+        void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH)
+        {
+            size_t size = p.srcW * p.srcC, mask = bufH - 1;
+            size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
+            if (yInt > yBeg)
+                Float32ToBFloat16(src + yBeg * size, (yInt - yBeg) * size, dst + (yBeg & mask) * size);
+            if (yEnd > yInt)
+                Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
-#if defined(SIMD_AMX_EMULATE)
             : Avx512bw::SynetMergedConvolution32fBf16Cdc(p)
-#else
-            : Avx512bf16::SynetMergedConvolution32fBf16Cdc(p)
-#endif
         {
             if (p.conv[2].dstC > HF)
             {
@@ -50,25 +59,21 @@ namespace Simd
                     Avx512bw::SetInput(_param.conv[0], _input);
                 Avx512bw::SetDepthwise(_param.conv[1], _depthwise);
 #else
-                _convert = Avx512bf16::ConvertFp32ToBf16;
+                _convert =ConvertFp32ToBf16;
                 if (_param.conv[0].Is1x1())
                     SetInput(_param.conv[0], _input);
                 else
-                    Avx512bf16::SetInput(_param.conv[0], _input);
-                Avx512bf16::SetDepthwise(_param.conv[1], _depthwise);
+                    Avx512bw::SetInput(_param.conv[0], _input);
+                SetDepthwise(_param.conv[1], _depthwise);
 #endif
                 SetOutput(_param.conv[2], _output);
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p)
-#if defined(SIMD_AMX_EMULATE)
             : Avx512bw::SynetMergedConvolution32fBf16Cd(p)
-#else
-            : Avx512bf16::SynetMergedConvolution32fBf16Cd(p)
-#endif
         {
             if (p.conv[1].dstC > HF)
             {
@@ -81,24 +86,20 @@ namespace Simd
                     Avx512bw::SetInput(_param.conv[0], _input);
                 Avx512bw::SetDepthwise(_param.conv[1], _depthwise);
 #else
-                _convert = Avx512bf16::ConvertFp32ToBf16;
+                _convert = ConvertFp32ToBf16;
                 if (_param.conv[0].Is1x1())
                     SetInput(_param.conv[0], _input);
                 else
-                    Avx512bf16::SetInput(_param.conv[0], _input);
-                Avx512bf16::SetDepthwise(_param.conv[1], _depthwise);
+                    Avx512bw::SetInput(_param.conv[0], _input);
+                SetDepthwise(_param.conv[1], _depthwise);
 #endif
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p)
-#if defined(SIMD_AMX_EMULATE)
             : Avx512bw::SynetMergedConvolution32fBf16Dc(p)
-#else
-            : Avx512bf16::SynetMergedConvolution32fBf16Dc(p)
-#endif
         {
             if (p.conv[0].dstC > HF && p.conv[1].dstC > HF)
             {
@@ -106,13 +107,13 @@ namespace Simd
 #if defined(SIMD_AMX_EMULATE)
                 Avx512bw::SetDepthwise(_param.conv[0], _depthwise);
 #else
-                Avx512bf16::SetDepthwise(_param.conv[0], _depthwise);
+                SetDepthwise(_param.conv[0], _depthwise);
 #endif
                 SetOutput(_param.conv[1], _output);
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
         {
@@ -130,11 +131,7 @@ namespace Simd
                 else
                     return new Base::SynetMergedConvolution32fBf16(param);
             }
-#if defined(SIMD_AMX_EMULATE)
             return Avx512bw::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
-#else
-            return Avx512bf16::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
-#endif
         }
 	}
 #endif
