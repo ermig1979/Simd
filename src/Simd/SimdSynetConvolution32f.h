@@ -806,6 +806,13 @@ namespace Simd
     }
 #endif
 
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
+    namespace AmxBf16
+    {
+        void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {

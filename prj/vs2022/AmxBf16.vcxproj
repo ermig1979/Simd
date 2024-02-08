@@ -37,6 +37,7 @@
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16Common.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
@@ -50,7 +51,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16Cpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution32fBf16.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution32fBf16NhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution8iDirect.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution8iDirect1x1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution8iDirectAny.cpp" />

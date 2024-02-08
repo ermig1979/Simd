@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetConvolution32f.h"
+#include "Simd/SimdSynetConvolution32fBf16.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"

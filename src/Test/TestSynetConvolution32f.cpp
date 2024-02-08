@@ -624,6 +624,8 @@ namespace Test
 #if 1 
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 512, 32, 32, 128, _1, _1, _1, _0, _0, 1, aId, tT), fp32, f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 512, 32, 32, 128, _1, _1, _1, _0, _0, 1, aId, tT), bf16, f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 256, 32, 32, 128, _3, _1, _1, _1, _1, 1, aId, tT), fp32, f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 256, 32, 32, 128, _3, _1, _1, _1, _1, 1, aId, tT), bf16, f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 91, 33, 33, 65, _3, _1, _1, _1, _1, 1, aId, tT), bf16, f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(25, 67, 15, 15, 35, _1, _1, _1, _0, _0, 1, aId, tT), bf16, f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 3000, 15, 15, 35, _1, _1, _1, _0, _0, 1, aId, tT), bf16, f1, f2);
@@ -710,7 +712,7 @@ namespace Test
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx512bf16::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif
 
-#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && 0
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
         if (Simd::AmxBf16::Enable)
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::AmxBf16::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif
