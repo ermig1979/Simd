@@ -370,6 +370,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvaToBgraV2.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fBf16NhwcGemm.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">
@@ -627,6 +630,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdShuffle.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

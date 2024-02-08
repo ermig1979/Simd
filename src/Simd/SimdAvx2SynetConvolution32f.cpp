@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
+#include "Simd/SimdSynetConvolution32fBf16.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdAvx2.h"

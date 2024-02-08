@@ -644,5 +644,8 @@
     <ClInclude Include="..\..\src\Simd\SimdGrayToY.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
