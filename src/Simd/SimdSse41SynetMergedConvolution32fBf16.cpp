@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetMergedConvolution32fBf16.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
 #include "Simd/SimdSse41.h"

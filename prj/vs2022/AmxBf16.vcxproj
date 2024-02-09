@@ -43,6 +43,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32fBf16.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTile.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />

@@ -43,7 +43,6 @@
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16BFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution32fBf16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetMergedConvolution32fBf16.cpp" />

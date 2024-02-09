@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@ namespace Simd
 #ifdef SIMD_AVX512BF16_ENABLE    
     namespace Avx512bf16
     {
-        void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst);
     }
 #endif
 }

@@ -21,10 +21,10 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetMergedConvolution32fBf16.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
-#include "Simd/SimdAvx512bf16.h"
+#include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -37,9 +37,9 @@ namespace Simd
             size_t size = p.srcW * p.srcC, mask = bufH - 1;
             size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
             if (yInt > yBeg)
-                Float32ToBFloat16(src + yBeg * size, (yInt - yBeg) * size, dst + (yBeg & mask) * size);
+                Avx512bw::Float32ToBFloat16(src + yBeg * size, (yInt - yBeg) * size, dst + (yBeg & mask) * size);
             if (yEnd > yInt)
-                Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
+                Avx512bw::Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
         }
 
         //---------------------------------------------------------------------

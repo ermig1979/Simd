@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetConvolution32f.h"
-#include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetMergedConvolution32fBf16.h"
 #include "Simd/SimdSynetConvolution32fBf16Common.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
