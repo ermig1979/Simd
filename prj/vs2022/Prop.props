@@ -43,7 +43,7 @@
     </ClCompile>
     <ClCompile Condition="'$(Configuration)'=='Debug'">
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SIMD_AMX_EMULATE;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SIMD_AMX_EMULATE2;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ClCompile Condition="'$(Configuration)'=='Release'">

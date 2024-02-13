@@ -44,10 +44,10 @@ namespace Simd
 
             struct AlgParam
             {
-                size_t miC, maC, yStep[3], yStart[3], bufH[3], dp[2], dw[3];
+                size_t miC, maC, miK, yStep[3], yStart[3], bufH[3], dp[2], dw[3];
             };
 
-            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH);
+            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
 
             typedef void(*InputConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const uint16_t* weight, const float* bias, const float* params, float* dst);
@@ -65,7 +65,7 @@ namespace Simd
             void SetBias(const float* src, const ConvParam32f& p, Array32f & dst);
             void SetParams(const float* src, const ConvParam32f& p, Array32f& dst);
 
-            bool _dw0, _1x1;
+            bool _dw0;
             ConvertPtr _convert;
             InputConvolutionPtr _input;
             DepthwiseConvolutionPtr _depthwise;
@@ -86,7 +86,7 @@ namespace Simd
             static bool Preferable(const MergConvParam32f& p);
 
         protected:
-            void SetSize(size_t F);
+            void SetSize(size_t miC, size_t miK);
         };
 
         class SynetMergedConvolution32fBf16Cd : public SynetMergedConvolution32fBf16
@@ -99,7 +99,7 @@ namespace Simd
             static bool Preferable(const MergConvParam32f& p);
 
         protected:
-            void SetSize(size_t F);
+            void SetSize(size_t miC, size_t miK);
         };
 
         class SynetMergedConvolution32fBf16Dc : public SynetMergedConvolution32fBf16
@@ -112,7 +112,7 @@ namespace Simd
             static bool Preferable(const MergConvParam32f& p);
 
         protected:
-            void SetSize(size_t F);
+            void SetSize(size_t miC, size_t miK);
         };
     }
 
@@ -189,7 +189,7 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH);
+        void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, const Base::SynetMergedConvolution32fBf16::AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
 
         void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
@@ -226,8 +226,6 @@ namespace Simd
 #ifdef SIMD_AVX512BF16_ENABLE    
     namespace Avx512bf16
     {
-        void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH);
-
         void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
         void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
@@ -292,6 +290,10 @@ namespace Simd
 
             virtual String Ext() const { return "AmxBf16"; }
         };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
     }
 #endif
 }

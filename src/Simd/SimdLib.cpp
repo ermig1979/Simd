@@ -74,7 +74,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetGridSample.h"
 #include "Simd/SimdSynetInnerProduct32f.h"
-#include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetMergedConvolution32fBf16.h"
 #include "Simd/SimdSynetMergedConvolution8i.h"
 #include "Simd/SimdSynetPermute.h"
 #include "Simd/SimdSynetScale8i.h"
@@ -5214,7 +5214,7 @@ SIMD_API void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvol
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetMergedConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetMergedConvolution32fInitPtr simdSynetMergedConvolution32fInit = SIMD_FUNC6(SynetMergedConvolution32fInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetMergedConvolution32fInitPtr simdSynetMergedConvolution32fInit = SIMD_FUNC5(SynetMergedConvolution32fInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
 #else

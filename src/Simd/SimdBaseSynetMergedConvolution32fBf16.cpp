@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ namespace Simd
         typedef SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr DepthwisePtr;
         typedef SynetMergedConvolution32fBf16::OutputConvolutionPtr OutputPtr;
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type, UpdateType update> void DirectBf16(const float* src, 
             const ConvParam32f& p, const uint16_t * weight, const float* bias, const float* params, float* dst)
@@ -169,7 +169,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SynetMergedConvolution32fBf16::SynetMergedConvolution32fBf16(const MergConvParam32f& p)
            : Simd::SynetMergedConvolution32f(p)
@@ -181,7 +181,6 @@ namespace Simd
             _sizeS = beg.srcH * beg.srcW * beg.srcC;
             _sizeD = end.dstH * end.dstW * end.dstC;
             _dw0 = beg.group != 1;
-            _1x1 = beg.kernelY == 1 && beg.strideY == 1;
             _sizeB[0] = p.conv[1].srcH * p.conv[1].srcW * p.conv[1].srcC;
             _sizeB[1] = p.count == 3 ? p.conv[1].dstH * p.conv[1].dstW * p.conv[1].dstC : 0;
             _sizeB[2] = 0;
@@ -251,27 +250,26 @@ namespace Simd
             assert(p.group == 1);
             if (_alg.miC)
             {
-                size_t F = _alg.miC * 2, C = DivHi(p.srcC, 2), D = DivHi(p.dstC, F), K = p.kernelY * p.kernelX;
-                _weightI.Resize(K * C * D * F * 2, true);
+                assert(Is1x1(p));
+                size_t F = _alg.miC * 2, C = DivHi(AlignHi(p.srcC, _alg.miK), 2), D = DivHi(p.dstC, F);
+                _weightI.Resize(C * D * F * 2, true);
                 uint16_t* dst = _weightI.data;
                 for (size_t d = 0; d < D; d++)
                 {
-                    for (size_t k = 0; k < K; ++k)
+                    for (size_t c = 0; c < C; ++c)
                     {
-                        for (size_t c = 0; c < C; ++c)
+                        const float* ps = src + c * 2 * p.dstC + d * F;
+                        for (size_t f = 0; f < F; ++f)
                         {
-                            const float* ps = src + (k * p.srcC + c * 2) * p.dstC + d * F;
-                            for (size_t f = 0; f < F; ++f)
+                            for (size_t i = 0; i < 2; ++i)
                             {
-                                for (size_t i = 0; i < 2; ++i)
-                                {
-                                    if (d * F + f < p.dstC && c * 2 + i < p.srcC)
-                                        *(dst++) = Float32ToBFloat16(ps[i * p.dstC]);
-                                    else
-                                        *(dst++) = 0;
-                                }
-                                ps++;
+                                if (d * F + f < p.dstC && c * 2 + i < p.srcC)
+                                    *(dst++) = Float32ToBFloat16(ps[i * p.dstC]);
+                                else
+                                    *(dst++) = 0;
                             }
+                            if(c * 2 < p.srcC)
+                                ps++;
                         }
                     }
                 }            
@@ -311,10 +309,10 @@ namespace Simd
 
         void SynetMergedConvolution32fBf16::SetOutputWeight(const float* src, const ConvParam32f& p)
         {
-            assert(p.group == 1 && p.kernelX == 1 && p.kernelY == 1 && p.strideX == 1 && p.strideY == 1);
+            assert(p.group == 1 && Is1x1(p));
             if (_alg.miC)
             {
-                size_t F = _alg.miC * 2, C = DivHi(p.srcC, 2), D = DivHi(p.dstC, F), M = DivHi(_alg.maC, 2);
+                size_t F = _alg.miC * 2, C = DivHi(AlignHi(p.srcC, _alg.miK), 2), D = DivHi(p.dstC, F), M = DivHi(_alg.maC, 2);
                 _weightO.Resize(C * D * F * 2, true);
                 uint16_t* dst = _weightO.data;
                 for (size_t cB = 0; cB < C; cB += M)
@@ -334,7 +332,8 @@ namespace Simd
                                     else
                                         *(dst++) = 0;
                                 }
-                                ps++;
+                                if (c * 2 < p.srcC)
+                                    ps++;
                             }
                         }
                     }
@@ -475,7 +474,7 @@ namespace Simd
                         size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c1.dstH);
                         size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c1.srcH);
                         size_t yEnd0 = Simd::RestrictRange(yBeg0 + a.yStep[0], a.yStart[0], c0.srcH);
-                        _convert(src, c0, yBeg0, yEnd0, buf0, a.bufH[0]);
+                        _convert(src, c0, a, yBeg0, yEnd0, buf0);
                         _input(buf0, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0], 
                             _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
                         _depthwise(buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1], 
@@ -503,10 +502,10 @@ namespace Simd
 
         bool SynetMergedConvolution32fBf16Cdc::Preferable(const MergConvParam32f& p)
         {
-            return p.count == 3;
+            return p.count == 3 && Is1x1(p.conv[0]);
         }
 
-        void SynetMergedConvolution32fBf16Cdc::SetSize(size_t F)
+        void SynetMergedConvolution32fBf16Cdc::SetSize(size_t miC, size_t miK)
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam32f& p = _param;
@@ -515,12 +514,16 @@ namespace Simd
             const ConvParam32f& c2 = p.conv[2];
             AlgParam& a = _alg;
 
-            a.miC = F;
+            a.miC = miC;
+            a.miK = miK;
             size_t size = 0;
             for (size_t i = 0; i < 3; ++i)
             {
                 const ConvParam32f& c = p.conv[i];
-                size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC * 2 : 4);
+                if (c.group == 1)
+                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC) * 2;
+                else
+                    size += c.kernelY * c.kernelX * c.srcC * 4;
             }
             size_t count = size / (L3 / 2) + 1;
             a.maC = AlignHiAny(c0.dstC / count, 2 * a.miC);
@@ -534,11 +537,11 @@ namespace Simd
                 a.yStart[1] = Simd::Min((a.yStart[2] - 1) * c1.strideY + c1.kernelY - c1.padY, c1.srcH);
                 a.bufH[1] = Pow2Hi(Simd::Max((a.yStep[2] - 1) * c1.strideY + c1.kernelY, a.yStart[1]));
 
-                a.yStep[0] = a.yStep[1] * c0.strideY;
-                a.yStart[0] = Simd::Min((a.yStart[1] - 1) * c0.strideY + c0.kernelY - c0.padY, c0.srcH);
-                a.bufH[0] = Pow2Hi(Simd::Max((a.yStep[1] - 1) * c0.strideY + c0.kernelY, a.yStart[0]));
+                a.yStep[0] = a.yStep[1];
+                a.yStart[0] = Simd::Min(a.yStart[1], c0.srcH);
+                a.bufH[0] = Pow2Hi(Simd::Max(a.yStep[1], a.yStart[0]));
 
-                _sizeB[0] = a.bufH[0] * p.conv[0].srcW * p.conv[0].srcC;
+                _sizeB[0] = a.bufH[0] * p.conv[0].srcW * AlignHi(p.conv[0].srcC, a.miK);
                 _sizeB[1] = a.bufH[1] * p.conv[1].srcW * a.maC;
                 _sizeB[2] = a.bufH[2] * p.conv[1].dstW * a.maC;
                 if (_sizeB[0] * 2 + _sizeB[1] * 4 + _sizeB[2] * 2 <= L2)
@@ -546,7 +549,7 @@ namespace Simd
             }
             a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
-            a.dw[0] = c0.kernelY * c0.kernelX * c0.srcC;
+            a.dw[0] = AlignHi(c0.srcC, a.miK);
             a.dw[1] = c1.kernelY * c1.kernelX;
             a.dw[2] = AlignHiAny(c2.dstC, 2 * a.miC);
             
@@ -583,7 +586,7 @@ namespace Simd
                         size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c1.dstH);
                         size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c1.srcH);
                         size_t yEnd0 = Simd::RestrictRange(yBeg0 + a.yStep[0], a.yStart[0], c0.srcH);
-                        _convert(src, c0, yBeg0, yEnd0, buf0, a.bufH[0]);
+                        _convert(src, c0, a, yBeg0, yEnd0, buf0);
                         _input(buf0, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0],
                             _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
                         _depthwise(buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
@@ -600,10 +603,10 @@ namespace Simd
 
         bool SynetMergedConvolution32fBf16Cd::Preferable(const MergConvParam32f& p)
         {
-            return p.count == 2 && p.conv[0].group == 1;
+            return p.count == 2 && p.conv[0].group == 1 && Is1x1(p.conv[0]);
         }
 
-        void SynetMergedConvolution32fBf16Cd::SetSize(size_t F)
+        void SynetMergedConvolution32fBf16Cd::SetSize(size_t miC, size_t miK)
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam32f& p = _param;
@@ -611,7 +614,8 @@ namespace Simd
             const ConvParam32f& c1 = p.conv[1];
             AlgParam& a = _alg;
 
-            a.miC = F;
+            a.miC = miC;
+            a.miK = miK;
             size_t size = 0;
             for (size_t i = 0; i < 2; ++i)
             {
@@ -629,18 +633,18 @@ namespace Simd
                 a.yStart[1] = Simd::Min((a.yStart[2] - 1) * c1.strideY + c1.kernelY - c1.padY, c1.srcH);
                 a.bufH[1] = Pow2Hi(Simd::Max((a.yStep[2] - 1) * c1.strideY + c1.kernelY, a.yStart[1]));
 
-                a.yStep[0] = a.yStep[1] * c0.strideY;
-                a.yStart[0] = Simd::Min((a.yStart[1] - 1) * c0.strideY + c0.kernelY - c0.padY, c0.srcH);
-                a.bufH[0] = Pow2Hi(Simd::Max((a.yStep[1] - 1) * c0.strideY + c0.kernelY, a.yStart[0]));
+                a.yStep[0] = a.yStep[1];
+                a.yStart[0] = Simd::Min(a.yStart[1], c0.srcH);
+                a.bufH[0] = Pow2Hi(Simd::Max(a.yStep[1], a.yStart[0]));
 
-                _sizeB[0] = a.bufH[0] * p.conv[0].srcW * p.conv[0].srcC;
+                _sizeB[0] = a.bufH[0] * p.conv[0].srcW * AlignHi(p.conv[0].srcC, a.miK);
                 _sizeB[1] = a.bufH[1] * p.conv[1].srcW * a.maC;
                 if (_sizeB[0] * 2 + _sizeB[1] * 4 <= L2)
                     break;
             }
             a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
-            a.dw[0] = c0.kernelY * c0.kernelX * c0.srcC;
+            a.dw[0] = AlignHi(c0.srcC, a.miK);
             a.dw[1] = c1.kernelY * c1.kernelX;
             a.dw[2] = 0;
             a.bufH[2] = 0;
@@ -696,7 +700,7 @@ namespace Simd
             return p.count == 2 && p.conv[1].group == 1;
         }
 
-        void SynetMergedConvolution32fBf16Dc::SetSize(size_t F)
+        void SynetMergedConvolution32fBf16Dc::SetSize(size_t miC, size_t miK)
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam32f& p = _param;
@@ -704,7 +708,8 @@ namespace Simd
             const ConvParam32f& c1 = p.conv[1];
             AlgParam& a = _alg;
 
-            a.miC = F;
+            a.miC = miC;
+            a.miK = miK;
             size_t size = 0;
             for (size_t i = 0; i < 2; ++i)
             {

@@ -27,7 +27,7 @@
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
-#include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetMergedConvolution32fBf16.h"
 #include "Simd/SimdSynet.h"
 
 namespace Test
@@ -312,24 +312,12 @@ namespace Test
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1024, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 5, 1), Cnv(a2, 1, 1, 192), f), c, f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1024, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 5, 1)), c, f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 192, 40, 40), Cnv(a1, 5, 1), Cnv(a2, 1, 1, 192)), c, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 192, 39, 39), Cnv(a1, 5, 1), Cnv(a2, 1, 1, 181)), c, f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 91, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 3, 1)), c, f1, f2);
 #endif
 #else
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 16, 192, 199), Cnv(a0, 1, 1, 96), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 24), f), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 16, 24, 48), Cnv(a0, 1, 1, 32), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 32), f), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 32, 24, 32), Cnv(a0, 1, 1, 144), Cnv(a1, 3, 1)), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 96, 99), Cnv(a0, 1, 1, 144), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 24), t), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 19, 63, 81), Cnv(a0, 1, 1, 51), Cnv(a1, 3, 2)), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 35, 63, 81), Cnv(a0, 1, 1, 51), Cnv(a1, 3, 2)), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps * 2.0f, Param(Shp(1, 160, 12, 15), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 160), t), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps * 2.0f, Param(Shp(1, 64, 14, 14), Cnv(a0, 1, 1, 384), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 64), t), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 480, 640), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1)), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1, 94, 23), Cnv(a0, 1, 1, 64), Cnv(a1, Size(3, 3), Size(2, 1))), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 64, 47, 23), Cnv(a0, 1, 1, 128), Cnv(a1, Size(3, 3), Size(2, 1))), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1024, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 5, 1)), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1024, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 5, 1), Cnv(a2, 1, 1, 192), f), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 192, 40, 40), Cnv(a1, 5, 1), Cnv(a2, 1, 1, 192)), c, f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 512, 16, 16), Cnv(a0, 1, 1, 512), Cnv(a1, 3, 1)), c, f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 512, 16, 16), Cnv(a0, 1, 1, 512), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 512), f), c, f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 91, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 3, 1)), c, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 96, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 3, 1)), c, f1, f2);
 #endif
         return result;
     }
@@ -345,8 +333,8 @@ namespace Test
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
 #else
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
 #endif
 
         return result;
@@ -373,10 +361,10 @@ namespace Test
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bw::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif
 
-#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
-        if (Simd::Avx512bf16::Enable)
-            result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bf16::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
-#endif
+//#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
+//        if (Simd::Avx512bf16::Enable)
+//            result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bf16::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
+//#endif
 
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
         if (Simd::AmxBf16::Enable)

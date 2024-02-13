@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -32,25 +32,13 @@ namespace Simd
 #if defined(SIMD_AVX512BF16_ENABLE) && defined(SIMD_SYNET_ENABLE) 
 	namespace Avx512bf16
 	{
-        void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH)
-        {
-            size_t size = p.srcW * p.srcC, mask = bufH - 1;
-            size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
-            if (yInt > yBeg)
-                Avx512bw::Float32ToBFloat16(src + yBeg * size, (yInt - yBeg) * size, dst + (yBeg & mask) * size);
-            if (yEnd > yInt)
-                Avx512bw::Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
-        }
-
-        //---------------------------------------------------------------------
-
         SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
             : Avx512bw::SynetMergedConvolution32fBf16Cdc(p)
         {
             if (p.conv[2].dstC > HF)
             {
-                SetSize(Avx512bw::F);
-                _convert = ConvertFp32ToBf16;
+                SetSize(Avx512bw::F, 2);
+                _convert = Avx512bw::ConvertFp32ToBf16;
                 SetInput(_param.conv[0], _input);
                 SetDepthwise(_param.conv[1], _depthwise);
                 SetOutput(_param.conv[2], _output);
@@ -64,8 +52,8 @@ namespace Simd
         {
             if (p.conv[1].dstC > HF)
             {
-                SetSize(Avx512bw::F);
-                _convert = ConvertFp32ToBf16;
+                SetSize(Avx512bw::F, 2);
+                _convert = Avx512bw::ConvertFp32ToBf16;
                 SetInput(_param.conv[0], _input);
                 SetDepthwise(_param.conv[1], _depthwise);
             }
@@ -78,7 +66,7 @@ namespace Simd
         {
             if (p.conv[0].dstC > HF && p.conv[1].dstC > HF)
             {
-                SetSize(Avx512bw::F);
+                SetSize(Avx512bw::F, 2);
                 SetDepthwise(_param.conv[0], _depthwise);
                 SetOutput(_param.conv[1], _output);
             }

@@ -24,6 +24,7 @@
 #include "Simd/SimdSynetMergedConvolution32fBf16.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdBFloat16.h"
 #include "Simd/SimdAvx512bf16.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdCpu.h"
@@ -33,14 +34,47 @@ namespace Simd
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)
 	namespace AmxBf16
 	{
-        void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH)
+        using AlgParam = Base::SynetMergedConvolution32fBf16::AlgParam;
+
+        //-----------------------------------------------------------------------------------------
+
+        static void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
-            size_t size = p.srcW * p.srcC, mask = bufH - 1;
-            size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
-            if (yInt > yBeg)
-                Float32ToBFloat16(src + yBeg * size, (yInt - yBeg) * size, dst + (yBeg & mask) * size);
-            if (yEnd > yInt)
-                Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
+            size_t srcC = AlignHi(p.srcC, a.miK);
+            size_t bufH = a.bufH[0], mask = bufH - 1;
+            if (srcC == p.srcC)
+            {
+                size_t size = p.srcW * p.srcC;
+                size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
+                if (yInt > yBeg)
+                    Float32ToBFloat16(src + yBeg * size, (yInt - yBeg) * size, dst + (yBeg & mask) * size);
+                if (yEnd > yInt)
+                    Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
+            }
+            else
+            {
+                size_t srcC32 = AlignLo(p.srcC, 32);
+                __mmask16 srcMask[2];
+                __mmask32 dstMask[1], gapMask = TailMask32(srcC - p.srcC);
+                if (srcC32 < p.srcC)
+                {
+                    srcMask[0] = TailMask16(p.srcC - srcC32 - F * 0);
+                    srcMask[1] = TailMask16(p.srcC - srcC32 - F * 1);
+                    dstMask[0] = TailMask32(p.srcC - srcC32);
+                }
+                for (size_t y = yBeg; y < yEnd; ++y)
+                {
+                    const float* ps = src + y * p.srcW * p.srcC;
+                    uint16_t* pd = dst + (y & mask) * srcC;
+                    size_t c = 0;
+                    for (; c < srcC32; c += 32)
+                        Float32ToBFloat16<false, false>(ps + c, pd + c, srcMask, dstMask);
+                    if (srcC32 < p.srcC)
+                        Float32ToBFloat16<false, true>(ps + c, pd + c, srcMask, dstMask);
+                    if (p.srcC < srcC)
+                        Store<false, true>(pd + p.srcC, K_ZERO, gapMask);
+                }
+            }
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -50,7 +84,7 @@ namespace Simd
         {
             if (p.conv[2].dstC > HF)
             {
-                SetSize(Avx512bw::F);
+                SetSize(Avx512bw::F, Avx512bw::DF);
 #if defined(SIMD_AMX_EMULATE)
                 _convert = Avx512bw::ConvertFp32ToBf16;
                 if(_param.conv[0].Is1x1())
@@ -59,7 +93,7 @@ namespace Simd
                     Avx512bw::SetInput(_param.conv[0], _input);
                 Avx512bw::SetDepthwise(_param.conv[1], _depthwise);
 #else
-                _convert =ConvertFp32ToBf16;
+                _convert = ConvertFp32ToBf16;
                 if (_param.conv[0].Is1x1())
                     SetInput(_param.conv[0], _input);
                 else
@@ -77,7 +111,7 @@ namespace Simd
         {
             if (p.conv[1].dstC > HF)
             {
-                SetSize(Avx512bw::F);
+                SetSize(Avx512bw::F, Avx512bw::DF);
 #if defined(SIMD_AMX_EMULATE)
                 _convert = Avx512bw::ConvertFp32ToBf16;
                 if (_param.conv[0].Is1x1())
@@ -103,7 +137,7 @@ namespace Simd
         {
             if (p.conv[0].dstC > HF && p.conv[1].dstC > HF)
             {
-                SetSize(Avx512bw::F);
+                SetSize(Avx512bw::F, Avx512bw::DF);
 #if defined(SIMD_AMX_EMULATE)
                 Avx512bw::SetDepthwise(_param.conv[0], _depthwise);
 #else

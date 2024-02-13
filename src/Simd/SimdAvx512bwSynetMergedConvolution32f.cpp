@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,9 @@
 */
 #include "Simd/SimdSynetMergedConvolution32fBf16.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
+#include "Simd/SimdBFloat16.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdStore.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdCpu.h"
 
@@ -32,6 +34,51 @@ namespace Simd
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE) 
 	namespace Avx512bw
 	{
+        using AlgParam = Base::SynetMergedConvolution32fBf16::AlgParam;
+
+        //-----------------------------------------------------------------------------------------
+
+        void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        {
+            size_t srcC = AlignHi(p.srcC, a.miK);
+            size_t bufH = a.bufH[0], mask = bufH - 1;
+            if (srcC == p.srcC)
+            {
+                size_t size = p.srcW * p.srcC;
+                size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
+                if (yInt > yBeg)
+                    Float32ToBFloat16(src + yBeg * size, (yInt - yBeg) * size, dst + (yBeg & mask) * size);
+                if (yEnd > yInt)
+                    Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
+            }
+            else
+            {
+                size_t srcC32 = AlignLo(p.srcC, 32);
+                __mmask16 srcMask[2];
+                __mmask32 dstMask[1], gapMask = TailMask32(srcC - p.srcC);
+                if (srcC32 < p.srcC)
+                {
+                    srcMask[0] = TailMask16(p.srcC - srcC32 - F * 0);
+                    srcMask[1] = TailMask16(p.srcC - srcC32 - F * 1);
+                    dstMask[0] = TailMask32(p.srcC - srcC32);
+                }
+                for (size_t y = yBeg; y < yEnd; ++y)
+                {
+                    const float* ps = src + y * p.srcW * p.srcC;
+                    uint16_t* pd = dst + (y & mask) * srcC;
+                    size_t c = 0;
+                    for (; c < srcC32; c += 32)
+                        Float32ToBFloat16<false, false>(ps + c, pd + c, srcMask, dstMask);
+                    if (srcC32 < p.srcC)
+                        Float32ToBFloat16<false, true>(ps + c, pd + c, srcMask, dstMask);
+                    if (p.srcC < srcC)
+                        Store<false, true>(pd + p.srcC, K_ZERO, gapMask);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH)
         {
             size_t size = p.srcW * p.srcC, mask = bufH - 1;
@@ -49,7 +96,7 @@ namespace Simd
         {
             if (p.conv[2].dstC > HF)
             {
-                SetSize(Avx512bw::F);
+                SetSize(Avx512bw::F, 2);
                 _convert = ConvertFp32ToBf16;
                 SetInput(_param.conv[0], _input);
                 SetDepthwise(_param.conv[1], _depthwise);
@@ -64,7 +111,7 @@ namespace Simd
         {
             if (p.conv[1].dstC > HF)
             {
-                SetSize(Avx512bw::F);
+                SetSize(Avx512bw::F, 2);
                 _convert = ConvertFp32ToBf16;
                 SetInput(_param.conv[0], _input);
                 SetDepthwise(_param.conv[1], _depthwise);
@@ -78,7 +125,7 @@ namespace Simd
         {
             if (p.conv[0].dstC > HF && p.conv[1].dstC > HF)
             {
-                SetSize(Avx512bw::F);
+                SetSize(Avx512bw::F, 2);
                 SetDepthwise(_param.conv[0], _depthwise);
                 SetOutput(_param.conv[1], _output);
             }
