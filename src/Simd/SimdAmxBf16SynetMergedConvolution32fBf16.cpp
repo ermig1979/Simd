@@ -109,7 +109,7 @@ namespace Simd
         SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p)
             : Avx512bw::SynetMergedConvolution32fBf16Cd(p)
         {
-            if (p.conv[1].dstC > HF)
+            if (p.conv[1].dstC > HF && 0)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
 #if defined(SIMD_AMX_EMULATE)

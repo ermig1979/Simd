@@ -58,29 +58,34 @@ namespace Simd
                 for (size_t y = yBeg; y < yEnd; ++y)
                 {
                     const float* ps = src + y * p.srcW * p.srcC;
-                    uint16_t* pd = dst + (y & mask) * srcC;
-                    size_t c = 0;
-                    for (; c < srcC16; c += 16)
+                    uint16_t* pd = dst + (y & mask) * p.srcW * srcC;
+                    for (size_t x = 0; x < p.srcW; ++x)
                     {
-                        __m256i d0 = Float32ToBFloat16(_mm256_loadu_ps(ps + c + 0));
-                        __m256i d1 = Float32ToBFloat16(_mm256_loadu_ps(ps + c + 8));
-                        _mm256_storeu_si256((__m256i*)(pd + c), _mm256_permute4x64_epi64(_mm256_packus_epi32(d0, d1), 0xD8));
+                        size_t c = 0;
+                        for (; c < srcC16; c += 16)
+                        {
+                            __m256i d0 = Float32ToBFloat16(_mm256_loadu_ps(ps + c + 0));
+                            __m256i d1 = Float32ToBFloat16(_mm256_loadu_ps(ps + c + 8));
+                            _mm256_storeu_si256((__m256i*)(pd + c), _mm256_permute4x64_epi64(_mm256_packus_epi32(d0, d1), 0xD8));
+                        }
+                        for (; c < srcC8; c += 8)
+                        {
+                            __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + c + 0));
+                            __m128i d1 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + c + 4));
+                            _mm_storeu_si128((__m128i*)(pd + c), _mm_packus_epi32(d0, d1));
+                        }
+                        for (; c < srcC4; c += 4)
+                        {
+                            __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + c + 0));
+                            _mm_storel_epi64((__m128i*)(pd + c), _mm_packus_epi32(d0, Sse41::K_ZERO));
+                        }
+                        for (; c < p.srcC; ++c)
+                            pd[c] = Base::Float32ToBFloat16(ps[c]);
+                        for (; c < srcC; ++c)
+                            pd[c] = 0;
+                        ps += p.srcC;
+                        pd += srcC;
                     }
-                    for (; c < srcC8; c += 8)
-                    {
-                        __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + c + 0));
-                        __m128i d1 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + c + 4));
-                        _mm_storeu_si128((__m128i*)(pd + c), _mm_packus_epi32(d0, d1));
-                    }
-                    for (; c < srcC4; c += 4)
-                    {
-                        __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + c + 0));
-                        _mm_storel_epi64((__m128i*)(pd + c), _mm_packus_epi32(d0, Sse41::K_ZERO));
-                    }
-                    for (; c < p.srcC; ++c)
-                        pd[c] = Base::Float32ToBFloat16(ps[c]);
-                    for (; c < srcC; ++c)
-                        pd[c] = 0;
                 }
             }
         }

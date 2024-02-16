@@ -54,14 +54,17 @@ namespace Simd
             _mm_storeu_ps(dst1, Activate<type>(_mm_add_ps(sum1, bias[1]), params, 1));
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template<SimdConvolutionActivationType type, int M> void InputConvolution1x1_2xM(const uint16_t* src0, const ConvParam32f& p,
             const AlgParam& a, size_t dstC, const uint16_t* weight, const __m128* bias, const __m128* params, float* dst0, float* dst1)
         {
             __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
-            const uint16_t* src1 = src0 + 1 * p.srcC;
-            const uint16_t* src2 = src0 + 2 * p.srcC;
-            const uint16_t* src3 = src0 + 3 * p.srcC;
-            const uint16_t* src4 = src0 + 4 * p.srcC;
+            size_t srcC = AlignHi(p.srcC, a.miK);
+            const uint16_t* src1 = src0 + 1 * srcC;
+            const uint16_t* src2 = src0 + 2 * srcC;
+            const uint16_t* src3 = src0 + 3 * srcC;
+            const uint16_t* src4 = src0 + 4 * srcC;
             if (dstC > F)
             {
                 if (M > 0) d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
@@ -69,7 +72,7 @@ namespace Simd
                 if (M > 2) d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
                 if (M > 3) d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
                 if (M > 4) d40 = _mm_setzero_ps(), d41 = _mm_setzero_ps();
-                for (size_t offs = 0, end = p.srcC; offs < end; offs += 2)
+                for (size_t offs = 0, end = srcC; offs < end; offs += 2)
                 {
                     w01 = _mm_loadu_ps((float*)weight + 0);
                     w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
@@ -127,7 +130,7 @@ namespace Simd
                 if (M > 2) d20 = _mm_setzero_ps();
                 if (M > 3) d30 = _mm_setzero_ps();
                 if (M > 4) d40 = _mm_setzero_ps();
-                for (size_t offs = 0, end = p.srcC; offs < end; offs += 2)
+                for (size_t offs = 0, end = srcC; offs < end; offs += 2)
                 {
                     w01 = _mm_loadu_ps((float*)weight + 0);
                     w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
@@ -198,7 +201,7 @@ namespace Simd
         template<SimdConvolutionActivationType type> void InputConvolution1x1_2(const uint16_t* src, const ConvParam32f& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
-            size_t dstM = a.bufH[1] - 1, dstS = a.bufH[1] * p.dstW * F, srcM = a.bufH[0] - 1;
+            size_t dstM = a.bufH[1] - 1, dstS = a.bufH[1] * p.dstW * F, srcM = a.bufH[0] - 1, srcC = AlignHi(p.srcC, a.miK);
             __m128 _bias[2], _params[2];
             _params[0] = _mm_set1_ps(params[0]);
             _params[1] = _mm_set1_ps(params[1]);
@@ -222,24 +225,24 @@ namespace Simd
                     }
                     if (yInt > yBeg)
                     {
-                        const uint16_t* src0 = src + yBeg * p.srcW * p.srcC;
+                        const uint16_t* src0 = src + yBeg * p.srcW * srcC;
                         float* dst0 = dst + (yBeg & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
-                        for (size_t j = 0; j < in; j += n, src0 += p.srcC * n, dst0 += F * n, dst1 += F * n)
+                        for (size_t j = 0; j < in; j += n, src0 += srcC * n, dst0 += F * n, dst1 += F * n)
                             inputConvolution1x1_2xN(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
                         if (in < i1)
                             inputConvolution1x1_2xI(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
                     }
                     if (yEnd > yInt)
                     {
-                        const uint16_t* src0 = src + yInt * p.srcW * p.srcC;
+                        const uint16_t* src0 = src + yInt * p.srcW * srcC;
                         float* dst0 = dst + (yInt & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
-                        for (size_t j = 0; j < en; j += n, src0 += p.srcC * n, dst0 += F * n, dst1 += F * n)
+                        for (size_t j = 0; j < en; j += n, src0 += srcC * n, dst0 += F * n, dst1 += F * n)
                             inputConvolution1x1_2xN(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
                         if (en < e1)
                             inputConvolution1x1_2xE(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
                     }
                     dst += a.bufH[1] * p.dstW * DF;
-                    weight += DivHi(p.srcC, 2) * QF;
+                    weight += srcC * DF;
                 }
             }
             else
@@ -259,16 +262,16 @@ namespace Simd
                     }
                     for (size_t dy = yBeg; dy < yEnd; dy++)
                     {
-                        const uint16_t* src0 = src + (dy & srcM) * p.srcW * p.srcC;
+                        const uint16_t* src0 = src + (dy & srcM) * p.srcW * srcC;
                         float* dst0 = dst + (dy & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
                         size_t dx = 0;
-                        for (; dx < bodyWn; dx += n, src0 += p.srcC * n, dst0 += F * n, dst1 += F * n)
+                        for (; dx < bodyWn; dx += n, src0 += srcC * n, dst0 += F * n, dst1 += F * n)
                             inputConvolution1x1_2xN(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
                         if (dx < bodyW)
                             inputConvolution1x1_2xM(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
                     }
                     dst += a.bufH[1] * p.dstW * DF;
-                    weight += DivHi(p.srcC, 2) * QF;
+                    weight += srcC * DF;
                 }
             }
         }

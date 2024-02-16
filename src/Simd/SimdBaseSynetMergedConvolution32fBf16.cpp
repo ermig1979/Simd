@@ -251,24 +251,24 @@ namespace Simd
             if (_alg.miC)
             {
                 assert(Is1x1(p));
-                size_t F = _alg.miC * 2, C = DivHi(AlignHi(p.srcC, _alg.miK), 2), D = DivHi(p.dstC, F);
-                _weightI.Resize(C * D * F * 2, true);
+                size_t F = _alg.miC * 2, C = AlignHi(p.srcC, _alg.miK), D = DivHi(p.dstC, F);
+                _weightI.Resize(C * D * F, true);
                 uint16_t* dst = _weightI.data;
                 for (size_t d = 0; d < D; d++)
                 {
-                    for (size_t c = 0; c < C; ++c)
+                    for (size_t c = 0; c < C; c += 2)
                     {
-                        const float* ps = src + c * 2 * p.dstC + d * F;
+                        const float* ps = src + c * p.dstC + d * F;
                         for (size_t f = 0; f < F; ++f)
                         {
                             for (size_t i = 0; i < 2; ++i)
                             {
-                                if (d * F + f < p.dstC && c * 2 + i < p.srcC)
+                                if (d * F + f < p.dstC && c + i < p.srcC)
                                     *(dst++) = Float32ToBFloat16(ps[i * p.dstC]);
                                 else
                                     *(dst++) = 0;
                             }
-                            if(c * 2 < p.srcC)
+                            if(c < p.srcC)
                                 ps++;
                         }
                     }
@@ -620,7 +620,10 @@ namespace Simd
             for (size_t i = 0; i < 2; ++i)
             {
                 const ConvParam32f& c = p.conv[i];
-                size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC * 2 : 4);
+                if (c.group == 1)
+                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC) * 2;
+                else
+                    size += c.kernelY * c.kernelX * c.srcC * 4;
             }
             size_t count = size / (L3 / 2) + 1;
             a.maC = AlignHiAny(c0.dstC / count, 2 * a.miC);
@@ -714,7 +717,10 @@ namespace Simd
             for (size_t i = 0; i < 2; ++i)
             {
                 const ConvParam32f& c = p.conv[i];
-                size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC * 2 : 4);
+                if (c.group == 1)
+                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC) * 2;
+                else
+                    size += c.kernelY * c.kernelX * c.srcC * 4;
             }
             size_t count = size / (L3 / 2) + 1;
             a.maC = AlignHiAny(c0.srcC / count, 2 * a.miC);

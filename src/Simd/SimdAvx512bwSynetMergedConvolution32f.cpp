@@ -65,28 +65,21 @@ namespace Simd
                 for (size_t y = yBeg; y < yEnd; ++y)
                 {
                     const float* ps = src + y * p.srcW * p.srcC;
-                    uint16_t* pd = dst + (y & mask) * srcC;
-                    size_t c = 0;
-                    for (; c < srcC32; c += 32)
-                        Float32ToBFloat16<false, false>(ps + c, pd + c, srcMask, dstMask);
-                    if (srcC32 < p.srcC)
-                        Float32ToBFloat16<false, true>(ps + c, pd + c, srcMask, dstMask);
-                    if (p.srcC < srcC)
-                        Store<false, true>(pd + p.srcC, K_ZERO, gapMask);
+                    uint16_t* pd = dst + (y & mask) * p.srcW * srcC;
+                    for (size_t x = 0; x < p.srcW; ++x)
+                    {
+                        size_t c = 0;
+                        for (; c < srcC32; c += 32)
+                            Float32ToBFloat16<false, false>(ps + c, pd + c, srcMask, dstMask);
+                        if (srcC32 < p.srcC)
+                            Float32ToBFloat16<false, true>(ps + c, pd + c, srcMask, dstMask);
+                        if (p.srcC < srcC)
+                            Store<false, true>(pd + p.srcC, K_ZERO, gapMask);
+                        ps += p.srcC;
+                        pd += srcC;
+                    }
                 }
             }
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH)
-        {
-            size_t size = p.srcW * p.srcC, mask = bufH - 1;
-            size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
-            if (yInt > yBeg)
-                Float32ToBFloat16(src + yBeg * size, (yInt - yBeg) * size, dst + (yBeg & mask) * size);
-            if (yEnd > yInt)
-                Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
         }
 
         //-----------------------------------------------------------------------------------------
