@@ -315,7 +315,7 @@ namespace Test
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1024, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 5, 1)), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 192, 40, 40), Cnv(a1, 5, 1), Cnv(a2, 1, 1, 192)), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 192, 39, 39), Cnv(a1, 5, 1), Cnv(a2, 1, 1, 181)), c, f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 91, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 3, 1)), c, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 91, 41, 41), Cnv(a0, 1, 1, 191), Cnv(a1, 3, 1)), c, f1, f2);
 #endif
 #else
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 91, 40, 40), Cnv(a0, 1, 1, 192), Cnv(a1, 3, 1)), c, f1, f2);
@@ -332,7 +332,7 @@ namespace Test
         SimdSynetCompatibilityType bf16 = (SimdSynetCompatibilityType)(SimdSynetCompatibility16bfSoft | SimdSynetCompatibilityFmaAvoid);
 
 #if defined(NDEBUG)
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
 #else
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
