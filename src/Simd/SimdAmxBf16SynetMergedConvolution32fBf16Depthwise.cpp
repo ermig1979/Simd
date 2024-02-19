@@ -51,6 +51,7 @@ namespace Simd
             size_t bodyX4 = AlignLo(bodyX - noseX, 4) + noseX;
             size_t bodyX8 = AlignLo(bodyX - noseX, 8) + noseX;
             size_t dstCF = AlignLo(dstC, F);
+            bool zeroTail = AlignHi(dstC, a.miK) - dstCF == DF;
 
             __m512 _params[2], _bias[1];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -65,7 +66,7 @@ namespace Simd
                     _params[0] = _mm512_loadu_ps(params + c);
                 if (c == dstCF)
                 {
-                    __mmask16 tail = TailMask16(dstC - dstCF);
+                    __mmask16 srcMask = TailMask16(dstC - dstCF), dstMask = (term == TermBf16Last16b ? 0xFFFF : TailMask16(dstC - dstCF));
                     for (size_t dy = yBeg; dy < yEnd; ++dy)
                     {
                         uint16_t* pd = dst + (dy - dy0) * dY;
@@ -84,12 +85,14 @@ namespace Simd
                                         {
                                             const float* pw = weight + (ky * p.kernelX + kx) * F;
                                             const float* ps = src + (sy & sM) * sY + sx * sX;
-                                            sum = Fmadd<nofma>(_mm512_loadu_ps(ps), _mm512_loadu_ps(pw), sum);
+                                            sum = Fmadd<nofma>(_mm512_maskz_loadu_ps(srcMask, ps), _mm512_maskz_loadu_ps(srcMask, pw), sum);
                                         }
                                     }
                                 }
                             }
-                            Save1<term, type>(pd, sum, _bias, _params, tail);
+                            Save1<term, type>(pd, sum, _bias, _params, dstMask);
+                            if (term == TermBf16Last16b && zeroTail)
+                                _mm256_storeu_si256((__m256i*)pd + 1, Avx2::K_ZERO);
                         }
                     }
                     return;

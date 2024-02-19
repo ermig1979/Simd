@@ -521,12 +521,12 @@ namespace Simd
             {
                 const ConvParam32f& c = p.conv[i];
                 if (c.group == 1)
-                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC) * 2;
+                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC * 2) * 2;
                 else
                     size += c.kernelY * c.kernelX * c.srcC * 4;
             }
             size_t count = size / (L3 / 2) + 1;
-            a.maC = AlignHiAny(c0.dstC / count, 2 * a.miC);
+            a.maC = AlignHi(AlignHi(c0.srcC / count, 2 * a.miC), a.miK);
             for (size_t yStep = c1.dstH; yStep >= 1; yStep--)
             {
                 a.yStep[2] = Simd::Max<size_t>(1, yStep);
@@ -551,7 +551,7 @@ namespace Simd
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dw[0] = AlignHi(c0.srcC, a.miK);
             a.dw[1] = c1.kernelY * c1.kernelX;
-            a.dw[2] = AlignHiAny(c2.dstC, 2 * a.miC);
+            a.dw[2] = AlignHi(c2.dstC, 2 * a.miC);
             
             ((ConvParam32f&)c1).dstT = SimdTensorData16b;
             ((ConvParam32f&)c2).srcT = SimdTensorData16b;
@@ -621,7 +621,7 @@ namespace Simd
             {
                 const ConvParam32f& c = p.conv[i];
                 if (c.group == 1)
-                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC) * 2;
+                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC * 2) * 2;
                 else
                     size += c.kernelY * c.kernelX * c.srcC * 4;
             }
@@ -718,12 +718,12 @@ namespace Simd
             {
                 const ConvParam32f& c = p.conv[i];
                 if (c.group == 1)
-                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC) * 2;
+                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC * 2) * 2;
                 else
                     size += c.kernelY * c.kernelX * c.srcC * 4;
             }
             size_t count = size / (L3 / 2) + 1;
-            a.maC = AlignHiAny(c0.srcC / count, 2 * a.miC);
+            a.maC = AlignHi(AlignHi(c0.srcC / count, 2 * a.miC), a.miK);
 
             for (size_t yStep = c0.dstH; yStep >= 1; yStep--)
             {
@@ -745,7 +745,7 @@ namespace Simd
             a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dw[0] = c0.kernelY * c0.kernelX;
-            a.dw[1] = AlignHiAny(c1.dstC, 2 * a.miC);
+            a.dw[1] = AlignHi(c1.dstC, 2 * a.miC);
 
             ((ConvParam32f&)c0).dstT = SimdTensorData16b;
             ((ConvParam32f&)c1).srcT = SimdTensorData16b;

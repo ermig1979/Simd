@@ -42,7 +42,7 @@ namespace Simd
         template<SimdConvolutionActivationType type> void OutputConvolution_2x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
-            size_t dS = a.maC * p.strideX, dD = p.dstC, srcC32 = AlignLo(srcC, 32);
+            size_t dS = a.maC * p.strideX, dD = p.dstC;
             int strideS = (int)dS * 2, strideW = 128, strideD = (int)dD * 4;
             const uint16_t* src1 = src0 + dS * 16, * weight1 = weight0 + 32;
 
@@ -80,26 +80,8 @@ namespace Simd
                 _tile_loadd(3, dst + 16 * dD + F, strideD);
             }
             size_t sc = 0;
-            for (; sc < srcC32; sc += 32)
+            for (; sc < srcC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
-                _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(7, weight1 + sc * 32, strideW);
-                _tile_dpbf16ps(1, 4, 7);
-                _tile_loadd(5, src1 + sc, strideS);
-                _tile_dpbf16ps(2, 5, 6);
-                _tile_dpbf16ps(3, 5, 7);
-            }
-            if (sc < srcC)
-            {
-                size_t tailC = AlignHi(srcC - sc, 2);
-                conf.rows[6] = uint8_t(tailC / 2);
-                conf.rows[7] = uint8_t(tailC / 2);
-                conf.colsb[4] = uint16_t(tailC * 2);
-                conf.colsb[5] = uint16_t(tailC * 2);
-                _tile_loadconfig(&conf);
-
                 _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
@@ -113,6 +95,7 @@ namespace Simd
             _tile_stored(1, dst + F, strideD);
             _tile_stored(2, dst + 16 * dD + 0, strideD);
             _tile_stored(3, dst + 16 * dD + F, strideD);
+
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC - F);
@@ -127,7 +110,7 @@ namespace Simd
         template<SimdConvolutionActivationType type> void OutputConvolution_2x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
-            size_t dS = a.maC * p.strideX, dD = p.dstC, srcC32 = AlignLo(srcC, 32);
+            size_t dS = a.maC * p.strideX, dD = p.dstC;
             int strideS = (int)dS * 2, strideW = 128, strideD = (int)dD * 4;
             const uint16_t* src1 = src0 + dS * 16;
 
@@ -155,22 +138,8 @@ namespace Simd
                 _tile_loadd(2, dst + 16 * dD + 0, strideD);
             }
             size_t sc = 0;
-            for (; sc < srcC32; sc += 32)
+            for (; sc < srcC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
-                _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(5, src1 + sc, strideS);
-                _tile_dpbf16ps(2, 5, 6);
-            }
-            if (sc < srcC)
-            {
-                size_t tailC = AlignHi(srcC - sc, 2);
-                conf.rows[6] = uint8_t(tailC / 2);
-                conf.colsb[4] = uint16_t(tailC * 2);
-                conf.colsb[5] = uint16_t(tailC * 2);
-                _tile_loadconfig(&conf);
-
                 _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
@@ -179,6 +148,7 @@ namespace Simd
             }
             _tile_stored(0, dst + 0, strideD);
             _tile_stored(2, dst + 16 * dD + 0, strideD);
+
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC);
@@ -193,7 +163,7 @@ namespace Simd
         template<SimdConvolutionActivationType type> void OutputConvolution_1x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
-            size_t dS = a.maC * p.strideX, dD = p.dstC, srcC32 = AlignLo(srcC, 32);
+            size_t dS = a.maC * p.strideX, dD = p.dstC;
             int strideS = (int)dS * 2, strideW = 128, strideD = (int)dD * 4;
             const uint16_t* weight1 = weight0 + 32;
 
@@ -221,22 +191,8 @@ namespace Simd
                 _tile_loadd(1, dst + F, strideD);
             }
             size_t sc = 0;
-            for (; sc < srcC32; sc += 32)
+            for (; sc < srcC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
-                _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(7, weight1 + sc * 32, strideW);
-                _tile_dpbf16ps(1, 4, 7);
-            }
-            if (sc < srcC)
-            {
-                size_t tailC = AlignHi(srcC - sc, 2);
-                conf.rows[6] = uint8_t(tailC / 2);
-                conf.rows[7] = uint8_t(tailC / 2);
-                conf.colsb[4] = uint16_t(tailC * 2);
-                _tile_loadconfig(&conf);
-
                 _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
@@ -245,6 +201,7 @@ namespace Simd
             }
             _tile_stored(0, dst + 0, strideD);
             _tile_stored(1, dst + F, strideD);
+
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC - F);
@@ -259,7 +216,7 @@ namespace Simd
         template<SimdConvolutionActivationType type> void OutputConvolution_1x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
-            size_t dS = a.maC * p.strideX, dD = p.dstC, srcC32 = AlignLo(srcC, 32);
+            size_t dS = a.maC * p.strideX, dD = p.dstC;
             int strideS = (int)dS * 2, strideW = 128, strideD = (int)dD * 4;
 
             TileConf conf;
@@ -280,24 +237,14 @@ namespace Simd
                 _tile_loadd(0, dst + 0, strideD);
             }
             size_t sc = 0;
-            for (; sc < srcC32; sc += 32)
+            for (; sc < srcC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
-                _tile_dpbf16ps(0, 4, 6);
-            }
-            if (sc < srcC)
-            {
-                size_t tailC = AlignHi(srcC - sc, 2);
-                conf.rows[6] = uint8_t(tailC / 2);
-                conf.colsb[4] = uint16_t(tailC * 2);
-                _tile_loadconfig(&conf);
-
                 _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
             }
             _tile_stored(0, dst + 0, strideD);
+
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC);
@@ -316,7 +263,7 @@ namespace Simd
             const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight,
             const float* bias, const float* params, float* dst, int zero)
         {
-            size_t n = 32, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(maC, 2) * DF;
+            size_t n = 32, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(maC, a.miK) * DF;
             OutputConvolutionPtr body_2 = OutputConvolution_2x2<type>;
             OutputConvolutionPtr tail_2 = m > 16 ? OutputConvolution_2x2<type> : OutputConvolution_1x2<type>;
             OutputConvolutionPtr body_1 = OutputConvolution_2x1<type>;
