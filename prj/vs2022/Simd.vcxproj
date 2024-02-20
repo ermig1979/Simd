@@ -29,7 +29,6 @@
     <ClInclude Include="..\..\src\Simd\SimdAmxBf16.h" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
-    <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512vnni.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />

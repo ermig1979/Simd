@@ -441,8 +441,8 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX512BF16_ENABLE
-    namespace Avx512bf16
+#ifdef SIMD_AMXBF16_ENABLE
+    namespace AmxBf16
     {
         SIMD_INLINE __m512bh Set2(const uint16_t* src)
         {
@@ -471,7 +471,7 @@ namespace Simd
             return vmlaq_f32(positive, slope, negative);
         }
     }
-#endif//SIMD_NEON_ENABLE
+#endif
 }
 
-#endif//__SimdSynet_h__
+#endif

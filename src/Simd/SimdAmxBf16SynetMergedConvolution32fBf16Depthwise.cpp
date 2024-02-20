@@ -26,7 +26,6 @@
 #include "Simd/SimdSynetConvolution32fBf16Common.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdAvx512bf16.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd

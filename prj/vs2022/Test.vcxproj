@@ -30,9 +30,6 @@
     <ProjectReference Include="Avx2.vcxproj">
       <Project>{4c82474f-3b9a-4b92-ac74-2434ca1d5064}</Project>
     </ProjectReference>
-    <ProjectReference Include="Avx512bf16.vcxproj">
-      <Project>{8023d218-c0d2-48ad-ad1b-0d4e6b1de7be}</Project>
-    </ProjectReference>
     <ProjectReference Include="Avx512bw.vcxproj">
       <Project>{3e24da78-24e3-41d2-9066-54c75be13b90}</Project>
     </ProjectReference>

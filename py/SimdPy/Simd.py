@@ -65,12 +65,10 @@ class CpuInfo(enum.Enum) :
 	AVX512BW = 9
 	## Enabling of AVX-512VNNI CPU extensions (x86 specific).
 	AVX512VNNI = 10
-	## Enabling of AVX-512BF16 CPU extensions (x86 specific).
-	AVX512BF16 = 11
-	## Enabling of AMX-BF16, AMX-INT8 CPU extensions (x86 specific).
-	AMXBF16 = 12
+	## Enabling of AVX-512BF16, AMX-BF16, AMX-INT8 CPU extensions (x86 specific).
+	AMXBF16 = 11
 	## Enabling of NEON CPU extensions (ARM specific).
-	NEON = 13
+	NEON = 12
 
 ## @ingroup python
 # Describes frame format type. It is used in Simd.Frame.
@@ -650,10 +648,8 @@ class Lib():
 		info += ", L3: {:.1f} MB".format(Lib.CpuInfo(Simd.CpuInfo.CacheL3) / 1024 / 1024)
 		info += ", RAM: {:.1f} GB".format(Lib.CpuInfo(Simd.CpuInfo.RAM) / 1024 / 1024 / 1024)
 		info += "; Available SIMD:"
-		if Lib.CpuInfo(Simd.CpuInfo.AMX) > 0 :
-			info += " AMX-BF16 AMX-INT8"
-		if Lib.CpuInfo(Simd.CpuInfo.AVX512BF16) > 0 :
-			info += " AVX-512VBF16"
+		if Lib.CpuInfo(Simd.CpuInfo.AMXBF16) > 0 :
+			info += " AMX-BF16 AMX-INT8 AVX-512VBF16"
 		if Lib.CpuInfo(Simd.CpuInfo.AVX512VNNI) > 0 :
 			info += " AVX-512VNNI"
 		if Lib.CpuInfo(Simd.CpuInfo.AVX512BW) > 0 :

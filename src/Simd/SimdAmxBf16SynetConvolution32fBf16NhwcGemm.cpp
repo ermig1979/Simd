@@ -26,7 +26,6 @@
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512bw.h"
-#include "Simd/SimdAvx512bf16.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdTile.h"

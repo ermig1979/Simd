@@ -26,7 +26,6 @@
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512bw.h"
-#include "Simd/SimdAvx512bf16.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdTile.h"
@@ -773,11 +772,7 @@ namespace Simd
         }
 
         SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f & p)
-#if defined(SIMD_AMX_EMULATE)
             : Avx512bw::SynetConvolution32fBf16Nhwc(p)
-#else
-            : Avx512bf16::SynetConvolution32fBf16Nhwc(p)
-#endif
         {
             size_t microD = 16 * 2;
             size_t microHW = 16 * 2;
@@ -787,17 +782,10 @@ namespace Simd
                 return;
 #endif
             SetAlgParam(microD, microHW, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-#if defined(SIMD_AMX_EMULATE)
             if (_alg.mode)
                 _convert = Avx512bw::ConvolutionBf16NhwcConvertGemm;
             else
                 _convert = Avx512bw::ConvolutionBf16NhwcConvertConv;
-#else
-            if (_alg.mode)
-                _convert = Avx512bf16::ConvolutionBf16NhwcConvertGemm;
-            else
-                _convert = Avx512bf16::ConvolutionBf16NhwcConvertConv;
-#endif
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
@@ -829,11 +817,7 @@ namespace Simd
                 else
                     return new Base::SynetConvolution32fBf16Gemm(param);
             }
-#if defined(SIMD_AMX_EMULATE)
             return Avx512bw::SynetConvolution32fInit(batch, conv, compatibility);
-#else
-            return Avx512bf16::SynetConvolution32fInit(batch, conv, compatibility);
-#endif
         }
     }
 #endif

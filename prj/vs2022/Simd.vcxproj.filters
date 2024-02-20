@@ -187,9 +187,6 @@
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEmpty.h">
       <Filter>Inc</Filter>
     </ClInclude>

@@ -61,9 +61,6 @@
     <ClInclude Include="..\..\src\Simd\SimdArray.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAvx1.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -121,9 +118,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSse41.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSsse3.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -140,12 +134,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdVersion.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdVmx.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdVsx.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
@@ -197,12 +185,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAmx.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEmpty.h">

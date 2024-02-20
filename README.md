@@ -94,8 +94,7 @@ There are addition build parameters:
 
 * `SIMD_AVX512` - Enable of AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) CPU extensions. It is switched on by default.
 * `SIMD_AVX512VNNI` - Enable of AVX-512-VNNI CPU extensions. It is switched on by default.
-* `SIMD_AVX512BF16` - Enable of AVX-512-BF16 CPU extensions. It is switched off by default.
-* `SIMD_AMX` - Enable of AMX CPU extensions. It is switched off by default.
+* `SIMD_AMXBF16` - Enable of AMX-BF16, AMX-INT8 and AVX-512-BF16 CPU extensions. It is switched off by default.
 * `SIMD_TEST` - Build test framework. It is switched on by default.
 * `SIMD_INFO` - Print build information. It is switched on by default.
 * `SIMD_PERF` - Enable of internal performance statistic. It is switched off by default.

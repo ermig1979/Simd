@@ -87,7 +87,7 @@ namespace Simd
         return ptr == AlignLo(ptr, align);
     }
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     template<class T> T* Allocate(uint8_t*& buffer, size_t size, size_t align = SIMD_ALIGN)
     {
@@ -102,7 +102,7 @@ namespace Simd
         buffer += size;
     }
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
 #ifdef SIMD_NO_MANS_LAND
     const uint8_t NO_MANS_LAND_WATERMARK = 0x55;
@@ -173,14 +173,14 @@ namespace Simd
 #endif
     }
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     struct Deletable
     {
         virtual ~Deletable() {}
     };
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
 #if defined(SIMD_CPP_2011_ENABLE)
     template<class T> using Holder = std::unique_ptr<T>;
@@ -228,7 +228,7 @@ namespace Simd
     };
 #endif
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
@@ -243,7 +243,7 @@ namespace Simd
             return Simd::Aligned(ptr, align);
         }
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
@@ -258,7 +258,7 @@ namespace Simd
             return Simd::Aligned(ptr, align);
         }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
@@ -273,21 +273,21 @@ namespace Simd
             return Simd::Aligned(ptr, align);
         }
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_AVX512VNNI_ENABLE
     namespace Avx512vnni
     {
         using Avx512bw::Aligned;
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 
-#ifdef SIMD_AVX512BF16_ENABLE
-    namespace Avx512bf16
+#ifdef SIMD_AMXBF16_ENABLE
+    namespace AmxBf16
     {
         using Avx512bw::Aligned;
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
@@ -302,7 +302,7 @@ namespace Simd
             return Simd::Aligned(ptr, align);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }
 
-#endif//__SimdMemory_h__
+#endif

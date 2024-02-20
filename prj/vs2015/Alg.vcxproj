@@ -41,11 +41,7 @@
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdAvx512bf16*.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
-    </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdAmx*.cpp">
+	<ClCompile Include="..\..\src\Simd\SimdAmxBf16*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>

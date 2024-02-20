@@ -160,8 +160,7 @@ int main()
     std::cout &lt;&lt; "AVX2: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx2) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "AVX-512BW: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx512bw) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "AVX-512VNNI: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? "Yes" : "No") &lt;&lt; std::endl;
-    std::cout &lt;&lt; "AVX-512BF16: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx512bf16) ? "Yes" : "No") &lt;&lt; std::endl;
-    std::cout &lt;&lt; "AMX: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAmx) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "AMX-BF16: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAmxBf16) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "ARM-NEON: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") &lt;&lt; std::endl;
     return 0;
 }

@@ -38,10 +38,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnni*.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16*.cpp">
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAmx*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16*.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeon*.cpp">

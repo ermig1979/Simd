@@ -25,7 +25,6 @@
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
 #include "Simd/SimdBFloat16.h"
-#include "Simd/SimdAvx512bf16.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdCpu.h"
 
