@@ -44,10 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetMergedConvolution32fBf16.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetMergedConvolution32fBf16Depthwise.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetMergedConvolution32fBf16Input.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetMergedConvolution32fBf16Output.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemDefinitionGroup>

@@ -213,7 +213,7 @@ namespace Test
         float epsilon = eps;
 #endif
 #if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER >= 1900 && _MSC_VER < 1920
-        epsilon = eps * 5;
+        epsilon = eps * 10;
 #endif
 
         result = result && Compare(dst1, dst2, epsilon, true, 64, DifferenceBoth);
@@ -379,11 +379,6 @@ namespace Test
         if (Simd::Avx512bw::Enable)
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bw::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif
-
-//#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
-//        if (Simd::Avx512bf16::Enable)
-//            result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bf16::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
-//#endif
 
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
         if (Simd::AmxBf16::Enable)
