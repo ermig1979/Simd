@@ -218,29 +218,6 @@ namespace Simd
     }
 #endif
 
-#if defined(SIMD_AVX512BF16_ENABLE) && 0    
-    namespace Avx512bf16
-    {
-        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
-
-        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
-
-        //-----------------------------------------------------------------------------------------
-
-        class SynetConvolution32fBf16Nhwc : public Avx512bw::SynetConvolution32fBf16Nhwc
-        {
-        public:
-            SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
-
-            virtual String Ext() const { return "Avx512bf16"; }
-        };
-
-        //-----------------------------------------------------------------------------------------
-
-        void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    }
-#endif
-
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
     namespace AmxBf16
     {
