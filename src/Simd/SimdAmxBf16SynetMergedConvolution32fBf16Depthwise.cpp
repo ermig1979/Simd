@@ -37,7 +37,7 @@ namespace Simd
         using AlgParam = Base::SynetMergedConvolution32fBf16::AlgParam;
         using DepthwisePtr = Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr;
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution(const float* src, const ConvParam32f& p,
             const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint16_t* dst)
@@ -50,8 +50,7 @@ namespace Simd
             size_t bodyX2 = AlignLo(bodyX - noseX, 2) + noseX;
             size_t bodyX4 = AlignLo(bodyX - noseX, 4) + noseX;
             size_t bodyX8 = AlignLo(bodyX - noseX, 8) + noseX;
-            size_t dstCF = AlignLo(dstC, F);
-            bool zeroTail = AlignHi(dstC, a.miK) - dstCF == DF;
+            size_t dstCF = AlignLo(dstC, F), dstCK = (term == TermBf16Last16b ?AlignHi(dstC, a.miK) : dstC);
 
             __m512 _params[2], _bias[1];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -59,14 +58,14 @@ namespace Simd
                 type == SimdConvolutionActivationHswish ||
                 type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm512_set1_ps(params[1]);
-            for (size_t c = 0; c < dstC; c += F)
+            for (size_t c = 0; c < dstCK; c += F)
             {
                 _bias[0] = _mm512_loadu_ps(bias + c);
                 if (type == ::SimdConvolutionActivationPrelu)
                     _params[0] = _mm512_loadu_ps(params + c);
-                if (c == dstCF)
+                if (c >= dstCF)
                 {
-                    __mmask16 srcMask = TailMask16(dstC - dstCF), dstMask = (term == TermBf16Last16b ? 0xFFFF : TailMask16(dstC - dstCF));
+                    __mmask16 srcMask = TailMask16(dstC - c), dstMask = (term == TermBf16Last16b ? 0xFFFF : TailMask16(dstC - c));
                     for (size_t dy = yBeg; dy < yEnd; ++dy)
                     {
                         uint16_t* pd = dst + (dy - dy0) * dY;
@@ -91,11 +90,12 @@ namespace Simd
                                 }
                             }
                             Save1<term, type>(pd, sum, _bias, _params, dstMask);
-                            if (term == TermBf16Last16b && zeroTail)
-                                _mm256_storeu_si256((__m256i*)pd + 1, Avx2::K_ZERO);
                         }
                     }
-                    return;
+                    src += sD;
+                    dst += dD;
+                    weight += wD;
+                    continue;
                 }
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
@@ -271,226 +271,226 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x2(const float* src0,
-            const float* src1, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 tail)
+            const float* src1, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 srcMask, __mmask16 dstMask)
         {
             if (nofma)
             {
                 __m512 sum = _mm512_setzero_ps();
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 0 * sX), weight[0], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 1 * sX), weight[1], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 0 * sX), weight[3], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 1 * sX), weight[4], sum);
-                Save1<term, type>(dst, sum, bias, params, tail);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX), weight[0], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX), weight[1], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX), weight[3], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX), weight[4], sum);
+                Save1<term, type>(dst, sum, bias, params, dstMask);
             }
             else
             {
                 __m512 sum0 = _mm512_setzero_ps(), sum1 = _mm512_setzero_ps();
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src0 + 0 * sX), weight[0], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src0 + 1 * sX), weight[1], sum1);
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src1 + 0 * sX), weight[3], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src1 + 1 * sX), weight[4], sum1);
-                Save1<term, type>(dst, _mm512_add_ps(sum0, sum1), bias, params, tail);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX), weight[0], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX), weight[1], sum1);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX), weight[3], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX), weight[4], sum1);
+                Save1<term, type>(dst, _mm512_add_ps(sum0, sum1), bias, params, dstMask);
             }
         }
 
         template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x3(const float* src0,
-            const float* src1, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 tail)
+            const float* src1, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 srcMask, __mmask16 dstMask)
         {
             if (nofma)
             {
                 __m512 sum = _mm512_setzero_ps();
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 0 * sX), weight[0], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 1 * sX), weight[1], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 2 * sX), weight[2], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 0 * sX), weight[3], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 1 * sX), weight[4], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 2 * sX), weight[5], sum);
-                Save1<term, type>(dst, sum, bias, params, tail);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX), weight[0], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX), weight[1], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 2 * sX), weight[2], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX), weight[3], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX), weight[4], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 2 * sX), weight[5], sum);
+                Save1<term, type>(dst, sum, bias, params, dstMask);
             }
             else
             {
                 __m512 sum0 = _mm512_setzero_ps(), sum1 = _mm512_setzero_ps(), sum2 = _mm512_setzero_ps();
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src0 + 0 * sX), weight[0], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src0 + 1 * sX), weight[1], sum1);
-                sum2 = Fmadd<false>(_mm512_loadu_ps(src0 + 2 * sX), weight[2], sum2);
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src1 + 0 * sX), weight[3], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src1 + 1 * sX), weight[4], sum1);
-                sum2 = Fmadd<false>(_mm512_loadu_ps(src1 + 2 * sX), weight[5], sum2);
-                Save1<term, type>(dst, _mm512_add_ps(_mm512_add_ps(sum0, sum1), sum2), bias, params, tail);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX), weight[0], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX), weight[1], sum1);
+                sum2 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 2 * sX), weight[2], sum2);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX), weight[3], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX), weight[4], sum1);
+                sum2 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 2 * sX), weight[5], sum2);
+                Save1<term, type>(dst, _mm512_add_ps(_mm512_add_ps(sum0, sum1), sum2), bias, params, dstMask);
             }
         }
 
         template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge3x2(const float* src0,
-            const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 tail)
+            const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 srcMask, __mmask16 dstMask)
         {
             if (nofma)
             {
                 __m512 sum = _mm512_setzero_ps();
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 0 * sX), weight[0], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 1 * sX), weight[1], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 0 * sX), weight[3], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 1 * sX), weight[4], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src2 + 0 * sX), weight[6], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src2 + 1 * sX), weight[7], sum);
-                Save1<term, type>(dst, sum, bias, params, tail);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX), weight[0], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX), weight[1], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX), weight[3], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX), weight[4], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src2 + 0 * sX), weight[6], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src2 + 1 * sX), weight[7], sum);
+                Save1<term, type>(dst, sum, bias, params, dstMask);
             }
             else
             {
                 __m512 sum0 = _mm512_setzero_ps(), sum1 = _mm512_setzero_ps();
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src0 + 0 * sX), weight[0], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src0 + 1 * sX), weight[1], sum1);
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src1 + 0 * sX), weight[3], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src1 + 1 * sX), weight[4], sum1);
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src2 + 0 * sX), weight[6], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src2 + 1 * sX), weight[7], sum1);
-                Save1<term, type>(dst, _mm512_add_ps(sum0, sum1), bias, params, tail);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX), weight[0], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX), weight[1], sum1);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX), weight[3], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX), weight[4], sum1);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src2 + 0 * sX), weight[6], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src2 + 1 * sX), weight[7], sum1);
+                Save1<term, type>(dst, _mm512_add_ps(sum0, sum1), bias, params, dstMask);
             }
         }
 
         template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x1(const float* src0,
-            const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 tail)
+            const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 srcMask, __mmask16 dstMask)
         {
             if (nofma)
             {
                 __m512 sum = _mm512_setzero_ps();
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 0 * sX), weight[0], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 1 * sX), weight[1], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src0 + 2 * sX), weight[2], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 0 * sX), weight[3], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 1 * sX), weight[4], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src1 + 2 * sX), weight[5], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src2 + 0 * sX), weight[6], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src2 + 1 * sX), weight[7], sum);
-                sum = Fmadd<true>(_mm512_loadu_ps(src2 + 2 * sX), weight[8], sum);
-                Save1<term, type>(dst, sum, bias, params, tail);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX), weight[0], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX), weight[1], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src0 + 2 * sX), weight[2], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX), weight[3], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX), weight[4], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src1 + 2 * sX), weight[5], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src2 + 0 * sX), weight[6], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src2 + 1 * sX), weight[7], sum);
+                sum = Fmadd<true>(_mm512_maskz_loadu_ps(srcMask, src2 + 2 * sX), weight[8], sum);
+                Save1<term, type>(dst, sum, bias, params, dstMask);
             }
             else
             {
                 __m512 sum0 = _mm512_setzero_ps(), sum1 = _mm512_setzero_ps(), sum2 = _mm512_setzero_ps();
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src0 + 0 * sX), weight[0], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src0 + 1 * sX), weight[1], sum1);
-                sum2 = Fmadd<false>(_mm512_loadu_ps(src0 + 2 * sX), weight[2], sum2);
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src1 + 0 * sX), weight[3], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src1 + 1 * sX), weight[4], sum1);
-                sum2 = Fmadd<false>(_mm512_loadu_ps(src1 + 2 * sX), weight[5], sum2);
-                sum0 = Fmadd<false>(_mm512_loadu_ps(src2 + 0 * sX), weight[6], sum0);
-                sum1 = Fmadd<false>(_mm512_loadu_ps(src2 + 1 * sX), weight[7], sum1);
-                sum2 = Fmadd<false>(_mm512_loadu_ps(src2 + 2 * sX), weight[8], sum2);
-                Save1<term, type>(dst, _mm512_add_ps(_mm512_add_ps(sum0, sum1), sum2), bias, params, tail);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX), weight[0], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX), weight[1], sum1);
+                sum2 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src0 + 2 * sX), weight[2], sum2);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX), weight[3], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX), weight[4], sum1);
+                sum2 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src1 + 2 * sX), weight[5], sum2);
+                sum0 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src2 + 0 * sX), weight[6], sum0);
+                sum1 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src2 + 1 * sX), weight[7], sum1);
+                sum2 = Fmadd<false>(_mm512_maskz_loadu_ps(srcMask, src2 + 2 * sX), weight[8], sum2);
+                Save1<term, type>(dst, _mm512_add_ps(_mm512_add_ps(sum0, sum1), sum2), bias, params, dstMask);
             }
         }
 
         template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x2(const float* src0,
-            const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512* bias, const __m512* params, uint16_t* dst, size_t dX, __mmask16 tail)
+            const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512* bias, const __m512* params, uint16_t* dst, size_t dX, __mmask16 srcMask, __mmask16 dstMask)
         {
             __m512 sum0 = _mm512_setzero_ps(), sum1 = _mm512_setzero_ps(), s0;
 
-            s0 = _mm512_loadu_ps(src0 + 0 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX);
             sum0 = Fmadd<nofma>(s0, weight[0], sum0);
-            s0 = _mm512_loadu_ps(src0 + 1 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX);
             sum0 = Fmadd<nofma>(s0, weight[1], sum0);
             sum1 = Fmadd<nofma>(s0, weight[0], sum1);
-            s0 = _mm512_loadu_ps(src0 + 2 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 2 * sX);
             sum0 = Fmadd<nofma>(s0, weight[2], sum0);
             sum1 = Fmadd<nofma>(s0, weight[1], sum1);
-            s0 = _mm512_loadu_ps(src0 + 3 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 3 * sX);
             sum1 = Fmadd<nofma>(s0, weight[2], sum1);
 
-            s0 = _mm512_loadu_ps(src1 + 0 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX);
             sum0 = Fmadd<nofma>(s0, weight[3], sum0);
-            s0 = _mm512_loadu_ps(src1 + 1 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX);
             sum0 = Fmadd<nofma>(s0, weight[4], sum0);
             sum1 = Fmadd<nofma>(s0, weight[3], sum1);
-            s0 = _mm512_loadu_ps(src1 + 2 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 2 * sX);
             sum0 = Fmadd<nofma>(s0, weight[5], sum0);
             sum1 = Fmadd<nofma>(s0, weight[4], sum1);
-            s0 = _mm512_loadu_ps(src1 + 3 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 3 * sX);
             sum1 = Fmadd<nofma>(s0, weight[5], sum1);
 
-            s0 = _mm512_loadu_ps(src2 + 0 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 0 * sX);
             sum0 = Fmadd<nofma>(s0, weight[6], sum0);
-            s0 = _mm512_loadu_ps(src2 + 1 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 1 * sX);
             sum0 = Fmadd<nofma>(s0, weight[7], sum0);
             sum1 = Fmadd<nofma>(s0, weight[6], sum1);
-            s0 = _mm512_loadu_ps(src2 + 2 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 2 * sX);
             sum0 = Fmadd<nofma>(s0, weight[8], sum0);
             sum1 = Fmadd<nofma>(s0, weight[7], sum1);
-            s0 = _mm512_loadu_ps(src2 + 3 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 3 * sX);
             sum1 = Fmadd<nofma>(s0, weight[8], sum1);
 
-            Save1<term, type>(dst + 0 * dX, sum0, bias, params, tail);
-            Save1<term, type>(dst + 1 * dX, sum1, bias, params, tail);
+            Save1<term, type>(dst + 0 * dX, sum0, bias, params, dstMask);
+            Save1<term, type>(dst + 1 * dX, sum1, bias, params, dstMask);
         }
 
         template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x4(const float* src0,
-            const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512* bias, const __m512* params, uint16_t* dst, size_t dX, __mmask16 tail)
+            const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512* bias, const __m512* params, uint16_t* dst, size_t dX, __mmask16 srcMask, __mmask16 dstMask)
         {
             __m512 sum0 = _mm512_setzero_ps(), sum1 = _mm512_setzero_ps(), sum2 = _mm512_setzero_ps(), sum3 = _mm512_setzero_ps(), s0;
 
-            s0 = _mm512_loadu_ps(src0 + 0 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 0 * sX);
             sum0 = Fmadd<nofma>(s0, weight[0], sum0);
-            s0 = _mm512_loadu_ps(src0 + 1 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 1 * sX);
             sum0 = Fmadd<nofma>(s0, weight[1], sum0);
             sum1 = Fmadd<nofma>(s0, weight[0], sum1);
-            s0 = _mm512_loadu_ps(src0 + 2 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 2 * sX);
             sum0 = Fmadd<nofma>(s0, weight[2], sum0);
             sum1 = Fmadd<nofma>(s0, weight[1], sum1);
             sum2 = Fmadd<nofma>(s0, weight[0], sum2);
-            s0 = _mm512_loadu_ps(src0 + 3 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 3 * sX);
             sum1 = Fmadd<nofma>(s0, weight[2], sum1);
             sum2 = Fmadd<nofma>(s0, weight[1], sum2);
             sum3 = Fmadd<nofma>(s0, weight[0], sum3);
-            s0 = _mm512_loadu_ps(src0 + 4 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 4 * sX);
             sum2 = Fmadd<nofma>(s0, weight[2], sum2);
             sum3 = Fmadd<nofma>(s0, weight[1], sum3);
-            s0 = _mm512_loadu_ps(src0 + 5 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src0 + 5 * sX);
             sum3 = Fmadd<nofma>(s0, weight[2], sum3);
 
-            s0 = _mm512_loadu_ps(src1 + 0 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 0 * sX);
             sum0 = Fmadd<nofma>(s0, weight[3], sum0);
-            s0 = _mm512_loadu_ps(src1 + 1 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 1 * sX);
             sum0 = Fmadd<nofma>(s0, weight[4], sum0);
             sum1 = Fmadd<nofma>(s0, weight[3], sum1);
-            s0 = _mm512_loadu_ps(src1 + 2 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 2 * sX);
             sum0 = Fmadd<nofma>(s0, weight[5], sum0);
             sum1 = Fmadd<nofma>(s0, weight[4], sum1);
             sum2 = Fmadd<nofma>(s0, weight[3], sum2);
-            s0 = _mm512_loadu_ps(src1 + 3 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 3 * sX);
             sum1 = Fmadd<nofma>(s0, weight[5], sum1);
             sum2 = Fmadd<nofma>(s0, weight[4], sum2);
             sum3 = Fmadd<nofma>(s0, weight[3], sum3);
-            s0 = _mm512_loadu_ps(src1 + 4 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 4 * sX);
             sum2 = Fmadd<nofma>(s0, weight[5], sum2);
             sum3 = Fmadd<nofma>(s0, weight[4], sum3);
-            s0 = _mm512_loadu_ps(src1 + 5 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src1 + 5 * sX);
             sum3 = Fmadd<nofma>(s0, weight[5], sum3);
 
-            s0 = _mm512_loadu_ps(src2 + 0 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 0 * sX);
             sum0 = Fmadd<nofma>(s0, weight[6], sum0);
-            s0 = _mm512_loadu_ps(src2 + 1 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 1 * sX);
             sum0 = Fmadd<nofma>(s0, weight[7], sum0);
             sum1 = Fmadd<nofma>(s0, weight[6], sum1);
-            s0 = _mm512_loadu_ps(src2 + 2 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 2 * sX);
             sum0 = Fmadd<nofma>(s0, weight[8], sum0);
             sum1 = Fmadd<nofma>(s0, weight[7], sum1);
             sum2 = Fmadd<nofma>(s0, weight[6], sum2);
-            s0 = _mm512_loadu_ps(src2 + 3 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 3 * sX);
             sum1 = Fmadd<nofma>(s0, weight[8], sum1);
             sum2 = Fmadd<nofma>(s0, weight[7], sum2);
             sum3 = Fmadd<nofma>(s0, weight[6], sum3);
-            s0 = _mm512_loadu_ps(src2 + 4 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 4 * sX);
             sum2 = Fmadd<nofma>(s0, weight[8], sum2);
             sum3 = Fmadd<nofma>(s0, weight[7], sum3);
-            s0 = _mm512_loadu_ps(src2 + 5 * sX);
+            s0 = _mm512_maskz_loadu_ps(srcMask, src2 + 5 * sX);
             sum3 = Fmadd<nofma>(s0, weight[8], sum3);
 
-            Save1<term, type>(dst + 0 * dX, sum0, bias, params, tail);
-            Save1<term, type>(dst + 1 * dX, sum1, bias, params, tail);
-            Save1<term, type>(dst + 2 * dX, sum2, bias, params, tail);
-            Save1<term, type>(dst + 3 * dX, sum3, bias, params, tail);
+            Save1<term, type>(dst + 0 * dX, sum0, bias, params, dstMask);
+            Save1<term, type>(dst + 1 * dX, sum1, bias, params, dstMask);
+            Save1<term, type>(dst + 2 * dX, sum2, bias, params, dstMask);
+            Save1<term, type>(dst + 3 * dX, sum3, bias, params, dstMask);
         }
 
         template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution3x3(const float* src, const ConvParam32f& p,
@@ -503,6 +503,7 @@ namespace Simd
             size_t xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
             size_t xMainEnd2 = AlignLo(xMainEnd - padX, 2) * (p.strideX == 1 ? 1 : 0) + padX;
             size_t xMainEnd4 = AlignLo(xMainEnd - padX, 4) * (p.strideX == 1 ? 1 : 0) + padX;
+            size_t dstCF = AlignLo(dstC, F), dstCK = (term == TermBf16Last16b ? AlignHi(dstC, a.miK) : dstC);
 
             __m512 _params[2], _bias[1];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -510,9 +511,9 @@ namespace Simd
                 type == SimdConvolutionActivationHswish ||
                 type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm512_set1_ps(params[1]);
-            for (size_t c = 0; c < dstC; c += F)
+            for (size_t c = 0; c < dstCK; c += F)
             {
-                __mmask16 tail = TailMask16(dstC - c);
+                __mmask16 srcMask = TailMask16(dstC - c), dstMask = (term == TermBf16Last16b ? 0xFFFF : TailMask16(dstC - c));
                 __m512 _weight[9];
                 for (size_t i = 0; i < 9; ++i)
                     _weight[i] = _mm512_loadu_ps(weight + i * F);
@@ -528,12 +529,12 @@ namespace Simd
                     const float* src1 = src + ((sy + 1) & sM) * sY;
                     uint16_t* pDst = dst + (dy - dy0) * dY;
                     if (padX)
-                        DepthwiseConvolution3x3Edge2x2<term, type, nofma>(src0, src1, sX, _weight + 4, _bias, _params, pDst, tail),
+                        DepthwiseConvolution3x3Edge2x2<term, type, nofma>(src0, src1, sX, _weight + 4, _bias, _params, pDst, srcMask, dstMask),
                         pDst += dX, dx++, src0 += ssX0, src1 += ssX0;
                     for (; dx < xMainEnd; dx++, pDst += dX, src0 += ssX, src1 += ssX)
-                        DepthwiseConvolution3x3Edge2x3<term, type, nofma>(src0, src1, sX, _weight + 3, _bias, _params, pDst, tail);
+                        DepthwiseConvolution3x3Edge2x3<term, type, nofma>(src0, src1, sX, _weight + 3, _bias, _params, pDst, srcMask, dstMask);
                     if (padW)
-                        DepthwiseConvolution3x3Edge2x2<term, type, nofma>(src0, src1, sX, _weight + 3, _bias, _params, pDst, tail);
+                        DepthwiseConvolution3x3Edge2x2<term, type, nofma>(src0, src1, sX, _weight + 3, _bias, _params, pDst, srcMask, dstMask);
                     dy++;
                 }
                 for (; dy < yMainEnd; ++dy)
@@ -544,16 +545,16 @@ namespace Simd
                     const float* src2 = src + ((sy + 2) & sM) * sY;
                     uint16_t* pDst = dst + (dy - dy0) * dY;
                     if (padX)
-                        DepthwiseConvolution3x3Edge3x2<term, type, nofma>(src0, src1, src2, sX, _weight + 1, _bias, _params, pDst, tail),
+                        DepthwiseConvolution3x3Edge3x2<term, type, nofma>(src0, src1, src2, sX, _weight + 1, _bias, _params, pDst, srcMask, dstMask),
                         pDst += dX, dx++, src0 += ssX0, src1 += ssX0, src2 += ssX0;
                     for (; dx < xMainEnd4; dx += 4, pDst += dX * 4, src0 += ssX * 4, src1 += ssX * 4, src2 += ssX * 4)
-                        DepthwiseConvolution3x3Main1x4<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst, dX, tail);
+                        DepthwiseConvolution3x3Main1x4<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst, dX, srcMask, dstMask);
                     for (; dx < xMainEnd2; dx += 2, pDst += dX * 2, src0 += ssX * 2, src1 += ssX * 2, src2 += ssX * 2)
-                        DepthwiseConvolution3x3Main1x2<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst, dX, tail);
+                        DepthwiseConvolution3x3Main1x2<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst, dX, srcMask, dstMask);
                     for (; dx < xMainEnd; dx++, pDst += dX, src0 += ssX, src1 += ssX, src2 += ssX)
-                        DepthwiseConvolution3x3Main1x1<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst, tail);
+                        DepthwiseConvolution3x3Main1x1<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst, srcMask, dstMask);
                     if (padW)
-                        DepthwiseConvolution3x3Edge3x2<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst, tail);
+                        DepthwiseConvolution3x3Edge3x2<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst, srcMask, dstMask);
                 }
                 if (dy < yEnd)
                 {
@@ -562,12 +563,12 @@ namespace Simd
                     const float* src1 = src + ((sy + 1) & sM) * sY;
                     uint16_t* pDst = dst + (dy - dy0) * dY;
                     if (padX)
-                        DepthwiseConvolution3x3Edge2x2<term, type, nofma>(src0, src1, sX, _weight + 1, _bias, _params, pDst, tail),
+                        DepthwiseConvolution3x3Edge2x2<term, type, nofma>(src0, src1, sX, _weight + 1, _bias, _params, pDst, srcMask, dstMask),
                         pDst += dX, dx++, src0 += ssX0, src1 += ssX0;
                     for (; dx < xMainEnd; dx++, pDst += dX, src0 += ssX, src1 += ssX)
-                        DepthwiseConvolution3x3Edge2x3<term, type, nofma>(src0, src1, sX, _weight + 0, _bias, _params, pDst, tail);
+                        DepthwiseConvolution3x3Edge2x3<term, type, nofma>(src0, src1, sX, _weight + 0, _bias, _params, pDst, srcMask, dstMask);
                     if (padW)
-                        DepthwiseConvolution3x3Edge2x2<term, type, nofma>(src0, src1, sX, _weight + 0, _bias, _params, pDst, tail);
+                        DepthwiseConvolution3x3Edge2x2<term, type, nofma>(src0, src1, sX, _weight + 0, _bias, _params, pDst, srcMask, dstMask);
                 }
                 src += sD;
                 dst += dD;
@@ -575,7 +576,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<TermBf16Type term, SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam32f& p, DepthwisePtr& depthwise)
         {

@@ -349,7 +349,7 @@ namespace Simd
         void SynetMergedConvolution32fBf16::SetBias(const float* src, const ConvParam32f& p, Array32f& dst)
         {
             const AlgParam& a = _alg;
-            dst.Resize(AlignHiAny(p.dstC, Simd::Max(size_t(1), a.miC)), true);
+            dst.Resize(AlignHiAny(p.dstC, Simd::Max(size_t(1), a.miC * 2)), true);
             if (src)
                 memcpy(dst.data, src, p.dstC * sizeof(float));
         }
@@ -358,7 +358,7 @@ namespace Simd
         {
             const AlgParam& a = _alg;
             if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
-                dst.Resize(AlignHiAny(p.dstC, Simd::Max(size_t(1), a.miC)), true);
+                dst.Resize(AlignHiAny(p.dstC, Simd::Max(size_t(1), a.miC * 2)), true);
             else
                 dst.Resize(2, true);
             switch (p.activation)
@@ -590,7 +590,7 @@ namespace Simd
                         _input(buf0, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0],
                             _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
                         _depthwise(buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
-                            _bias[1].data + c, _params[1].data + c * a.dp[1], (uint16_t*)dst);
+                            _bias[1].data + c, _params[1].data + c * a.dp[1], (uint16_t*)(dst + c));
                         yBeg2 = yEnd2;
                         yBeg1 = yEnd1;
                         yBeg0 = yEnd0;
