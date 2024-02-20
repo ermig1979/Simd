@@ -51,7 +51,7 @@ if(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "gnu"))
 	set_source_files_properties(${SIMD_AMXBF16_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512f -mavx512cd -mavx512bw -mavx512vl -mavx512dq -mavx512vnni -mavx512bf16 -mamx-tile -mamx-int8 -mamx-bf16")
 
 	if(UNIX AND ((SIMD_AMXBF16 AND (NOT(BINUTILS_VERSION VERSION_LESS "2.34"))) OR SIMD_AMX_EMULATE))
-		set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -mamx-tile -mamx-int8 -mamx-bf16")
+		set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -mamx-tile -mamx-int8 -mamx-bf16 -mavx512bf16")
 		set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_AMXBF16_SRC})
 		if(SIMD_INFO)
 			message("Use AMX-INT8 and AMX-BF16")
