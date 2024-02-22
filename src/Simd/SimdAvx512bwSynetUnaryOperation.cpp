@@ -34,6 +34,7 @@
 #include "Simd/SimdErf.h"
 #include "Simd/SimdInterleave.h"
 #include "Simd/SimdDeinterleave.h"
+#include "Simd/SimdTrigonometric.h"
 
 namespace Simd
 {
@@ -146,7 +147,7 @@ namespace Simd
             case SimdSynetUnaryOperation32fTanh: SynetUnaryOperation32f<SimdSynetUnaryOperation32fTanh, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fZero: SynetUnaryOperation32f<SimdSynetUnaryOperation32fZero, align>(src, size, dst); break;
             default:
-                assert(0);
+                Avx2::SynetUnaryOperation32f(src, size, type, dst);
             }
         }
 

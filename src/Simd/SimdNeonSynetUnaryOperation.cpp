@@ -30,6 +30,7 @@
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdErf.h"
+#include "Simd/SimdTrigonometric.h"
 
 namespace Simd
 {
@@ -151,7 +152,7 @@ namespace Simd
             case SimdSynetUnaryOperation32fTanh: SynetUnaryOperation32f<SimdSynetUnaryOperation32fTanh, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fZero: SynetUnaryOperation32f<SimdSynetUnaryOperation32fZero, align>(src, size, dst); break;
             default:
-                assert(0);
+                Base::SynetUnaryOperation32f(src, size, type, dst);
             }
         }
 

@@ -518,6 +518,8 @@ typedef enum
     /*! Gets ceil for every point of input tensor. */
     SimdSynetUnaryOperation32fCeil,
     /*! Gets erf (error function) for every point of input tensor. */
+    SimdSynetUnaryOperation32fCos,
+    /*! Gets cosine function for every point of input tensor. */
     SimdSynetUnaryOperation32fErf,
     /*! Gets exponent for every point of input tensor. */
     SimdSynetUnaryOperation32fExp,
@@ -533,6 +535,8 @@ typedef enum
     SimdSynetUnaryOperation32fRcp,
     /*! Gets reverse square root for every point of input tensor. */
     SimdSynetUnaryOperation32fRsqrt,
+    /*! Gets sine function for every point of input tensor. */
+    SimdSynetUnaryOperation32fSin,
     /*! Gets square root for every point of input tensor. */
     SimdSynetUnaryOperation32fSqrt,
     /*! Gets hyperbolic tangent for every point of input tensor. */

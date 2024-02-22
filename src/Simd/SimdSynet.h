@@ -237,6 +237,11 @@ namespace Simd
             return fiv + (fiv < value ? 1.0f : 0.0f);
         }
 
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fCos>(float value)
+        {
+            return ::cosf(value);
+        }
+
         template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf>(float value)
         {
             return ::erf(value);
@@ -276,6 +281,11 @@ namespace Simd
         template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fRsqrt>(float value)
         {
             return 1.0f / ::sqrt(value);
+        }
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fSin>(float value)
+        {
+            return ::sinf(value);
         }
 
         template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fSqrt>(float value)

@@ -32,7 +32,6 @@ namespace Simd
 		void AbsDifference(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride, size_t width, size_t height)
 		{
 			assert(width >= A);
-
 			size_t bodyWidth = AlignLo(width, A);
 			for (size_t row = 0; row < height; ++row)
 			{

@@ -41,6 +41,8 @@ namespace Test
             return "Abs";
         case SimdSynetUnaryOperation32fCeil:
             return "Ceil";
+        case SimdSynetUnaryOperation32fCos:
+            return "Cos";
         case SimdSynetUnaryOperation32fErf:
             return "Erf";
         case SimdSynetUnaryOperation32fExp:
@@ -57,6 +59,8 @@ namespace Test
             return "Rcp";
         case SimdSynetUnaryOperation32fRsqrt:
             return "Rsqrt";
+        case SimdSynetUnaryOperation32fSin:
+            return "Sin";
         case SimdSynetUnaryOperation32fSqrt:
             return "Sqrt";
         case SimdSynetUnaryOperation32fTanh:
