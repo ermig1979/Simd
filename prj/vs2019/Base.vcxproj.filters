@@ -576,6 +576,9 @@
     <ClInclude Include="..\..\src\Simd\SimdTrigonometric.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPoly.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Base">
