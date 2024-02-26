@@ -193,18 +193,61 @@ namespace Simd
 
         static std::string Execute(const char* cmd)
         {
-            std::string result = "";            
-            ::FILE * pipe = _popen(cmd, "r");
-            if (pipe)
+            // NOTE: Don't use _popen, it will display a console window
+            std::string result;
+
+            // Set up security attributes for the pipe
+            SECURITY_ATTRIBUTES saAttr;
+            saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+            saAttr.bInheritHandle = TRUE;
+            saAttr.lpSecurityDescriptor = NULL;
+
+            // Create a pipe for the child process's STDOUT
+            HANDLE hReadPipe = NULL;
+            HANDLE hWritePipe = NULL;
+            if (!CreatePipe(&hReadPipe, &hWritePipe, &saAttr, 0))
+                return "";
+            SetHandleInformation(hReadPipe, HANDLE_FLAG_INHERIT, 0);
+
+            // Set up members of the PROCESS_INFORMATION structure
+            PROCESS_INFORMATION piProcInfo;
+            ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+
+            // Set up the start-up information struct.
+            STARTUPINFOA siStartInfo;
+            ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+            siStartInfo.cb = sizeof(STARTUPINFO);
+            siStartInfo.hStdError = hWritePipe;
+            siStartInfo.hStdOutput = hWritePipe;
+            siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+            // Create the child process
+            BOOL bSuccess = CreateProcessA(NULL,
+                (LPSTR)cmd,          // command line
+                NULL,                // process security attributes
+                NULL,                // primary thread security attributes
+                TRUE,                // handles are inherited
+                CREATE_NO_WINDOW,    // creation flags, hide console window
+                NULL,                // use parent's environment
+                NULL,                // use parent's current directory
+                &siStartInfo,        // STARTUPINFO pointer
+                &piProcInfo);        // receives PROCESS_INFORMATION
+
+            // Close write end of pipe
+            CloseHandle(hWritePipe);
+
+            if (bSuccess)
             {
-                char buffer[260];
-                while (!feof(pipe))
-                {
-                    if (fgets(buffer, sizeof(buffer), pipe) != NULL)
-                        result += buffer;
-                }
-                _pclose(pipe);
+                // Read output from the child process's pipe for STDOUT
+                char buffer[4096];
+                DWORD dwRead = 0;
+                while (ReadFile(hReadPipe, buffer, sizeof(buffer), &dwRead, NULL) && dwRead > 0)
+                    result.append(buffer, dwRead);
+                CloseHandle(piProcInfo.hProcess);
+                CloseHandle(piProcInfo.hThread);
             }
+
+            CloseHandle(hReadPipe);
             return result;
         }
 
