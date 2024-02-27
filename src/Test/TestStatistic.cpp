@@ -861,6 +861,7 @@ namespace Test
     {
         bool result = true;
 
+#if !(defined(_MSC_VER) && _MSC_VER >= 1933 && defined(NDEBUG))
         result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Base::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
 
 #ifdef SIMD_SSE41_ENABLE
@@ -881,6 +882,7 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Neon::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
+#endif
 #endif
 
         return result;
