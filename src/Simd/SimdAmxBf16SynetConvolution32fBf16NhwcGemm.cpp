@@ -40,8 +40,68 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static void ConvertBf16NhwcGemm1x1(const float* src, const ConvParam32f& p, const SynetConvolution32fBf16NhwcGemm::AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        {
+            size_t srcC32 = AlignLo(p.srcC, 32);
+            __mmask16 srcMask[2];
+            __mmask32 dstMask[1];
+            if (srcC32 < p.srcC)
+            {
+                srcMask[0] = TailMask16(p.srcC - srcC32 - F * 0);
+                srcMask[1] = TailMask16(p.srcC - srcC32 - F * 1);
+                dstMask[0] = __mmask32(-1);
+            }
+            if (a.macroK < a.bufK)
+            {
+                //SIMD_PERF_BEG("reorder");
+                uint16_t* buf = dst + a.bufM * a.bufK;
+                size_t bodyK = AlignLoAny(a.bufK, a.macroK), tailK = a.bufK - bodyK;
+                for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
+                {
+                    for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
+                    {
+                        size_t sc = 0, mak = 0;
+                        for (; mak < bodyK; mak += a.macroK)
+                        {
+                            uint16_t* buf = dst + mak * a.bufM + dr * a.macroK;
+                            for (size_t scE = mak + a.macroK; sc < scE; sc += 32)
+                                Float32ToBFloat16<false, false>(src + sc, buf + sc - mak, srcMask, dstMask);
+                        }
+                        if(tailK)
+                        {
+                            uint16_t* buf = dst + mak * a.bufM + dr * tailK;
+                            for (; sc < srcC32; sc += 32)
+                                Float32ToBFloat16<false, false>(src + sc, buf + sc - mak, srcMask, dstMask);
+                            if (srcC32 < p.srcC)
+                                Float32ToBFloat16<false, true>(src + sc, buf + sc - mak, srcMask, dstMask);
+                        }
+                        src += p.srcC;
+                    }
+                }
+            }
+            else
+            {
+                //SIMD_PERF_BEG("direct");
+                for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
+                {
+                    for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
+                    {
+                        size_t sc = 0;
+                        for (; sc < srcC32; sc += 32)
+                            Float32ToBFloat16<false, false>(src + sc, dst + sc, srcMask, dstMask);
+                        if (srcC32 < p.srcC)
+                            Float32ToBFloat16<false, true>(src + sc, dst + sc, srcMask, dstMask);
+                        src += p.srcC;
+                        dst += a.bufK;
+                    }
+                }
+            }
+        }
+
         static void ConvertBf16NhwcGemm(const float* src, const ConvParam32f& p, const SynetConvolution32fBf16NhwcGemm::AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
+            //SIMD_PERF_FUNC();
+
             size_t srcC32 = AlignLo(p.srcC, 32);
             __mmask16 srcMask[2];
             __mmask32 dstMask[1];
@@ -53,6 +113,7 @@ namespace Simd
             }
             uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
+            __mmask32 gapMask = TailMask32(gap);
             for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
@@ -89,8 +150,11 @@ namespace Simd
                             row += p.kernelX * p.srcC;
                         }
                     }
-                    for (size_t g = 0; g < gap; ++g)
-                        *(row++) = 0;
+                    if (gap)
+                    {
+                        _mm512_mask_storeu_epi16(row, gapMask, _mm512_setzero_si512());
+                        row += gap;
+                    }
                     if (a.macroK < a.bufK)
                     {
                         for (size_t mak = 0; mak < a.bufK; mak += a.macroK)
@@ -383,12 +447,15 @@ namespace Simd
             size_t microM = 16 * 2;
             size_t microC = 16 * 2;
 #if !defined(SIMD_AMX_EMULATE)
-            if (p.srcC < 2 * microC)
+            if (p.srcC* p.kernelX * p.kernelY < 2 * microC)
                 return;
 #endif
             SetAlgParam(microD, microM, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
 #if !defined(SIMD_AMX_EMULATE)
-            _convert = ConvertBf16NhwcGemm;
+            if(p.Is1x1())
+                _convert = ConvertBf16NhwcGemm1x1;
+            else
+                _convert = ConvertBf16NhwcGemm;
 #endif
             switch (p.activation)
             {
