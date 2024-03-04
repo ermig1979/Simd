@@ -266,6 +266,11 @@ namespace Test
         return (&f)[-1].first.Average() > 0 ? (&f)[-1] : Previous((&f)[-1]);
     }
 
+    template <class T> const T& Previous(const T* d, size_t i)
+    {
+        return d[i - 1].first.Average() > 0 || i == 2 ? d[i - 1] : Previous(d, i - 1);
+    }
+
     static inline void AddToFunction(const PerformanceMeasurer & src, Function & dst, bool & enable)
     {
         const String & desc = src.Description();
@@ -328,14 +333,15 @@ namespace Test
 		for (size_t i = 0; i < enable.Size(); ++i)
 			if (enable[i])
 				table.SetHeader(col++, names[i].full, i == last, Table::Right);
-        if (enable[1])
+        for (size_t i = 2; i < enable.Size(); ++i)
+            if (enable[1] && enable[i])
+                table.SetHeader(col++, String(names[1].brief) + "/" + names[i].brief, i == last, Table::Right);
+        for (size_t i = 2, p = 1; i < enable.Size(); ++i)
         {
-            for (size_t i = 2; i < enable.Size(); ++i)
-                if (enable[i])
-                    table.SetHeader(col++, String(names[1].brief) + "/" + names[i].brief, i == last, Table::Right);
-            for (size_t i = 2, p = 1; i < enable.Size(); ++i)
-                if (enable[i])
-                    table.SetHeader(col++, names[p].brief + String("/") + names[i].brief, i == last, Table::Right), p = i;
+            if (enable[p] && enable[i])
+                table.SetHeader(col++, names[p].brief + String("/") + names[i].brief, i == last, Table::Right);
+            if (enable[i])
+                p = i;
         }
 		if (align)
 		{
@@ -353,14 +359,15 @@ namespace Test
         for (size_t i = 0; i < statistic.Size(); ++i)
             if (enable[i])
                 table.SetCell(col++, row, ToString(statistic[i].first.Average()*(timeMax < 0.001 ? 1000000.0 : 1000.0), V, false));
-        if (enable[1])
+        for (size_t i = 2; i < statistic.Size(); ++i)
+            if (enable[1] && enable[i])
+                table.SetCell(col++, row, ToString(Test::Relation(statistic[1].first, statistic[i].first), R, false));
+        for (size_t i = 2, p = 1; i < statistic.Size(); ++i)
         {
-            for (size_t i = 2; i < statistic.Size(); ++i)
-                if (enable[i])
-                    table.SetCell(col++, row, ToString(Test::Relation(statistic[1].first, statistic[i].first), R, false));
-            for (size_t i = 2; i < statistic.Size(); ++i)
-                if (enable[i])
-                    table.SetCell(col++, row, ToString(Test::Relation(Previous(statistic[i]).first, statistic[i].first), R, false));
+            if (enable[p] && enable[i])
+                table.SetCell(col++, row, ToString(Test::Relation(Previous(&statistic.simd, i).first, statistic[i].first), R, false));
+            if (enable[i])
+                p = i;
         }
         if (align)
         {
@@ -409,7 +416,7 @@ namespace Test
         for (size_t i = 0; i < enable.Size(); ++i)
             if (enable[i])
                 size++;
-        TablePtr table(new Table(size*(align ? 4 : 3) - 3, 1 + functions.size()));
+        TablePtr table(new Table(1 + size + (enable[1] ? size - 2 : 0) + (size > 2 ? size - 2: 0) + (align ? size : 0), 1 + functions.size()));
         AddHeader(*table, names, enable, align);
         size_t row = 0;
         table->SetRowProp(row, true, true);

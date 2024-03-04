@@ -692,6 +692,10 @@ namespace Test
                 {
                     checkCpp = FromString<bool>(arg.substr(4, arg.size() - 4));
                 }
+                else if (arg.find("-de=") == 0)
+                {
+                    DISABLED_EXTENSIONS = FromString<uint32_t>(arg.substr(4, arg.size() - 4));
+                }
                 else
                 {
                     TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
@@ -849,9 +853,11 @@ namespace Test
         std::cout << "    -lc=1         to litter CPU cache between test runs." << std::endl << std::endl;
         std::cout << "    -ri=city.jpg  a name of real image used in some tests." << std::endl << std::endl;
         std::cout << "                  The image have to be placed in ./data/image directory." << std::endl << std::endl;
-        std::cout << "    -tr=2         a number of test execution repeats." << std::endl;
-        std::cout << "    -ts=1         to print statistics of time of tests execution." << std::endl;
-        std::cout << "    -cc=1         to check c++ API." << std::endl;
+        std::cout << "    -tr=2         a number of test execution repeats." << std::endl << std::endl;
+        std::cout << "    -ts=1         to print statistics of time of tests execution." << std::endl << std::endl;
+        std::cout << "    -cc=1         to check c++ API." << std::endl << std::endl;
+        std::cout << "    -de=2         a flags of SIMD extensions which testing are disabled." << std::endl;
+        std::cout << "                  Base - 1, 2 - SSE4.1/NEON, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16." << std::endl << std::endl;
         return 0;
     }
 
@@ -875,6 +881,7 @@ namespace Test
 #endif
     double MINIMAL_TEST_EXECUTION_TIME = 0.1;
     int LITTER_CPU_CACHE = 0;
+    uint32_t DISABLED_EXTENSIONS = 0;
 
     void CheckCpp();
 }

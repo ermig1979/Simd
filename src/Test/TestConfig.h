@@ -24,7 +24,7 @@
 #ifndef __TestConfig_h__
 #define __TestConfig_h__
 
-#if defined(NDEBUG)
+#if defined(NDEBUG) || 1
 #define TEST_PERFORMANCE_TEST_ENABLE
 #endif
 
@@ -104,6 +104,8 @@ namespace Test
     extern int H;    
     extern int W;
 
+    extern uint32_t DISABLED_EXTENSIONS;
+
     extern String ROOT_PATH;
     extern String SOURCE;
     extern String OUTPUT;
@@ -119,6 +121,47 @@ namespace Test
         DifferenceAny,
         DifferenceLogical,
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    SIMD_INLINE bool TestBase()
+    {
+        return (DISABLED_EXTENSIONS & 0x000000001) == 0;
+    }
+
+    SIMD_INLINE bool TestSse41()
+    {
+        return (DISABLED_EXTENSIONS & 0x000000002) == 0;
+    }
+
+    SIMD_INLINE bool TestAvx2()
+    {
+        return (DISABLED_EXTENSIONS & 0x000000004) == 0;
+    }
+
+
+    SIMD_INLINE bool TestAvx512bw()
+    {
+        return (DISABLED_EXTENSIONS & 0x000000008) == 0;
+    }
+
+
+    SIMD_INLINE bool TestAvx512vnni()
+    {
+        return (DISABLED_EXTENSIONS & 0x000000010) == 0;
+    }
+
+
+    SIMD_INLINE bool TestAmxBf16()
+    {
+        return (DISABLED_EXTENSIONS & 0x000000020) == 0;
+    }
+
+
+    SIMD_INLINE bool TestNeon()
+    {
+        return (DISABLED_EXTENSIONS & 0x000000002) == 0;
+    }
 }
 
 #endif//__TestConfig_h__

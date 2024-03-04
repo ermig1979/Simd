@@ -363,30 +363,31 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Base::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
+        if (TestBase())
+            result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Base::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Sse41::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx2::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bw::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif
 
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
-        if (Simd::AmxBf16::Enable)
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::AmxBf16::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Neon::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif 
 

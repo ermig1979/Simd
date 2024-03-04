@@ -202,4 +202,5 @@ Also you can use parameters:
 * `-tr=2` a number of test execution repeats.
 * `-ts=1` to print statistics of time of tests execution.
 * `-cc=1` to check c++ API.
+* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16.
 

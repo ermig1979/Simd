@@ -151,4 +151,4 @@ namespace Simd
         }
     }
 }
-#endif//SIMD_PERFORMANCE_STATISTIC
+#endif
