@@ -126,7 +126,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && IntegralAutoTest(FUNC(Simd::Base::Integral), FUNC(SimdIntegral));
+        if (TestBase())
+            result = result && IntegralAutoTest(FUNC(Simd::Base::Integral), FUNC(SimdIntegral));
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)

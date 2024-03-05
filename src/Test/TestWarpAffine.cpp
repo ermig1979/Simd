@@ -229,7 +229,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WarpAffineAutoTest(FUNC_WA(Simd::Base::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
+        if (TestBase())
+            result = result && WarpAffineAutoTest(FUNC_WA(Simd::Base::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

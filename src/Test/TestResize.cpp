@@ -263,7 +263,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizerAutoTest(FUNC_RS(Simd::Base::ResizerInit), FUNC_RS(SimdResizerInit));
+        if (TestBase())
+            result = result && ResizerAutoTest(FUNC_RS(Simd::Base::ResizerInit), FUNC_RS(SimdResizerInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

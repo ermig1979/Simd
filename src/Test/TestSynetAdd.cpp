@@ -105,7 +105,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Base::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+        if (TestBase())
+            result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Base::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -237,7 +238,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Base::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
+        if (TestBase())
+            result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Base::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

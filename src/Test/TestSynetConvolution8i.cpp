@@ -277,7 +277,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Base::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+        if (TestBase())
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Base::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

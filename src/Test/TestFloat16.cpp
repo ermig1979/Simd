@@ -85,7 +85,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Base::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
+        if (TestBase())
+            result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Base::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -170,7 +171,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Float16ToFloat32AutoTest(FUNC_HS(Simd::Base::Float16ToFloat32), FUNC_HS(SimdFloat16ToFloat32));
+        if (TestBase())
+            result = result && Float16ToFloat32AutoTest(FUNC_HS(Simd::Base::Float16ToFloat32), FUNC_HS(SimdFloat16ToFloat32));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -262,7 +264,8 @@ namespace Test
 
         CheckPtr check = ::SimdSquaredDifferenceSum32f;
 
-        result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Base::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f), check);
+        if (TestBase())
+            result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Base::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f), check);
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
@@ -288,7 +291,8 @@ namespace Test
 
         CheckPtr check = ::SimdCosineDistance32f;
 
-        result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Base::CosineDistance16f), FUNC_S(SimdCosineDistance16f), check);
+        if (TestBase())
+            result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Base::CosineDistance16f), FUNC_S(SimdCosineDistance16f), check);
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
@@ -407,7 +411,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Base::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+        if (TestBase())
+            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Base::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
@@ -504,7 +509,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Base::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+        if (TestBase())
+            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Base::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
@@ -590,7 +596,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Base::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
+        if (TestBase())
+            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Base::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
@@ -677,7 +684,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Base::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
+        if (TestBase())
+            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Base::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)

@@ -93,7 +93,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && FillAutoTest(FUNC(Simd::Base::Fill), FUNC(SimdFill));
+        if (TestBase())
+            result = result && FillAutoTest(FUNC(Simd::Base::Fill), FUNC(SimdFill));
 
         return result;
     }
@@ -170,7 +171,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && FillFrameAutoTest(FUNC_F(Simd::Base::FillFrame), FUNC_F(SimdFillFrame));
+        if (TestBase())
+            result = result && FillFrameAutoTest(FUNC_F(Simd::Base::FillFrame), FUNC_F(SimdFillFrame));
 
         return result;
     }
@@ -236,7 +238,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Base::FillBgra), FUNC_BGRA(SimdFillBgra));
+        if (TestBase())
+            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Base::FillBgra), FUNC_BGRA(SimdFillBgra));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W >= Simd::Sse41::F)
@@ -321,7 +324,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && FillBgrAutoTest(FUNC_BGR(Simd::Base::FillBgr), FUNC_BGR(SimdFillBgr));
+        if (TestBase())
+            result = result && FillBgrAutoTest(FUNC_BGR(Simd::Base::FillBgr), FUNC_BGR(SimdFillBgr));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
@@ -412,7 +416,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && FillPixelAutoTest(FUNC_FP(Simd::Base::FillPixel), FUNC_FP(SimdFillPixel));
+        if (TestBase())
+            result = result && FillPixelAutoTest(FUNC_FP(Simd::Base::FillPixel), FUNC_FP(SimdFillPixel));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
@@ -494,7 +499,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Fill32fAutoTest(FUNC_32F(Simd::Base::Fill32f), FUNC_32F(SimdFill32f));
+        if (TestBase())
+            result = result && Fill32fAutoTest(FUNC_32F(Simd::Base::Fill32f), FUNC_32F(SimdFill32f));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

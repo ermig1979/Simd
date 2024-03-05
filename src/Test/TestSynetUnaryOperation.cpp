@@ -161,7 +161,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetUnaryOperation32fAutoTest(FUNC_UO(Simd::Base::SynetUnaryOperation32f), FUNC_UO(SimdSynetUnaryOperation32f));
+        if (TestBase())
+            result = result && SynetUnaryOperation32fAutoTest(FUNC_UO(Simd::Base::SynetUnaryOperation32f), FUNC_UO(SimdSynetUnaryOperation32f));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

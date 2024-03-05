@@ -168,7 +168,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Base::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
+        if (TestBase())
+            result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Base::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

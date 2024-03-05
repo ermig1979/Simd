@@ -102,7 +102,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Base::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
+        if (TestBase())
+            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Base::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

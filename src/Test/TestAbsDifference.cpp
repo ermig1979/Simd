@@ -89,7 +89,8 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AbsDifferenceAutoTest(FUNC1(Simd::Base::AbsDifference), FUNC1(SimdAbsDifference), 1);
+		if (TestBase())
+			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Base::AbsDifference), FUNC1(SimdAbsDifference), 1);
 
 #ifdef SIMD_SSE41_ENABLE
 		if (Simd::Sse41::Enable && W >= Simd::Sse41::A)

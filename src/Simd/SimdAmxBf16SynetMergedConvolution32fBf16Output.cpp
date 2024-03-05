@@ -74,20 +74,20 @@ namespace Simd
             }
             else
             {
-                _tile_loadd(0, dst + 0, strideD);
-                _tile_loadd(1, dst + F, strideD);
-                _tile_loadd(2, dst + 16 * dD + 0, strideD);
-                _tile_loadd(3, dst + 16 * dD + F, strideD);
+                _tile_stream_loadd(0, dst + 0, strideD);
+                _tile_stream_loadd(1, dst + F, strideD);
+                _tile_stream_loadd(2, dst + 16 * dD + 0, strideD);
+                _tile_stream_loadd(3, dst + 16 * dD + F, strideD);
             }
             size_t sc = 0;
             for (; sc < srcC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
                 _tile_loadd(7, weight1 + sc * 32, strideW);
                 _tile_dpbf16ps(1, 4, 7);
-                _tile_loadd(5, src1 + sc, strideS);
+                _tile_stream_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
                 _tile_dpbf16ps(3, 5, 7);
             }
@@ -134,16 +134,16 @@ namespace Simd
             }
             else
             {
-                _tile_loadd(0, dst + 0, strideD);
-                _tile_loadd(2, dst + 16 * dD + 0, strideD);
+                _tile_stream_loadd(0, dst + 0, strideD);
+                _tile_stream_loadd(2, dst + 16 * dD + 0, strideD);
             }
             size_t sc = 0;
             for (; sc < srcC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(5, src1 + sc, strideS);
+                _tile_stream_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
             }
             _tile_stored(0, dst + 0, strideD);
@@ -187,13 +187,13 @@ namespace Simd
             }
             else
             {
-                _tile_loadd(0, dst + 0, strideD);
-                _tile_loadd(1, dst + F, strideD);
+                _tile_stream_loadd(0, dst + 0, strideD);
+                _tile_stream_loadd(1, dst + F, strideD);
             }
             size_t sc = 0;
             for (; sc < srcC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
                 _tile_loadd(7, weight1 + sc * 32, strideW);
@@ -234,12 +234,12 @@ namespace Simd
             }
             else
             {
-                _tile_loadd(0, dst + 0, strideD);
+                _tile_stream_loadd(0, dst + 0, strideD);
             }
             size_t sc = 0;
             for (; sc < srcC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
             }

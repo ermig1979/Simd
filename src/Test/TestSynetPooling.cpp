@@ -167,7 +167,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Base::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
+        if (TestBase())
+            result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Base::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -295,7 +296,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetPoolingMax32fAutoTest(FUNC_PM32F(Simd::Base::SynetPoolingMax32f), FUNC_PM32F(SimdSynetPoolingMax32f));
+        if (TestBase())
+            result = result && SynetPoolingMax32fAutoTest(FUNC_PM32F(Simd::Base::SynetPoolingMax32f), FUNC_PM32F(SimdSynetPoolingMax32f));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -408,7 +410,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetPoolingMax8uAutoTest(FUNC_PM8U(Simd::Base::SynetPoolingMax8u), FUNC_PM8U(SimdSynetPoolingMax8u));
+        if (TestBase())
+            result = result && SynetPoolingMax8uAutoTest(FUNC_PM8U(Simd::Base::SynetPoolingMax8u), FUNC_PM8U(SimdSynetPoolingMax8u));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

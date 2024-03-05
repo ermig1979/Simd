@@ -214,7 +214,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Gemm32fNNAutoTest(FUNC_GEMM32F(Simd::Base::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+        if (TestBase())
+            result = result && Gemm32fNNAutoTest(FUNC_GEMM32F(Simd::Base::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -286,7 +287,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Base::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
+        if (TestBase())
+            result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Base::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

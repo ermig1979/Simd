@@ -98,7 +98,8 @@ namespace Test
 
         Size _1x3(3, 1), _1x4(4, 1);
 
-        result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Base::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
+        if (TestBase())
+            result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Base::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

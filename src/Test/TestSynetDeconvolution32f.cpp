@@ -174,7 +174,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Base::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
+        if (TestBase())
+            result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Base::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

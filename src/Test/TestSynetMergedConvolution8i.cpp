@@ -331,7 +331,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetMergedConvolution8iForwardAutoTest(EPS, FUNC_MC(Simd::Base::SynetMergedConvolution8iInit), FUNC_MC(SimdSynetMergedConvolution8iInit));
+        if (TestBase())
+            result = result && SynetMergedConvolution8iForwardAutoTest(EPS, FUNC_MC(Simd::Base::SynetMergedConvolution8iInit), FUNC_MC(SimdSynetMergedConvolution8iInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

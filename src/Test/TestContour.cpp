@@ -88,7 +88,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Base::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
+        if (TestBase())
+            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Base::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W > Simd::Sse41::A)
@@ -173,7 +174,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Base::ContourAnchors), FUNC_A(SimdContourAnchors));
+        if (TestBase())
+            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Base::ContourAnchors), FUNC_A(SimdContourAnchors));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W > Simd::Sse41::A)

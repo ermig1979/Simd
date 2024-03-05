@@ -90,7 +90,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32), FUNC(SimdCrc32));
+        if (TestBase())
+            result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32), FUNC(SimdCrc32));
 
         return result;
     }
@@ -99,7 +100,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32c), FUNC(SimdCrc32c));
+        if (TestBase())
+            result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32c), FUNC(SimdCrc32c));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

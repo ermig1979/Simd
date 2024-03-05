@@ -85,7 +85,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Base::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
+        if (TestBase())
+            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Base::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -175,7 +176,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Base::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
+        if (TestBase())
+            result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Base::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

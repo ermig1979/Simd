@@ -146,7 +146,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+        if (TestBase())
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -175,7 +176,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
+        if (TestBase())
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -204,7 +206,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
+        if (TestBase())
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 2 >= Simd::Sse41::A)
@@ -233,7 +236,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
+        if (TestBase())
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -262,7 +266,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
+        if (TestBase())
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 2 >= Simd::Sse41::A)
@@ -291,7 +296,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
+        if (TestBase())
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -375,7 +381,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -404,7 +411,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::LbpEstimate), FUNC_G(SimdLbpEstimate));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::LbpEstimate), FUNC_G(SimdLbpEstimate));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 2 >= Simd::Sse41::A)
@@ -433,7 +441,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::NormalizeHistogram), FUNC_G(SimdNormalizeHistogram));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::NormalizeHistogram), FUNC_G(SimdNormalizeHistogram));
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && W >= Simd::Avx512bw::A)
@@ -447,7 +456,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDx), FUNC_G(SimdSobelDx));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDx), FUNC_G(SimdSobelDx));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -476,7 +486,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -505,7 +516,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDy), FUNC_G(SimdSobelDy));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDy), FUNC_G(SimdSobelDy));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -534,7 +546,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -563,7 +576,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::ContourMetrics), FUNC_G(SimdContourMetrics));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::ContourMetrics), FUNC_G(SimdContourMetrics));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -592,7 +606,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::Laplace), FUNC_G(SimdLaplace));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::Laplace), FUNC_G(SimdLaplace));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -621,7 +636,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+        if (TestBase())
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
@@ -746,7 +762,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Base::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+        if (TestBase())
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Base::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -909,7 +926,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Base::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+        if (TestBase())
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Base::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

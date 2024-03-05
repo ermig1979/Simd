@@ -74,12 +74,12 @@ namespace Simd
             size_t sc = 0;
             for (; sc < sC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
                 _tile_loadd(7, weight1 + sc * 32, strideW);
                 _tile_dpbf16ps(1, 4, 7);
-                _tile_loadd(5, src1 + sc, strideS);
+                _tile_stream_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
                 _tile_dpbf16ps(3, 5, 7);
             }
@@ -122,10 +122,10 @@ namespace Simd
             size_t sc = 0;
             for (; sc < sC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(5, src1 + sc, strideS);
+                _tile_stream_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
             }
             _tile_stored(0, dst0, strideD);
@@ -163,7 +163,7 @@ namespace Simd
             size_t sc = 0;
             for (; sc < sC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
                 _tile_loadd(7, weight1 + sc * 32, strideW);
@@ -200,7 +200,7 @@ namespace Simd
             size_t sc = 0;
             for (; sc < sC; sc += 32)
             {
-                _tile_loadd(4, src0 + sc, strideS);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
             }

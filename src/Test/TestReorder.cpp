@@ -84,7 +84,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder16bit), FUNC(SimdReorder16bit), 2);
+        if (TestBase())
+            result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder16bit), FUNC(SimdReorder16bit), 2);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -113,7 +114,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder32bit), FUNC(SimdReorder32bit), 4);
+        if (TestBase())
+            result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder32bit), FUNC(SimdReorder32bit), 4);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -142,7 +144,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder64bit), FUNC(SimdReorder64bit), 8);
+        if (TestBase())
+            result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder64bit), FUNC(SimdReorder64bit), 8);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

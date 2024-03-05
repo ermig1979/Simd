@@ -189,7 +189,8 @@ namespace Test
         const float EPS = 0.001f;
         bool result = true;
 
-        result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Base::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
+        if (TestBase())
+            result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Base::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -284,7 +285,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Base::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
+        if (TestBase())
+            result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Base::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

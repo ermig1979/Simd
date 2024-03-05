@@ -94,7 +94,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Base64DecodeAutoTest(FUNC_D(Simd::Base::Base64Decode), FUNC_D(SimdBase64Decode));
+        if (TestBase())
+            result = result && Base64DecodeAutoTest(FUNC_D(Simd::Base::Base64Decode), FUNC_D(SimdBase64Decode));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -181,7 +182,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Base64EncodeAutoTest(FUNC_E(Simd::Base::Base64Encode), FUNC_E(SimdBase64Encode));
+        if (TestBase())
+            result = result && Base64EncodeAutoTest(FUNC_E(Simd::Base::Base64Encode), FUNC_E(SimdBase64Encode));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

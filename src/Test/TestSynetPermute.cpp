@@ -134,7 +134,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Base::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
+        if (TestBase())
+            result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Base::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

@@ -96,7 +96,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToAnyAutoTest(1, 1, View::Hsl24, FUNC(Simd::Base::Yuv444pToHsl), FUNC(SimdYuv444pToHsl));
+        if (TestBase())
+            result = result && YuvToAnyAutoTest(1, 1, View::Hsl24, FUNC(Simd::Base::Yuv444pToHsl), FUNC(SimdYuv444pToHsl));
 
         return result;
     }
@@ -105,7 +106,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToAnyAutoTest(1, 1, View::Hsv24, FUNC(Simd::Base::Yuv444pToHsv), FUNC(SimdYuv444pToHsv));
+        if (TestBase())
+            result = result && YuvToAnyAutoTest(1, 1, View::Hsv24, FUNC(Simd::Base::Yuv444pToHsv), FUNC(SimdYuv444pToHsv));
 
         return result;
     }
@@ -120,7 +122,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), MAX_DIFFERECE);
+        if (TestBase())
+            result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), MAX_DIFFERECE);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -149,7 +152,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), MAX_DIFFERECE);
+        if (TestBase())
+            result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), MAX_DIFFERECE);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -178,7 +182,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Base::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
+        if (TestBase())
+            result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Base::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -270,7 +275,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv420pToBgrV2), FUNC_YUV2(SimdYuv420pToBgrV2), 2, 2);
+        if (TestBase())
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv420pToBgrV2), FUNC_YUV2(SimdYuv420pToBgrV2), 2, 2);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -299,7 +305,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv422pToBgrV2), FUNC_YUV2(SimdYuv422pToBgrV2), 2, 1);
+        if (TestBase())
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv422pToBgrV2), FUNC_YUV2(SimdYuv422pToBgrV2), 2, 1);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -328,7 +335,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv444pToBgrV2), FUNC_YUV2(SimdYuv444pToBgrV2), 1, 1);
+        if (TestBase())
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv444pToBgrV2), FUNC_YUV2(SimdYuv444pToBgrV2), 1, 1);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -357,7 +365,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv420pToRgbV2), FUNC_YUV2(SimdYuv420pToRgbV2), 2, 2);
+        if (TestBase())
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv420pToRgbV2), FUNC_YUV2(SimdYuv420pToRgbV2), 2, 2);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -386,7 +395,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv422pToRgbV2), FUNC_YUV2(SimdYuv422pToRgbV2), 2, 1);
+        if (TestBase())
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv422pToRgbV2), FUNC_YUV2(SimdYuv422pToRgbV2), 2, 1);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -415,7 +425,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv444pToRgbV2), FUNC_YUV2(SimdYuv444pToRgbV2), 1, 1);
+        if (TestBase())
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Base::Yuv444pToRgbV2), FUNC_YUV2(SimdYuv444pToRgbV2), 1, 1);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

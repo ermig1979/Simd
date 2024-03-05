@@ -116,7 +116,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Base::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
+        if (TestBase())
+            result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Base::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -200,7 +201,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Base::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
+        if (TestBase())
+            result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Base::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -307,7 +309,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Base::SynetSetInput), FUNC_SI(SimdSynetSetInput));
+        if (TestBase())
+            result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Base::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

@@ -88,7 +88,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && StretchGrayAutoTest(FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
+        if (TestBase())
+            result = result && StretchGrayAutoTest(FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

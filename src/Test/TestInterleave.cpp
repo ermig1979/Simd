@@ -86,7 +86,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && InterleaveUvAutoTest(FUNC2(Simd::Base::InterleaveUv), FUNC2(SimdInterleaveUv));
+        if (TestBase())
+            result = result && InterleaveUvAutoTest(FUNC2(Simd::Base::InterleaveUv), FUNC2(SimdInterleaveUv));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -172,7 +173,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && InterleaveBgrAutoTest(FUNC3(Simd::Base::InterleaveBgr), FUNC3(SimdInterleaveBgr));
+        if (TestBase())
+            result = result && InterleaveBgrAutoTest(FUNC3(Simd::Base::InterleaveBgr), FUNC3(SimdInterleaveBgr));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -260,7 +262,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && InterleaveBgraAutoTest(FUNC4(Simd::Base::InterleaveBgra), FUNC4(SimdInterleaveBgra));
+        if (TestBase())
+            result = result && InterleaveBgraAutoTest(FUNC4(Simd::Base::InterleaveBgra), FUNC4(SimdInterleaveBgra));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

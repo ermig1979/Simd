@@ -111,7 +111,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ShiftBilinearAutoTest(FUNC(Simd::Base::ShiftBilinear), FUNC(SimdShiftBilinear));
+        if (TestBase())
+            result = result && ShiftBilinearAutoTest(FUNC(Simd::Base::ShiftBilinear), FUNC(SimdShiftBilinear));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
