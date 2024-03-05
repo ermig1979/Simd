@@ -2574,6 +2574,11 @@ SIMD_API void SimdNormalizedColors(const uint32_t * histogram, uint8_t * colors)
 SIMD_API void SimdChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride)
 {
     SIMD_EMPTY();
+#ifdef SIMD_AMXBF16_ENABLE
+    if (AmxBf16::Enable)
+        AmxBf16::ChangeColors(src, srcStride, width, height, colors, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable && width >= Avx512bw::HA)
         Avx512bw::ChangeColors(src, srcStride, width, height, colors, dst, dstStride);
@@ -2585,6 +2590,11 @@ SIMD_API void SimdChangeColors(const uint8_t * src, size_t srcStride, size_t wid
 SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
     SIMD_EMPTY();
+#ifdef SIMD_AMXBF16_ENABLE
+    if (AmxBf16::Enable)
+        AmxBf16::NormalizeHistogram(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable && width >= Avx512bw::HA)
         Avx512bw::NormalizeHistogram(src, srcStride, width, height, dst, dstStride);

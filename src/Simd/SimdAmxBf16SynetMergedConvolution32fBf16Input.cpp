@@ -41,7 +41,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> void InputConvolution1x1_2x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_2x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float *dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
@@ -74,12 +74,18 @@ namespace Simd
             size_t sc = 0;
             for (; sc < sC; sc += 32)
             {
-                _tile_stream_loadd(4, src0 + sc, strideS);
+                if(srcStream)
+                    _tile_stream_loadd(4, src0 + sc, strideS);
+                else
+                    _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
                 _tile_loadd(7, weight1 + sc * 32, strideW);
                 _tile_dpbf16ps(1, 4, 7);
-                _tile_stream_loadd(5, src1 + sc, strideS);
+                if (srcStream)
+                    _tile_stream_loadd(5, src1 + sc, strideS);
+                else
+                    _tile_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
                 _tile_dpbf16ps(3, 5, 7);
             }
@@ -97,7 +103,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void InputConvolution1x1_2x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_2x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
@@ -122,10 +128,16 @@ namespace Simd
             size_t sc = 0;
             for (; sc < sC; sc += 32)
             {
-                _tile_stream_loadd(4, src0 + sc, strideS);
+                if (srcStream)
+                    _tile_stream_loadd(4, src0 + sc, strideS);
+                else
+                    _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
-                _tile_stream_loadd(5, src1 + sc, strideS);
+                if (srcStream)
+                    _tile_stream_loadd(5, src1 + sc, strideS);
+                else
+                    _tile_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
             }
             _tile_stored(0, dst0, strideD);
@@ -138,7 +150,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void InputConvolution1x1_1x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_1x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
@@ -163,7 +175,10 @@ namespace Simd
             size_t sc = 0;
             for (; sc < sC; sc += 32)
             {
-                _tile_stream_loadd(4, src0 + sc, strideS);
+                if (srcStream)
+                    _tile_stream_loadd(4, src0 + sc, strideS);
+                else
+                    _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
                 _tile_loadd(7, weight1 + sc * 32, strideW);
@@ -181,7 +196,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void InputConvolution1x1_1x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_1x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
@@ -200,7 +215,10 @@ namespace Simd
             size_t sc = 0;
             for (; sc < sC; sc += 32)
             {
-                _tile_stream_loadd(4, src0 + sc, strideS);
+                if (srcStream)
+                    _tile_stream_loadd(4, src0 + sc, strideS);
+                else
+                    _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
             }
@@ -216,7 +234,7 @@ namespace Simd
         typedef void (*InputConvolution1x1Ptr)(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1);
 
-        template<SimdConvolutionActivationType type> void InputConvolution1x1_2(const uint16_t* src, const ConvParam32f& p,
+        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_2(const uint16_t* src, const ConvParam32f& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             size_t dstM = a.bufH[1] - 1, dstS = a.bufH[1] * p.dstW * F, srcM = a.bufH[0] - 1, srcC = AlignHi(p.srcC, a.miK);
@@ -226,12 +244,12 @@ namespace Simd
             size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, a.bufH[1])), n = 32;
             size_t i1 = (yInt - yBeg) * p.dstW, in = AlignLoAny(i1, n), i = i1 - in;
             size_t e1 = (yEnd - yInt) * p.dstW, en = AlignLoAny(e1, n), e = e1 - en;
-            InputConvolution1x1Ptr conv_2x2 = InputConvolution1x1_2x2<type>;
-            InputConvolution1x1Ptr conv_2x1 = InputConvolution1x1_2x1<type>;
-            InputConvolution1x1Ptr conv_Ix2 = i > 16 ? InputConvolution1x1_2x2<type> : InputConvolution1x1_1x2<type>;
-            InputConvolution1x1Ptr conv_Ix1 = i > 16 ? InputConvolution1x1_2x1<type> : InputConvolution1x1_1x1<type>;
-            InputConvolution1x1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2<type> : InputConvolution1x1_1x2<type>;
-            InputConvolution1x1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1<type> : InputConvolution1x1_1x1<type>;
+            InputConvolution1x1Ptr conv_2x2 = InputConvolution1x1_2x2<type, srcStream>;
+            InputConvolution1x1Ptr conv_2x1 = InputConvolution1x1_2x1<type, srcStream>;
+            InputConvolution1x1Ptr conv_Ix2 = i > 16 ? InputConvolution1x1_2x2<type, srcStream> : InputConvolution1x1_1x2<type, srcStream>;
+            InputConvolution1x1Ptr conv_Ix1 = i > 16 ? InputConvolution1x1_2x1<type, srcStream> : InputConvolution1x1_1x1<type, srcStream>;
+            InputConvolution1x1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2<type, srcStream> : InputConvolution1x1_1x2<type, srcStream>;
+            InputConvolution1x1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1<type, srcStream> : InputConvolution1x1_1x1<type, srcStream>;
             for (size_t dc = 0; dc < maC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, maC - dc);
@@ -294,7 +312,7 @@ namespace Simd
         template<SimdConvolutionActivationType type> static void SetInput(const ConvParam32f& p, InputPtr& input)
         {
             if (Is1x1(p))
-                input = InputConvolution1x1_2<type>;
+                input = InputConvolution1x1_2<type, true>;
             else
                 assert(0);
         }

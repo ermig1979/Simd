@@ -56,6 +56,7 @@ namespace Simd
                 Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_VL);
 #else
             return
+                Base::CheckBit(7, 0, Cpuid::Ecx, Cpuid::AVX512_VBMI) &&
                 Base::CheckBit(7, 1, Cpuid::Eax, Cpuid::AVX512_BF16) &&
                 Base::CheckBit(7, 0, Cpuid::Edx, Cpuid::AMX_TILE) &&
                 Base::CheckBit(7, 0, Cpuid::Edx, Cpuid::AMX_INT8) &&

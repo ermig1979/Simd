@@ -40,6 +40,7 @@ namespace Simd
         void TileLoadConfig(const TileConf* tileConf)
         {
             memcpy(&g_tileConf, tileConf, sizeof(TileConf));
+            memset(g_tileRegs, 0, sizeof(TileReg) * TileRegCount);
         }
 
         //-----------------------------------------------------------------------------------------

@@ -301,7 +301,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, c, d2));
 
-        result = result && Compare(d1, d2, 0, true, 32);
+        result = result && Compare(d1, d2, 0, true, 64);
 
         return result;
     }
@@ -327,6 +327,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw() && W >= Simd::Avx512bw::HA)
             result = result && ChangeColorsAutoTest(FUNC_CC(Simd::Avx512bw::ChangeColors), FUNC_CC(SimdChangeColors));
 #endif 
+
+#ifdef SIMD_AMXBF16_ENABLE
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
+            result = result && ChangeColorsAutoTest(FUNC_CC(Simd::AmxBf16::ChangeColors), FUNC_CC(SimdChangeColors));
+#endif
 
         return result;
     }
