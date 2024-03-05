@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -233,22 +233,22 @@ namespace Test
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Base::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Sse41::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Avx2::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Avx512bw::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 #endif
 
 //#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
+//        if (Simd::Neon::Enable && TestNeon())
 //            result = result && ResizerAutoTest(FUNC_RS(Simd::Neon::ResizerInit), FUNC_RS(SimdResizerInit));
 //#endif 
 

@@ -124,22 +124,22 @@ namespace Test
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Base::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Sse41::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Avx2::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Avx512bw::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Neon::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif 
 
@@ -316,17 +316,17 @@ namespace Test
             result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Base::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Sse41::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Avx2::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Avx512bw::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 #endif
 

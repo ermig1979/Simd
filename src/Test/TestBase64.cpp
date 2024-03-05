@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -98,22 +98,22 @@ namespace Test
             result = result && Base64DecodeAutoTest(FUNC_D(Simd::Base::Base64Decode), FUNC_D(SimdBase64Decode));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && Base64DecodeAutoTest(FUNC_D(Simd::Sse41::Base64Decode), FUNC_D(SimdBase64Decode));
 #endif  
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && Base64DecodeAutoTest(FUNC_D(Simd::Avx2::Base64Decode), FUNC_D(SimdBase64Decode));
 #endif  
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && Base64DecodeAutoTest(FUNC_D(Simd::Avx512bw::Base64Decode), FUNC_D(SimdBase64Decode));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && Base64DecodeAutoTest(FUNC_D(Simd::Neon::Base64Decode), FUNC_D(SimdBase64Decode));
 #endif 
 
@@ -186,22 +186,22 @@ namespace Test
             result = result && Base64EncodeAutoTest(FUNC_E(Simd::Base::Base64Encode), FUNC_E(SimdBase64Encode));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && Base64EncodeAutoTest(FUNC_E(Simd::Sse41::Base64Encode), FUNC_E(SimdBase64Encode));
 #endif  
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && Base64EncodeAutoTest(FUNC_E(Simd::Avx2::Base64Encode), FUNC_E(SimdBase64Encode));
 #endif  
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && Base64EncodeAutoTest(FUNC_E(Simd::Avx512bw::Base64Encode), FUNC_E(SimdBase64Encode));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && Base64EncodeAutoTest(FUNC_E(Simd::Neon::Base64Encode), FUNC_E(SimdBase64Encode));
 #endif 
         

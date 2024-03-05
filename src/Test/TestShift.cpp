@@ -115,22 +115,22 @@ namespace Test
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Base::ShiftBilinear), FUNC(SimdShiftBilinear));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Sse41::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Avx2::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Avx512bw::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Neon::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 

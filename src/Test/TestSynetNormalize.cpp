@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -123,17 +123,17 @@ namespace Test
             result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Base::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Sse41::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Avx2::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Avx512bw::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
 #endif 
 
@@ -224,17 +224,17 @@ namespace Test
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Base::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sse41::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx2::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx512bw::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
 #endif 
 
@@ -249,17 +249,17 @@ namespace Test
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Base::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sse41::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx2::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx512bw::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
 #endif 
 
@@ -275,17 +275,17 @@ namespace Test
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Base::SynetNormalizeLayerForwardV4), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV4));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sse41::SynetNormalizeLayerForwardV4), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV4));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx2::SynetNormalizeLayerForwardV4), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV4));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx512bw::SynetNormalizeLayerForwardV4), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV4));
 #endif 
 

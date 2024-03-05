@@ -88,22 +88,22 @@ namespace Test
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Avx2::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Avx512bw::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Neon::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
@@ -171,22 +171,22 @@ namespace Test
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Base::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Sse41::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Avx2::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Avx512bw::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Neon::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
@@ -254,22 +254,22 @@ namespace Test
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Base::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Sse41::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Avx2::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Avx512bw::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Neon::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
@@ -345,22 +345,22 @@ namespace Test
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Base::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Sse41::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Avx2::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Avx512bw::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Neon::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 

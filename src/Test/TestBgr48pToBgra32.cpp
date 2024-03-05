@@ -93,22 +93,22 @@ namespace Test
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Base::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::HA)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::HA)
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Sse41::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::HA)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::HA)
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Avx2::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Avx512bw::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::HA)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::HA)
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Neon::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif
 

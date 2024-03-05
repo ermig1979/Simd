@@ -109,22 +109,22 @@ namespace Test
             result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Base::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Sse41::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Avx2::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Avx512bw::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Neon::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif
 
@@ -242,17 +242,17 @@ namespace Test
             result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Base::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Sse41::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Avx2::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Avx512bw::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
 #endif
 

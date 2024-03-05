@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -104,7 +104,7 @@ namespace Test
             result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32c), FUNC(SimdCrc32c));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && Crc32AutoTest(FUNC(Simd::Sse41::Crc32c), FUNC(SimdCrc32c));
 #endif 
 

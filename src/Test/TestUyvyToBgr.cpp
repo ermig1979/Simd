@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar,
+* Copyright (c) 2011-2024 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -90,22 +90,22 @@ namespace Test
             result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Base::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::DA)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::DA)
             result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Sse41::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::DA)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::DA)
             result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Avx2::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Avx512bw::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::DA)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::DA)
             result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Neon::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
 #endif 
 

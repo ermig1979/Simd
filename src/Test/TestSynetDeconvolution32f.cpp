@@ -178,22 +178,22 @@ namespace Test
             result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Base::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Sse41::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx2::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx512bw::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Neon::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 #endif
 

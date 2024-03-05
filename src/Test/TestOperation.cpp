@@ -183,22 +183,22 @@ namespace Test
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Base::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Sse41::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Avx2::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Avx512bw::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Neon::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
@@ -250,22 +250,22 @@ namespace Test
             result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Base::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Sse41::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Avx2::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Avx512bw::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Neon::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 #endif
 
@@ -313,22 +313,22 @@ namespace Test
             result = result && VectorProductAutoTest(ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && VectorProductAutoTest(ARGS_VP(Simd::Sse41::VectorProduct), ARGS_VP(SimdVectorProduct));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && VectorProductAutoTest(ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(SimdVectorProduct));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && VectorProductAutoTest(ARGS_VP(Simd::Avx512bw::VectorProduct), ARGS_VP(SimdVectorProduct));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && VectorProductAutoTest(ARGS_VP(Simd::Neon::VectorProduct), ARGS_VP(SimdVectorProduct));
 #endif 
 

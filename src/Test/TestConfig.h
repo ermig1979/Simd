@@ -24,7 +24,7 @@
 #ifndef __TestConfig_h__
 #define __TestConfig_h__
 
-#if defined(NDEBUG) || 1
+#if defined(NDEBUG)
 #define TEST_PERFORMANCE_TEST_ENABLE
 #endif
 

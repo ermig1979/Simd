@@ -242,22 +242,22 @@ namespace Test
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Base::FillBgra), FUNC_BGRA(SimdFillBgra));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::F)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::F)
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Sse41::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::F)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::F)
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Avx2::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Avx512bw::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::F)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::F)
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Neon::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif 
 
@@ -328,22 +328,22 @@ namespace Test
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Base::FillBgr), FUNC_BGR(SimdFillBgr));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Sse41::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Avx2::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Avx512bw::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Neon::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
@@ -420,22 +420,22 @@ namespace Test
             result = result && FillPixelAutoTest(FUNC_FP(Simd::Base::FillPixel), FUNC_FP(SimdFillPixel));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && FillPixelAutoTest(FUNC_FP(Simd::Sse41::FillPixel), FUNC_FP(SimdFillPixel));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && FillPixelAutoTest(FUNC_FP(Simd::Avx2::FillPixel), FUNC_FP(SimdFillPixel));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && FillPixelAutoTest(FUNC_FP(Simd::Avx512bw::FillPixel), FUNC_FP(SimdFillPixel));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && FillPixelAutoTest(FUNC_FP(Simd::Neon::FillPixel), FUNC_FP(SimdFillPixel));
 #endif 
 
@@ -503,22 +503,22 @@ namespace Test
             result = result && Fill32fAutoTest(FUNC_32F(Simd::Base::Fill32f), FUNC_32F(SimdFill32f));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && Fill32fAutoTest(FUNC_32F(Simd::Sse41::Fill32f), FUNC_32F(SimdFill32f));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx2::Fill32f), FUNC_32F(SimdFill32f));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx512bw::Fill32f), FUNC_32F(SimdFill32f));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && Fill32fAutoTest(FUNC_32F(Simd::Neon::Fill32f), FUNC_32F(SimdFill32f));
 #endif 
 

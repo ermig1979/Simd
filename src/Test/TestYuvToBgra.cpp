@@ -98,22 +98,22 @@ namespace Test
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Base::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Sse41::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx2::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx512bw::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Neon::Yuva420pToBgraV2), FUNC_YUVA2(SimdYuva420pToBgraV2), 2, 2);
 #endif 
 
@@ -128,22 +128,22 @@ namespace Test
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Base::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Sse41::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx2::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx512bw::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Neon::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
 #endif 
 
@@ -158,22 +158,22 @@ namespace Test
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Base::Yuva444pToBgraV2), FUNC_YUVA2(SimdYuva444pToBgraV2), 1, 1);
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Sse41::Yuva444pToBgraV2), FUNC_YUVA2(SimdYuva444pToBgraV2), 1, 1);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx2::Yuva444pToBgraV2), FUNC_YUVA2(SimdYuva444pToBgraV2), 1, 1);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Avx512bw::Yuva444pToBgraV2), FUNC_YUVA2(SimdYuva444pToBgraV2), 1, 1);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Neon::Yuva444pToBgraV2), FUNC_YUVA2(SimdYuva444pToBgraV2), 1, 1);
 #endif 
 
@@ -252,22 +252,22 @@ namespace Test
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Base::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Sse41::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx2::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Neon::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
 #endif 
 
@@ -282,22 +282,22 @@ namespace Test
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Base::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Sse41::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx2::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Neon::Yuv422pToBgraV2), FUNC_YUV2(SimdYuv422pToBgraV2), 2, 1);
 #endif 
 
@@ -312,22 +312,22 @@ namespace Test
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Base::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Sse41::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx2::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Neon::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
 #endif 
 

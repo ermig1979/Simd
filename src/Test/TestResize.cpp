@@ -267,22 +267,22 @@ namespace Test
             result = result && ResizerAutoTest(FUNC_RS(Simd::Base::ResizerInit), FUNC_RS(SimdResizerInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && ResizerAutoTest(FUNC_RS(Simd::Sse41::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && ResizerAutoTest(FUNC_RS(Simd::Avx2::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && ResizerAutoTest(FUNC_RS(Simd::Avx512bw::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && ResizerAutoTest(FUNC_RS(Simd::Neon::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif 
 

@@ -92,22 +92,22 @@ namespace Test
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Base::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A + 2)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse41::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A + 2)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Avx2::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && W >= Simd::Avx512bw::HA + 2)
+        if (Simd::Avx512bw::Enable && TestAvx512bw() && W >= Simd::Avx512bw::HA + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Avx512bw::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A + 2)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Neon::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif
 
@@ -177,22 +177,22 @@ namespace Test
             result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Base::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A + 2)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A + 2)
             result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Sse41::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::HA + 2)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::HA + 2)
             result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Avx2::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && W >= Simd::Avx512bw::HA + 2)
+        if (Simd::Avx512bw::Enable && TestAvx512bw() && W >= Simd::Avx512bw::HA + 2)
             result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Avx512bw::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A + 2)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A + 2)
             result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Neon::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 #endif 
 
@@ -270,22 +270,22 @@ namespace Test
             result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Base::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Sse41::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Avx2::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Avx512bw::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Neon::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 #endif 
 
@@ -369,22 +369,22 @@ namespace Test
             result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Base::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Sse41::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Avx2::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Avx512bw::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Neon::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 #endif 
 

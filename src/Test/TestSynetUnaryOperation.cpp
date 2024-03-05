@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -165,22 +165,22 @@ namespace Test
             result = result && SynetUnaryOperation32fAutoTest(FUNC_UO(Simd::Base::SynetUnaryOperation32f), FUNC_UO(SimdSynetUnaryOperation32f));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetUnaryOperation32fAutoTest(FUNC_UO(Simd::Sse41::SynetUnaryOperation32f), FUNC_UO(SimdSynetUnaryOperation32f));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetUnaryOperation32fAutoTest(FUNC_UO(Simd::Avx2::SynetUnaryOperation32f), FUNC_UO(SimdSynetUnaryOperation32f));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetUnaryOperation32fAutoTest(FUNC_UO(Simd::Avx512bw::SynetUnaryOperation32f), FUNC_UO(SimdSynetUnaryOperation32f));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && SynetUnaryOperation32fAutoTest(FUNC_UO(Simd::Neon::SynetUnaryOperation32f), FUNC_UO(SimdSynetUnaryOperation32f));
 #endif 
 

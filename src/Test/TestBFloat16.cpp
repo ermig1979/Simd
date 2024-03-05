@@ -89,27 +89,27 @@ namespace Test
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Base::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Sse41::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx2::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx512bw::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
 
 #if defined(SIMD_AMXBF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
-        if (Simd::AmxBf16::Enable)
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::AmxBf16::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Neon::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
 
@@ -180,22 +180,22 @@ namespace Test
             result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Base::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Sse41::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Avx2::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Avx512bw::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && TestNeon())
             result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Neon::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
 #endif
 

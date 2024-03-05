@@ -172,12 +172,12 @@ namespace Test
             result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Base::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && TestSse41())
             result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Sse41::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && TestAvx2())
             result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Avx2::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
 #endif 
 

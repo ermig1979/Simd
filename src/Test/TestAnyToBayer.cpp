@@ -90,17 +90,17 @@ namespace Test
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Base::BgrToBayer), FUNC(SimdBgrToBayer));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Sse41::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Avx512bw::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Neon::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif
 
@@ -115,17 +115,17 @@ namespace Test
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Base::BgraToBayer), FUNC(SimdBgraToBayer));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Sse41::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Avx512bw::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Neon::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif
 

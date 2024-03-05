@@ -444,22 +444,22 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sse41::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx512bw::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 #endif 
 
@@ -474,22 +474,22 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sse41::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx512bw::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
 #endif
         return result;
@@ -503,22 +503,22 @@ namespace Test
             result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Base::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Sse41::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Avx2::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Avx512bw::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Neon::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 #endif 
 
@@ -533,22 +533,22 @@ namespace Test
             result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Base::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Sse41::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Avx2::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Avx512bw::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Neon::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 #endif
         return result;
@@ -562,22 +562,22 @@ namespace Test
             result = result && BackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Base::BackgroundAdjustRangeMasked), FUNC4(SimdBackgroundAdjustRangeMasked));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && BackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Sse41::BackgroundAdjustRangeMasked), FUNC4(SimdBackgroundAdjustRangeMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && BackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Avx2::BackgroundAdjustRangeMasked), FUNC4(SimdBackgroundAdjustRangeMasked));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && BackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Avx512bw::BackgroundAdjustRangeMasked), FUNC4(SimdBackgroundAdjustRangeMasked));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && BackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Neon::BackgroundAdjustRangeMasked), FUNC4(SimdBackgroundAdjustRangeMasked));
 #endif 
 
@@ -592,22 +592,22 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Base::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sse41::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx512bw::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 #endif 
 
@@ -622,22 +622,22 @@ namespace Test
             result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Base::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Sse41::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Avx2::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Avx512bw::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Neon::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 #endif 
 
@@ -652,22 +652,22 @@ namespace Test
             result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Base::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
             result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Sse41::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
             result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Avx2::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Avx512bw::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
             result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Neon::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 #endif 
 
