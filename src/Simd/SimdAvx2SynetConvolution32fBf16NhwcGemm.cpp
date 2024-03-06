@@ -45,7 +45,7 @@ namespace Simd
             size_t srcC4 = Simd::AlignLo(p.srcC, 4);
             uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
-            for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
+            for (size_t dy = yBeg, dr = a.macroK < a.bufK ? dy * p.dstW : 0; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {

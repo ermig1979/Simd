@@ -405,7 +405,7 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                        size_t offs = mak * a.bufM + yBeg * p.dstW * macroK;
+                        size_t offs = a.macroK < a.bufK ? mak * a.bufM + yBeg * p.dstW * macroK : 0;
                         if (dc == 0 && mak == 0)
                         {
                             if (a.batch > 1)

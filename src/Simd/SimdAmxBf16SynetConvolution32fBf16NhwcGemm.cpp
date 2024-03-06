@@ -82,9 +82,11 @@ namespace Simd
             else
             {
                 //SIMD_PERF_BEG("direct");
-                for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
+                src += yBeg * p.srcW * p.srcC;
+                //dst += yBeg * p.dstW * a.bufK;
+                for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
-                    for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
+                    for (size_t dx = 0; dx < p.dstW; ++dx)
                     {
                         size_t sc = 0;
                         for (; sc < srcC32; sc += 32)
@@ -114,7 +116,7 @@ namespace Simd
             uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
             __mmask32 gapMask = TailMask32(gap);
-            for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
+            for (size_t dy = yBeg, dr = a.macroK < a.bufK ? dy * p.dstW : 0; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
@@ -449,7 +451,7 @@ namespace Simd
             size_t microM = 16 * 2;
             size_t microC = 16 * 2;
 #if !defined(SIMD_AMX_EMULATE)
-            if (p.srcC* p.kernelX * p.kernelY < 2 * microC)
+            if (p.srcC* p.kernelX * p.kernelY < 1 * microC)
                 return;
 #endif
             SetAlgParam(microD, microM, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
