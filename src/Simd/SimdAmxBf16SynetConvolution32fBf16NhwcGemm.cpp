@@ -51,10 +51,10 @@ namespace Simd
                 srcMask[1] = TailMask16(p.srcC - srcC32 - F * 1);
                 dstMask[0] = __mmask32(-1);
             }
+            src += yBeg * p.srcW * p.srcC;
             if (a.macroK < a.bufK)
             {
                 //SIMD_PERF_BEG("reorder");
-                uint16_t* buf = dst + a.bufM * a.bufK;
                 size_t bodyK = AlignLoAny(a.bufK, a.macroK), tailK = a.bufK - bodyK;
                 for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
                 {
@@ -79,11 +79,9 @@ namespace Simd
                     }
                 }
             }
-            else
+            else if (srcC32 < p.srcC)
             {
                 //SIMD_PERF_BEG("direct");
-                src += yBeg * p.srcW * p.srcC;
-                //dst += yBeg * p.dstW * a.bufK;
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     for (size_t dx = 0; dx < p.dstW; ++dx)
@@ -97,6 +95,12 @@ namespace Simd
                         dst += a.bufK;
                     }
                 }
+            }
+            else
+            {
+                //SIMD_PERF_BEG("solid");
+                for (size_t n = (yEnd - yBeg) * p.srcW * p.srcC, i = 0; i < n; i += 32)
+                    Float32ToBFloat16<false, false>(src + i, dst + i, srcMask, dstMask);
             }
         }
 
