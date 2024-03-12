@@ -87,7 +87,7 @@ namespace Simd
                 size_t bufD, bufM, bufK;
             };
 
-            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst);
 
             typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, size_t dstC, size_t dstH,
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);

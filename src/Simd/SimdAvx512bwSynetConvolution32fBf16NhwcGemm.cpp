@@ -39,7 +39,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void ConvertBf16NhwcGemm(const float* src, const ConvParam32f& p, const SynetConvolution32fBf16NhwcGemm::AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void ConvertBf16NhwcGemm(const float* src, const ConvParam32f& p, const SynetConvolution32fBf16NhwcGemm::AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             size_t srcC32 = AlignLo(p.srcC, 32);
             __mmask16 srcMask[2];
@@ -52,7 +52,7 @@ namespace Simd
             }
             uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
-            for (size_t dy = yBeg, dr = a.macroK < a.bufK ? dy * p.dstW : 0; dy < yEnd; ++dy)
+            for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * p.dstW : 0) + b * p.dstH * p.dstW; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {

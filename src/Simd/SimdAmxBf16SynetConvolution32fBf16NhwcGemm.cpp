@@ -40,7 +40,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static void ConvertBf16NhwcGemm1x1(const float* src, const ConvParam32f& p, const SynetConvolution32fBf16NhwcGemm::AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void ConvertBf16NhwcGemm1x1(const float* src, const ConvParam32f& p, const SynetConvolution32fBf16NhwcGemm::AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             size_t srcC32 = AlignLo(p.srcC, 32);
             __mmask16 srcMask[2];
@@ -56,7 +56,7 @@ namespace Simd
             {
                 //SIMD_PERF_BEG("reorder");
                 size_t bodyK = AlignLoAny(a.bufK, a.macroK), tailK = a.bufK - bodyK;
-                for (size_t dy = yBeg, dr = dy * p.dstW; dy < yEnd; ++dy)
+                for (size_t dy = yBeg, dr = (b * p.dstH + dy) * p.dstW; dy < yEnd; ++dy)
                 {
                     for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                     {
@@ -82,6 +82,7 @@ namespace Simd
             else if (srcC32 < p.srcC)
             {
                 //SIMD_PERF_BEG("direct");
+                dst += b * p.dstH * p.dstW * a.bufK;
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     for (size_t dx = 0; dx < p.dstW; ++dx)
@@ -99,12 +100,13 @@ namespace Simd
             else
             {
                 //SIMD_PERF_BEG("solid");
+                dst += b * p.dstH * p.dstW * p.dstC;
                 for (size_t n = (yEnd - yBeg) * p.srcW * p.srcC, i = 0; i < n; i += 32)
                     Float32ToBFloat16<false, false>(src + i, dst + i, srcMask, dstMask);
             }
         }
 
-        static void ConvertBf16NhwcGemm(const float* src, const ConvParam32f& p, const SynetConvolution32fBf16NhwcGemm::AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void ConvertBf16NhwcGemm(const float* src, const ConvParam32f& p, const SynetConvolution32fBf16NhwcGemm::AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             //SIMD_PERF_FUNC();
 
@@ -120,7 +122,7 @@ namespace Simd
             uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
             __mmask32 gapMask = TailMask32(gap);
-            for (size_t dy = yBeg, dr = a.macroK < a.bufK ? dy * p.dstW : 0; dy < yEnd; ++dy)
+            for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * p.dstW : 0) + b * p.dstH * p.dstW; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {

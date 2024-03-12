@@ -411,12 +411,11 @@ namespace Simd
                             if (a.batch > 1)
                             {
                                 size_t dS = p.srcH * p.srcW * p.srcC;
-                                size_t dB = p.dstH * p.dstW * macroK;
                                 for (size_t b = 0; b < a.batch; ++b)
-                                   _convert(src + b * dS, p, a, 0, p.dstH, buf + b * dB);
+                                    _convert(src + b * dS, p, a, b, 0, p.dstH, buf);
                             }
                             else
-                                _convert(src, p, a, yBeg, yEnd, buf);
+                                _convert(src, p, a, 0, yBeg, yEnd, buf);
                         }
                         if (mak + macroK == a.bufK)
                             _convolutions[TermLast](buf + offs, p, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 1 : 0,
