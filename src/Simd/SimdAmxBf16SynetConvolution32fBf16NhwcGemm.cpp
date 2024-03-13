@@ -100,7 +100,7 @@ namespace Simd
             else
             {
                 //SIMD_PERF_BEG("solid");
-                dst += b * p.dstH * p.dstW * p.dstC;
+                dst += b * p.dstH * p.dstW * a.bufK;
                 for (size_t n = (yEnd - yBeg) * p.srcW * p.srcC, i = 0; i < n; i += 32)
                     Float32ToBFloat16<false, false>(src + i, dst + i, srcMask, dstMask);
             }
