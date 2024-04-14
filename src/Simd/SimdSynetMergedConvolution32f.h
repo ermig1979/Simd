@@ -39,7 +39,7 @@ namespace Simd
     {
         SimdBool add;
         size_t count;
-        ConvParam32f conv[3];
+        ConvParam conv[3];
 
         MergConvParam32f(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
         {
@@ -47,7 +47,7 @@ namespace Simd
             this->add = add;
             this->count = count;
             for (size_t i = 0; i < count; ++i)
-                this->conv[i] = ConvParam32f(batch, convs + i, compatibility);
+                this->conv[i] = ConvParam(batch, convs + i, compatibility);
         }
 
         bool Valid()
@@ -149,7 +149,7 @@ namespace Simd
         {
         }
 
-        virtual const MergConvParam32f& Param() const 
+        virtual const MergConvParam32f& Param() const
         { 
             return _param; 
         }
@@ -238,7 +238,7 @@ namespace Simd
         class SynetMergedConvolution32fCdc : public SynetMergedConvolution32f
         {
         public:
-            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
+            SynetMergedConvolution32fCdc(const MergConvParam32f& p);
 
             virtual void Forward(const float * src, float * buf, float * dst);
 
@@ -328,7 +328,7 @@ namespace Simd
         class SynetMergedConvolution32fCdc : public Sse41::SynetMergedConvolution32fCdc
         {
         public:
-            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
+            SynetMergedConvolution32fCdc(const MergConvParam32f& p);
             virtual String Ext() const { return "Avx2"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
@@ -400,7 +400,7 @@ namespace Simd
         class SynetMergedConvolution32fCdc : public Base::SynetMergedConvolution32fCdc
         {
         public:
-            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
+            SynetMergedConvolution32fCdc(const MergConvParam32f& p);
             virtual String Ext() const { return "Neon"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);

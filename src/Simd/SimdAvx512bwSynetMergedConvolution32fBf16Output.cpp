@@ -39,7 +39,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         template<TermBf16Type term, SimdConvolutionActivationType type, int M> void OutputConvolution1x1_2xM(
-            const uint16_t* src0, const ConvParam32f& p, const AlgParam& a, size_t srcC, size_t dstC,
+            const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC,
             const uint16_t* weight, const __m512* bias, const __m512* params, float* dst, int zero)
         {
             __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51,
@@ -527,7 +527,7 @@ namespace Simd
             }
         }
 
-        typedef void(*OutputConvolution1x1_2xM_Ptr)(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a, size_t srcC, size_t dstC,
+        typedef void(*OutputConvolution1x1_2xM_Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC,
             const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst, int zero);
 
         template<TermBf16Type term, SimdConvolutionActivationType type> OutputConvolution1x1_2xM_Ptr GetOutputConvolution1x1_2xM(size_t M)
@@ -553,7 +553,7 @@ namespace Simd
         }
 
         template<TermBf16Type term, SimdConvolutionActivationType type> void OutputConvolution1x1_2(const uint16_t* src,
-            const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight,
+            const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight,
             const float* bias, const float* params, float* dst, int zero)
         {
             size_t n = 12, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
@@ -585,13 +585,13 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> static void SetOutput(const ConvParam32f& p, OutputPtr* output)
+        template<SimdConvolutionActivationType type> static void SetOutput(const ConvParam& p, OutputPtr* output)
         {
             output[0] = OutputConvolution1x1_2<TermBf16Last32f, type>;
             output[1] = OutputConvolution1x1_2<TermBf16Interim, SimdConvolutionActivationIdentity>;
         }
 
-        void SetOutput(const ConvParam32f& p, OutputPtr* output)
+        void SetOutput(const ConvParam& p, OutputPtr* output)
         {
             switch (p.activation)
             {

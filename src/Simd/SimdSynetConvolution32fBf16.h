@@ -33,7 +33,7 @@ namespace Simd
         class SynetConvolution32fBf16Gemm : public SynetConvolution32f
         {
         public:
-            SynetConvolution32fBf16Gemm(const ConvParam32f& p);
+            SynetConvolution32fBf16Gemm(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::Bf16Gemm"; }
             virtual size_t ExternalBufferSize() const;
@@ -54,7 +54,7 @@ namespace Simd
         class SynetConvolution32fBf16Nhwc : public SynetConvolution32f
         {
         public:
-            SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
+            SynetConvolution32fBf16Nhwc(const ConvParam& p);
             virtual size_t InternalBufferSize() const;
 
         protected:
@@ -70,14 +70,14 @@ namespace Simd
         class SynetConvolution32fBf16NhwcGemm : public SynetConvolution32fBf16Nhwc
         {
         public:
-            SynetConvolution32fBf16NhwcGemm(const ConvParam32f& p);
+            SynetConvolution32fBf16NhwcGemm(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float* src, float* buf, float* dst);
 
-            static bool Preferable(const ConvParam32f& p);
+            static bool Preferable(const ConvParam& p);
 
             struct AlgParam
             {
@@ -87,9 +87,9 @@ namespace Simd
                 size_t bufD, bufM, bufK;
             };
 
-            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst);
+            typedef void(*ConvertPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, size_t dstC, size_t dstH,
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, size_t dstC, size_t dstH,
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
 
         protected:
@@ -107,7 +107,7 @@ namespace Simd
         class SynetConvolution32fBf16NhwcOld : public SynetConvolution32f
         {
         public:
-            SynetConvolution32fBf16NhwcOld(const ConvParam32f& p);
+            SynetConvolution32fBf16NhwcOld(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
@@ -115,7 +115,7 @@ namespace Simd
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float* src, float* buf, float* dst);
 
-            static bool Preferable(const ConvParam32f& p);
+            static bool Preferable(const ConvParam& p);
 
             struct AlgParam
             {
@@ -124,9 +124,9 @@ namespace Simd
                 size_t batch, srcH, srcW;
             };
 
-            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
+            typedef void(*ConvertPtr)(const float* src, const ConvParam& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, size_t dstC, size_t dstH, 
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, size_t dstC, size_t dstH, 
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
 
         protected:
@@ -153,7 +153,7 @@ namespace Simd
         class SynetConvolution32fBf16NhwcGemm : public Base::SynetConvolution32fBf16NhwcGemm
         {
         public:
-            SynetConvolution32fBf16NhwcGemm(const ConvParam32f& p);
+            SynetConvolution32fBf16NhwcGemm(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -161,7 +161,7 @@ namespace Simd
         class SynetConvolution32fBf16NhwcOld : public Base::SynetConvolution32fBf16NhwcOld
         {
         public:
-            SynetConvolution32fBf16NhwcOld(const ConvParam32f& p);
+            SynetConvolution32fBf16NhwcOld(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -174,7 +174,7 @@ namespace Simd
         class SynetConvolution32fBf16NhwcGemm : public Sse41::SynetConvolution32fBf16NhwcGemm
         {
         public:
-            SynetConvolution32fBf16NhwcGemm(const ConvParam32f& p);
+            SynetConvolution32fBf16NhwcGemm(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -182,7 +182,7 @@ namespace Simd
         class SynetConvolution32fBf16NhwcOld : public Sse41::SynetConvolution32fBf16NhwcOld
         {
         public:
-            SynetConvolution32fBf16NhwcOld(const ConvParam32f& p);
+            SynetConvolution32fBf16NhwcOld(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -195,23 +195,23 @@ namespace Simd
         class SynetConvolution32fBf16NhwcGemm : public Avx2::SynetConvolution32fBf16NhwcGemm
         {
         public:
-            SynetConvolution32fBf16NhwcGemm(const ConvParam32f& p);
+            SynetConvolution32fBf16NhwcGemm(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
 
         //-----------------------------------------------------------------------------------------
 
-        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
+        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
 
-        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
+        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
 
         //-----------------------------------------------------------------------------------------
 
         class SynetConvolution32fBf16NhwcOld : public Avx2::SynetConvolution32fBf16NhwcOld
         {
         public:
-            SynetConvolution32fBf16NhwcOld(const ConvParam32f& p);
+            SynetConvolution32fBf16NhwcOld(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
@@ -224,7 +224,7 @@ namespace Simd
         class SynetConvolution32fBf16NhwcGemm : public Avx512bw::SynetConvolution32fBf16NhwcGemm
         {
         public:
-            SynetConvolution32fBf16NhwcGemm(const ConvParam32f& p);
+            SynetConvolution32fBf16NhwcGemm(const ConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };

@@ -47,23 +47,23 @@ namespace Simd
                 size_t miC, maC, miK, yStep[3], yStart[3], bufH[3], dp[2], dw[3];
             };
 
-            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+            typedef void(*ConvertPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
 
-            typedef void(*InputConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*InputConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const uint16_t* weight, const float* bias, const float* params, float* dst);
 
-            typedef void(*DepthwiseConvolutionPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*DepthwiseConvolutionPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const float* weight, const float* bias, const float* params, uint16_t* dst);
 
-            typedef void(*OutputConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*OutputConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const uint16_t* weight, const float* bias, const float* params, float* dst, int zero);
 
         protected:
-            void SetInputWeight(const float* src, const ConvParam32f& p);
-            void SetDepthwiseWeight(const float* src, const ConvParam32f& p);
-            void SetOutputWeight(const float* src, const ConvParam32f& p);
-            void SetBias(const float* src, const ConvParam32f& p, Array32f & dst);
-            void SetParams(const float* src, const ConvParam32f& p, Array32f& dst);
+            void SetInputWeight(const float* src, const ConvParam& p);
+            void SetDepthwiseWeight(const float* src, const ConvParam& p);
+            void SetOutputWeight(const float* src, const ConvParam& p);
+            void SetBias(const float* src, const ConvParam& p, Array32f & dst);
+            void SetParams(const float* src, const ConvParam& p, Array32f& dst);
 
             bool _dw0;
             ConvertPtr _convert;
@@ -119,11 +119,11 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
-        void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution32fBf16Cdc : public Base::SynetMergedConvolution32fBf16Cdc
         {
@@ -154,11 +154,11 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
-        void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution32fBf16Cdc : public Sse41::SynetMergedConvolution32fBf16Cdc
         {
@@ -189,13 +189,13 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, const Base::SynetMergedConvolution32fBf16::AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+        void ConvertFp32ToBf16(const float* src, const ConvParam& p, const Base::SynetMergedConvolution32fBf16::AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
 
-        void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
-        void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution32fBf16Cdc : public Avx2::SynetMergedConvolution32fBf16Cdc
         {
@@ -226,11 +226,11 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
     namespace AmxBf16
     {
-        void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
-        void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution32fBf16Cdc : public Avx512bw::SynetMergedConvolution32fBf16Cdc
         {

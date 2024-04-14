@@ -55,7 +55,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, int M> void InputConvolution1x1_2xM(const uint16_t* src0, const ConvParam32f& p,
+        template<SimdConvolutionActivationType type, int M> void InputConvolution1x1_2xM(const uint16_t* src0, const ConvParam& p,
             const AlgParam& a, size_t dstC, const uint16_t* weight, const __m256* bias, const __m256* params, float* dst0, float* dst1)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm256_castsi256_ps(Bf16::MASK);
@@ -278,7 +278,7 @@ namespace Simd
             }
         }
 
-        typedef void(*InputConvolution1x1_2xM_Ptr)(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a, size_t dstC,
+        typedef void(*InputConvolution1x1_2xM_Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t dstC,
             const uint16_t* weight, const __m256* bias, const __m256* params, float* dst0, float* dst1);
 
         template<SimdConvolutionActivationType type> InputConvolution1x1_2xM_Ptr GetInputConvolution1x1_2xM(size_t M)
@@ -296,7 +296,7 @@ namespace Simd
             return NULL;
         }
 
-        template<SimdConvolutionActivationType type> void InputConvolution1x1_2(const uint16_t* src, const ConvParam32f& p,
+        template<SimdConvolutionActivationType type> void InputConvolution1x1_2(const uint16_t* src, const ConvParam& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             size_t dstM = a.bufH[1] - 1, dstS = a.bufH[1] * p.dstW * F, srcM = a.bufH[0] - 1, srcC = AlignHi(p.srcC, a.miK);
@@ -376,7 +376,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> static void SetInput(const ConvParam32f& p, InputPtr& input)
+        template<SimdConvolutionActivationType type> static void SetInput(const ConvParam& p, InputPtr& input)
         {
             if (Is1x1(p))
                 input = InputConvolution1x1_2<type>;
@@ -384,7 +384,7 @@ namespace Simd
                 assert(0);
         }
 
-        void SetInput(const ConvParam32f& p, InputPtr& input)
+        void SetInput(const ConvParam& p, InputPtr& input)
         {
             switch (p.activation)
             {

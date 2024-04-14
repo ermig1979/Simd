@@ -34,7 +34,7 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx2
     {
-        SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam32f & p)
+        SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam & p)
             : Sse41::SynetConvolution32fDirectNchw(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
@@ -351,7 +351,7 @@ namespace Simd
 
         SynetConvolution32fDirectNchw::ConvolutionBiasActivationPtr SynetConvolution32fDirectNchw::SetConvolutionBiasActivation()
         {
-            const ConvParam32f & p = _param;
+            const ConvParam & p = _param;
             if (p.dstW < F)
                 return Sse41::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
             switch (p.strideX)

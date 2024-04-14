@@ -21,29 +21,17 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#ifndef __SimdSynetConvolution16b_h__
+#define __SimdSynetConvolution16b_h__
 
-#include "Simd/SimdSynetConvolution32fBf16.h"
-#include "Simd/SimdSynet.h"
+#include "Simd/SimdArray.h"
+#include "Simd/SimdPerformance.h"
+#include "Simd/SimdRuntime.h"
+#include "Simd/SimdGemm.h"
 
 namespace Simd
 {
-#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)
-    namespace AmxBf16
-    {
-        void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
-        {
-            ConvParam param(batch, conv, compatibility);
-            if (!param.Valid(SimdTensorData32f))
-                return NULL;
-            else if (Base::Bf16Soft(compatibility) || Base::Bf16Hard(compatibility))
-            {
-                if (Base::SynetConvolution32fBf16NhwcGemm::Preferable(param))
-                    return new SynetConvolution32fBf16NhwcGemm(param);
-                else
-                    return new Base::SynetConvolution32fBf16Gemm(param);
-            }
-            return Avx512bw::SynetConvolution32fInit(batch, conv, compatibility);
-        }
-    }
-#endif
+
 }
+
+#endif

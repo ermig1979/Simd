@@ -468,7 +468,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f& p)
+        SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam& p)
             : Base::SynetConvolution32fGemmNN(p)
         {
             _gemm.Init(InitGemmFuncs(Sse41::Gemm32fNN, "Sse41"));
@@ -489,7 +489,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f& p)
+        SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam& p)
             : Base::SynetConvolution32fGemmNT(p)
         {
             _gemm.Init(InitGemmFuncs(Sse41::Gemm32fNT, "Sse41"));
@@ -498,7 +498,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f& p)
+        SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam& p)
             : Base::SynetConvolution32fWinograd(p)
         {
             if (p.kernelY == 1 && p.kernelX == 3)
@@ -582,7 +582,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SynetConvolution32fDepthwiseDotProduct::SynetConvolution32fDepthwiseDotProduct(const ConvParam32f& p)
+        SynetConvolution32fDepthwiseDotProduct::SynetConvolution32fDepthwiseDotProduct(const ConvParam& p)
             : Base::SynetConvolution32fDepthwiseDotProduct(p)
         {
         }
@@ -646,7 +646,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
+        SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam& p)
             : Base::SynetConvolution32fNhwcDirect(p)
         {
             //_old.enable = true;
@@ -669,7 +669,7 @@ namespace Simd
             }
         }
 
-        bool SynetConvolution32fNhwcDirect::SetRt(const ConvParam32f& p, AlgParam& a)
+        bool SynetConvolution32fNhwcDirect::SetRt(const ConvParam& p, AlgParam& a)
         {
             switch (a.microD)
             {
@@ -680,7 +680,7 @@ namespace Simd
             }
         }
 
-        bool SynetConvolution32fNhwcDirect::Preferable(const ConvParam32f& p)
+        bool SynetConvolution32fNhwcDirect::Preferable(const ConvParam& p)
         {
             if (p.trans != SimdTrue || p.group != 1)
                 return false;
@@ -702,8 +702,8 @@ namespace Simd
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam32f param(batch, conv, compatibility);
-            if (!param.Valid())
+            ConvParam param(batch, conv, compatibility);
+            if (!param.Valid(SimdTensorData32f))
                 return NULL;
             else if (Base::Bf16Soft(compatibility))
             {

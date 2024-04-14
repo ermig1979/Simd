@@ -39,7 +39,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution(const float* src, const ConvParam32f& p,
+        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution(const float* src, const ConvParam& p,
             const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint16_t* dst)
         {
             size_t strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
@@ -490,7 +490,7 @@ namespace Simd
             Save1<term, type>(dst + 3 * dX, sum3, bias, params, tail);
         }
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution3x3(const float* src, const ConvParam32f& p,
+        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution3x3(const float* src, const ConvParam& p,
             const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint16_t* dst)
         {
             size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
@@ -574,7 +574,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<TermBf16Type term, SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam32f& p, DepthwisePtr& depthwise)
+        template<TermBf16Type term, SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
         {
             if (IsKernel(p, 3) && IsDilation(p, 1))
             {
@@ -592,7 +592,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam32f& p, DepthwisePtr& depthwise)
+        template<SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
         {
             if (p.dstT == SimdTensorData32f)
                 SetDepthwise<TermBf16Last32f, type>(p, depthwise);
@@ -600,7 +600,7 @@ namespace Simd
                 SetDepthwise<TermBf16Last16b, type>(p, depthwise);
         }
 
-        void SetDepthwise(const ConvParam32f& p, DepthwisePtr& depthwise)
+        void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
         {
             switch (p.activation)
             {

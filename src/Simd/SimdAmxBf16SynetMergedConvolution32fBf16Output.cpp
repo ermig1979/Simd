@@ -39,7 +39,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> void OutputConvolution_2x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type> void OutputConvolution_2x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
             size_t dS = a.maC * p.strideX, dD = p.dstC;
@@ -107,7 +107,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void OutputConvolution_2x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type> void OutputConvolution_2x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
             size_t dS = a.maC * p.strideX, dD = p.dstC;
@@ -160,7 +160,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void OutputConvolution_1x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type> void OutputConvolution_1x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
             size_t dS = a.maC * p.strideX, dD = p.dstC;
@@ -213,7 +213,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void OutputConvolution_1x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type> void OutputConvolution_1x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
             size_t dS = a.maC * p.strideX, dD = p.dstC;
@@ -256,11 +256,11 @@ namespace Simd
             }
         }
 
-        typedef void (*OutputConvolutionPtr)(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+        typedef void (*OutputConvolutionPtr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst);
 
         template<SimdConvolutionActivationType type> void OutputConvolution1x1_2(const uint16_t* src,
-            const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight,
+            const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight,
             const float* bias, const float* params, float* dst, int zero)
         {
             size_t n = 32, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(maC, a.miK) * DF;
@@ -305,13 +305,13 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> static void SetOutput(const ConvParam32f& p, OutputPtr* output)
+        template<SimdConvolutionActivationType type> static void SetOutput(const ConvParam& p, OutputPtr* output)
         {
             output[0] = OutputConvolution1x1_2<type>;
             output[1] = OutputConvolution1x1_2<SimdConvolutionActivationIdentity>;
         }
 
-        void SetOutput(const ConvParam32f& p, OutputPtr* output)
+        void SetOutput(const ConvParam& p, OutputPtr* output)
         {
             switch (p.activation)
             {

@@ -35,7 +35,7 @@ namespace Simd
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Neon
     {
-        SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam32f & p)
+        SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam & p)
             : Base::SynetConvolution32fDirectNchw(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
@@ -320,7 +320,7 @@ namespace Simd
             }
         }
 
-        bool SynetConvolution32fDirectNchw::Preferable(const ConvParam32f & p)
+        bool SynetConvolution32fDirectNchw::Preferable(const ConvParam & p)
         {
             if (!p.IsDilation(1))
                 return false;
@@ -353,7 +353,7 @@ namespace Simd
 
         SynetConvolution32fDirectNchw::ConvolutionBiasActivationPtr SynetConvolution32fDirectNchw::SetConvolutionBiasActivation()
         {
-            const ConvParam32f & p = _param;
+            const ConvParam & p = _param;
             if (p.dstW < F)
                 return Base::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
             switch (p.strideX)

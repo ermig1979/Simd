@@ -37,7 +37,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void ConvertFp32ToBf16(const float* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             size_t srcC = AlignHi(p.srcC, a.miK);
             size_t bufH = a.bufH[0], mask = bufH - 1;

@@ -509,7 +509,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f & p)
+        SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam & p)
             : Sse41::SynetConvolution32fGemmNN(p)
         {
             _index.Resize(F);
@@ -551,7 +551,7 @@ namespace Simd
 
         void SynetConvolution32fGemmNN::ImgToCol(const float * src, float * dst)
         {
-            const ConvParam32f & p = _param;
+            const ConvParam & p = _param;
             size_t srcSize = p.srcW * p.srcH;
             if (p.dilationX == 1 && p.dilationY == 1 && p.strideX == 2 && p.strideY == 2 && p.padX == 0 && p.padY == 0 && p.padW == 0 && p.padH == 0 && p.kernelX == 1 && p.kernelY == 1)
             {
@@ -614,7 +614,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
+        SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam & p)
             : Sse41::SynetConvolution32fGemmNT(p)
         {
             _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNT, "Avx2"));
@@ -623,7 +623,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
+        SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam & p)
             : Sse41::SynetConvolution32fWinograd(p)
         {
             if (p.kernelY == 1 && p.kernelX == 3)
@@ -706,7 +706,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SynetConvolution32fDepthwiseDotProduct::SynetConvolution32fDepthwiseDotProduct(const ConvParam32f& p)
+        SynetConvolution32fDepthwiseDotProduct::SynetConvolution32fDepthwiseDotProduct(const ConvParam& p)
             : Sse41::SynetConvolution32fDepthwiseDotProduct(p)
         {
         }
@@ -770,7 +770,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
+        SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam& p)
             : Sse41::SynetConvolution32fNhwcDirect(p)
         {
             if (p.dstC <= Sse41::F)
@@ -795,7 +795,7 @@ namespace Simd
             }
         }
 
-        bool SynetConvolution32fNhwcDirect::SetRt(const ConvParam32f& p, AlgParam& a)
+        bool SynetConvolution32fNhwcDirect::SetRt(const ConvParam& p, AlgParam& a)
         {
             switch (a.microD)
             {
@@ -810,8 +810,8 @@ namespace Simd
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam32f param(batch, conv, compatibility);
-            if (!param.Valid())
+            ConvParam param(batch, conv, compatibility);
+            if (!param.Valid(SimdTensorData32f))
                 return NULL;
             else if (Base::Bf16Soft(compatibility))
             {
