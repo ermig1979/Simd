@@ -128,11 +128,11 @@ namespace Simd
             if (!param.Valid())
                 return NULL;
             if (SynetMergedConvolution8iCdc::Preferable(param))
-                return new SynetMergedConvolution8iCdc(param);
+                return new Avx512vnni::SynetMergedConvolution8iCdc(param);
             else if (SynetMergedConvolution8iCd::Preferable(param))
-                return new SynetMergedConvolution8iCd(param);
+                return new Avx512vnni::SynetMergedConvolution8iCd(param);
             else if (SynetMergedConvolution8iDc::Preferable(param))
-                return new SynetMergedConvolution8iDc(param);
+                return new Avx512vnni::SynetMergedConvolution8iDc(param);
             else
                 return new Base::SynetMergedConvolution8i(param);
         }

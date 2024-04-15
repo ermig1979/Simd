@@ -65,7 +65,7 @@ namespace Simd
 
     //-------------------------------------------------------------------------
 
-    SynetConvolution8i::SynetConvolution8i(const ConvParam8i& p)
+    SynetConvolution8i::SynetConvolution8i(const ConvParam& p)
         : _param(p)
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         , _perf(NULL)
@@ -98,7 +98,7 @@ namespace Simd
 
     void SynetConvolution8i::SetParams(const float* weight, const float* bias, const float* params, const float* const* stats)
     {
-        const ConvParam8i& p = _param;
+        const ConvParam& p = _param;
         _srcCvt.Init(stats[0], stats[1], p.srcC, p.compatibility);
         _dstCvt.Init(stats[2], stats[3], p.dstC, p.compatibility);
         size_t G = p.group, D = p.dstC / G, C = p.srcC / G, K = p.kernelY * p.kernelX, CK = C * K, GD = G * D;
@@ -246,7 +246,7 @@ namespace Simd
             _buffer.Resize(ExternalBufferSize());
             buf = _buffer.data;
         }
-        const ConvParam8i& p = _param;
+        const ConvParam& p = _param;
         uint8_t* src8u = _src8u ? NULL : Allocate<uint8_t>(buf, _sizeS * _merge);
         for (size_t b = 0; b < p.batch; b += _merge)
         {
@@ -269,7 +269,7 @@ namespace Simd
 
     namespace Base
     {
-        SynetConvolution8iGemmNN::SynetConvolution8iGemmNN(const ConvParam8i& p)
+        SynetConvolution8iGemmNN::SynetConvolution8iGemmNN(const ConvParam& p)
             : SynetConvolution8i(p)
         {
             if (p.IsDilation(1) && p.IsStride(1) && p.IsPad(0))
@@ -316,7 +316,7 @@ namespace Simd
 
         void SynetConvolution8iGemmNN::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
-            const ConvParam8i& p = _param;
+            const ConvParam& p = _param;
             const int8_t * weight = _weight.data;
             int32_t * sum = Allocate<int32_t>(buf, _sizeD * _merge);
             float * dst32f = _dst8u ? Allocate<float>(buf, _sizeD * _merge) : (float*)dst;
@@ -394,7 +394,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
+        SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam& p)
             : SynetConvolution8i(p)
         {
             for (size_t i = 0; i < Term8iSize; ++i)
@@ -403,7 +403,7 @@ namespace Simd
 
         String SynetConvolution8iNhwcDirect::Desc() const
         {
-            const ConvParam8i& p = _param;
+            const ConvParam& p = _param;
             return Ext() + "::NhwcDirect" + (Overflow(p.compatibility) ? "-o" : (Narrowed(p.compatibility) ? "-n" : "-p"));
         }
 
@@ -415,7 +415,7 @@ namespace Simd
 
         size_t SynetConvolution8iNhwcDirect::ExternalBufferSize() const
         {
-            const ConvParam8i& p = _param;
+            const ConvParam& p = _param;
             size_t size = SynetConvolution8i::ExternalBufferSize();
             size += AlignHi(_sizeP * sizeof(uint8_t), SIMD_ALIGN);
             size += AlignHi(_sizeB * sizeof(int32_t), SIMD_ALIGN);
@@ -430,14 +430,14 @@ namespace Simd
             _alg.upper = Set4(_dstCvt.uMax);
         }
 
-        bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam8i& p)
+        bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam& p)
         {
             return false;
         }
 
         bool SynetConvolution8iNhwcDirect::PadEnable(size_t microHW)
         {
-            const ConvParam8i& p = _param;
+            const ConvParam& p = _param;
             if (p.padX == 0 && p.padW == 0 && p.padY == 0 && p.padH == 0)
                 return false;
             if (microHW >= 32)
@@ -452,7 +452,7 @@ namespace Simd
 
         void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t microHW, size_t L1, size_t L2, size_t L3)
         {
-            const ConvParam8i& p = _param;
+            const ConvParam& p = _param;
             _alg.F = F;
             _alg.microD = microD;
             _alg.macroC = Simd::Min(AlignLoAny(L1 / p.kernelY / p.kernelX / microD, 4), p.srcC);
@@ -485,7 +485,7 @@ namespace Simd
 
         void SynetConvolution8iNhwcDirect::ReorderWeight()
         {
-            const ConvParam8i& p = _param;
+            const ConvParam& p = _param;
             size_t C = DivHi(p.srcC, 4), D = DivHi(p.dstC, _alg.F);
             Array8i weight(p.kernelY * p.kernelX * C * D * _alg.F * 4);
             int8_t* dst = weight.data;
@@ -536,7 +536,7 @@ namespace Simd
 
         void SynetConvolution8iNhwcDirect::PadInput(const uint8_t* src, uint8_t* dst)
         {
-            const ConvParam8i& p = _param;
+            const ConvParam& p = _param;
             size_t noseX = p.padX * p.srcC * sizeof(uint8_t);
             size_t bodyX = p.srcW * p.srcC * sizeof(uint8_t);
             size_t tailX = p.padW * p.srcC * sizeof(uint8_t);
@@ -554,7 +554,7 @@ namespace Simd
                 memset(dst, _srcCvt.zero[0], tailY), dst += tailY;
         }
 
-        void SynetConvolution8iNhwcDirect::Forward8u(const uint8_t* src, const ConvParam8i& p, int32_t* buf, uint8_t* dst)
+        void SynetConvolution8iNhwcDirect::Forward8u(const uint8_t* src, const ConvParam& p, int32_t* buf, uint8_t* dst)
         {
             const int8_t* weight = _weight.data;
             const float* norm = _norm.data;
@@ -599,7 +599,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SynetConvolution8iNhwcDepthwise::SynetConvolution8iNhwcDepthwise(const ConvParam8i& p)
+        SynetConvolution8iNhwcDepthwise::SynetConvolution8iNhwcDepthwise(const ConvParam& p)
             : SynetConvolution8i(p)
         {
             _convolution = NULL;
@@ -607,7 +607,7 @@ namespace Simd
 
         String SynetConvolution8iNhwcDepthwise::Desc() const
         {
-            const ConvParam8i& p = _param;
+            const ConvParam& p = _param;
             return Ext() + "::NhwcDepthwise" + (Overflow(p.compatibility) ? "-o" : (Narrowed(p.compatibility) ? "-n" : "-p"));
         }
 
@@ -619,7 +619,7 @@ namespace Simd
             _alg.size = (_param.dstT == SimdTensorData32f ? 4 : 1);
         }
 
-        bool SynetConvolution8iNhwcDepthwise::Preferable(const ConvParam8i& p)
+        bool SynetConvolution8iNhwcDepthwise::Preferable(const ConvParam& p)
         {
             return false;
         }
@@ -646,8 +646,8 @@ namespace Simd
 
         void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam8i param(batch, conv, compatibility);
-            if (!param.Valid())
+            ConvParam param(batch, conv, compatibility);
+            if (!param.Valid(SimdTensorData32f, SimdTensorData8u))
                 return NULL;
 #if !defined(SIMD_BASE_ONLY_GEMM_NN)
             else if (SynetConvolution8iNhwcDepthwise::Preferable(param))

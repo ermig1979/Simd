@@ -42,7 +42,7 @@ namespace Simd
         //-----------------------------------------------------------------------------------------
 
         template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x2(const uint8_t* src0,
-            const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm, 
+            const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm, 
             const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, srcC64 = AlignLo(srcC, 64);
@@ -136,7 +136,7 @@ namespace Simd
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x1(const uint8_t* src0,
-            const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm,
+            const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm,
             const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dW = 64, srcC64 = AlignLo(srcC, 64);
@@ -210,7 +210,7 @@ namespace Simd
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_1x2(const uint8_t* src0,
-            const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm,
+            const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm,
             const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dW = 64, srcC64 = AlignLo(srcC, 64);
@@ -284,7 +284,7 @@ namespace Simd
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_1x1(const uint8_t* src0,
-            const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm,
+            const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, const int8_t* weight0, const __m512* norm,
             const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dW = 64, srcC64 = AlignLo(srcC, 64);
@@ -344,11 +344,11 @@ namespace Simd
             }
         }
 
-        typedef void(*ConvolutionNhwcDirect1x1_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC,
+        typedef void(*ConvolutionNhwcDirect1x1_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC,
             const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first);
 
         template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const uint8_t* src, 
-            const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight, 
+            const ConvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight, 
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t n = 32, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(srcC, 4) * A;
@@ -400,20 +400,20 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <Term8iType term, SimdConvolutionActivationType activation> void SetDirect1x1(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
+        template <Term8iType term, SimdConvolutionActivationType activation> void SetDirect1x1(const ConvParam& p, const AlgParam& a, ConvolutionPtr* d)
         {
             assert(a.microD == 2 * F && p.Is1x1() == true);
             d[term] = ConvolutionNhwcDirect1x1_2<term, activation>;
         }
 
-        template<SimdConvolutionActivationType activation> void SetDirect1x1(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
+        template<SimdConvolutionActivationType activation> void SetDirect1x1(const ConvParam& p, const AlgParam& a, ConvolutionPtr* d)
         {
             SetDirect1x1<Term8iLast8u, activation>(p, a, d);
             SetDirect1x1<Term8iLast32f, activation>(p, a, d);
             SetDirect1x1<Term8iInterim, SimdConvolutionActivationIdentity>(p, a, d);
         }
 
-        void SetDirect1x1(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
+        void SetDirect1x1(const ConvParam& p, const AlgParam& a, ConvolutionPtr* d)
         {
             switch (p.activation)
             {

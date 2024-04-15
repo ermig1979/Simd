@@ -38,14 +38,14 @@ namespace Simd
     struct MergConvParam8i
     {
         size_t count;
-        ConvParam8i conv[3];
+        ConvParam conv[3];
 
         MergConvParam8i(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdSynetCompatibilityType compatibility)
         {
             assert(count <= 3);
             this->count = count;
             for (size_t i = 0; i < count; ++i)
-                this->conv[i] = ConvParam8i(batch, convs + i, compatibility);
+                this->conv[i] = ConvParam(batch, convs + i, compatibility);
         }
 
         bool Valid()
@@ -54,8 +54,8 @@ namespace Simd
                 return false;
             for (size_t i = 0; i < count; ++i)
             {
-                ConvParam8i& c = conv[i];
-                if (!c.Valid())
+                ConvParam& c = conv[i];
+                if (!c.Valid(SimdTensorData32f, SimdTensorData8u))
                     return false;
                 if (c.srcF != SimdTensorFormatNhwc)
                     return false;
@@ -180,21 +180,21 @@ namespace Simd
             typedef void(*Convert32fTo8uPtr)(const float* src, size_t yBeg, size_t yEnd, size_t width, size_t channels, 
                 const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility);
 
-            typedef void(*InputConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*InputConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const int8_t* weight, const float* norm, const float* bias, const float* params, float* dst);
 
-            typedef void(*DepthwiseConvolutionPtr)(const float* src, const ConvParam8i& p, const AlgParam & a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*DepthwiseConvolutionPtr)(const float* src, const ConvParam& p, const AlgParam & a, size_t maC, size_t yBeg, size_t yEnd,
                 const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t * dst);
 
-            typedef void(*OutputConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*OutputConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first);
 
         protected:
             uint8_t* GetBuffer(uint8_t* buffer);
             void Quantize(const float* weight, const float* bias, size_t i, size_t q);
-            void ReorderInputWeight(const ConvParam8i& p, Array8i & weight);
-            void ReorderDepthwiseWeight(const ConvParam8i& p, Array32f & weight);
-            void ReorderOutputWeight(const ConvParam8i& p, Array8i& weight);
+            void ReorderInputWeight(const ConvParam& p, Array8i & weight);
+            void ReorderDepthwiseWeight(const ConvParam& p, Array32f & weight);
+            void ReorderOutputWeight(const ConvParam& p, Array8i& weight);
             void DirectConvolution8i(const uint8_t* src, size_t i, size_t q, uint8_t* buf, int32_t* sum, float* dst);
 
             MergConvParam8i _param;
@@ -263,11 +263,11 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
 
-        void SetDepthwise(const ConvParam8i& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const ConvParam8i& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution8iCdc : public Base::SynetMergedConvolution8iCdc
         {
@@ -300,11 +300,11 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
 
-        void SetDepthwise(const ConvParam8i& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const ConvParam8i& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution8iCdc : public Sse41::SynetMergedConvolution8iCdc
         {
@@ -343,11 +343,11 @@ namespace Simd
         void Convert32fTo8u(const float* src, size_t yBeg, size_t yEnd, size_t width, size_t channels,
             const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility);
 
-        void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
 
-        void SetDepthwise(const ConvParam8i& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const ConvParam8i& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution8iCdc : public Avx2::SynetMergedConvolution8iCdc
         {
@@ -380,9 +380,9 @@ namespace Simd
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
     {
-        void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
 
-        void SetOutput(const ConvParam8i& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution8iCdc : public Avx512bw::SynetMergedConvolution8iCdc
         {
@@ -415,9 +415,9 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
     namespace AmxBf16
     {
-        void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
 
-        void SetOutput(const ConvParam8i& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
 
 #if defined(SIMD_AMX_EMULATE)
         class SynetMergedConvolution8iCdc : public Avx512bw::SynetMergedConvolution8iCdc

@@ -74,7 +74,7 @@ namespace Simd
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const uint8_t* src0,
-            const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0, const float32x4_t* norm, 
+            const ConvParam& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0, const float32x4_t* norm, 
             const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst, int first)
         {
             int32x4_t d00, d01;
@@ -182,7 +182,7 @@ namespace Simd
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect_2xM(const uint8_t* src0,
-            const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0, const float32x4_t* norm,
+            const ConvParam& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0, const float32x4_t* norm,
             const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst, int first)
         {
             int32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41;
@@ -357,7 +357,7 @@ namespace Simd
             }
         }
 
-        typedef void(*ConvolutionNhwcDirect_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC,
+        typedef void(*ConvolutionNhwcDirect_2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC,
             const int8_t* weight0, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst, int first);
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect_2xM_Ptr GetConvolutionNhwcDirect_2xM(size_t M)
@@ -376,7 +376,7 @@ namespace Simd
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const uint8_t* src,
-            const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
+            const ConvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t noseH = p.NoseH(), noseW = p.NoseW(), bodyH = p.BodyH(), bodyW = p.BodyW();
@@ -426,7 +426,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(
-            const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0, const float32x4_t* norm,
+            const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0, const float32x4_t* norm,
             const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst, int first)
         {
             int32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41;
@@ -532,7 +532,7 @@ namespace Simd
             }
         }
 
-        typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0, 
+        typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0, 
             const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst, int first);
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect1x1_2xM_Ptr GetConvolutionNhwcDirect1x1_2xM(size_t M)
@@ -551,7 +551,7 @@ namespace Simd
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const uint8_t* src,
-            const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
+            const ConvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t n1 = (yEnd - yBeg) * p.dstW, n5 = AlignLoAny(n1, 5), m = n1 - n5;
@@ -590,7 +590,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template <bool overflow, Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
+        template <bool overflow, Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam& p, const AlgParam& a, ConvolutionPtr* d)
         {
             if (p.Is1x1())
             {
@@ -612,7 +612,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
+        template<Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam& p, const AlgParam& a, ConvolutionPtr* d)
         {
             if (Base::Overflow(p.compatibility))
                 Set<true, term, activation>(p, a, d);
@@ -620,14 +620,14 @@ namespace Simd
                 Set<false, term, activation>(p, a, d);
         }
 
-        template<SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
+        template<SimdConvolutionActivationType activation> void Set(const ConvParam& p, const AlgParam& a, ConvolutionPtr* d)
         {
             Set<Term8iLast8u, activation>(p, a, d);
             Set<Term8iLast32f, activation>(p, a, d);
             Set<Term8iInterim, SimdConvolutionActivationIdentity>(p, a, d);
         }
 
-        static void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
+        static void Set(const ConvParam& p, const AlgParam& a, ConvolutionPtr* d)
         {
             switch (p.activation)
             {
@@ -646,7 +646,7 @@ namespace Simd
             }
         }
 
-        SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
+        SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam& p)
             : Base::SynetConvolution8iNhwcDirect(p)
         {
             SetAlgParam(F, 2 * F, 5, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
@@ -654,7 +654,7 @@ namespace Simd
             _convertSrc = Neon::SynetConvert32fTo8u;
         }
 
-        bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam8i& p)
+        bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam& p)
         {
             if (p.trans != SimdTrue || p.group != 1)
                 return false;
@@ -665,8 +665,8 @@ namespace Simd
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam8i param(batch, conv, compatibility);
-            if (!param.Valid())
+            ConvParam param(batch, conv, compatibility);
+            if (!param.Valid(SimdTensorData32f, SimdTensorData8u))
                 return NULL;
             else if (SynetConvolution8iNhwcDirect::Preferable(param))
                 return new SynetConvolution8iNhwcDirect(param);

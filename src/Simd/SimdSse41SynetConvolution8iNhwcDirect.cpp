@@ -34,7 +34,7 @@ namespace Simd
 #if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Sse41
     {
-        SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
+        SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam& p)
             : Base::SynetConvolution8iNhwcDirect(p)
         {
             SetAlgParam(F, 2 * F, 5, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
@@ -45,7 +45,7 @@ namespace Simd
             _convertSrc = Sse41::SynetConvert32fTo8u;
         }
 
-        bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam8i& p)
+        bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam& p)
         {
             if (p.trans != SimdTrue || p.group != 1)
                 return false;
@@ -56,8 +56,8 @@ namespace Simd
 
         void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam8i param(batch, conv, compatibility);
-            if (!param.Valid())
+            ConvParam param(batch, conv, compatibility);
+            if (!param.Valid(SimdTensorData32f, SimdTensorData8u))
                 return NULL;
 #if defined(SIMD_INT8_DEBUG_ENABLE)
             else if (SynetConvolution8iNhwcDepthwise::Preferable(param))

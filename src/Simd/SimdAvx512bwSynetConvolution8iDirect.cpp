@@ -34,7 +34,7 @@ namespace Simd
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx512bw
     {
-        SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
+        SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam& p)
             : Avx2::SynetConvolution8iNhwcDirect(p)
         {
             SetAlgParam(F, 2 * F, 12, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
@@ -49,8 +49,8 @@ namespace Simd
 
         void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam8i param(batch, conv, compatibility);
-            if (!param.Valid())
+            ConvParam param(batch, conv, compatibility);
+            if (!param.Valid(SimdTensorData32f, SimdTensorData8u))
                 return NULL;
 #if defined(SIMD_INT8_DEBUG_ENABLE)
             else if (SynetConvolution8iNhwcDepthwise::Preferable(param))

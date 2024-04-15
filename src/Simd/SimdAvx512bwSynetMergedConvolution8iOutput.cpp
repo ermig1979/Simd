@@ -40,7 +40,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         template<Term8iType term, SimdConvolutionActivationType type, int M> void OutputConvolution1x1_2xM(
-            const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight,
+            const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight,
             const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
@@ -263,7 +263,7 @@ namespace Simd
             }
         }
 
-        typedef void(*OutputConvolution1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC,
+        typedef void(*OutputConvolution1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC,
             const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first);
 
         template<Term8iType term, SimdConvolutionActivationType type> OutputConvolution1x1_2xM_Ptr GetOutputConvolution1x1_2xM(size_t M)
@@ -289,7 +289,7 @@ namespace Simd
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> void OutputConvolution1x1_2(const uint8_t* src,
-            const ConvParam8i& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const int8_t* weight,
+            const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const int8_t* weight,
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t n = 12, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
@@ -328,13 +328,13 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-         template<SimdConvolutionActivationType type> static void SetOutput(const ConvParam8i& p, OutputConvolutionPtr* output)
+         template<SimdConvolutionActivationType type> static void SetOutput(const ConvParam& p, OutputConvolutionPtr* output)
         {
             output[0] = p.dstT == SimdTensorData32f ? OutputConvolution1x1_2<Term8iLast32f, type> : OutputConvolution1x1_2<Term8iLast8u, type>;
             output[1] = OutputConvolution1x1_2<Term8iInterim, SimdConvolutionActivationIdentity>;
         }
 
-        void SetOutput(const ConvParam8i& p, OutputConvolutionPtr* output)
+        void SetOutput(const ConvParam& p, OutputConvolutionPtr* output)
         {
             switch (p.activation)
             {

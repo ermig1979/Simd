@@ -99,7 +99,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        inline void ImgToCol(const uint8_t* src, const ConvParam8i& p, const uint8_t* zero, uint8_t* dst)
+        inline void ImgToCol(const uint8_t* src, const ConvParam& p, const uint8_t* zero, uint8_t* dst)
         {
             assert(!p.trans);
             size_t srcSize = p.srcW * p.srcH;

@@ -24,6 +24,7 @@
 #ifndef __SimdSynetConvolution8i_h__
 #define __SimdSynetConvolution8i_h__
 
+#include "Simd/SimdSynetConvParam.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPerformance.h"
 
@@ -33,106 +34,6 @@
 
 namespace Simd
 {
-    struct ConvParam8i : public SimdConvolutionParameters
-    {
-        SimdBool trans;
-        size_t batch;
-        SimdSynetCompatibilityType compatibility;
-
-        ConvParam8i()
-        {
-        }
-
-        ConvParam8i(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
-        {
-            *((SimdConvolutionParameters*)this) = *conv;
-            this->trans = (srcF == SimdTensorFormatNhwc ? SimdTrue : SimdFalse);
-            this->batch = batch;
-            this->compatibility = compatibility;
-        }
-
-        bool Valid()
-        {
-            return 
-                dstH == (srcH + padY + padH - (dilationY * (kernelY - 1) + 1)) / strideY + 1 && dstH > 0 &&
-                dstW == (srcW + padX + padW - (dilationX * (kernelX - 1) + 1)) / strideX + 1 && dstW > 0 &&
-                (srcT == SimdTensorData32f || srcT == SimdTensorData8u) && (dstT == SimdTensorData32f || dstT == SimdTensorData8u) &&
-                srcF == dstF && (srcF == SimdTensorFormatNchw || srcF == SimdTensorFormatNhwc);
-        }
-
-        SIMD_INLINE bool IsKernel(size_t value) const
-        {
-            return kernelY == value && kernelX == value;
-        }
-
-        SIMD_INLINE bool IsKernel(size_t valueY, size_t valueX) const
-        {
-            return kernelY == valueY && kernelX == valueX;
-        }
-
-        SIMD_INLINE bool IsDilation(size_t value) const
-        {
-            return dilationY == value && dilationX == value;
-        }
-
-        SIMD_INLINE bool IsStride(size_t value) const
-        {
-            return strideY == value && strideX == value;
-        }
-
-        SIMD_INLINE bool IsPad(size_t value) const
-        {
-            return padY == value && padX == value && padH == value && padW == value;
-        }
-
-        SIMD_INLINE bool IsDepthwise() const
-        {
-            return srcC == group && dstC == group;
-        }
-
-        SIMD_INLINE bool Is1x1() const
-        {
-            return IsKernel(1) && IsDilation(1) && IsStride(1) && IsPad(0);
-        }
-
-        SIMD_INLINE size_t NoseH() const
-        {
-            return DivHi(padY, strideY);
-        }
-
-        SIMD_INLINE size_t NoseW() const
-        {
-            return DivHi(padX, strideX);
-        }
-
-        SIMD_INLINE size_t BodyH() const
-        {
-            return (padY + srcH - (kernelY - 1) * dilationY - 1)/ strideY + 1;
-        }
-
-        SIMD_INLINE size_t BodyW() const
-        {
-            return (padX + srcW - (kernelX - 1) * dilationX - 1) / strideX + 1;
-        }
-
-#ifdef SIMD_PERFORMANCE_STATISTIC
-        String Info() const
-        {
-            std::stringstream ss;
-            ss << batch << "x" << srcC << "x" << srcH << "x" << srcW;
-            ss << "-" << dstC << "x" << kernelY << "x" << kernelX;
-            ss << "-" << dilationX << "-" << strideX << "-" << Simd::Max(padX, padW) << "-" << group;
-            ss << "-" << (srcT == SimdTensorData8u ? "u" : "f") << (dstT == SimdTensorData8u ? "u" : "f");
-            return ss.str();
-        }
-
-        int64_t Flop() const
-        {
-            return int64_t(batch) * kernelY * kernelX * srcC * dstH * dstW * dstC / group * 2;
-        }
-#endif
-    };
-
     struct CvtParam
     {
         Array8u zero;
@@ -156,9 +57,9 @@ namespace Simd
     class SynetConvolution8i : public Deletable
     {
     public:
-        SynetConvolution8i(const ConvParam8i& p);
+        SynetConvolution8i(const ConvParam& p);
 
-        const ConvParam8i & Param() const { return _param; }
+        const ConvParam & Param() const { return _param; }
 
         virtual String Ext() const = 0;
         virtual String Desc() const = 0;
@@ -185,7 +86,7 @@ namespace Simd
 
         typedef void(*Convert32fTo8u)(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
-        ConvParam8i _param;
+        ConvParam _param;
         Array8u _buffer;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer * _perf;
@@ -204,7 +105,7 @@ namespace Simd
         class SynetConvolution8iGemmNN : public SynetConvolution8i
         {
         public:
-            SynetConvolution8iGemmNN(const ConvParam8i & p);
+            SynetConvolution8iGemmNN(const ConvParam & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::GemmNN"; }
             virtual size_t ExternalBufferSize() const;
@@ -219,14 +120,14 @@ namespace Simd
         class SynetConvolution8iNhwcDirect : public SynetConvolution8i
         {
         public:
-            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+            SynetConvolution8iNhwcDirect(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t InternalBufferSize() const;
             virtual size_t ExternalBufferSize() const;
             virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
 
-            static bool Preferable(const ConvParam8i& p);
+            static bool Preferable(const ConvParam& p);
 
             struct AlgParam
             {
@@ -234,7 +135,7 @@ namespace Simd
                 int32_t zero, size, upper;
             };
 
-            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, 
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, 
                 const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first);
 
         protected:
@@ -244,30 +145,30 @@ namespace Simd
             void PadInput(const uint8_t* src, uint8_t* dst);
 
             virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
-            void Forward8u(const uint8_t* src, const ConvParam8i & p, int32_t* buf, uint8_t* dst);
+            void Forward8u(const uint8_t* src, const ConvParam & p, int32_t* buf, uint8_t* dst);
 
             AlgParam _alg;
             size_t _sizeP, _sizeB;
-            ConvParam8i _paramP;
+            ConvParam _paramP;
             ConvolutionPtr _convolutions[3];
         };
 
         class SynetConvolution8iNhwcDepthwise : public SynetConvolution8i
         {
         public:
-            SynetConvolution8iNhwcDepthwise(const ConvParam8i& p);
+            SynetConvolution8iNhwcDepthwise(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
 
-            static bool Preferable(const ConvParam8i& p);
+            static bool Preferable(const ConvParam& p);
 
             struct AlgParam
             {
                 int32_t zero, size, upper;
             };
 
-            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, 
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, const int8_t* weight, 
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst);
 
         protected:
@@ -287,26 +188,26 @@ namespace Simd
         class SynetConvolution8iNhwcDirect : public Base::SynetConvolution8iNhwcDirect
         {
         public:
-            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+            SynetConvolution8iNhwcDirect(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
 
-            static bool Preferable(const ConvParam8i& p);
+            static bool Preferable(const ConvParam& p);
         };
 
-        void SetDirectAny(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirectAny(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
-        void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirect1x1(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
 #if defined(SIMD_INT8_DEBUG_ENABLE)
         class SynetConvolution8iNhwcDepthwise : public Base::SynetConvolution8iNhwcDepthwise
         {
         public:
-            SynetConvolution8iNhwcDepthwise(const ConvParam8i& p);
+            SynetConvolution8iNhwcDepthwise(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
 
-            static bool Preferable(const ConvParam8i& p);
+            static bool Preferable(const ConvParam& p);
         };
 #endif
 
@@ -320,20 +221,20 @@ namespace Simd
         class SynetConvolution8iNhwcDirect : public Sse41::SynetConvolution8iNhwcDirect
         {
         public:
-            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+            SynetConvolution8iNhwcDirect(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
 
-        void SetDirectAny(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirectAny(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
-        void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirect1x1(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
 #if defined(SIMD_INT8_DEBUG_ENABLE)
         class SynetConvolution8iNhwcDepthwise : public Sse41::SynetConvolution8iNhwcDepthwise
         {
         public:
-            SynetConvolution8iNhwcDepthwise(const ConvParam8i& p);
+            SynetConvolution8iNhwcDepthwise(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -349,20 +250,20 @@ namespace Simd
         class SynetConvolution8iNhwcDirect : public Avx2::SynetConvolution8iNhwcDirect
         {
         public:
-            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+            SynetConvolution8iNhwcDirect(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
 
-        void SetDirectAny(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirectAny(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
-        void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirect1x1(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
 #if defined(SIMD_INT8_DEBUG_ENABLE)
         class SynetConvolution8iNhwcDepthwise : public Avx2::SynetConvolution8iNhwcDepthwise
         {
         public:
-            SynetConvolution8iNhwcDepthwise(const ConvParam8i& p);
+            SynetConvolution8iNhwcDepthwise(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
@@ -378,20 +279,20 @@ namespace Simd
         class SynetConvolution8iNhwcDirect : public Avx512bw::SynetConvolution8iNhwcDirect
         {
         public:
-            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+            SynetConvolution8iNhwcDirect(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512vnni"; }
         };
 
-        void SetDirectAny(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirectAny(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
-        void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirect1x1(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
 #if defined(SIMD_INT8_DEBUG_ENABLE)
         class SynetConvolution8iNhwcDepthwise : public Avx512bw::SynetConvolution8iNhwcDepthwise
         {
         public:
-            SynetConvolution8iNhwcDepthwise(const ConvParam8i& p);
+            SynetConvolution8iNhwcDepthwise(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512vnni"; }
         };
@@ -411,14 +312,14 @@ namespace Simd
 #endif
         {
         public:
-            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+            SynetConvolution8iNhwcDirect(const ConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };
 
-        void SetDirectAny(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirectAny(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
-        void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+        void SetDirect1x1(const ConvParam& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
@@ -430,11 +331,11 @@ namespace Simd
         class SynetConvolution8iNhwcDirect : public Base::SynetConvolution8iNhwcDirect
         {
         public:
-            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+            SynetConvolution8iNhwcDirect(const ConvParam& p);
 
             virtual String Ext() const { return "Neon"; }
 
-            static bool Preferable(const ConvParam8i& p);
+            static bool Preferable(const ConvParam& p);
         };
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);

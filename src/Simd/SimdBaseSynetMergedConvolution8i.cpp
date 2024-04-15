@@ -52,7 +52,7 @@ namespace Simd
             Base::SynetConvert32fTo8u(src, 1, channels, yEnd, width, SimdTensorFormatNhwc, scale, shift, dst, compatibility);
         }
 
-        template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const ConvParam8i& p, const SynetMergedConvolution8i::AlgParam& a,
+        template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const ConvParam& p, const SynetMergedConvolution8i::AlgParam& a,
             size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
         {
             DepthwiseConvolution<type>(src, p, 0, 0, p.dstH, NULL, weight, bias, params, (float*)dst, 1);
@@ -65,8 +65,8 @@ namespace Simd
 #endif        
         {
             _alg.miC = 0;
-            const ConvParam8i& beg = p.conv[0];
-            const ConvParam8i& end = p.conv[p.count - 1];
+            const ConvParam& beg = p.conv[0];
+            const ConvParam& end = p.conv[p.count - 1];
             _sizeS = beg.srcH * beg.srcW * beg.srcC;
             _sizeD = end.dstH * end.dstW * end.dstC;
             _sizeI[0] = p.conv[1].srcH * p.conv[1].srcW * p.conv[1].srcC;
@@ -143,14 +143,14 @@ namespace Simd
         void SynetMergedConvolution8i::SetParams(const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats)
         {
             const MergConvParam8i& p = _param;
-            const ConvParam8i& beg = p.conv[0];
-            const ConvParam8i& end = p.conv[p.count - 1];
+            const ConvParam& beg = p.conv[0];
+            const ConvParam& end = p.conv[p.count - 1];
             _cvt[0].Init(stats[0], stats[1], beg.srcC, beg.compatibility);
             _cvt[1].Init(stats[2], stats[3], end.srcC, beg.compatibility);
             _cvt[2].Init(stats[4], stats[5], end.dstC, beg.compatibility);
             for (size_t i = 0, q = 0; i < p.count; ++i)
             {
-                const ConvParam8i& c = p.conv[i];
+                const ConvParam& c = p.conv[i];
                 if (p.conv[i].group == 1)
                 {
                     _weight8i[q].Resize(c.dstC * c.kernelY * c.kernelX * c.srcC);
@@ -227,9 +227,9 @@ namespace Simd
         void SynetMergedConvolution8i::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const MergConvParam8i& p = _param;
-            const ConvParam8i& c0 = p.conv[0];
-            const ConvParam8i& c1 = p.conv[1];
-            const ConvParam8i& c2 = p.conv[2];
+            const ConvParam& c0 = p.conv[0];
+            const ConvParam& c1 = p.conv[1];
+            const ConvParam& c2 = p.conv[2];
 
             buf = GetBuffer(buf);
             float* buf0 = Allocate<float>(buf, _sizeB[0]);
@@ -277,7 +277,7 @@ namespace Simd
                 }
                 if (_d8u)
                 {
-                    const ConvParam8i& e = p.conv[p.count - 1];
+                    const ConvParam& e = p.conv[p.count - 1];
                     _cvt32fTo8u(dst32f, 0, e.dstH, e.dstW, e.dstC, _cvt[2].scale.data, _cvt[2].shift.data, dst8u, 0, c0.compatibility);
                     dst8u += _sizeD;
                 }
@@ -308,7 +308,7 @@ namespace Simd
 
         void SynetMergedConvolution8i::Quantize(const float* weight, const float* bias, size_t i, size_t q)
         {
-            const ConvParam8i& conv = _param.conv[i];
+            const ConvParam& conv = _param.conv[i];
             const CvtParam& cvt = _cvt[i ? 1 : 0];
             size_t D = conv.dstC, C = conv.srcC, K = conv.kernelY * conv.kernelX;
             Array32f  normW(C * K);
@@ -347,7 +347,7 @@ namespace Simd
             }
         }
 
-        void SynetMergedConvolution8i::ReorderInputWeight(const ConvParam8i & p, Array8i& weight)
+        void SynetMergedConvolution8i::ReorderInputWeight(const ConvParam & p, Array8i& weight)
         {
             if (_alg.miC == 0)
                 return;
@@ -378,7 +378,7 @@ namespace Simd
             weight.Swap(buf);
         }
 
-        void SynetMergedConvolution8i::ReorderDepthwiseWeight(const ConvParam8i& p, Array32f& weight)
+        void SynetMergedConvolution8i::ReorderDepthwiseWeight(const ConvParam& p, Array32f& weight)
         {
             if (_alg.miC == 0)
                 return;
@@ -402,7 +402,7 @@ namespace Simd
             weight.Swap(buf);
         }
 
-        void SynetMergedConvolution8i::ReorderOutputWeight(const ConvParam8i& p, Array8i& weight)
+        void SynetMergedConvolution8i::ReorderOutputWeight(const ConvParam& p, Array8i& weight)
         {
             if (_alg.miC == 0)
                 return;
@@ -436,7 +436,7 @@ namespace Simd
 
         void SynetMergedConvolution8i::DirectConvolution8i(const uint8_t* src, size_t i, size_t q, uint8_t* buf, int32_t* sum, float* dst)
         {
-            const ConvParam8i& conv = _param.conv[i];
+            const ConvParam& conv = _param.conv[i];
             const float* params = _params[i].data;
             const uint8_t* tmp = src;
             if (!_1x1 && i == 0)
@@ -500,9 +500,9 @@ namespace Simd
         void SynetMergedConvolution8iCdc::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const MergConvParam8i& p = _param;
-            const ConvParam8i& c0 = p.conv[0];
-            const ConvParam8i& c1 = p.conv[1];
-            const ConvParam8i& c2 = p.conv[2];
+            const ConvParam& c0 = p.conv[0];
+            const ConvParam& c1 = p.conv[1];
+            const ConvParam& c2 = p.conv[2];
             const AlgParam& a = _alg;
 
             buf = GetBuffer(buf);
@@ -552,15 +552,15 @@ namespace Simd
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam8i& p = _param;
-            const ConvParam8i& c0 = p.conv[0];
-            const ConvParam8i& c1 = p.conv[1];
-            const ConvParam8i& c2 = p.conv[2];
+            const ConvParam& c0 = p.conv[0];
+            const ConvParam& c1 = p.conv[1];
+            const ConvParam& c2 = p.conv[2];
             AlgParam & a = _alg;
             a.miC = F;
             size_t size = 0;
             for (size_t i = 0; i < 3; ++i)
             {
-                const ConvParam8i & c = p.conv[i];
+                const ConvParam & c = p.conv[i];
                 size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC : 4);
             }
             size_t count = size / (L3 / 2) + 1;
@@ -605,8 +605,8 @@ namespace Simd
         void SynetMergedConvolution8iCd::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const MergConvParam8i& p = _param;
-            const ConvParam8i& c0 = p.conv[0];
-            const ConvParam8i& c1 = p.conv[1];
+            const ConvParam& c0 = p.conv[0];
+            const ConvParam& c1 = p.conv[1];
             const AlgParam& a = _alg;
 
             buf = GetBuffer(buf);
@@ -648,14 +648,14 @@ namespace Simd
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam8i& p = _param;
-            const ConvParam8i& c0 = p.conv[0];
-            const ConvParam8i& c1 = p.conv[1];
+            const ConvParam& c0 = p.conv[0];
+            const ConvParam& c1 = p.conv[1];
             AlgParam& a = _alg;
             a.miC = F;
             size_t size = 0;
             for (size_t i = 0; i < 2; ++i)
             {
-                const ConvParam8i& c = p.conv[i];
+                const ConvParam& c = p.conv[i];
                 size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC : 4);
             }
             size_t count = size / (L3 / 2) + 1;
@@ -700,8 +700,8 @@ namespace Simd
         void SynetMergedConvolution8iDc::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const MergConvParam8i& p = _param;
-            const ConvParam8i& c0 = p.conv[0];
-            const ConvParam8i& c1 = p.conv[1];
+            const ConvParam& c0 = p.conv[0];
+            const ConvParam& c1 = p.conv[1];
             const AlgParam& a = _alg;
 
             buf = GetBuffer(buf);
@@ -747,14 +747,14 @@ namespace Simd
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam8i& p = _param;
-            const ConvParam8i& c0 = p.conv[0];
-            const ConvParam8i& c1 = p.conv[1];
+            const ConvParam& c0 = p.conv[0];
+            const ConvParam& c1 = p.conv[1];
             AlgParam& a = _alg;
             a.miC = F;
             size_t size = 0;
             for (size_t i = 0; i < 2; ++i)
             {
-                const ConvParam8i& c = p.conv[i];
+                const ConvParam& c = p.conv[i];
                 size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC : 4);
             }
             size_t count = size / (L3 / 2) + 1;

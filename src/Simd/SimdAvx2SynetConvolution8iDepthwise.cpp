@@ -63,7 +63,7 @@ namespace Simd
 		}
 
 		template <Term8iType term, SimdConvolutionActivationType activation, bool nofma> void ConvolutionNhwcDepthwiseDefault(
-			const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const float* norm,
+			const uint8_t* src, const ConvParam& p, const AlgParam& a, const int8_t* weight, const float* norm,
 			const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
 		{
 			__m256i zero = _mm256_set1_epi32(a.zero);
@@ -171,7 +171,7 @@ namespace Simd
 		}
 
 		template<Term8iType term, SimdConvolutionActivationType activation, bool nofma> SIMD_INLINE void ConvolutionNhwcDepthwise3x3Edge(
-			const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, const int8_t* weight,
+			const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dy, size_t dx, const int8_t* weight,
 			const float* norm, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
 		{
 			__m256i zero = _mm256_set1_epi32(a.zero);
@@ -272,7 +272,7 @@ namespace Simd
 		}
 
 		template<Term8iType term, SimdConvolutionActivationType activation, bool nofma> SIMD_INLINE void ConvolutionNhwcDepthwise3x3Main1(
-			const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const float* norm,
+			const uint8_t* src, const ConvParam& p, const AlgParam& a, const int8_t* weight, const float* norm,
 			const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
 		{
 			__m128i w01, w23, s01, s23;
@@ -350,7 +350,7 @@ namespace Simd
 		}
 
 		template<Term8iType term, SimdConvolutionActivationType activation, bool nofma> SIMD_INLINE void ConvolutionNhwcDepthwise3x3Main2(
-			const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const float* norm,
+			const uint8_t* src, const ConvParam& p, const AlgParam& a, const int8_t* weight, const float* norm,
 			const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
 		{
 			__m128i w0, s0, s1;
@@ -458,7 +458,7 @@ namespace Simd
 		}
 
 		template<Term8iType term, SimdConvolutionActivationType activation, bool nofma> SIMD_INLINE void ConvolutionNhwcDepthwise3x3(
-			const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const float* norm,
+			const uint8_t* src, const ConvParam& p, const AlgParam& a, const int8_t* weight, const float* norm,
 			const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
 		{
 			size_t srcS = p.srcC * p.srcW;
@@ -491,7 +491,7 @@ namespace Simd
 
 		//---------------------------------------------------------------------
 
-		template <Term8iType term, SimdConvolutionActivationType activation, bool nofma> void Set(const ConvParam8i& p, ConvolutionPtr& d)
+		template <Term8iType term, SimdConvolutionActivationType activation, bool nofma> void Set(const ConvParam& p, ConvolutionPtr& d)
 		{
 			if (p.IsKernel(3) && p.IsDilation(1))
 				d = ConvolutionNhwcDepthwise3x3<term, activation, nofma>;
@@ -499,7 +499,7 @@ namespace Simd
 				d = ConvolutionNhwcDepthwiseDefault<term, activation, nofma>;
 		}
 
-		template<Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, ConvolutionPtr& d)
+		template<Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam& p, ConvolutionPtr& d)
 		{
 			if (Base::FmaAvoid(p.compatibility))
 				Set<term, activation, true>(p, d);
@@ -507,7 +507,7 @@ namespace Simd
 				Set<term, activation, false>(p, d);
 		}
 
-		template<SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, ConvolutionPtr& d)
+		template<SimdConvolutionActivationType activation> void Set(const ConvParam& p, ConvolutionPtr& d)
 		{
 			if (p.dstT == SimdTensorData8u)
 				Set<Term8iLast8u, activation>(p, d);
@@ -515,7 +515,7 @@ namespace Simd
 				Set<Term8iLast32f, activation>(p, d);
 		}
 
-		static void Set(const ConvParam8i& p, ConvolutionPtr& d)
+		static void Set(const ConvParam& p, ConvolutionPtr& d)
 		{
 			switch (p.activation)
 			{
@@ -534,7 +534,7 @@ namespace Simd
 			}
 		}
 
-		SynetConvolution8iNhwcDepthwise::SynetConvolution8iNhwcDepthwise(const ConvParam8i& p)
+		SynetConvolution8iNhwcDepthwise::SynetConvolution8iNhwcDepthwise(const ConvParam& p)
 			: Sse41::SynetConvolution8iNhwcDepthwise(p)
 		{
 			Set(p, _convolution);
