@@ -549,6 +549,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Avx512bw::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif 
+
+#if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
+        if (Simd::Avx512vnni::Enable && TestAvx512vnni())
+            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Avx512vnni::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
         
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon())

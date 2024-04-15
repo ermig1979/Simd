@@ -204,6 +204,9 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        Base::DescrInt::CosineDistancePtr GetCosineDistance(size_t depth);
+        Base::DescrInt::MacroCosineDistancesDirectPtr GetMacroCosineDistancesDirect(size_t depth);
+
         Base::DescrInt::MacroCosineDistancesUnpackPtr GetMacroCosineDistancesUnpack(size_t depth);
 
         //-------------------------------------------------------------------------------------------------
