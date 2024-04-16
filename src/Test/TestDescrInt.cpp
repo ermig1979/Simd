@@ -47,6 +47,7 @@ namespace Test
                 u8p->at(r) = dst;
         }
         TEST_ALIGN(SimdDescrIntDecodedSize(c));
+        TEST_ALIGN(SIMD_ALIGN);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -554,6 +555,11 @@ namespace Test
         if (Simd::Avx512vnni::Enable && TestAvx512vnni())
             result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::Avx512vnni::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif
+
+#if defined(SIMD_AMXBF16_ENABLE)
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
+            result = result && DescrIntCosineDistanceAutoTest(FUNC_DI(Simd::AmxBf16::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
         
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon())
@@ -604,7 +610,7 @@ namespace Test
             result = result && DescrIntCosineDistancesMxNaAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(128, 128, 512, depth, f1, f2);
             //result = result && DescrIntCosineDistancesMxNaAutoTest(127, 129, 520, depth, f1, f2);
-            //result = result && DescrIntCosineDistancesMxNaAutoTest(29, 31, 10000, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNaAutoTest(32, 32, 10000, depth, f1, f2);
         }
 
         return result;
@@ -635,6 +641,11 @@ namespace Test
 #if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
         if (Simd::Avx512vnni::Enable && TestAvx512vnni())
             result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Avx512vnni::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
+
+#if defined(SIMD_AMXBF16_ENABLE)
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
+            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::AmxBf16::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif
         
 #if defined(SIMD_NEON_ENABLE)
@@ -714,6 +725,11 @@ namespace Test
 #if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
         if (Simd::Avx512vnni::Enable && TestAvx512vnni())
             result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Avx512vnni::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
+
+#if defined(SIMD_AMXBF16_ENABLE)
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
+            result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::AmxBf16::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif
 
 #if defined(SIMD_NEON_ENABLE)

@@ -215,6 +215,25 @@ namespace Simd
     }
 #endif
 
+#if defined(SIMD_AMXBF16_ENABLE)
+    namespace AmxBf16
+    {
+        class DescrInt : public Avx512vnni::DescrInt
+        {
+        public:
+            DescrInt(size_t size, size_t depth);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        Base::DescrInt::CosineDistancePtr GetCosineDistance(size_t depth);
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* DescrIntInit(size_t size, size_t depth);
+    }
+#endif
+
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
