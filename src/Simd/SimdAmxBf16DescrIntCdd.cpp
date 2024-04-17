@@ -40,77 +40,52 @@ namespace Simd
         template<> int32_t Correlation<4>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
-            __m512i ab32 = _mm512_setzero_si512();
+            __m512i ab0 = _mm512_setzero_si512();
+            __m512i ab1 = _mm512_setzero_si512();
             size_t i = 0, size128 = AlignLo(size, 128);
             for (; i < size128; i += 128, a += 64, b += 64)
             {
                 __m512i _a = _mm512_loadu_si512((__m512i*)a);
                 __m512i _b = _mm512_loadu_si512((__m512i*)b);
-                ab32 = _mm512_dpbusd_epi32(ab32, _mm512_and_si512(_a, K8_0F), _mm512_and_si512(_b, K8_0F));
-                ab32 = _mm512_dpbusd_epi32(ab32, _mm512_and_si512(_mm512_srli_epi16(_a, 4), K8_0F), _mm512_and_si512(_mm512_srli_epi16(_b, 4), K8_0F));
+                ab0 = _mm512_dpbusd_epi32(ab0, _mm512_and_si512(_a, K8_0F), _mm512_and_si512(_b, K8_0F));
+                ab1 = _mm512_dpbusd_epi32(ab1, _mm512_and_si512(_mm512_srli_epi16(_a, 4), K8_0F), _mm512_and_si512(_mm512_srli_epi16(_b, 4), K8_0F));
             }
             if(i < size)
             {
                 __mmask16 mask = TailMask16((size - i) / 8);
                 __m512i _a = _mm512_maskz_loadu_epi32(mask, a);
                 __m512i _b = _mm512_maskz_loadu_epi32(mask, b);
-                ab32 = _mm512_dpbusd_epi32(ab32, _mm512_and_si512(_a, K8_0F), _mm512_and_si512(_b, K8_0F));
-                ab32 = _mm512_dpbusd_epi32(ab32, _mm512_and_si512(_mm512_srli_epi16(_a, 4), K8_0F), _mm512_and_si512(_mm512_srli_epi16(_b, 4), K8_0F));
+                ab0 = _mm512_dpbusd_epi32(ab0, _mm512_and_si512(_a, K8_0F), _mm512_and_si512(_b, K8_0F));
+                ab1 = _mm512_dpbusd_epi32(ab1, _mm512_and_si512(_mm512_srli_epi16(_a, 4), K8_0F), _mm512_and_si512(_mm512_srli_epi16(_b, 4), K8_0F));
             }
-            return ExtractSum<uint32_t>(ab32);
+            return ExtractSum<uint32_t>(_mm512_add_epi32(ab0, ab1));
         }
 
-        SIMD_INLINE __m512i Load5(const uint8_t* ptr, __mmask32 mask = 0x000FFFFF)
+        SIMD_INLINE __m512i Load5(const uint8_t* ptr, __mmask64 mask = 0x000000FFFFFFFFFF)
         {
-            return _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(C5_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(mask, ptr))), C5_SHFL), C5_MULLO), 11);
+            return _mm512_and_si512(C5_MASK, _mm512_multishift_epi64_epi8(C5_MUSH, _mm512_permutexvar_epi8(C5_PERM, _mm512_maskz_loadu_epi8(mask, ptr))));
         }
 
         template<> int32_t Correlation<5>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
             __m512i _ab = _mm512_setzero_si512();
-            size_t i = 0, size32 = AlignLo(size, 32);
-            for (; i < size32; i += 32, a += 20, b += 20)
+            size_t i = 0, size64 = AlignLo(size, 64);
+            for (; i < size64; i += 64, a += 40, b += 40)
             {
                 __m512i _a = Load5(a);
                 __m512i _b = Load5(b);
-                _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+                _ab = _mm512_dpbusd_epi32(_ab, _a, _b);
             }
             if (i < size)
             {
-                __mmask32 mask = TailMask32((size - i) / 8 * 5);
+                __mmask64 mask = TailMask64((size - i) / 8 * 5);
                 __m512i _a = Load5(a, mask);
                 __m512i _b = Load5(b, mask);
-                _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+                _ab = _mm512_dpbusd_epi32(_ab, _a, _b);
             }
             return ExtractSum<uint32_t>(_ab);
         }
-
-        //SIMD_INLINE __m512i Load6(const uint8_t* ptr, __mmask32 mask = 0x00FFFFFF)
-        //{
-        //    return _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(C6_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(mask, ptr))), C6_SHFL), C6_MULLO), 10);
-        //}
-
-        //template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
-        //{
-        //    assert(size % 8 == 0);
-        //    __m512i _ab = _mm512_setzero_si512();
-        //    size_t i = 0, size32 = AlignLo(size, 32);
-        //    for (; i < size32; i += 32, a += 24, b += 24)
-        //    {
-        //        __m512i _a = Load6(a);
-        //        __m512i _b = Load6(b);
-        //        _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
-        //    }
-        //    if (i < size)
-        //    {
-        //        __mmask32 mask = TailMask32((size - i) / 8 * 6);
-        //        __m512i _a = Load6(a, mask);
-        //        __m512i _b = Load6(b, mask);
-        //        _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
-        //    }
-        //    return ExtractSum<uint32_t>(_ab);
-        //}
 
         SIMD_INLINE __m512i Load6(const uint8_t* ptr, __mmask64 mask = 0x0000FFFFFFFFFFFF)
         {
@@ -173,14 +148,14 @@ namespace Simd
             {
                 __m512i _a = _mm512_cvtepu8_epi16(_mm256_loadu_si256((__m256i*)(a + i)));
                 __m512i _b = _mm512_cvtepu8_epi16(_mm256_loadu_si256((__m256i*)(b + i)));
-                _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
             }
-            if ( i < size)
+            if (i < size)
             {
                 __mmask32 mask = TailMask32(size - i);
                 __m512i _a = _mm512_cvtepu8_epi16(_mm256_maskz_loadu_epi8(mask, a + i));
                 __m512i _b = _mm512_cvtepu8_epi16(_mm256_maskz_loadu_epi8(mask, b + i));
-                _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
             }
             return ExtractSum<uint32_t>(_ab);
         }
@@ -322,7 +297,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect4x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
-            size_t i = 0, size32 = AlignLo(size, 32), o = 16;
+            size_t i = 0, size64 = AlignLo(size, 64), o = 16;
             __m512i a0, a1, a2, a3, b0;
             __m512i ab00 = _mm512_setzero_si512();
             __m512i ab01 = _mm512_setzero_si512();
@@ -340,7 +315,7 @@ namespace Simd
             __m512i ab31 = _mm512_setzero_si512();
             __m512i ab32 = _mm512_setzero_si512();
             __m512i ab33 = _mm512_setzero_si512();
-            for (; i < size32; i += 32, o += 20)
+            for (; i < size64; i += 64, o += 40)
             {
                 a0 = Load5(A[0] + o);
                 a1 = Load5(A[1] + o);
@@ -348,60 +323,60 @@ namespace Simd
                 a3 = Load5(A[3] + o);
 
                 b0 = Load5(B[0] + o);
-                ab00 = _mm512_dpwssd_epi32(ab00, a0, b0);
-                ab10 = _mm512_dpwssd_epi32(ab10, a1, b0);
-                ab20 = _mm512_dpwssd_epi32(ab20, a2, b0);
-                ab30 = _mm512_dpwssd_epi32(ab30, a3, b0);
+                ab00 = _mm512_dpbusd_epi32(ab00, a0, b0);
+                ab10 = _mm512_dpbusd_epi32(ab10, a1, b0);
+                ab20 = _mm512_dpbusd_epi32(ab20, a2, b0);
+                ab30 = _mm512_dpbusd_epi32(ab30, a3, b0);
 
                 b0 = Load5(B[1] + o);
-                ab01 = _mm512_dpwssd_epi32(ab01, a0, b0);
-                ab11 = _mm512_dpwssd_epi32(ab11, a1, b0);
-                ab21 = _mm512_dpwssd_epi32(ab21, a2, b0);
-                ab31 = _mm512_dpwssd_epi32(ab31, a3, b0);
+                ab01 = _mm512_dpbusd_epi32(ab01, a0, b0);
+                ab11 = _mm512_dpbusd_epi32(ab11, a1, b0);
+                ab21 = _mm512_dpbusd_epi32(ab21, a2, b0);
+                ab31 = _mm512_dpbusd_epi32(ab31, a3, b0);
 
                 b0 = Load5(B[2] + o);
-                ab02 = _mm512_dpwssd_epi32(ab02, a0, b0);
-                ab12 = _mm512_dpwssd_epi32(ab12, a1, b0);
-                ab22 = _mm512_dpwssd_epi32(ab22, a2, b0);
-                ab32 = _mm512_dpwssd_epi32(ab32, a3, b0);
+                ab02 = _mm512_dpbusd_epi32(ab02, a0, b0);
+                ab12 = _mm512_dpbusd_epi32(ab12, a1, b0);
+                ab22 = _mm512_dpbusd_epi32(ab22, a2, b0);
+                ab32 = _mm512_dpbusd_epi32(ab32, a3, b0);
 
                 b0 = Load5(B[3] + o);
-                ab03 = _mm512_dpwssd_epi32(ab03, a0, b0);
-                ab13 = _mm512_dpwssd_epi32(ab13, a1, b0);
-                ab23 = _mm512_dpwssd_epi32(ab23, a2, b0);
-                ab33 = _mm512_dpwssd_epi32(ab33, a3, b0);
+                ab03 = _mm512_dpbusd_epi32(ab03, a0, b0);
+                ab13 = _mm512_dpbusd_epi32(ab13, a1, b0);
+                ab23 = _mm512_dpbusd_epi32(ab23, a2, b0);
+                ab33 = _mm512_dpbusd_epi32(ab33, a3, b0);
             }
             if (i < size)
             {
-                __mmask32 mask = TailMask32((size - i) / 8 * 5);
+                __mmask64 mask = TailMask64((size - i) / 8 * 5);
                 a0 = Load5(A[0] + o, mask);
                 a1 = Load5(A[1] + o, mask);
                 a2 = Load5(A[2] + o, mask);
                 a3 = Load5(A[3] + o, mask);
 
                 b0 = Load5(B[0] + o, mask);
-                ab00 = _mm512_dpwssd_epi32(ab00, a0, b0);
-                ab10 = _mm512_dpwssd_epi32(ab10, a1, b0);
-                ab20 = _mm512_dpwssd_epi32(ab20, a2, b0);
-                ab30 = _mm512_dpwssd_epi32(ab30, a3, b0);
+                ab00 = _mm512_dpbusd_epi32(ab00, a0, b0);
+                ab10 = _mm512_dpbusd_epi32(ab10, a1, b0);
+                ab20 = _mm512_dpbusd_epi32(ab20, a2, b0);
+                ab30 = _mm512_dpbusd_epi32(ab30, a3, b0);
 
                 b0 = Load5(B[1] + o, mask);
-                ab01 = _mm512_dpwssd_epi32(ab01, a0, b0);
-                ab11 = _mm512_dpwssd_epi32(ab11, a1, b0);
-                ab21 = _mm512_dpwssd_epi32(ab21, a2, b0);
-                ab31 = _mm512_dpwssd_epi32(ab31, a3, b0);
+                ab01 = _mm512_dpbusd_epi32(ab01, a0, b0);
+                ab11 = _mm512_dpbusd_epi32(ab11, a1, b0);
+                ab21 = _mm512_dpbusd_epi32(ab21, a2, b0);
+                ab31 = _mm512_dpbusd_epi32(ab31, a3, b0);
 
                 b0 = Load5(B[2] + o, mask);
-                ab02 = _mm512_dpwssd_epi32(ab02, a0, b0);
-                ab12 = _mm512_dpwssd_epi32(ab12, a1, b0);
-                ab22 = _mm512_dpwssd_epi32(ab22, a2, b0);
-                ab32 = _mm512_dpwssd_epi32(ab32, a3, b0);
+                ab02 = _mm512_dpbusd_epi32(ab02, a0, b0);
+                ab12 = _mm512_dpbusd_epi32(ab12, a1, b0);
+                ab22 = _mm512_dpbusd_epi32(ab22, a2, b0);
+                ab32 = _mm512_dpbusd_epi32(ab32, a3, b0);
 
                 b0 = Load5(B[3] + o, mask);
-                ab03 = _mm512_dpwssd_epi32(ab03, a0, b0);
-                ab13 = _mm512_dpwssd_epi32(ab13, a1, b0);
-                ab23 = _mm512_dpwssd_epi32(ab23, a2, b0);
-                ab33 = _mm512_dpwssd_epi32(ab33, a3, b0);
+                ab03 = _mm512_dpbusd_epi32(ab03, a0, b0);
+                ab13 = _mm512_dpbusd_epi32(ab13, a1, b0);
+                ab23 = _mm512_dpbusd_epi32(ab23, a2, b0);
+                ab33 = _mm512_dpbusd_epi32(ab33, a3, b0);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
             __m128 ab1 = _mm_cvtepi32_ps(Extract4Sums(ab10, ab11, ab12, ab13));
@@ -760,44 +735,44 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect1x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
-            size_t i = 0, size32 = AlignLo(size, 32), o = 16;
+            size_t i = 0, size64 = AlignLo(size, 64), o = 16;
             __m512i a0, b0;
             __m512i ab00 = _mm512_setzero_si512();
             __m512i ab01 = _mm512_setzero_si512();
             __m512i ab02 = _mm512_setzero_si512();
             __m512i ab03 = _mm512_setzero_si512();
-            for (; i < size32; i += 32, o += 20)
+            for (; i < size64; i += 64, o += 40)
             {
                 a0 = Load5(A[0] + o);
 
                 b0 = Load5(B[0] + o);
-                ab00 = _mm512_dpwssd_epi32(ab00, a0, b0);
+                ab00 = _mm512_dpbusd_epi32(ab00, a0, b0);
 
                 b0 = Load5(B[1] + o);
-                ab01 = _mm512_dpwssd_epi32(ab01, a0, b0);
+                ab01 = _mm512_dpbusd_epi32(ab01, a0, b0);
 
                 b0 = Load5(B[2] + o);
-                ab02 = _mm512_dpwssd_epi32(ab02, a0, b0);
+                ab02 = _mm512_dpbusd_epi32(ab02, a0, b0);
 
                 b0 = Load5(B[3] + o);
-                ab03 = _mm512_dpwssd_epi32(ab03, a0, b0);
+                ab03 = _mm512_dpbusd_epi32(ab03, a0, b0);
             }
             if (i < size)
             {
-                __mmask32 mask = TailMask32((size - i) / 8 * 5);
+                __mmask64 mask = TailMask64((size - i) / 8 * 5);
                 a0 = Load5(A[0] + o, mask);
 
                 b0 = Load5(B[0] + o, mask);
-                ab00 = _mm512_dpwssd_epi32(ab00, a0, b0);
+                ab00 = _mm512_dpbusd_epi32(ab00, a0, b0);
 
                 b0 = Load5(B[1] + o, mask);
-                ab01 = _mm512_dpwssd_epi32(ab01, a0, b0);
+                ab01 = _mm512_dpbusd_epi32(ab01, a0, b0);
 
                 b0 = Load5(B[2] + o, mask);
-                ab02 = _mm512_dpwssd_epi32(ab02, a0, b0);
+                ab02 = _mm512_dpbusd_epi32(ab02, a0, b0);
 
                 b0 = Load5(B[3] + o, mask);
-                ab03 = _mm512_dpwssd_epi32(ab03, a0, b0);
+                ab03 = _mm512_dpbusd_epi32(ab03, a0, b0);
             }
             __m128 ab0 = _mm_cvtepi32_ps(Extract4Sums(ab00, ab01, ab02, ab03));
             Sse41::DecodeCosineDistances1x4(A[0], B, ab0, distances + 0 * stride);

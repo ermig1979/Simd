@@ -40,24 +40,25 @@ namespace Simd
         template<> int32_t Correlation<4>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
-            __m512i ab32 = _mm512_setzero_si512();
+            __m512i ab0 = _mm512_setzero_si512();
+            __m512i ab1 = _mm512_setzero_si512();
             size_t i = 0, size128 = AlignLo(size, 128);
             for (; i < size128; i += 128, a += 64, b += 64)
             {
                 __m512i _a = _mm512_loadu_si512((__m512i*)a);
                 __m512i _b = _mm512_loadu_si512((__m512i*)b);
-                ab32 = _mm512_dpbusd_epi32(ab32, _mm512_and_si512(_a, K8_0F), _mm512_and_si512(_b, K8_0F));
-                ab32 = _mm512_dpbusd_epi32(ab32, _mm512_and_si512(_mm512_srli_epi16(_a, 4), K8_0F), _mm512_and_si512(_mm512_srli_epi16(_b, 4), K8_0F));
+                ab0 = _mm512_dpbusd_epi32(ab0, _mm512_and_si512(_a, K8_0F), _mm512_and_si512(_b, K8_0F));
+                ab1 = _mm512_dpbusd_epi32(ab1, _mm512_and_si512(_mm512_srli_epi16(_a, 4), K8_0F), _mm512_and_si512(_mm512_srli_epi16(_b, 4), K8_0F));
             }
-            if(i < size)
+            if (i < size)
             {
                 __mmask16 mask = TailMask16((size - i) / 8);
                 __m512i _a = _mm512_maskz_loadu_epi32(mask, a);
                 __m512i _b = _mm512_maskz_loadu_epi32(mask, b);
-                ab32 = _mm512_dpbusd_epi32(ab32, _mm512_and_si512(_a, K8_0F), _mm512_and_si512(_b, K8_0F));
-                ab32 = _mm512_dpbusd_epi32(ab32, _mm512_and_si512(_mm512_srli_epi16(_a, 4), K8_0F), _mm512_and_si512(_mm512_srli_epi16(_b, 4), K8_0F));
+                ab0 = _mm512_dpbusd_epi32(ab0, _mm512_and_si512(_a, K8_0F), _mm512_and_si512(_b, K8_0F));
+                ab1 = _mm512_dpbusd_epi32(ab1, _mm512_and_si512(_mm512_srli_epi16(_a, 4), K8_0F), _mm512_and_si512(_mm512_srli_epi16(_b, 4), K8_0F));
             }
-            return ExtractSum<uint32_t>(ab32);
+            return ExtractSum<uint32_t>(_mm512_add_epi32(ab0, ab1));
         }
 
         SIMD_INLINE __m512i Load5(const uint8_t* ptr, __mmask32 mask = 0x000FFFFF)
@@ -147,14 +148,14 @@ namespace Simd
             {
                 __m512i _a = _mm512_cvtepu8_epi16(_mm256_loadu_si256((__m256i*)(a + i)));
                 __m512i _b = _mm512_cvtepu8_epi16(_mm256_loadu_si256((__m256i*)(b + i)));
-                _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
             }
-            if ( i < size)
+            if (i < size)
             {
                 __mmask32 mask = TailMask32(size - i);
                 __m512i _a = _mm512_cvtepu8_epi16(_mm256_maskz_loadu_epi8(mask, a + i));
                 __m512i _b = _mm512_cvtepu8_epi16(_mm256_maskz_loadu_epi8(mask, b + i));
-                _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+                _ab = _mm512_add_epi32(_mm512_madd_epi16(_a, _b), _ab);
             }
             return ExtractSum<uint32_t>(_ab);
         }

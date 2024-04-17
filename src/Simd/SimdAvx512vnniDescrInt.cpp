@@ -38,8 +38,7 @@ namespace Simd
         DescrInt::DescrInt(size_t size, size_t depth)
             : Avx512bw::DescrInt(size, depth)
         {
-            if(_depth != 4 && _depth != 8)
-                _cosineDistance = GetCosineDistance(_depth);
+            _cosineDistance = GetCosineDistance(_depth);
             _macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
             _microMd = 4;
             _microNd = 4;
