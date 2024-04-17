@@ -86,35 +86,56 @@ namespace Simd
             return ExtractSum<uint32_t>(_ab);
         }
 
-        SIMD_INLINE __m512i Load6(const uint8_t* ptr, __mmask32 mask = 0x00FFFFFF)
+        //SIMD_INLINE __m512i Load6(const uint8_t* ptr, __mmask32 mask = 0x00FFFFFF)
+        //{
+        //    return _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(C6_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(mask, ptr))), C6_SHFL), C6_MULLO), 10);
+        //}
+
+        //template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
+        //{
+        //    assert(size % 8 == 0);
+        //    __m512i _ab = _mm512_setzero_si512();
+        //    size_t i = 0, size32 = AlignLo(size, 32);
+        //    for (; i < size32; i += 32, a += 24, b += 24)
+        //    {
+        //        __m512i _a = Load6(a);
+        //        __m512i _b = Load6(b);
+        //        _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+        //    }
+        //    if (i < size)
+        //    {
+        //        __mmask32 mask = TailMask32((size - i) / 8 * 6);
+        //        __m512i _a = Load6(a, mask);
+        //        __m512i _b = Load6(b, mask);
+        //        _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+        //    }
+        //    return ExtractSum<uint32_t>(_ab);
+        //}
+
+        SIMD_INLINE __m512i Load6(const uint8_t* ptr, __mmask64 mask = 0x0000FFFFFFFFFFFF)
         {
-            return _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(C6_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(mask, ptr))), C6_SHFL), C6_MULLO), 10);
+            return _mm512_and_si512(C6_MASK, _mm512_multishift_epi64_epi8(C6_MUSH, _mm512_permutexvar_epi8(C6_PERM, _mm512_maskz_loadu_epi8(mask, ptr))));
         }
 
         template<> int32_t Correlation<6>(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0);
             __m512i _ab = _mm512_setzero_si512();
-            size_t i = 0, size32 = AlignLo(size, 32);
-            for (; i < size32; i += 32, a += 24, b += 24)
+            size_t i = 0, size64 = AlignLo(size, 64);
+            for (; i < size64; i += 64, a += 48, b += 48)
             {
                 __m512i _a = Load6(a);
                 __m512i _b = Load6(b);
-                _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+                _ab = _mm512_dpbusd_epi32(_ab, _a, _b);
             }
             if (i < size)
             {
-                __mmask32 mask = TailMask32((size - i) / 8 * 6);
+                __mmask64 mask = TailMask64((size - i) / 8 * 6);
                 __m512i _a = Load6(a, mask);
                 __m512i _b = Load6(b, mask);
-                _ab = _mm512_dpwssd_epi32(_ab, _a, _b);
+                _ab = _mm512_dpbusd_epi32(_ab, _a, _b);
             }
             return ExtractSum<uint32_t>(_ab);
-        }
-
-        SIMD_INLINE __m512i Load7Old(const uint8_t* ptr, __mmask32 mask = 0x0FFFFFFF)
-        {
-            return _mm512_srli_epi16(_mm512_mullo_epi16(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(Avx512bw::C7_PERM, _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(mask, ptr))), Avx512bw::C7_SHFL), Avx512bw::C7_MULLO), 9);
         }
 
         SIMD_INLINE __m512i Load7(const uint8_t* ptr, __mmask64 mask = 0x00FFFFFFFFFFFFFF)

@@ -55,6 +55,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16BFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16Cpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16DescrInt.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16DescrIntCdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution32fBf16.cpp" />

@@ -38,7 +38,7 @@ namespace Simd
         DescrInt::DescrInt(size_t size, size_t depth)
             : Avx512vnni::DescrInt(size, depth)
         {
-            if(_depth >= 7 && _depth <= 7)
+            if(_depth >= 6 && _depth <= 7)
                 _cosineDistance = GetCosineDistance(_depth);
             //_macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
             //_microMd = 4;
