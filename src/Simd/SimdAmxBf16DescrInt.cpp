@@ -43,14 +43,15 @@ namespace Simd
                 _cosineDistance = GetCosineDistance(_depth);
                 _macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
             }
-            //_microMd = 4;
-            //_microNd = 4;
 
             //if (_depth != 8)
             //{
-            //    _macroCosineDistancesUnpack = GetMacroCosineDistancesUnpack(_depth);
-            //    _microMu = 12;
-            //    _microNu = 32;
+                _unpackDataA = GetUnpackData(_depth, false);
+                _unpackDataB = GetUnpackData(_depth, true);
+                _macroCosineDistancesUnpack = GetMacroCosineDistancesUnpack(_depth);
+                _unpSize = AlignHi(_size, 64);
+                _microMu = 32;
+                _microNu = 32;
             //}
         }
 

@@ -718,7 +718,7 @@ namespace Simd
         {
             if (_macroCosineDistancesDirect)
             {
-                if (_unpSize * _microNu > Base::AlgCacheL1() || N * 2 < _microNu || _macroCosineDistancesUnpack == NULL)
+                if (_unpSize * _microNu > Base::AlgCacheL1() || N * 2 < _microNu || M * 2 < _microMu  || _macroCosineDistancesUnpack == NULL)
                     CosineDistancesDirect(M, N, A, B, distances);
                 else
                     CosineDistancesUnpack(M, N, A, B, distances);

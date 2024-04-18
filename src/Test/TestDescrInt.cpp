@@ -609,8 +609,8 @@ namespace Test
         {
             result = result && DescrIntCosineDistancesMxNaAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(128, 128, 512, depth, f1, f2);
-            //result = result && DescrIntCosineDistancesMxNaAutoTest(127, 129, 520, depth, f1, f2);
 #if !(defined(__GNUC__) && defined(__clang__))
+            result = result && DescrIntCosineDistancesMxNaAutoTest(127, 129, 520, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(31, 33, 10000, depth, f1, f2);
 #endif
         }
