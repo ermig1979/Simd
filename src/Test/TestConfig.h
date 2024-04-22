@@ -89,6 +89,7 @@ namespace Test
     typedef Tensor<uint8_t> Tensor8u;
     typedef Tensor<int8_t> Tensor8i;
     typedef Tensor<int32_t> Tensor32i;
+    typedef Tensor<uint16_t> Tensor16u;
 
     const int E = 10;
     const int O = 9;

@@ -366,6 +366,8 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetConvolution8iForward);
 
+    TEST_ADD_GROUP_A0(SynetConvolution16bForward);
+
     TEST_ADD_GROUP_A0(SynetConvolution32fForward);
 
     TEST_ADD_GROUP_A0(SynetDeconvolution32fForward);
