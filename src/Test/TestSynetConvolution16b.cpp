@@ -124,9 +124,6 @@ namespace Test
         void* context1 = f1.func(p.batch, &p.conv, comp);
         void* context2 = f2.func(p.batch, &p.conv, comp);
 
-        if (context1 == NULL || context2 == NULL)
-            return result;
-
         Tensor8u buf8u;
         buf8u.Extend({ ::SimdSynetConvolution16bExternalBufferSize(context1) });
         buf8u.Extend({ ::SimdSynetConvolution16bExternalBufferSize(context2) });
@@ -174,7 +171,9 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 16, 16, 32, _1, _1, _1, _0, _0, 1, aRe, tT, b16, f32), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 32, 32, 256, _1, _1, _1, _0, _0, 1, aRe, tT, b16, f32), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 128, 32, 32, 128, _3, _1, _1, _1, _1, 1, aGe, tT, f32, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 128, 64, 64, 128, _3, _1, _2, _1, _1, 1, aPr, tF, b16, b16), c, f1, f2);
 #endif
 #else
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 16, 16, 32, _1, _1, _1, _0, _0, 1, aRe, tT, b16, f32), c, f1, f2);

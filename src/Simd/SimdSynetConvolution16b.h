@@ -35,13 +35,7 @@ namespace Simd
     class SynetConvolution16b : public Deletable
     {
     public:
-        SynetConvolution16b(const ConvParam& p)
-            : _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-            , _perf(NULL)
-#endif
-        {
-        }
+        SynetConvolution16b(const ConvParam& p);
 
         const ConvParam& Param() const
         {
@@ -58,10 +52,11 @@ namespace Simd
 
         virtual size_t InternalBufferSize() const
         {
-            return _buffer.size;
+            return _buffer.RawSize() + _weight.RawSize() +
+                _bias.RawSize() + _params.RawSize();
         }
 
-        virtual void SetParams(const float* weight, const float* bias, const float* params) = 0;
+        virtual void SetParams(const float* weight, const float* bias, const float* params);
 
         virtual void Forward(const uint8_t * src, uint8_t* buf, uint8_t* dst) = 0;
 
@@ -94,12 +89,36 @@ namespace Simd
         Base::PerformanceMeasurer* _perf;
 #endif
         mutable String _info;
+        Array16u _weight;
+        Array32f _bias, _params;
+        bool _src16b, _dst16b, _is1x1;
     };
 
     //-------------------------------------------------------------------------------------------------
 
     namespace Base
     {
+        class SynetConvolution16bGemm : public SynetConvolution16b
+        {
+        public:
+            SynetConvolution16bGemm(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::Gemm"; }
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+        protected:
+            void ImgToCol(const uint16_t* src, uint16_t* dst);
+            void ImgToRow(const uint16_t* src, uint16_t* dst);
+
+            void GemmNN(size_t M, size_t N, size_t K, const uint16_t* A, size_t lda, const uint16_t* B, size_t ldb, float* C, size_t ldc);
+
+            size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
 }
