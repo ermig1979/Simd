@@ -28,6 +28,7 @@
 #include "Test/TestRandom.h"
 
 #include "Simd/SimdSynetConvolution16b.h"
+#include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynet.h"
 
 namespace Test
@@ -67,7 +68,7 @@ namespace Test
 #define FUNC_C(function) \
     FuncC(function, std::string(#function))
 
-    bool SynetConvolution16bForwardAutoTest(float eps, const Param & p, SimdSynetCompatibilityType comp, FuncC f1, FuncC f2)
+    bool SynetConvolution16bForwardAutoTest(float eps, const Param& p, SimdSynetCompatibilityType comp, FuncC f1, FuncC f2)
     {
         bool result = true;
 
@@ -76,7 +77,7 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test [" << f1.desc << " & " << f2.desc << "].");
 
-        const SimdConvolutionParameters & c = p.conv;
+        const SimdConvolutionParameters& c = p.conv;
 
         Tensor32f weight(p.WeightShape());
         FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
@@ -92,7 +93,7 @@ namespace Test
             params.Data()[0] = 3.0f;
             params.Data()[1] = 1.0f / 6.0f;
         }
-        else if(p.conv.activation == ::SimdConvolutionActivationMish)
+        else if (p.conv.activation == ::SimdConvolutionActivationMish)
             params.Data()[0] = 20.0f;
         else if (p.conv.activation == ::SimdConvolutionActivationHardSigmoid)
         {
@@ -152,6 +153,25 @@ namespace Test
             SimdBFloat16ToFloat32(dst16u2.Data(), dst16u2.Size(), dst32f2.Data());
         }
         result = result && Compare(dst32f1, dst32f2, eps, true, 64, DifferenceBoth);
+
+        if(1)
+        {
+            SimdConvolutionParameters c = p.conv;
+            c.srcT = SimdTensorData32f;
+            c.dstT = SimdTensorData32f;
+
+            void* context3 = SimdSynetConvolution32fInit(p.batch, &c, SimdSynetCompatibilityDefault);
+
+            Tensor32f dst32f3(p.DstShape(), p.conv.dstF), buf32f(Shp( ::SimdSynetConvolution32fExternalBufferSize(context3)));
+
+            ::SimdSynetConvolution32fSetParams(context3, weight.Data(), NULL, bias.Data(), params.Data());
+
+            ::SimdSynetConvolution32fForward(context3, src32f.Data(), buf32f.Data(), dst32f3.Data());
+
+            ::SimdRelease(context3);
+
+            result = result && Compare(dst32f1, dst32f3, 0.129, true, 64, DifferenceBoth);
+        }
 
         return result;
     }

@@ -56,7 +56,7 @@ namespace Simd
                 _bias.RawSize() + _params.RawSize();
         }
 
-        virtual void SetParams(const float* weight, const float* bias, const float* params);
+        virtual void SetParams(const float* weight, const float* bias, const float* params) = 0;
 
         virtual void Forward(const uint8_t * src, uint8_t* buf, uint8_t* dst) = 0;
 
@@ -92,6 +92,10 @@ namespace Simd
         Array16u _weight;
         Array32f _bias, _params;
         bool _src16b, _dst16b, _is1x1;
+        size_t _elemS, _elemD, _stepS, _stepD;
+
+        void SetBias(const float* bias, size_t align);
+        void SetParams(const float* params, size_t align);
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -115,6 +119,43 @@ namespace Simd
             void GemmNN(size_t M, size_t N, size_t K, const uint16_t* A, size_t lda, const uint16_t* B, size_t ldb, float* C, size_t ldc);
 
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class SynetConvolution16bNhwcGemm : public SynetConvolution16b
+        {
+        public:
+            SynetConvolution16bNhwcGemm(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t batch, K, M;
+                size_t microD, microM, microK;
+                size_t macroD, macroH, macroK;
+                size_t bufD, bufM, bufK;
+            };
+
+            typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst);
+
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, size_t dstC, size_t dstH,
+                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float * sum, uint8_t* dst);
+
+        protected:
+            void SetAlgParam(size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
+            virtual void SetWeight(const float* weight);
+            void Forward(const uint8_t* src, uint16_t* buf, float *sum, uint8_t* dst);
+
+            AlgParam _alg;
+            ConvertPtr _convert;
+            ConvolutionPtr _convolutions[2];
         };
 
         //-------------------------------------------------------------------------------------------------
