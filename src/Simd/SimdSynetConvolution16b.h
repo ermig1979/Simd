@@ -140,12 +140,12 @@ namespace Simd
                 size_t batch, K, M;
                 size_t microD, microM, microK;
                 size_t macroD, macroH, macroK;
-                size_t bufD, bufM, bufK;
+                size_t bufD, bufM, bufK, elem;
             };
 
             typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, size_t dstC, size_t dstH,
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float * sum, uint8_t* dst);
 
         protected:
@@ -162,6 +162,23 @@ namespace Simd
 
         void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
+
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
+    {
+        class SynetConvolution16bNhwcGemm : public Base::SynetConvolution16bNhwcGemm
+        {
+        public:
+            SynetConvolution16bNhwcGemm(const ConvParam& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
 }
 
 #endif

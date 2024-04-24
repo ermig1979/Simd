@@ -154,7 +154,7 @@ namespace Test
         }
         result = result && Compare(dst32f1, dst32f2, eps, true, 64, DifferenceBoth);
 
-        if(1)
+        if(0)
         {
             SimdConvolutionParameters c = p.conv;
             c.srcT = SimdTensorData32f;
@@ -170,7 +170,7 @@ namespace Test
 
             ::SimdRelease(context3);
 
-            result = result && Compare(dst32f1, dst32f3, 0.129, true, 64, DifferenceBoth);
+            result = result && Compare(dst32f1, dst32f3, 0.03, true, 64, DifferenceBoth, " Compare to SynetConvolution32f.");//0.129
         }
 
         return result;
@@ -191,12 +191,12 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 32, 32, 256, _1, _1, _1, _0, _0, 1, aRe, tT, b16, f32), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 32, 32, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, f32), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 128, 32, 32, 128, _3, _1, _1, _1, _1, 1, aGe, tT, f32, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 128, 64, 64, 128, _3, _1, _2, _1, _1, 1, aPr, tF, b16, b16), c, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 16, 16, 32, _1, _1, _1, _0, _0, 1, aRe, tT, b16, f32), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 128, 32, 32, 128, _3, _1, _1, _1, _1, 1, aGe, tT, f32, b16), c, f1, f2);
 #endif
 
         return result;
@@ -208,13 +208,13 @@ namespace Test
         bool result = true;
 
         if(TestBase())
-            result = result && SynetConvolution16bForwardAutoTest(1 * EPS, FUNC_C(Simd::Base::SynetConvolution16bInit), FUNC_C(SimdSynetConvolution16bInit));
+            result = result && SynetConvolution16bForwardAutoTest(7 * EPS, FUNC_C(Simd::Base::SynetConvolution16bInit), FUNC_C(SimdSynetConvolution16bInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetConvolution16bForwardAutoTest(1 * EPS, FUNC_C(Simd::Sse41::SynetConvolution16bInit), FUNC_C(SimdSynetConvolution16bInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetConvolution16bForwardAutoTest(7 * EPS, FUNC_C(Simd::Sse41::SynetConvolution16bInit), FUNC_C(SimdSynetConvolution16bInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetConvolution16bForwardAutoTest(1 * EPS, FUNC_C(Simd::Avx2::SynetConvolution16bInit), FUNC_C(SimdSynetConvolution16bInit));

@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetMergedConvolution32fBf16.h"
-#include "Simd/SimdSynetConvolution32fBf16Common.h"
+#include "Simd/SimdSynetConvolution16bCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdAvx512bw.h"

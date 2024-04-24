@@ -23,7 +23,7 @@
 */
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution32fBf16.h"
-#include "Simd/SimdSynetConvolution32fBf16Common.h"
+#include "Simd/SimdSynetConvolution16bCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCpu.h"
@@ -38,7 +38,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution(const float* src, const ConvParam& p,
+        template<Term16bType term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution(const float* src, const ConvParam& p,
             const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint16_t* dst)
         {
             size_t strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
@@ -49,7 +49,7 @@ namespace Simd
             size_t bodyX2 = AlignLo(bodyX - noseX, 2) + noseX;
             size_t bodyX4 = AlignLo(bodyX - noseX, 4) + noseX;
             size_t bodyX8 = AlignLo(bodyX - noseX, 8) + noseX;
-            size_t dstCF = AlignLo(dstC, F), dstCK = (term == TermBf16Last16b ?AlignHi(dstC, a.miK) : dstC);
+            size_t dstCF = AlignLo(dstC, F), dstCK = (term == Term16bLast16b ?AlignHi(dstC, a.miK) : dstC);
 
             __m512 _params[2], _bias[1];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -64,7 +64,7 @@ namespace Simd
                     _params[0] = _mm512_loadu_ps(params + c);
                 if (c >= dstCF)
                 {
-                    __mmask16 srcMask = TailMask16(dstC - c), dstMask = (term == TermBf16Last16b ? 0xFFFF : TailMask16(dstC - c));
+                    __mmask16 srcMask = TailMask16(dstC - c), dstMask = (term == Term16bLast16b ? 0xFFFF : TailMask16(dstC - c));
                     for (size_t dy = yBeg; dy < yEnd; ++dy)
                     {
                         uint16_t* pd = dst + (dy - dy0) * dY;
@@ -272,7 +272,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x2(const float* src0,
+        template<Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x2(const float* src0,
             const float* src1, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 srcMask, __mmask16 dstMask)
         {
             if (nofma)
@@ -295,7 +295,7 @@ namespace Simd
             }
         }
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x3(const float* src0,
+        template<Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x3(const float* src0,
             const float* src1, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 srcMask, __mmask16 dstMask)
         {
             if (nofma)
@@ -322,7 +322,7 @@ namespace Simd
             }
         }
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge3x2(const float* src0,
+        template<Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge3x2(const float* src0,
             const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 srcMask, __mmask16 dstMask)
         {
             if (nofma)
@@ -349,7 +349,7 @@ namespace Simd
             }
         }
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x1(const float* src0,
+        template<Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x1(const float* src0,
             const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512 * bias, const __m512* params, uint16_t* dst, __mmask16 srcMask, __mmask16 dstMask)
         {
             if (nofma)
@@ -382,7 +382,7 @@ namespace Simd
             }
         }
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x2(const float* src0,
+        template<Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x2(const float* src0,
             const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512* bias, const __m512* params, uint16_t* dst, size_t dX, __mmask16 srcMask, __mmask16 dstMask)
         {
             __m512 sum0 = _mm512_setzero_ps(), sum1 = _mm512_setzero_ps(), s0;
@@ -424,7 +424,7 @@ namespace Simd
             Save1<term, type>(dst + 1 * dX, sum1, bias, params, dstMask);
         }
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x4(const float* src0,
+        template<Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x4(const float* src0,
             const float* src1, const float* src2, size_t sX, const __m512* weight, const __m512* bias, const __m512* params, uint16_t* dst, size_t dX, __mmask16 srcMask, __mmask16 dstMask)
         {
             __m512 sum0 = _mm512_setzero_ps(), sum1 = _mm512_setzero_ps(), sum2 = _mm512_setzero_ps(), sum3 = _mm512_setzero_ps(), s0;
@@ -492,7 +492,7 @@ namespace Simd
             Save1<term, type>(dst + 3 * dX, sum3, bias, params, dstMask);
         }
 
-        template<TermBf16Type term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution3x3(const float* src, const ConvParam& p,
+        template<Term16bType term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution3x3(const float* src, const ConvParam& p,
             const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint16_t* dst)
         {
             size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
@@ -502,7 +502,7 @@ namespace Simd
             size_t xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
             size_t xMainEnd2 = AlignLo(xMainEnd - padX, 2) * (p.strideX == 1 ? 1 : 0) + padX;
             size_t xMainEnd4 = AlignLo(xMainEnd - padX, 4) * (p.strideX == 1 ? 1 : 0) + padX;
-            size_t dstCF = AlignLo(dstC, F), dstCK = (term == TermBf16Last16b ? AlignHi(dstC, a.miK) : dstC);
+            size_t dstCF = AlignLo(dstC, F), dstCK = (term == Term16bLast16b ? AlignHi(dstC, a.miK) : dstC);
 
             __m512 _params[2], _bias[1];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -512,7 +512,7 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t c = 0; c < dstCK; c += F)
             {
-                __mmask16 srcMask = TailMask16(dstC - c), dstMask = (term == TermBf16Last16b ? 0xFFFF : TailMask16(dstC - c));
+                __mmask16 srcMask = TailMask16(dstC - c), dstMask = (term == Term16bLast16b ? 0xFFFF : TailMask16(dstC - c));
                 __m512 _weight[9];
                 for (size_t i = 0; i < 9; ++i)
                     _weight[i] = _mm512_loadu_ps(weight + i * F);
@@ -577,7 +577,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<TermBf16Type term, SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
+        template<Term16bType term, SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
         {
             if (IsKernel(p, 3) && IsDilation(p, 1))
             {
@@ -598,9 +598,9 @@ namespace Simd
         template<SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
         {
             if (p.dstT == SimdTensorData32f)
-                SetDepthwise<TermBf16Last32f, type>(p, depthwise);
+                SetDepthwise<Term16bLast32f, type>(p, depthwise);
             else
-                SetDepthwise<TermBf16Last16b, type>(p, depthwise);
+                SetDepthwise<Term16bLast16b, type>(p, depthwise);
         }
 
         void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
