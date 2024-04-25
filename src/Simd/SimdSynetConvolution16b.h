@@ -196,6 +196,23 @@ namespace Simd
         void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
 #endif
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        class SynetConvolution16bNhwcGemm : public Avx2::SynetConvolution16bNhwcGemm
+        {
+        public:
+            SynetConvolution16bNhwcGemm(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
 }
 
 #endif

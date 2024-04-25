@@ -339,6 +339,7 @@ namespace Simd
         template <Term16bType term> struct Term16b
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1));
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1));
         };
 
         template <> struct Term16b<Term16bLast16b>
@@ -348,6 +349,12 @@ namespace Simd
                 __m512 f32 = Activate<type>(_mm512_add_ps(value, bias[index]), params, index);
                 _mm256_mask_storeu_epi16(ptr, tail, _mm512_cvtepi32_epi16(Float32ToBFloat16(f32)));
             }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
+            {
+                __m512 f32 = Activate<type>(_mm512_add_ps(value, bias[index]), params, index);
+                _mm256_mask_storeu_epi16(ptr + index * DF, tail, _mm512_cvtepi32_epi16(Float32ToBFloat16(f32)));
+            }
         };
 
         template <> struct Term16b<Term16bLast32f>
@@ -356,6 +363,11 @@ namespace Simd
             {
                 _mm512_mask_storeu_ps((float*)ptr, tail, Activate<type>(_mm512_add_ps(value, bias[index]), params, index));
             }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
+            {
+                _mm512_mask_storeu_ps((float*)ptr + index * F, tail, Activate<type>(_mm512_add_ps(value, bias[index]), params, index));
+            }
         };
 
         template <> struct Term16b<Term16bInterim>
@@ -363,6 +375,11 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
             {
                 _mm512_mask_storeu_ps((float*)ptr, tail, value);
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
+            {
+                _mm512_mask_storeu_ps(buf + index * F, tail, value);
             }
         };
 
@@ -375,6 +392,17 @@ namespace Simd
         {
             Term16b<term>::template Save<type, 0>(dst + 0 * DF, val0, bias, params);
             Term16b<term>::template Save<type, 1>(dst + 1 * DF, val1, bias, params, tail);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, __m512 val0, const __m512* bias, const __m512* params, const __mmask16* tails)
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, tails[0]);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, __m512 val0, __m512 val1, const __m512* bias, const __m512* params, const __mmask16* tails)
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
+            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params, tails[1]);
         }
     }
 #endif
