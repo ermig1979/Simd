@@ -236,7 +236,7 @@ namespace Simd
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m256 value, const __m256* bias, const __m256* params)
             {
-                _mm256_storeu_ps((float*)ptr + index * F, Avx2::Activate<type>(_mm256_add_ps(value, bias[index]), params, index));
+                _mm256_storeu_ps((float*)ptr, Avx2::Activate<type>(_mm256_add_ps(value, bias[index]), params, index));
             }
 
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m256 value, const __m256* bias, const __m256* params, size_t tail)
