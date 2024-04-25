@@ -572,9 +572,6 @@
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16Common.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdBase64.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -663,6 +660,12 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16bCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

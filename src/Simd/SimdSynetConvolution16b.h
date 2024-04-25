@@ -58,7 +58,7 @@ namespace Simd
 
         virtual void SetParams(const float* weight, const float* bias, const float* params) = 0;
 
-        virtual void Forward(const uint8_t * src, uint8_t* buf, uint8_t* dst) = 0;
+        virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
 
         uint8_t* Buffer(uint8_t* buffer)
         {
@@ -146,12 +146,12 @@ namespace Simd
             typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst);
 
             typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float * sum, uint8_t* dst);
+                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
             virtual void SetWeight(const float* weight);
-            void Forward(const uint8_t* src, uint16_t* buf, float *sum, uint8_t* dst);
+            void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 
             AlgParam _alg;
             ConvertPtr _convert;
@@ -172,6 +172,23 @@ namespace Simd
             SynetConvolution16bNhwcGemm(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        class SynetConvolution16bNhwcGemm : public Sse41::SynetConvolution16bNhwcGemm
+        {
+        public:
+            SynetConvolution16bNhwcGemm(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx2"; }
         };
 
         //-------------------------------------------------------------------------------------------------

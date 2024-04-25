@@ -364,6 +364,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fBf16NhwcGemm.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcGemm.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16b.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">
@@ -575,9 +581,6 @@
     <ClInclude Include="..\..\src\Simd\SimdBFloat16.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16Common.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdInterleave.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -630,6 +633,18 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTrigonometric.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPoly.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16bCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
