@@ -50,13 +50,12 @@ namespace Simd
                 srcMask[1] = TailMask16(p.srcC - srcC32 - F * 1);
                 dstMask[0] = TailMask32(p.srcC - srcC32);
             }
-            uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
             for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * p.dstW : 0) + b * p.dstH * p.dstW; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
-                    uint16_t* row = a.macroK < a.bufK ? buf : dst + dr * a.bufK;
+                    uint16_t* row = dst + dr * a.bufK;
                     for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
@@ -90,14 +89,6 @@ namespace Simd
                     }
                     for (size_t g = 0; g < gap; ++g)
                         *(row++) = 0;
-                    if (a.macroK < a.bufK)
-                    {
-                        for (size_t mak = 0; mak < a.bufK; mak += a.macroK)
-                        {
-                            size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-                            memcpy(dst + mak * a.bufM + dr * macroK, buf + mak, macroK * 2);
-                        }
-                    }
                 }
             }
         }
@@ -105,13 +96,12 @@ namespace Simd
         static void Reorder16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
-            uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
             for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * p.dstW : 0) + b * p.dstH * p.dstW; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
-                    uint16_t* row = a.macroK < a.bufK ? buf : dst + dr * a.bufK;
+                    uint16_t* row = dst + dr * a.bufK;
                     for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
@@ -141,14 +131,6 @@ namespace Simd
                     }
                     for (size_t g = 0; g < gap; ++g)
                         *(row++) = 0;
-                    if (a.macroK < a.bufK)
-                    {
-                        for (size_t mak = 0; mak < a.bufK; mak += a.macroK)
-                        {
-                            size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-                            memcpy(dst + mak * a.bufM + dr * macroK, buf + mak, macroK * 2);
-                        }
-                    }
                 }
             }
         }
@@ -161,12 +143,12 @@ namespace Simd
             __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51,
                 d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1,
                 s0, w00, w01, w10, w11, m = _mm512_castsi512_ps(Bf16::MASK);
-            size_t dB = a.macroD, dD = p.dstC * a.elem;
-            const uint16_t* src1 = src0 + 1 * srcC;
-            const uint16_t* src2 = src0 + 2 * srcC;
-            const uint16_t* src3 = src0 + 3 * srcC;
-            const uint16_t* src4 = src0 + 4 * srcC;
-            const uint16_t* src5 = src0 + 5 * srcC;
+            size_t dB = a.macroD, dD = p.dstC * a.elem, dS = a.bufK;
+            const uint16_t* src1 = src0 + 1 * dS;
+            const uint16_t* src2 = src0 + 2 * dS;
+            const uint16_t* src3 = src0 + 3 * dS;
+            const uint16_t* src4 = src0 + 4 * dS;
+            const uint16_t* src5 = src0 + 5 * dS;
             if (tails[1])
             {
                 if (zero)
@@ -199,7 +181,7 @@ namespace Simd
                     if (M > 0xa) da0 = _mm512_loadu_ps(buf + 0xa * dB + 0), da1 = _mm512_maskz_loadu_ps(tails[1], buf + 0xa * dB + F);
                     if (M > 0xb) db0 = _mm512_loadu_ps(buf + 0xb * dB + 0), db1 = _mm512_maskz_loadu_ps(tails[1], buf + 0xb * dB + F);
                 }
-                for (size_t offs0 = 0, offs6 = offs0 + 6 * srcC; offs0 < srcC; offs0 += 2, offs6 += 2)
+                for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 2, offs6 += 2)
                 {
                     w01 = _mm512_loadu_ps((float*)weight + 0);
                     w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
@@ -338,7 +320,7 @@ namespace Simd
                     if (M > 0xa) da0 = _mm512_maskz_loadu_ps(tails[0], buf + 0xa * dB + 0);
                     if (M > 0xb) db0 = _mm512_maskz_loadu_ps(tails[0], buf + 0xb * dB + 0);
                 }
-                for (size_t offs0 = 0, offs6 = offs0 + 6 * srcC; offs0 < srcC; offs0 += 2, offs6 += 2)
+                for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 2, offs6 += 2)
                 {
                     w01 = _mm512_loadu_ps((float*)weight + 0);
                     w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
@@ -474,7 +456,7 @@ namespace Simd
         {
             size_t n1 = dstH * p.dstW, n = 12;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(srcC, 2) * DF;
-            size_t dB = a.macroD, dD = p.dstC * a.elem;
+            size_t dB = a.macroD, dD = p.dstC * a.elem, dS = a.bufK;
             Convolution16bNhwcGemm_2xM_Ptr convolution_2xN = GetConvolution16bNhwcGemm_2xM<term, type>(n);
             Convolution16bNhwcGemm_2xM_Ptr convolution_2xM = GetConvolution16bNhwcGemm_2xM<term, type>(m);
 
@@ -500,9 +482,9 @@ namespace Simd
                 float* b = buf + dc;
                 uint8_t* d = dst + dc * a.elem;
                 size_t i = 0;
-                for (; i < nn; i += n, s += n * srcC, b += n * dB, d += n * dD)
+                for (; i < nn; i += n, s += n * dS, b += n * dB, d += n * dD)
                     convolution_2xN(s, p, a, srcC, zero, weight, _bias, _params, b, d, tails);
-                for (; i < n1; i += m, s += m * srcC, b += m * dB, d += m * dD)
+                for (; i < n1; i += m, s += m * dS, b += m * dB, d += m * dD)
                     convolution_2xM(s, p, a, srcC, zero, weight, _bias, _params, b, d, tails);
                 weight += dW;
             }
@@ -522,7 +504,7 @@ namespace Simd
         SynetConvolution16bNhwcGemm::SynetConvolution16bNhwcGemm(const ConvParam & p)
             : Avx2::SynetConvolution16bNhwcGemm(p)
         {
-            SetAlgParam(F * 2, 12, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(F, F * 2, 12, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             _convert = _src16b ? Reorder16bNhwcGemm : Convert16bNhwcGemm;
             switch (p.activation)
             {

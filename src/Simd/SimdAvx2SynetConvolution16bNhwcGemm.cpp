@@ -44,13 +44,12 @@ namespace Simd
             size_t srcC16 = Simd::AlignLo(p.srcC, 16);
             size_t srcC8 = Simd::AlignLo(p.srcC, 8);
             size_t srcC4 = Simd::AlignLo(p.srcC, 4);
-            uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
             for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * p.dstW : 0) + b * p.dstH * p.dstW; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
-                    uint16_t* row = a.macroK < a.bufK ? buf : dst + dr * a.bufK;
+                    uint16_t* row = dst + dr * a.bufK;
                     for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
@@ -99,14 +98,6 @@ namespace Simd
                     }
                     for (size_t g = 0; g < gap; ++g)
                         *(row++) = 0;
-                    if (a.macroK < a.bufK)
-                    {
-                        for (size_t mak = 0; mak < a.bufK; mak += a.macroK)
-                        {
-                            size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-                            memcpy(dst + mak * a.bufM + dr * macroK, buf + mak, macroK * 2);
-                        }
-                    }
                 }
             }
         }
@@ -114,13 +105,12 @@ namespace Simd
         static void Reorder16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
-            uint16_t* buf = dst + a.bufM * a.bufK;
             size_t gap = a.bufK - a.K;
             for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * p.dstW : 0) + b * p.dstH * p.dstW; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
-                    uint16_t* row = a.macroK < a.bufK ? buf : dst + dr * a.bufK;
+                    uint16_t* row = dst + dr * a.bufK;
                     for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
@@ -150,14 +140,6 @@ namespace Simd
                     }
                     for (size_t g = 0; g < gap; ++g)
                         *(row++) = 0;
-                    if (a.macroK < a.bufK)
-                    {
-                        for (size_t mak = 0; mak < a.bufK; mak += a.macroK)
-                        {
-                            size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-                            memcpy(dst + mak * a.bufM + dr * macroK, buf + mak, macroK * 2);
-                        }
-                    }
                 }
             }
         }
@@ -168,11 +150,11 @@ namespace Simd
             size_t srcC, size_t dstC, int zero, const uint16_t* weight, const __m256* bias, const __m256* params, float* buf, uint8_t* dst)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm256_castsi256_ps(Bf16::MASK);
-            size_t dB = a.macroD, dD = p.dstC * a.elem;
-            const uint16_t* src1 = src0 + 1 * srcC;
-            const uint16_t* src2 = src0 + 2 * srcC;
-            const uint16_t* src3 = src0 + 3 * srcC;
-            const uint16_t* src4 = src0 + 4 * srcC;
+            size_t dB = a.macroD, dD = p.dstC * a.elem, dS = a.bufK;
+            const uint16_t* src1 = src0 + 1 * dS;
+            const uint16_t* src2 = src0 + 2 * dS;
+            const uint16_t* src3 = src0 + 3 * dS;
+            const uint16_t* src4 = src0 + 4 * dS;
             if (dstC > F)
             {
                 if (zero)
@@ -366,7 +348,7 @@ namespace Simd
         {
             size_t n1 = dstH * p.dstW, n = 5;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(srcC, 2) * DF;
-            size_t dB = a.macroD, dD = p.dstC * a.elem;
+            size_t dB = a.macroD, dD = p.dstC * a.elem, dS = a.bufK;
             Convolution16bNhwcGemm_2xM_Ptr convolution_2xN = GetConvolution16bNhwcGemm_2xM<term, type>(n);
             Convolution16bNhwcGemm_2xM_Ptr convolution_2xM = GetConvolution16bNhwcGemm_2xM<term, type>(m);
 
@@ -391,9 +373,9 @@ namespace Simd
                 float* b = buf + dc;
                 uint8_t* d = dst + dc * a.elem;
                 size_t i = 0;
-                for (; i < nn; i += n, s += n * srcC, b += n * dB, d += n * dD)
+                for (; i < nn; i += n, s += n * dS, b += n * dB, d += n * dD)
                     convolution_2xN(s, p, a, srcC, dC, zero, weight, _bias, _params, b, d);
-                for (; i < n1; i += m, s += m * srcC, b += m * dB, d += m * dD)
+                for (; i < n1; i += m, s += m * dS, b += m * dB, d += m * dD)
                     convolution_2xM(s, p, a, srcC, dC, zero, weight, _bias, _params, b, d);
                 weight += dW;
             }
@@ -413,7 +395,7 @@ namespace Simd
         SynetConvolution16bNhwcGemm::SynetConvolution16bNhwcGemm(const ConvParam & p)
             : Sse41::SynetConvolution16bNhwcGemm(p)
         {
-            SetAlgParam(F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(F, F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             _convert = _src16b ? Reorder16bNhwcGemm : Convert16bNhwcGemm;
             switch (p.activation)
             {

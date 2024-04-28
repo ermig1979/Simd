@@ -51,13 +51,14 @@ namespace Simd
             return desc.str();
         }
 
-        void SynetConvolution16bNhwcGemm::SetAlgParam(size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
+        void SynetConvolution16bNhwcGemm::SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam& p = _param;
             AlgParam& a = _alg;
 
             a.M = p.dstW * p.dstH;
             a.K = p.srcC * p.kernelY * p.kernelX;
+            a.F = F;
             a.microD = microD;
             a.microM = microM;
             a.microK = microK;
@@ -83,7 +84,9 @@ namespace Simd
         size_t SynetConvolution16bNhwcGemm::ExternalBufferSize() const
         {
             const AlgParam& a = _alg;
-            size_t size = (a.bufM + 1) * a.bufK * sizeof(uint16_t);
+            size_t size = 0;
+            if(_convert)
+                size += (a.bufM + 1) * a.bufK * sizeof(uint16_t);
             if (_dst16b && a.macroK < a.K)
                 size += a.macroD * a.bufM * sizeof(float);
             return size;
@@ -139,7 +142,7 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             buf8 = Buffer(buf8);
-            uint16_t* buf = Allocate<uint16_t>(buf8, (a.bufM + 1) * a.bufK);
+            uint16_t* buf = _convert ? Allocate<uint16_t>(buf8, (a.bufM + 1) * a.bufK) : (uint16_t*)src;
             float* sum = _dst16b && a.macroK < a.K ? Allocate<float>(buf8, a.macroD * a.bufM) : (float*)dst;
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
@@ -165,10 +168,10 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                        size_t bufOffs = a.macroK < a.bufK ? mak * a.bufM + yBeg * p.dstW * macroK : 0;
+                        size_t bufOffs = a.macroK < a.bufK ? /*mak * a.bufM + yBeg * p.dstW * macroK*/yBeg * p.dstW * a.bufK + mak : 0;
                         size_t sumOffs = yBeg * p.dstW * a.macroD;
                         size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
-                        if (dc == 0 && mak == 0)
+                        if (dc == 0 && mak == 0 && _convert)
                         {
                             if (a.batch > 1)
                             {
