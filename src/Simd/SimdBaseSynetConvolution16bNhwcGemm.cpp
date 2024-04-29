@@ -103,35 +103,24 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            Array16u buffer(a.bufD * a.bufK, true);
-            uint16_t* buf = buffer.data;
-            for (size_t k = 0; k < a.K; k += 2)
-            {
-                for (size_t d = 0; d < p.dstC; ++d)
-                {
-                    *(buf++) = Float32ToBFloat16(weight[d]);
-                    *(buf++) = k + 1 < a.K ? Float32ToBFloat16(weight[d + p.dstC]) : 0;
-                }
-                buf += 2 * (a.bufD - p.dstC);
-                weight += 2 * p.dstC;
-            }
+            size_t D = DivHi(p.dstC, _alg.F);
             _weight.Resize(a.bufK * a.bufD, true);
-            size_t bufK = a.bufK / 2, macK = a.macroK / 2, bufD = a.bufD * 2, macD = a.macroD * 2, micD = a.microD * 2;
-            const uint16_t* src = buffer.data;
             uint16_t* dst = _weight.data;
-            for (size_t mad = 0; mad < bufD; mad += macD)
+            for (size_t d = 0; d < D; d++)
             {
-                size_t macroD = Simd::Min(bufD, mad + macD) - mad;
-                for (size_t mak = 0; mak < bufK; mak += macK)
+                for (size_t k = 0; k < a.bufK; k += 2)
                 {
-                    size_t macroK = Simd::Min(bufK, mak + macK) - mak;
-                    for (size_t mid = 0; mid < macroD; mid += micD)
+                    const float* src = weight + k * p.dstC + d * _alg.F;
+                    for (size_t f = 0; f < _alg.F; ++f)
                     {
-                        for (size_t k = 0; k < macroK; ++k)
+                        for (size_t i = 0; i < 2; ++i)
                         {
-                            memcpy(dst, src + (mak + k) * bufD + mad + mid, micD * 2);
-                            dst += micD;
+                            if (d * _alg.F + f < p.dstC && k + i < a.K)
+                                *(dst++) = Float32ToBFloat16(src[i * p.dstC]);
+                            else
+                                *(dst++) = 0;
                         }
+                        src++;
                     }
                 }
             }
@@ -156,19 +145,19 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            const uint16_t* weight = _weight.data;
             const float* bias = _bias.data, * params = _params.data;
             size_t dstH = p.dstH * a.batch;
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
+                const uint16_t* weight = _weight.data + dc * a.bufK;
                 for (size_t mak = 0; mak < a.K; mak += a.macroK)
                 {
                     size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
                     for (size_t yBeg = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                        size_t bufOffs = a.macroK < a.bufK ? /*mak * a.bufM + yBeg * p.dstW * macroK*/yBeg * p.dstW * a.bufK + mak : 0;
+                        size_t bufOffs = a.macroK < a.bufK ? yBeg * p.dstW * a.bufK + mak : 0;
                         size_t sumOffs = yBeg * p.dstW * a.macroD;
                         size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
                         if (dc == 0 && mak == 0 && _convert)
@@ -190,7 +179,7 @@ namespace Simd
                                 weight, bias, params, sum + sumOffs, dst + dstOffs);
                         yBeg = yEnd;
                     }
-                    weight += AlignHi(macroK, a.microK) * AlignHiAny(macroD, a.microD);
+                    weight += macroK * a.F;
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
