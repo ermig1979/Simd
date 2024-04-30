@@ -507,7 +507,16 @@ namespace Simd
             : Avx2::SynetConvolution16bNhwcGemm(p)
         {
             SetAlgParam(F, F * 2, 12, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            _convert = _src16b ? Reorder16bNhwcGemm : Convert16bNhwcGemm;
+            if (_src16b)
+            {
+                AlgParam& a = _alg;
+                if (_is1x1 && a.K == a.bufK)
+                    _convert = NULL;
+                else
+                    _convert = Reorder16bNhwcGemm;
+            }
+            else
+                _convert = Convert16bNhwcGemm;
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;

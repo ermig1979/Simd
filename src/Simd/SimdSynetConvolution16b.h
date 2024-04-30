@@ -141,6 +141,7 @@ namespace Simd
                 size_t F, microD, microM, microK;
                 size_t macroD, macroH, macroK;
                 size_t bufD, bufM, bufK, elem;
+                int reorderType;
             };
 
             typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst);
@@ -206,6 +207,23 @@ namespace Simd
             SynetConvolution16bNhwcGemm(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
+    namespace AmxBf16
+    {
+        class SynetConvolution16bNhwcGemm : public Avx512bw::SynetConvolution16bNhwcGemm
+        {
+        public:
+            SynetConvolution16bNhwcGemm(const ConvParam& p);
+
+            virtual String Ext() const { return "AmxBf16"; }
         };
 
         //-------------------------------------------------------------------------------------------------

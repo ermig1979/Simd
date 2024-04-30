@@ -77,6 +77,7 @@ namespace Simd
             a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, a.bufD);
             a.elem = _elemD;
+            a.reorderType = 0;
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
         }
@@ -86,8 +87,8 @@ namespace Simd
             const AlgParam& a = _alg;
             size_t size = 0;
             if(_convert)
-                size += (a.bufM + 1) * a.bufK * sizeof(uint16_t);
-            if (_dst16b && a.macroK < a.K)
+                size += a.bufM * a.bufK * sizeof(uint16_t);
+            if ((_dst16b && a.macroK < a.K) || a.microK > 2)
                 size += a.macroD * a.bufM * sizeof(float);
             return size;
         }
@@ -131,8 +132,8 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             buf8 = Buffer(buf8);
-            uint16_t* buf = _convert ? Allocate<uint16_t>(buf8, (a.bufM + 1) * a.bufK) : (uint16_t*)src;
-            float* sum = _dst16b && a.macroK < a.K ? Allocate<float>(buf8, a.macroD * a.bufM) : (float*)dst;
+            uint16_t* buf = _convert ? Allocate<uint16_t>(buf8, a.bufM * a.bufK) : (uint16_t*)src;
+            float* sum = (_dst16b && a.macroK < a.K) || a.microK > 2 ? Allocate<float>(buf8, a.macroD * a.bufM) : (float*)dst;
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
                 Forward(src, buf, sum, dst);
@@ -157,7 +158,7 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                        size_t bufOffs = a.macroK < a.bufK ? yBeg * p.dstW * a.bufK + mak : 0;
+                        size_t bufOffs = (a.macroK < a.bufK || _convert == NULL) ? yBeg * p.dstW * a.bufK + mak : 0;
                         size_t sumOffs = yBeg * p.dstW * a.macroD;
                         size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
                         if (dc == 0 && mak == 0 && _convert)
