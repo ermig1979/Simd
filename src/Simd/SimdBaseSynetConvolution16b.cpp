@@ -50,7 +50,7 @@ namespace Simd
     Base::PerformanceMeasurer * SynetConvolution16b::Perf(const char* func)
     {
         if (_perf == NULL)
-            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info(true) + " " + Desc(), Param().Flop());
         return _perf;
     }
 #endif

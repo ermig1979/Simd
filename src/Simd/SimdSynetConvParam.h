@@ -81,6 +81,18 @@ namespace Simd
         return (p.padX + p.srcW - (p.kernelX - 1) * p.dilationX - 1) / p.strideX + 1;
     }
 
+    SIMD_INLINE String ToStr(SimdConvolutionActivationType t)
+    {
+        const char* cats[] = { "id", "re", "lr", "rr", "pr", "el", "hs", "mi", "hi", "sw", "ge" };
+        return String(cats[t]);
+    }
+
+    SIMD_INLINE String ToChar(SimdTensorDataType t)
+    {
+        const char* tdts[] = { "?", "f", "i", "u", "u", "l", "l", "~", "b", "b"};
+        return String(tdts[int(t) + 1]);
+    }
+
     //-------------------------------------------------------------------------------------------------
 
     struct ConvParam : public SimdConvolutionParameters
@@ -184,13 +196,17 @@ namespace Simd
             return batch * dstC * dstH * dstW;
         }
 
-        SIMD_INLINE String Info() const
+        SIMD_INLINE String Info(bool detail = false) const
         {
             std::stringstream ss;
             ss << batch << "x" << srcC << "x" << srcH << "x" << srcW;
             ss << "-" << dstC << "x" << kernelY << "x" << kernelX;
             ss << "-" << Simd::Max(dilationX, dilationY) << "-" << Simd::Max(strideX, strideY);
             ss << "-" << group << "-" << trans;
+            if (detail)
+            {
+                ss << "-" << ToChar(srcT) << ToChar(dstT) << "-" << ToStr(activation);
+            }
             return ss.str();
         }
 

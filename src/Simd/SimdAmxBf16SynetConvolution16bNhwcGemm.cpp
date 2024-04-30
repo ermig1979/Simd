@@ -39,7 +39,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convert16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
+ #define SIMD_CONV_REORDER_TYPE 1
+
+       static void Convert16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const float* src = (float*)src8;
             size_t srcC32 = AlignLo(p.srcC, 32);
@@ -51,12 +53,13 @@ namespace Simd
                 srcMask[1] = TailMask16(p.srcC - srcC32 - F * 1);
                 dstMask[0] = TailMask32(p.srcC - srcC32);
             }
-            size_t gap = a.bufK - a.K;
+            __mmask32 gapMask = TailMask32(a.bufK - a.K);
             for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * p.dstW : 0) + b * p.dstH * p.dstW; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
                     uint16_t* row = dst + dr * a.bufK;
+
                     for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
@@ -88,16 +91,61 @@ namespace Simd
                             row += p.kernelX * p.srcC;
                         }
                     }
-                    for (size_t g = 0; g < gap; ++g)
-                        *(row++) = 0;
+                    SetZero(row, gapMask);
                 }
             }
+        }
+
+        static void Convert16bNhwcGemm1x1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
+        {
+            const float* src = (float*)src8;
+            size_t srcC32 = AlignLo(p.srcC, 32), n = (yEnd - yBeg) * p.dstW;
+            __mmask16 srcMask0 = TailMask16(p.srcC - srcC32 - F * 0);
+            __mmask16 srcMask1 = TailMask16(p.srcC - srcC32 - F * 1);
+            src += yBeg * p.srcW * p.srcC;
+            dst += ((a.macroK < a.bufK ? yBeg * p.dstW : 0) + b * p.dstH * p.dstW) * a.bufK;
+#if SIMD_CONV_REORDER_TYPE
+            for (size_t i = 0; i < n; i += 16)
+            {
+                size_t m = Min(i + 16, n) - i;
+                size_t sc = 0;
+                for (; sc < srcC32; sc += 32)
+                {
+                    size_t j = 0;
+                    for(; j < m; ++j)
+                        ConvertA(src + sc + j * p.srcC, dst + j * 32 + sc * 16);
+                    for (; j < 16; ++j)
+                        SetZero(dst + j * 32 + sc * 16);
+                }
+                if (srcC32 < p.srcC)
+                {
+                    size_t j = 0;
+                    for (; j < m; ++j)
+                        ConvertA(src + sc + j * p.srcC, dst + j * 32 + sc * 16, srcMask0, srcMask1);
+                    for (; j < 16; ++j)
+                        SetZero(dst + j * 32 + sc * 16);
+                }
+                src += p.srcC * 16;
+                dst += a.bufK * 16;
+            }
+#else
+            for (size_t i = 0; i < n; ++i)
+            {
+                size_t sc = 0;
+                for (; sc < srcC32; sc += 32)
+                    ConvertA(src + sc, dst + sc);
+                if (srcC32 < p.srcC)
+                    ConvertA(src + sc, dst + sc, srcMask0, srcMask1);
+                src += p.srcC;
+                dst += a.bufK;
+            }
+#endif
         }
 
         static void Reorder16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
-            size_t gap = a.bufK - a.K;
+            __mmask32 gapMask = TailMask32(a.bufK - a.K);
             for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * p.dstW : 0) + b * p.dstH * p.dstW; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
@@ -130,8 +178,7 @@ namespace Simd
                             row += p.kernelX * p.srcC;
                         }
                     }
-                    for (size_t g = 0; g < gap; ++g)
-                        *(row++) = 0;
+                    SetZero(row, gapMask);
                 }
             }
         }
@@ -419,16 +466,27 @@ namespace Simd
             : Avx512bw::SynetConvolution16bNhwcGemm(p)
         {
             SetAlgParam(F, F * 2, F * 2, 32, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            AlgParam& a = _alg;            
             if (_src16b)
             {
-                AlgParam& a = _alg;
+
                 if (_is1x1 && a.K == a.bufK)
                     _convert = NULL;
                 else
                     _convert = Reorder16bNhwcGemm;
             }
             else
-                _convert = Convert16bNhwcGemm;
+            {
+                if (_is1x1)
+                {
+                    _convert = Convert16bNhwcGemm1x1;
+                    a.reorderType = SIMD_CONV_REORDER_TYPE;
+                }
+                else
+                {
+                    _convert = Convert16bNhwcGemm;
+                }
+            }
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;

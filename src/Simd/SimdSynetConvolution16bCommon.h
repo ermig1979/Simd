@@ -410,22 +410,27 @@ namespace Simd
 #ifdef SIMD_AMXBF16_ENABLE    
     namespace AmxBf16
     {
-        SIMD_INLINE void ConvertA(const float* src, uint16_t* dst)
+        SIMD_INLINE void ConvertA(const float* src, uint16_t* dst, __mmask16 srcMask0 = __mmask16(-1), __mmask16 srcMask1 = __mmask16(-1), __mmask32 dstMask = __mmask32(-1))
         {
-            __m512 s0 = _mm512_loadu_ps(src + 0 * 16);
-            __m512 s1 = _mm512_loadu_ps(src + 1 * 16);
-            _mm512_storeu_si512(dst, (__m512i)_mm512_cvtne2ps_pbh(s1, s0));
+            __m512 s0 = _mm512_maskz_loadu_ps(srcMask0, src + 0 * 16);
+            __m512 s1 = _mm512_maskz_loadu_ps(srcMask1, src + 1 * 16);
+            _mm512_mask_storeu_epi16(dst, dstMask, (__m512i)_mm512_cvtne2ps_pbh(s1, s0));
         }
 
-        SIMD_INLINE void ConvertB(const float* src, int stride, uint16_t* dst, __mmask16 tail = __mmask16(-1))
+        SIMD_INLINE void ConvertB(const float* src, int stride, uint16_t* dst, __mmask16 mask = __mmask16(-1))
         {
             static const __m512i PERM_IDX = _mm512_set_epi16(
                 0x1f, 0x0f, 0x1e, 0x0e, 0x1d, 0x0d, 0x1c, 0x0c, 0x1b, 0x0b, 0x1a, 0x0a, 0x19, 0x09, 0x18, 0x08,
                 0x17, 0x07, 0x16, 0x06, 0x15, 0x05, 0x14, 0x04, 0x13, 0x03, 0x12, 0x02, 0x11, 0x01, 0x10, 0x00);
-            __m512 s0 = _mm512_maskz_loadu_ps(tail, src + 0 * stride);
-            __m512 s1 = _mm512_maskz_loadu_ps(tail, src + 1 * stride);
+            __m512 s0 = _mm512_maskz_loadu_ps(mask, src + 0 * stride);
+            __m512 s1 = _mm512_maskz_loadu_ps(mask, src + 1 * stride);
             __m512i d = (__m512i)_mm512_cvtne2ps_pbh(s1, s0);
             _mm512_storeu_si512(dst, _mm512_permutexvar_epi16(PERM_IDX, d));
+        }
+
+        SIMD_INLINE void SetZero(uint16_t* dst, __mmask32 dstMask = __mmask32(-1))
+        {
+            _mm512_mask_storeu_epi16(dst, dstMask, _mm512_setzero_si512());
         }
 
         //-------------------------------------------------------------------------------------------------
