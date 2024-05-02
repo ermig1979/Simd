@@ -37,12 +37,12 @@ namespace Simd
         typedef Base::SynetConvolution16bNhwcGemm::AlgParam AlgParam;
         typedef Base::SynetConvolution16bNhwcGemm::ConvolutionPtr Convolution;
 
+#define SIMD_CONV_REORDER_TYPE 1
+
         //-----------------------------------------------------------------------------------------
 
- #define SIMD_CONV_REORDER_TYPE 1
-
-       static void Convert16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
-        {
+       static void Convert16bNhwcGemmD(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
+       {
             const float* src = (float*)src8;
             size_t srcC32 = AlignLo(p.srcC, 32);
             __mmask16 srcMask[2];
@@ -59,7 +59,6 @@ namespace Simd
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
                     uint16_t* row = dst + dr * a.bufK;
-
                     for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
@@ -96,7 +95,51 @@ namespace Simd
             }
         }
 
-        static void Convert16bNhwcGemm1x1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
+       static void Convert16bNhwcGemmR(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
+       {
+           const float* src = (float*)src8;
+           size_t srcC32 = AlignLo(p.srcC, 32);
+           assert(p.srcC == srcC32);
+           for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * p.dstW : 0) + b * p.dstH * p.dstW; dy < yEnd; ++dy)
+           {
+               for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
+               {
+                   uint16_t* row = dst + dr * a.bufK;
+                   for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
+                   {
+                       size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                       if (sy < p.srcH)
+                       {
+                           for (size_t kx = 0; kx < p.kernelX; kx++)
+                           {
+                               size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
+                               if (sx < p.srcW)
+                               {
+                                   const float* ps = src + (sy * p.srcW + sx) * p.srcC;
+                                   for (size_t sc = 0; sc < srcC32; sc += 32)
+                                       ConvertA(ps + sc, row + sc);
+                                   row += p.srcC;
+                               }
+                               else
+                               {
+                                   for (size_t sc = 0; sc < srcC32; sc += 32)
+                                       SetZero(row + sc);
+                                   row += p.srcC;
+                               }
+                           }
+                       }
+                       else
+                       {
+                           for (size_t sc = 0, n = p.kernelX * p.srcC; sc < n; sc += 32)
+                               SetZero(row + sc);
+                           row += p.kernelX * p.srcC;
+                       }
+                   }
+               }
+           }
+       }
+
+        static void Convert16bNhwcGemm1x1D(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const float* src = (float*)src8;
             size_t srcC32 = AlignLo(p.srcC, 32), n = (yEnd - yBeg) * p.dstW;
@@ -104,31 +147,6 @@ namespace Simd
             __mmask16 srcMask1 = TailMask16(p.srcC - srcC32 - F * 1);
             src += yBeg * p.srcW * p.srcC;
             dst += ((a.macroK < a.bufK ? yBeg * p.dstW : 0) + b * p.dstH * p.dstW) * a.bufK;
-#if SIMD_CONV_REORDER_TYPE
-            for (size_t i = 0; i < n; i += 16)
-            {
-                size_t m = Min(i + 16, n) - i;
-                size_t sc = 0;
-                for (; sc < srcC32; sc += 32)
-                {
-                    size_t j = 0;
-                    for(; j < m; ++j)
-                        ConvertA(src + sc + j * p.srcC, dst + j * 32 + sc * 16);
-                    for (; j < 16; ++j)
-                        SetZero(dst + j * 32 + sc * 16);
-                }
-                if (srcC32 < p.srcC)
-                {
-                    size_t j = 0;
-                    for (; j < m; ++j)
-                        ConvertA(src + sc + j * p.srcC, dst + j * 32 + sc * 16, srcMask0, srcMask1);
-                    for (; j < 16; ++j)
-                        SetZero(dst + j * 32 + sc * 16);
-                }
-                src += p.srcC * 16;
-                dst += a.bufK * 16;
-            }
-#else
             for (size_t i = 0; i < n; ++i)
             {
                 size_t sc = 0;
@@ -139,7 +157,35 @@ namespace Simd
                 src += p.srcC;
                 dst += a.bufK;
             }
-#endif
+        }
+
+        static void Convert16bNhwcGemm1x1R(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
+        {
+            const float* src = (float*)src8;
+            size_t srcC32 = AlignLo(p.srcC, 32), n = (yEnd - yBeg) * p.dstW;
+            __mmask16 srcMask0 = TailMask16(p.srcC - srcC32 - F * 0);
+            __mmask16 srcMask1 = TailMask16(p.srcC - srcC32 - F * 1);
+            src += yBeg * p.srcW * p.srcC;
+            dst += ((a.macroK < a.bufK ? yBeg * p.dstW : 0) + b * p.dstH * p.dstW) * a.bufK;
+            for (size_t i = 0; i < n; i += 16)
+            {
+                size_t m = Min(i + 16, n) - i;
+                size_t sc = 0;
+                for (; sc < srcC32; sc += 32)
+                {
+                    size_t j = 0;
+                    for(; j < m; ++j)
+                        ConvertA(src + sc + j * p.srcC, dst + j * 32 + sc * 16);
+                }
+                if (srcC32 < p.srcC)
+                {
+                    size_t j = 0;
+                    for (; j < m; ++j)
+                        ConvertA(src + sc + j * p.srcC, dst + j * 32 + sc * 16, srcMask0, srcMask1);
+                }
+                src += p.srcC * 16;
+                dst += a.bufK * 16;
+            }
         }
 
         static void Reorder16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst)
@@ -479,12 +525,26 @@ namespace Simd
             {
                 if (_is1x1)
                 {
-                    _convert = Convert16bNhwcGemm1x1;
-                    a.reorderType = SIMD_CONV_REORDER_TYPE;
+#if SIMD_CONV_REORDER_TYPE
+                    _convert = Convert16bNhwcGemm1x1R;
+                    a.reorderType = 1;
+#else
+                    _convert = Convert16bNhwcGemm1x1D;
+                    a.reorderType = 0;
+#endif
                 }
                 else
                 {
-                    _convert = Convert16bNhwcGemm;
+                    if (p.srcC == AlignLo(p.srcC, 32))
+                    {
+                        _convert = Convert16bNhwcGemmR;
+                        a.reorderType = 0;
+                    }
+                    else
+                    {
+                        _convert = Convert16bNhwcGemmD;
+                        a.reorderType = 0;
+                    }
                 }
             }
             switch (p.activation)
