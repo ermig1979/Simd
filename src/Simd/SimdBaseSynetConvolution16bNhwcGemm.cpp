@@ -73,9 +73,9 @@ namespace Simd
                     if (p.batch % batch == 0 && batch * bufSize <= L2)
                         a.batch = batch;
             }
-            a.bufM = a.batch * a.M;
             a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, a.bufD);
+            a.bufM = a.batch * p.dstH * AlignHi(p.dstW, a.F);
             a.elem = _elemD;
             a.reorderType = 0;
             a.sumBuf = (_dst16b && a.macroK < a.K) || a.microK > 2 ? 1 : 0;
@@ -136,10 +136,12 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             buf8 = Buffer(buf8);
-            uint16_t* buf = _convert ? Allocate<uint16_t>(buf8, a.bufM * a.bufK) : (uint16_t*)src;
-            float* sum = a.sumBuf ? Allocate<float>(buf8, a.macroD * a.bufM) : (float*)dst;
+            uint16_t* bufB = _convert ? Allocate<uint16_t>(buf8, a.bufM * a.bufK) : NULL;
+            float* bufS = a.sumBuf ? Allocate<float>(buf8, a.macroD * a.bufM) : NULL;
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
+                uint16_t* buf = _convert ? bufB : (uint16_t*)src;
+                float* sum = a.sumBuf ? bufS : (float*)dst;
                 Forward(src, buf, sum, dst);
                 src += _stepS;
                 dst += _stepD;
@@ -162,7 +164,7 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                        size_t bufOffs = (a.macroK < a.bufK || _convert == NULL) ? yBeg * p.dstW * a.bufK + (a.reorderType ? mak * a.F : mak) : 0;
+                        size_t bufOffs = (a.macroK < a.bufK || _convert == NULL) ? yBeg * AlignHi(p.dstW, a.F) * a.bufK + (a.reorderType ? mak * a.F : mak) : 0;
                         size_t sumOffs = yBeg * p.dstW * a.macroD;
                         size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
                         if (dc == 0 && mak == 0 && _convert)
@@ -170,11 +172,12 @@ namespace Simd
                             if (a.batch > 1)
                             {
                                 size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
+                                size_t dB = p.dstH * p.dstW * a.bufK;
                                 for (size_t b = 0; b < a.batch; ++b)
-                                    _convert(src + b * dS, p, a, b, 0, p.dstH, buf);
+                                    _convert(src + b * dS, p, a, 0, p.dstH, buf + b * dB);
                             }
                             else
-                                _convert(src, p, a, 0, yBeg, yEnd, buf);
+                                _convert(src, p, a, yBeg, yEnd, buf);
                         }
                         if (mak + macroK == a.bufK)
                             _convolutions[1](buf + bufOffs, p, a, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 1 : 0,

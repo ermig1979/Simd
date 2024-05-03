@@ -181,29 +181,32 @@ namespace Simd
         {
             const ConvParam& p = _param;
             buf = Buffer(buf);
-            uint16_t* bufS = _src16b ? (uint16_t*)src : Allocate<uint16_t>(buf, _sizeS);
-            uint16_t* bufB = _is1x1 ? bufS : Allocate<uint16_t>(buf, _sizeB);
-            float* bufD = _dst16b ? Allocate<float>(buf, _sizeD) : (float*)dst;
+            uint16_t* bufS = _src16b ? NULL : Allocate<uint16_t>(buf, _sizeS);
+            uint16_t* bufB = _is1x1 ? NULL : Allocate<uint16_t>(buf, _sizeB);
+            float* bufD = _dst16b ? Allocate<float>(buf, _sizeD) : NULL;
             const uint16_t* wgt = _weight.data;
             for (size_t b = 0; b < _batch; ++b)
             {
+                const uint16_t* src16b = _src16b ? (uint16_t*)src : bufS;
+                const uint16_t* buf16b = _is1x1 ? src16b : bufB;
+                float* dst32f = _dst16b ? bufD : (float*)dst;
                 if (!_src16b)
                     Float32ToBFloat16((float*)src, _sizeS, bufS);
                 if (_param.trans)
                 {
                     if(!_is1x1)
-                        ImgToRow(bufS, bufB);
+                        ImgToRow(src16b, bufB);
                     for (size_t g = 0; g < p.group; ++g)
-                        GemmNN(_M, _N, _K, bufB + _grS * g, _ldS, wgt + _grW * g, _ldW, bufD + _grD * g, _ldD);
+                        GemmNN(_M, _N, _K, buf16b + _grS * g, _ldS, wgt + _grW * g, _ldW, dst32f + _grD * g, _ldD);
                 }
                 else
                 {
                     if (!_is1x1)
-                        ImgToCol(bufS, bufB);
+                        ImgToCol(src16b, bufB);
                     for (size_t g = 0; g < p.group; ++g)
-                        GemmNN(_M, _N, _K, wgt + _grW * g, _ldW, bufB + _grS * g, _ldS, bufD + _grD * g, _ldD);
+                        GemmNN(_M, _N, _K, wgt + _grW * g, _ldW, buf16b + _grS * g, _ldS, dst32f + _grD * g, _ldD);
                 }
-                ConvolutionBiasAndActivation(_bias.data, p.dstC, p.dstH * p.dstW, p.activation, _params.data, p.trans, bufD);
+                ConvolutionBiasAndActivation(_bias.data, p.dstC, p.dstH * p.dstW, p.activation, _params.data, p.trans, dst32f);
                 if(_dst16b)
                     Float32ToBFloat16(bufD, _sizeD, (uint16_t*)dst);
                 src += _stepS;
