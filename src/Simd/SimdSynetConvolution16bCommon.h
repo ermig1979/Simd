@@ -133,7 +133,10 @@ namespace Simd
 
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, __m128 value, const __m128* bias, const __m128* params, size_t tail)
             {
-                _mm_storeu_ps(buf + index * F, value);
+                float tmp[F];
+                _mm_storeu_ps(tmp, value);
+                for (size_t i = 0; i < tail; ++i)
+                    ((float*)ptr)[index * F + i] = tmp[i];
             }
         };
 
@@ -283,7 +286,10 @@ namespace Simd
 
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, __m256 value, const __m256* bias, const __m256* params, size_t tail)
             {
-                _mm256_storeu_ps(buf + index * F, value);
+                float tmp[F];
+                _mm256_storeu_ps(tmp, value);
+                for (size_t i = 0; i < tail; ++i)
+                    ((float*)ptr)[index * F + i] = tmp[i];
             }
         };
 

@@ -146,7 +146,7 @@ namespace Simd
             _mm512_mask_storeu_epi16(dst, mask, _mm512_setzero_si512());
         }
 
-        SIMD_INLINE void SetZero(uint16_t* dst, size_t size32, __mmask32 tail)
+        SIMD_INLINE void SetZeros(uint16_t* dst, size_t size32, __mmask32 tail)
         {
             size_t i = 0;
             __m512i zero = _mm512_setzero_si512();
@@ -156,10 +156,10 @@ namespace Simd
                 _mm512_mask_storeu_epi16(dst + i, tail, zero);
         }
 
-        SIMD_INLINE void SetZero(uint16_t* dst, size_t size)
+        SIMD_INLINE void SetZeros(uint16_t* dst, size_t size)
         {
             size_t tail = size & 31;
-            SetZero(dst, size & (~31), tail ? __mmask32(-1) >> (32 - tail) : 0);
+            SetZeros(dst, size & (~31), tail ? __mmask32(-1) >> (32 - tail) : 0);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

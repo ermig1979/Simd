@@ -1308,7 +1308,6 @@ namespace Simd
             {
                 int k;
                 unsigned int i, j;
-                uint8_t* output;
                 uint8_t* coutput[4] = { NULL, NULL, NULL, NULL };
 
                 jpeg__resample res_comp[4];

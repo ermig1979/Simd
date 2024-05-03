@@ -76,14 +76,14 @@ namespace Simd
 								}
 								else
 								{
-									SetZero(row, srcC32, dstMask);
+									SetZeros(row, srcC32, dstMask);
 									row += p.srcC;
 								}
 							}
 						}
 						else
 						{
-							SetZero(row, p.kernelX * p.srcC);
+							SetZeros(row, p.kernelX * p.srcC);
 							row += p.kernelX * p.srcC;
 						}
 					}
@@ -120,14 +120,14 @@ namespace Simd
 								}
 								else
 								{
-									SetZero(row, srcC32, 0);
+									SetZeros(row, srcC32, 0);
 									row += p.srcC;
 								}
 							}
 						}
 						else
 						{
-							SetZero(row, p.kernelX * srcC32, 0);
+							SetZeros(row, p.kernelX * srcC32, 0);
 							row += p.kernelX * srcC32;
 						}
 					}
@@ -209,14 +209,14 @@ namespace Simd
                                 }
                                 else
                                 {
-                                    SetZero(row, srcC32, tailMask);
+                                    SetZeros(row, srcC32, tailMask);
                                     row += p.srcC;
                                 }
                             }
                         }
                         else
                         {
-                            SetZero(row, p.kernelX * p.srcC);
+                            SetZeros(row, p.kernelX * p.srcC);
                             row += p.kernelX * p.srcC;
                         }
                     }
