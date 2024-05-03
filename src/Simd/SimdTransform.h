@@ -24,7 +24,7 @@
 #ifndef __SimdTransform_h__
 #define __SimdTransform_h__
 
-#include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdCopy.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdStore.h"
 

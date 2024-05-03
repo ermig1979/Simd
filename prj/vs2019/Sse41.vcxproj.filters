@@ -524,7 +524,7 @@
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdCopyPixel.h">
+    <ClInclude Include="..\..\src\Simd\SimdCopy.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h">

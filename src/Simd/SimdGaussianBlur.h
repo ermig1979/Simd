@@ -26,7 +26,7 @@
 
 #include "Simd/SimdArray.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdCopy.h"
 
 namespace Simd
 {

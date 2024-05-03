@@ -428,25 +428,6 @@ namespace Simd
             _mm512_storeu_si512(dst, _mm512_permutexvar_epi16(PERM_IDX, d));
         }
 
-        SIMD_INLINE void SetZero(uint16_t* dst, __mmask32 dstMask = __mmask32(-1))
-        {
-            _mm512_mask_storeu_epi16(dst, dstMask, _mm512_setzero_si512());
-        }
-
-        SIMD_INLINE void Copy(const uint16_t* src, uint16_t* dst, __mmask32 srcMask = __mmask32(-1), __mmask32 dstMask = __mmask32(-1))
-        {
-            _mm512_mask_storeu_epi16(dst, dstMask, _mm512_maskz_loadu_epi16(srcMask, src));
-        }
-
-        SIMD_INLINE void Copy(const uint16_t* src, uint16_t* dst, size_t size32, __mmask32 tail = __mmask32(0))
-        {
-            size_t i = 0;
-            for(; i < size32; i += 32)
-                _mm512_storeu_epi16(dst + i, _mm512_loadu_epi16(src + i));
-            if(tail)
-                _mm512_mask_storeu_epi16(dst + i, tail, _mm512_maskz_loadu_epi16(tail, src + i));
-        }
-
         //-------------------------------------------------------------------------------------------------
 
         template <Term16bType term> struct Term16b

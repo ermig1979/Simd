@@ -23,7 +23,7 @@
 */
 #include "Simd/SimdWarpAffine.h"
 #include "Simd/SimdWarpAffineCommon.h"
-#include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdCopy.h"
 #include "Simd/SimdUnpack.h"
 #include "Simd/SimdStore.h"
 

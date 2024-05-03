@@ -23,7 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdCopy.h"
 #include "Simd/SimdTransform.h"
 
 namespace Simd

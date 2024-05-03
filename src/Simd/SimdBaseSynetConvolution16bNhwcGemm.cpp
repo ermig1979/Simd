@@ -78,6 +78,10 @@ namespace Simd
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, a.bufD);
             a.elem = _elemD;
             a.reorderType = 0;
+            a.sumBuf = (_dst16b && a.macroK < a.K) || a.microK > 2 ? 1 : 0;
+            if (a.sumBuf == 0 && a.macroD > p.dstC)
+                a.macroD = p.dstC;
+
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
         }
@@ -88,7 +92,7 @@ namespace Simd
             size_t size = 0;
             if(_convert)
                 size += a.bufM * a.bufK * sizeof(uint16_t);
-            if ((_dst16b && a.macroK < a.K) || a.microK > 2)
+            if (a.sumBuf)
                 size += a.macroD * a.bufM * sizeof(float);
             return size;
         }
@@ -133,7 +137,7 @@ namespace Simd
             const AlgParam& a = _alg;
             buf8 = Buffer(buf8);
             uint16_t* buf = _convert ? Allocate<uint16_t>(buf8, a.bufM * a.bufK) : (uint16_t*)src;
-            float* sum = (_dst16b && a.macroK < a.K) || a.microK > 2 ? Allocate<float>(buf8, a.macroD * a.bufM) : (float*)dst;
+            float* sum = a.sumBuf ? Allocate<float>(buf8, a.macroD * a.bufM) : (float*)dst;
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
                 Forward(src, buf, sum, dst);

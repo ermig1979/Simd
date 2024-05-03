@@ -24,7 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdResizerCommon.h"
-#include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdCopy.h"
 #include "Simd/SimdUpdate.h"
 
 namespace Simd

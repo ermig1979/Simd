@@ -25,7 +25,7 @@
 #define __SimdWarpAffineCommon_h__
 
 #include "Simd/SimdWarpAffine.h"
-#include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdCopy.h"
 
 namespace Simd
 {

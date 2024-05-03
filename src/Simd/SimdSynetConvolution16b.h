@@ -141,7 +141,7 @@ namespace Simd
                 size_t F, microD, microM, microK;
                 size_t macroD, macroH, macroK;
                 size_t bufD, bufM, bufK, elem;
-                int reorderType;
+                int reorderType, sumBuf;
             };
 
             typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t b, size_t yBeg, size_t yEnd, uint16_t* dst);
