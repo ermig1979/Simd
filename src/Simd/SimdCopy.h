@@ -87,7 +87,7 @@ namespace Simd
         {
             size_t i = 0;
             for (; i < size32; i += 32)
-                _mm512_storeu_epi16(dst + i, _mm512_loadu_epi16(src + i));
+                _mm512_storeu_si512(dst + i, _mm512_loadu_si512(src + i));
             if (tail)
                 _mm512_mask_storeu_epi16(dst + i, tail, _mm512_maskz_loadu_epi16(tail, src + i));
         }
