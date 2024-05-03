@@ -51,7 +51,7 @@ namespace Simd
                 dstMask[0] = TailMask32(p.srcC - srcC32);
             }
             size_t gap = a.bufK - a.K;
-            for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * AlignHi(p.dstW, a.F) : 0); dy < yEnd; ++dy)
+            for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
@@ -97,7 +97,7 @@ namespace Simd
         {
             const uint16_t* src = (uint16_t*)src8;
             size_t gap = a.bufK - a.K;
-            for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * AlignHi(p.dstW, a.F) : 0); dy < yEnd; ++dy)
+            for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {

@@ -48,6 +48,8 @@ namespace Simd
             desc << Ext() << "::NhwcGemm";
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
+            if (_alg.reorderType)
+                desc << "-r";
             return desc.str();
         }
 
@@ -177,7 +179,7 @@ namespace Simd
                                     _convert(src + b * dS, p, a, 0, p.dstH, buf + b * dB);
                             }
                             else
-                                _convert(src, p, a, yBeg, yEnd, buf);
+                                _convert(src, p, a, yBeg, yEnd, buf + bufOffs);
                         }
                         if (mak + macroK == a.bufK)
                             _convolutions[1](buf + bufOffs, p, a, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 1 : 0,

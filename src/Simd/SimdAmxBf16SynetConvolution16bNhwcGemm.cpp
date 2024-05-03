@@ -51,7 +51,7 @@ namespace Simd
 			__mmask16 srcMask1 = TailMask16(p.srcC - srcC32 - F * 1);
 			__mmask32 dstMask = TailMask32(p.srcC - srcC32);
 			__mmask32 gapMask = TailMask32(a.bufK - a.K);
-			for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * AlignHi(p.dstW, a.F) : 0); dy < yEnd; ++dy)
+			for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
 			{
 				for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
 				{
@@ -97,12 +97,12 @@ namespace Simd
 			const float* src = (float*)src8;
 			size_t srcC32 = AlignLo(p.srcC, 32);
 			assert(p.srcC == srcC32);
-			//dst += (a.macroK < a.bufK ? yBeg * p.dstW : 0) * a.bufK;
-			for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * AlignHi(p.dstW, a.F) : 0); dy < yEnd; ++dy)
+			for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
 			{
 				for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
 				{
-					uint16_t* row = dst + dr * a.bufK;
+                    size_t drB = dr & (~15), drO = dr & 15;
+					uint16_t* row = dst + drB * a.bufK + drO * 32;
 					for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
 					{
 						size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
@@ -114,21 +114,20 @@ namespace Simd
 								if (sx < p.srcW)
 								{
 									const float* ps = src + (sy * p.srcW + sx) * p.srcC;
-									for (size_t sc = 0; sc < srcC32; sc += 32)
-										ConvertA(ps + sc, row + sc);
-									row += p.srcC;
+									for (size_t sc = 0; sc < srcC32; sc += 32, row += 512)
+										ConvertA(ps + sc, row);
 								}
 								else
 								{
-									SetZeros(row, srcC32, 0);
-									row += p.srcC;
+                                    for (size_t sc = 0; sc < srcC32; sc += 32, row += 512)
+                                        SetZero(row);
 								}
 							}
 						}
 						else
 						{
-							SetZeros(row, p.kernelX * srcC32, 0);
-							row += p.kernelX * srcC32;
+                            for (size_t sc = 0, scN = p.kernelX * srcC32; sc < scN; sc += 32, row += 512)
+                                SetZero(row);
 						}
 					}
 				}
@@ -142,7 +141,6 @@ namespace Simd
             __mmask16 srcMask0 = TailMask16(p.srcC - srcC32 - F * 0);
             __mmask16 srcMask1 = TailMask16(p.srcC - srcC32 - F * 1);
             src += yBeg * p.srcW * p.srcC;
-            dst += ((a.macroK < a.bufK ? yBeg * AlignHi(p.dstW, a.F) : 0)) * a.bufK;
             for (size_t i = 0; i < n; ++i)
             {
                 size_t sc = 0;
@@ -162,7 +160,6 @@ namespace Simd
             __mmask16 srcMask0 = TailMask16(p.srcC - srcC32 - F * 0);
             __mmask16 srcMask1 = TailMask16(p.srcC - srcC32 - F * 1);
             src += yBeg * p.srcW * p.srcC;
-            dst += ((a.macroK < a.bufK ? yBeg * AlignHi(p.dstW, a.F) : 0)) * a.bufK;
             for (size_t i = 0; i < n; i += 16)
             {
                 size_t m = Min(i + 16, n) - i;
@@ -193,7 +190,7 @@ namespace Simd
             const uint16_t* src = (uint16_t*)src8;
             size_t srcC32 = AlignLo(p.srcC, 32);
             __mmask32 gapMask = TailMask32(a.bufK - a.K), tailMask = TailMask32(p.srcC - srcC32);
-            for (size_t dy = yBeg, dr = (a.macroK < a.bufK ? dy * AlignHi(p.dstW, a.F) : 0); dy < yEnd; ++dy)
+            for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
@@ -526,7 +523,6 @@ namespace Simd
             {
                 if (_is1x1)
                 {
-#if SIMD_CONV_REORDER_TYPE
                     if (a.batch == 1)
                     {
                         _convert = Convert16bNhwcGemm1x1R;
@@ -537,17 +533,13 @@ namespace Simd
                         _convert = Convert16bNhwcGemm1x1D;
                         a.reorderType = 0;
                     }
-#else
-                    _convert = Convert16bNhwcGemm1x1D;
-                    a.reorderType = 0;
-#endif
                 }
                 else
                 {
-                    if (p.srcC == AlignLo(p.srcC, 32))
+                    if (p.srcC == AlignLo(p.srcC, 32) && a.batch == 1)
                     {
                         _convert = Convert16bNhwcGemmR;
-                        a.reorderType = 0;
+                        a.reorderType = 1;
                     }
                     else
                     {
