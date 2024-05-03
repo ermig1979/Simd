@@ -151,7 +151,7 @@ namespace Simd
             size_t i = 0;
             __m512i zero = _mm512_setzero_si512();
             for (; i < size32; i += 32)
-                _mm512_storeu_epi16(dst + i, zero);
+                _mm512_storeu_si512(dst + i, zero);
             if (tail)
                 _mm512_mask_storeu_epi16(dst + i, tail, zero);
         }
