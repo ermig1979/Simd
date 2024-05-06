@@ -161,6 +161,46 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class SynetConvolution16bNhwcDirect : public SynetConvolution16b
+        {
+        public:
+            SynetConvolution16bNhwcDirect(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t batch, K, M;
+                size_t F, microD, microS, microC;
+                size_t macroD, macroH, macroC;
+                size_t yStart, yStep;
+                size_t zRow, zImg, zBeg, zEnd;
+                size_t bufD, bufH, bufW, bufC, elem;
+                int sumBuf;
+            };
+
+            typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
+                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst);
+
+        protected:
+            void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
+            virtual void SetWeight(const float* weight);
+            void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
+
+            AlgParam _alg;
+            ConvertPtr _convert;
+            ConvolutionPtr _convolutions[2];
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
 
