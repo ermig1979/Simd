@@ -175,19 +175,18 @@ namespace Simd
 
             struct AlgParam
             {
-                size_t batch, K, M;
+                size_t batch, srcC, srcH, srcW, dstC, K;
                 size_t F, microD, microS, microC;
                 size_t macroD, macroH, macroC;
                 size_t yStart, yStep;
-                size_t zRow, zImg, zBeg, zEnd;
-                size_t bufD, bufH, bufW, bufC, elem;
-                int sumBuf;
+                size_t bufS, bufD, elem;
             };
 
-            typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+            typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst);
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst);
+
+            typedef void(*PostprocessPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, const float* bias, const float* params, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
@@ -195,8 +194,9 @@ namespace Simd
             void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 
             AlgParam _alg;
-            ConvertPtr _convert;
-            ConvolutionPtr _convolutions[2];
+            PreprocessPtr _preprocess;
+            ConvolutionPtr _convolution;
+            PostprocessPtr _postprocess;
         };
 
         //-------------------------------------------------------------------------------------------------
