@@ -215,6 +215,14 @@ namespace Simd
             virtual String Ext() const { return "Sse41"; }
         };
 
+        class SynetConvolution16bNhwcDirect : public Base::SynetConvolution16bNhwcDirect
+        {
+        public:
+            SynetConvolution16bNhwcDirect(const ConvParam& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
         //-------------------------------------------------------------------------------------------------
 
         void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);

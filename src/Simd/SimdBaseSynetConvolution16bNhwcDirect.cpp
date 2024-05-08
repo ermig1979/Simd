@@ -155,7 +155,7 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
-            size_t srcH = a.srcH * a.batch;
+            size_t srcH = a.srcH * a.batch, dyPad = p.kernelY - 1;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
@@ -166,10 +166,8 @@ namespace Simd
                     for (size_t syBeg = 0; syBeg < srcH;)
                     {
                         size_t syEnd = Simd::Min(syBeg + a.macroH, srcH);
-                        //size_t dyBeg = 
-            //            size_t bufOffs = (a.macroK < a.bufK || _convert == NULL) ? yBeg * AlignHi(p.dstW, a.F) * a.bufK + (a.reorderType ? mak * a.F : mak) : 0;
-            //            size_t sumOffs = yBeg * p.dstW * a.macroD;
-            //            size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
+                        size_t dyBeg = syBeg ? syBeg - dyPad : 0;
+                        size_t dyEnd = syEnd - dyPad;
                         if (mad == 0 && mac == 0)
                         {
                             if (a.batch > 1)
@@ -190,7 +188,7 @@ namespace Simd
                                 //_postprocess(sum, p, a, macroD, );
                             }
                             else
-                                _postprocess(sum, p, a, macroD, syBeg, syEnd, bias, params, dst);
+                                _postprocess(sum, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
                         }
                         syBeg = syEnd;
                     }

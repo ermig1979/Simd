@@ -48,6 +48,14 @@ namespace Simd
             return _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)p0), (__m64*)p1);
         } 
 
+        SIMD_INLINE __m128 Load(const float* ptr, size_t size)
+        {
+            SIMD_ALIGNED(16) float buf[F] = {0};
+            for (size_t i = 0; i < size; ++i)
+                buf[i] = ptr[i];
+            return _mm_loadu_ps(buf);
+        }
+
         SIMD_INLINE __m128 LoadPadZeroNose1(const float* p)
         {
             SIMD_ALIGNED(16) const int32_t m[F] = { 0, -1, -1, -1 };
@@ -140,6 +148,14 @@ namespace Simd
         SIMD_INLINE __m256 Load(const float* p0, const float* p1, const float* p2, const float* p3)
         {
             return _mm256_insertf128_ps(_mm256_castps128_ps256(Sse41::Load(p0, p1)), Sse41::Load(p2, p3), 1);
+        }
+
+        SIMD_INLINE __m256 Load(const float* ptr, size_t size)
+        {
+            SIMD_ALIGNED(32) float buf[F] = { 0 };
+            for (size_t i = 0; i < size; ++i)
+                buf[i] = ptr[i];
+            return _mm256_loadu_ps(buf);
         }
 
         SIMD_INLINE __m256 Load(const float* ptr, __m256i mask)
