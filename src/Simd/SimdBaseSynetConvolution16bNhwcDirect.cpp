@@ -75,8 +75,8 @@ namespace Simd
                     if (p.batch % batch == 0 && batch * bufSize <= L2)
                         a.batch = batch;
             }
-            a.macroH = Simd::RestrictRange(L2 / a.macroC / p.srcW / 2, p.kernelY, p.srcH * a.batch);
-            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.K / 2, a.microD), a.microD, a.bufD);
+            a.macroH = Simd::RestrictRange(L2 / a.macroC / a.srcW / 2, size_t(1), p.dstH * a.batch);
+            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.K / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
             a.elem = _elemD;
             a.bufS = a.batch * a.srcC * a.srcH * a.srcW;
             a.bufD = a.batch * a.macroD * a.srcH * a.srcW;
@@ -155,7 +155,7 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
-            size_t srcH = a.srcH * a.batch, dyPad = p.kernelY - 1;
+            size_t dstH = p.srcH * a.batch, dyPad = p.kernelY - 1;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
@@ -163,11 +163,11 @@ namespace Simd
                 for (size_t mac = 0; mac < a.srcC; mac += a.macroC)
                 {
                     size_t macroC = Simd::Min(a.srcC, mac + a.macroC) - mac;
-                    for (size_t syBeg = 0; syBeg < srcH;)
+                    for (size_t dyBeg = 0; dyBeg < dstH;)
                     {
-                        size_t syEnd = Simd::Min(syBeg + a.macroH, srcH);
-                        size_t dyBeg = syBeg ? syBeg - dyPad : 0;
-                        size_t dyEnd = syEnd - dyPad;
+                        size_t dyEnd = Simd::Min(dyBeg + a.macroH, dstH);
+                        //size_t syBeg = dyBeg ? syBeg - dyPad : 0;
+                        //size_t dyEnd = syEnd - dyPad;
                         if (mad == 0 && mac == 0)
                         {
                             if (a.batch > 1)
@@ -178,9 +178,9 @@ namespace Simd
                                     _preprocess(src + b * dS, p, a, 0, p.dstH, buf + b * dB);
                             }
                             else
-                                _preprocess(src, p, a, syBeg, syEnd, buf);
+                                _preprocess(src, p, a, dyBeg, dyEnd, buf);
                         }
-                        _convolution(buf, p, a, macroD, syEnd - syBeg, macroC, mac == 0 ? 1 : 0, weight, sum);
+                        //_convolution(buf, p, a, macroD, syEnd - syBeg, macroC, mac == 0 ? 1 : 0, weight, sum);
                         if (mac + macroC == a.srcC)
                         {
                             if (a.batch > 1)
@@ -188,9 +188,9 @@ namespace Simd
                                 //_postprocess(sum, p, a, macroD, );
                             }
                             else
-                                _postprocess(sum, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
+                                ;// _postprocess(sum, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
                         }
-                        syBeg = syEnd;
+                        dyBeg = dyEnd;
                     }
                     weight += macroC * a.F;
                 }
