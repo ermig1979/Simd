@@ -65,7 +65,7 @@ jobs:
       run: lscpu
 
     - name: Install toolchain
-      run: sudo apt-get -y install clang
+      run: sudo apt-get update && sudo apt-get -y install clang
 
     - name: Configure CMake
       run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="clang" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native"
@@ -92,7 +92,7 @@ jobs:
       run: lscpu
 
     - name: Install toolchain
-      run: sudo apt-get -y install g++-${{matrix.gcc_version}}
+      run: sudo apt-get update && sudo apt-get -y install g++-${{matrix.gcc_version}}
 
     - name: Configure CMake
       run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=ON -DSIMD_TEST_FLAGS="-march=native"
