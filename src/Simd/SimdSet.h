@@ -29,6 +29,15 @@
 
 namespace Simd
 {
+    namespace Base
+    {
+        SIMD_INLINE void SetZero(uint16_t* dst, size_t size)
+        {
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = 0;
+        }
+    }
+
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
@@ -50,6 +59,13 @@ namespace Simd
         SIMD_INLINE __m128 SetFloat(float a0, float a1)
         {
             return _mm_unpacklo_ps(_mm_set_ps1(a0), _mm_set_ps1(a1));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void SetZero(uint16_t* dst)
+        {
+            _mm_storeu_si128((__m128i*)dst, _mm_setzero_si128());
         }
     }
 #endif// SIMD_SSE41_ENABLE

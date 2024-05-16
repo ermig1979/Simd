@@ -79,6 +79,7 @@ namespace Simd
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.K / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
             a.elem = _elemD;
             a.bufS = a.batch * a.srcC * a.srcH * a.srcW;
+            a.bufP = a.batch * a.microC * a.srcH * a.srcW;
             a.bufD = a.batch * a.macroD * a.srcH * a.srcW;
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
@@ -139,7 +140,7 @@ namespace Simd
             const AlgParam& a = _alg;
             buf8 = Buffer(buf8);
             uint16_t* bufS = a.bufS ? Allocate<uint16_t>(buf8, a.bufS) : NULL;
-            float* bufD = a.bufD ? Allocate<float>(buf8, a.macroD * a.bufD) : NULL;
+            float* bufD = a.bufD ? Allocate<float>(buf8, a.bufD) : NULL;
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
                 uint16_t* buf = bufS ? bufS : (uint16_t*)src;
@@ -155,7 +156,7 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
-            size_t dstH = p.srcH * a.batch, dyPad = p.kernelY - 1;
+            size_t dstH = p.dstH * a.batch, dstHb = a.srcH * a.batch + 1 - p.kernelY;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
@@ -166,8 +167,6 @@ namespace Simd
                     for (size_t dyBeg = 0; dyBeg < dstH;)
                     {
                         size_t dyEnd = Simd::Min(dyBeg + a.macroH, dstH);
-                        //size_t syBeg = dyBeg ? syBeg - dyPad : 0;
-                        //size_t dyEnd = syEnd - dyPad;
                         if (mad == 0 && mac == 0)
                         {
                             if (a.batch > 1)
@@ -180,7 +179,15 @@ namespace Simd
                             else
                                 _preprocess(src, p, a, dyBeg, dyEnd, buf);
                         }
-                        //_convolution(buf, p, a, macroD, syEnd - syBeg, macroC, mac == 0 ? 1 : 0, weight, sum);
+                        if (a.batch > 1)
+                        {
+                            _convolution(buf + mac, p, a, macroD, dstHb, macroC, mac == 0 ? 1 : 0, weight, sum);
+                        }
+                        else
+                        {
+                            _convolution(buf + mac + dyBeg * a.srcW * a.srcC, p, a, macroD, dyEnd - dyBeg, 
+                                macroC, mac == 0 ? 1 : 0, weight, sum + dyBeg * a.srcW * a.macroD);
+                        }
                         if (mac + macroC == a.srcC)
                         {
                             if (a.batch > 1)

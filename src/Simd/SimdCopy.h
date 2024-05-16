@@ -75,6 +75,16 @@ namespace Simd
         }
     }
 
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        SIMD_INLINE void Copy(const uint16_t* src, uint16_t* dst)
+        {
+            _mm_storeu_si128((__m128i*)dst, _mm_loadu_si128((__m128i*)src));
+        }
+    }
+#endif// SIMD_SSE41_ENABLE
+
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {

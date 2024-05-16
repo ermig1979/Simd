@@ -178,8 +178,7 @@ namespace Simd
                 size_t batch, srcC, srcH, srcW, dstC, K;
                 size_t F, microD, microS, microC;
                 size_t macroD, macroH, macroC;
-                size_t yStart, yStep;
-                size_t bufS, bufD, elem;
+                size_t bufS, bufP, bufD, elem;
             };
 
             typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst);
