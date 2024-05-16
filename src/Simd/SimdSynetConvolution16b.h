@@ -185,7 +185,7 @@ namespace Simd
 
             typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst);
 
-            typedef void(*PostprocessPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, const float* bias, const float* params, uint8_t* dst);
+            typedef void(*PostprocessPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);

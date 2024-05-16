@@ -156,7 +156,7 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
-            size_t dstH = p.dstH * a.batch, dstHb = a.srcH * a.batch + 1 - p.kernelY;
+            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch + 1 - p.kernelY;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
@@ -181,11 +181,11 @@ namespace Simd
                         }
                         if (a.batch > 1)
                         {
-                            _convolution(buf + mac, p, a, macroD, dstHb, macroC, mac == 0 ? 1 : 0, weight, sum);
+                            _convolution(buf + mac * a.srcH * a.srcW * a.batch, p, a, macroD, dstHb, macroC, mac == 0 ? 1 : 0, weight, sum);
                         }
                         else
                         {
-                            _convolution(buf + mac + dyBeg * a.srcW * a.srcC, p, a, macroD, dyEnd - dyBeg, 
+                            _convolution(buf + mac * a.srcH * a.srcW + dyBeg * a.srcW * a.microC, p, a, macroD, dyEnd - dyBeg,
                                 macroC, mac == 0 ? 1 : 0, weight, sum + dyBeg * a.srcW * a.macroD);
                         }
                         if (mac + macroC == a.srcC)
@@ -195,11 +195,11 @@ namespace Simd
                                 //_postprocess(sum, p, a, macroD, );
                             }
                             else
-                                ;// _postprocess(sum, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
+                                _postprocess(sum, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
                         }
                         dyBeg = dyEnd;
                     }
-                    weight += macroC * a.F;
+                    weight += macroC * a.K * a.F;
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
@@ -210,7 +210,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcDirect::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && p.IsDilation(1) &&p.IsStride(1);
+            return p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1);
         }
     }
 #endif

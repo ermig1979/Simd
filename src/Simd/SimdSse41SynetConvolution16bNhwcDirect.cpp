@@ -36,7 +36,7 @@ namespace Simd
     namespace Sse41
     {
         typedef Base::SynetConvolution16bNhwcDirect::AlgParam AlgParam;
-        typedef Base::SynetConvolution16bNhwcDirect::PostprocessPtr Postprocess;
+        typedef Base::SynetConvolution16bNhwcDirect::PostprocessPtr PostprocessPtr;
 
         SIMD_INLINE void Float32ToBFloat16Tail(const float* src, size_t size, uint16_t* dst)
         {
@@ -174,10 +174,10 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<int M> void Convolution16bNhwcDirect_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t dstC, size_t srcC, int zero, const uint16_t* weight0, float* dst)
+        template<int M> void Convolution16bNhwcDirect_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int zero, const uint16_t* weight0, float* dst)
         {
             __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
-            size_t dD = a.macroD, dX = a.microC, dY = a.srcW * dX, dC = dY * a.srcH * dY, kX = p.kernelX, kY = p.kernelY;
+            size_t dD = a.macroD, dX = a.microC, dY = a.srcW * dX, dC = dY * a.srcH, kX = p.kernelX, kY = p.kernelY;
             const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
             const uint16_t* src1 = src0 + 1 * dX;
             const uint16_t* src2 = src0 + 2 * dX;
@@ -207,59 +207,62 @@ namespace Simd
                     {
                         for (size_t x = 0, offsX = offsY; x < kX; x += 1, offsX += dX)
                         {
-                            w01 = _mm_loadu_ps((float*)weight0);
-                            w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
-                            w01 = _mm_and_ps(w01, m);
-                            w11 = _mm_loadu_ps((float*)weight1);
-                            w10 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w11), Base::Bf16::SHIFT));
-                            w11 = _mm_and_ps(w11, m);
-                            if (M > 0)
+                            for (size_t offs = offsX, end = offs + dX; offs < end; offs += 2)
                             {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offsX - 1)), m);
-                                d00 = _mm_add_ps(_mm_mul_ps(s0, w00), d00);
-                                d01 = _mm_add_ps(_mm_mul_ps(s0, w10), d01);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offsX - 0)), m);
-                                d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00);
-                                d01 = _mm_add_ps(_mm_mul_ps(s0, w11), d01);
+                                w01 = _mm_loadu_ps((float*)weight0);
+                                w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
+                                w01 = _mm_and_ps(w01, m);
+                                w11 = _mm_loadu_ps((float*)weight1);
+                                w10 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w11), Base::Bf16::SHIFT));
+                                w11 = _mm_and_ps(w11, m);
+                                if (M > 0)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 1)), m);
+                                    d00 = _mm_add_ps(_mm_mul_ps(s0, w00), d00);
+                                    d01 = _mm_add_ps(_mm_mul_ps(s0, w10), d01);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 0)), m);
+                                    d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00);
+                                    d01 = _mm_add_ps(_mm_mul_ps(s0, w11), d01);
+                                }
+                                if (M > 1)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 1)), m);
+                                    d10 = _mm_add_ps(_mm_mul_ps(s0, w00), d10);
+                                    d11 = _mm_add_ps(_mm_mul_ps(s0, w10), d11);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 0)), m);
+                                    d10 = _mm_add_ps(_mm_mul_ps(s0, w01), d10);
+                                    d11 = _mm_add_ps(_mm_mul_ps(s0, w11), d11);
+                                }
+                                if (M > 2)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 1)), m);
+                                    d20 = _mm_add_ps(_mm_mul_ps(s0, w00), d20);
+                                    d21 = _mm_add_ps(_mm_mul_ps(s0, w10), d21);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 0)), m);
+                                    d20 = _mm_add_ps(_mm_mul_ps(s0, w01), d20);
+                                    d21 = _mm_add_ps(_mm_mul_ps(s0, w11), d21);
+                                }
+                                if (M > 3)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 1)), m);
+                                    d30 = _mm_add_ps(_mm_mul_ps(s0, w00), d30);
+                                    d31 = _mm_add_ps(_mm_mul_ps(s0, w10), d31);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 0)), m);
+                                    d30 = _mm_add_ps(_mm_mul_ps(s0, w01), d30);
+                                    d31 = _mm_add_ps(_mm_mul_ps(s0, w11), d31);
+                                }
+                                if (M > 4)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 1)), m);
+                                    d40 = _mm_add_ps(_mm_mul_ps(s0, w00), d40);
+                                    d41 = _mm_add_ps(_mm_mul_ps(s0, w10), d41);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 0)), m);
+                                    d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40);
+                                    d41 = _mm_add_ps(_mm_mul_ps(s0, w11), d41);
+                                }
+                                weight0 += DF;
+                                weight1 += DF;
                             }
-                            if (M > 1)
-                            {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offsX - 1)), m);
-                                d10 = _mm_add_ps(_mm_mul_ps(s0, w00), d10);
-                                d11 = _mm_add_ps(_mm_mul_ps(s0, w10), d11);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offsX - 0)), m);
-                                d10 = _mm_add_ps(_mm_mul_ps(s0, w01), d10);
-                                d11 = _mm_add_ps(_mm_mul_ps(s0, w11), d11);
-                            }
-                            if (M > 2)
-                            {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offsX - 1)), m);
-                                d20 = _mm_add_ps(_mm_mul_ps(s0, w00), d20);
-                                d21 = _mm_add_ps(_mm_mul_ps(s0, w10), d21);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offsX - 0)), m);
-                                d20 = _mm_add_ps(_mm_mul_ps(s0, w01), d20);
-                                d21 = _mm_add_ps(_mm_mul_ps(s0, w11), d21);
-                            }
-                            if (M > 3)
-                            {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offsX - 1)), m);
-                                d30 = _mm_add_ps(_mm_mul_ps(s0, w00), d30);
-                                d31 = _mm_add_ps(_mm_mul_ps(s0, w10), d31);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offsX - 0)), m);
-                                d30 = _mm_add_ps(_mm_mul_ps(s0, w01), d30);
-                                d31 = _mm_add_ps(_mm_mul_ps(s0, w11), d31);
-                            }
-                            if (M > 4)
-                            {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offsX - 1)), m);
-                                d40 = _mm_add_ps(_mm_mul_ps(s0, w00), d40);
-                                d41 = _mm_add_ps(_mm_mul_ps(s0, w10), d41);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offsX - 0)), m);
-                                d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40);
-                                d41 = _mm_add_ps(_mm_mul_ps(s0, w11), d41);
-                            }
-                            weight0 += DF;
-                            weight1 += DF;
                         }
                     }
                 }
@@ -293,45 +296,48 @@ namespace Simd
                     {
                         for (size_t x = 0, offsX = offsY; x < kX; x += 1, offsX += dX)
                         {
-                            w01 = _mm_loadu_ps((float*)weight0);
-                            w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
-                            w01 = _mm_and_ps(w01, m);
-                            if (M > 0)
+                            for (size_t offs = offsX, end = offs + dX; offs < end; offs += 2)
                             {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offsX - 1)), m);
-                                d00 = _mm_add_ps(_mm_mul_ps(s0, w00), d00);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offsX - 0)), m);
-                                d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00);
+                                w01 = _mm_loadu_ps((float*)weight0);
+                                w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
+                                w01 = _mm_and_ps(w01, m);
+                                if (M > 0)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 1)), m);
+                                    d00 = _mm_add_ps(_mm_mul_ps(s0, w00), d00);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 0)), m);
+                                    d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00);
+                                }
+                                if (M > 1)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 1)), m);
+                                    d10 = _mm_add_ps(_mm_mul_ps(s0, w00), d10);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 0)), m);
+                                    d10 = _mm_add_ps(_mm_mul_ps(s0, w01), d10);
+                                }
+                                if (M > 2)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 1)), m);
+                                    d20 = _mm_add_ps(_mm_mul_ps(s0, w00), d20);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 0)), m);
+                                    d20 = _mm_add_ps(_mm_mul_ps(s0, w01), d20);
+                                }
+                                if (M > 3)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 1)), m);
+                                    d30 = _mm_add_ps(_mm_mul_ps(s0, w00), d30);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 0)), m);
+                                    d30 = _mm_add_ps(_mm_mul_ps(s0, w01), d30);
+                                }
+                                if (M > 4)
+                                {
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 1)), m);
+                                    d40 = _mm_add_ps(_mm_mul_ps(s0, w00), d40);
+                                    s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 0)), m);
+                                    d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40);
+                                }
+                                weight0 += DF;
                             }
-                            if (M > 1)
-                            {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offsX - 1)), m);
-                                d10 = _mm_add_ps(_mm_mul_ps(s0, w00), d10);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offsX - 0)), m);
-                                d10 = _mm_add_ps(_mm_mul_ps(s0, w01), d10);
-                            }
-                            if (M > 2)
-                            {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offsX - 1)), m);
-                                d20 = _mm_add_ps(_mm_mul_ps(s0, w00), d20);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offsX - 0)), m);
-                                d20 = _mm_add_ps(_mm_mul_ps(s0, w01), d20);
-                            }
-                            if (M > 3)
-                            {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offsX - 1)), m);
-                                d30 = _mm_add_ps(_mm_mul_ps(s0, w00), d30);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offsX - 0)), m);
-                                d30 = _mm_add_ps(_mm_mul_ps(s0, w01), d30);
-                            }
-                            if (M > 4)
-                            {
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offsX - 1)), m);
-                                d40 = _mm_add_ps(_mm_mul_ps(s0, w00), d40);
-                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offsX - 0)), m);
-                                d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40);
-                            }
-                            weight0 += DF;
                         }
                     }
                 }
@@ -343,7 +349,7 @@ namespace Simd
             }
         }
 
-        typedef void(*Convolution16bNhwcDirect_2xM_Ptr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t srcC, int zero, const uint16_t* weight, float* dst);
+        typedef void(*Convolution16bNhwcDirect_2xM_Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int zero, const uint16_t* weight0, float* dst);
 
         static Convolution16bNhwcDirect_2xM_Ptr GetConvolution16bNhwcDirect_2xM(size_t M)
         {
@@ -383,6 +389,37 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        template<Term16bType term, SimdConvolutionActivationType type>  void Postprocess16bNhwcDirect(const float* src, const ConvParam& p,
+            const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst)
+        {
+            size_t dstCF = AlignLo(dstC, F), tailD = dstC - dstCF;
+            size_t rowGap = (p.kernelX - 1) * a.macroD;
+            for (size_t dy = dyBeg; dy < dyEnd; ++dy)
+            {
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                {
+                    size_t dc = 0;
+                    for (; dc < dstCF; dc += F)
+                        Sse41::Postprocess<term, type>(src, bias, params, dc, dst);
+                    if (tailD)
+                        Sse41::Postprocess<term, type>(src, bias, params, dc, dst, tailD);
+                    src += a.macroD;
+                    dst += p.dstC * a.elem;
+                }
+                src += rowGap;
+            }
+        }
+
+        template<SimdConvolutionActivationType type> void SetPostprocess(const ConvParam& p, const AlgParam& a, PostprocessPtr & postprocess)
+        {
+            if (p.dstT == SimdTensorData16b)
+                postprocess = Postprocess16bNhwcDirect<Term16bLast16b, type>;
+            else
+                postprocess = Postprocess16bNhwcDirect<Term16bLast32f, type>;
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         SynetConvolution16bNhwcDirect::SynetConvolution16bNhwcDirect(const ConvParam & p)
             : Base::SynetConvolution16bNhwcDirect(p)
         {
@@ -392,6 +429,21 @@ namespace Simd
             else
                 _preprocess = Convert16bNhwcDirect;
             _convolution = Convolution16bNhwcDirect_2;
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationRelu: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationLeakyRelu: SetPostprocess<SimdConvolutionActivationPrelu>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationRestrictRange: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationPrelu: SetPostprocess<SimdConvolutionActivationPrelu>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationElu: SetPostprocess<SimdConvolutionActivationElu>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationHswish: SetPostprocess<SimdConvolutionActivationHswish>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationMish: SetPostprocess<SimdConvolutionActivationMish>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationHardSigmoid: SetPostprocess<SimdConvolutionActivationHardSigmoid>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationSwish: SetPostprocess<SimdConvolutionActivationSwish>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationGelu: SetPostprocess<SimdConvolutionActivationGelu>(p, _alg, _postprocess); break;
+            default: assert(0);
+            }
         }
     }
 #endif

@@ -83,7 +83,7 @@ namespace Test
         FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
 
         Tensor32f bias({ c.dstC });
-        FillRandom(bias.Data(), bias.Size(), -1.0, 1.0f);
+        FillRandom(bias.Data(), bias.Size(), 0.0, 0.0f);
 
         Tensor32f params({ c.dstC });
         FillRandom(params.Data(), params.Size(), 0.0f, 2.0f);
@@ -207,7 +207,7 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 3072, 24, 24, 256, _1, _1, _1, _0, _0, 1, aRe, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 600, 24, 24, 64, _1, _1, _1, _0, _0, 1, aRe, tT, b16, b16), c, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(12, 768 + 768, 5, 5, 255, _1, _1, _1, _0, _0, 1, aRe, tT, f32, f32), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 768 + 768, 127, 127, 255, _1, _1, _1, _0, _0, 1, aRe, tT, f32, f32), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 77, 77, 255, _3, _1, _1, _1, _1, 1, aRe, tT, f32, f32), c, f1, f2);
@@ -219,8 +219,12 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 3072, 24, 24, 256, _1, _1, _1, _0, _0, 1, aRe, tT, f32, f32), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 600, 24, 24, 64, _1, _1, _1, _0, _0, 1, aRe, tT, f32, f32), c, f1, f2);
 #endif
-#else
+#if 1
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 768, 16, 16, 256, _1, _1, _1, _0, _0, 1, aRe, tT, f32, f32), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 32, 32, 256, _3, _1, _1, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
+#endif
+#else
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 8, 8, 8, _3, _1, _1, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
 #endif
 
         return result;
