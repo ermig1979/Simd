@@ -63,7 +63,7 @@ namespace Simd
             assert(a.microC == 8);
             const float* src = (float*)src8;
             size_t srcC8 = Simd::AlignLo(p.srcC, 8), tailC = p.srcC - srcC8;
-            size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? dyEnd : dyEnd + syPad);
+            size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
             size_t cD = a.batch * a.srcH * a.srcW, sD = a.microC;
             if (dyBeg == 0)
             {
@@ -76,7 +76,7 @@ namespace Simd
             else
             {
                 syBeg = dyBeg + syPad;
-                src += syBeg * p.srcC;
+                src += syBeg * p.srcW * p.srcC;
                 dst += (dyBeg + p.kernelY - 1) * a.srcW * sD;
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
@@ -120,7 +120,7 @@ namespace Simd
             assert(a.microC == 8);
             const uint16_t* src = (uint16_t*)src8;
             size_t srcC8 = Simd::AlignLo(p.srcC, 8), tailC = p.srcC - srcC8;
-            size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? dyEnd : dyEnd + syPad);
+            size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
             size_t cD = a.batch * a.srcH * a.srcW, sD = a.microC;
             if (dyBeg == 0)
             {
@@ -133,7 +133,7 @@ namespace Simd
             else
             {
                 syBeg = dyBeg + syPad;
-                src += syBeg * p.srcC;
+                src += syBeg * p.srcW * p.srcC;
                 dst += (dyBeg + p.kernelY - 1) * a.srcW * sD;
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
@@ -394,6 +394,8 @@ namespace Simd
         {
             size_t dstCF = AlignLo(dstC, F), tailD = dstC - dstCF;
             size_t rowGap = (p.kernelX - 1) * a.macroD;
+            src += dyBeg * a.srcW * a.macroD;
+            dst += dyBeg * p.dstW * p.dstC * a.elem;
             for (size_t dy = dyBeg; dy < dyEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx)
