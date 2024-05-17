@@ -77,12 +77,39 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
 
-  build_and_test_gcc:
-    runs-on: ubuntu-latest
+  build_and_test_gcc_old:
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
-        gcc_version: [10, 11, 13]
+        gcc_version: [10, 11]
+        build_type: [Debug, Release]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: sudo apt-get update && sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=ON -DSIMD_TEST_FLAGS="-march=native"
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
+
+  build_and_test_gcc_new:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        gcc_version: [13]
         build_type: [Debug, Release]
 
     steps:
