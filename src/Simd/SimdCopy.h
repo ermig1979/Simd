@@ -83,7 +83,17 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst, _mm_loadu_si128((__m128i*)src));
         }
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        SIMD_INLINE void Copy(const uint16_t* src, uint16_t* dst)
+        {
+            _mm256_storeu_si256((__m256i*)dst, _mm256_loadu_si256((__m256i*)src));
+        }
+    }
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw

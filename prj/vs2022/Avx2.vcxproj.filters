@@ -370,6 +370,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16b.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcDirect.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">

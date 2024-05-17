@@ -68,7 +68,7 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst, _mm_setzero_si128());
         }
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
@@ -124,8 +124,15 @@ namespace Simd
                 mask[i] = second;
             return _mm256_loadu_si256((__m256i*)mask);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void SetZero(uint16_t* dst)
+        {
+            _mm256_storeu_si256((__m256i*)dst, _mm256_setzero_si256());
+        }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
@@ -178,7 +185,7 @@ namespace Simd
             SetZeros(dst, size & (~31), tail ? __mmask32(-1) >> (32 - tail) : 0);
         }
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
@@ -195,7 +202,7 @@ namespace Simd
             return vld1q_s32(a);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }
 
-#endif//__SimdSet_h__
+#endif
