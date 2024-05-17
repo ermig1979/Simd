@@ -192,7 +192,10 @@ namespace Simd
                         {
                             if (a.batch > 1)
                             {
-                                //_postprocess(sum, p, a, macroD, );
+                                size_t dS = a.srcH * a.srcW * a.macroD;
+                                size_t dD = p.dstH * p.dstW * p.dstC * a.elem;
+                                for (size_t b = 0; b < a.batch; ++b)
+                                    _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, params, dst + b * dD);
                             }
                             else
                                 _postprocess(sum, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
