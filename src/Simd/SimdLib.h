@@ -260,6 +260,7 @@ typedef enum
     SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */
     SimdCpuInfoAmxBf16, /*!< Availability of AMX-BF16, AMX-INT8 (x86). */
     SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
+    SimdCpuInfoCurrentFrequency, /*!< Gets CPU current frequency (for current CPU core). */
 } SimdCpuInfoType;
 
 /*! @ingroup c_types

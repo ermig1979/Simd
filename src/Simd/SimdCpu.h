@@ -125,6 +125,8 @@ namespace Simd
 
         size_t CpuCacheSize(size_t level);
 
+        uint64_t CpuCurrentFrequency();
+
         SIMD_INLINE size_t AlgCacheL1()
         {
             return Cpu::L1_CACHE_SIZE;

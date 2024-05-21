@@ -262,6 +262,11 @@ namespace Simd
             return raw.substr(beg, end - beg);
         }
 
+        uint64_t CpuCurrentFrequency()
+        {
+            return 0;
+        }
+
 #elif defined(__GNUC__)
 
         size_t CpuSocketNumber()
@@ -361,6 +366,42 @@ namespace Simd
                 ::pclose(file);
             }
             return model;
+        }
+
+        uint64_t CpuCurrentFrequency()
+        {
+            int core = sched_getcpu();
+            std::string scaling_cur_freq = "/sys/devices/system/cpu/cpu" + std::to_string(core) + "/cpufreq/scaling_cur_freq";
+            if (::access(scaling_cur_freq.c_str(), F_OK) != -1)
+            {
+                std::stringstream args;
+                args << "cat " << scaling_cur_freq;
+                ::FILE* p = ::popen(args.str().c_str(), "r");
+                if (p)
+                {
+                    char buffer[1024];
+                    while (::fgets(buffer, 1024, p));
+                    ::pclose(p);
+                    return ::atoi(buffer) * uint64_t(1000);
+                }
+            }
+            else
+            {
+                std::stringstream args;
+                args << "cat /proc/cpuinfo | grep \"MHz\" | head -n" << core + 1 << " | tail -1";
+                ::FILE* p = ::popen(args.str().c_str(), "r");
+                if (p)
+                {
+                    char buffer[1024];
+                    while (::fgets(buffer, 1024, p));
+                    ::pclose(p);
+                    std::string output = buffer;
+                    std::size_t beg = output.find(":");
+                    if (beg != std::string::npos)
+                        return Round(::atof(output.substr(beg + 1).c_str())) * uint64_t(1000000);
+                }
+            }
+            return 0;
         }
 #else
 #error This platform is unsupported!

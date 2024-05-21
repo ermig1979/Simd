@@ -144,6 +144,7 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 #ifdef SIMD_NEON_ENABLE
     case SimdCpuInfoNeon: return Neon::Enable ? 1 : 0;
 #endif
+    case SimdCpuInfoCurrentFrequency: return Base::CpuCurrentFrequency();
     default:
         return 0;
     }
