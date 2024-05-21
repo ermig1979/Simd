@@ -460,7 +460,7 @@ namespace Simd
             if (p.srcC* p.kernelX * p.kernelY < 1 * microC)
                 return;
 #endif
-            SetAlgParam(microD, microM, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(microD, microM, microC, Base::AlgCacheL1(), Base::AlgCacheL2() / 2, Base::AlgCacheL3());
 #if !defined(SIMD_AMX_EMULATE)
             if(p.Is1x1())
                 _convert = ConvertBf16NhwcGemm1x1;

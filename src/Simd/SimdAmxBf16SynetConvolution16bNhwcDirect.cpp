@@ -204,7 +204,7 @@ namespace Simd
             {
                 for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
                 {
-                    for (size_t x = 0, offsX = offsY; x < kX; x += 1, offsX += dX)
+                    for (size_t offsX = offsY, endX = offsY + kX * dX; offsX < endX; offsX += dX)
                     {
                         _tile_stream_loadd(4, src0 + offsX, strideS);
                         _tile_loadd(6, weight0, strideW);
@@ -436,7 +436,7 @@ namespace Simd
         SynetConvolution16bNhwcDirect::SynetConvolution16bNhwcDirect(const ConvParam & p)
             : Avx512bw::SynetConvolution16bNhwcDirect(p)
         {
-            SetAlgParam(F, F * 2, 32, F * 2, int(Base::AlgCacheL1() * 1.05), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(F, F * 2, 32, F * 2, int(Base::AlgCacheL1() * 1.05), int(Base::AlgCacheL2() * 0.5), Base::AlgCacheL3());
             if (_src16b)
                 _preprocess = Reorder16bNhwcDirect;
             else

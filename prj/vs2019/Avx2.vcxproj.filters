@@ -271,9 +271,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2BFloat16.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fBf16.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fBf16.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>

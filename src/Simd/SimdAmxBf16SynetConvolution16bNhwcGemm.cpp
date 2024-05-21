@@ -509,11 +509,10 @@ namespace Simd
         SynetConvolution16bNhwcGemm::SynetConvolution16bNhwcGemm(const ConvParam & p)
             : Avx512bw::SynetConvolution16bNhwcGemm(p)
         {
-            SetAlgParam(F, F * 2, F * 2, 32, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(F, F * 2, F * 2, 32, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5), Base::AlgCacheL3());
             AlgParam& a = _alg;            
             if (_src16b)
             {
-
                 if (_is1x1 && a.K == a.bufK)
                     _convert = NULL;
                 else

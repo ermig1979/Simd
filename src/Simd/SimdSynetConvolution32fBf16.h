@@ -101,50 +101,6 @@ namespace Simd
             ConvertPtr _convert;
             ConvolutionPtr _convolutions[2];
         };
-
-        //-------------------------------------------------------------------------------------------------
-
-        class SynetConvolution32fBf16NhwcOld : public SynetConvolution32f
-        {
-        public:
-            SynetConvolution32fBf16NhwcOld(const ConvParam& p);
-            virtual String Ext() const { return "Base"; }
-            virtual String Desc() const;
-            virtual size_t ExternalBufferSize() const;
-            virtual size_t InternalBufferSize() const;
-            virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
-            virtual void Forward(const float* src, float* buf, float* dst);
-
-            static bool Preferable(const ConvParam& p);
-
-            struct AlgParam
-            {
-                int mode;
-                size_t microC, microD, macroH, macroC, macroD;
-                size_t batch, srcH, srcW;
-            };
-
-            typedef void(*ConvertPtr)(const float* src, const ConvParam& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
-
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, size_t dstC, size_t dstH, 
-                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
-
-        protected:
-            void SetAlgParam(size_t microD, size_t microHW, size_t microC, size_t L1, size_t L2, size_t L3);
-            int PreferableMode(size_t microD, size_t microHW, size_t microC, size_t L1, size_t L2, size_t L3);
-            void SetWeight(const float* weight);
-            void SetBias(const float* bias);
-            void SetParams(const float* params);
-            void ForwardConv(const float* src, uint16_t* buf, float* dst);
-            void ForwardGemm(const float* src, uint16_t* buf, float* dst);
-            size_t Offset(size_t yBeg, size_t cBeg, size_t cEnd);
-
-            Array16u _weight;
-            Array32f _bias, _params;
-            AlgParam _alg;
-            ConvertPtr _convert;
-            ConvolutionPtr _convolutions[2];
-        };
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -154,14 +110,6 @@ namespace Simd
         {
         public:
             SynetConvolution32fBf16NhwcGemm(const ConvParam& p);
-
-            virtual String Ext() const { return "Sse41"; }
-        };
-
-        class SynetConvolution32fBf16NhwcOld : public Base::SynetConvolution32fBf16NhwcOld
-        {
-        public:
-            SynetConvolution32fBf16NhwcOld(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -175,14 +123,6 @@ namespace Simd
         {
         public:
             SynetConvolution32fBf16NhwcGemm(const ConvParam& p);
-
-            virtual String Ext() const { return "Avx2"; }
-        };
-
-        class SynetConvolution32fBf16NhwcOld : public Sse41::SynetConvolution32fBf16NhwcOld
-        {
-        public:
-            SynetConvolution32fBf16NhwcOld(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -205,16 +145,6 @@ namespace Simd
         void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
 
         void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam& p, size_t yBeg, size_t yEnd, size_t srcC, size_t micC, uint16_t* dst);
-
-        //-----------------------------------------------------------------------------------------
-
-        class SynetConvolution32fBf16NhwcOld : public Avx2::SynetConvolution32fBf16NhwcOld
-        {
-        public:
-            SynetConvolution32fBf16NhwcOld(const ConvParam& p);
-
-            virtual String Ext() const { return "Avx512bw"; }
-        };
     }
 #endif
 
