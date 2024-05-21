@@ -27,6 +27,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestLog.h"
 #include "Test/TestString.h"
+#include "Test/TestTensor.h"
 
 #if defined(_MSC_VER)
 #ifndef NOMINMAX
@@ -466,6 +467,22 @@ namespace Test
     TEST_ADD_GROUP_A0(Yuv422pToBgraV2);
     TEST_ADD_GROUP_A0(Yuv420pToBgraV2);
 
+    void WarmUpCpu()
+    {
+        TEST_LOG_SS(Info, "CPU warm upping is started. Initial frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000 / 1000 << " MHz.");
+        double time = 0;
+        while (time < WARM_UP_TIME)
+        {
+            double start = GetTime();
+            const size_t n = 128;
+            const float _1 = 1.0f, _0 = 0.0f;
+            Tensor32f buf( Shp(n, n));
+            SimdGemm32fNN(n, n, n, &_1, buf.Data(), n, buf.Data(), n, &_0, buf.Data(), n);
+            time += GetTime() - start;
+        }
+        TEST_LOG_SS(Info, "CPU warm upping is ended. Current frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000 / 1000 << " MHz." << std::endl);
+    }
+
     class Task
     {
         Group * _groups;
@@ -499,6 +516,8 @@ namespace Test
 
         void Run()
         {
+            if (WARM_UP_TIME > 0)
+                WarmUpCpu();
             for (size_t i = 0; i < _size && !s_stopped; ++i)
             {
                 _progress = double(i) / double(_size);
@@ -698,6 +717,10 @@ namespace Test
                 {
                     DISABLED_EXTENSIONS = FromString<uint32_t>(arg.substr(4, arg.size() - 4));
                 }
+                else if (arg.find("-wu=") == 0)
+                {
+                    WARM_UP_TIME = FromString<int>(arg.substr(4, arg.size() - 4)) * 0.001;
+                }
                 else
                 {
                     TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
@@ -860,6 +883,7 @@ namespace Test
         std::cout << "    -cc=1         to check c++ API." << std::endl << std::endl;
         std::cout << "    -de=2         a flags of SIMD extensions which testing are disabled." << std::endl;
         std::cout << "                  Base - 1, 2 - SSE4.1/NEON, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16." << std::endl << std::endl;
+        std::cout << "    -wu=100       a time to warm up CPU before testing (in milliseconds)." << std::endl << std::endl;
         return 0;
     }
 
@@ -882,6 +906,7 @@ namespace Test
     int W = 128;
 #endif
     double MINIMAL_TEST_EXECUTION_TIME = 0.1;
+    double WARM_UP_TIME = 0.0;
     int LITTER_CPU_CACHE = 0;
     uint32_t DISABLED_EXTENSIONS = 0;
 
