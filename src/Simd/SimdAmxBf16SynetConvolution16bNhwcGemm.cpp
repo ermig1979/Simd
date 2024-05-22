@@ -450,7 +450,7 @@ namespace Simd
             size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* buf, uint8_t* dst)
         {
             size_t n = 32, n1 = dstH * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * DF;
-            size_t dB = a.macroD, dD = p.dstC * a.elem, dS = a.bufK;
+            size_t dB = a.macroK < a.bufK ? a.macroD : 0, dD = p.dstC * a.elem, dS = a.bufK;
             Convolution16bNhwcGemmPtr body_2 = Convolution16bNhwcGemm_32x32<term, type>;
             Convolution16bNhwcGemmPtr tail_2 = m > 16 ? Convolution16bNhwcGemm_32x32<term, type> : Convolution16bNhwcGemm_16x32<term, type>;
             Convolution16bNhwcGemmPtr body_1 = Convolution16bNhwcGemm_32x16<term, type>;
@@ -522,7 +522,7 @@ namespace Simd
             {
                 if (_is1x1)
                 {
-                    if (a.batch == 1)
+                    if (a.batch == 1/* && a.macroK < a.bufK*/)
                     {
                         _convert = Convert16bNhwcGemm1x1R;
                         a.reorderType = 1;

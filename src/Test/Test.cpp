@@ -467,9 +467,15 @@ namespace Test
     TEST_ADD_GROUP_A0(Yuv422pToBgraV2);
     TEST_ADD_GROUP_A0(Yuv420pToBgraV2);
 
+    //-------------------------------------------------------------------------------------------------
+
     void WarmUpCpu()
     {
+#if defined(__linux__)
         TEST_LOG_SS(Info, "CPU warm upping is started. Initial frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000 / 1000 << " MHz.");
+#else
+        TEST_LOG_SS(Info, "CPU warm upping is started.");
+#endif
         double time = 0;
         while (time < WARM_UP_TIME)
         {
@@ -480,7 +486,11 @@ namespace Test
             SimdGemm32fNN(n, n, n, &_1, buf.Data(), n, buf.Data(), n, &_0, buf.Data(), n);
             time += GetTime() - start;
         }
+#if defined(__linux__)
         TEST_LOG_SS(Info, "CPU warm upping is ended. Current frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000 / 1000 << " MHz." << std::endl);
+#else
+        TEST_LOG_SS(Info, "CPU warm upping is ended.");
+#endif
     }
 
     class Task
@@ -579,6 +589,8 @@ namespace Test
     volatile bool Task::s_stopped = false;
     typedef std::shared_ptr<Task> TaskPtr;
     typedef std::vector<TaskPtr> TaskPtrs;
+
+    //-------------------------------------------------------------------------------------------------
 
     inline void Sleep(unsigned int miliseconds)
     {
@@ -912,6 +924,8 @@ namespace Test
 
     void CheckCpp();
 }
+
+//-------------------------------------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 {
