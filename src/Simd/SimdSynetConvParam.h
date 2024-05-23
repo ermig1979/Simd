@@ -215,6 +215,106 @@ namespace Simd
             return int64_t(batch) * kernelY * kernelX * srcC * dstH * dstW * dstC / group * 2;
         }
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    struct MergConvParam
+    {
+        ConvParam conv[3];
+        size_t count;
+        SimdBool add;
+
+        MergConvParam(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
+        {
+            assert(count <= 3);
+            this->count = count;
+            for (size_t i = 0; i < count; ++i)
+                this->conv[i] = ConvParam(batch, convs + i, compatibility);
+            this->add = add;
+        }
+
+        bool Valid(SimdTensorDataType type0, SimdTensorDataType type1 = SimdTensorData32f)
+        {
+            if (count < 2 || count > 3)
+                return false;
+            for (size_t i = 0; i < count; ++i)
+            {
+                ConvParam& c = conv[i];
+                if (!c.Valid(type0, type1))
+                    return false;
+                if (c.srcF != SimdTensorFormatNhwc || c.dstF != SimdTensorFormatNhwc)
+                    return false;
+                if (c.dstH != (c.srcH + c.padY + c.padH - (c.dilationY * (c.kernelY - 1) + 1)) / c.strideY + 1 || c.dstH == 0)
+                    return false;
+                if (c.dstW != (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1)) / c.strideX + 1 || c.dstW == 0)
+                    return false;
+                if (c.kernelY != c.kernelX || !(c.kernelY == 1 || c.kernelY == 3 || c.kernelY == 5 || c.kernelY == 7))
+                    return false;
+                if (/*c.strideY != c.strideX ||*/ !(c.strideY == 1 || c.strideY == 2 || c.strideY == 3))
+                    return false;
+                if (c.dilationY != 1 || c.dilationX != 1)
+                    return false;
+
+                if (c.dstH == (c.srcH + c.padY + c.padH - (c.dilationY * (c.kernelY - 1) + 1) - 1) / c.strideY + 1)
+                    c.padH--;
+                if (c.dstW == (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1) - 1) / c.strideX + 1)
+                    c.padW--;
+                if (c.IsDepthwise() && i != count - 1 && type1 != SimdTensorData32f)
+                    c.dstT = type1;
+            }
+            if (count == 3)
+            {
+                if (conv[0].group != 1 || (conv[0].kernelY != 1 && conv[0].kernelY != 3))
+                    return false;
+                if (conv[1].group != conv[1].srcC || conv[1].group != conv[1].dstC || (conv[1].kernelY != 3 && conv[1].kernelY != 5 && conv[1].kernelY != 7))
+                    return false;
+                if (conv[2].group != 1 || conv[2].kernelY != 1 || conv[2].strideY != 1)
+                    return false;
+                if (add && (conv[0].srcC != conv[2].dstC || conv[0].srcH != conv[2].dstH || conv[0].srcW != conv[2].dstW))
+                    return false;
+            }
+            else
+            {
+                if (conv[0].group == 1)
+                {
+                    if (conv[0].kernelY != 1 && conv[0].kernelY != 3)
+                        return false;
+                    if (conv[1].group != conv[1].srcC || conv[1].group != conv[1].dstC || (conv[1].kernelY != 3 && conv[1].kernelY != 5 && conv[1].kernelY != 7))
+                        return false;
+                }
+                else
+                {
+                    if (conv[0].group != conv[0].srcC || conv[0].group != conv[0].dstC || (conv[0].kernelY != 3 && conv[0].kernelY != 5 && conv[0].kernelY != 7))
+                        return false;
+                    if (conv[1].group != 1 || conv[1].kernelY != 1 || conv[1].strideY != 1)
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        SIMD_INLINE bool IsPad(size_t index, size_t value) const
+        {
+            return conv[index].padY == value && conv[index].padX == value && conv[index].padH == value && conv[index].padW == value;
+        }
+
+        SIMD_INLINE String Info() const
+        {
+            std::stringstream ss;
+            ss << count << ":" << conv[0].batch << "x" << conv[0].srcC << "x" << conv[0].srcH << "x" << conv[0].srcW;
+            for (size_t i = 0; i < count; ++i)
+                ss << "-" << (conv[i].group != 1 ? String("") : ToStr(conv[i].dstC) + "x") << conv[i].kernelY << "x" << conv[i].strideY;
+            return ss.str();
+        }
+
+        SIMD_INLINE int64_t Flop() const
+        {
+            int64_t flop = 0;
+            for (size_t i = 0; i < count; ++i)
+                flop += conv[i].Flop();
+            return flop;
+        }
+    };
 }
 
 #endif

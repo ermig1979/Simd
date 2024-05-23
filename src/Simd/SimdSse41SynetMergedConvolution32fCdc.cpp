@@ -1417,7 +1417,7 @@ namespace Simd
 
 			//---------------------------------------------------------------------
 
-			template <SimdConvolutionActivationType type> void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32fCdc::ConvolutionPtr * c)
+			template <SimdConvolutionActivationType type> void Set(const MergConvParam& p, size_t t, size_t i, SynetMergedConvolution32fCdc::ConvolutionPtr * c)
 			{
 				switch (t)
 				{
@@ -1445,7 +1445,7 @@ namespace Simd
 
 		//---------------------------------------------------------------------
 
-		SynetMergedConvolution32fCdc::SynetMergedConvolution32fCdc(const MergConvParam32f& p)
+		SynetMergedConvolution32fCdc::SynetMergedConvolution32fCdc(const MergConvParam& p)
 			: Base::SynetMergedConvolution32fCdc(p)
 		{
 			SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F);
@@ -1453,7 +1453,7 @@ namespace Simd
 				Set(p, i, i, _convolution);
 		}
 
-		void SynetMergedConvolution32fCdc::Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c)
+		void SynetMergedConvolution32fCdc::Set(const MergConvParam& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c)
 		{
 			switch (p.conv[i].activation)
 			{
@@ -1476,8 +1476,8 @@ namespace Simd
 
 		void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
 		{
-			MergConvParam32f param(batch, convs, count, add, compatibility);
-			if (!param.Valid())
+			MergConvParam param(batch, convs, count, add, compatibility);
+			if (!param.Valid(SimdTensorData32f))
 				return NULL;
 			if (Base::Bf16Soft(compatibility))
 			{

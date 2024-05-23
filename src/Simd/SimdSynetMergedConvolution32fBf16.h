@@ -33,7 +33,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16 : public Simd::SynetMergedConvolution32f
         {
         public:
-            SynetMergedConvolution32fBf16(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16(const MergConvParam& p);
 
             virtual String Desc() const { return Ext() + "-bf16"; }
             virtual String Ext() const { return "Base"; }
@@ -79,11 +79,11 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cdc : public SynetMergedConvolution32fBf16
         {
         public:
-            SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cdc(const MergConvParam& p);
 
             virtual void Forward(const float* src, float* buf, float* dst);
 
-            static bool Preferable(const MergConvParam32f& p);
+            static bool Preferable(const MergConvParam& p);
 
         protected:
             void SetSize(size_t miC, size_t miK);
@@ -92,11 +92,11 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cd : public SynetMergedConvolution32fBf16
         {
         public:
-            SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cd(const MergConvParam& p);
 
             virtual void Forward(const float* src, float* buf, float* dst);
 
-            static bool Preferable(const MergConvParam32f& p);
+            static bool Preferable(const MergConvParam& p);
 
         protected:
             void SetSize(size_t miC, size_t miK);
@@ -105,11 +105,11 @@ namespace Simd
         class SynetMergedConvolution32fBf16Dc : public SynetMergedConvolution32fBf16
         {
         public:
-            SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Dc(const MergConvParam& p);
 
             virtual void Forward(const float* src, float* buf, float* dst);
 
-            static bool Preferable(const MergConvParam32f& p);
+            static bool Preferable(const MergConvParam& p);
 
         protected:
             void SetSize(size_t miC, size_t miK);
@@ -128,7 +128,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cdc : public Base::SynetMergedConvolution32fBf16Cdc
         {
         public:
-            SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cdc(const MergConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -136,7 +136,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cd : public Base::SynetMergedConvolution32fBf16Cd
         {
         public:
-            SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cd(const MergConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -144,7 +144,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Dc : public Base::SynetMergedConvolution32fBf16Dc
         {
         public:
-            SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Dc(const MergConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -163,7 +163,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cdc : public Sse41::SynetMergedConvolution32fBf16Cdc
         {
         public:
-            SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cdc(const MergConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -171,7 +171,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cd : public Sse41::SynetMergedConvolution32fBf16Cd
         {
         public:
-            SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cd(const MergConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -179,7 +179,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Dc : public Sse41::SynetMergedConvolution32fBf16Dc
         {
         public:
-            SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Dc(const MergConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -200,7 +200,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cdc : public Avx2::SynetMergedConvolution32fBf16Cdc
         {
         public:
-            SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cdc(const MergConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
@@ -208,7 +208,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cd : public Avx2::SynetMergedConvolution32fBf16Cd
         {
         public:
-            SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cd(const MergConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
@@ -216,7 +216,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Dc : public Avx2::SynetMergedConvolution32fBf16Dc
         {
         public:
-            SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Dc(const MergConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
@@ -235,7 +235,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cdc : public Avx512bw::SynetMergedConvolution32fBf16Cdc
         {
         public:
-            SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cdc(const MergConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };
@@ -243,7 +243,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Cd : public Avx512bw::SynetMergedConvolution32fBf16Cd
         {
         public:
-            SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Cd(const MergConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };
@@ -251,7 +251,7 @@ namespace Simd
         class SynetMergedConvolution32fBf16Dc : public Avx512bw::SynetMergedConvolution32fBf16Dc
         {
         public:
-            SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p);
+            SynetMergedConvolution32fBf16Dc(const MergConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };

@@ -84,7 +84,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam& p)
             : Avx2::SynetMergedConvolution32fBf16Cdc(p)
         {
             if (p.conv[2].dstC > HF)
@@ -99,7 +99,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam& p)
             : Avx2::SynetMergedConvolution32fBf16Cd(p)
         {
             if (p.conv[1].dstC > HF)
@@ -113,7 +113,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam& p)
             : Avx2::SynetMergedConvolution32fBf16Dc(p)
         {
             if (p.conv[0].dstC > HF && p.conv[1].dstC > HF)
@@ -128,8 +128,8 @@ namespace Simd
 
         void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
         {
-            MergConvParam32f param(batch, convs, count, add, compatibility);
-            if (!param.Valid())
+            MergConvParam param(batch, convs, count, add, compatibility);
+            if (!param.Valid(SimdTensorData32f))
                 return NULL;
             if (Base::Bf16Soft(compatibility))
             {

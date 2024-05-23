@@ -92,7 +92,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam& p)
             : Sse41::SynetMergedConvolution32fBf16Cdc(p)
         {
             if (p.conv[2].dstC >= F)
@@ -107,7 +107,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam& p)
             : Sse41::SynetMergedConvolution32fBf16Cd(p)
         {
             if (p.conv[1].dstC >= F)
@@ -121,7 +121,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam& p)
             : Sse41::SynetMergedConvolution32fBf16Dc(p)
         {
             if (p.conv[0].dstC >= F && p.conv[1].dstC >= HF)

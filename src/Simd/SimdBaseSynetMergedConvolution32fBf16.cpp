@@ -142,7 +142,7 @@ namespace Simd
             DirectBf16<type, update>((const float*)src, p, weight, bias, params, dst);
         }
 
-        template <SimdConvolutionActivationType type> void Set(const MergConvParam32f& p, size_t index, InputPtr & input, DepthwisePtr & depthwise, OutputPtr & output)
+        template <SimdConvolutionActivationType type> void Set(const MergConvParam& p, size_t index, InputPtr & input, DepthwisePtr & depthwise, OutputPtr & output)
         {
             switch (index)
             {
@@ -171,7 +171,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16::SynetMergedConvolution32fBf16(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16::SynetMergedConvolution32fBf16(const MergConvParam& p)
            : Simd::SynetMergedConvolution32f(p)
         {
             memset(&_alg, 0, sizeof(_alg));
@@ -223,7 +223,7 @@ namespace Simd
 
         void SynetMergedConvolution32fBf16::SetParams(const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params)
         {
-            const MergConvParam32f& p = _param;
+            const MergConvParam& p = _param;
             if (_dw0)
             {
                 SetDepthwiseWeight(weight[0], p.conv[0]);
@@ -412,7 +412,7 @@ namespace Simd
             uint8_t* buffer = (uint8_t*)Buffer(buf);
             float* buf0 = Allocate<float>(buffer, _sizeB[0]);
             float* buf1 = Allocate<float>(buffer, _sizeB[1]);
-            const MergConvParam32f& p = _param;
+            const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
             const ConvParam& c2 = p.conv[2];
@@ -444,14 +444,14 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam& p)
             : SynetMergedConvolution32fBf16(p)
         {
         }
 
         void SynetMergedConvolution32fBf16Cdc::Forward(const float* src, float* buf, float* dst)
         {
-            const MergConvParam32f& p = _param;
+            const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
             const ConvParam& c2 = p.conv[2];
@@ -500,7 +500,7 @@ namespace Simd
             }
         }
 
-        bool SynetMergedConvolution32fBf16Cdc::Preferable(const MergConvParam32f& p)
+        bool SynetMergedConvolution32fBf16Cdc::Preferable(const MergConvParam& p)
         {
             return p.count == 3 && Is1x1(p.conv[0]);
         }
@@ -508,7 +508,7 @@ namespace Simd
         void SynetMergedConvolution32fBf16Cdc::SetSize(size_t miC, size_t miK)
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
-            const MergConvParam32f& p = _param;
+            const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
             const ConvParam& c2 = p.conv[2];
@@ -559,14 +559,14 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam& p)
             : SynetMergedConvolution32fBf16(p)
         {
         }
 
         void SynetMergedConvolution32fBf16Cd::Forward(const float* src, float* buf, float* dst)
         {
-            const MergConvParam32f& p = _param;
+            const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
             const AlgParam& a = _alg;
@@ -601,7 +601,7 @@ namespace Simd
             }
         }
 
-        bool SynetMergedConvolution32fBf16Cd::Preferable(const MergConvParam32f& p)
+        bool SynetMergedConvolution32fBf16Cd::Preferable(const MergConvParam& p)
         {
             return p.count == 2 && p.conv[0].group == 1 && Is1x1(p.conv[0]);
         }
@@ -609,7 +609,7 @@ namespace Simd
         void SynetMergedConvolution32fBf16Cd::SetSize(size_t miC, size_t miK)
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
-            const MergConvParam32f& p = _param;
+            const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
             AlgParam& a = _alg;
@@ -656,14 +656,14 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p)
+        SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam& p)
             : SynetMergedConvolution32fBf16(p)
         {
         }
 
         void SynetMergedConvolution32fBf16Dc::Forward(const float* src, float* buf, float* dst)
         {
-            const MergConvParam32f& p = _param;
+            const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
             const AlgParam& a = _alg;
@@ -698,7 +698,7 @@ namespace Simd
             }
         }
 
-        bool SynetMergedConvolution32fBf16Dc::Preferable(const MergConvParam32f& p)
+        bool SynetMergedConvolution32fBf16Dc::Preferable(const MergConvParam& p)
         {
             return p.count == 2 && p.conv[1].group == 1;
         }
@@ -706,7 +706,7 @@ namespace Simd
         void SynetMergedConvolution32fBf16Dc::SetSize(size_t miC, size_t miK)
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
-            const MergConvParam32f& p = _param;
+            const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
             AlgParam& a = _alg;
