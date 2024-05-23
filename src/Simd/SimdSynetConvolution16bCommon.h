@@ -582,12 +582,16 @@ namespace Simd
                 __m512 value = _mm512_maskz_loadu_ps(tail, buf + index * F);
                 __m512 f32 = Activate<type>(_mm512_add_ps(value, bias[index]), params, index);
                 _mm256_mask_storeu_epi16((uint16_t*)ptr + index * F, tail, (__m256i)_mm512_cvtneps_pbh(f32));
+                _mm_prefetch((const char*)(ptr + index * DF), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(buf + index * A), _MM_HINT_NTA);
             }
 
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1))
             {
                 __m512 f32 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + offset), _mm512_loadu_ps(bias + offset)), params, offset);
                 _mm256_mask_storeu_epi16(dst + offset * 2, tail, (__m256i)_mm512_cvtneps_pbh(f32));
+                //_mm_prefetch((const char*)(src + offset), _MM_HINT_NTA);
+                //_mm_prefetch((const char*)(dst + offset * 2), _MM_HINT_NTA);
             }
         };
 
@@ -602,12 +606,16 @@ namespace Simd
             {
                 __m512 value = _mm512_maskz_loadu_ps(tail, buf + index * F);
                 _mm512_mask_storeu_ps((float*)ptr + index * F, tail, Activate<type>(_mm512_add_ps(value, bias[index]), params, index));
+                _mm_prefetch((const char*)(ptr + index * A), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(buf + index * A), _MM_HINT_NTA);
             }
 
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1))
             {
                 __m512 f32 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + offset), _mm512_loadu_ps(bias + offset)), params, offset);
                 _mm512_mask_storeu_ps((float*)(dst + offset * 4), tail, f32);
+                //_mm_prefetch((const char*)(src + offset), _MM_HINT_NTA);
+                //_mm_prefetch((const char*)(dst + offset * 4), _MM_HINT_NTA);
             }
         };
 
@@ -676,6 +684,19 @@ namespace Simd
         template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Postprocess(const float* sum, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1))
         {
             Term16b<term>::template Postprocess<type>(sum, bias, params, offset, dst, tail);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<class T> SIMD_INLINE void TileMoveToMemory(const T* ptr, size_t stride, size_t count = 16)
+        {
+            for (const T* end = ptr + stride * count; ptr < end; ptr += 4 * stride)
+            {
+                _mm_prefetch((const char*)(ptr + 0 * stride), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(ptr + 1 * stride), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(ptr + 2 * stride), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(ptr + 3 * stride), _MM_HINT_NTA);
+            }            
         }
     }
 #endif

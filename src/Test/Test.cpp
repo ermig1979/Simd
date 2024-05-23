@@ -480,7 +480,7 @@ namespace Test
         while (time < WARM_UP_TIME)
         {
             double start = GetTime();
-            const size_t n = 128;
+            const size_t n = 1024;
             const float _1 = 1.0f, _0 = 0.0f;
             Tensor32f buf( Shp(n, n));
             SimdGemm32fNN(n, n, n, &_1, buf.Data(), n, buf.Data(), n, &_0, buf.Data(), n);

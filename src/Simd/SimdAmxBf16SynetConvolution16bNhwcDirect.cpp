@@ -223,6 +223,10 @@ namespace Simd
             _tile_stored(1, dst0 + F, strideD);
             _tile_stored(2, dst1 + 0, strideD);
             _tile_stored(3, dst1 + F, strideD);
+            TileMoveToMemory(dst0 + 0, dD);
+            TileMoveToMemory(dst0 + F, dD);
+            TileMoveToMemory(dst1 + 0, dD);
+            TileMoveToMemory(dst1 + F, dD);
         }
 
         static void Convolution16bNhwcDirect_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
@@ -272,6 +276,8 @@ namespace Simd
             }
             _tile_stored(0, dst0 + 0, strideD);
             _tile_stored(2, dst1 + 0, strideD);
+            TileMoveToMemory(dst0 + 0, dD);
+            TileMoveToMemory(dst1 + 0, dD);
         }
 
         static void Convolution16bNhwcDirect_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
@@ -321,6 +327,8 @@ namespace Simd
             }
             _tile_stored(0, dst0 + 0, strideD);
             _tile_stored(1, dst0 + F, strideD);
+            TileMoveToMemory(dst0 + 0, dD);
+            TileMoveToMemory(dst0 + F, dD);
         }
 
         static void Convolution16bNhwcDirect_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
@@ -360,6 +368,7 @@ namespace Simd
                 }
             }
             _tile_stored(0, dst0 + 0, strideD);
+            TileMoveToMemory(dst0 + 0, dD);
         }
 
         typedef void (*Convolution16bNhwcDirectPtr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0);

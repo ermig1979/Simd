@@ -284,7 +284,6 @@ namespace Simd
             _tile_stored(1, buf + F, strideB);
             _tile_stored(2, buf + 16 * dB + 0, strideB);
             _tile_stored(3, buf + 16 * dB + F, strideB);
-
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC - F);
@@ -293,6 +292,13 @@ namespace Simd
                     Apply2x8<term, type>(dst + ds * dD, dD, buf + ds * dB, dB, bias, params, tailD);
                 for (; ds < dstS; ++ds)
                     Apply2<term, type>(dst + ds * dD, buf + ds * dB, bias, params, tailD);
+            }
+            else
+            {
+                TileMoveToMemory(buf + 0, dB);
+                TileMoveToMemory(buf + F, dB);
+                TileMoveToMemory(buf + 16 * dB + 0, dB);
+                TileMoveToMemory(buf + 16 * dB + F, dB);
             }
         }
 
@@ -346,6 +352,11 @@ namespace Simd
                 for (; ds < dstS; ++ds)
                     Apply1<term, type>(dst + ds * dD, buf + ds * dB, bias, params, tailD);
             }
+            else
+            {
+                TileMoveToMemory(buf + 0, dB);
+                TileMoveToMemory(buf + 16 * dB + 0, dB);
+            }
         }
 
         template<Term16bType term, SimdConvolutionActivationType type> void Convolution16bNhwcGemm_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
@@ -398,6 +409,11 @@ namespace Simd
                 for (; ds < dstS; ++ds)
                     Apply2<term, type>(dst + ds * dD, buf + ds * dB, bias, params, tailD);
             }
+            else
+            {
+                TileMoveToMemory(buf + 0, dB);
+                TileMoveToMemory(buf + F, dB);
+            }
         }
 
         template<Term16bType term, SimdConvolutionActivationType type> void Convolution16bNhwcGemm_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
@@ -440,7 +456,10 @@ namespace Simd
                 for (; ds < dstS; ++ds)
                     Apply1<term, type>(dst + ds * dD, buf + ds * dB, bias, params, tailD);
             }
-            std::cout << "a.macroD=" << a.macroD << std::endl;
+            else
+            {
+                TileMoveToMemory(buf + 0, dB);
+            }
         }
 
         typedef void (*Convolution16bNhwcGemmPtr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
