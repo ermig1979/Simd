@@ -448,7 +448,7 @@ namespace Simd
 
 			//---------------------------------------------------------------------
 
-			template <SimdConvolutionActivationType type> void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32fCd::ConvolutionPtr * c)
+			template <SimdConvolutionActivationType type> void Set(const MergConvParam& p, size_t t, size_t i, SynetMergedConvolution32fCd::ConvolutionPtr * c)
 			{
 				switch (t)
 				{
@@ -466,7 +466,7 @@ namespace Simd
 
 		//---------------------------------------------------------------------
 
-		SynetMergedConvolution32fCd::SynetMergedConvolution32fCd(const MergConvParam32f& p)
+		SynetMergedConvolution32fCd::SynetMergedConvolution32fCd(const MergConvParam& p)
 			: Base::SynetMergedConvolution32fCd(p)
 		{
 			SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F);
@@ -474,7 +474,7 @@ namespace Simd
 			SynetMergedConvolution32fCd::Set(_param, 1, 1, _convolution);
 		}
 
-		void SynetMergedConvolution32fCd::Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c)
+		void SynetMergedConvolution32fCd::Set(const MergConvParam& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c)
 		{
 			switch (p.conv[i].activation)
 			{
