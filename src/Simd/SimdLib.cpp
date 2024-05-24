@@ -75,7 +75,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetGridSample.h"
 #include "Simd/SimdSynetInnerProduct32f.h"
-#include "Simd/SimdSynetMergedConvolution32fBf16.h"
+#include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetMergedConvolution16b.h"
 #include "Simd/SimdSynetMergedConvolution8i.h"
 #include "Simd/SimdSynetPermute.h"
 #include "Simd/SimdSynetScale8i.h"
@@ -5348,6 +5349,75 @@ SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float *
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     SynetMergedConvolution32f * c = (SynetMergedConvolution32f*)context;
+    SIMD_PERF_EXT(c);
+    c->Forward(src, buf, dst);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void* SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void* (*SimdSynetMergedConvolution16bInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+    const static SimdSynetMergedConvolution16bInitPtr simdSynetMergedConvolution16bInit = SIMD_FUNC0(SynetMergedConvolution16bInit);// , SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+
+    return simdSynetMergedConvolution16bInit(batch, convs, count, compatibility);
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetMergedConvolution16bExternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return ((SynetMergedConvolution16b*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetMergedConvolution16bInternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return ((SynetMergedConvolution16b*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API const char* SimdSynetMergedConvolution16bInfo(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return ((SynetMergedConvolution16b*)context)->Info();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    ((SynetMergedConvolution16b*)context)->SetParams(weight, internal, bias, params);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetMergedConvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    SynetMergedConvolution16b* c = (SynetMergedConvolution16b*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else

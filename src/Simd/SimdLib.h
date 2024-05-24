@@ -6753,6 +6753,82 @@ extern "C"
     */
     SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
+    /*! @ingroup synet_merged_convolution_bf16
+
+        \fn void * SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+
+        \short Initilizes BF16 merged convolution algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] convs - an array with convolutions parameters.
+        \param [in] count - a number of merged convolutions.
+        \param [in] compatibility - a flags of calculation compatibility.
+        \return a pointer to BF16 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetMergedConvolution16bExternalBufferSize, ::SimdSynetMergedConvolution16bInternalBufferSize, 
+            ::SimdSynetMergedConvolution16bInfo, ::SimdSynetMergedConvolution16bSetParams and ::SimdSynetMergedConvolution16bForward.
+    */
+    SIMD_API void* SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+
+    /*! @ingroup synet_merged_convolution_bf16
+
+        \fn size_t SimdSynetMergedConvolution16bExternalBufferSize(const void * context);
+
+        \short Gets size in bytes of external temporary buffer required for BF16 merged convolution algorithm.
+
+        \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
+        \return size in bytes of external temporary buffer required for BF16 merged convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetMergedConvolution16bExternalBufferSize(const void* context);
+
+    /*! @ingroup synet_merged_convolution_bf16
+
+        \fn size_t SimdSynetMergedConvolution16bInternalBufferSize(const void * context);
+
+        \short Gets size in bytes of internal buffer used inside BF16 merged convolution algorithm.
+
+        \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
+        \return size in bytes of internal buffer used inside BF16 merged convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetMergedConvolution16bInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_merged_convolution_bf16
+
+        \fn const char* SimdSynetMergedConvolution16bInfo(const void* context);
+
+        \short Gets description of internal implementation of BF16 merged convolution algorithm.
+
+        \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
+        \return string with description of internal implementation of BF16 merged convolution algorithm.
+    */
+    SIMD_API const char* SimdSynetMergedConvolution16bInfo(const void* context);
+
+    /*! @ingroup synet_merged_convolution_bf16
+
+        \fn void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
+
+        \short Sets weights, beases and parameters of activation function required for BF16 merged convolution algorithm.
+
+        \param [in, out] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
+        \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
+        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
+    */
+    SIMD_API void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params);
+
+    /*! @ingroup synet_merged_convolution_bf16
+
+        \fn void SimdSynetMergedConvolution16bForward(void * context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+        \short Performs forward propagation of BF16 merged convolution algorithm.
+
+        \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input image.
+        \param [out] buf - a pointer to external temporary buffer. The size in bytes of the external temporary buffer is determined by function ::SimdSynetMergedConvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output image.
+    */
+    SIMD_API void SimdSynetMergedConvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
     /*! @ingroup synet_merged_convolution_int8
 
         \fn void * SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
@@ -6825,7 +6901,7 @@ extern "C"
 
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \param [in] src - a pointer to input image.
-        \param [out] buf - a pointer to external temporary buffer. The sizein bytes of the external temporary buffer is determined by function ::SimdSynetMergedConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] buf - a pointer to external temporary buffer. The size in bytes of the external temporary buffer is determined by function ::SimdSynetMergedConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
         \param [out] dst - a pointer to output image.
     */
     SIMD_API void SimdSynetMergedConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
