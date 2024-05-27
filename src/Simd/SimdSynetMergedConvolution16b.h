@@ -45,7 +45,6 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         virtual Base::PerformanceMeasurer* Perf(const char* func) = 0;
 #endif
-
         virtual const char* Info() const = 0;
     };
 
@@ -58,28 +57,33 @@ namespace Simd
         public:
             SynetMergedConvolution16b(const MergConvParam& p);
 
+            virtual const MergConvParam& Param() const {  return _param; };
             virtual String Desc() const { return Ext(); }
             virtual String Ext() const { return "Base"; }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params);
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            virtual Base::PerformanceMeasurer* Perf(const char* func);
+#endif
+            virtual const char* Info() const;
 
             struct AlgParam
             {
                 size_t miC, maC, miK, yStep[3], yStart[3], bufH[3], dp[2], dw[3];
             };
 
-            typedef void(*ConvertPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+            typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
 
             typedef void(*InputConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const uint16_t* weight, const float* bias, const float* params, float* dst);
 
-            typedef void(*DepthwiseConvolutionPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-                const float* weight, const float* bias, const float* params, uint16_t* dst);
+            typedef void(*DepthwiseConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+                const float* weight, const float* bias, const float* params, uint8_t* dst);
 
             typedef void(*OutputConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-                const uint16_t* weight, const float* bias, const float* params, float* dst, int zero);
+                int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst);
 
         protected:
             void SetInputWeight(const float* src, const ConvParam& p);
@@ -90,6 +94,10 @@ namespace Simd
             uint8_t* Buffer(uint8_t* buffer);
 
             MergConvParam _param;
+            mutable String _info;
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* _perf;
+#endif
             bool _dw0, _src16b, _dst16b;
             ConvertPtr _convert;
             InputConvolutionPtr _input;

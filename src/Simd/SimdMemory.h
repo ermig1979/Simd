@@ -91,9 +91,14 @@ namespace Simd
 
     template<class T> T* Allocate(uint8_t*& buffer, size_t size, size_t align = SIMD_ALIGN)
     {
-        T* ptr = (T*)buffer;
-        buffer = buffer + AlignHi(size * sizeof(T), align);
-        return ptr;
+        if (size)
+        {
+            T* ptr = (T*)buffer;
+            buffer = buffer + AlignHi(size * sizeof(T), align);
+            return ptr;
+        }
+        else
+            return NULL;
     }
 
     SIMD_INLINE void SetGap(uint8_t*& buffer, size_t size = SIMD_ALIGN)
