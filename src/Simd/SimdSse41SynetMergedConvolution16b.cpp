@@ -128,9 +128,9 @@ namespace Simd
                 return NULL;
             /*if (SynetMergedConvolution16bCdc::Preferable(param))
                 return new Sse41::SynetMergedConvolution16bCdc(param);
-            else if (SynetMergedConvolution16bCd::Preferable(param))
+            else */if (SynetMergedConvolution16bCd::Preferable(param))
                 return new Sse41::SynetMergedConvolution16bCd(param);
-            else */if (SynetMergedConvolution16bDc::Preferable(param))
+            else if (SynetMergedConvolution16bDc::Preferable(param))
                 return new Sse41::SynetMergedConvolution16bDc(param);
             else
                 return new Base::SynetMergedConvolution16b(param);

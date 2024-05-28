@@ -624,6 +624,7 @@ namespace Simd
             float* buf1 = Allocate<float>(buf, _sizeB[1]);
             uint16_t* buf2 = Allocate<uint16_t>(buf, _sizeB[2]);
             SetGap(buf);
+            float* buf3 = Allocate<float>(buf, _sizeB[3]);
 
             for (size_t b = 0; b < c0.batch; ++b)
             {
@@ -656,8 +657,8 @@ namespace Simd
                         yBeg0 = yEnd0;
                     }
                 }
-                src += _sizeS * _alg.elem[0];
-                dst += _sizeD * _alg.elem[1];
+                src += _sizeS * a.elem[0];
+                dst += _sizeD * a.elem[1];
             }
         }
 
@@ -747,18 +748,20 @@ namespace Simd
                         size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c1.dstH);
                         size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c1.srcH);
                         size_t yEnd0 = Simd::RestrictRange(yBeg0 + a.yStep[0], a.yStart[0], c0.srcH);
-                        //_convert(src, c0, a, yBeg0, yEnd0, buf0);
-                        //_input(buf0, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0],
-                        //    _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
-                        //_depthwise(buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
-                        //    _bias[1].data + c, _params[1].data + c * a.dp[1], (uint16_t*)(dst + c));
+                        if(!_src16b)
+                            _convert(src, c0, a, yBeg0, yEnd0, buf0);
+                        const uint16_t* src16b = _src16b ? (uint16_t*)src : buf0;
+                        _input(src16b, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0],
+                            _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
+                        _depthwise((uint8_t*)buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
+                            _bias[1].data + c, _params[1].data + c * a.dp[1], dst + c * a.elem[1]);
                         yBeg2 = yEnd2;
                         yBeg1 = yEnd1;
                         yBeg0 = yEnd0;
                     }
                 }
-                src += _sizeS * _alg.elem[0];
-                dst += _sizeD * _alg.elem[1];
+                src += _sizeS * a.elem[0];
+                dst += _sizeD * a.elem[1];
             }
         }
 
@@ -801,7 +804,7 @@ namespace Simd
                 a.yStart[0] = Simd::Min(a.yStart[1], c0.srcH);
                 a.bufH[0] = Pow2Hi(Simd::Max(a.yStep[1], a.yStart[0]));
 
-                _sizeB[0] = a.bufH[0] * p.conv[0].srcW * AlignHi(p.conv[0].srcC, a.miK);
+                _sizeB[0] = _src16b ? 0 : a.bufH[0] * p.conv[0].srcW * AlignHi(p.conv[0].srcC, a.miK);
                 _sizeB[1] = a.bufH[1] * p.conv[1].srcW * a.maC;
                 if (_sizeB[0] * 2 + _sizeB[1] * 4 <= L2)
                     break;
@@ -813,6 +816,7 @@ namespace Simd
             a.dw[2] = 0;
             a.bufH[2] = 0;
             _sizeB[2] = 0;
+            _sizeB[3] = 0;
         }
 
         //-----------------------------------------------------------------------------------------
@@ -855,8 +859,8 @@ namespace Simd
                         yBeg1 = yEnd1;
                     }
                 }
-                src += _sizeS * _alg.elem[0];
-                dst += _sizeD * _alg.elem[1];
+                src += _sizeS * a.elem[0];
+                dst += _sizeD * a.elem[1];
             }
         }
 
