@@ -126,9 +126,9 @@ namespace Simd
             MergConvParam param(batch, convs, count, SimdFalse, compatibility);
             if (!param.Valid(SimdTensorData32f, SimdTensorData16b))
                 return NULL;
-            /*if (SynetMergedConvolution16bCdc::Preferable(param))
+            if (SynetMergedConvolution16bCdc::Preferable(param))
                 return new Sse41::SynetMergedConvolution16bCdc(param);
-            else */if (SynetMergedConvolution16bCd::Preferable(param))
+            else if (SynetMergedConvolution16bCd::Preferable(param))
                 return new Sse41::SynetMergedConvolution16bCd(param);
             else if (SynetMergedConvolution16bDc::Preferable(param))
                 return new Sse41::SynetMergedConvolution16bDc(param);
