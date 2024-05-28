@@ -271,8 +271,8 @@ namespace Simd
                     _depthwise(buf0, c1, _alg, 0, 0, c1.dstH, _weight32f.data, _bias[1].data, _params[1].data, NULL, NULL, (uint8_t*)(p.count == 3 ? buf1 : dst32f));
                     if (p.count == 3)
                     {
-                        _cvt32fTo8u(buf1, 0, c2.srcH, c2.srcW, c2.srcC, _cvt[1].scale.data, _cvt[1].shift.data, buf2, 0, c0.compatibility);
-                        DirectConvolution8i(buf2, 2, 1, NULL, buf4, dst32f);
+                        _cvt32fTo8u(buf1, 0, c2.srcH, c2.srcW, c2.srcC, _cvt[1].scale.data, _cvt[1].shift.data, buf3, 0, c0.compatibility);
+                        DirectConvolution8i(buf3, 2, 1, NULL, buf4, dst32f);
                     }
                 }
                 if (_d8u)
