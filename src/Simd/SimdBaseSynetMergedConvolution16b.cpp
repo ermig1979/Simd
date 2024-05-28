@@ -220,40 +220,25 @@ namespace Simd
             size_t maC, size_t yBeg, size_t yEnd, int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst8)
 		{
             float* dst = (float*)dst8;
-			size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC, srcC2 = AlignLo(srcC, 2);
-			size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
+			size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
 			Array32f buf(dstC);
 			for (size_t dy = 0; dy < p.dstH; ++dy)
 			{
 				for (size_t dx = 0; dx < dstW; ++dx)
 				{
                     buf.Clear();
-					for (size_t ky = 0; ky < kernelY; ++ky)
-					{
-						size_t sy = dy * strideY + ky - padY;
-						if (sy < p.srcH)
-						{
-							for (size_t kx = 0; kx < kernelX; ++kx)
-							{
-								size_t sx = dx * strideX + kx - padX;
-								if (sx < p.srcW)
-								{
-									const uint16_t* pw = weight + (ky * kernelX + kx) * srcC * dstC;
-									const uint16_t* ps = src + (sy * srcW + sx) * srcC;
-									for (size_t sc = 0; sc < srcC; ++sc)
-									{
-										float s = BFloat16ToFloat32(ps[sc]);
-										for (size_t dc = 0; dc < dstC; ++dc)
-											buf[dc] += s * BFloat16ToFloat32(pw[dc]);
-										pw += dstC;
-									}
-								}
-							}
-						}
-					}
-					for (size_t dc = 0; dc < dstC; ++dc)
-						dst[dc] = Activate<type>(buf[dc] + bias[dc], params, dc);
-					dst += p.dstC;
+                    const uint16_t* pw = weight;
+                    for (size_t sc = 0; sc < srcC; ++sc)
+                    {
+                        float s = BFloat16ToFloat32(src[sc]);
+                        for (size_t dc = 0; dc < dstC; ++dc)
+                            buf[dc] += s * BFloat16ToFloat32(pw[dc]);
+                        pw += dstC;
+                    }
+                    for (size_t dc = 0; dc < dstC; ++dc)
+                        dst[dc] = Activate<type>(buf[dc] + bias[dc], params, dc);
+                    src += srcC;
+                    dst += p.dstC;
 				}
 			}
 		}
@@ -262,8 +247,7 @@ namespace Simd
             size_t maC, size_t yBeg, size_t yEnd, int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst8)
         {
             uint16_t* dst = (uint16_t*)dst8;
-            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC, srcC2 = AlignLo(srcC, 2);
-            size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
+            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
             Array32f buf(dstC);
             for (size_t dy = 0; dy < p.dstH; ++dy)
             {
@@ -314,6 +298,9 @@ namespace Simd
 
         SynetMergedConvolution16b::SynetMergedConvolution16b(const MergConvParam& p)
             : _param(p)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            , _perf(NULL)
+#endif
         {
             memset(&_alg, 0, sizeof(_alg));
             _convert = NULL, _input = NULL, _depthwise = NULL, _output[0] = NULL, _output[1] = NULL;
@@ -930,7 +917,7 @@ namespace Simd
         void* SynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility)
         {
             MergConvParam param(batch, convs, count, SimdFalse, compatibility);
-            if (!param.Valid(SimdTensorData32f, SimdTensorData16b) || 1)
+            if (!param.Valid(SimdTensorData32f, SimdTensorData16b))
                 return NULL;
             return new SynetMergedConvolution16b(param);
         }

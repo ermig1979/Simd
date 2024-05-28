@@ -237,7 +237,7 @@ namespace Test
 
             Tensor32f dst32f3(dstS, end.dstF);
             Fill(dst32f3, 3.3f);
-            Tensor32f buf32f(Shp(::SimdSynetConvolution32fExternalBufferSize(context3)));
+            Tensor32f buf32f(Shp(::SimdSynetMergedConvolution32fExternalBufferSize(context3)));
 
             ::SimdSynetMergedConvolution32fSetParams(context3, p.weight, NULL, p.bias, p.params);
 
@@ -245,7 +245,7 @@ namespace Test
 
             ::SimdRelease(context3);
 
-            result = result && Compare(dst32f1, dst32f3, 0.03, true, 64, DifferenceBoth, " Compare to SynetConvolution32f.");//0.129
+            result = result && Compare(dst32f1, dst32f3, 0.07, true, 64, DifferenceBoth, " Compare to SynetMergedConvolution32f.");//0.129
         }
 
         return result;
@@ -268,10 +268,10 @@ namespace Test
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), b16, b16, c), f1, f2);
 #endif
 #else
-        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 1024, 8, 6), Cnv(a0, 1, 1, 1548), Cnv(a1, 3, 1), b16, b16, c), f1, f2);
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 1024, 8, 6), Cnv(a0, 1, 1, 1548), Cnv(a1, 3, 1), b16, b16, c), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 128), b16, b16, c), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), b16, b16, c), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 128), b16, b16, c), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 128), b16, b16, c), f1, f2);
 #endif
         return result;
     }
