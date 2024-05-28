@@ -310,10 +310,10 @@ namespace Simd
             const ConvParam& dw = _dw0 ? p.conv[0] : p.conv[1];
             _src16b = beg.srcT == SimdTensorData16b;
             _dst16b = end.dstT == SimdTensorData16b;
-            _elemS = _src16b ? 2 : 4;
-            _elemD = _dst16b ? 2 : 4;
-            _sizeS = beg.srcH * beg.srcW * beg.srcC * _elemS;
-            _sizeD = end.dstH * end.dstW * end.dstC * _elemD;
+            _alg.elem[0] = _src16b ? 2 : 4;
+            _alg.elem[1] = _dst16b ? 2 : 4;
+            _sizeS = beg.srcH * beg.srcW * beg.srcC;
+            _sizeD = end.dstH * end.dstW * end.dstC;
 
             _sizeB[0] = _dw0 || _src16b ? 0 : p.conv[0].srcH * p.conv[0].srcW * p.conv[0].srcC;
             _sizeB[1] = _dw0 ? 0 : dw.srcH * dw.srcW * dw.srcC;
@@ -342,7 +342,7 @@ namespace Simd
 
         size_t SynetMergedConvolution16b::ExternalBufferSize() const
         {
-            return (_sizeB[0] + _sizeB[2]) * 2 + (_sizeB[1] + _sizeB[3])* 4 + SIMD_ALIGN;
+            return (_sizeB[0] + _sizeB[2]) * 2 + (_sizeB[1] + _sizeB[3]) * 4 + SIMD_ALIGN;
         }
 
         size_t SynetMergedConvolution16b::InternalBufferSize() const
@@ -587,8 +587,8 @@ namespace Simd
                     else
                         _depthwise((uint8_t*)buf1, c1, a, 0, 0, c1.dstH, _weightD.data, _bias[1].data, _params[1].data, dst);
                 }
-                src += _sizeS;
-                dst += _sizeD;
+                src += _sizeS * _alg.elem[0];
+                dst += _sizeD * _alg.elem[1];
             }
         };
 
@@ -656,8 +656,8 @@ namespace Simd
                         yBeg0 = yEnd0;
                     }
                 }
-                src += _sizeS;
-                dst += _sizeD;
+                src += _sizeS * _alg.elem[0];
+                dst += _sizeD * _alg.elem[1];
             }
         }
 
@@ -757,8 +757,8 @@ namespace Simd
                         yBeg0 = yEnd0;
                     }
                 }
-                src += _sizeS;
-                dst += _sizeD;
+                src += _sizeS * _alg.elem[0];
+                dst += _sizeD * _alg.elem[1];
             }
         }
 
@@ -831,6 +831,7 @@ namespace Simd
 
             buf = Buffer(buf);
             uint16_t* buf2 = Allocate<uint16_t>(buf, _sizeB[2]);
+            float* buf3 = Allocate<float>(buf, _sizeB[3]);
             SetGap(buf);
 
             for (size_t b = 0; b < c0.batch; ++b)
@@ -842,20 +843,20 @@ namespace Simd
                     {
                         size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c0.dstH);
                         size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c0.srcH);
-                        //_depthwise(src + c, c0, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[0], _bias[0].data + c,
-                        //    _params[0].data + c * a.dp[0], buf2);
-                        //if (c + maC == C)
-                        //    _output[0](buf2, c1, a, maC, yBeg2, yEnd2, _weightO.data + c * a.dw[1],
-                        //        _bias[1].data, _params[1].data, dst, maC != C ? 0 : 1);
-                        //else
-                        //    _output[1](buf2, c1, a, maC, yBeg2, yEnd2, _weightO.data + c * a.dw[1],
-                        //        _bias[1].data, _params[1].data, dst, c != 0 ? 0 : 1);
+                        _depthwise(src + c * a.elem[0], c0, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[0], _bias[0].data + c,
+                            _params[0].data + c * a.dp[0], (uint8_t*)buf2);
+                        if (c + maC == C)
+                            _output[0](buf2, c1, a, maC, yBeg2, yEnd2, maC != C ? 0 : 1, _weightO.data + c * a.dw[1],
+                                _bias[1].data, _params[1].data, buf3, dst);
+                        else
+                            _output[1](buf2, c1, a, maC, yBeg2, yEnd2, c != 0 ? 0 : 1, _weightO.data + c * a.dw[1],
+                                _bias[1].data, _params[1].data, buf3, dst);
                         yBeg2 = yEnd2;
                         yBeg1 = yEnd1;
                     }
                 }
-                src += _sizeS;
-                dst += _sizeD;
+                src += _sizeS * _alg.elem[0];
+                dst += _sizeD * _alg.elem[1];
             }
         }
 
@@ -903,6 +904,7 @@ namespace Simd
             a.bufH[1] = 0;
             _sizeB[0] = 0;
             _sizeB[1] = 0;
+            _sizeB[3] = count > 1 ? _sizeD : 0;
             a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dw[0] = c0.kernelY * c0.kernelX;

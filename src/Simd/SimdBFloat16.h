@@ -60,7 +60,20 @@ namespace Simd
         {
             return Bf16::Bits(uint32_t(value) << Bf16::SHIFT).f32;
         }
+
     }
+
+#ifdef SIMD_LOG_ENABLE
+        SIMD_INLINE void Log16b(const uint16_t* data, size_t size, const std::string& name)
+        {
+            std::cout << name.c_str() << " = { " << std::setprecision(3) << std::fixed;
+            for (size_t i = 0; i < size; i++)
+            {
+                std::cout << Base::BFloat16ToFloat32(data[i]) << " ";
+            }
+            std::cout << "} " << std::endl << std::flush;
+        }
+#endif
 
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41

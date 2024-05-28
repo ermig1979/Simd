@@ -111,6 +111,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample2d32fBlZ.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct8i.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fBf16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fBf16Depthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fBf16Input.cpp" />
