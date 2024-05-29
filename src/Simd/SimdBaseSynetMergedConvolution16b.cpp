@@ -342,7 +342,7 @@ namespace Simd
 
         size_t SynetMergedConvolution16b::ExternalBufferSize() const
         {
-            return (_sizeB[0] + _sizeB[2]) * 2 + (_sizeB[1] + _sizeB[3]) * 4 + SIMD_ALIGN;
+            return (_sizeB[0] + _sizeB[2]) * 2 + (_sizeB[1] + _sizeB[3]) * 4 + SIMD_ALIGN * 2;
         }
 
         size_t SynetMergedConvolution16b::InternalBufferSize() const
