@@ -169,7 +169,7 @@ namespace Simd
                 float tmp[F];
                 _mm_storeu_ps(tmp, value);
                 for (size_t i = 0; i < tail; ++i)
-                    ((float*)ptr)[index * F + i] = tmp[i];
+                    buf[index * F + i] = tmp[i];
             }
 
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst)
@@ -375,7 +375,7 @@ namespace Simd
                 float tmp[F];
                 _mm256_storeu_ps(tmp, value);
                 for (size_t i = 0; i < tail; ++i)
-                    ((float*)ptr)[index * F + i] = tmp[i];
+                    buf[index * F + i] = tmp[i];
             }
 
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst)
@@ -530,6 +530,17 @@ namespace Simd
         {
             Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
             Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params, tails[1]);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, __m512 val0, const __m512* bias, const __m512* params, const __mmask16 tail = __mmask16(-1))
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, tail);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, __m512 val0, __m512 val1, const __m512* bias, const __m512* params, const __mmask16 tail = __mmask16(-1))
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
+            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params, tail);
         }
 
         template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Postprocess(const float* sum, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1))
