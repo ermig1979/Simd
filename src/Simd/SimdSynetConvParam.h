@@ -298,12 +298,16 @@ namespace Simd
             return conv[index].padY == value && conv[index].padX == value && conv[index].padH == value && conv[index].padW == value;
         }
 
-        SIMD_INLINE String Info() const
+        SIMD_INLINE String Info(bool detail = false) const
         {
             std::stringstream ss;
             ss << count << ":" << conv[0].batch << "x" << conv[0].srcC << "x" << conv[0].srcH << "x" << conv[0].srcW;
             for (size_t i = 0; i < count; ++i)
                 ss << "-" << (conv[i].group != 1 ? String("") : ToStr(conv[i].dstC) + "x") << conv[i].kernelY << "x" << conv[i].strideY;
+            if (detail)
+            {
+                ss << "-" << ToChar(conv[0].srcT) << ToChar(conv[count - 1].dstT);
+            }
             return ss.str();
         }
 

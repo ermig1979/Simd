@@ -103,6 +103,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetGridSample.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetGridSample2d32fBlZ.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetInnerProduct32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16bDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16bInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16bOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fBf16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fBf16Depthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fBf16Input.cpp" />
