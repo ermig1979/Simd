@@ -202,6 +202,14 @@ namespace Simd
             __m512 s1 = _mm512_maskz_loadu_ps(__mmask16(loadMask >> 1 * 16), src + 1 * F);
             _mm512_mask_storeu_epi16(dst, saveMask, (__m512i)_mm512_cvtne2ps_pbh(s1, s0));
         }
+
+        SIMD_INLINE __m512 BFloat16ToFloat32(__m256i value)
+        {
+            static const __m512i K16_PERM = SIMD_MM512_SETR_EPI16(
+                0x10, 0x00, 0x10, 0x01, 0x10, 0x02, 0x10, 0x03, 0x10, 0x04, 0x10, 0x05, 0x10, 0x06, 0x10, 0x07,
+                0x10, 0x08, 0x10, 0x09, 0x10, 0x0A, 0x10, 0x0B, 0x10, 0x0C, 0x10, 0x0D, 0x10, 0x0E, 0x10, 0x0F);
+            return _mm512_castsi512_ps(_mm512_permutexvar_epi16(K16_PERM, _mm512_castsi256_si512(value)));
+        }
     }
 #endif
 

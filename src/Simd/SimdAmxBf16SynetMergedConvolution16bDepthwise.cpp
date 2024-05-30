@@ -46,7 +46,7 @@ namespace Simd
 
         template <> SIMD_INLINE __m512 LoadSrc<uint16_t>(const uint16_t* src)
         {
-            return _mm512_cvtpbh_ps((__m256bh)_mm256_loadu_si256((__m256i*)src));
+            return BFloat16ToFloat32(_mm256_loadu_si256((__m256i*)src));
         }
 
         //-------------------------------------------------------------------------------------------------

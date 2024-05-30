@@ -67,6 +67,8 @@ namespace Simd
             Rgb24,
             /*! One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
             Rgba32,
+            /*! Three planes (8-bit full size Y, U, V planes) YUV444P pixel format. */
+            Yuv444p,
         };
 
         const size_t width; /*!< \brief A width of the frame. */
@@ -571,6 +573,13 @@ namespace Simd
             if (yuvType != SimdYuvUnknown)
                 *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
+        case Yuv444p:
+            planes[0] = View<A>(width, height, stride0, View<A>::Gray8, data0);
+            planes[1] = View<A>(width, height, stride1, View<A>::Gray8, data1);
+            planes[2] = View<A>(width, height, stride2, View<A>::Gray8, data2);
+            if (yuvType == SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvBt601;
+            break;
         default:
             assert(0);
         }
@@ -697,6 +706,13 @@ namespace Simd
             if (yuvType != SimdYuvUnknown)
                 *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
+        case Yuv444p:
+            planes[0].Recreate(width, height, View<A>::Gray8);
+            planes[1].Recreate(width, height, View<A>::Gray8);
+            planes[2].Recreate(width, height, View<A>::Gray8);
+            if (yuvType == SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvBt601;
+            break;
         default:
             assert(0);
         }
@@ -745,6 +761,12 @@ namespace Simd
 
             if (format == Yuv420p)
                 frame.planes[2] = planes[2].Region(left / 2, top / 2, right / 2, bottom / 2);
+
+            if (format == Yuv444p)
+            {
+                frame.planes[1] = planes[1].Region(left, top, right, bottom);
+                frame.planes[2] = planes[2].Region(left, top, right, bottom);
+            }
 
             return frame;
         }
@@ -816,6 +838,7 @@ namespace Simd
         case Gray8:   return 1;
         case Rgb24:   return 1;
         case Rgba32:  return 1;
+        case Yuv444p: return 3;
         default: assert(0); return 0;
         }
     }
@@ -947,6 +970,16 @@ namespace Simd
                 BgrToRgba(bgr, dst.planes[0]);
                 break;
             }
+            case Frame<A>::Yuv444p:
+            {
+                assert(src.yuvType == dst.yuvType);
+                Copy(src.planes[0], dst.planes[0]);
+                View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
+                DeinterleaveUv(src.planes[1], u, v);
+                Simd::StretchGray2x2(u, dst.planes[1]);
+                Simd::StretchGray2x2(v, dst.planes[2]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -982,6 +1015,14 @@ namespace Simd
                 BgrToRgba(bgr, dst.planes[0]);
                 break;
             }
+            case Frame<A>::Yuv444p:
+            {
+                assert(src.yuvType == dst.yuvType);
+                Copy(src.planes[0], dst.planes[0]);
+                Simd::StretchGray2x2(src.planes[0], dst.planes[1]);
+                Simd::StretchGray2x2(src.planes[1], dst.planes[2]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -1011,6 +1052,9 @@ namespace Simd
                 break;
             case Frame<A>::Rgba32:
                 BgraToRgba(src.planes[0], dst.planes[0]);
+                break;
+            case Frame<A>::Yuv444p:
+                BgraToYuv444p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
                 break;
             default:
                 assert(0);
@@ -1042,6 +1086,9 @@ namespace Simd
             case Frame<A>::Rgba32:
                 BgrToRgba(src.planes[0], dst.planes[0]);
                 break;
+            case Frame<A>::Yuv444p:
+                BgrToYuv444p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
+                break;
             default:
                 assert(0);
             }
@@ -1058,6 +1105,7 @@ namespace Simd
                 Fill(dst.planes[1], 128);
                 break;
             case Frame<A>::Yuv420p:
+            case Frame<A>::Yuv444p:
                 if (dst.yuvType == SimdYuvTrect871)
                     Copy(src.planes[0], dst.planes[0]);
                 else
@@ -1113,6 +1161,13 @@ namespace Simd
             case Frame<A>::Rgba32:
                 RgbToRgba(src.planes[0], dst.planes[0]);
                 break;
+            case Frame<A>::Yuv444p:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                RgbToBgr(src.planes[0], bgr);
+                BgrToYuv444p(bgr, dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -1149,6 +1204,61 @@ namespace Simd
             case Frame<A>::Rgb24:
                 RgbaToRgb(src.planes[0], dst.planes[0]);
                 break;
+            case Frame<A>::Yuv444p:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                RgbaToBgr(src.planes[0], bgr);
+                BgrToYuv444p(bgr, dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
+                break;
+            }
+            default:
+                assert(0);
+            }
+            break;
+
+        case Frame<A>::Yuv444p:
+            switch (dst.format)
+            {
+            case Frame<A>::Nv12:
+            {
+                assert(src.yuvType == dst.yuvType);
+                Copy(src.planes[0], dst.planes[0]);
+                View<A> u(src.Size() / 2, View<A>::Gray8), v(src.Size() / 2, View<A>::Gray8);
+                Simd::ReduceGray2x2(src.planes[0], u);
+                Simd::ReduceGray2x2(src.planes[1], v);
+                InterleaveUv(u, v, dst.planes[1]);
+                break;
+            }
+            case Frame<A>::Yuv420p:
+            {
+                assert(src.yuvType == dst.yuvType);
+                Copy(src.planes[0], dst.planes[0]);
+                Simd::ReduceGray2x2(src.planes[0], dst.planes[1]);
+                Simd::ReduceGray2x2(src.planes[1], dst.planes[2]);
+                break;
+            }            
+            case Frame<A>::Bgra32:
+                Yuv444pToBgra(src.planes[0], src.planes[1], src.planes[2], dst.planes[0], src.yuvType);
+                break;
+            case Frame<A>::Bgr24:
+                Yuv444pToBgr(src.planes[0], src.planes[1], src.planes[2], dst.planes[0], src.yuvType);
+                break;
+            case Frame<A>::Gray8:
+                if (src.yuvType == SimdYuvTrect871)
+                    Copy(src.planes[0], dst.planes[0]);
+                else
+                    YToGray(src.planes[0], dst.planes[0]);
+                break;
+            case Frame<A>::Rgb24:
+                Yuv444pToRgb(src.planes[0], src.planes[1], src.planes[2], dst.planes[0], src.yuvType);
+                break;
+            case Frame<A>::Rgba32:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                Yuv444pToBgr(src.planes[0], src.planes[1], src.planes[2], bgr, src.yuvType);
+                BgrToRgba(bgr, dst.planes[0]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -1160,4 +1270,4 @@ namespace Simd
     }
 }
 
-#endif//__SimdFrame_hpp__
+#endif
