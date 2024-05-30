@@ -711,7 +711,7 @@ namespace Simd
             a.dw[0] = AlignHi(c0.srcC, a.miK);
             a.dw[1] = c1.kernelY * c1.kernelX;
             a.dw[2] = AlignHi(c2.dstC, 2 * a.miC);
-            _sizeB[3] = count > 1 ? _sizeD : 0;
+            _sizeB[3] = count > 1 || (a.miK == 32 && _dst16b) ? _sizeD : 0;
             
             ((ConvParam&)c1).dstT = SimdTensorData16b;
             ((ConvParam&)c2).srcT = SimdTensorData16b;
@@ -906,7 +906,7 @@ namespace Simd
             a.bufH[1] = 0;
             _sizeB[0] = 0;
             _sizeB[1] = 0;
-            _sizeB[3] = count > 1 ? _sizeD : 0;
+            _sizeB[3] = count > 1 || (a.miK == 32 && _dst16b)  ? _sizeD : 0;
             a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dw[0] = c0.kernelY * c0.kernelX;

@@ -266,6 +266,8 @@ namespace Simd
         {
             size_t n = 32, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             size_t dW = AlignHi(maC, a.miK) * DF, dS = a.maC, dB = p.dstC, dD = p.dstC * a.elem[1];
+            if (buf == NULL && p.dstT == SimdTensorData32f)
+                buf = (float*)dst;
             OutputConvolutionPtr body_2 = OutputConvolution_2x2<term, type>;
             OutputConvolutionPtr tail_2 = m > 16 ? OutputConvolution_2x2<term, type> : OutputConvolution_1x2<term, type>;
             OutputConvolutionPtr body_1 = OutputConvolution_2x1<term, type>;
