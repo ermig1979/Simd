@@ -74,6 +74,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution8iDirect.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution8iDirect1x1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution8iDirectAny.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution32fBf16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution32fBf16Depthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution32fBf16Input.cpp" />

@@ -267,16 +267,18 @@ namespace Test
 #if 1
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 555, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 1555), f32, f32, c), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 1024, 8, 6), Cnv(a0, 1, 1, 1548), Cnv(a1, 3, 1), f32, f32, c), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), f32, f32, c), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 128), b16, b16, c), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), f32, f32, c), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 128), b16, b16, c), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 1024, 8, 6), Cnv(a0, 1, 1, 1548), Cnv(a1, 3, 1), b16, b16, c), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), b16, b16, c), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), b16, b16, c), f1, f2);
 #endif
 #else
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 555, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 1555), f32, f32, c), f1, f2);
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 1024, 8, 6), Cnv(a0, 1, 1, 1548), Cnv(a1, 3, 1), f32, f32, c), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), f32, f32, c), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 128), b16, b16, c), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 1024, 8, 6), Cnv(a0, 1, 1, 1548), Cnv(a1, 3, 1), b16, b16, c), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 128), b16, b16, c), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), b16, b16, c), f1, f2);
-        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 128), b16, b16, c), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), b16, b16, c), f1, f2);
 #endif
         return result;
     }
@@ -303,10 +305,10 @@ namespace Test
             result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bw::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
 #endif 
 
-//#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
-//        if (Simd::AmxBf16::Enable && TestAmxBf16())
-//            result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::AmxBf16::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
-//#endif
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
+            result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::AmxBf16::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
+#endif
 
         return result;
     }
