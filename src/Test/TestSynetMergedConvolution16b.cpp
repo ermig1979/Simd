@@ -265,6 +265,8 @@ namespace Test
         const SimdConvolutionActivationType a0 = aSw, a1 = aSw, a2 = aSw;
 #if defined(NDEBUG)
 #if 1
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 555, 40, 23), Cnv(a1, 1, 1, 256), Cnv(a0, 3, 1), f32, b16, c), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 555, 40, 23), Cnv(a1, 1, 1, 256), Cnv(a0, 3, 1), b16, b16, c), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 555, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 1555), f32, f32, c), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 1024, 8, 6), Cnv(a0, 1, 1, 1548), Cnv(a1, 3, 1), f32, f32, c), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), f32, f32, c), f1, f2);

@@ -4,7 +4,8 @@
 * Copyright (c) 2011-2024 Yermalayeu Ihar,
 *               2022-2022 Souriya Trinh,
 *               2022-2022 Fabien Spindler,
-*               2024-2024 Jan Rysavy.
+*               2024-2024 Jan Rysavy,
+*               2024-2024 Jamil Halabi.
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
