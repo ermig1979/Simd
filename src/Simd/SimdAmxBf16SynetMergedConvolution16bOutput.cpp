@@ -43,8 +43,8 @@ namespace Simd
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, uint8_t * dst)
         {
             int dS = (int)a.maC, dB = (int)p.dstC, dD = int(p.dstC * a.elem[1]);
-            int strideS = dS * 2, strideW = 128, strideB = dB * 4;
-            const uint16_t* src1 = src0 + dS * 16, * weight1 = weight0 + 32;
+            int strideS = dS * 2, strideW = 64, strideB = dB * 4;
+            const uint16_t* src1 = src0 + dS * 16, * weight1 = weight0 + AlignHi(srcC, a.miK) * F;
             float* buf1 = buf0 + 16 * dB;
 
             TileConf conf;
@@ -84,9 +84,9 @@ namespace Simd
             for (; sc < srcC; sc += 32)
             {
                 _tile_stream_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_loadd(7, weight1 + sc * 16, strideW);
                 _tile_dpbf16ps(1, 4, 7);
                 _tile_stream_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
@@ -112,7 +112,7 @@ namespace Simd
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, uint8_t* dst)
         {
             int dS = (int)a.maC, dB = (int)p.dstC, dD = int(p.dstC * a.elem[1]);
-            int strideS = dS * 2, strideW = 128, strideB = dB * 4;
+            int strideS = dS * 2, strideW = 64, strideB = dB * 4;
             const uint16_t* src1 = src0 + dS * 16;
             float* buf1 = buf0 + 16 * dB;
 
@@ -143,7 +143,7 @@ namespace Simd
             for (; sc < srcC; sc += 32)
             {
                 _tile_stream_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
                 _tile_stream_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
@@ -166,8 +166,8 @@ namespace Simd
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, uint8_t* dst)
         {
             int dS = (int)a.maC, dB = (int)p.dstC, dD = int(p.dstC * a.elem[1]);
-            int strideS = dS * 2, strideW = 128, strideB = dB * 4;
-            const uint16_t* weight1 = weight0 + 32;
+            int strideS = dS * 2, strideW = 64, strideB = dB * 4;
+            const uint16_t* weight1 = weight0 + AlignHi(srcC, a.miK) * F;
 
             TileConf conf;
             conf.rows[0] = uint8_t(dstS);
@@ -196,9 +196,9 @@ namespace Simd
             for (; sc < srcC; sc += 32)
             {
                 _tile_stream_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_loadd(7, weight1 + sc * 16, strideW);
                 _tile_dpbf16ps(1, 4, 7);
             }
             _tile_stored(0, buf0 + 0, strideB);
@@ -219,7 +219,7 @@ namespace Simd
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, uint8_t* dst)
         {
             int dS = (int)a.maC, dB = (int)p.dstC, dD = int(p.dstC * a.elem[1]);
-            int strideS = dS * 2, strideW = 128, strideB = dB * 4;
+            int strideS = dS * 2, strideW = 64, strideB = dB * 4;
 
             TileConf conf;
             conf.rows[0] = uint8_t(dstS);
@@ -242,7 +242,7 @@ namespace Simd
             for (; sc < srcC; sc += 32)
             {
                 _tile_stream_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
             }
             _tile_stored(0, buf0 + 0, strideB);

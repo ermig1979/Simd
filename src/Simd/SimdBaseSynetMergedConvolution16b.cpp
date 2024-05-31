@@ -398,7 +398,7 @@ namespace Simd
             if (_alg.miC)
             {
                 assert(Is1x1(p));
-                size_t F = _alg.miC * 2, C = AlignHi(p.srcC, _alg.miK), D = DivHi(p.dstC, F);
+                size_t F = _alg.miC, C = AlignHi(p.srcC, _alg.miK), D = DivHi(p.dstC, F);
                 _weightI.Resize(C * D * F, true);
                 uint16_t* dst = _weightI.data;
                 for (size_t d = 0; d < D; d++)
@@ -459,7 +459,7 @@ namespace Simd
             assert(p.group == 1 && Is1x1(p));
             if (_alg.miC)
             {
-                size_t F = _alg.miC * 2, C = DivHi(AlignHi(p.srcC, _alg.miK), 2), D = DivHi(p.dstC, F), M = DivHi(_alg.maC, 2);
+                size_t F = _alg.miC, C = DivHi(AlignHi(p.srcC, _alg.miK), 2), D = DivHi(p.dstC, F), M = DivHi(_alg.maC, 2);
                 _weightO.Resize(C * D * F * 2, true);
                 uint16_t* dst = _weightO.data;
                 for (size_t cB = 0; cB < C; cB += M)
@@ -710,7 +710,7 @@ namespace Simd
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dw[0] = AlignHi(c0.srcC, a.miK);
             a.dw[1] = c1.kernelY * c1.kernelX;
-            a.dw[2] = AlignHi(c2.dstC, 2 * a.miC);
+            a.dw[2] = AlignHi(c2.dstC, a.miC);
             _sizeB[3] = count > 1 || (a.miK == 32 && _dst16b) ? _sizeD : 0;
             
             ((ConvParam&)c1).dstT = SimdTensorData16b;
@@ -910,7 +910,7 @@ namespace Simd
             a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dw[0] = c0.kernelY * c0.kernelX;
-            a.dw[1] = AlignHi(c1.dstC, 2 * a.miC);
+            a.dw[1] = AlignHi(c1.dstC, a.miC);
 
             ((ConvParam&)c0).dstT = SimdTensorData16b;
             ((ConvParam&)c1).srcT = SimdTensorData16b;

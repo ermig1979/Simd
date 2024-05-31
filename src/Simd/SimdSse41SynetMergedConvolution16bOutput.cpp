@@ -39,10 +39,11 @@ namespace Simd
         //---------------------------------------------------------------------
 
         template<Term16bType term, SimdConvolutionActivationType type, int M> void OutputConvolution1x1_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int zero, const uint16_t* weight, const __m128* bias, const __m128* params, float* buf, uint8_t* dst)
+            size_t srcC, size_t dstC, int zero, const uint16_t* weight0, const __m128* bias, const __m128* params, float* buf, uint8_t* dst)
         {
             __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
             size_t dS = a.maC * p.strideX, dB = p.dstC, dD = p.dstC * a.elem[1];
+            const uint16_t* weight1 = weight0 + AlignHi(srcC, 2) * F;
             const uint16_t* src1 = src0 + 1 * dS;
             const uint16_t* src2 = src0 + 2 * dS;
             const uint16_t* src3 = src0 + 3 * dS;
@@ -67,10 +68,10 @@ namespace Simd
                 }
                 for (size_t offs = 0; offs < srcC; offs += 2)
                 {
-                    w01 = _mm_loadu_ps((float*)weight + 0);
+                    w01 = _mm_loadu_ps((float*)weight0);
                     w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
                     w01 = _mm_and_ps(w01, m);
-                    w11 = _mm_loadu_ps((float*)weight + F);
+                    w11 = _mm_loadu_ps((float*)weight1);
                     w10 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w11), Base::Bf16::SHIFT));
                     w11 = _mm_and_ps(w11, m);
                     if (M > 0)
@@ -108,7 +109,8 @@ namespace Simd
                         s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 0)), m);
                         d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40); d41 = _mm_add_ps(_mm_mul_ps(s0, w11), d41);
                     }
-                    weight += QF;
+                    weight0 += DF;
+                    weight1 += DF;
                 }
                 if (dstC == DF)
                 {
@@ -147,7 +149,7 @@ namespace Simd
                 }
                 for (size_t offs = 0; offs < srcC; offs += 2)
                 {
-                    w01 = _mm_loadu_ps((float*)weight + 0);
+                    w01 = _mm_loadu_ps((float*)weight0);
                     w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
                     w01 = _mm_and_ps(w01, m);
                     if (M > 0)
@@ -185,7 +187,7 @@ namespace Simd
                         s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 0)), m);
                         d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40);
                     }
-                    weight += QF;
+                    weight0 += DF;
                 }
                 if (dstC == F)
                 {
@@ -251,7 +253,7 @@ namespace Simd
                     outputConvolution1x1_2xN(s, p, a, maC, dC, zero, weight, _bias, _params, b, d);
                 for (; i < n1; i += m, s += a.maC * m, b += p.dstC * m, d += p.dstC * a.elem[1] * m)
                     outputConvolution1x1_2xM(s, p, a, maC, dC, zero, weight, _bias, _params, b, d);
-                weight += DivHi(maC, 2) * QF;
+                weight += AlignHi(maC, 2) * DF;
             }
         }
 

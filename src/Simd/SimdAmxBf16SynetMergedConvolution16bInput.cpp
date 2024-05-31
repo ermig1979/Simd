@@ -44,8 +44,8 @@ namespace Simd
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float *dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
-            int strideS = (int)sC * 2, strideW = 128, strideD = 64;
-            const uint16_t* src1 = src0 + sC * 16, * weight1 = weight0 + 32;
+            int strideS = (int)sC * 2, strideW = 64, strideD = 64;
+            const uint16_t* src1 = src0 + sC * 16, * weight1 = weight0 + sC * 16;
 
             TileConf conf;
             conf.rows[0] = 16;
@@ -77,9 +77,9 @@ namespace Simd
                     _tile_stream_loadd(4, src0 + sc, strideS);
                 else
                     _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_loadd(7, weight1 + sc * 16, strideW);
                 _tile_dpbf16ps(1, 4, 7);
                 if (srcStream)
                     _tile_stream_loadd(5, src1 + sc, strideS);
@@ -106,7 +106,7 @@ namespace Simd
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
-            int strideS = (int)sC * 2, strideW = 128, strideD = 64;
+            int strideS = (int)sC * 2, strideW = 64, strideD = 64;
             const uint16_t* src1 = src0 + sC * 16;
 
             TileConf conf;
@@ -131,7 +131,7 @@ namespace Simd
                     _tile_stream_loadd(4, src0 + sc, strideS);
                 else
                     _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
                 if (srcStream)
                     _tile_stream_loadd(5, src1 + sc, strideS);
@@ -153,8 +153,8 @@ namespace Simd
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
-            int strideS = (int)sC * 2, strideW = 128, strideD = 64;
-            const uint16_t* weight1 = weight0 + 32;
+            int strideS = (int)sC * 2, strideW = 64, strideD = 64;
+            const uint16_t* weight1 = weight0 + sC * 16;
 
             TileConf conf;
             conf.rows[0] = uint8_t(dstS);
@@ -178,9 +178,9 @@ namespace Simd
                     _tile_stream_loadd(4, src0 + sc, strideS);
                 else
                     _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_loadd(7, weight1 + sc * 16, strideW);
                 _tile_dpbf16ps(1, 4, 7);
             }
             _tile_stored(0, dst0, strideD);
@@ -199,7 +199,7 @@ namespace Simd
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
-            int strideS = (int)sC * 2, strideW = 128, strideD = 64;
+            int strideS = (int)sC * 2, strideW = 64, strideD = 64;
 
             TileConf conf;
             conf.rows[0] = uint8_t(dstS);
@@ -218,7 +218,7 @@ namespace Simd
                     _tile_stream_loadd(4, src0 + sc, strideS);
                 else
                     _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
             }
             _tile_stored(0, dst0, strideD);
@@ -302,7 +302,7 @@ namespace Simd
                     }
                 }
                 dst += a.bufH[1] * p.dstW * DF;
-                weight += srcC * DF;;
+                weight += srcC * DF;
             }
         }
 
