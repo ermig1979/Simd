@@ -27,6 +27,8 @@
 #include "Simd/SimdUpdate.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdCopy.h"
+#include "Simd/SimdSet.h"
 
 namespace Simd
 {
@@ -82,14 +84,40 @@ namespace Simd
             }
         }
 
+        static void ReorderBf16(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        {
+            const uint16_t* src = (uint16_t*)src8;
+            size_t srcC = AlignHi(p.srcC, a.miK);
+            size_t bufH = a.bufH[0], mask = bufH - 1;
+            size_t srcCDF = Simd::AlignLo(p.srcC, DF);
+            __mmask32 srcMask = TailMask32(p.srcC - srcCDF), gapMask = TailMask32(srcC - p.srcC);
+            for (size_t y = yBeg; y < yEnd; ++y)
+            {
+                const uint16_t* ps = src + y * p.srcW * p.srcC;
+                uint16_t* pd = dst + (y & mask) * p.srcW * srcC;
+                for (size_t x = 0; x < p.srcW; ++x)
+                {
+                    Copy(ps, srcCDF, srcMask, pd);
+                    if (gapMask)
+                        SetZero(pd + p.srcC, gapMask);
+                    ps += p.srcC;
+                    pd += srcC;
+                }
+            }
+        }
+
         //-----------------------------------------------------------------------------------------
 
         SynetMergedConvolution16bCdc::SynetMergedConvolution16bCdc(const MergConvParam& p)
             : Avx2::SynetMergedConvolution16bCdc(p)
         {
             SetSize(F, 2);
-            if(!_src16b)
+            if (!_src16b)
                 _convert = ConvertFp32ToBf16;
+            else if (!Aligned(p.conv[0].srcC, 2))
+                _convert = ReorderBf16;
+            else
+                _convert = NULL;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
             SetOutput(_param.conv[2], _output);
@@ -103,6 +131,10 @@ namespace Simd
             SetSize(F, 2);
             if (!_src16b)
                 _convert = ConvertFp32ToBf16;
+            else if (!Aligned(p.conv[0].srcC, 2))
+                _convert = ReorderBf16;
+            else
+                _convert = NULL;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
         }

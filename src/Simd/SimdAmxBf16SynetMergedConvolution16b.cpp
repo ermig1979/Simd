@@ -27,6 +27,7 @@
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdCopy.h"
 
 namespace Simd
 {
@@ -82,6 +83,30 @@ namespace Simd
             }
         }
 
+        static void ReorderBf16(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        {
+            const uint16_t* src = (uint16_t*)src8;
+            size_t bufH = a.bufH[0], mask = bufH - 1;
+            size_t srcC = AlignHi(p.srcC, a.miK);
+            size_t srcCDF = Simd::AlignLo(p.srcC, DF);
+            __mmask32 tailC = TailMask32(p.srcC - srcCDF);
+            for (size_t y = yBeg; y < yEnd; ++y)
+            {
+                const uint16_t* ps = src + y * p.srcW * p.srcC;
+                uint16_t* pd = dst + (y & mask) * p.srcW * srcC;
+                for (size_t x = 0; x < p.srcW; ++x)
+                {
+                    size_t c = 0;
+                    for (; c < srcCDF; c += DF)
+                        Avx512bw::Copy(ps + c, pd + c);
+                    if (tailC)
+                        Avx512bw::Copy(ps + c, pd + c, tailC);
+                    ps += p.srcC;
+                    pd += srcC;
+                }
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         SynetMergedConvolution16bCdc::SynetMergedConvolution16bCdc(const MergConvParam& p)
@@ -90,7 +115,12 @@ namespace Simd
             if (p.conv[2].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
-                _convert = ConvertFp32ToBf16;
+                if (!_src16b)
+                    _convert = ConvertFp32ToBf16;
+                else if (!Aligned(p.conv[0].srcC, Avx512bw::DF))
+                    _convert = ReorderBf16;
+                else
+                    _convert = NULL;
                 if (_param.conv[0].Is1x1())
                     SetInput(_param.conv[0], _input);
                 else
@@ -108,7 +138,12 @@ namespace Simd
             if (p.conv[1].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
-                _convert = ConvertFp32ToBf16;
+                if (!_src16b)
+                    _convert = ConvertFp32ToBf16;
+                else if (!Aligned(p.conv[0].srcC, Avx512bw::DF))
+                    _convert = ReorderBf16;
+                else
+                    _convert = NULL;
                 if (_param.conv[0].Is1x1())
                     SetInput(_param.conv[0], _input);
                 else

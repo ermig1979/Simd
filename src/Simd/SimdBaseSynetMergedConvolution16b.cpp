@@ -636,9 +636,9 @@ namespace Simd
                         size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c1.dstH);
                         size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c1.srcH);
                         size_t yEnd0 = Simd::RestrictRange(yBeg0 + a.yStep[0], a.yStart[0], c0.srcH);
-                        if (!_src16b)
+                        if (_convert)
                             _convert(src, c0, a, yBeg0, yEnd0, buf0);
-                        const uint16_t* src16b = _src16b ? (uint16_t*)src : buf0;
+                        const uint16_t* src16b = _convert ? buf0 : (uint16_t*)src;
                         _input(src16b, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0],
                             _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
                         _depthwise((uint8_t*)buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
@@ -700,7 +700,7 @@ namespace Simd
                 a.yStart[0] = Simd::Min(a.yStart[1], c0.srcH);
                 a.bufH[0] = Pow2Hi(Simd::Max(a.yStep[1], a.yStart[0]));
 
-                _sizeB[0] = _src16b ? 0 : a.bufH[0] * p.conv[0].srcW * AlignHi(p.conv[0].srcC, a.miK);
+                _sizeB[0] = _src16b && Aligned(c0.srcC, a.miK) ? 0 : a.bufH[0] * p.conv[0].srcW * AlignHi(p.conv[0].srcC, a.miK);
                 _sizeB[1] = a.bufH[1] * p.conv[1].srcW * a.maC;
                 _sizeB[2] = a.bufH[2] * p.conv[1].dstW * a.maC;
                 if (_sizeB[0] * 2 + _sizeB[1] * 4 + _sizeB[2] * 2 <= L2)
@@ -746,9 +746,9 @@ namespace Simd
                         size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c1.dstH);
                         size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c1.srcH);
                         size_t yEnd0 = Simd::RestrictRange(yBeg0 + a.yStep[0], a.yStart[0], c0.srcH);
-                        if(!_src16b)
+                        if(_convert)
                             _convert(src, c0, a, yBeg0, yEnd0, buf0);
-                        const uint16_t* src16b = _src16b ? (uint16_t*)src : buf0;
+                        const uint16_t* src16b = _convert ? buf0 : (uint16_t*)src;
                         _input(src16b, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0],
                             _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
                         _depthwise((uint8_t*)buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
@@ -802,7 +802,7 @@ namespace Simd
                 a.yStart[0] = Simd::Min(a.yStart[1], c0.srcH);
                 a.bufH[0] = Pow2Hi(Simd::Max(a.yStep[1], a.yStart[0]));
 
-                _sizeB[0] = _src16b ? 0 : a.bufH[0] * p.conv[0].srcW * AlignHi(p.conv[0].srcC, a.miK);
+                _sizeB[0] = _src16b && Aligned(c0.srcC, a.miK) ? 0 : a.bufH[0] * p.conv[0].srcW * AlignHi(p.conv[0].srcC, a.miK);
                 _sizeB[1] = a.bufH[1] * p.conv[1].srcW * a.maC;
                 if (_sizeB[0] * 2 + _sizeB[1] * 4 <= L2)
                     break;
