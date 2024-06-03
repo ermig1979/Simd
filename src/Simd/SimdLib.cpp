@@ -5261,6 +5261,75 @@ SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float *
 #endif
 }
 
+SIMD_API void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transpA, SimdBool constB, SimdBool bias)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void* (*SimdSynetInnerProduct16bInitPtr) (size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transpA, SimdBool constB, SimdBool bias);
+    const static SimdSynetInnerProduct16bInitPtr simdSynetInnerProduct32fInit = NULL;// SIMD_FUNC4(SynetInnerProduct32fInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+
+    return 0;// simdSynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transpA, constB, bias);
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetInnerProduct16bInternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// ((SynetInnerProduct16b*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetInnerProduct16bExternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// ((SynetInnerProduct16b*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API const char* SimdSynetInnerProduct16bInfo(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// ((SynetInnerProduct16b*)context)->Info();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, SimdBool* internal, const float* bias)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    //((SynetInnerProduct16b*)context)->SetParams(weight, internal, bias);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetInnerProduct16bForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    //SynetInnerProduct16b* c = (SynetInnerProduct16b*)context;
+    //SIMD_PERF_EXT(c);
+    //c->Forward(A, B, buf, C);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility)
 {
     SIMD_EMPTY();

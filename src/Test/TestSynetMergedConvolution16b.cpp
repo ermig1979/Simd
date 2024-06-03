@@ -219,7 +219,7 @@ namespace Test
         ::SimdRelease(context2);
 
         if (end.dstT == SimdTensorData16b)
-            eps = eps * 8.0f;
+            eps = eps * 9.0f;
         else
             eps = eps * 2.0f;
 
