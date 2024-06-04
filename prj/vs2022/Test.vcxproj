@@ -115,6 +115,7 @@
     <ClCompile Include="..\..\src\Test\TestSynetDeconvolution32f.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetGridSample.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetInnerProduct.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetInnerProduct16b.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution8i.cpp" />

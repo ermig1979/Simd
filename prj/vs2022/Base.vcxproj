@@ -87,6 +87,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetGridSample.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
@@ -195,6 +196,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetGridSample.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetGridSample2d32fBlZ.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetGridSample2dRef.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetInnerProduct16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution32f.cpp" />

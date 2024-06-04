@@ -6613,7 +6613,7 @@ extern "C"
 
     /*! @ingroup synet_inner_product_bf16
 
-        \fn void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transpA, SimdBool constB, SimdBool bias);
+        \fn void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
 
         \short Initilizes BF16 inner product (matrix mutiplication) algorithm.
 
@@ -6634,14 +6634,14 @@ extern "C"
         \param [in] typeA - a type of A matrix. It can be FP32 or BF16.
         \param [in] typeB - a type of B matrix. It can be FP32 or BF16.
         \param [in] typeC - a type of C matrix. It can be FP32 or BF16.
-        \param [in] transpA - a transpose matrix A before multiplication.
+        \param [in] transB - a transpose matrix B before multiplication.
         \param [in] constB - a matrix B is constant.
         \param [in] bias - a flag to add bias to output matrix C.
         \return a pointer to BF32 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetInnerProduct16bInternalBufferSize, ::SimdSynetInnerProduct16bExternalBufferSize, 
             ::SimdSynetInnerProduct16bInfo, ::SimdSynetInnerProduct16bSetParams and ::SimdSynetInnerProduct16bForward.
     */
-    SIMD_API void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transpA, SimdBool constB, SimdBool bias);
+    SIMD_API void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
 
     /*! @ingroup synet_inner_product_bf16
 
