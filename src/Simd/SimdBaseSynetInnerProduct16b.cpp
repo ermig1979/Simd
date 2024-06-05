@@ -36,7 +36,7 @@ namespace Simd
         {
             _sizeA = p.typeA == SimdTensorData32f ? p.M * p.K : 0;
             _sizeB = (p.typeB == SimdTensorData32f && !p.constB) ? p.K * p.N : 0;
-            _sizeC = p.typeB == SimdTensorData16b ? p.M * p.N : 0;
+            _sizeC = p.typeC == SimdTensorData16b ? p.M * p.N : 0;
         }
 
         String SynetInnerProduct16bRef::Desc() const
@@ -101,7 +101,8 @@ namespace Simd
                     {
                         const uint16_t* pA = A + i * p.K;
                         const uint16_t* pB = B + j * p.K;
-                          for (size_t k = 0; k < p.K; ++k)
+                        pC[j] = 0;
+                        for (size_t k = 0; k < p.K; ++k)
                             pC[j] += BFloat16ToFloat32(pA[k]) * BFloat16ToFloat32(pB[k]);
                     }
                 }

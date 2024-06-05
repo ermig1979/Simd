@@ -165,8 +165,9 @@ namespace Simd
         //    SynetInnerProduct16bGemm(const InnerProductParam16b& p);
         //    virtual String Ext() const { return "Base"; }
         //    virtual String Desc() const;
-        //    virtual void SetParams(const float* weight, SimdBool* internal, const float* bias);
-        //    virtual void Forward(const uint8_t* A, const uint8_t* B, const uint8_t* bias, uint8_t* C);
+        //    virtual size_t ExternalBufferSize() const;
+        //    virtual void SetParams(const float* weight, const float* bias);
+        //    virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
         //protected:
         //    //typedef void(*GemmPtr)(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);

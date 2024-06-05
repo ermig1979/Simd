@@ -118,14 +118,14 @@ namespace Test
         }
         result = result && Compare(C1f, C2f, eps, true, 64, DifferenceBoth);
 
-        if(0)
+        if(1)
         {
             void* context3 = SimdSynetInnerProduct32fInit(p.M, p.K, p.N, p.transB, SimdConvolutionActivationIdentity);
-            ::SimdSynetInnerProduct32fSetParams(context3, Bf.Data(), NULL, bias.Data(), NULL);
+            ::SimdSynetInnerProduct32fSetParams(context3, Bf.Data(), NULL, p.bias ? bias.Data() : NULL, NULL);
             ::SimdSynetInnerProduct32fForward(context3, Af.Data(), C3f.Data());
             ::SimdRelease(context3);
 
-            result = result && Compare(C1f, C3f, 0.03, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");//0.129
+            result = result && Compare(C1f, C3f, 0.033, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");//0.129
         }
 
         return result;
@@ -141,10 +141,13 @@ namespace Test
 
 #if defined(NDEBUG)
 #if 1
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, f32, f, t, f), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, b16, f, f, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, f32, f, t, f), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, b16, t, f, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, f32, t, t, f), f1, f2);
 #endif
 #else
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, f32, f, t, f), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, b16, f, f, f), f1, f2);
 #endif
 
         return result;
