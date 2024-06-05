@@ -6683,11 +6683,10 @@ extern "C"
         \short Sets weights and beases required for BF16 inner product algorithm.
 
         \param [in, out] context - a pointer to BF16 inner product context. It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to inner product weights. Can be NULL.
-        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [in] weight - a pointer to B matrix. Can be NULL.
         \param [in] bias - a pointer to bias. Can be NULL.
     */
-    SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, SimdBool* internal, const float* bias);
+    SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, const float* bias);
 
     /*! @ingroup synet_inner_product_bf16
 

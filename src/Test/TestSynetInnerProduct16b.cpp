@@ -94,8 +94,8 @@ namespace Test
         if (context1 == NULL)
             return true;
 
-        ::SimdSynetInnerProduct16bSetParams(context1, Bf.Data(), NULL, bias.Data());
-        ::SimdSynetInnerProduct16bSetParams(context2, Bf.Data(), NULL, bias.Data());
+        ::SimdSynetInnerProduct16bSetParams(context1, Bf.Data(), bias.Data());
+        ::SimdSynetInnerProduct16bSetParams(context2, Bf.Data(), bias.Data());
 
         Tensor8u buf;
         buf.Extend( Shp(SimdSynetInnerProduct16bExternalBufferSize(context1)) );

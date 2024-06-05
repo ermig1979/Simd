@@ -5267,9 +5267,9 @@ SIMD_API void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTe
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetInnerProduct16bInitPtr) (size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
-    const static SimdSynetInnerProduct16bInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC0(SynetInnerProduct16bInit);// , SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetInnerProduct16bInitPtr simdSynetInnerProduct16bInit = SIMD_FUNC0(SynetInnerProduct16bInit);// , SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
-    return 0;// simdSynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
+    return simdSynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
 #else
     assert(0);
     return 0;
@@ -5309,11 +5309,11 @@ SIMD_API const char* SimdSynetInnerProduct16bInfo(const void* context)
 #endif
 }
 
-SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, SimdBool* internal, const float* bias)
+SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, const float* bias)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetInnerProduct16b*)context)->SetParams(weight, internal, bias);
+    ((SynetInnerProduct16b*)context)->SetParams(weight, bias);
 #else
     assert(0);
 #endif
