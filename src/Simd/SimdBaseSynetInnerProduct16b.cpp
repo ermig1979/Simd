@@ -45,11 +45,6 @@ namespace Simd
             desc << Ext() << "::Ref";
             return desc.str();
         }
-
-        size_t SynetInnerProduct16bRef::ExternalBufferSize() const
-        {
-            return _sizeA * 2 + _sizeB * 2 + _sizeC * 4;
-        }
         
         void SynetInnerProduct16bRef::SetParams(const float* weight, const float* bias)
         {

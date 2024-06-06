@@ -78,6 +78,9 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
             , _perf(NULL)
 #endif
+            , _sizeA(0)
+            , _sizeB(0)
+            , _sizeC(0)
         {
         }
 
@@ -93,7 +96,7 @@ namespace Simd
 
         virtual size_t ExternalBufferSize() const
         {
-            return 0;
+            return _sizeA * 2 + _sizeB * 2 + _sizeC * 4;
         }
 
         virtual String Ext() const = 0;
@@ -126,6 +129,7 @@ namespace Simd
         Array16u _weight;
         Array32f _bias;
         mutable String _info;
+        size_t _sizeA, _sizeB, _sizeC;
 
         uint8_t* Buffer(uint8_t* buffer)
         {
@@ -149,65 +153,44 @@ namespace Simd
             SynetInnerProduct16bRef(const InnerProductParam16b& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
-            virtual size_t ExternalBufferSize() const;
             virtual void SetParams(const float* weight, const float* bias);
             virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
         protected:
             void GemmAndBias(const uint16_t* A, const uint16_t* B, float* C);
-
-            size_t _sizeA, _sizeB, _sizeC;
         };
 
-        //class SynetInnerProduct16bGemm : public SynetInnerProduct16b
-        //{
-        //public:
-        //    SynetInnerProduct16bGemm(const InnerProductParam16b& p);
-        //    virtual String Ext() const { return "Base"; }
-        //    virtual String Desc() const;
-        //    virtual size_t ExternalBufferSize() const;
-        //    virtual void SetParams(const float* weight, const float* bias);
-        //    virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
+        class SynetInnerProduct16bGemmNN : public SynetInnerProduct16b
+        {
+        public:
+            SynetInnerProduct16bGemmNN(const InnerProductParam16b& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual void SetParams(const float* weight, const float* bias);
+            virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
-        //protected:
-        //    //typedef void(*GemmPtr)(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
-        //    typedef void(*BiasAndActivationPtr)( const float* bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float* params, SimdBool trans, float* dst);
-        //    //typedef void(*ProdPtr)(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst);
-        //    //typedef void(*CbPackPtr)(size_t M, size_t N, size_t K, const float* B, float* pB, GemmKernelType type, bool compatibility);
-        //    ///typedef void(*CbRunPtr)(size_t M, size_t N, size_t K, const float* A, const float* B, float* C, GemmKernelType type, bool compatibility);
+            static bool Preferable(const InnerProductParam16b& p);
 
-        //    float _0, _1;
-        //    GemmPtr _gemm;
-        //    BiasAndActivationPtr _biasAndActivation;
-        //    ProdPtr _prod;
-        //    size_t _M, _N, _K, _ldW, _ldS, _ldD;
-        //    Array32f _cbWeight;
-        //    CbPackPtr _cbPack;
-        //    CbRunPtr _cbRun;
-        //};
+            struct AlgParam
+            {
+                size_t F, microM, microN, microK;
+                size_t macroM, macroN, macroK;
+                size_t aM, aN, aK;
+                size_t elemA, elemB, elemC;
+            };
 
-        //class SynetInnerProduct16bProd : public SynetInnerProduct16b
-        //{
-        //public:
-        //    SynetInnerProduct16bProd(const InnerProductParam16b& p);
-        //    virtual String Ext() const { return "Base"; }
-        //    virtual String Desc() const { return Ext() + "::Prod"; }
-        //    virtual size_t InternalBufferSize() const { return _rWeight.size + _rBias.size; }
-        //    virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
-        //    virtual void Forward(const float* src, float* dst);
+            typedef void(*PrepPtr)(const uint8_t* src, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst);
+            typedef void(*GemmPtr)(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C);
+            typedef void(*PostPtr)(const float* src, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, const float* bias, uint8_t* dst);
 
-        //    static bool Preferable(const InnerProductParam16b& p);
+        protected:
+            void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
 
-        //protected:
-        //    typedef void(*ProdPtr)(const float* src, const float* weight, const float* bias, size_t input, size_t output, float* dst);
-
-        //    ProdPtr _prod;
-        //    Array32f _rWeight, _rBias;
-        //    size_t _F, _N, _K;
-
-        //    void SetSize(size_t F);
-        //    void ReorderWeight(const float* src, float* dst);
-        //};
+            AlgParam _alg;
+            PrepPtr _prepA, _prepB;
+            GemmPtr _gemm;
+            PostPtr _post;
+        };
 
         //-------------------------------------------------------------------------------------------------
 
