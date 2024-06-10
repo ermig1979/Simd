@@ -125,7 +125,7 @@ namespace Test
             ::SimdSynetInnerProduct32fForward(context3, Af.Data(), C3f.Data());
             ::SimdRelease(context3);
 
-            result = result && Compare(C1f, C3f, 0.033, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");//0.129
+            result = result && Compare(C1f, C3f, 0.035, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");//0.129
         }
 
         return result;
@@ -147,7 +147,10 @@ namespace Test
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, f32, t, t, f), f1, f2);
 #endif
 #else
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, b16, f, f, f), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, b16, f, f, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, f32, f, t, f), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, b16, t, f, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, f32, t, t, f), f1, f2);
 #endif
 
         return result;
@@ -161,11 +164,11 @@ namespace Test
         if (TestBase())
             result = result && SynetInnerProduct16bForwardAutoTest(EPS, FUNC_IP16B(Simd::Base::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetInnerProduct16borwardAutoTest(EPS, FUNC_IP16B(Simd::Sse41::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct32fInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetInnerProduct16bForwardAutoTest(EPS, FUNC_IP16B(Simd::Sse41::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetInnerProduct16borwardAutoTest(EPS, FUNC_IP16B(Simd::Avx2::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));

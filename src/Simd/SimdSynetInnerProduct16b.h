@@ -175,8 +175,7 @@ namespace Simd
             {
                 size_t F, microM, microN, microK;
                 size_t macroM, macroN, macroK;
-                size_t aM, aN, aK;
-                size_t elemA, elemB, elemC;
+                size_t aM, aN, aK, elemA, elemB, elemC;
             };
 
             typedef void(*PrepPtr)(const uint8_t* src, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst);
@@ -200,6 +199,17 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        class SynetInnerProduct16bGemmNN : public Base::SynetInnerProduct16bGemmNN
+        {
+        public:
+            SynetInnerProduct16bGemmNN(const InnerProductParam16b& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
     }
 #endif
 

@@ -33,7 +33,8 @@ namespace Simd
     {
         bool SynetInnerProduct16bGemmNN::Preferable(const InnerProductParam16b& p)
         {
-            return p.constB == SimdTrue && p.transB == SimdFalse;
+            return p.constB == SimdTrue && p.transB == SimdFalse && 
+                p.typeA == SimdTensorData16b && p.typeC == SimdTensorData32f;
         }
 
         SynetInnerProduct16bGemmNN::SynetInnerProduct16bGemmNN(const InnerProductParam16b& p)
@@ -63,7 +64,7 @@ namespace Simd
             a.microN = microN;
             a.microK = microK;
             a.aK = AlignHi(p.K, a.microK);
-            a.aN = AlignHiAny(p.N, a.microN);
+            a.aN = AlignHi(p.N, a.F);
             a.aM = AlignHi(p.M, a.microM);
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN / 2, a.microK), a.microK, a.aK);
             a.macroN = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microN), a.microN, a.aN);
