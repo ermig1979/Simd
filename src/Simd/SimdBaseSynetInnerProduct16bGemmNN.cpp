@@ -33,7 +33,7 @@ namespace Simd
     {
         bool SynetInnerProduct16bGemmNN::Preferable(const InnerProductParam16b& p)
         {
-            return p.constB == SimdTrue && p.transB == SimdFalse && p.typeC == SimdTensorData32f && p.bias == SimdFalse;
+            return p.constB == SimdTrue && p.transB == SimdFalse;
         }
 
         SynetInnerProduct16bGemmNN::SynetInnerProduct16bGemmNN(const InnerProductParam16b& p)
@@ -71,10 +71,11 @@ namespace Simd
             a.eA = p.typeA == SimdTensorData32f ? 4 : 2;
             a.eB = p.typeB == SimdTensorData32f ? 4 : 2;
             a.eC = p.typeC == SimdTensorData32f ? 4 : 2;
+            a.cN = p.typeC == SimdTensorData32f || a.macroK < a.aK ? p.N : a.macroN;
 
             _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? (a.macroN == a.aN ? a.macroM : a.aM) * a.aK : 0;
             _sizeB = (p.typeB == SimdTensorData32f && !p.constB) ? a.macroK * a.macroN : 0;
-            _sizeC = p.typeC == SimdTensorData16b ? a.macroM * (a.macroK < a.aK ? p.N : a.macroN): 0;
+            _sizeC = p.typeC == SimdTensorData16b ? a.macroM * a.cN : 0;
         }
 
         void SynetInnerProduct16bGemmNN::SetParams(const float* weight, const float* bias)
@@ -130,7 +131,7 @@ namespace Simd
                         size_t macroM = Simd::Min(p.M, i + a.macroM) - i;
                         size_t offsA = (a.macroN == a.aN && _prepA) ? 0 : i * a.aK;
                         size_t offsB = p.constB ? j * a.aK + k * a.F : 0;
-                        size_t offsC = _sizeC ? 0 : i * a.aN + j;
+                        size_t offsC = _sizeC ? 0 : i * a.cN + j;
                         if (j == 0 && k == 0 && _prepA)
                             _prepA(A + i * p.K * a.eA, p, a, macroM, p.K, bufA + offsA);
                         if (i == 0 && _prepB)
