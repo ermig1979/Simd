@@ -30,6 +30,7 @@
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBFloat16.h"
+#include "Simd/SimdCopy.h"
 
 namespace Simd
 {
@@ -41,11 +42,66 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        static void InnerProduct16bGemmNNConvertA(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst)
+        {
+            const float* src = (float*)src8;
+            if (p.K == a.aK)
+            {
+                Float32ToBFloat16(src, K * size, dst);
+            }
+            else
+            {
+                size_t KDF = Simd::AlignLo(p.K, DF);
+                size_t KF = Simd::AlignLo(p.K, F);
+                for (size_t i = 0; i < size; ++i)
+                {
+                    size_t k = 0;
+                    for (; k < KDF; k += DF)
+                    {
+                        __m128i d0 = Float32ToBFloat16(_mm_loadu_ps(src + k + 0));
+                        __m128i d1 = Float32ToBFloat16(_mm_loadu_ps(src + k + F));
+                        _mm_storeu_si128((__m128i*)(dst + k), _mm_packus_epi32(d0, d1));
+                    }
+                    for (; k < KF; k += F)
+                    {
+                        __m128i d0 = Float32ToBFloat16(_mm_loadu_ps(src + k));
+                        _mm_storel_epi64((__m128i*)(dst + k), _mm_packus_epi32(d0, K_ZERO));
+                    }
+                    for (; k < p.K; ++k)
+                        dst[k] = Base::Float32ToBFloat16(src[k]);
+                    for (; k < a.aK; ++k)
+                        dst[k] = 0;
+                    src += p.K;
+                    dst += a.aK;
+                }
+            }
+        }
+
+        static void InnerProduct16bGemmNNReorderA(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst)
+        {
+            const uint16_t* src = (uint16_t*)src8;
+            size_t KDF = Simd::AlignLo(p.K, DF);
+            for (size_t i = 0; i < size; ++i)
+            {
+                size_t k = 0;
+                for (; k < KDF; k += DF)
+                    Copy(src + k, dst + k);
+                for (; k < p.K; ++k)
+                    dst[k] = src[k];
+                for (; k < a.aK; ++k)
+                    dst[k] = 0;
+                src += p.K;
+                dst += a.aK;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         template<int M> void InnerProduct16bGemmNN_2xM(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
             size_t N, size_t K, int update, const uint16_t* B0, float* C)
         {
             __m128 c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, a0, b00, b01, b10, b11, m = _mm_castsi128_ps(Bf16::MASK);
-            size_t dC = a.aN, dA = a.aK;
+            size_t dC = p.N, dA = a.aK;
             const uint16_t* B1 = B0 + a.aK * F;
             const uint16_t* A1 = A0 + 1 * dA;
             const uint16_t* A2 = A0 + 2 * dA;
@@ -267,6 +323,13 @@ namespace Simd
         {
             SetAlgParam(F, F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             _gemm = InnerProduct16bGemmNN_2;
+            if (_sizeA)
+            {
+                if (p.typeA == SimdTensorData16b)
+                    _prepA = InnerProduct16bGemmNNReorderA;
+                else
+                    _prepA = InnerProduct16bGemmNNConvertA;
+            }
         }
     }
 #endif

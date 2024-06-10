@@ -33,8 +33,7 @@ namespace Simd
     {
         bool SynetInnerProduct16bGemmNN::Preferable(const InnerProductParam16b& p)
         {
-            return p.constB == SimdTrue && p.transB == SimdFalse && 
-                p.typeA == SimdTensorData16b && p.typeC == SimdTensorData32f;
+            return p.constB == SimdTrue && p.transB == SimdFalse && p.typeC == SimdTensorData32f && p.bias == SimdFalse;
         }
 
         SynetInnerProduct16bGemmNN::SynetInnerProduct16bGemmNN(const InnerProductParam16b& p)
@@ -69,9 +68,9 @@ namespace Simd
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN / 2, a.microK), a.microK, a.aK);
             a.macroN = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microN), a.microN, a.aN);
             a.macroM = Simd::RestrictRange(L2 / a.macroK / 2, a.microM, a.aM);
-            a.elemA = p.typeA == SimdTensorData32f ? 4 : 2;
-            a.elemB = p.typeB == SimdTensorData32f ? 4 : 2;
-            a.elemC = p.typeC == SimdTensorData32f ? 4 : 2;
+            a.eA = p.typeA == SimdTensorData32f ? 4 : 2;
+            a.eB = p.typeB == SimdTensorData32f ? 4 : 2;
+            a.eC = p.typeC == SimdTensorData32f ? 4 : 2;
 
             _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? (a.macroN == a.aN ? a.macroM : a.aM) * a.aK : 0;
             _sizeB = (p.typeB == SimdTensorData32f && !p.constB) ? a.macroK * a.macroN : 0;
@@ -133,12 +132,12 @@ namespace Simd
                         size_t offsB = p.constB ? j * a.aK + k * a.F : 0;
                         size_t offsC = _sizeC ? 0 : i * a.aN + j;
                         if (j == 0 && k == 0 && _prepA)
-                            _prepA(A + i * p.K * a.elemA, p, a, macroM, p.K, bufA + offsA);
+                            _prepA(A + i * p.K * a.eA, p, a, macroM, p.K, bufA + offsA);
                         if (i == 0 && _prepB)
-                            _prepB(B + (k * p.N + j) * a.elemB, p, a, macroN, macroK, bufB + offsB);
+                            _prepB(B + (k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
                         _gemm(bufA + offsA + k, p, a, macroM, macroN, macroK, (int)k, bufB + offsB, bufC + offsC);
                         if (k + macroK == p.K && _post)
-                            _post(bufC + offsC, p, a, macroM, macroN, _bias.data + j, C + (i * p.N + j) * a.elemC);
+                            _post(bufC + offsC, p, a, macroM, macroN, _bias.data + j, C + (i * p.N + j) * a.eC);
                     }
                 }
             }
