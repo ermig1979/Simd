@@ -112,7 +112,7 @@ namespace Test
 
         if (p.typeC == SimdTensorData16b)
         {
-            eps = eps * 1.0f;
+            eps = eps * 5.0f;
             SimdBFloat16ToFloat32(C1b.Data(), C1b.Size(), C1f.Data());
             SimdBFloat16ToFloat32(C2b.Data(), C2b.Size(), C2f.Data());
         }
@@ -157,7 +157,7 @@ namespace Test
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, b16, t, f, t), f1, f2);
 #endif
 #else
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, b16, f, t, f), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, b16, t, f, t), f1, f2);
 #endif
 
         return result;

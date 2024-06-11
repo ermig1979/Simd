@@ -77,6 +77,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------------------------
+
         static void InnerProduct16bGemmNN_ReorderA(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t K, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
@@ -97,47 +99,230 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SIMD_INLINE void ConvertBn(const float* src, int stride, uint16_t* dst)
+        SIMD_INLINE void ConvertBn(const float* src, size_t stride, uint16_t* dst)
         {
             __m128i d0 = _mm_srli_epi32(_mm_add_epi32(_mm_castps_si128(_mm_loadu_ps(src + 0 * stride)), Bf16::ROUND), Base::Bf16::SHIFT);
-            __m128i d1 = _mm_or_si128(_mm_add_epi32(_mm_castps_si128(_mm_loadu_ps(src + 1 * stride)), Bf16::ROUND), Bf16::MASK);
+            __m128i d1 = _mm_and_si128(_mm_add_epi32(_mm_castps_si128(_mm_loadu_ps(src + 1 * stride)), Bf16::ROUND), Bf16::MASK);
             _mm_storeu_si128((__m128i*)dst, _mm_or_si128(d0, d1));
         }
 
-        //static void InnerProduct16bGemmNN_ConvertBn(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
-        //{
-        //    const float* src = (float*)src8;
-        //    if (p.K == a.aK)
-        //    {
-        //        Float32ToBFloat16(src, K * size, dst);
-        //    }
-        //    else
-        //    {
-        //        size_t KDF = Simd::AlignLo(p.K, DF);
-        //        size_t KF = Simd::AlignLo(p.K, F);
-        //        for (size_t i = 0; i < size; ++i)
-        //        {
-        //            size_t k = 0;
-        //            for (; k < KDF; k += DF)
-        //            {
-        //                __m128i d0 = Float32ToBFloat16(_mm_loadu_ps(src + k + 0));
-        //                __m128i d1 = Float32ToBFloat16(_mm_loadu_ps(src + k + F));
-        //                _mm_storeu_si128((__m128i*)(dst + k), _mm_packus_epi32(d0, d1));
-        //            }
-        //            for (; k < KF; k += F)
-        //            {
-        //                __m128i d0 = Float32ToBFloat16(_mm_loadu_ps(src + k));
-        //                _mm_storel_epi64((__m128i*)(dst + k), _mm_packus_epi32(d0, K_ZERO));
-        //            }
-        //            for (; k < p.K; ++k)
-        //                dst[k] = Base::Float32ToBFloat16(src[k]);
-        //            for (; k < a.aK; ++k)
-        //                dst[k] = 0;
-        //            src += p.K;
-        //            dst += a.aK;
-        //        }
-        //    }
-        //}
+        static void InnerProduct16bGemmNN_ConvertBn(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
+        {
+            const float* src = (float*)src8;
+            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0;
+            for (; j < Nf; j += a.F)
+            {
+                size_t k = 0;
+                for (; k < Kl; k += 2)
+                {
+                    const float* ps = src + k * p.N + j;
+                    for (size_t f = 0; f < a.F; f += F, dst += DF)
+                        ConvertBn(ps + f, p.N, dst);
+                }
+                for (; k < Kh; k += 2)
+                {
+                    const float* ps = src + k * p.N + j;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (j + f < p.N && k + i < p.K)
+                                *(dst++) = Base::Float32ToBFloat16(ps[i * p.N + f]);
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+            for (; j < N; j += a.F)
+            {
+                for (size_t k = 0; k < Kh; k += 2)
+                {
+                    const float* ps = src + k * p.N + j;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (j + f < p.N && k + i < p.K)
+                                *(dst++) = Base::Float32ToBFloat16(ps[i * p.N + f]);
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE void ConvertBt(const float* src, size_t stride, uint16_t* dst)
+        {
+            __m128 s01 = Load(src + 0 * stride, src + 1 * stride);
+            __m128 s23 = Load(src + 2 * stride, src + 3 * stride);
+            __m128i d01 = Float32ToBFloat16(s01);
+            __m128i d23 = Float32ToBFloat16(s23);
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi32(d01, d23));
+        }
+
+        static void InnerProduct16bGemmNN_ConvertBt(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
+        {
+            const float* src = (float*)src8;
+            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0;
+            for (; j < Nf; j += a.F)
+            {
+                size_t k = 0;
+                for (; k < Kl; k += 2)
+                {
+                    const float* ps = src + j * p.K + k;
+                    for (size_t f = 0; f < a.F; f += F, dst += DF)
+                        ConvertBt(ps + f * p.K, p.K, dst);
+                }
+                for (; k < Kh; k += 2)
+                {
+                    const float* ps = src + j * p.K + k;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (j + f < p.N && k + i < p.K)
+                                *(dst++) = Base::Float32ToBFloat16(ps[f * p.K + i]);
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+            for (; j < N; j += a.F)
+            {
+                for (size_t k = 0; k < Kh; k += 2)
+                {
+                    const float* ps = src + j * p.K + k;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (j + f < p.N && k + i < p.K)
+                                *(dst++) = Base::Float32ToBFloat16(ps[f * p.K + i]);
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE void ReorderBn(const uint16_t* src, size_t stride, uint16_t* dst)
+        {
+            __m128i d0 = LoadHalf((__m128i*)(src + 0 * stride));
+            __m128i d1 = LoadHalf((__m128i*)(src + 1 * stride));
+            _mm_storeu_si128((__m128i*)dst, _mm_unpacklo_epi16(d0, d1));
+        }
+
+        static void InnerProduct16bGemmNN_ReorderBn(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
+        {
+            const uint16_t* src = (uint16_t*)src8;
+            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0;
+            for (; j < Nf; j += a.F)
+            {
+                size_t k = 0;
+                for (; k < Kl; k += 2)
+                {
+                    const uint16_t* ps = src + k * p.N + j;
+                    for (size_t f = 0; f < a.F; f += F, dst += DF)
+                        ReorderBn(ps + f, p.N, dst);
+                }
+                for (; k < Kh; k += 2)
+                {
+                    const uint16_t* ps = src + k * p.N + j;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (j + f < p.N && k + i < p.K)
+                                *(dst++) = ps[i * p.N + f];
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+            for (; j < N; j += a.F)
+            {
+                for (size_t k = 0; k < Kh; k += 2)
+                {
+                    const uint16_t* ps = src + k * p.N + j;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (j + f < p.N && k + i < p.K)
+                                *(dst++) = ps[i * p.N + f];
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE void ReorderBt(const uint16_t* src, size_t stride, uint16_t* dst)
+        {
+            *(uint32_t*)(dst + 0) = *(uint32_t*)(src + 0 * stride);
+            *(uint32_t*)(dst + 2) = *(uint32_t*)(src + 1 * stride);
+            *(uint32_t*)(dst + 4) = *(uint32_t*)(src + 2 * stride);
+            *(uint32_t*)(dst + 6) = *(uint32_t*)(src + 3 * stride);
+        }
+
+        static void InnerProduct16bGemmNN_ReorderBt(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
+        {
+            const uint16_t* src = (uint16_t*)src8;
+            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0;
+            for (; j < Nf; j += a.F)
+            {
+                size_t k = 0;
+                for (; k < Kl; k += 2)
+                {
+                    const uint16_t* ps = src + j * p.K + k;
+                    for (size_t f = 0; f < a.F; f += F, dst += DF)
+                        ReorderBt(ps + f * p.K, p.K, dst);
+                }
+                for (; k < Kh; k += 2)
+                {
+                    const uint16_t* ps = src + j * p.K + k;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (j + f < p.N && k + i < p.K)
+                                *(dst++) = ps[f * p.K + i];
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+            for (; j < N; j += a.F)
+            {
+                for (size_t k = 0; k < Kh; k += 2)
+                {
+                    const uint16_t* ps = src + j * p.K + k;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (j + f < p.N && k + i < p.K)
+                                *(dst++) = ps[f * p.K + i];
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+        }
 
         //-----------------------------------------------------------------------------------------
 
@@ -378,6 +563,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------------------------
+
         void InnerProduct16bGemmNN_Post16b(const float* src, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, const float* bias, uint8_t* dst8)
         {
             uint16_t* dst = (uint16_t*)dst8;
@@ -400,7 +587,6 @@ namespace Simd
             : Base::SynetInnerProduct16bGemmNN(p)
         {
             SetAlgParam(F, F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            _gemm = InnerProduct16bGemmNN_Gemm2;
             if (_sizeA)
             {
                 if (p.typeA == SimdTensorData16b)
@@ -408,6 +594,21 @@ namespace Simd
                 else
                     _prepA = InnerProduct16bGemmNN_ConvertA;
             }
+            if (p.typeB == SimdTensorData32f || p.constB)
+            {
+                if (p.transB)
+                    _prepB = InnerProduct16bGemmNN_ConvertBt;
+                else
+                    _prepB = InnerProduct16bGemmNN_ConvertBn;
+            }
+            else
+            {
+                if (p.transB)
+                    _prepB = InnerProduct16bGemmNN_ReorderBt;
+                else
+                    _prepB = InnerProduct16bGemmNN_ReorderBn;
+            }
+            _gemm = InnerProduct16bGemmNN_Gemm2;
             if (_sizeC || p.bias)
             {
                 if (p.typeC == SimdTensorData16b)

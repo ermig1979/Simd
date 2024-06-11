@@ -35,20 +35,20 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void InnerProduct16bGemmNN_ConvertBn(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst)
+        static void InnerProduct16bGemmNN_ConvertBn(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
         {
             const float* src = (float*)src8;
-            size_t N = DivHi(p.N, a.F);
-            for (size_t n = 0; n < N; n++)
+            size_t Kh = AlignHi(K, a.microK);
+            for (size_t j = 0; j < N; j += a.F)
             {
-                for (size_t k = 0; k < a.aK; k += 2)
+                for (size_t k = 0; k < Kh; k += 2)
                 {
-                    const float* ps = src + k * p.N + n * a.F;
+                    const float* ps = src + k * p.N + j;
                     for (size_t f = 0; f < a.F; ++f)
                     {
                         for (size_t i = 0; i < 2; ++i)
                         {
-                            if (n * a.F + f < p.N && k + i < p.K)
+                            if (j + f < p.N && k + i < p.K)
                                 *(dst++) = Float32ToBFloat16(ps[i * p.N + f]);
                             else
                                 *(dst++) = 0;
@@ -58,20 +58,22 @@ namespace Simd
             }
         }
 
-        static void InnerProduct16bGemmNN_ConvertBt(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst)
+        //-----------------------------------------------------------------------------------------
+
+        static void InnerProduct16bGemmNN_ConvertBt(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
         {
             const float* src = (float*)src8;
-            size_t N = DivHi(p.N, a.F);
-            for (size_t n = 0; n < N; n++)
+            size_t Kh = AlignHi(K, a.microK);
+            for (size_t j = 0; j < N; j += a.F)
             {
-                for (size_t k = 0; k < a.aK; k += 2)
+                for (size_t k = 0; k < Kh; k += 2)
                 {
-                    const float* ps = src + n * a.F * p.K + k;
+                    const float* ps = src + j * p.K + k;
                     for (size_t f = 0; f < a.F; ++f)
                     {
                         for (size_t i = 0; i < 2; ++i)
                         {
-                            if (n * a.F + f < p.N && k + i < p.K)
+                            if (j + f < p.N && k + i < p.K)
                                 *(dst++) = Float32ToBFloat16(ps[f * p.K + i]);
                             else
                                 *(dst++) = 0;
@@ -85,7 +87,7 @@ namespace Simd
 
         bool SynetInnerProduct16bGemmNN::Preferable(const InnerProductParam16b& p)
         {
-            return p.constB == SimdTrue || p.typeB == SimdTensorData32f;
+            return true;// p.constB == SimdTrue || p.typeB == SimdTensorData32f;
         }
 
         SynetInnerProduct16bGemmNN::SynetInnerProduct16bGemmNN(const InnerProductParam16b& p)
@@ -133,7 +135,7 @@ namespace Simd
             a.cN = p.typeC == SimdTensorData32f || a.macroK < a.aK ? p.N : a.macroN;
 
             _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? (a.macroN == a.aN ? a.macroM : a.aM) * a.aK : 0;
-            _sizeB = (p.typeB == SimdTensorData32f && !p.constB) ? a.macroK * a.macroN : 0;
+            _sizeB = p.constB ? 0 : a.macroK * a.macroN;
             _sizeC = p.typeC == SimdTensorData16b ? a.macroM * a.cN : 0;
         }
 
