@@ -25,8 +25,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)      
-    namespace Sse41
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)      
+    namespace Avx2
     {
         void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias)
         {
@@ -34,8 +34,8 @@ namespace Simd
             if (!param.Valid())
                 return NULL;
             if (Base::SynetInnerProduct16bGemmNN::Preferable(param))
-                return new Sse41::SynetInnerProduct16bGemmNN(param);
-            return Base::SynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
+                return new Avx2::SynetInnerProduct16bGemmNN(param);
+            return Sse41::SynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
         }
     }
 #endif

@@ -176,11 +176,11 @@ namespace Test
             result = result && SynetInnerProduct16bForwardAutoTest(EPS, FUNC_IP16B(Simd::Sse41::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2())
-//            result = result && SynetInnerProduct16borwardAutoTest(EPS, FUNC_IP16B(Simd::Avx2::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));
-//#endif
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && SynetInnerProduct16bForwardAutoTest(EPS, FUNC_IP16B(Simd::Avx2::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));
+#endif
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw())
 //            result = result && SynetInnerProduct16bForwardAutoTest(EPS, FUNC_IP16B(Simd::Avx512bw::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));

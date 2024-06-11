@@ -216,6 +216,17 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        class SynetInnerProduct16bGemmNN : public Sse41::SynetInnerProduct16bGemmNN
+        {
+        public:
+            SynetInnerProduct16bGemmNN(const InnerProductParam16b& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
     }
 #endif
 

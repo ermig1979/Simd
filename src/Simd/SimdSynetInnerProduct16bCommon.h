@@ -62,6 +62,30 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        SIMD_INLINE void Save1(float* ptr, __m256 value)
+        {
+            _mm256_storeu_ps(ptr, value);
+        }
+
+        SIMD_INLINE void Save1(float* ptr, __m256 value, size_t tail)
+        {
+            SIMD_ALIGNED(32) float tmp[F];
+            _mm256_storeu_ps(tmp, value);
+            for (size_t i = 0; i < tail; ++i)
+                ptr[i] = tmp[i];
+        }
+
+        SIMD_INLINE void Save2(float* ptr, __m256 val0, __m256 val1)
+        {
+            _mm256_storeu_ps(ptr + 0, val0);
+            _mm256_storeu_ps(ptr + F, val1);
+        }
+
+        SIMD_INLINE void Save2(float* ptr, __m256 val0, __m256 val1, size_t tail)
+        {
+            _mm256_storeu_ps(ptr + 0, val0);
+            Save1(ptr + F, val1, tail);
+        }
     }
 #endif
 
