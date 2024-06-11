@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2022 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)      
-    namespace Sse41
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)      
+    namespace Avx512bw
     {
         void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias)
         {
@@ -34,8 +34,8 @@ namespace Simd
             if (!param.Valid())
                 return NULL;
             if (Base::SynetInnerProduct16bGemmNN::Preferable(param))
-                return new Sse41::SynetInnerProduct16bGemmNN(param);
-            return Base::SynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
+                return new Avx512bw::SynetInnerProduct16bGemmNN(param);
+            return Avx2::SynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
         }
     }
 #endif

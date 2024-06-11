@@ -36,7 +36,7 @@ namespace Simd
         SimdTensorDataType typeA, typeB, typeC;
         SimdBool transB, constB, bias;
 
-        InnerProductParam16b(size_t m, size_t n, size_t k, 
+        InnerProductParam16b(size_t m, size_t n, size_t k,
             SimdTensorDataType ta, SimdTensorDataType tb, SimdTensorDataType tc,
             SimdBool t, SimdBool c, SimdBool b)
             : M(m), N(n), K(k)
@@ -47,7 +47,7 @@ namespace Simd
 
         bool Valid()
         {
-            return 
+            return
                 (typeA == SimdTensorData32f || typeA == SimdTensorData16b) &&
                 (typeB == SimdTensorData32f || typeB == SimdTensorData16b) &&
                 (typeC == SimdTensorData32f || typeC == SimdTensorData16b);
@@ -123,7 +123,7 @@ namespace Simd
     protected:
         InnerProductParam16b _param;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer * _perf;
+        Base::PerformanceMeasurer* _perf;
 #endif
         Array8u _buffer;
         Array16u _weight;
@@ -193,7 +193,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void * SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -233,6 +233,17 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        class SynetInnerProduct16bGemmNN : public Avx2::SynetInnerProduct16bGemmNN
+        {
+        public:
+            SynetInnerProduct16bGemmNN(const InnerProductParam16b& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
     }
 #endif
 

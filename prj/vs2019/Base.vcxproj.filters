@@ -609,6 +609,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16b.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16bCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Base">

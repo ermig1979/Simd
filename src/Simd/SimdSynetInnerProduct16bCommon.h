@@ -92,6 +92,16 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        SIMD_INLINE void Save1(float* ptr, __m512 value, __mmask16 tail = __mmask16(-1))
+        {
+            _mm512_mask_storeu_ps(ptr, tail, value);
+        }
+
+        SIMD_INLINE void Save2(float* ptr, __m512 val0, __m512 val1, __mmask16 tail = __mmask16(-1))
+        {
+            _mm512_storeu_ps(ptr + 0, val0);
+            Save1(ptr + F, val1, tail);
+        }
     }
 #endif
 

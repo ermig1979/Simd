@@ -103,6 +103,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect1x1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirectAny.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDeconvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetInnerProduct16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetInnerProduct16bGemmNN.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16bDepthwise.cpp" />
@@ -213,7 +215,10 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16b.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16bCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32fBf16.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
