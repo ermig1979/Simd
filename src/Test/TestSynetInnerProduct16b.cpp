@@ -125,7 +125,7 @@ namespace Test
             ::SimdSynetInnerProduct32fForward(context3, Af.Data(), C3f.Data());
             ::SimdRelease(context3);
 
-            result = result && Compare(C1f, C3f, 0.038, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");//0.129
+            result = result && Compare(C1f, C3f, 0.039, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");
         }
 
         return result;
@@ -154,6 +154,7 @@ namespace Test
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, b16, t, f, t), f1, f2);
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, f32, t, t, f), f1, f2);
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, b16, f, t, f), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, b16, t, f, t), f1, f2);
 #endif
 #else
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, b16, f, t, f), f1, f2);

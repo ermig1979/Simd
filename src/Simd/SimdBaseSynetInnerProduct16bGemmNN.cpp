@@ -31,9 +31,61 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
+        typedef Base::SynetInnerProduct16bGemmNN::AlgParam AlgParam;
+
+        //-----------------------------------------------------------------------------------------
+
+        static void InnerProduct16bGemmNN_ConvertBn(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst)
+        {
+            const float* src = (float*)src8;
+            size_t N = DivHi(p.N, a.F);
+            for (size_t n = 0; n < N; n++)
+            {
+                for (size_t k = 0; k < a.aK; k += 2)
+                {
+                    const float* ps = src + k * p.N + n * a.F;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (n * a.F + f < p.N && k + i < p.K)
+                                *(dst++) = Float32ToBFloat16(ps[i * p.N + f]);
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        static void InnerProduct16bGemmNN_ConvertBt(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst)
+        {
+            const float* src = (float*)src8;
+            size_t N = DivHi(p.N, a.F);
+            for (size_t n = 0; n < N; n++)
+            {
+                for (size_t k = 0; k < a.aK; k += 2)
+                {
+                    const float* ps = src + n * a.F * p.K + k;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (n * a.F + f < p.N && k + i < p.K)
+                                *(dst++) = Float32ToBFloat16(ps[f * p.K + i]);
+                            else
+                                *(dst++) = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         bool SynetInnerProduct16bGemmNN::Preferable(const InnerProductParam16b& p)
         {
-            return p.constB == SimdTrue && p.transB == SimdFalse;
+            return p.constB == SimdTrue || p.typeB == SimdTensorData32f;
         }
 
         SynetInnerProduct16bGemmNN::SynetInnerProduct16bGemmNN(const InnerProductParam16b& p)
@@ -44,6 +96,13 @@ namespace Simd
             , _gemm(0)
             , _post(0)
         {
+            if (p.typeB == SimdTensorData32f || p.constB)
+            {
+                if (p.transB)
+                    _prepB = InnerProduct16bGemmNN_ConvertBt;
+                else
+                    _prepB = InnerProduct16bGemmNN_ConvertBn;
+            }
         }
 
         String SynetInnerProduct16bGemmNN::Desc() const
@@ -86,26 +145,7 @@ namespace Simd
             {
                 assert(weight);
                 _weight.Resize(a.aK * a.aN, true);
-                size_t N = DivHi(p.N, _alg.F);
-                uint16_t* dst = _weight.data;
-                for (size_t n = 0; n < N; n++)
-                {
-                    for (size_t k = 0; k < a.aK; k += 2)
-                    {
-                        const float* src = weight + k * p.N + n * _alg.F;
-                        for (size_t f = 0; f < _alg.F; ++f)
-                        {
-                            for (size_t i = 0; i < 2; ++i)
-                            {
-                                if (n * _alg.F + f < p.N && k + i < p.K)
-                                    *(dst++) = Float32ToBFloat16(src[i * p.N]);
-                                else
-                                    *(dst++) = 0;
-                            }
-                            src++;
-                        }
-                    }
-                }
+                _prepB((uint8_t*)weight, p, a, p.N, p.K, _weight.data);
             }
             _bias.Resize(a.aN, true);
             if (p.bias && bias)
@@ -134,7 +174,7 @@ namespace Simd
                         size_t offsC = _sizeC ? 0 : i * a.cN + j;
                         if (j == 0 && k == 0 && _prepA)
                             _prepA(A + i * p.K * a.eA, p, a, macroM, p.K, bufA + offsA);
-                        if (i == 0 && _prepB)
+                        if (i == 0 && _prepB && !p.constB)
                             _prepB(B + (k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
                         _gemm(bufA + offsA + k, p, a, macroM, macroN, macroK, (int)k, bufB + offsB, bufC + offsC);
                         if (k + macroK == p.K && _post)

@@ -25,6 +25,7 @@
 #define __SimdSynetInnerProduct16bCommon_h__
 
 #include "Simd/SimdStore.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {

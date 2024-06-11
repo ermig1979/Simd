@@ -87,35 +87,37 @@ namespace Simd
         void SynetInnerProduct16bRef::GemmAndBias(const uint16_t* A, const uint16_t* B, float* C)
         {
             const InnerProductParam16b& p = _param;
+            Array32f Af(p.K);
             for (size_t i = 0; i < p.M; ++i)
             {            
-                float* pC = C + i * p.N;
+                for (size_t k = 0; k < p.K; ++k)
+                    Af[k] = BFloat16ToFloat32(A[k]);
                 if (p.transB)
                 {
                     for (size_t j = 0; j < p.N; ++j)
                     {
-                        const uint16_t* pA = A + i * p.K;
                         const uint16_t* pB = B + j * p.K;
-                        pC[j] = 0;
+                        C[j] = 0;
                         for (size_t k = 0; k < p.K; ++k)
-                            pC[j] += BFloat16ToFloat32(pA[k]) * BFloat16ToFloat32(pB[k]);
+                            C[j] += Af[k] * BFloat16ToFloat32(pB[k]);
                     }
                 }
                 else
                 {
                     for (size_t j = 0; j < p.N; ++j)
-                        pC[j] = 0.0;
+                        C[j] = 0.0;
                     for (size_t k = 0; k < p.K; ++k)
                     {
                         const uint16_t* pB = B + k * p.N;
-                        float a = BFloat16ToFloat32(A[i * p.K + k]);
                         for (size_t j = 0; j < p.N; ++j)
-                            pC[j] += a * BFloat16ToFloat32(pB[j]);
+                            C[j] += Af[k] * BFloat16ToFloat32(pB[j]);
                     }
                 }
                 for (size_t j = 0; j < p.N; ++j)
-                    pC[j] += _bias[j];
-            }        
+                    C[j] += _bias[j];
+                A += p.K;
+                C += p.N;
+            }  
         }
 
         //-------------------------------------------------------------------------------------------------
