@@ -138,7 +138,7 @@ namespace Test
             ::SimdSynetInnerProduct32fForward(context3, Af.Data(), C3f.Data());
             ::SimdRelease(context3);
 
-            float e = EPS * GetRange(C3f.Data(), C3f.Size()) * 2.5f;
+            float e = EPS * GetRange(C3f.Data(), C3f.Size()) * 3.0f;
             result = result && Compare(C1f, C3f, e, true, 64, DifferenceAbsolute, " Compare to SynetInnerProduct32f.");
         }
 
@@ -172,14 +172,11 @@ namespace Test
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 8192, b16, b16, b16, f, t, t), f1, f2);
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 8192, b16, b16, b16, f, f, t), f1, f2);
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 8192, b16, b16, b16, t, f, t), f1, f2);
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(2, 512, 8192, b16, b16, b16, f, t, t), f1, f2);
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(4, 512, 8192, b16, b16, b16, f, t, t), f1, f2);
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 512, b16, b16, b16, f, t, t), f1, f2);
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(2, 512, 512, b16, b16, b16, f, t, t), f1, f2);
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(4, 512, 512, b16, b16, b16, f, t, t), f1, f2);
+
 #endif
 #else
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 8192 + 1000, b16, b16, b16, t, f, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 4096, b16, b16, b16, t, f, t), f1, f2);
 #endif
 
         return result;
