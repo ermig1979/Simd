@@ -36,13 +36,30 @@ namespace Simd
         uint16_t colsb[16];
         uint8_t rows[16];
 
-        SIMD_INLINE TileConf(uint8_t paletteId = 1, uint8_t startRow = 0)
+        SIMD_INLINE TileConf(bool zero = true)
         {
-            uint64_t* dst = (uint64_t * )this;
-            for (size_t i = 0; i < 8; ++i)
-                dst[i] = 0;
-            this->paletteId = paletteId;
-            this->startRow = startRow;
+            uint64_t* dst = (uint64_t*)this;
+            dst[0] = 0x0000000000000001;
+            if (zero)
+            {
+                dst[1] = 0x0000000000000000;
+                dst[2] = 0x0000000000000000;
+                dst[3] = 0x0000000000000000;
+                dst[4] = 0x0000000000000000;
+                dst[5] = 0x0000000000000000;
+                dst[6] = 0x0000000000000000;
+                dst[7] = 0x0000000000000000;
+            }
+            else
+            {
+                dst[1] = 0x0000000000000000;
+                dst[2] = 0x0080008000800080;
+                dst[3] = 0x0080008000800080;
+                dst[4] = 0x0000000000000000;
+                dst[5] = 0x0000000000000000;
+                dst[6] = 0x1010101010101010;
+                dst[7] = 0x0000000000000000;
+            }
         }
     };
 }
@@ -113,6 +130,16 @@ namespace Simd
 #ifdef SIMD_AMXBF16_ENABLE
     namespace AmxBf16
     {
+        template<class T> SIMD_INLINE void TileMoveToMemory(const T* ptr, size_t stride, size_t count = 16)
+        {
+            for (const T* end = ptr + stride * count; ptr < end; ptr += 4 * stride)
+            {
+                _mm_prefetch((const char*)(ptr + 0 * stride), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(ptr + 1 * stride), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(ptr + 2 * stride), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(ptr + 3 * stride), _MM_HINT_NTA);
+            }
+        }
     }
 #endif
 }

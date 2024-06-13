@@ -724,19 +724,6 @@ namespace Simd
         {
             Term16b<term>::template Postprocess<type>(sum, bias, params, offset, dst, tail);
         }
-
-        //-------------------------------------------------------------------------------------------------
-
-        template<class T> SIMD_INLINE void TileMoveToMemory(const T* ptr, size_t stride, size_t count = 16)
-        {
-            for (const T* end = ptr + stride * count; ptr < end; ptr += 4 * stride)
-            {
-                _mm_prefetch((const char*)(ptr + 0 * stride), _MM_HINT_NTA);
-                _mm_prefetch((const char*)(ptr + 1 * stride), _MM_HINT_NTA);
-                _mm_prefetch((const char*)(ptr + 2 * stride), _MM_HINT_NTA);
-                _mm_prefetch((const char*)(ptr + 3 * stride), _MM_HINT_NTA);
-            }            
-        }
     }
 #endif
 }
