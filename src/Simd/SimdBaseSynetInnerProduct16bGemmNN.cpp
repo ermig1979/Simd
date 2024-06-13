@@ -38,7 +38,7 @@ namespace Simd
         static void InnerProduct16bGemmNN_ConvertBn(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
         {
             const float* src = (float*)src8;
-            size_t Kh = AlignHi(K, a.microK);
+            size_t Kh = AlignHi(K, a.microK), gap = (a.bK - Kh) * a.F;
             for (size_t j = 0; j < N; j += a.F)
             {
                 for (size_t k = 0; k < Kh; k += 2)
@@ -55,6 +55,7 @@ namespace Simd
                         }
                     }
                 }
+                dst += gap;
             }
         }
 
@@ -63,7 +64,7 @@ namespace Simd
         static void InnerProduct16bGemmNN_ConvertBt(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
         {
             const float* src = (float*)src8;
-            size_t Kh = AlignHi(K, a.microK);
+            size_t Kh = AlignHi(K, a.microK), gap = (a.bK - Kh) * a.F;
             for (size_t j = 0; j < N; j += a.F)
             {
                 for (size_t k = 0; k < Kh; k += 2)
@@ -80,6 +81,7 @@ namespace Simd
                         }
                     }
                 }
+                dst += gap;
             }
         }
 
@@ -96,7 +98,6 @@ namespace Simd
             , _prepA(0)
             , _prepB(0)
             , _gemm(0)
-            //, _post(0)
         {
             if (p.typeB == SimdTensorData32f || p.constB)
             {
@@ -127,11 +128,12 @@ namespace Simd
             a.aN = AlignHi(p.N, a.F);
             a.aM = AlignHi(p.M, a.microM);
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN / 2, a.microK), a.microK, a.aK);
-            a.macroN = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microN), a.microN, a.aN);
+            a.macroN = Simd::RestrictRange(AlignLo(L3 / a.macroK / 2, a.microN), a.microN, a.aN);
             a.macroM = Simd::RestrictRange(L2 / a.macroK / 2, a.microM, a.aM);
             a.eA = p.typeA == SimdTensorData32f ? 4 : 2;
             a.eB = p.typeB == SimdTensorData32f ? 4 : 2;
             a.eC = p.typeC == SimdTensorData32f ? 4 : 2;
+            a.bK = p.constB ? a.aK : a.macroK;
             a.cN = p.typeC == SimdTensorData32f || a.macroK < a.aK ? p.N : a.macroN;
 
             _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? (a.macroN == a.aN ? a.macroM : a.aM) * a.aK : 0;
@@ -172,12 +174,12 @@ namespace Simd
                     {
                         size_t macroM = Simd::Min(p.M, i + a.macroM) - i;
                         size_t offsA = (a.macroN == a.aN && _prepA) ? 0 : i * a.aK;
-                        size_t offsB = p.constB ? j * a.aK + k * a.F : 0;
+                        size_t offsB = p.constB ? j * a.bK + k * a.F : 0;
                         size_t offsC = _sizeC ? 0 : i * a.cN + j;
                         if (j == 0 && k == 0 && _prepA)
                             _prepA(A + i * p.K * a.eA, p, a, macroM, p.K, bufA + offsA);
                         if (i == 0 && _prepB && !p.constB)
-                            _prepB(B + (k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
+                            _prepB(B + (p.transB ? j * p.K + k : k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
                         _gemm(bufA + offsA + k, p, a, macroM, macroN, macroK, (int)k, bufB + offsB, bufC + offsC, 
                             k + macroK == p.K && (_sizeC || p.bias), _bias.data + j, C + (i * p.N + j) * a.eC);
                     }

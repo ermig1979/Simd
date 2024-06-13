@@ -428,7 +428,7 @@ namespace Test
                     for(size_t i = 0; i < index.size() - 1; ++i)
                         message << index[i] << ", ";
                     message << index[index.size() - 1] << "] : " << _a << " != " << _b << ";"
-                        << " (absolute = " << absolute << ", relative = " << relative << ")!" << std::endl;
+                        << " (absolute = " << absolute << ", relative = " << relative << ", threshold = " << differenceMax  << ")!" << std::endl;
                 }
                 if (errorCount > errorCountMax)
                 {

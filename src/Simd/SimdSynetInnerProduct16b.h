@@ -175,7 +175,7 @@ namespace Simd
             {
                 size_t F, microM, microN, microK;
                 size_t macroM, macroN, macroK;
-                size_t aM, aN, aK, eA, eB, eC, cN;
+                size_t aM, aN, aK, eA, eB, eC, bK, cN;
             };
 
             typedef void(*PrepPtr)(const uint8_t* src, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst);

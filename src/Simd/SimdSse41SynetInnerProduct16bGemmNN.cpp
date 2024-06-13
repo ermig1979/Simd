@@ -109,7 +109,7 @@ namespace Simd
         static void InnerProduct16bGemmNN_ConvertBn(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
         {
             const float* src = (float*)src8;
-            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0;
+            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0, gap = (a.bK - Kh) * a.F;
             for (; j < Nf; j += a.F)
             {
                 size_t k = 0;
@@ -133,6 +133,7 @@ namespace Simd
                         }
                     }
                 }
+                dst += gap;
             }
             for (; j < N; j += a.F)
             {
@@ -165,7 +166,7 @@ namespace Simd
         static void InnerProduct16bGemmNN_ConvertBt(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
         {
             const float* src = (float*)src8;
-            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0;
+            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0, gap = (a.bK - Kh) * a.F;
             for (; j < Nf; j += a.F)
             {
                 size_t k = 0;
@@ -189,6 +190,7 @@ namespace Simd
                         }
                     }
                 }
+                dst += gap;
             }
             for (; j < N; j += a.F)
             {
@@ -221,7 +223,7 @@ namespace Simd
         static void InnerProduct16bGemmNN_ReorderBn(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
-            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0;
+            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0, gap = (a.bK - Kh) * a.F;
             for (; j < Nf; j += a.F)
             {
                 size_t k = 0;
@@ -245,6 +247,7 @@ namespace Simd
                         }
                     }
                 }
+                dst += gap;
             }
             for (; j < N; j += a.F)
             {
@@ -278,7 +281,7 @@ namespace Simd
         static void InnerProduct16bGemmNN_ReorderBt(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
-            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0;
+            size_t Kl = AlignLo(K, a.microK), Kh = AlignHi(K, a.microK), Nf = AlignLo(N, a.F), j = 0, gap = (a.bK - Kh) * a.F;
             for (; j < Nf; j += a.F)
             {
                 size_t k = 0;
@@ -302,6 +305,7 @@ namespace Simd
                         }
                     }
                 }
+                dst += gap;
             }
             for (; j < N; j += a.F)
             {
@@ -329,7 +333,7 @@ namespace Simd
         {
             __m128 c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, a0, b00, b01, b10, b11, m = _mm_castsi128_ps(Bf16::MASK);
             size_t dC = a.cN, dA = a.aK, dD = p.N * a.eC;
-            const uint16_t* B1 = B0 + a.aK * F;
+            const uint16_t* B1 = B0 + a.bK * F;
             const uint16_t* A1 = A0 + 1 * dA;
             const uint16_t* A2 = A0 + 2 * dA;
             const uint16_t* A3 = A0 + 3 * dA;
@@ -528,7 +532,7 @@ namespace Simd
         {
             size_t m1 = M, m = 5;
             size_t mm = AlignLoAny(m1, m), t = m1 - mm;
-            size_t dA = a.aK, dB = a.aK * DF, dC = a.cN, dD = p.N * a.eC;
+            size_t dA = a.aK, dB = a.bK * DF, dC = a.cN, dD = p.N * a.eC;
             GemmNN_2xM_Ptr gemm_2xM = post ? GetGemmNN_2xM<term>(m) : GetGemmNN_2xM<Term16bInterim>(m);
             GemmNN_2xM_Ptr gemm_2xT = post ? GetGemmNN_2xM<term>(t) : GetGemmNN_2xM<Term16bInterim>(t);
 
@@ -554,7 +558,7 @@ namespace Simd
         SynetInnerProduct16bGemmNN::SynetInnerProduct16bGemmNN(const InnerProductParam16b& p)
             : Base::SynetInnerProduct16bGemmNN(p)
         {
-            SetAlgParam(F, F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(F, 5, F * 2, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_sizeA)
             {
                 if (p.typeA == SimdTensorData16b)

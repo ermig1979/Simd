@@ -74,7 +74,7 @@ namespace Simd
         {
             int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
             int strideA = dA * 2, strideB = 64, strideC = dC * 4;
-            const uint16_t *A1 = A0 + dA * 16, *B1 = B0 + a.aK * 16;
+            const uint16_t *A1 = A0 + dA * 16, *B1 = B0 + a.bK * 16;
             float* C1 = C0 + 16 * dC;
             if (loadConf)
             {
@@ -206,7 +206,7 @@ namespace Simd
         {
             int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
             int strideA = dA * 2, strideB = 64, strideC = dC * 4;
-            const uint16_t* B1 = B0 + a.aK * 16;
+            const uint16_t* B1 = B0 + a.bK * 16;
 
             TileConf conf;
             conf.rows[0] = uint8_t(M);
@@ -308,7 +308,7 @@ namespace Simd
             size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C, int post, const float* bias, uint8_t* dst)
         {
             size_t m = 32, m1 = M, mm = AlignLo(m1, m), t = m1 - mm;
-            size_t dA = a.aK, dB = a.aK * DF, dC = a.cN, dD = p.N * a.eC;
+            size_t dA = a.aK, dB = a.bK * DF, dC = a.cN, dD = p.N * a.eC;
             GemmNN_Ptr tail_2 = t > 16 ? InnerProduct16bGemmNN_2x2<term, true> : InnerProduct16bGemmNN_1x2<term>;
             GemmNN_Ptr tail_1 = t > 16 ? InnerProduct16bGemmNN_2x1<term> : InnerProduct16bGemmNN_1x1<term>;
             __m512 _bias[2];

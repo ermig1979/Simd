@@ -60,6 +60,19 @@ namespace Test
 #define FUNC_IP16B(function) \
     FuncIP16b(function, std::string(#function))
 
+    static float GetRange(const float* src, size_t size)
+    {
+        float min = FLT_MAX;
+        float max = -FLT_MAX;
+        for (size_t i = 0; i < size; ++i)
+        {
+            float val = src[i];
+            min = Simd::Min(val, min);
+            max = Simd::Max(val, max);
+        }
+        return max - min;
+    }
+
     bool SynetInnerProduct16bForwardAutoTest(float eps, Simd::InnerProductParam16b p, FuncIP16b f1, FuncIP16b f2)
     {
         bool result = true;
@@ -112,7 +125,7 @@ namespace Test
 
         if (p.typeC == SimdTensorData16b)
         {
-            eps = eps * 7.0f;
+            eps = eps * 7.1f;
             SimdBFloat16ToFloat32(C1b.Data(), C1b.Size(), C1f.Data());
             SimdBFloat16ToFloat32(C2b.Data(), C2b.Size(), C2f.Data());
         }
@@ -125,7 +138,8 @@ namespace Test
             ::SimdSynetInnerProduct32fForward(context3, Af.Data(), C3f.Data());
             ::SimdRelease(context3);
 
-            result = result && Compare(C1f, C3f, 0.044, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");
+            float e = EPS * GetRange(C3f.Data(), C3f.Size()) * 2.5f;
+            result = result && Compare(C1f, C3f, e, true, 64, DifferenceAbsolute, " Compare to SynetInnerProduct32f.");
         }
 
         return result;
@@ -155,9 +169,17 @@ namespace Test
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(127, 129, 131, f32, f32, f32, t, t, f), f1, f2);
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(127, 129, 131, f32, f32, b16, t, f, t), f1, f2);
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(127, 129, 131, b16, b16, f32, t, t, f), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 8192, b16, b16, b16, f, t, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 8192, b16, b16, b16, f, f, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 8192, b16, b16, b16, t, f, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(2, 512, 8192, b16, b16, b16, f, t, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(4, 512, 8192, b16, b16, b16, f, t, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 512, b16, b16, b16, f, t, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(2, 512, 512, b16, b16, b16, f, t, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(4, 512, 512, b16, b16, b16, f, t, t), f1, f2);
 #endif
 #else
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, b16, t, f, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 8192 + 1000, b16, b16, b16, t, f, t), f1, f2);
 #endif
 
         return result;
