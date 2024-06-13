@@ -24,7 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynetInnerProduct16b.h"
-#include "Simd/SimdSynetInnerProduct16bCommon.h"
+#include "Simd/SimdSynetConvolution16bCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdAmxBf16.h"
@@ -69,11 +69,11 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool loadConf> void InnerProduct16bGemmNN_2x2(const uint16_t* A0, 
-            const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0)
+        template<Term16bType term, bool loadConf> void InnerProduct16bGemmNN_2x2(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
+            size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0, int post, __m512* bias, uint8_t* dst)
         {
-            size_t dC = a.cN, dA = a.aK;
-            int strideA = (int)dA * 2, strideB = 64, strideC = (int)dC * 4;
+            int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
+            int strideA = dA * 2, strideB = 64, strideC = dC * 4;
             const uint16_t *A1 = A0 + dA * 16, *B1 = B0 + a.aK * 16;
             float* C1 = C0 + 16 * dC;
             if (loadConf)
@@ -126,16 +126,29 @@ namespace Simd
             _tile_stored(1, C0 + F, strideC);
             _tile_stored(2, C1 + 0, strideC);
             _tile_stored(3, C1 + F, strideC);
-            TileMoveToMemory(C0 + 0, dC);
-            TileMoveToMemory(C0 + F, dC);
-            TileMoveToMemory(C1 + 0, dC);
-            TileMoveToMemory(C1 + F, dC);
+            if (post)
+            {
+                __mmask16 tail = TailMask16(N - F);
+                size_t M8 = AlignLo(M, 8), i = 0;
+                for (; i < M8; i += 8)
+                    Apply2x8<term, SimdConvolutionActivationIdentity>(dst + i * dD, dD, C0 + i * dC, dC, bias, NULL, tail);
+                for (; i < M; ++i)
+                    Apply2<term, SimdConvolutionActivationIdentity>(dst + i * dD, C0 + i * dC, bias, NULL, tail);
+            }
+            else
+            {
+                TileMoveToMemory(C0 + 0, dC);
+                TileMoveToMemory(C0 + F, dC);
+                TileMoveToMemory(C1 + 0, dC);
+                TileMoveToMemory(C1 + F, dC);
+            }
         }
 
-        void InnerProduct16bGemmNN_2x1(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0)
+        template<Term16bType term> void InnerProduct16bGemmNN_2x1(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
+            size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0, int post, __m512* bias, uint8_t* dst)
         {
-            size_t dC = a.cN, dA = a.aK;
-            int strideA = (int)dA * 2, strideB = 64, strideC = (int)dC * 4;
+            int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
+            int strideA = dA * 2, strideB = 64, strideC = dC * 4;
             const uint16_t* A1 = A0 + dA * 16;
             float* C1 = C0 + 16 * dC;
 
@@ -172,14 +185,27 @@ namespace Simd
             }
             _tile_stored(0, C0 + 0, strideC);
             _tile_stored(2, C1 + 0, strideC);
-            TileMoveToMemory(C0 + 0, dC);
-            TileMoveToMemory(C1 + 0, dC);
+            if (post)
+            {
+                __mmask16 tail = TailMask16(N);
+                size_t M8 = AlignLo(M, 8), i = 0;
+                for (; i < M8; i += 8)
+                    Apply1x8<term, SimdConvolutionActivationIdentity>(dst + i * dD, dD, C0 + i * dC, dC, bias, NULL, tail);
+                for (; i < M; ++i)
+                    Apply1<term, SimdConvolutionActivationIdentity>(dst + i * dD, C0 + i * dC, bias, NULL, tail);
+            }
+            else
+            {
+                TileMoveToMemory(C0 + 0, dC);
+                TileMoveToMemory(C1 + 0, dC);
+            }
         }
 
-        void InnerProduct16bGemmNN_1x2(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0)
+        template<Term16bType term> void InnerProduct16bGemmNN_1x2(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
+            size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0, int post, __m512* bias, uint8_t* dst)
         {
-            size_t dC = a.cN, dA = a.aK;
-            int strideA = (int)dA * 2, strideB = 64, strideC = (int)dC * 4;
+            int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
+            int strideA = dA * 2, strideB = 64, strideC = dC * 4;
             const uint16_t* B1 = B0 + a.aK * 16;
 
             TileConf conf;
@@ -215,14 +241,27 @@ namespace Simd
             }
             _tile_stored(0, C0 + 0, strideC);
             _tile_stored(1, C0 + F, strideC);
-            TileMoveToMemory(C0 + 0, dC);
-            TileMoveToMemory(C0 + F, dC);
+            if (post)
+            {
+                __mmask16 tail = TailMask16(N - F);
+                size_t M8 = AlignLo(M, 8), i = 0;
+                for (; i < M8; i += 8)
+                    Apply2x8<term, SimdConvolutionActivationIdentity>(dst + i * dD, dD, C0 + i * dC, dC, bias, NULL, tail);
+                for (; i < M; ++i)
+                    Apply2<term, SimdConvolutionActivationIdentity>(dst + i * dD, C0 + i * dC, bias, NULL, tail);
+            }
+            else
+            {
+                TileMoveToMemory(C0 + 0, dC);
+                TileMoveToMemory(C0 + F, dC);
+            }
         }
 
-        void InnerProduct16bGemmNN_1x1(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0)
+        template<Term16bType term> void InnerProduct16bGemmNN_1x1(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
+            size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0, int post, __m512* bias, uint8_t* dst)
         {
-            size_t dC = a.cN, dA = a.aK;
-            int strideA = (int)dA * 2, strideB = 64, strideC = (int)dC * 4;
+            int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
+            int strideA = dA * 2, strideB = 64, strideC = dC * 4;
 
             TileConf conf;
             conf.rows[0] = uint8_t(M);
@@ -248,38 +287,54 @@ namespace Simd
                 _tile_dpbf16ps(0, 4, 6);
             }
             _tile_stored(0, C0 + 0, strideC);
-            TileMoveToMemory(C0 + 0, dC);
+            if (post)
+            {
+                __mmask16 tail = TailMask16(N);
+                size_t M8 = AlignLo(M, 8), i = 0;
+                for (; i < M8; i += 8)
+                    Apply1x8<term, SimdConvolutionActivationIdentity>(dst + i * dD, dD, C0 + i * dC, dC, bias, NULL, tail);
+                for (; i < M; ++i)
+                    Apply1<term, SimdConvolutionActivationIdentity>(dst + i * dD, C0 + i * dC, bias, NULL, tail);
+            }
+            else
+            {
+                TileMoveToMemory(C0 + 0, dC);
+            }
         }
 
-        typedef void(*GemmNN_Ptr)(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C);
+        typedef void(*GemmNN_Ptr)(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C, int post, __m512* bias, uint8_t* dst);
 
-        static void InnerProduct16bGemmNN_Gemm2(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C)
+        template<Term16bType term> void InnerProduct16bGemmNN_Gemm2(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a,
+            size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C, int post, const float* bias, uint8_t* dst)
         {
             size_t m = 32, m1 = M, mm = AlignLo(m1, m), t = m1 - mm;
-            size_t dA = a.aK, dB = a.aK * DF, dC = a.cN;
-            GemmNN_Ptr tail_2 = t > 16 ? InnerProduct16bGemmNN_2x2<true> : InnerProduct16bGemmNN_1x2;
-            GemmNN_Ptr tail_1 = t > 16 ? InnerProduct16bGemmNN_2x1 : InnerProduct16bGemmNN_1x1;
-
+            size_t dA = a.aK, dB = a.aK * DF, dC = a.cN, dD = p.N * a.eC;
+            GemmNN_Ptr tail_2 = t > 16 ? InnerProduct16bGemmNN_2x2<term, true> : InnerProduct16bGemmNN_1x2<term>;
+            GemmNN_Ptr tail_1 = t > 16 ? InnerProduct16bGemmNN_2x1<term> : InnerProduct16bGemmNN_1x1<term>;
+            __m512 _bias[2];
             for (size_t j = 0; j < N; j += DF)
             {
+                _bias[0] = _mm512_loadu_ps(bias + j + 0);
+                _bias[1] = _mm512_loadu_ps(bias + j + F);
                 size_t dN = Simd::Min(DF, N - j);
                 size_t i = 0;
                 if (dN > F)
                 {
                     for (; i < mm; i += m)
-                        InnerProduct16bGemmNN_2x2<true>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC);
+                        InnerProduct16bGemmNN_2x2<term, true>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                     if (t)
-                        tail_2(A + i * dA, p, a, t, dN, K, update, B, C + i * dC);
+                        tail_2(A + i * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                 }
                 else
                 {
                     for (; i < mm; i += m)
-                        InnerProduct16bGemmNN_2x1(A + i * dA, p, a, m, dN, K, update, B, C + i * dC);
+                        InnerProduct16bGemmNN_2x1<term>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                     if (t)
-                        tail_1(A + i * dA, p, a, t, dN, K, update, B, C + i * dC);
+                        tail_1(A + i * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                 }
                 B += dB;
                 C += dN;
+                dst += DF * a.eC;
             }
         }
 
@@ -294,7 +349,10 @@ namespace Simd
                 if (p.typeA == SimdTensorData32f)
                     _prepA = InnerProduct16bGemmNN_ConvertA;
             }
-            _gemm = InnerProduct16bGemmNN_Gemm2;
+            if (p.typeC == SimdTensorData16b)
+                _gemm = InnerProduct16bGemmNN_Gemm2<Term16bLast16b>;
+            else
+                _gemm = InnerProduct16bGemmNN_Gemm2<Term16bLast32f>;
         }
     }
 #endif

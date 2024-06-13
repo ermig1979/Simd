@@ -198,7 +198,7 @@
 #define SIMD_AVX512VNNI_ENABLE
 #endif
 
-#if !defined(SIMD_AMX_DISABLE) && defined(__AMX_TILE__) && defined(__AMX_INT8__) && defined(__AMX_BF16__) && defined(__AVX512BF16__)
+#if !defined(SIMD_AMXBF16_DISABLE) && defined(__AMX_TILE__) && defined(__AMX_INT8__) && defined(__AMX_BF16__) && defined(__AVX512BF16__)
 #define SIMD_AMXBF16_ENABLE
 #endif
 #endif

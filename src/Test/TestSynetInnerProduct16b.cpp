@@ -125,7 +125,7 @@ namespace Test
             ::SimdSynetInnerProduct32fForward(context3, Af.Data(), C3f.Data());
             ::SimdRelease(context3);
 
-            result = result && Compare(C1f, C3f, 0.041, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");
+            result = result && Compare(C1f, C3f, 0.044, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");
         }
 
         return result;

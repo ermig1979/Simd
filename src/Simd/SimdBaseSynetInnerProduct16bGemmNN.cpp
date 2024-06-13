@@ -96,7 +96,7 @@ namespace Simd
             , _prepA(0)
             , _prepB(0)
             , _gemm(0)
-            , _post(0)
+            //, _post(0)
         {
             if (p.typeB == SimdTensorData32f || p.constB)
             {
@@ -178,9 +178,8 @@ namespace Simd
                             _prepA(A + i * p.K * a.eA, p, a, macroM, p.K, bufA + offsA);
                         if (i == 0 && _prepB && !p.constB)
                             _prepB(B + (k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
-                        _gemm(bufA + offsA + k, p, a, macroM, macroN, macroK, (int)k, bufB + offsB, bufC + offsC);
-                        if (k + macroK == p.K && _post)
-                            _post(bufC + offsC, p, a, macroM, macroN, _bias.data + j, C + (i * p.N + j) * a.eC);
+                        _gemm(bufA + offsA + k, p, a, macroM, macroN, macroK, (int)k, bufB + offsB, bufC + offsC, 
+                            k + macroK == p.K && (_sizeC || p.bias), _bias.data + j, C + (i * p.N + j) * a.eC);
                     }
                 }
             }

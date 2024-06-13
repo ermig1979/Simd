@@ -24,7 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynetInnerProduct16b.h"
-#include "Simd/SimdSynetInnerProduct16bCommon.h"
+#include "Simd/SimdSynetConvolution16bCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdAvx2.h"
@@ -330,11 +330,11 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<int M> void InnerProduct16bGemmNN_2xM(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
-            size_t N, size_t K, int update, const uint16_t* B0, float* C)
+        template<Term16bType term, int M> void InnerProduct16bGemmNN_2xM(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a,
+            size_t N, size_t K, int update, const uint16_t* B0, float* C, const __m256* bias, uint8_t* dst)
         {
             __m256 c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, a0, b00, b01, b10, b11, m = _mm256_castsi256_ps(Bf16::MASK);
-            size_t dC = a.cN, dA = a.aK;
+            size_t dC = a.cN, dA = a.aK, dD = p.N * a.eC;
             const uint16_t* B1 = B0 + a.aK * F;
             const uint16_t* A1 = A0 + 1 * dA;
             const uint16_t* A2 = A0 + 2 * dA;
@@ -416,20 +416,20 @@ namespace Simd
                 }
                 if (N == DF)
                 {
-                    if (M > 0) Save2(C, c00, c01), C += dC;
-                    if (M > 1) Save2(C, c10, c11), C += dC;
-                    if (M > 2) Save2(C, c20, c21), C += dC;
-                    if (M > 3) Save2(C, c30, c31), C += dC;
-                    if (M > 4) Save2(C, c40, c41), C += dC;
+                    if (M > 0) Save2<term>(dst, C, c00, c01, bias), C += dC, dst += dD;
+                    if (M > 1) Save2<term>(dst, C, c10, c11, bias), C += dC, dst += dD;
+                    if (M > 2) Save2<term>(dst, C, c20, c21, bias), C += dC, dst += dD;
+                    if (M > 3) Save2<term>(dst, C, c30, c31, bias), C += dC, dst += dD;
+                    if (M > 4) Save2<term>(dst, C, c40, c41, bias), C += dC, dst += dD;
                 }
                 else
                 {
                     size_t tail = N - F;
-                    if (M > 0) Save2(C, c00, c01, tail), C += dC;
-                    if (M > 1) Save2(C, c10, c11, tail), C += dC;
-                    if (M > 2) Save2(C, c20, c21, tail), C += dC;
-                    if (M > 3) Save2(C, c30, c31, tail), C += dC;
-                    if (M > 4) Save2(C, c40, c41, tail), C += dC;
+                    if (M > 0) Save2<term>(dst, C, c00, c01, bias, tail), C += dC, dst += dD;
+                    if (M > 1) Save2<term>(dst, C, c10, c11, bias, tail), C += dC, dst += dD;
+                    if (M > 2) Save2<term>(dst, C, c20, c21, bias, tail), C += dC, dst += dD;
+                    if (M > 3) Save2<term>(dst, C, c30, c31, bias, tail), C += dC, dst += dD;
+                    if (M > 4) Save2<term>(dst, C, c40, c41, bias, tail), C += dC, dst += dD;
                 }
             }
             else
@@ -494,97 +494,64 @@ namespace Simd
                 }
                 if (N == F)
                 {
-                    if (M > 0) Save1(C, c00), C += dC;
-                    if (M > 1) Save1(C, c10), C += dC;
-                    if (M > 2) Save1(C, c20), C += dC;
-                    if (M > 3) Save1(C, c30), C += dC;
-                    if (M > 4) Save1(C, c40), C += dC;
+                    if (M > 0) Save1<term>(dst, C, c00, bias), C += dC, dst += dD;
+                    if (M > 1) Save1<term>(dst, C, c10, bias), C += dC, dst += dD;
+                    if (M > 2) Save1<term>(dst, C, c20, bias), C += dC, dst += dD;
+                    if (M > 3) Save1<term>(dst, C, c30, bias), C += dC, dst += dD;
+                    if (M > 4) Save1<term>(dst, C, c40, bias), C += dC, dst += dD;
                 }
                 else
                 {
                     size_t tail = N;
-                    if (M > 0) Save1(C, c00, tail), C += dC;
-                    if (M > 1) Save1(C, c10, tail), C += dC;
-                    if (M > 2) Save1(C, c20, tail), C += dC;
-                    if (M > 3) Save1(C, c30, tail), C += dC;
-                    if (M > 4) Save1(C, c40, tail), C += dC;
+                    if (M > 0) Save1<term>(dst, C, c00, bias, tail), C += dC, dst += dD;
+                    if (M > 1) Save1<term>(dst, C, c10, bias, tail), C += dC, dst += dD;
+                    if (M > 2) Save1<term>(dst, C, c20, bias, tail), C += dC, dst += dD;
+                    if (M > 3) Save1<term>(dst, C, c30, bias, tail), C += dC, dst += dD;
+                    if (M > 4) Save1<term>(dst, C, c40, bias, tail), C += dC, dst += dD;
                 }
             }
         }
 
-        typedef void(*GemmNN_2xM_Ptr)(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, int update, const uint16_t* B0, float* C);
+        typedef void(*GemmNN_2xM_Ptr)(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, int update, const uint16_t* B0, float* C, const __m256* bias, uint8_t* dst);
 
-        static GemmNN_2xM_Ptr GetInnerProduct16bGemmNN_2xM(size_t M)
+        template<Term16bType term> GemmNN_2xM_Ptr GetGemmNN_2xM(size_t M)
         {
             switch (M)
             {
             case 0: return NULL;
-            case 1: return InnerProduct16bGemmNN_2xM<1>;
-            case 2: return InnerProduct16bGemmNN_2xM<2>;
-            case 3: return InnerProduct16bGemmNN_2xM<3>;
-            case 4: return InnerProduct16bGemmNN_2xM<4>;
-            case 5: return InnerProduct16bGemmNN_2xM<5>;
+            case 1: return InnerProduct16bGemmNN_2xM<term, 1>;
+            case 2: return InnerProduct16bGemmNN_2xM<term, 2>;
+            case 3: return InnerProduct16bGemmNN_2xM<term, 3>;
+            case 4: return InnerProduct16bGemmNN_2xM<term, 4>;
+            case 5: return InnerProduct16bGemmNN_2xM<term, 5>;
             }
             assert(0);
             return NULL;
         }
 
-        static void InnerProduct16bGemmNN_Gemm2(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C)
+        template<Term16bType term> void InnerProduct16bGemmNN_Gemm2(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a,
+            size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C, int post, const float* bias, uint8_t* dst)
         {
             size_t m1 = M, m = 5;
             size_t mm = AlignLoAny(m1, m), t = m1 - mm;
-            size_t dA = a.aK, dB = a.aK * DF, dC = a.cN;
-            GemmNN_2xM_Ptr gemm_2xM = GetInnerProduct16bGemmNN_2xM(m);
-            GemmNN_2xM_Ptr gemm_2xT = GetInnerProduct16bGemmNN_2xM(t);
+            size_t dA = a.aK, dB = a.aK * DF, dC = a.cN, dD = p.N * a.eC;
+            GemmNN_2xM_Ptr gemm_2xM = post ? GetGemmNN_2xM<term>(m) : GetGemmNN_2xM<Term16bInterim>(m);
+            GemmNN_2xM_Ptr gemm_2xT = post ? GetGemmNN_2xM<term>(t) : GetGemmNN_2xM<Term16bInterim>(t);
+
+            __m256 _bias[2];
             for (size_t j = 0; j < N; j += DF)
             {
                 size_t dN = Simd::Min(DF, N - j);
+                _bias[0] = _mm256_loadu_ps(bias + j + 0);
+                _bias[1] = _mm256_loadu_ps(bias + j + F);
                 size_t i = 0;
                 for (; i < mm; i += m)
-                    gemm_2xM(A + i * dA, p, a, dN, K, update, B, C + i * dC);
+                    gemm_2xM(A + i * dA, p, a, dN, K, update, B, C + i * dC, _bias, dst + i * dD);
                 for (; i < m1; i += t)
-                    gemm_2xT(A + i * dA, p, a, dN, K, update, B, C + i * dC);
+                    gemm_2xT(A + i * dA, p, a, dN, K, update, B, C + i * dC, _bias, dst + i * dD);
                 B += dB;
                 C += dN;
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        void InnerProduct16bGemmNN_Post32f(const float* src, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, const float* bias, uint8_t* dst8)
-        {
-            float* dst = (float*)dst8;
-            size_t NF = Simd::AlignLo(N, F);
-            for (size_t i = 0; i < M; ++i)
-            {
-                size_t j = 0;
-                for (; j < NF; j += F)
-                    _mm256_storeu_ps(dst + j, _mm256_add_ps(_mm256_loadu_ps(src + j), _mm256_loadu_ps(bias + j)));
-                for (; j < N; ++j)
-                    dst[j] = src[j] + bias[j];
-                src += a.cN;
-                dst += p.N;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        void InnerProduct16bGemmNN_Post16b(const float* src, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, const float* bias, uint8_t* dst8)
-        {
-            uint16_t* dst = (uint16_t*)dst8;
-            size_t NF = Simd::AlignLo(N, F);
-            for (size_t i = 0; i < M; ++i)
-            {
-                size_t j = 0;
-                for (; j < NF; j += F)
-                {
-                    __m256i d = Avx2::Float32ToBFloat16((_mm256_add_ps(_mm256_loadu_ps(src + j), _mm256_loadu_ps(bias + j))));
-                    _mm_storeu_si128((__m128i*)(dst + j), _mm256_castsi256_si128(_mm256_permute4x64_epi64(_mm256_packus_epi32(d, Avx2::K_ZERO), 0xD8)));
-                }
-                for (; j < N; ++j)
-                    dst[j] = Base::Float32ToBFloat16(src[j] + bias[j]);
-                src += a.cN;
-                dst += p.N;
+                dst += DF * a.eC;
             }
         }
 
@@ -615,14 +582,10 @@ namespace Simd
                 else
                     _prepB = InnerProduct16bGemmNN_ReorderBn;
             }
-            _gemm = InnerProduct16bGemmNN_Gemm2;
-            if (_sizeC || p.bias)
-            {
-                if (p.typeC == SimdTensorData16b)
-                    _post = InnerProduct16bGemmNN_Post16b;
-                else
-                    _post = InnerProduct16bGemmNN_Post32f;
-            }
+            if (p.typeC == SimdTensorData16b)
+                _gemm = InnerProduct16bGemmNN_Gemm2<Term16bLast16b>;
+            else
+                _gemm = InnerProduct16bGemmNN_Gemm2<Term16bLast32f>;
         }
     }
 #endif

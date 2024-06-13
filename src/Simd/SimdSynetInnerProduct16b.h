@@ -179,8 +179,7 @@ namespace Simd
             };
 
             typedef void(*PrepPtr)(const uint8_t* src, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst);
-            typedef void(*GemmPtr)(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C);
-            typedef void(*PostPtr)(const float* src, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, const float* bias, uint8_t* dst);
+            typedef void(*GemmPtr)(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C, int post, const float* bias, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
@@ -188,7 +187,6 @@ namespace Simd
             AlgParam _alg;
             PrepPtr _prepA, _prepB;
             GemmPtr _gemm;
-            PostPtr _post;
         };
 
         //-------------------------------------------------------------------------------------------------
