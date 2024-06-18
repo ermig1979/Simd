@@ -341,7 +341,6 @@ namespace Simd
             conf.rows[4] = uint8_t(dstS);
             conf.rows[6] = 16;
             conf.colsb[0] = 64;
-            conf.colsb[1] = 64;
             conf.colsb[4] = 64;
             conf.colsb[6] = 64;
             _tile_loadconfig(&conf);

@@ -79,7 +79,6 @@ namespace Simd
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.K / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
             a.elem = _elemD;
             a.bufS = a.batch * a.srcC * a.srcH * a.srcW;
-            a.bufP = a.batch * a.microC * a.srcH * a.srcW;
             a.bufD = a.batch * a.macroD * a.srcH * a.srcW;
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
