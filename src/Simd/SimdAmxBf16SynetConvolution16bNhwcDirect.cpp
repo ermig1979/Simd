@@ -82,7 +82,7 @@ namespace Simd
                     src += p.srcC;
                     dst += sD;
                 }
-                if (p.padX)
+                if (p.padW)
                 {
                     for (size_t s = 0; s < p.padW; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
@@ -140,7 +140,7 @@ namespace Simd
                     src += p.srcC;
                     dst += sD;
                 }
-                if (p.padX)
+                if (p.padW)
                 {
                     for (size_t s = 0; s < p.padW; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
