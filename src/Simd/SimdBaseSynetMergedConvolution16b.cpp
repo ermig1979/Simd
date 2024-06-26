@@ -643,6 +643,8 @@ namespace Simd
                             _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
                         _depthwise((uint8_t*)buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
                             _bias[1].data + c, _params[1].data + c * a.dp[1], (uint8_t*)buf2);
+                        if (buf3 == NULL)
+                            buf3 = (float*)dst;
                         if (c + maC == C)
                             _output[0](buf2, c2, a, maC, yBeg2, yEnd2, (maC != C) ? 0 : 1, 
                                 _weightO.data + c * a.dw[2], _bias[2].data, _params[2].data, buf3, dst);
@@ -685,7 +687,7 @@ namespace Simd
                     size += c.kernelY * c.kernelX * c.srcC * 4;
             }
             size_t count = size / (L3 / 2) + 1;
-            a.maC = AlignHi(AlignHi(c0.srcC / count, 2 * a.miC), a.miK);
+            a.maC = AlignHi(AlignHi(c0.dstC / count, 2 * a.miC), a.miK);
             for (size_t yStep = c1.dstH; yStep >= 1; yStep--)
             {
                 a.yStep[2] = Simd::Max<size_t>(1, yStep);
@@ -847,6 +849,8 @@ namespace Simd
                         size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c0.srcH);
                         _depthwise(src + c * a.elem[0], c0, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[0], _bias[0].data + c,
                             _params[0].data + c * a.dp[0], (uint8_t*)buf2);
+                        if (buf3 == NULL)
+                            buf3 = (float*)dst;
                         if (c + maC == C)
                             _output[0](buf2, c1, a, maC, yBeg2, yEnd2, maC != C ? 0 : 1, _weightO.data + c * a.dw[1],
                                 _bias[1].data, _params[1].data, buf3, dst);
@@ -887,7 +891,7 @@ namespace Simd
                     size += c.kernelY * c.kernelX * c.srcC * 4;
             }
             size_t count = size / (L3 / 2) + 1;
-            a.maC = AlignHi(AlignHi(c0.srcC / count, 2 * a.miC), a.miK);
+            a.maC = AlignHi(AlignHi(c0.dstC / count, 2 * a.miC), a.miK);
 
             for (size_t yStep = c0.dstH; yStep >= 1; yStep--)
             {
