@@ -26,6 +26,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdSet.h"
 
 namespace Simd
 {
@@ -63,7 +64,7 @@ namespace Simd
             size_t bodyX2 = AlignLo(bodyX - noseX, 2) + noseX;
             size_t bodyX4 = AlignLo(bodyX - noseX, 4) + noseX;
             size_t bodyX8 = AlignLo(bodyX - noseX, 8) + noseX;
-            size_t dstCF = AlignLo(dstC, F);
+            size_t dstCF = AlignLo(dstC, F), dstCe = a.bufH[2] ? AlignHi(dstC, DF) : dstC;
 
             __m512 _params[2], _bias[1];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -71,7 +72,7 @@ namespace Simd
                 type == SimdConvolutionActivationHswish ||
                 type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm512_set1_ps(params[1]);
-            for (size_t c = 0; c < dstC; c += F)
+            for (size_t c = 0; c < dstCe; c += F)
             {
                 _bias[0] = _mm512_loadu_ps(bias + c);
                 if (type == ::SimdConvolutionActivationPrelu)
@@ -79,6 +80,7 @@ namespace Simd
                 if (c == dstCF)
                 {
                     __mmask16 tail = TailMask16(dstC - c);
+                    __mmask32 gapMask = a.bufH[2] ? TailMask32(dstCe - dstC) : 0;
                     for (size_t dy = yBeg; dy < yEnd; ++dy)
                     {
                         uint8_t* pd = dst + (dy - dy0) * dY;
@@ -103,6 +105,8 @@ namespace Simd
                                 }
                             }
                             Save1<term, type>(pd, NULL, sum, _bias, _params, tail);
+                            if (gapMask)
+                                SetZero((uint16_t*)pd + dstC - dstCF, gapMask);
                         }
                     }
                     return;
@@ -514,6 +518,7 @@ namespace Simd
             size_t xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
             size_t xMainEnd2 = AlignLo(xMainEnd - padX, 2) * (p.strideX == 1 ? 1 : 0) + padX;
             size_t xMainEnd4 = AlignLo(xMainEnd - padX, 4) * (p.strideX == 1 ? 1 : 0) + padX;
+            size_t dstCe = a.bufH[2] ? AlignHi(dstC, DF) : dstC;
 
             __m512 _params[2], _bias[1];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -521,7 +526,7 @@ namespace Simd
                 type == SimdConvolutionActivationHswish ||
                 type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm512_set1_ps(params[1]);
-            for (size_t c = 0; c < dstC; c += F)
+            for (size_t c = 0; c < dstCe; c += F)
             {
                 __mmask16 tail = TailMask16(dstC - c);
                 __m512 _weight[9];
@@ -532,6 +537,17 @@ namespace Simd
                     _params[0] = _mm512_loadu_ps(params + c);
 
                 size_t dy = yBeg;
+                if (c == dstC)
+                {
+                    __mmask32 gapMask = a.bufH[2] ? TailMask32(dstCe - dstC) : 0;
+                    for (; dy < yEnd; ++dy)
+                    {
+                        uint8_t* pDst = dst + (dy - dy0) * dY;
+                        for (size_t dx = 0; dx < p.dstW; dx++, pDst += dX)
+                            SetZero((uint16_t*)pDst, gapMask);
+                    }
+                    return;
+                }
                 if (yBeg == 0 && padY)
                 {
                     size_t sy = 0, dx = 0;
