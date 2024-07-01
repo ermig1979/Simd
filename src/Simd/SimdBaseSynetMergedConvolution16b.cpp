@@ -643,14 +643,13 @@ namespace Simd
                             _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
                         _depthwise((uint8_t*)buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
                             _bias[1].data + c, _params[1].data + c * a.dp[1], (uint8_t*)buf2);
-                        if (buf3 == NULL)
-                            buf3 = (float*)dst;
+                        float *buf3p = buf3 == NULL ? (float*)dst : buf3;
                         if (c + maC == C)
                             _output[0](buf2, c2, a, maC, yBeg2, yEnd2, (maC != C) ? 0 : 1, 
-                                _weightO.data + c * a.dw[2], _bias[2].data, _params[2].data, buf3, dst);
+                                _weightO.data + c * a.dw[2], _bias[2].data, _params[2].data, buf3p, dst);
                         else
                             _output[1](buf2, c2, a, maC, yBeg2, yEnd2, (c != 0) ? 0 : 1, 
-                                _weightO.data + c * a.dw[2], _bias[2].data, _params[2].data, buf3, dst);
+                                _weightO.data + c * a.dw[2], _bias[2].data, _params[2].data, buf3p, dst);
                         yBeg2 = yEnd2;
                         yBeg1 = yEnd1;
                         yBeg0 = yEnd0;
@@ -849,14 +848,13 @@ namespace Simd
                         size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c0.srcH);
                         _depthwise(src + c * a.elem[0], c0, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[0], _bias[0].data + c,
                             _params[0].data + c * a.dp[0], (uint8_t*)buf2);
-                        if (buf3 == NULL)
-                            buf3 = (float*)dst;
+                        float* buf3p = buf3 == NULL ? (float*)dst : buf3;
                         if (c + maC == C)
                             _output[0](buf2, c1, a, maC, yBeg2, yEnd2, maC != C ? 0 : 1, _weightO.data + c * a.dw[1],
-                                _bias[1].data, _params[1].data, buf3, dst);
+                                _bias[1].data, _params[1].data, buf3p, dst);
                         else
                             _output[1](buf2, c1, a, maC, yBeg2, yEnd2, c != 0 ? 0 : 1, _weightO.data + c * a.dw[1],
-                                _bias[1].data, _params[1].data, buf3, dst);
+                                _bias[1].data, _params[1].data, buf3p, dst);
                         yBeg2 = yEnd2;
                         yBeg1 = yEnd1;
                     }
