@@ -139,6 +139,8 @@ namespace Simd
             _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? (a.macroN == a.aN ? a.macroM : a.aM) * a.aK : 0;
             _sizeB = p.constB ? 0 : a.macroK * a.macroN;
             _sizeC = p.typeC == SimdTensorData16b ? a.macroM * a.cN : 0;
+
+            _bias.Resize(a.aN, true);
         }
 
         void SynetInnerProduct16bGemmNN::SetParams(const float* weight, const float* bias)
@@ -151,7 +153,6 @@ namespace Simd
                 _weight.Resize(a.aK * a.aN, true);
                 _prepB((uint8_t*)weight, p, a, p.N, p.K, _weight.data);
             }
-            _bias.Resize(a.aN, true);
             if (p.bias && bias)
                 memcpy(_bias.data, bias, p.N * 4);
         }

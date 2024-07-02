@@ -176,7 +176,8 @@ namespace Test
 
 #endif
 #else
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 4096, b16, b16, b16, t, f, t), f1, f2);
+        //result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 4096, b16, b16, b16, t, f, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 1000, 1280, f32, f32, f32, f, t, t), f1, f2);
 #endif
 
         return result;
