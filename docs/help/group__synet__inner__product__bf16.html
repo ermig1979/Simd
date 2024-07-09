@@ -62,9 +62,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8ee7e775a1e7932e2322ff1f02996ba1"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product__bf16.html#ga8ee7e775a1e7932e2322ff1f02996ba1">SimdSynetInnerProduct16bInfo</a> (const void *context)</td></tr>
 <tr class="memdesc:ga8ee7e775a1e7932e2322ff1f02996ba1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets string with description of internal implementation of BF16 inner product algorithm.  <a href="group__synet__inner__product__bf16.html#ga8ee7e775a1e7932e2322ff1f02996ba1">More...</a><br /></td></tr>
 <tr class="separator:ga8ee7e775a1e7932e2322ff1f02996ba1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1019198cee5a3e9f3c7b2c2a561cc47e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product__bf16.html#ga1019198cee5a3e9f3c7b2c2a561cc47e">SimdSynetInnerProduct16bSetParams</a> (void *context, const float *weight, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *internal, const float *bias)</td></tr>
-<tr class="memdesc:ga1019198cee5a3e9f3c7b2c2a561cc47e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights and beases required for BF16 inner product algorithm.  <a href="group__synet__inner__product__bf16.html#ga1019198cee5a3e9f3c7b2c2a561cc47e">More...</a><br /></td></tr>
-<tr class="separator:ga1019198cee5a3e9f3c7b2c2a561cc47e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae873b7b89f3c3275f521946c9937571d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product__bf16.html#gae873b7b89f3c3275f521946c9937571d">SimdSynetInnerProduct16bForward</a> (void *context, const uint8_t *A, const uint8_t *B, uint8_t *buf, uint8_t *C)</td></tr>
 <tr class="memdesc:gae873b7b89f3c3275f521946c9937571d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of BF16 inner product algorithm.  <a href="group__synet__inner__product__bf16.html#gae873b7b89f3c3275f521946c9937571d">More...</a><br /></td></tr>
 <tr class="separator:gae873b7b89f3c3275f521946c9937571d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,7 +159,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to BF32 inner product context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__inner__product__bf16.html#ga77a93ef1a0409d3e66835b3e2d6d92ac" title="Gets size in bytes of internal buffer used inside BF16 inner product algorithm.">SimdSynetInnerProduct16bInternalBufferSize</a>, <a class="el" href="group__synet__inner__product__bf16.html#ga2068a3866a4d83fce8b8b3c64a38bf85" title="Gets size in bytes of external buffer used in BF16 inner product algorithm.">SimdSynetInnerProduct16bExternalBufferSize</a>, <a class="el" href="group__synet__inner__product__bf16.html#ga8ee7e775a1e7932e2322ff1f02996ba1" title="Gets string with description of internal implementation of BF16 inner product algorithm.">SimdSynetInnerProduct16bInfo</a>, <a class="el" href="group__synet__inner__product__bf16.html#ga1019198cee5a3e9f3c7b2c2a561cc47e" title="Sets weights and beases required for BF16 inner product algorithm.">SimdSynetInnerProduct16bSetParams</a> and <a class="el" href="group__synet__inner__product__bf16.html#gae873b7b89f3c3275f521946c9937571d" title="Performs forward propagation of BF16 inner product algorithm.">SimdSynetInnerProduct16bForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to BF32 inner product context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__inner__product__bf16.html#ga77a93ef1a0409d3e66835b3e2d6d92ac" title="Gets size in bytes of internal buffer used inside BF16 inner product algorithm.">SimdSynetInnerProduct16bInternalBufferSize</a>, <a class="el" href="group__synet__inner__product__bf16.html#ga2068a3866a4d83fce8b8b3c64a38bf85" title="Gets size in bytes of external buffer used in BF16 inner product algorithm.">SimdSynetInnerProduct16bExternalBufferSize</a>, <a class="el" href="group__synet__inner__product__bf16.html#ga8ee7e775a1e7932e2322ff1f02996ba1" title="Gets string with description of internal implementation of BF16 inner product algorithm.">SimdSynetInnerProduct16bInfo</a>, SimdSynetInnerProduct16bSetParams and <a class="el" href="group__synet__inner__product__bf16.html#gae873b7b89f3c3275f521946c9937571d" title="Performs forward propagation of BF16 inner product algorithm.">SimdSynetInnerProduct16bForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -244,57 +241,6 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>string with description of internal implementation of BF16 inner product algorithm. </dd></dl>
-
-</div>
-</div>
-<a id="ga1019198cee5a3e9f3c7b2c2a561cc47e" name="ga1019198cee5a3e9f3c7b2c2a561cc47e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga1019198cee5a3e9f3c7b2c2a561cc47e">&#9670;&#160;</a></span>SimdSynetInnerProduct16bSetParams()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdSynetInnerProduct16bSetParams </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>context</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>weight</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *&#160;</td>
-          <td class="paramname"><em>internal</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>bias</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Sets weights and beases required for BF16 inner product algorithm. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to BF16 inner product context. It must be created by function <a class="el" href="group__synet__inner__product__bf16.html#gac25569090fbcb038a6542c850cea7589" title="Initilizes BF16 inner product (matrix mutiplication) algorithm.">SimdSynetInnerProduct16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to inner product weights. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a flag signalized that weight is stored in the internal buffer. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to bias. Can be NULL. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>

@@ -7354,6 +7354,27 @@ extern "C"
 
     /*! @ingroup synet_activation
 
+        \fn void SimdSynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst);
+
+        \short Calculates ReLU (rectified linear unit) function for 16-bit brain-float array.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] =  src[i] > 0 ? src[i] : (slope*src[i];
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 16-bit brain-float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] slope - a pointer to the 'slope' parameter.
+        \param [out] dst - a pointer to output 16-bit brain-float array.
+    */
+    SIMD_API void SimdSynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst);
+
+    /*! @ingroup synet_activation
+
         \fn void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
         \short This function is used in order to restrict range for given 320bit float array.
