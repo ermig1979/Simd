@@ -25,6 +25,7 @@
 #define __SimdBFloat16_h__
 
 #include "Simd/SimdStore.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {
@@ -99,6 +100,33 @@ namespace Simd
         SIMD_INLINE __m128 BFloat16ToFloat32(__m128i value)
         {
             return _mm_castsi128_ps(_mm_slli_epi32(value, Base::Bf16::SHIFT));
+        }
+
+        SIMD_INLINE __m128i Float32ToBFloat16(__m128 lo, __m128 hi)
+        {
+            return _mm_packus_epi32(Float32ToBFloat16(lo), Float32ToBFloat16(hi));
+        }
+
+        template<int part> SIMD_INLINE __m128 BFloat16ToFloat32(__m128i value)
+        {
+            return _mm_castsi128_ps(UnpackU16<part>(K_ZERO, value));
+        }
+
+        SIMD_INLINE __m128 BFloat16ToFloat32Even(__m128i value)
+        {
+            return _mm_castsi128_ps(_mm_slli_epi32(value, Base::Bf16::SHIFT));
+        }
+
+        SIMD_INLINE __m128 BFloat16ToFloat32Odd(__m128i value)
+        {
+            return _mm_castsi128_ps(_mm_and_si128(Bf16::MASK, value));
+        }
+
+        SIMD_INLINE __m128i Float32ToBFloat16Interlived(__m128 even, __m128 odd)
+        {
+            __m128i _even = _mm_srli_epi32(_mm_add_epi32(_mm_castps_si128(even), Bf16::ROUND), Base::Bf16::SHIFT);
+            __m128i _odd = _mm_and_si128(_mm_add_epi32(_mm_castps_si128(odd), Bf16::ROUND), Bf16::MASK);
+            return _mm_or_si128(_even, _odd);
         }
     }
 #endif   

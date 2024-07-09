@@ -313,7 +313,7 @@ namespace Simd
             return 0.0f;
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         static SIMD_INLINE int32_t Set4(uint8_t value)
         {
@@ -360,7 +360,7 @@ namespace Simd
             i32 = _mm_add_epi32(i32, _mm_hadd_epi32(lo, hi));
         }
     }
-#endif//SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2

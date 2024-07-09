@@ -476,6 +476,8 @@ namespace Simd
 
         void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
 
+        void SynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst);
+
         void SynetRestrictRange32f(const float* src, size_t size, const float* lower, const float* upper, float* dst);
 
         void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
