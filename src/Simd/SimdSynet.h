@@ -26,6 +26,7 @@
 
 #include "Simd/SimdMath.h"
 #include "Simd/SimdUnpack.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
@@ -151,14 +152,14 @@ namespace Simd
             return SynetConvert32fTo8i(value, scale, shift, I8_NARROWED_MIN, I8_NARROWED_MAX);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE float SynetConvert8uTo32f(int value, float scale, float shift)
         {
             return value * scale + shift;
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <SimdSynetEltwiseOperationType type> float SynetEltwiseLayerForward(float a, float b);
 
@@ -222,7 +223,16 @@ namespace Simd
             return ::tanh(value*slope);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE uint16_t SynetRelu16b(uint16_t value, float slope)
+        {
+            float src = BFloat16ToFloat32(value);
+            float dst = Simd::Max(0.0f, src) + slope * Simd::Min(src, 0.0f);
+            return Float32ToBFloat16(dst);
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         template<SimdSynetUnaryOperation32fType type> float SynetUnaryOperation32f(float value);
 

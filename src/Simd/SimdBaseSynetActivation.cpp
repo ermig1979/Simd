@@ -25,6 +25,7 @@
 #include "Simd/SimdExp.h"
 #include "Simd/SimdErf.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
@@ -190,6 +191,24 @@ namespace Simd
             }
             for (; i < size; ++i)
                 dst[i] = SynetRelu32f(src[i], _slope);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst)
+        {
+            float _slope = slope[0];
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = SynetRelu16b(src[i + 0], _slope);
+                dst[i + 1] = SynetRelu16b(src[i + 1], _slope);
+                dst[i + 2] = SynetRelu16b(src[i + 2], _slope);
+                dst[i + 3] = SynetRelu16b(src[i + 3], _slope);
+            }
+            for (; i < size; ++i)
+                dst[i] = SynetRelu16b(src[i], _slope);
         }
 
         //-------------------------------------------------------------------------------------------------
