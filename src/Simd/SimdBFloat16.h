@@ -156,6 +156,23 @@ namespace Simd
         {
             return _mm256_castsi256_ps(_mm256_slli_epi32(value, Base::Bf16::SHIFT));
         }
+
+        SIMD_INLINE __m256 BFloat16ToFloat32Even(__m256i value)
+        {
+            return _mm256_castsi256_ps(_mm256_slli_epi32(value, Base::Bf16::SHIFT));
+        }
+
+        SIMD_INLINE __m256 BFloat16ToFloat32Odd(__m256i value)
+        {
+            return _mm256_castsi256_ps(_mm256_and_si256(Bf16::MASK, value));
+        }
+
+        SIMD_INLINE __m256i Float32ToBFloat16Interlived(__m256 even, __m256 odd)
+        {
+            __m256i _even = _mm256_srli_epi32(_mm256_add_epi32(_mm256_castps_si256(even), Bf16::ROUND), Base::Bf16::SHIFT);
+            __m256i _odd = _mm256_and_si256(_mm256_add_epi32(_mm256_castps_si256(odd), Bf16::ROUND), Bf16::MASK);
+            return _mm256_or_si256(_even, _odd);
+        }
     }
 #endif  
 

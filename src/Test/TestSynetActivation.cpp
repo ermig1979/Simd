@@ -721,11 +721,11 @@ namespace Test
             result = result && SynetRelu16bAutoTest(FUNC_RE16B(Simd::Sse41::SynetRelu16b), FUNC_RE16B(SimdSynetRelu16b));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2())
-//            result = result && SynetRelu16bAutoTest(FUNC_RE16B(Simd::Avx2::SynetRelu16b), FUNC_RE16B(SimdSynetRelu16b));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && SynetRelu16bAutoTest(FUNC_RE16B(Simd::Avx2::SynetRelu16b), FUNC_RE16B(SimdSynetRelu16b));
+#endif 
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw())
 //            result = result && SynetRelu16bAutoTest(FUNC_RE16B(Simd::Avx512bw::SynetRelu16b), FUNC_RE16B(SimdSynetRelu16b));
