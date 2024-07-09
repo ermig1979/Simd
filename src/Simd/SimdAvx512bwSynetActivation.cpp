@@ -413,6 +413,29 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void SynetRelu16b(const uint16_t* src, __m512 slope, uint16_t* dst, __mmask32 tail = -1)
+        {
+            __m512i _src = _mm512_maskz_loadu_epi16(tail, src);
+            __m512 even = SynetRelu32f(BFloat16ToFloat32Even(_src), slope);
+            __m512 odd = SynetRelu32f(BFloat16ToFloat32Odd(_src), slope);
+            _mm512_mask_storeu_epi16(dst, tail, Float32ToBFloat16Interlived(even, odd));
+        }
+
+        void SynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst)
+        {
+            __m512 _slope = _mm512_set1_ps(slope[0]);
+            size_t sizeDF = AlignLo(size, DF);
+            __mmask32 tail = TailMask32(size - sizeDF);
+
+            size_t i = 0;
+            for (; i < sizeDF; i += DF)
+                SynetRelu16b(src + i, _slope, dst + i);
+            if(tail)
+                SynetRelu16b(src + i, _slope, dst + i, tail);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <bool align> void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {
             assert(lower[0] <= upper[0]);

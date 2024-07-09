@@ -221,6 +221,23 @@ namespace Simd
             __m512i d1 = Float32ToBFloat16(s1);
             _mm512_mask_storeu_epi16(dst, saveMask, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, d1)));
         }
+
+        SIMD_INLINE __m512 BFloat16ToFloat32Even(__m512i value)
+        {
+            return _mm512_castsi512_ps(_mm512_slli_epi32(value, Base::Bf16::SHIFT));
+        }
+
+        SIMD_INLINE __m512 BFloat16ToFloat32Odd(__m512i value)
+        {
+            return _mm512_castsi512_ps(_mm512_and_si512(Bf16::MASK, value));
+        }
+
+        SIMD_INLINE __m512i Float32ToBFloat16Interlived(__m512 even, __m512 odd)
+        {
+            __m512i _even = _mm512_srli_epi32(_mm512_add_epi32(_mm512_castps_si512(even), Bf16::ROUND), Base::Bf16::SHIFT);
+            __m512i _odd = _mm512_and_si512(_mm512_add_epi32(_mm512_castps_si512(odd), Bf16::ROUND), Bf16::MASK);
+            return _mm512_or_si512(_even, _odd);
+        }
     }
 #endif 
 
