@@ -5938,7 +5938,39 @@ extern "C"
     SIMD_API void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    /*! @ingroup synet_other
+    /*! @ingroup synet_add
+
+        \fn void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
+
+        \short Initilizes add algorithm.
+
+        \param [in] aShape - a pointer to shape of input A tensor.
+        \param [in] aCount - a count of dimensions of input A tensor.
+        \param [in] aType - a type of input A tensor. Can be FP32 of BF16.
+        \param [in] bShape - a pointer to shape of input B tensor.
+        \param [in] bCount - a count of dimensions of input B tensor.
+        \param [in] bType - a type of input B tensor. Can be FP32 of BF16.        
+        \param [in] dstType - a type of output tensor. Can be FP32 of BF16.
+        \param [in] format - a format of input / output tensors.
+        \return a pointer to add context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in function ::SimdSynetAdd16bForward.
+    */
+    SIMD_API void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
+
+    /*! @ingroup synet_add
+
+        \fn void SimdSynetAdd16bForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
+
+        \short Performs forward propagation of add algorithm.
+
+        \param [in] context - a pointer to add context. It must be created by function ::SimdSynetAdd16bInit and released by function ::SimdRelease.
+        \param [in] a - a pointer to input A tensor.
+        \param [in] b - a pointer to input B tensor.
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetAdd16bForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
+
+    /*! @ingroup synet_add
 
         \fn void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -5961,7 +5993,7 @@ extern "C"
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet_other
+    /*! @ingroup synet_add
 
         \fn void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift, uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
