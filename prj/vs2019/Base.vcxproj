@@ -78,6 +78,7 @@
     <ClInclude Include="..\..\src\Simd\SimdShuffle.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetAdd16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16bCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
@@ -186,6 +187,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetAdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcDirect.cpp" />

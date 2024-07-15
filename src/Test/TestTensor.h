@@ -28,7 +28,6 @@
 
 namespace Test
 {
-    typedef std::vector<size_t> Shape;
     typedef std::vector<size_t> Index;
 
     //-------------------------------------------------------------------------------------------------
@@ -550,6 +549,24 @@ namespace Test
         case SimdTensorDataBool: return "Bool";
         case SimdTensorData16b: return "16b";
         case SimdTensorData16f: return "16f";
+        default: assert(0); return "Assert";
+        }
+    }
+
+    inline String ToChar(SimdTensorDataType data)
+    {
+        switch (data)
+        {
+        case SimdTensorDataUnknown: return "?";
+        case SimdTensorData32f: return "f";
+        case SimdTensorData32i: return "i";
+        case SimdTensorData8i: return "u";
+        case SimdTensorData8u: return "u";
+        case SimdTensorData64i: return "l";
+        case SimdTensorData64u: return "l";
+        case SimdTensorDataBool: return "~";
+        case SimdTensorData16b: return "b";
+        case SimdTensorData16f: return "h";
         default: assert(0); return "Assert";
         }
     }

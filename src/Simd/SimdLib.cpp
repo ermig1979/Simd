@@ -69,6 +69,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdRecursiveBilateralFilter.h"
 #include "Simd/SimdResizer.h"
+#include "Simd/SimdSynetAdd16b.h"
 #include "Simd/SimdSynetConvolution8i.h"
 #include "Simd/SimdSynetConvolution16b.h"
 #include "Simd/SimdSynetConvolution32f.h"
@@ -4768,6 +4769,31 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
     else
 #endif
         Base::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+}
+
+SIMD_API void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void* (*SimdSynetAdd16bInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
+    const static SimdSynetAdd16bInitPtr simdSynetAdd16bInit = SIMD_FUNC0(SynetAdd16bInit);// , SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    return simdSynetAdd16bInit(aShape, aCount, aType, bShape, bCount, bType, dstType, format);
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetAdd16bForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    SynetAdd16b* c = (SynetAdd16b*)context;
+    c->Forward(a, b, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)

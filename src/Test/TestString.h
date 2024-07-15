@@ -107,6 +107,18 @@ namespace Test
         }
     }
 
+    template <> SIMD_INLINE String ToString<Shape>(const Shape& value)
+    {
+        std::stringstream ss;
+        for (size_t i = 0; i < value.size(); ++i)
+        {
+            if (i)
+                ss << "x";
+            ss << value[i];
+        }
+        return ss.str();
+    }
+
     SIMD_INLINE String ToString(int value, int width)
     {
         std::stringstream ss;
