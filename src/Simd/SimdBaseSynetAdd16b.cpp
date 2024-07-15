@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetAdd16b.h"
-#include "Simd/SimdBFloat16.h"
+#include "Simd/SimdSynetAdd16bCommon.h"
 
 namespace Simd
 {
@@ -38,32 +38,6 @@ namespace Simd
 
     namespace Base
     {
-        template <class S, class D> SIMD_INLINE D Convert16b(const S& src)
-        {
-            return (D)src;
-        }
-
-        template <> SIMD_INLINE float Convert16b(const uint16_t& src)
-        {
-            return BFloat16ToFloat32(src);
-        }
-
-        template <> SIMD_INLINE uint16_t Convert16b(const float& src)
-        {
-            return Float32ToBFloat16(src);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        template <typename A, typename B, typename D> void Add16b(const A& a, const B& b, D& dst)
-        {
-            float _a = Convert16b<A, float>(a);
-            float _b = Convert16b<B, float>(b);
-            dst = Convert16b<float, D>(_a + _b);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         template <typename A, typename B, typename D> static void Add16bUniform(const uint8_t* a8, const uint8_t* b8, size_t size, uint8_t* dst8)
         {
             const A* a = (const A*)a8;

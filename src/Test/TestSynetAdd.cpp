@@ -375,11 +375,11 @@ namespace Test
         if (TestBase())
             result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Base::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Sse41::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Sse41::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Avx2::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
