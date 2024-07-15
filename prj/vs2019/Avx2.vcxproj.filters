@@ -388,6 +388,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetInnerProduct16bGemmNN.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetAdd16b.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">
@@ -669,6 +672,12 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetAdd16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetAdd16bCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

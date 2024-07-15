@@ -380,11 +380,11 @@ namespace Test
             result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Sse41::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2())
-//            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Avx2::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Avx2::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
+#endif 
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw())
 //            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Avx512bw::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
