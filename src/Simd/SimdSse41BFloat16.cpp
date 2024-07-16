@@ -53,28 +53,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void Float32ToBFloat16NearestEven(const float* src, size_t size, uint16_t* dst)
-        {
-            size_t size8 = Simd::AlignLo(size, 8);
-            size_t size4 = Simd::AlignLo(size, 4);
-            size_t i = 0;
-            for (; i < size8; i += 8)
-            {
-                __m128i d0 = Float32ToBFloat16NearestEven(_mm_loadu_ps(src + i + 0));
-                __m128i d1 = Float32ToBFloat16NearestEven(_mm_loadu_ps(src + i + 4));
-                _mm_storeu_si128((__m128i*)(dst + i), _mm_packus_epi32(d0, d1));
-            }
-            for (; i < size4; i += 4)
-            {
-                __m128i d0 = Float32ToBFloat16NearestEven(_mm_loadu_ps(src + i + 0));
-                _mm_storel_epi64((__m128i*)(dst + i), _mm_packus_epi32(d0, K_ZERO));
-            }
-            for (; i < size; ++i)
-                dst[i] = Base::Float32ToBFloat16NearestEven(src[i]);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)
         {
             size_t size8 = Simd::AlignLo(size, 8);

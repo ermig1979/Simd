@@ -60,13 +60,16 @@ namespace Test
         View dst1(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst2(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
 
-        FillRandom32f(src, -1.277, 1.1);
+        FillRandom32f(src, -4096.0, 4096.0);
+
+        for(size_t i = 0, n = size / 16; i < n; ++i)
+            ((uint32_t*)src.data)[i] = ((uint32_t*)src.data)[i] & 0xFFFF8000;
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
 
-        result = result && Compare(dst1, dst2, 0, true, 32);
+        result = result && Compare(dst1, dst2, 0, true, 64);
 
         return result;
     }
@@ -103,40 +106,15 @@ namespace Test
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx512bw::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
 
+#if defined(SIMD_AMXBF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
+            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::AmxBf16::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon())
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Neon::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
-
-        return result;
-    }
-
-    bool Float32ToBFloat16NearestEvenAutoTest()
-    {
-        bool result = true;
-
-        if (TestBase())
-            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Base::Float32ToBFloat16NearestEven), FUNC_SB(SimdFloat32ToBFloat16NearestEven));
-
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
-            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Sse41::Float32ToBFloat16NearestEven), FUNC_SB(SimdFloat32ToBFloat16NearestEven));
-#endif 
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
-            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx2::Float32ToBFloat16NearestEven), FUNC_SB(SimdFloat32ToBFloat16NearestEven));
-#endif 
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
-            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx512bw::Float32ToBFloat16NearestEven), FUNC_SB(SimdFloat32ToBFloat16NearestEven));
-#endif 
-
-//#if defined(SIMD_AMXBF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
-//        if (Simd::AmxBf16::Enable && TestAmxBf16())
-//            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::AmxBf16::Float32ToBFloat16NearestEven), FUNC_SB(SimdFloat32ToBFloat16NearestEven));
-//#endif 
 
         return result;
     }

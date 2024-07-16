@@ -3031,25 +3031,13 @@ extern "C"
 
         \fn void SimdFloat32ToBFloat16(const float * src, size_t size, uint16_t * dst);
 
-        \short Converts numbers in the array from 32-bit float to 16-bit bfloat format. Perform rounding to nearest.
+        \short Converts numbers in the array from 32-bit float to 16-bit bfloat format.
 
         \param [in] src - a pointer to the input array with 32-bit float point numbers.
         \param [in] size - a size of input and output array.
         \param [out] dst - a pointer to the output array with 16-bit bfloat point numbers.
     */
     SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst);
-
-    /*! @ingroup bfloat16
-
-        \fn void SimdFloat32ToBFloat16NearestEven(const float * src, size_t size, uint16_t * dst);
-
-        \short Converts numbers in the array from 32-bit float to 16-bit bfloat format. Perform rounding to nearest even.
-
-        \param [in] src - a pointer to the input array with 32-bit float point numbers.
-        \param [in] size - a size of input and output array.
-        \param [out] dst - a pointer to the output array with 16-bit bfloat point numbers.
-    */
-    SIMD_API void SimdFloat32ToBFloat16NearestEven(const float* src, size_t size, uint16_t* dst);
 
     /*! @ingroup bfloat16
 

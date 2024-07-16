@@ -2093,18 +2093,9 @@ SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst
 {
     SIMD_EMPTY();
     typedef void(*SimdFloat32ToBFloat16Ptr) (const float* src, size_t size, uint16_t* dst);
-    const static SimdFloat32ToBFloat16Ptr simdFloat32ToBFloat16 = SIMD_FUNC4(Float32ToBFloat16, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdFloat32ToBFloat16Ptr simdFloat32ToBFloat16 = SIMD_FUNC5(Float32ToBFloat16, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdFloat32ToBFloat16(src, size, dst);
-}
-
-SIMD_API void SimdFloat32ToBFloat16NearestEven(const float* src, size_t size, uint16_t* dst)
-{
-    SIMD_EMPTY();
-    typedef void(*SimdFloat32ToBFloat16NearestEvenPtr) (const float* src, size_t size, uint16_t* dst);
-    const static SimdFloat32ToBFloat16NearestEvenPtr simdFloat32ToBFloat16NearestEven = SIMD_FUNC3(Float32ToBFloat16NearestEven, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//SIMD_AMXBF16_FUNC, 
-
-    simdFloat32ToBFloat16NearestEven(src, size, dst);
 }
 
 SIMD_API void SimdBFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)

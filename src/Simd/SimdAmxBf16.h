@@ -31,7 +31,7 @@ namespace Simd
 #ifdef SIMD_AMXBF16_ENABLE    
     namespace AmxBf16
     {
-        void Float32ToBFloat16NearestEven(const float* src, size_t size, uint16_t* dst);
+        void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst);
 
         void ChangeColors(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* colors, uint8_t* dst, size_t dstStride);
 
