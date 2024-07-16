@@ -49,6 +49,25 @@ namespace Simd
 
         //---------------------------------------------------------------------------------------------
 
+        void Float32ToBFloat16NearestEven(const float* src, size_t size, uint16_t* dst)
+        {
+            size_t size32 = AlignLo(size, 32);
+            __mmask16 srcMask[2];
+            __mmask32 dstMask[1];
+            size_t i = 0;
+            for (; i < size32; i += 32)
+                Float32ToBFloat16NearestEven<false, false>(src + i, dst + i, srcMask, dstMask);
+            if (size32 < size)
+            {
+                srcMask[0] = TailMask16(size - size32 - F * 0);
+                srcMask[1] = TailMask16(size - size32 - F * 1);
+                dstMask[0] = TailMask32(size - size32);
+                Float32ToBFloat16NearestEven<false, true>(src + i, dst + i, srcMask, dstMask);
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------
+
         template<bool align, bool mask> SIMD_INLINE void BFloat16ToFloat32(const uint16_t* src, float* dst, __mmask32 srcMask[1], __mmask16 dstMask[2])
         {
             __m512i _src = Load<align, mask>(src, srcMask[0]);

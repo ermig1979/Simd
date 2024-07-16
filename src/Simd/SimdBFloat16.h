@@ -26,6 +26,7 @@
 
 #include "Simd/SimdStore.h"
 #include "Simd/SimdUnpack.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
@@ -45,6 +46,7 @@ namespace Simd
             const int SHIFT = 16;
             const uint32_t ROUND = 0x00008000;
             const uint32_t MASK = 0xFFFF0000;
+            const uint32_t EVEN = 0x00010000;
         }
 
         SIMD_INLINE float RoundToBFloat16(float value)
@@ -55,6 +57,12 @@ namespace Simd
         SIMD_INLINE uint16_t Float32ToBFloat16(float value)
         {
             return uint16_t((Bf16::Bits(value).u32 + Bf16::ROUND) >> Bf16::SHIFT);
+        }
+
+        SIMD_INLINE uint16_t Float32ToBFloat16NearestEven(float value)
+        {
+            uint32_t round = (Bf16::Bits(value).u32 & Bf16::EVEN) >> 1;
+            return uint16_t((Bf16::Bits(value).u32 + round) >> Bf16::SHIFT);
         }
 
         SIMD_INLINE float BFloat16ToFloat32(uint16_t value)
@@ -82,6 +90,7 @@ namespace Simd
         {
             const __m128i ROUND = SIMD_MM_SET1_EPI32(Base::Bf16::ROUND);
             const __m128i MASK = SIMD_MM_SET1_EPI32(Base::Bf16::MASK);
+            const __m128i EVEN = SIMD_MM_SET1_EPI32(Base::Bf16::EVEN);
         }
 
         SIMD_INLINE __m128i Float32ToBFloat16(__m128 value)
@@ -93,6 +102,19 @@ namespace Simd
         {
             __m128i d0 = Float32ToBFloat16(_mm_loadu_ps(src + 0));
             __m128i d1 = Float32ToBFloat16(_mm_loadu_ps(src + F));
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi32(d0, d1));
+        }
+
+        SIMD_INLINE __m128i Float32ToBFloat16NearestEven(__m128 value)
+        {
+            __m128i round = _mm_srli_epi32(_mm_and_si128(_mm_castps_si128(value), Bf16::EVEN), 1);
+            return _mm_srli_epi32(_mm_add_epi32(_mm_castps_si128(value), round), Base::Bf16::SHIFT);
+        }
+
+        SIMD_INLINE void Float32ToBFloat16NearestEven(const float* src, uint16_t* dst)
+        {
+            __m128i d0 = Float32ToBFloat16NearestEven(_mm_loadu_ps(src + 0));
+            __m128i d1 = Float32ToBFloat16NearestEven(_mm_loadu_ps(src + F));
             _mm_storeu_si128((__m128i*)dst, _mm_packus_epi32(d0, d1));
         }
 
@@ -137,6 +159,7 @@ namespace Simd
         {
             const __m256i ROUND = SIMD_MM256_SET1_EPI32(Base::Bf16::ROUND);
             const __m256i MASK = SIMD_MM256_SET1_EPI32(Base::Bf16::MASK);
+            const __m256i EVEN = SIMD_MM256_SET1_EPI32(Base::Bf16::EVEN);
         }
 
         SIMD_INLINE __m256i Float32ToBFloat16(__m256 value)
@@ -148,6 +171,19 @@ namespace Simd
         {
             __m256i d0 = Float32ToBFloat16(_mm256_loadu_ps(src + 0));
             __m256i d1 = Float32ToBFloat16(_mm256_loadu_ps(src + F));
+            _mm256_storeu_si256((__m256i*)dst, _mm256_permute4x64_epi64(_mm256_packus_epi32(d0, d1), 0xD8));
+        }
+
+        SIMD_INLINE __m256i Float32ToBFloat16NearestEven(__m256 value)
+        {
+            __m256i round = _mm256_srli_epi32(_mm256_and_si256(_mm256_castps_si256(value), Bf16::EVEN), 1);
+            return _mm256_srli_epi32(_mm256_add_epi32(_mm256_castps_si256(value), round), Base::Bf16::SHIFT);
+        }
+
+        SIMD_INLINE void Float32ToBFloat16NearestEven(const float* src, uint16_t* dst)
+        {
+            __m256i d0 = Float32ToBFloat16NearestEven(_mm256_loadu_ps(src + 0));
+            __m256i d1 = Float32ToBFloat16NearestEven(_mm256_loadu_ps(src + F));
             _mm256_storeu_si256((__m256i*)dst, _mm256_permute4x64_epi64(_mm256_packus_epi32(d0, d1), 0xD8));
         }
 
@@ -192,6 +228,7 @@ namespace Simd
         {
             const __m512i ROUND = SIMD_MM512_SET1_EPI32(Base::Bf16::ROUND);
             const __m512i MASK = SIMD_MM512_SET1_EPI32(Base::Bf16::MASK);
+            const __m512i EVEN = SIMD_MM512_SET1_EPI32(Base::Bf16::EVEN);
         }
 
         SIMD_INLINE __m512i Float32ToBFloat16(__m512 value)
@@ -231,6 +268,21 @@ namespace Simd
             _mm512_mask_storeu_epi16(dst, saveMask, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, d1)));
         }
 
+        SIMD_INLINE __m512i Float32ToBFloat16NearestEven(__m512 value)
+        {
+            __m512i round = _mm512_srli_epi32(_mm512_and_si512(_mm512_castps_si512(value), Bf16::EVEN), 1);
+            return _mm512_srli_epi32(_mm512_add_epi32(_mm512_castps_si512(value), round), Base::Bf16::SHIFT);
+        }
+
+        template <bool align, bool mask> SIMD_INLINE void Float32ToBFloat16NearestEven(const float* src, uint16_t* dst, __mmask16 srcMask[2], __mmask32 dstMask[1])
+        {
+            __m512 s0 = Load<align, mask>(src + 0 * F, srcMask[0]);
+            __m512 s1 = Load<align, mask>(src + 1 * F, srcMask[1]);
+            __m512i d0 = Float32ToBFloat16NearestEven(s0);
+            __m512i d1 = Float32ToBFloat16NearestEven(s1);
+            Store<align, mask>(dst, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, d1)), dstMask[0]);
+        }
+
         SIMD_INLINE __m512 BFloat16ToFloat32Even(__m512i value)
         {
             return _mm512_castsi512_ps(_mm512_slli_epi32(value, Base::Bf16::SHIFT));
@@ -253,21 +305,21 @@ namespace Simd
 #ifdef SIMD_AMXBF16_ENABLE    
     namespace AmxBf16
     {
-        template <bool align, bool mask> SIMD_INLINE void Float32ToBFloat16(const float* src, uint16_t* dst, __mmask16 srcMask[2], __mmask32 dstMask[1])
+        template <bool align, bool mask> SIMD_INLINE void Float32ToBFloat16NearestEven(const float* src, uint16_t* dst, __mmask16 srcMask[2], __mmask32 dstMask[1])
         {
             __m512 s0 = Avx512bw::Load<align, mask>(src + 0 * F, srcMask[0]);
             __m512 s1 = Avx512bw::Load<align, mask>(src + 1 * F, srcMask[1]);
             Avx512bw::Store<align, mask>(dst, (__m512i)_mm512_cvtne2ps_pbh(s1, s0), dstMask[0]);
         }
 
-        SIMD_INLINE void Float32ToBFloat16(const float* src, uint16_t* dst)
+        SIMD_INLINE void Float32ToBFloat16NearestEven(const float* src, uint16_t* dst)
         {
             __m512 s0 = _mm512_loadu_ps(src + 0 * F);
             __m512 s1 = _mm512_loadu_ps(src + 1 * F);
             _mm512_storeu_si512(dst, (__m512i)_mm512_cvtne2ps_pbh(s1, s0));
         }
 
-        SIMD_INLINE void Float32ToBFloat16(const float* src, uint16_t* dst, __mmask32 loadMask, __mmask32 saveMask = __mmask32(-1))
+        SIMD_INLINE void Float32ToBFloat16NearestEven(const float* src, uint16_t* dst, __mmask32 loadMask, __mmask32 saveMask = __mmask32(-1))
         {
             __m512 s0 = _mm512_maskz_loadu_ps(__mmask16(loadMask >> 0 * 16), src + 0 * F);
             __m512 s1 = _mm512_maskz_loadu_ps(__mmask16(loadMask >> 1 * 16), src + 1 * F);
@@ -280,6 +332,24 @@ namespace Simd
                 0x10, 0x00, 0x10, 0x01, 0x10, 0x02, 0x10, 0x03, 0x10, 0x04, 0x10, 0x05, 0x10, 0x06, 0x10, 0x07,
                 0x10, 0x08, 0x10, 0x09, 0x10, 0x0A, 0x10, 0x0B, 0x10, 0x0C, 0x10, 0x0D, 0x10, 0x0E, 0x10, 0x0F);
             return _mm512_castsi512_ps(_mm512_permutexvar_epi16(K16_PERM, _mm512_castsi256_si512(value)));
+        }
+
+        template<int part> SIMD_INLINE __m512 BFloat16ToFloat32(__m512i value);
+
+        template<> SIMD_INLINE __m512 BFloat16ToFloat32<0>(__m512i value)
+        {
+            static const __m512i K16_PERM = SIMD_MM512_SETR_EPI16(
+                0x10, 0x00, 0x10, 0x01, 0x10, 0x02, 0x10, 0x03, 0x10, 0x04, 0x10, 0x05, 0x10, 0x06, 0x10, 0x07,
+                0x10, 0x08, 0x10, 0x09, 0x10, 0x0A, 0x10, 0x0B, 0x10, 0x0C, 0x10, 0x0D, 0x10, 0x0E, 0x10, 0x0F);
+            return _mm512_castsi512_ps(_mm512_maskz_permutexvar_epi16(0xAAAAAAAA, K16_PERM, value));
+        }
+
+        template<> SIMD_INLINE __m512 BFloat16ToFloat32<1>(__m512i value)
+        {
+            static const __m512i K16_PERM = SIMD_MM512_SETR_EPI16(
+                0x10, 0x10, 0x10, 0x11, 0x10, 0x12, 0x10, 0x13, 0x10, 0x14, 0x10, 0x15, 0x10, 0x16, 0x10, 0x17,
+                0x10, 0x18, 0x10, 0x19, 0x10, 0x1A, 0x10, 0x1B, 0x10, 0x1C, 0x10, 0x1D, 0x10, 0x1E, 0x10, 0x1F);
+            return _mm512_castsi512_ps(_mm512_maskz_permutexvar_epi16(0xAAAAAAAA, K16_PERM, value));
         }
     }
 #endif

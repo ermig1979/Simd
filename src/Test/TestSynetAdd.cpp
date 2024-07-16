@@ -338,7 +338,7 @@ namespace Test
         float eps = EPS;
         if (dstType == SimdTensorData16b)
         {
-            eps = eps * 7.1f;
+            //eps = eps * 7.1f;
             SimdBFloat16ToFloat32(dst1b.Data(), dst1b.Size(), dst1f.Data());
             SimdBFloat16ToFloat32(dst2b.Data(), dst2b.Size(), dst2f.Data());
         }
@@ -358,12 +358,24 @@ namespace Test
 
 #endif
 
+#if 0
+        result = result && SynetAdd16bAutoTest(Shp(1, 127, 17, 17), b16, Shp(1, 127, 17, 17), b16, b16, nhwc, f1, f2);
+        result = result && SynetAdd16bAutoTest(Shp(1, 127, 17, 17), b16, Shp(1, 127, 17, 17), f32, b16, nhwc, f1, f2);
+        result = result && SynetAdd16bAutoTest(Shp(1, 127, 17, 17), b16, Shp(1, 127, 17, 17), b16, f32, nhwc, f1, f2);
+        result = result && SynetAdd16bAutoTest(Shp(1, 127, 17, 17), b16, Shp(1, 127, 17, 17), f32, f32, nhwc, f1, f2);
+        result = result && SynetAdd16bAutoTest(Shp(1, 127, 17, 17), f32, Shp(1, 127, 17, 17), f32, b16, nhwc, f1, f2);
+        result = result && SynetAdd16bAutoTest(Shp(1, 127, 17, 17), f32, Shp(1, 127, 17, 17), f32, f32, nhwc, f1, f2);
+#endif
+
+
+#if 1
         result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), b16, Shp(1, 128, 74, 74), b16, b16, nhwc, f1, f2);
         result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), b16, Shp(1, 128, 74, 74), f32, b16, nhwc, f1, f2);
         result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), b16, Shp(1, 128, 74, 74), b16, f32, nhwc, f1, f2);
         result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), b16, Shp(1, 128, 74, 74), f32, f32, nhwc, f1, f2);
         result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), f32, Shp(1, 128, 74, 74), f32, b16, nhwc, f1, f2);
         result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), f32, Shp(1, 128, 74, 74), f32, f32, nhwc, f1, f2);
+#endif
 
         return result;
     }

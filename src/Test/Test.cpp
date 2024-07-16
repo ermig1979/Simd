@@ -137,6 +137,7 @@ namespace Test
     TEST_ADD_GROUP_A0(BayerToBgra);
 
     TEST_ADD_GROUP_A0(Float32ToBFloat16);
+    TEST_ADD_GROUP_A0(Float32ToBFloat16NearestEven);
     TEST_ADD_GROUP_A0(BFloat16ToFloat32);
 
     TEST_ADD_GROUP_A0(Bgr48pToBgra32);

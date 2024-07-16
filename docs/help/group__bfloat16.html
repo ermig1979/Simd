@@ -51,8 +51,11 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gae4e3ffc0ce115dbdcb96086f0f060f54"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bfloat16.html#gae4e3ffc0ce115dbdcb96086f0f060f54">SimdFloat32ToBFloat16</a> (const float *src, size_t size, uint16_t *dst)</td></tr>
-<tr class="memdesc:gae4e3ffc0ce115dbdcb96086f0f060f54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts numbers in the array from 32-bit float to 16-bit bfloat format.  <a href="group__bfloat16.html#gae4e3ffc0ce115dbdcb96086f0f060f54">More...</a><br /></td></tr>
+<tr class="memdesc:gae4e3ffc0ce115dbdcb96086f0f060f54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts numbers in the array from 32-bit float to 16-bit bfloat format. Perform rounding to nearest.  <a href="group__bfloat16.html#gae4e3ffc0ce115dbdcb96086f0f060f54">More...</a><br /></td></tr>
 <tr class="separator:gae4e3ffc0ce115dbdcb96086f0f060f54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga56b8d65fd84dee9549536fa10399d1bf"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bfloat16.html#ga56b8d65fd84dee9549536fa10399d1bf">SimdFloat32ToBFloat16NearestEven</a> (const float *src, size_t size, uint16_t *dst)</td></tr>
+<tr class="memdesc:ga56b8d65fd84dee9549536fa10399d1bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts numbers in the array from 32-bit float to 16-bit bfloat format. Perform rounding to nearest even.  <a href="group__bfloat16.html#ga56b8d65fd84dee9549536fa10399d1bf">More...</a><br /></td></tr>
+<tr class="separator:ga56b8d65fd84dee9549536fa10399d1bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf2cc9b5268c146af5e7fff67da424b1a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bfloat16.html#gaf2cc9b5268c146af5e7fff67da424b1a">SimdBFloat16ToFloat32</a> (const uint16_t *src, size_t size, float *dst)</td></tr>
 <tr class="memdesc:gaf2cc9b5268c146af5e7fff67da424b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts numbers in the array from 16-bit bfloat to 32-bit float format.  <a href="group__bfloat16.html#gaf2cc9b5268c146af5e7fff67da424b1a">More...</a><br /></td></tr>
 <tr class="separator:gaf2cc9b5268c146af5e7fff67da424b1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -92,7 +95,51 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts numbers in the array from 32-bit float to 16-bit bfloat format. </p>
+<p>Converts numbers in the array from 32-bit float to 16-bit bfloat format. Perform rounding to nearest. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input array with 32-bit float point numbers. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output array. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output array with 16-bit bfloat point numbers. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga56b8d65fd84dee9549536fa10399d1bf" name="ga56b8d65fd84dee9549536fa10399d1bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga56b8d65fd84dee9549536fa10399d1bf">&#9670;&#160;</a></span>SimdFloat32ToBFloat16NearestEven()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdFloat32ToBFloat16NearestEven </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts numbers in the array from 32-bit float to 16-bit bfloat format. Perform rounding to nearest even. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input array with 32-bit float point numbers. </td></tr>

@@ -118,6 +118,13 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_AMXBF16_ENABLE
+    namespace AmxBf16
+    {
+        using Avx512bw::Log;
+    }
+#endif
+
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {

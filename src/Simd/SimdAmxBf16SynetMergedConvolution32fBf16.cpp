@@ -26,6 +26,7 @@
 #include "Simd/SimdUpdate.h"
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdAmxBf16.h"
+#include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
