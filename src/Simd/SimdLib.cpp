@@ -4776,7 +4776,7 @@ SIMD_API void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTens
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetAdd16bInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
-    const static SimdSynetAdd16bInitPtr simdSynetAdd16bInit = SIMD_FUNC2(SynetAdd16bInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC;
+    const static SimdSynetAdd16bInitPtr simdSynetAdd16bInit = SIMD_FUNC3(SynetAdd16bInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AMXBF16_FUNC;
 
     return simdSynetAdd16bInit(aShape, aCount, aType, bShape, bCount, bType, dstType, format);
 #else
