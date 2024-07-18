@@ -343,6 +343,8 @@ namespace Simd
         SynetInnerProduct16bGemmNN::SynetInnerProduct16bGemmNN(const InnerProductParam16b& p)
             : Avx512bw::SynetInnerProduct16bGemmNN(p)
         {
+            if (p.K < F)
+                return;
             SetAlgParam(F, F * 2, F * 2, F * 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_sizeA)
             {
