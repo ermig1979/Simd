@@ -221,7 +221,7 @@ namespace Simd
                 int reorderType, sumBuf;
             };
 
-            typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+            typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint16_t* dst);
 
             typedef void(*ConvolutionPtr)(const uint16_t* weight, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
                 size_t srcC, int zero, const uint16_t* src, const float* bias, const float* params, float* sum, uint8_t* dst);
