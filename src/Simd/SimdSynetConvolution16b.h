@@ -224,7 +224,7 @@ namespace Simd
             typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint16_t* dst);
 
             typedef void(*ConvolutionPtr)(const uint16_t* weight, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-                size_t srcC, int zero, const uint16_t* src, const float* bias, const float* params, float* sum, uint8_t* dst);
+                size_t K, int zero, const uint16_t* src, const float* bias, const float* params, float* sum, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
@@ -256,6 +256,14 @@ namespace Simd
         {
         public:
             SynetConvolution16bNhwcDirect(const ConvParam& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        class SynetConvolution16bNchwGemm : public Base::SynetConvolution16bNchwGemm
+        {
+        public:
+            SynetConvolution16bNchwGemm(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
