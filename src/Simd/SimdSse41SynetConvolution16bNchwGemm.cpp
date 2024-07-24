@@ -95,6 +95,88 @@ namespace Simd
         //    }
         //}
 
+        SIMD_INLINE void ConvertF(const float* src, size_t stride, uint16_t*& dst)
+        {
+            __m128 even = _mm_loadu_ps(src);
+            __m128 odd = _mm_loadu_ps(src + stride);
+            _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16Interlived(even, odd));
+            dst += DF;
+        }
+
+        static void Convert16bNchwGemm1x1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint16_t* dst)
+        {
+            const float* src = ((float*)src8) + (cBeg * p.srcH + yBeg) * p.srcW;
+            size_t N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), j, dS = p.srcH * p.srcW;
+            size_t K = Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
+            for (j = 0; j < NF; j += a.F)
+            {
+                for (k = 0; k < K2; k += 2)
+                {
+                    const float* src0 = src + k * dS;
+                    for (size_t f = 0; f < a.F; f += F)
+                        ConvertF(src0 + f, dS, dst);
+                }
+                for (; k < K; k += 2)
+                {
+                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = Base::Float32ToBFloat16(src0[f]);
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < KH; k += 2)
+                {
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                src += a.F;
+            }
+            if (j < N)
+            {
+                size_t tail = N - j, f;
+                for (k = 0; k < K2; k += 2)
+                {
+                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (f = 0; f < tail; ++f)
+                    {
+                        *dst++ = Base::Float32ToBFloat16(src0[f]);
+                        *dst++ = Base::Float32ToBFloat16(src1[f]);
+                    }
+                    for (; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < K; k += 2)
+                {
+                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (f = 0; f < tail; ++f)
+                    {
+                        *dst++ = Base::Float32ToBFloat16(src0[f]);
+                        *dst++ = 0;
+                    }
+                    for (; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < KH; k += 2)
+                {
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+            }
+        }
+
         //static void Reorder16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         //{
         //    const uint16_t* src = (uint16_t*)src8;
@@ -137,6 +219,14 @@ namespace Simd
         //    }
         //}
 
+        SIMD_INLINE void ReorderF(const uint16_t* src, size_t stride, uint16_t*& dst)
+        {
+            __m128i src0 = _mm_loadl_epi64((__m128i*)src);
+            __m128i src1 = _mm_loadl_epi64((__m128i*)(src + stride));
+            _mm_storeu_si128((__m128i*)dst, _mm_unpacklo_epi16(src0, src1));
+            dst += DF;
+        }
+
         static void Reorder16bNchwGemm1x1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint16_t* dst)
         {
             const uint16_t* src = ((uint16_t*)src8) + (cBeg * p.srcH + yBeg) * p.srcW;
@@ -146,12 +236,9 @@ namespace Simd
             {
                 for (k = 0; k < K2; k += 2)
                 {
-                    const uint16_t* src0 = src + k * dS, *src1 = src0 + dS;
-                    for (size_t f = 0; f < a.F; ++f)
-                    {
-                        *dst++ = src0[f];
-                        *dst++ = src1[f];
-                    }
+                    const uint16_t* src0 = src + k * dS;
+                    for (size_t f = 0; f < a.F; f += F)
+                        ReorderF(src0 + f, dS, dst);
                 }
                 for (; k < K; k += 2)
                 {
@@ -456,14 +543,18 @@ namespace Simd
             SetAlgParam(F, F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_src16b)
             {
-                AlgParam& a = _alg;
                 if (_is1x1)
                     _convert = Reorder16bNchwGemm1x1;
                 //else
                 //    _convert = Reorder16bNhwcGemm;
             }
-            //else
-            //    _convert = Convert16bNhwcGemm;
+            else
+            {
+                if (_is1x1)
+                    _convert = Convert16bNchwGemm1x1;
+                //else
+                //    _convert = Convert16bNhwcGemm;
+            }
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;

@@ -270,7 +270,7 @@ namespace Test
 #endif
 
 #else
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 2156, 4, 4, 4, _1, _1, _1, _0, _0, 1, aId, tF, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 2156, 4, 4, 4, _1, _1, _1, _0, _0, 1, aId, tF, f32, b16), c, f1, f2);
         //result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 88, 88, 128, _3, _1, _2, _1, _1, 1, aRe, tT, f32, b16), c, f1, f2);
         //result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 88, 88, 128, _3, _1, _2, _1, _1, 1, aRe, tT, f32, b16), c, f1, f2);
         //result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 88, 88, 64, _3, _1, _1, _1, _1, 1, aSw, tT, b16, f32), c, f1, f2);
