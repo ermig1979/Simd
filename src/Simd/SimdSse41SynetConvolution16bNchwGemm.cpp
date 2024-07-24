@@ -139,10 +139,10 @@ namespace Simd
 
         static void Reorder16bNchwGemm1x1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint16_t* dst)
         {
-            const uint16_t* src = (uint16_t*)src8 + (cBeg * p.srcH + yBeg) * p.srcW;
+            const uint16_t* src = ((uint16_t*)src8) + (cBeg * p.srcH + yBeg) * p.srcW;
             size_t N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), j, dS = p.srcH * p.srcW;
             size_t K = Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
-            for (j = 0; j < NF; j += F)
+            for (j = 0; j < NF; j += a.F)
             {
                 for (k = 0; k < K2; k += 2)
                 {
@@ -170,7 +170,7 @@ namespace Simd
                         *dst++ = 0;
                     }
                 }
-                src += F;
+                src += a.F;
             }
             if(j < N)
             {

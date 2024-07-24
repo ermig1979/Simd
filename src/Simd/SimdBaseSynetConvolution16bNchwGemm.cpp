@@ -34,12 +34,187 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
+        typedef Base::SynetConvolution16bNchwGemm::AlgParam AlgParam;
+        typedef Base::SynetConvolution16bNchwGemm::ConvolutionPtr Convolution;
+
+        //-----------------------------------------------------------------------------------------
+
+        static void Convert16bNchwGemm1x1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint16_t* dst)
+        {
+            const float* src = ((float*)src8) + (cBeg * p.srcH + yBeg) * p.srcW;
+            size_t N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), j, dS = p.srcH * p.srcW;
+            size_t K = Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
+            for (j = 0; j < NF; j += a.F)
+            {
+                for (k = 0; k < K2; k += 2)
+                {
+                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = Float32ToBFloat16(src0[f]);
+                        *dst++ = Float32ToBFloat16(src1[f]);
+                    }
+                }
+                for (; k < K; k += 2)
+                {
+                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = Float32ToBFloat16(src0[f]);
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < KH; k += 2)
+                {
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                src += a.F;
+            }
+            if (j < N)
+            {
+                size_t tail = N - j, f;
+                for (k = 0; k < K2; k += 2)
+                {
+                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (f = 0; f < tail; ++f)
+                    {
+                        *dst++ = Float32ToBFloat16(src0[f]);
+                        *dst++ = Float32ToBFloat16(src1[f]);
+                    }
+                    for (; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < K; k += 2)
+                {
+                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (f = 0; f < tail; ++f)
+                    {
+                        *dst++ = Float32ToBFloat16(src0[f]);
+                        *dst++ = 0;
+                    }
+                    for (; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < KH; k += 2)
+                {
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+            }
+        }
+
+        static void Reorder16bNchwGemm1x1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint16_t* dst)
+        {
+            const uint16_t* src = ((uint16_t*)src8) + (cBeg * p.srcH + yBeg) * p.srcW;
+            size_t N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), j, dS = p.srcH * p.srcW;
+            size_t K = Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
+            for (j = 0; j < NF; j += a.F)
+            {
+                for (k = 0; k < K2; k += 2)
+                {
+                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = src0[f];
+                        *dst++ = src1[f];
+                    }
+                }
+                for (; k < K; k += 2)
+                {
+                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = src0[f];
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < KH; k += 2)
+                {
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                src += a.F;
+            }
+            if (j < N)
+            {
+                size_t tail = N - j, f;
+                for (k = 0; k < K2; k += 2)
+                {
+                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (f = 0; f < tail; ++f)
+                    {
+                        *dst++ = src0[f];
+                        *dst++ = src1[f];
+                    }
+                    for (; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < K; k += 2)
+                {
+                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (f = 0; f < tail; ++f)
+                    {
+                        *dst++ = src0[f];
+                        *dst++ = 0;
+                    }
+                    for (; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < KH; k += 2)
+                {
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         SynetConvolution16bNchwGemm::SynetConvolution16bNchwGemm(const ConvParam& p)
             : SynetConvolution16b(p)
         {
             _convert = 0;
             _convolutions[0] = 0;
             _convolutions[1] = 0;
+            if (_src16b)
+            {
+                if (_is1x1)
+                    _convert = Reorder16bNchwGemm1x1;
+                //else
+                //    _convert = Reorder16bNhwcGemm;
+            }
+            else
+            {
+                if (_is1x1)
+                    _convert = Convert16bNchwGemm1x1;
+                //else
+                //    _convert = Convert16bNhwcGemm;
+            }
         }
 
         String SynetConvolution16bNchwGemm::Desc() const
@@ -149,11 +324,11 @@ namespace Simd
                     size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
                     if (_is1x1)
                         _convert(src, p, a, yBeg, yEnd, mak, mak + macroK, buf);
-                    size_t bufOffs = _is1x1 ? mak * a.F : 0;
+                    size_t bufOffs = _is1x1 ? 0 : mak * a.F;
                     for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
                     {
                         size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-                        size_t sumOffs = a.macroK < a.bufK ? yBeg * p.dstW * a.macroD : 0;
+                        size_t sumOffs = a.macroK < a.bufK ? (dc * p.dstH + yBeg) * p.dstW : 0;
                         size_t dstOffs = (dc * p.dstH + yBeg) * p.dstW * _elemD;
                         const uint16_t* weight = _weight.data + a.bufD * mak + dc * macroK;
                         if (mak + macroK == a.bufK)
@@ -170,7 +345,7 @@ namespace Simd
 
         bool SynetConvolution16bNchwGemm::Preferable(const ConvParam& p)
         {
-            return p.trans == 0 && p.group == 1 && Is1x1(p) && p.srcT == SimdTensorData16b;
+            return p.trans == 0 && p.group == 1 && Is1x1(p);//&& p.srcT == SimdTensorData16b;
         }
     }
 #endif
