@@ -93,7 +93,7 @@ namespace Simd
                 }
                 for (; k < K; k += 2)
                 {
-                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    const float* src0 = src + k * dS;
                     for (f = 0; f < tail; ++f)
                     {
                         *dst++ = Float32ToBFloat16(src0[f]);
@@ -134,7 +134,7 @@ namespace Simd
                 }
                 for (; k < K; k += 2)
                 {
-                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    const uint16_t* src0 = src + k * dS;
                     for (size_t f = 0; f < a.F; ++f)
                     {
                         *dst++ = src0[f];
@@ -170,7 +170,7 @@ namespace Simd
                 }
                 for (; k < K; k += 2)
                 {
-                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    const uint16_t* src0 = src + k * dS;
                     for (f = 0; f < tail; ++f)
                     {
                         *dst++ = src0[f];

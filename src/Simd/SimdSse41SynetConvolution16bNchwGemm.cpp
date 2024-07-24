@@ -61,7 +61,7 @@ namespace Simd
                 }
                 for (; k < K; k += 2)
                 {
-                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    const float* src0 = src + k * dS;
                     for (size_t f = 0; f < a.F; ++f)
                     {
                         *dst++ = Base::Float32ToBFloat16(src0[f]);
@@ -97,7 +97,7 @@ namespace Simd
                 }
                 for (; k < K; k += 2)
                 {
-                    const float* src0 = src + k * dS, * src1 = src0 + dS;
+                    const float* src0 = src + k * dS;
                     for (f = 0; f < tail; ++f)
                     {
                         *dst++ = Base::Float32ToBFloat16(src0[f]);
@@ -120,6 +120,15 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void ReorderDF(const uint16_t* src, size_t stride, uint16_t*& dst0, uint16_t*& dst1)
+        {
+            __m128i src0 = _mm_loadu_si128((__m128i*)src);
+            __m128i src1 = _mm_loadu_si128((__m128i*)(src + stride));
+            _mm_storeu_si128((__m128i*)dst0, _mm_unpacklo_epi16(src0, src1));
+            _mm_storeu_si128((__m128i*)dst1, _mm_unpackhi_epi16(src0, src1));
+            dst0 += DF, dst1 += DF;
+        }
+
         SIMD_INLINE void ReorderF(const uint16_t* src, size_t stride, uint16_t*& dst)
         {
             __m128i src0 = _mm_loadl_epi64((__m128i*)src);
@@ -131,9 +140,46 @@ namespace Simd
         static void Reorder16bNchwGemm1x1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint16_t* dst)
         {
             const uint16_t* src = ((uint16_t*)src8) + (cBeg * p.srcH + yBeg) * p.srcW;
-            size_t N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), j, dS = p.srcH * p.srcW;
+            size_t N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), N2F = AlignLo(N, a.F * 2), j = 0, dS = p.srcH * p.srcW;
             size_t K = Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
-            for (j = 0; j < NF; j += a.F)
+            if (a.F == F)
+            {
+                for (j = 0; j < N2F; j += a.F * 2)
+                {
+                    uint16_t* dst0 = dst + 0 * KH * a.F;
+                    uint16_t* dst1 = dst + 1 * KH * a.F;
+                    for (k = 0; k < K2; k += 2)
+                    {
+                        const uint16_t* src0 = src + k * dS;
+                        for (size_t f = 0; f < a.F; f += DF)
+                            ReorderDF(src0 + f, dS, dst0, dst1);
+                    }
+                    for (; k < K; k += 2)
+                    {
+                        const uint16_t* src0 = src + k * dS;
+                        for (size_t f = 0; f < a.F; ++f)
+                        {
+                            *dst0++ = src0[f];
+                            *dst0++ = 0;
+                            *dst1++ = src0[f + a.F];
+                            *dst1++ = 0;
+                        }
+                    }
+                    for (; k < KH; k += 2)
+                    {
+                        for (size_t f = 0; f < a.F; ++f)
+                        {
+                            *dst0++ = 0;
+                            *dst0++ = 0;
+                            *dst1++ = 0;
+                            *dst1++ = 0;
+                        }
+                    }
+                    src += a.F * 2;
+                    dst += KH * a.F * 2;
+                }
+            }
+            for (; j < NF; j += a.F)
             {
                 for (k = 0; k < K2; k += 2)
                 {
@@ -143,7 +189,7 @@ namespace Simd
                 }
                 for (; k < K; k += 2)
                 {
-                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    const uint16_t* src0 = src + k * dS;
                     for (size_t f = 0; f < a.F; ++f)
                     {
                         *dst++ = src0[f];
@@ -179,7 +225,7 @@ namespace Simd
                 }
                 for (; k < K; k += 2)
                 {
-                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    const uint16_t* src0 = src + k * dS;
                     for (f = 0; f < tail; ++f)
                     {
                         *dst++ = src0[f];
