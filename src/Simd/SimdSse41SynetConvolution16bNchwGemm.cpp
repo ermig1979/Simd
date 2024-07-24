@@ -137,6 +137,83 @@ namespace Simd
         //    }
         //}
 
+        static void Reorder16bNchwGemm1x1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint16_t* dst)
+        {
+            const uint16_t* src = (uint16_t*)src8 + (cBeg * p.srcH + yBeg) * p.srcW;
+            size_t N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), j, dS = p.srcH * p.srcW;
+            size_t K = Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
+            for (j = 0; j < NF; j += F)
+            {
+                for (k = 0; k < K2; k += 2)
+                {
+                    const uint16_t* src0 = src + k * dS, *src1 = src0 + dS;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = src0[f];
+                        *dst++ = src1[f];
+                    }
+                }
+                for (; k < K; k += 2)
+                {
+                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = src0[f];
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < KH; k += 2)
+                {
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                src += F;
+            }
+            if(j < N)
+            {
+                size_t tail = N - j, f;
+                for (k = 0; k < K2; k += 2)
+                {
+                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (f = 0; f < tail; ++f)
+                    {
+                        *dst++ = src0[f];
+                        *dst++ = src1[f];
+                    }
+                    for (; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < K; k += 2)
+                {
+                    const uint16_t* src0 = src + k * dS, * src1 = src0 + dS;
+                    for (f = 0; f < tail; ++f)
+                    {
+                        *dst++ = src0[f];
+                        *dst++ = 0;
+                    }
+                    for (; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+                for (; k < KH; k += 2)
+                {
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        *dst++ = 0;
+                        *dst++ = 0;
+                    }
+                }
+            }
+        }
+
         //-----------------------------------------------------------------------------------------
 
         template<Term16bType term, SimdConvolutionActivationType type, int M> void Convolution16bNchwGemm_2xM(const uint16_t* weight0, const ConvParam& p, const AlgParam& a, 
@@ -380,8 +457,8 @@ namespace Simd
             if (_src16b)
             {
                 AlgParam& a = _alg;
-                //if (_is1x1 && a.K == a.bufK)
-                //    _convert = NULL;
+                if (_is1x1)
+                    _convert = Reorder16bNchwGemm1x1;
                 //else
                 //    _convert = Reorder16bNhwcGemm;
             }

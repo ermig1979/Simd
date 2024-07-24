@@ -37,6 +37,8 @@ namespace Simd
                 return new Sse41::SynetConvolution16bNhwcDirect(param);
             if (SynetConvolution16bNhwcGemm::Preferable(param))
                 return new Sse41::SynetConvolution16bNhwcGemm(param);
+            if (SynetConvolution16bNchwGemm::Preferable(param))
+                return new Sse41::SynetConvolution16bNchwGemm(param);
             return new Base::SynetConvolution16bGemm(param);
         }
     }

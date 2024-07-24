@@ -170,7 +170,7 @@ namespace Simd
 
         bool SynetConvolution16bNchwGemm::Preferable(const ConvParam& p)
         {
-            return p.trans == 0 && p.group == 1;
+            return p.trans == 0 && p.group == 1 && Is1x1(p) && p.srcT == SimdTensorData16b;
         }
     }
 #endif
