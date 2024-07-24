@@ -105,7 +105,7 @@ namespace Simd
                 size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
                 for (size_t d = 0; d < a.bufD; d += 1)
                 {
-                    const float* src = weight + d * p.dstC + mak;
+                    const float* src = weight + d * a.K + mak;
                     for (size_t k = 0; k < macroK; k += 1)
                     {
                         if (d < p.dstC && mak + k < a.K)

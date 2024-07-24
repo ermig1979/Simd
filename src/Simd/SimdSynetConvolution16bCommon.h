@@ -314,7 +314,7 @@ namespace Simd
 
         template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, __m128 val0, const float* bias, const float* params, size_t offset, size_t tail)
         {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, tail, offset);
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, offset, tail);
         }
 
         template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, __m128 val0, __m128 val1, const float* bias, const float* params, size_t offset)
