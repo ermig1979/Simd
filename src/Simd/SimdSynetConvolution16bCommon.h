@@ -888,6 +888,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1));
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1));
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1));
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(uint8_t* ptr, float* buf, const float* bias, const float* params, size_t offset, __mmask16 tail = __mmask16(-1));
         };
 
         template <> struct Term16b<Term16bLast16b>
@@ -910,7 +911,7 @@ namespace Simd
                 __m512 f32 = Activate<type>(_mm512_add_ps(value, bias[index]), params, index);
                 _mm256_mask_storeu_epi16((uint16_t*)ptr + index * F, tail, (__m256i)_mm512_cvtneps_pbh(f32));
                 _mm_prefetch((const char*)(ptr + index * DF), _MM_HINT_NTA);
-                _mm_prefetch((const char*)(buf + index * A), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(buf + index * F), _MM_HINT_NTA);
             }
 
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1))
@@ -919,6 +920,15 @@ namespace Simd
                 _mm256_mask_storeu_epi16(dst + offset * 2, tail, (__m256i)_mm512_cvtneps_pbh(f32));
                 //_mm_prefetch((const char*)(src + offset), _MM_HINT_NTA);
                 //_mm_prefetch((const char*)(dst + offset * 2), _MM_HINT_NTA);
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(uint8_t* ptr, float* buf, const float* bias, const float* params, size_t offset, __mmask16 tail = __mmask16(-1))
+            {
+                __m512 value = _mm512_maskz_loadu_ps(tail, buf + index * F);
+                __m512 f32 = ActivateNchw<type>(_mm512_add_ps(value, _mm512_set1_ps(bias[offset])), params, offset);
+                _mm256_mask_storeu_epi16((uint16_t*)ptr + index * F, tail, (__m256i)_mm512_cvtneps_pbh(f32));
+                //_mm_prefetch((const char*)(ptr + index * DF), _MM_HINT_NTA);
+                //_mm_prefetch((const char*)(buf + index * A), _MM_HINT_NTA);
             }
         };
 
@@ -939,7 +949,7 @@ namespace Simd
                 __m512 value = _mm512_maskz_loadu_ps(tail, buf + index * F);
                 _mm512_mask_storeu_ps((float*)ptr + index * F, tail, Activate<type>(_mm512_add_ps(value, bias[index]), params, index));
                 _mm_prefetch((const char*)(ptr + index * A), _MM_HINT_NTA);
-                _mm_prefetch((const char*)(buf + index * A), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(buf + index * F), _MM_HINT_NTA);
             }
 
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1))
@@ -948,6 +958,15 @@ namespace Simd
                 _mm512_mask_storeu_ps((float*)(dst + offset * 4), tail, f32);
                 //_mm_prefetch((const char*)(src + offset), _MM_HINT_NTA);
                 //_mm_prefetch((const char*)(dst + offset * 4), _MM_HINT_NTA);
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(uint8_t* ptr, float* buf, const float* bias, const float* params, size_t offset, __mmask16 tail = __mmask16(-1))
+            {
+                __m512 value = _mm512_maskz_loadu_ps(tail, buf + index * F);
+                __m512 f32 = ActivateNchw<type>(_mm512_add_ps(value, _mm512_set1_ps(bias[offset])), params, offset);
+                _mm512_mask_storeu_ps((float*)ptr + index * F, tail, f32);
+                //_mm_prefetch((const char*)(ptr + index * DF), _MM_HINT_NTA);
+                //_mm_prefetch((const char*)(buf + index * A), _MM_HINT_NTA);
             }
         };
 
@@ -968,6 +987,10 @@ namespace Simd
             }
 
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1))
+            {
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(uint8_t* ptr, float* buf, const float* bias, const float* params, size_t offset, __mmask16 tail = __mmask16(-1))
             {
             }
         };
@@ -995,6 +1018,8 @@ namespace Simd
             Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
             Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params, tail);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
         {
@@ -1031,9 +1056,48 @@ namespace Simd
             Apply2<term, type>(ptr + 7 * dP, buf + 7 * dB, bias, params, tail);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Postprocess(const float* sum, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1))
         {
             Term16b<term>::template Postprocess<type>(sum, bias, params, offset, dst, tail);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply1(uint8_t* ptr, float* buf, const float* bias, const float* params, size_t offset, __mmask16 tail = __mmask16(-1))
+        {
+            Term16b<term>::template Apply<type, 0>(ptr, buf, bias, params, offset, tail);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply1x8(uint8_t* ptr, int dP, float* buf, int dB, const float* bias, const float* params, size_t offset, __mmask16 tail = __mmask16(-1))
+        {
+            Apply1<term, type>(ptr + 0 * dP, buf + 0 * dB, bias, params, offset + 0, tail);
+            Apply1<term, type>(ptr + 1 * dP, buf + 1 * dB, bias, params, offset + 1, tail);
+            Apply1<term, type>(ptr + 2 * dP, buf + 2 * dB, bias, params, offset + 2, tail);
+            Apply1<term, type>(ptr + 3 * dP, buf + 3 * dB, bias, params, offset + 3, tail);
+            Apply1<term, type>(ptr + 4 * dP, buf + 4 * dB, bias, params, offset + 4, tail);
+            Apply1<term, type>(ptr + 5 * dP, buf + 5 * dB, bias, params, offset + 5, tail);
+            Apply1<term, type>(ptr + 6 * dP, buf + 6 * dB, bias, params, offset + 6, tail);
+            Apply1<term, type>(ptr + 7 * dP, buf + 7 * dB, bias, params, offset + 7, tail);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply2(uint8_t* ptr, float* buf, const float* bias, const float* params, size_t offset, __mmask16 tail = __mmask16(-1))
+        {
+            Term16b<term>::template Apply<type, 0>(ptr, buf, bias, params, offset);
+            Term16b<term>::template Apply<type, 1>(ptr, buf, bias, params, offset, tail);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply2x8(uint8_t* ptr, int dP, float* buf, int dB, const float* bias, const float* params, size_t offset, __mmask16 tail = __mmask16(-1))
+        {
+            Apply2<term, type>(ptr + 0 * dP, buf + 0 * dB, bias, params, offset + 0, tail);
+            Apply2<term, type>(ptr + 1 * dP, buf + 1 * dB, bias, params, offset + 1, tail);
+            Apply2<term, type>(ptr + 2 * dP, buf + 2 * dB, bias, params, offset + 2, tail);
+            Apply2<term, type>(ptr + 3 * dP, buf + 3 * dB, bias, params, offset + 3, tail);
+            Apply2<term, type>(ptr + 4 * dP, buf + 4 * dB, bias, params, offset + 4, tail);
+            Apply2<term, type>(ptr + 5 * dP, buf + 5 * dB, bias, params, offset + 5, tail);
+            Apply2<term, type>(ptr + 6 * dP, buf + 6 * dB, bias, params, offset + 6, tail);
+            Apply2<term, type>(ptr + 7 * dP, buf + 7 * dB, bias, params, offset + 7, tail);
         }
     }
 #endif

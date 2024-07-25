@@ -245,5 +245,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetInnerProduct16b.cpp">
       <Filter>AmxBf16</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNchwGemm.cpp">
+      <Filter>AmxBf16</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
