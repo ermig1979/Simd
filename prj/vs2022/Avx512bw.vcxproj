@@ -89,6 +89,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNchwGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcDirect.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32f.cpp" />
@@ -207,6 +208,9 @@
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdStream.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetAdd16b.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetAdd16bCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16bCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />

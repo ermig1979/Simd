@@ -704,5 +704,8 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetAdd16bCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

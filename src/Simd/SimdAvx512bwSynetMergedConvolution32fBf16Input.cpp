@@ -24,6 +24,7 @@
 #include "Simd/SimdSynetMergedConvolution32fBf16.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
+#include "Simd/SimdSynetConvolution16bCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdAvx512bw.h"
