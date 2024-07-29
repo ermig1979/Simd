@@ -927,8 +927,8 @@ namespace Simd
                 __m512 value = _mm512_maskz_loadu_ps(tail, buf + index * F);
                 __m512 f32 = ActivateNchw<type>(_mm512_add_ps(value, _mm512_set1_ps(bias[offset])), params, offset);
                 _mm256_mask_storeu_epi16((uint16_t*)ptr + index * F, tail, (__m256i)_mm512_cvtneps_pbh(f32));
-                //_mm_prefetch((const char*)(ptr + index * DF), _MM_HINT_NTA);
-                //_mm_prefetch((const char*)(buf + index * A), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(ptr + index * DF), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(buf + index * F), _MM_HINT_NTA);
             }
         };
 
@@ -965,8 +965,8 @@ namespace Simd
                 __m512 value = _mm512_maskz_loadu_ps(tail, buf + index * F);
                 __m512 f32 = ActivateNchw<type>(_mm512_add_ps(value, _mm512_set1_ps(bias[offset])), params, offset);
                 _mm512_mask_storeu_ps((float*)ptr + index * F, tail, f32);
-                //_mm_prefetch((const char*)(ptr + index * DF), _MM_HINT_NTA);
-                //_mm_prefetch((const char*)(buf + index * A), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(ptr + index * A), _MM_HINT_NTA);
+                //_mm_prefetch((const char*)(buf + index * F), _MM_HINT_NTA);
             }
         };
 

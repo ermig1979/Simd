@@ -240,8 +240,8 @@ namespace Simd
             a.bufD = AlignHiAny(p.dstC, a.microD);
             a.bufK = AlignHi(a.K, a.microK);
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD / 2, a.microK), a.microK, a.bufK);
-            a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH);
-            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, a.bufD);
+            a.macroH = Simd::RestrictRange(L3 / a.macroK / p.dstW / 2, size_t(1), p.dstH);
+            a.macroD = Simd::RestrictRange(AlignLoAny(L2 / a.macroK / 2, a.microD), a.microD, a.bufD);
             a.bufN = p.dstH * AlignHi(p.dstW, a.F);
             a.elem = _elemD;
             a.reorderType = 0;
@@ -345,7 +345,7 @@ namespace Simd
 
         bool SynetConvolution16bNchwGemm::Preferable(const ConvParam& p)
         {
-            return p.trans == 0 && p.group == 1 && Is1x1(p);//&& p.srcT == SimdTensorData16b;
+            return p.trans == 0 && p.group == 1 && Is1x1(p);
         }
     }
 #endif

@@ -84,12 +84,12 @@ namespace Simd
             }
             for (size_t k = 0; k < K; k += 32, weight0 += stepW, weight1 += stepW)
             {
-                _tile_stream_loadd(4, weight0, strideW);
-                _tile_loadd(6, src0 + k * 16, strideS);
+                _tile_loadd(4, weight0, strideW);
+                _tile_stream_loadd(6, src0 + k * 16, strideS);
                 _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(7, src1 + k * 16, strideS);
+                _tile_stream_loadd(7, src1 + k * 16, strideS);
                 _tile_dpbf16ps(1, 4, 7);
-                _tile_stream_loadd(5, weight1, strideW);
+                _tile_loadd(5, weight1, strideW);
                 _tile_dpbf16ps(2, 5, 6);
                 _tile_dpbf16ps(3, 5, 7);
             }
