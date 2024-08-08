@@ -85,7 +85,7 @@ namespace Simd
             \param [in] tx - initial X value.
             \param [in] ty - initial Y value.
         */
-        template <typename TX, typename TY> Point(TX tx, TY ty);
+       template <typename TX, typename TY> SIMD_CONSTEXPR Point(TX tx, TY ty);
 
         /*!
             Creates a new Point structure on the base of another point of arbitrary type.
@@ -108,7 +108,7 @@ namespace Simd
         /*!
             A point destructor.
         */
-        ~Point();
+        SIMD_CONSTEXPR ~Point();
 
         /*!
             Converts itself to point of arbitrary type.
@@ -371,7 +371,7 @@ namespace Simd
 #endif
 
     template <class TD, class TS>
-    SIMD_INLINE TD Convert(TS src)
+    SIMD_INLINE SIMD_CONSTEXPR TD Convert(TS src)
     {
         return (TD)src;
     }
@@ -396,7 +396,7 @@ namespace Simd
     }
 
     template <typename T> template <typename TX, typename TY>
-    SIMD_INLINE Point<T>::Point(TX tx, TY ty)
+    SIMD_INLINE SIMD_CONSTEXPR Point<T>::Point(TX tx, TY ty)
         : x(Convert<T, TX>(tx))
         , y(Convert<T, TY>(ty))
     {
@@ -419,7 +419,7 @@ namespace Simd
 #endif
 
     template <typename T>
-    SIMD_INLINE Point<T>::~Point()
+    SIMD_INLINE SIMD_CONSTEXPR Point<T>::~Point()
     {
     }
 
