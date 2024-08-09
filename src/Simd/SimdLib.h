@@ -89,6 +89,16 @@ typedef unsigned __int64  uint64_t;
 #if __cplusplus >= 201703L
 #define SIMD_CPP_2017_ENABLE
 #endif
+
+#if __cplusplus >= 202002L
+#define SIMD_CPP_2020_ENABLE
+#endif
+#endif
+
+#if defined(SIMD_CPP_2020_ENABLE)
+#define SIMD_CONSTEXPR constexpr
+#else
+#define SIMD_CONSTEXPR
 #endif
 
 #if defined(SIMD_CPP_2014_ENABLE)
@@ -7296,7 +7306,7 @@ extern "C"
         \param [in] kernelC - a channel size of the pooling kernel in 3D case. In 2D case it must be equal to 1.
         \param [in] kernelY - a height of the pooling kernel.
         \param [in] kernelX - a width of the pooling kernel.
-        \param [in] strideC - a ñ-stride of the pooling in 3D case. In 2D case it must be equal to 1.
+        \param [in] strideC - a ï¿½-stride of the pooling in 3D case. In 2D case it must be equal to 1.
         \param [in] strideY - a y-stride of the pooling.
         \param [in] strideX - a x-stride of the pooling.
         \param [in] padC - a channel pad to the begin of the input image.
