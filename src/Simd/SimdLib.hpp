@@ -2516,7 +2516,7 @@ namespace Simd
     */
     SIMD_INLINE void LitterCpuCache(size_t k = 2)
     {
-        size_t size = SimdCpuInfo(SimdCpuInfoCacheL3)*k;
+        size_t size = (size_t)SimdCpuInfo(SimdCpuInfoCacheL3) * k;
         uint8_t * buffer = (uint8_t*)SimdAllocate(size, SimdAlignment());
         SimdFillBgra(buffer, size, size / 4, 1, 0, 1, 2, 3);
         SimdFree(buffer);
