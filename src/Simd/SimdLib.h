@@ -3,7 +3,8 @@
 *
 * Copyright (c) 2011-2024 Yermalayeu Ihar,
 *               2014-2019 Antonenka Mikhail,
-*               2019-2019 Facundo Galan.
+*               2019-2019 Facundo Galan,
+*               2024-2024 Sergey Chezhin.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
