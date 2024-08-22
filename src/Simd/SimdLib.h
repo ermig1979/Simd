@@ -458,6 +458,9 @@ typedef enum
     SimdResizeChannelShort,
     /*! 32-bit float channel type.  */
     SimdResizeChannelFloat,
+    /*! 16-bit BFloat16 (Brain Floating Point) channel type.  */
+    SimdResizeChannelBf16,
+
 } SimdResizeChannelType;
 
 /*! @ingroup resizing

@@ -50,9 +50,10 @@ namespace Test
     {
         switch (type)
         {
-        case SimdResizeChannelByte:  return "b";
-        case SimdResizeChannelShort:  return "s";
-        case SimdResizeChannelFloat:  return "f";
+        case SimdResizeChannelByte:  return "int8";
+        case SimdResizeChannelShort:  return "int16";
+        case SimdResizeChannelFloat:  return "fp32";
+        case SimdResizeChannelBf16:  return "bf16";
         default: assert(0); return "";
         }
     }
@@ -121,7 +122,7 @@ namespace Test
             srcW *= channels;
             dstW *= channels;
         }
-        else if (type == SimdResizeChannelShort)
+        else if (type == SimdResizeChannelShort || type == SimdResizeChannelBf16)
         {
             format = View::Int16;
             srcW *= channels;
@@ -145,8 +146,15 @@ namespace Test
         View src(srcW, srcH, format, NULL, TEST_ALIGN(srcW));
         if (format == View::Float)
             FillRandom32f(src);
-        else if (format == View::Int16)
+        else if (type == SimdResizeChannelShort)
             FillRandom16u(src);
+        else if (type == SimdResizeChannelBf16)
+        {
+            View src32f(srcW, srcH, View::Float);
+            FillRandom32f(src32f);
+            for (size_t row = 0; row < srcH; row++)
+                SimdFloat32ToBFloat16(src32f.Row<float>(row), srcW, src.Row<uint16_t>(row));
+        }
         else
         {
 #ifdef TEST_RESIZE_REAL_IMAGE
@@ -178,6 +186,16 @@ namespace Test
 
         if (format == View::Float)
             result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
+        else if (format == View::Float)
+        {
+            View dst32f1(dstW, dstH, View::Float), dst32f2(dstW, dstH, View::Float);
+            for (size_t row = 0; row < dstH; row++)
+            {
+                SimdBFloat16ToFloat32(dst1.Row<uint16_t>(row), dstW, dst32f1.Row<float>(row));
+                SimdBFloat16ToFloat32(dst2.Row<uint16_t>(row), dstW, dst32f2.Row<float>(row));
+            }
+            result = result && Compare(dst32f1, dst32f2, EPS, true, 64, DifferenceAbsolute);
+        }
         else if(format == View::Int16)
             result = result && Compare(dst1, dst2, 1, true, 64);
         else
@@ -232,6 +250,10 @@ namespace Test
     bool ResizerAutoTest(const FuncRS & f1, const FuncRS & f2)
     {
         bool result = true;
+
+        result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelBf16, 1, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelBf16, 3, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelBf16, 8, f1, f2);
 
         //result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 530, 404, 96, 96, f1, f2);
         //result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 4, 100, 1, 200, 10, f1, f2);

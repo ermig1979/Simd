@@ -90,7 +90,7 @@ namespace Simd
 
         size_t ChannelSize() const
         {
-            static const size_t sizes[3] = { 1, 2, 4 };
+            static const size_t sizes[4] = { 1, 2, 4, 2 };
             return sizes[(int)type];
         }
 
