@@ -5126,6 +5126,75 @@ SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src
 #endif
 }
 
+SIMD_API void* SimdSynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void* (*SimdSynetDeconvolution6bInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    //const static SimdSynetDeconvolution6bInitPtr simdSynetDeconvolution6bInit = SIMD_FUNC4(SynetDeconvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+
+    return 0;// simdSynetDeconvolution6bInit(batch, conv, compatibility);
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetDeconvolution16bExternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// ((SynetDeconvolution16b*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetDeconvolution16bInternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// ((SynetDeconvolution16b*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API const char* SimdSynetDeconvolution16bInfo(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// ((SynetDeconvolution16b*)context)->Info();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetDeconvolution16bSetParams(void* context, const float* weight, const float* bias, const float* params)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    //((SynetDeconvolution16b*)context)->SetParams(weight, bias, params);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetDeconvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    //SynetDeconvolution16b* c = (SynetDeconvolution16b*)context;
+    //SIMD_PERF_EXT(c);
+    //c->Forward(src, buf, dst);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst)
 {
     SIMD_EMPTY();

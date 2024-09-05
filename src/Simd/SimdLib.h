@@ -6387,6 +6387,80 @@ extern "C"
     */
     SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
+    /*! @ingroup synet_deconvolution_bf16
+
+    \fn void * SimdSynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
+
+    \short Initilizes BF16 deconvolution algorithm.
+
+    \param [in] batch - a batch size.
+    \param [in] conv - a pointer to deconvolution parameters.
+    \param [in] compatibility - a flags of calculation compatibility.
+    \return a pointer to BF16 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+        This pointer is used in functions ::SimdSynetDeconvolution16bExternalBufferSize, ::SimdSynetDeconvolution16bInternalBufferSize,
+        ::SimdSynetDeconvolution16bInfo, ::SimdSynetDeconvolution16bSetParams and ::SimdSynetDeconvolution16bForward.
+*/
+    SIMD_API void* SimdSynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+
+    /*! @ingroup synet_deconvolution_bf16
+
+        \fn size_t SimdSynetDeconvolution16bExternalBufferSize(const void * context);
+
+        \short Gets size in bytes of external temporary buffer required for BF16 deconvolution algorithm.
+
+        \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
+        \return size of external temporary buffer required for BF16 convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetDeconvolution16bExternalBufferSize(const void* context);
+
+    /*! @ingroup synet_deconvolution_bf16
+
+        \fn size_t SimdSynetDeconvolution16bInternalBufferSize(const void * context);
+
+        \short Gets size (in bytes) of internal buffer used inside BF16 deconvolution algorithm.
+
+        \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside BF16 convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetDeconvolution16bInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_deconvolution_bf16
+
+        \fn const char* SimdSynetDeconvolution16bInfo(const void* context);
+
+        \short Gets description of internal implementation of BF16 deconvolution algorithm.
+
+        \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
+        \return string with description of internal implementation of BF16 convolution algorithm.
+    */
+    SIMD_API const char* SimdSynetDeconvolution16bInfo(const void* context);
+
+    /*! @ingroup synet_deconvolution_bf16
+
+        \fn void SimdSynetDeconvolution16bSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
+
+        \short Sets weights, biases, parameters of activation function, input/output tensor statistics required for BF16 deconvolution algorithm.
+
+        \param [in, out] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
+        \param [in] weight - a pointer to original (32-bit float point) convolution weights.
+        \param [in] bias - a pointer to original (32-bit float point) bias. Can be NULL.
+        \param [in] params - a pointer to original (32-bit float point) parameters of activation functions (see ::SimdDeconvolutionActivationType). Can be NULL.
+    */
+    SIMD_API void SimdSynetDeconvolution16bSetParams(void* context, const float* weight, const float* bias, const float* params);
+
+    /*! @ingroup synet_deconvolution_bf16
+
+        \fn void SimdSynetDeconvolution16bForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
+
+        \short Performs forward propagation of BF16 deconvolution algorithm.
+
+        \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor.
+        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetDeconvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetDeconvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
     /*! @ingroup synet_other
 
         \fn void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
