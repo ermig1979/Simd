@@ -376,6 +376,8 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetDeconvolution32fForward);
 
+    TEST_ADD_GROUP_A0(SynetDeconvolution16bForward);
+
     TEST_ADD_GROUP_A0(SynetGridSample2d);
 
     TEST_ADD_GROUP_A0(SynetInnerProduct32fForward);
