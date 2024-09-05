@@ -36,7 +36,7 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx2
     {
-        SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)
+        SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam & p)
             : Sse41::SynetDeconvolution32fGemmNN(p)
         {
             _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2"));
@@ -57,11 +57,11 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        typedef void(*DeconvolutionNhwcDirect2x2_Ptr) (const float * src0, const DeconvParam32f & p, size_t srcC, size_t dstC, 
+        typedef void(*DeconvolutionNhwcDirect2x2_Ptr) (const float * src0, const DeconvParam & p, size_t srcC, size_t dstC, 
             const float * weight, const __m256 * bias, const __m256 * params, float * ds, int first);
 
         template<TermType term, SimdConvolutionActivationType type, size_t tail> void DeconvolutionNhwcDirect2x2_M(const float * src0,
-            const DeconvParam32f & p, size_t srcC, size_t dstC, const float * weight0, const __m256 * bias, const __m256 * params, float * dst, int first)
+            const DeconvParam & p, size_t srcC, size_t dstC, const float * weight0, const __m256 * bias, const __m256 * params, float * dst, int first)
         {
             size_t dS = p.srcC, dD = p.dstC;
             const float * weight1 = weight0 + srcC * F, *src1, *src2, *src3, *src4, *src5;
@@ -139,7 +139,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void DeconvolutionNhwcDirect2x2(const float* src, const DeconvParam32f& p,
+        template<TermType term, SimdConvolutionActivationType type> void DeconvolutionNhwcDirect2x2(const float* src, const DeconvParam& p,
             size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst, int first)
         {
             size_t body = 6, srcWb = AlignLoAny(p.srcW, body), tail = p.srcW - srcWb;
@@ -179,7 +179,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void DeconvolutionNhwcDirect2x2(const float* src, const DeconvParam32f& p,
+        template<SimdConvolutionActivationType type> void DeconvolutionNhwcDirect2x2(const float* src, const DeconvParam& p,
             const SynetDeconvolution32fNhwcDirect2x2::AlgParam& a, const float* weight, const float* bias, const float* params, float* dst)
         {
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
@@ -209,7 +209,7 @@ namespace Simd
             }
         }
 
-        SynetDeconvolution32fNhwcDirect2x2::SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p)
+        SynetDeconvolution32fNhwcDirect2x2::SynetDeconvolution32fNhwcDirect2x2(const DeconvParam & p)
             : Sse41::SynetDeconvolution32fNhwcDirect2x2(p)
         {
             if (p.dstC > HF)
@@ -237,8 +237,8 @@ namespace Simd
 
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            DeconvParam32f param(batch, conv, compatibility);
-            if (!param.Valid())
+            DeconvParam param(batch, conv, compatibility);
+            if (!param.Valid(SimdTensorData32f))
                 return NULL;
             if (SynetDeconvolution32fNhwcDirect2x2::Preferable(param))
                 return new SynetDeconvolution32fNhwcDirect2x2(param);

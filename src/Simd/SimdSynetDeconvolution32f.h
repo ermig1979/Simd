@@ -28,6 +28,7 @@
 #include "Simd/SimdPerformance.h"
 #include "Simd/SimdRuntime.h"
 #include "Simd/SimdGemm.h"
+#include "Simd/SimdSynetConvParam.h"
 
 #ifdef _N
 #undef _N
@@ -35,79 +36,10 @@
 
 namespace Simd
 {
-    struct DeconvParam32f : public SimdConvolutionParameters
-    {
-        SimdBool trans;
-        size_t batch;
-        SimdSynetCompatibilityType compatibility;
-
-        DeconvParam32f(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
-        {
-            *((SimdConvolutionParameters*)this) = *conv;
-            this->trans = (srcF == SimdTensorFormatNhwc ? SimdTrue : SimdFalse);
-            this->batch = batch;
-            this->compatibility = compatibility;
-        }
-
-        bool Valid()
-        {
-            return 
-                dstH == strideY * (srcH - 1) + dilationY * (kernelY - 1) + 1 - padY - padH && dstH > 0 &&
-                dstW == strideX * (srcW - 1) + dilationX * (kernelX - 1) + 1 - padX - padW && dstW > 0 &&
-                srcT == SimdTensorData32f && dstT == SimdTensorData32f && 
-                srcF == dstF && (srcF == SimdTensorFormatNchw || (srcF == SimdTensorFormatNhwc && group == 1));
-        }
-
-        SIMD_INLINE bool IsKernel(size_t value) const
-        {
-            return kernelY == value && kernelX == value;
-        }
-
-        SIMD_INLINE bool IsDilation(size_t value) const
-        {
-            return dilationY == value && dilationX == value;
-        }
-
-        SIMD_INLINE bool IsStride(size_t value) const
-        {
-            return strideY == value && strideX == value;
-        }
-
-        SIMD_INLINE bool IsPad(size_t value) const
-        {
-            return padY == value && padX == value && padH == value && padW == value;
-        }
-
-        SIMD_INLINE bool IsDepthwise() const
-        {
-            return srcC == group && dstC == group;
-        }
-        SIMD_INLINE bool Is1x1() const
-        {
-            return IsKernel(1) && IsDilation(1) && IsStride(1) && IsPad(0);
-        }
-
-#ifdef SIMD_PERFORMANCE_STATISTIC
-        String Info() const
-        {
-            std::stringstream ss;
-            ss << batch << "x" << srcC << "x" << srcH << "x" << srcW;
-            ss << "-" << dstC << "x" << kernelY << "x" << kernelX;
-            ss << "-" << strideX << "-" << Simd::Max(padX, padW) << "-" << group << "-" << trans;
-            return ss.str();
-        }
-
-        int64_t Flop() const
-        {
-            return int64_t(batch) * kernelY * kernelX * srcC * srcH * srcW * dstC / group * 2;
-        }
-#endif
-    };
-
     class SynetDeconvolution32f : public Deletable
     {
     public:
-        SynetDeconvolution32f(const DeconvParam32f & p)
+        SynetDeconvolution32f(const DeconvParam & p)
             : _param(p)
             , _0(0.0f)
             , _1(1.0f)
@@ -120,7 +52,7 @@ namespace Simd
         {
         }
 
-        const DeconvParam32f & Param() const
+        const DeconvParam & Param() const
         {
             return _param;
         }
@@ -175,7 +107,7 @@ namespace Simd
         typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float * A, const float * B, float * C, GemmKernelType type, bool compatibility);
         typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
 
-        DeconvParam32f _param;
+        DeconvParam _param;
         Array32f _buffer;
         float _0, _1;
         const float * _weight, * _bias, * _params;
@@ -196,7 +128,7 @@ namespace Simd
         class SynetDeconvolution32fGemmNN : public SynetDeconvolution32f
         {
         public:
-            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            SynetDeconvolution32fGemmNN(const DeconvParam & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::GemmNN" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
             virtual size_t ExternalBufferSize() const;
@@ -214,20 +146,20 @@ namespace Simd
         class SynetDeconvolution32fNhwcDirect2x2 : public SynetDeconvolution32f
         {
         public:
-            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);
+            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::NhwcDirect2x2"; }
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
 
-            static bool Preferable(const DeconvParam32f & p);
+            static bool Preferable(const DeconvParam & p);
 
             struct AlgParam
             {
                 size_t microD, macroH, macroC, macroD;
             };
-            typedef void(*DeconvolutionPtr)(const float * src, const DeconvParam32f & p, const AlgParam & a, const float * weight, const float * bias, const float * params, float * dst);
+            typedef void(*DeconvolutionPtr)(const float * src, const DeconvParam & p, const AlgParam & a, const float * weight, const float * bias, const float * params, float * dst);
 
         protected:
             void SetAlgParam(size_t F, size_t L1, size_t L2, size_t L3);
@@ -248,7 +180,7 @@ namespace Simd
         class SynetDeconvolution32fGemmNN : public Base::SynetDeconvolution32fGemmNN
         {
         public:
-            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            SynetDeconvolution32fGemmNN(const DeconvParam & p);
             virtual String Ext() const { return "Sse41"; }
 
         protected:
@@ -258,10 +190,10 @@ namespace Simd
         class SynetDeconvolution32fNhwcDirect2x2 : public Base::SynetDeconvolution32fNhwcDirect2x2
         {
         public:
-            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);
+            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam & p);
             virtual String Ext() const { return "Sse41"; }
 
-            static bool Preferable(const DeconvParam32f & p);
+            static bool Preferable(const DeconvParam & p);
         };
 
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
@@ -274,14 +206,14 @@ namespace Simd
         class SynetDeconvolution32fGemmNN : public Sse41::SynetDeconvolution32fGemmNN
         {
         public:
-            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            SynetDeconvolution32fGemmNN(const DeconvParam & p);
             virtual String Ext() const { return "Avx2"; }
         };
 
         class SynetDeconvolution32fNhwcDirect2x2 : public Sse41::SynetDeconvolution32fNhwcDirect2x2
         {
         public:
-            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);
+            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam & p);
             virtual String Ext() const { return "Avx2"; }
         };
 
@@ -295,7 +227,7 @@ namespace Simd
         class SynetDeconvolution32fGemmNN : public Avx2::SynetDeconvolution32fGemmNN
         {
         public:
-            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            SynetDeconvolution32fGemmNN(const DeconvParam & p);
             virtual String Ext() const { return "Avx512bw"; }
 
         protected:
@@ -305,7 +237,7 @@ namespace Simd
         class SynetDeconvolution32fNhwcDirect2x2 : public Avx2::SynetDeconvolution32fNhwcDirect2x2
         {
         public:
-            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);
+            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam & p);
             virtual String Ext() const { return "Avx512bw"; }
         };
 
@@ -319,17 +251,17 @@ namespace Simd
         class SynetDeconvolution32fGemmNN : public Base::SynetDeconvolution32fGemmNN
         {
         public:
-            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            SynetDeconvolution32fGemmNN(const DeconvParam & p);
             virtual String Ext() const { return "Neon"; }
         };
 
         class SynetDeconvolution32fNhwcDirect2x2 : public Base::SynetDeconvolution32fNhwcDirect2x2
         {
         public:
-            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);
+            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam & p);
             virtual String Ext() const { return "Neon"; }
 
-            static bool Preferable(const DeconvParam32f & p);
+            static bool Preferable(const DeconvParam & p);
         };
 
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);

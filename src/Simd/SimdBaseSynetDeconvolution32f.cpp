@@ -42,7 +42,7 @@ namespace Simd
 
     namespace Base
     {
-        SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)
+        SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam & p)
             : SynetDeconvolution32f(p)
         {
             _is1x1 = p.Is1x1();
@@ -131,7 +131,7 @@ namespace Simd
 
         void SynetDeconvolution32fGemmNN::Forward(const float * src, float * buf, float * dst)
         {
-            const DeconvParam32f & p = _param;
+            const DeconvParam & p = _param;
             if (!_is1x1)
                 buf = Buffer(buf);
             if (_merge > 1)
@@ -198,7 +198,7 @@ namespace Simd
 
         void SynetDeconvolution32fGemmNN::ColToImg(const float * src, float * dst)
         {
-            const DeconvParam32f & p = _param;
+            const DeconvParam & p = _param;
             assert(!p.trans);
             size_t dstSize = p.dstW * p.dstH;
             for (size_t cd = 0; cd < p.dstC; ++cd)
@@ -232,7 +232,7 @@ namespace Simd
 
         void SynetDeconvolution32fGemmNN::RowToImg(const float * src, float * dst)
         {
-            const DeconvParam32f & p = _param;
+            const DeconvParam & p = _param;
             assert(p.trans && p.group == 1);
             if (p.IsPad(0) && p.IsDilation(1) && p.kernelY == p.strideX && p.kernelX == p.strideX)
             {
@@ -289,7 +289,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SynetDeconvolution32fNhwcDirect2x2::SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p)
+        SynetDeconvolution32fNhwcDirect2x2::SynetDeconvolution32fNhwcDirect2x2(const DeconvParam & p)
             : SynetDeconvolution32f(p)
         {
             _sizeS = p.srcC*p.srcH*p.srcW;
@@ -299,7 +299,7 @@ namespace Simd
 
         void SynetDeconvolution32fNhwcDirect2x2::SetAlgParam(size_t F, size_t L1, size_t L2, size_t L3)
         {
-            const DeconvParam32f & p = _param;
+            const DeconvParam & p = _param;
             _alg.microD = F;
             _alg.macroC = Simd::Min(L1 / sizeof(float) / p.kernelX / _alg.microD, p.srcC);
             _alg.macroH = Simd::Min(L2 / sizeof(float) / _alg.macroC / p.srcW, p.srcH);
@@ -314,7 +314,7 @@ namespace Simd
 
         void SynetDeconvolution32fNhwcDirect2x2::ReorderWeight(const float * src, float * dst)
         {
-            const DeconvParam32f & p = _param;
+            const DeconvParam & p = _param;
             const AlgParam & a = _alg;
             for (size_t da = 0; da < p.dstC; da += a.macroD)
             {
@@ -356,7 +356,7 @@ namespace Simd
             SynetDeconvolution32f::SetParams(weight, internal, bias, params);
             if (_rWeight.data)
             {
-                const DeconvParam32f & p = _param;
+                const DeconvParam & p = _param;
                 ReorderWeight(weight, _rWeight.data);
                 _weight = _rWeight.data;
                 if (internal)
@@ -370,7 +370,7 @@ namespace Simd
             }
             if (_rParams.data)
             {
-                const DeconvParam32f& p = _param;
+                const DeconvParam& p = _param;
                 switch (p.activation)
                 {
                 case SimdConvolutionActivationIdentity:
@@ -421,7 +421,7 @@ namespace Simd
 
         void SynetDeconvolution32fNhwcDirect2x2::Forward(const float * src, float * buf, float * dst)
         {
-            const DeconvParam32f & p = _param;
+            const DeconvParam & p = _param;
             for (size_t b = 0; b < p.batch; ++b)
             {
                 _deconvolution(src, _param, _alg, _weight, _bias, _params, dst);
@@ -430,7 +430,7 @@ namespace Simd
             }
         }
 
-        bool SynetDeconvolution32fNhwcDirect2x2::Preferable(const DeconvParam32f & p)
+        bool SynetDeconvolution32fNhwcDirect2x2::Preferable(const DeconvParam & p)
         {
             return false;
         }
@@ -439,8 +439,8 @@ namespace Simd
 
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            DeconvParam32f param(batch, conv, compatibility);
-            if (!param.Valid())
+            DeconvParam param(batch, conv, compatibility);
+            if (!param.Valid(SimdTensorData32f))
                 return NULL;
             if (SynetDeconvolution32fNhwcDirect2x2::Preferable(param))
                 return new SynetDeconvolution32fNhwcDirect2x2(param);

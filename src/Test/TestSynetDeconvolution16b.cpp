@@ -27,7 +27,7 @@
 #include "Test/TestSynetConvolutionParam.h"
 #include "Test/TestRandom.h"
 
-//#include "Simd/SimdSynetDeconvolution16b.h"
+#include "Simd/SimdSynetDeconvolution16b.h"
 
 namespace Test
 {

@@ -218,6 +218,80 @@ namespace Simd
 
     //-------------------------------------------------------------------------------------------------
 
+    struct DeconvParam : public SimdConvolutionParameters
+    {
+        SimdBool trans;
+        size_t batch;
+        SimdSynetCompatibilityType compatibility;
+
+        DeconvParam(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
+        {
+            *((SimdConvolutionParameters*)this) = *conv;
+            this->trans = (srcF == SimdTensorFormatNhwc ? SimdTrue : SimdFalse);
+            this->batch = batch;
+            this->compatibility = compatibility;
+        }
+
+        bool Valid(SimdTensorDataType type0, SimdTensorDataType type1 = SimdTensorData32f)
+        {
+            return
+                dstH == strideY * (srcH - 1) + dilationY * (kernelY - 1) + 1 - padY - padH && dstH > 0 &&
+                dstW == strideX * (srcW - 1) + dilationX * (kernelX - 1) + 1 - padX - padW && dstW > 0 &&
+                srcF == dstF && (srcF == SimdTensorFormatNchw || (srcF == SimdTensorFormatNhwc && group == 1)) &&
+                (srcT == type0 || srcT == type1) && (dstT == type0 || dstT == type1);
+        }
+
+        SIMD_INLINE bool IsKernel(size_t value) const
+        {
+            return kernelY == value && kernelX == value;
+        }
+
+        SIMD_INLINE bool IsDilation(size_t value) const
+        {
+            return dilationY == value && dilationX == value;
+        }
+
+        SIMD_INLINE bool IsStride(size_t value) const
+        {
+            return strideY == value && strideX == value;
+        }
+
+        SIMD_INLINE bool IsPad(size_t value) const
+        {
+            return padY == value && padX == value && padH == value && padW == value;
+        }
+
+        SIMD_INLINE bool IsDepthwise() const
+        {
+            return Simd::IsDepthwise(*this);
+        }
+        SIMD_INLINE bool Is1x1() const
+        {
+            return Simd::Is1x1(*this);
+        }
+
+        String Info(bool detail = false) const
+        {
+            std::stringstream ss;
+            ss << batch << "x" << srcC << "x" << srcH << "x" << srcW;
+            ss << "-" << dstC << "x" << kernelY << "x" << kernelX;
+            ss << "-" << Simd::Max(dilationX, dilationY) << "-" << Simd::Max(strideX, strideY);
+            ss << "-" << group << "-" << trans;
+            if (detail)
+            {
+                ss << "-" << ToChar(srcT) << ToChar(dstT) << "-" << ToStr(activation);
+            }
+            return ss.str();
+        }
+
+        int64_t Flop() const
+        {
+            return int64_t(batch) * kernelY * kernelX * srcC * srcH * srcW * dstC / group * 2;
+        }
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
     struct MergConvParam
     {
         ConvParam conv[3];
