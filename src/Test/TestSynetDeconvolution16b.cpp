@@ -78,7 +78,7 @@ namespace Test
         const SimdConvolutionParameters& c = p.conv;
         srand(0);
         Tensor32f weight(p.WeightShape());
-        FillRandom(weight.Data(), weight.Size(), -10.0, 10.0f);
+        FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
 
         Tensor32f bias({ c.dstC });
         FillRandom(bias.Data(), bias.Size(), -1.0, 1.0f);
@@ -151,7 +151,7 @@ namespace Test
         }
         result = result && Compare(dst32f1, dst32f2, eps, true, 64, DifferenceBoth);
 
-        if (0)
+        if (1)
         {
             SimdConvolutionParameters c = p.conv;
             c.srcT = SimdTensorData32f;
@@ -187,11 +187,13 @@ namespace Test
         SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)(SimdSynetCompatibilityFmaUse | SimdSynetCompatibility16bfSoft);
 #ifdef NDEBUG
 #if 1
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 32, 32, 64, _4, _1, _2, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
+        //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 24, 12, 16, 32, _2, _1, _1, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
 #endif
 #else
 #if 1
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 32, 32, 64, _4, _1, _2, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
+        //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 24, 12, 16, 32, _2, _1, _1, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
 #endif
 #endif
 
@@ -202,8 +204,8 @@ namespace Test
     {
         bool result = true;
 
-        //if (TestBase())
-        //    result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Base::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
+        if (TestBase())
+            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Base::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
 
 //#ifdef SIMD_SSE41_ENABLE
 //        if (Simd::Sse41::Enable && TestSse41())

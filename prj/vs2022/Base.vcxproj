@@ -199,6 +199,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution32fBf16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution8i.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetDeconvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetDeconvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetGridSample.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetGridSample2d32fBlZ.cpp" />

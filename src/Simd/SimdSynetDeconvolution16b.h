@@ -113,8 +113,8 @@ namespace Simd
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
         protected:
-            void ImgToCol(const uint16_t* src, uint16_t* dst);
-            void ImgToRow(const uint16_t* src, uint16_t* dst);
+            void ImgToCol(const float* src, float* dst);
+            void ImgToRow(const float* src, float* dst);
 
             void GemmNN(size_t M, size_t N, size_t K, const uint16_t* A, size_t lda, const uint16_t* B, size_t ldb, float* C, size_t ldc);
 
