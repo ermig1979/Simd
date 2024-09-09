@@ -121,6 +121,32 @@ namespace Simd
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD;
         };
 
+        class SynetDeconvolution16bNhwcGemm : public SynetDeconvolution16b
+        {
+        public:
+            SynetDeconvolution16bNhwcGemm(const DeconvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::NhwcGemm"; }
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            struct AlgParam
+            {
+                size_t batch, M, N, K;
+                size_t F, microM, microN, microK;
+                size_t macroM, macroN, macroK;
+                size_t sizeS, sizeB, sizeD;
+            };
+
+        protected:
+            void ImgToRow(const float* src, float* dst);
+
+            void GemmNN(const uint16_t* A, const uint16_t* B, float* C);
+
+            AlgParam _alg;
+        };
+
         //-------------------------------------------------------------------------------------------------
 
         void * SynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
