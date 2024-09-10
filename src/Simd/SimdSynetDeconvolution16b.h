@@ -133,18 +133,23 @@ namespace Simd
 
             struct AlgParam
             {
-                size_t batch, M, N, K;
+                size_t M, N, K;
                 size_t F, microM, microN, microK;
-                size_t macroM, macroN, macroK;
-                size_t sizeS, sizeB, sizeD;
+                size_t macroH, macroN, macroK;
+                size_t bufM, bufN, bufK;
             };
 
-        protected:
-            void ImgToRow(const float* src, float* dst);
+            static bool Preferable(const ConvParam& p);
 
-            void GemmNN(const uint16_t* A, const uint16_t* B, float* C);
+        protected:
+            typedef void(*ConvertPtr)(const uint8_t* src, const DeconvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+            typedef void(*BiasActPtr)(const float* src, const DeconvParam& p, const AlgParam& a, size_t dstC, size_t dstH, const float* bias, const float* params, uint8_t* dst);
+
+            void SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
 
             AlgParam _alg;
+            ConvertPtr _convert;
+            BiasActPtr _biasAct;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -155,6 +160,18 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        class SynetDeconvolution16bNhwcGemm : public Base::SynetDeconvolution16bNhwcGemm
+        {
+        public:
+            SynetDeconvolution16bNhwcGemm(const DeconvParam& p);
+            virtual String Ext() const { return "Sse41"; }
+
+            static bool Preferable(const ConvParam& p);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
 #endif
 
