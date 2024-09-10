@@ -210,14 +210,14 @@ namespace Simd
                     assert(p.group == 1);
                     GemmNN(_M, _N, _K, src16b, _ldS, wgt, _ldW, buf32f, _ldD);
                     if (!_is1x1)
-                        ImgToRow(buf32f, dst32f);
+                        RowToImg(buf32f, dst32f);
                 }
                 else
                 {
                     for (size_t g = 0; g < p.group; ++g)
                         GemmNN(_M, _N, _K, wgt + _grW * g, _ldW, src16b + _grS * g, _ldS, buf32f + _grD * g, _ldD);
                     if (!_is1x1)
-                        ImgToCol(buf32f, dst32f);
+                        ColToImg(buf32f, dst32f);
                 }
                 ConvolutionBiasAndActivation(_bias.data, p.dstC, p.dstH * p.dstW, p.activation, _params.data, p.trans, dst32f);
                 if (_dst16b)
@@ -227,7 +227,7 @@ namespace Simd
             }
         }
 
-        void SynetDeconvolution16bGemm::ImgToCol(const float* src, float* dst)
+        void SynetDeconvolution16bGemm::ColToImg(const float* src, float* dst)
         {
             const DeconvParam& p = _param;
             assert(!p.trans);
@@ -261,7 +261,7 @@ namespace Simd
             }
         }
 
-        void SynetDeconvolution16bGemm::ImgToRow(const float* src, float* dst)
+        void SynetDeconvolution16bGemm::RowToImg(const float* src, float* dst)
         {
             const DeconvParam& p = _param;
             assert(p.trans && p.group == 1);

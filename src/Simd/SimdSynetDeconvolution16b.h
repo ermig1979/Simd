@@ -113,8 +113,8 @@ namespace Simd
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
         protected:
-            void ImgToCol(const float* src, float* dst);
-            void ImgToRow(const float* src, float* dst);
+            void ColToImg(const float* src, float* dst);
+            void RowToImg(const float* src, float* dst);
 
             void GemmNN(size_t M, size_t N, size_t K, const uint16_t* A, size_t lda, const uint16_t* B, size_t ldb, float* C, size_t ldc);
 
@@ -135,20 +135,26 @@ namespace Simd
             {
                 size_t M, N, K;
                 size_t F, microM, microN, microK;
-                size_t macroH, macroN, macroK;
+                size_t macroH, macroM, macroN, macroK;
                 size_t bufM, bufN, bufK;
             };
 
-            static bool Preferable(const ConvParam& p);
+            static bool Preferable(const DeconvParam& p);
 
-        protected:
             typedef void(*ConvertPtr)(const uint8_t* src, const DeconvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+            typedef void(*GemmPtr)(const uint16_t* src, const DeconvParam& p, const AlgParam& a, size_t M, size_t N, size_t K, int zero, const uint16_t* wgt, float* dst);
+            typedef void(*ToImgPtr)(const float* src, const DeconvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, float* dst);
             typedef void(*BiasActPtr)(const float* src, const DeconvParam& p, const AlgParam& a, size_t dstC, size_t dstH, const float* bias, const float* params, uint8_t* dst);
 
+        protected:
             void SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
+            void ForwardCommon(const uint8_t* src, uint16_t* bufS, float* bufB, float* bufD, uint8_t* dst);
+            void GemmCommon(const uint16_t* src, float* dst);
 
             AlgParam _alg;
             ConvertPtr _convert;
+            GemmPtr _gemm;
+            ToImgPtr _toImg;
             BiasActPtr _biasAct;
         };
 
@@ -166,7 +172,7 @@ namespace Simd
             SynetDeconvolution16bNhwcGemm(const DeconvParam& p);
             virtual String Ext() const { return "Sse41"; }
 
-            static bool Preferable(const ConvParam& p);
+            static bool Preferable(const DeconvParam& p);
         };
 
         //-------------------------------------------------------------------------------------------------

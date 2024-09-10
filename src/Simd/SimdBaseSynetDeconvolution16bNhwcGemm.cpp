@@ -36,6 +36,9 @@ namespace Simd
         SynetDeconvolution16bNhwcGemm::SynetDeconvolution16bNhwcGemm(const DeconvParam& p)
             : SynetDeconvolution16b(p)
             , _convert(0)
+            , _gemm(0)
+            , _toImg(0)
+            , _biasAct(0)
         {
             assert(p.trans && p.group == 1);
         }
@@ -70,6 +73,7 @@ namespace Simd
             a.bufM = p.dstH * AlignHi(p.dstW, a.F);
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN / 2, a.microK), a.microK, a.bufK);
             a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH);
+            a.macroM = a.macroH * p.dstW;
             a.macroN = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microN), a.microN, a.bufN);
             _stepS = p.srcH * p.srcW * p.srcC * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * _elemD;
@@ -112,24 +116,51 @@ namespace Simd
             uint16_t* bufS = _src16b && a.bufK == a.K ? NULL : Allocate<uint16_t>(buf, a.bufK * a.bufM); 
             float* bufB = _is1x1 ? NULL : Allocate<float>(buf, a.bufN * a.bufM);
             float* bufD = _dst16b ? Allocate<float>(buf, p.dstH * p.dstW * p.dstC) : NULL;
-            const uint16_t* wgt = _weight.data;
             for (size_t b = 0; b < p.batch; ++b)
             {
-                const uint16_t* src16b = _src16b ? (uint16_t*)src : bufS;
-                float* dst32f = _dst16b ? bufD : (float*)dst;
-                float* buf32f = _is1x1 ? dst32f : bufB;
-                if (!_src16b || a.bufK != a.K)
-                    _convert(src, p, a, 0, p.srcH, bufS);
-                //GemmNN(_M, _N, _K, src16b, _ldS, wgt, _ldW, buf32f, _ldD);
-                //if (!_is1x1)
-                //    ImgToRow(buf32f, dst32f);
-                _biasAct(dst32f, p, a, p.dstC, p.dstH, _bias.data, _params.data, dst);
+                ForwardCommon(src, bufS, bufB, bufD, dst);
                 src += _stepS;
                 dst += _stepD;
             }
         }
 
-        bool SynetDeconvolution16bNhwcGemm::Preferable(const ConvParam& p)
+        void SynetDeconvolution16bNhwcGemm::ForwardCommon(const uint8_t* src, uint16_t* bufS, float* bufB, float* bufD, uint8_t* dst)
+        {
+            const DeconvParam& p = _param;
+            const AlgParam& a = _alg;
+            const uint16_t* src16b = _src16b ? (uint16_t*)src : bufS;
+            float* dst32f = _dst16b ? bufD : (float*)dst;
+            float* buf32f = _is1x1 ? dst32f : bufB;
+            if (!_src16b || a.bufK != a.K)
+                _convert(src, p, a, 0, p.srcH, bufS);
+            GemmCommon(src16b, buf32f);
+            if (!_is1x1)
+                _toImg(buf32f, p, a, p.dstC, 0, p.dstH, dst32f);
+            _biasAct(dst32f, p, a, p.dstC, p.dstH, _bias.data, _params.data, dst);
+        }
+
+        void SynetDeconvolution16bNhwcGemm::GemmCommon(const uint16_t* src, float* dst)
+        {
+            const AlgParam& a = _alg;
+            for (size_t man = 0; man < a.N; man += a.macroN)
+            {
+                size_t macroN = Simd::Min(a.N, man + a.macroN) - man;
+                const uint16_t* wgt = _weight.data + man * a.bufK;
+                for (size_t mak = 0; mak < a.K; mak += a.macroK)
+                {
+                    size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
+                    for (size_t mam = 0; mam < a.M; mam += a.macroM)
+                    {
+                        size_t macroM = Simd::Min(a.bufM, mam + a.macroM) - mam;
+                        _gemm(src + mam * a.bufK + mak, _param, a, macroM, macroN, macroK, mak == 0 ? 1 : 0, wgt, dst + macroM * a.bufN);
+                    }
+                    wgt += macroK * a.F;
+                }
+                dst += macroN;
+            }
+        }
+
+        bool SynetDeconvolution16bNhwcGemm::Preferable(const DeconvParam& p)
         {
             return false;
         }
