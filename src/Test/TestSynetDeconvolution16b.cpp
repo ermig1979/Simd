@@ -215,11 +215,11 @@ namespace Test
             result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Sse41::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2())
-//            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Avx2::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
-//#endif
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Avx2::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
+#endif
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw())
 //            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Avx512bw::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));

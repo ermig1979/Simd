@@ -144,7 +144,7 @@ namespace Simd
             typedef void(*ConvertPtr)(const uint8_t* src, const DeconvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
             typedef void(*GemmPtr)(const uint16_t* src, const DeconvParam& p, const AlgParam& a, size_t M, size_t N, size_t K, int zero, const uint16_t* wgt, float* dst);
             typedef void(*ToImgPtr)(const float* src, const DeconvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, float* dst);
-            typedef void(*BiasActPtr)(const float* src, const DeconvParam& p, const AlgParam& a, size_t dstC, size_t dstH, const float* bias, const float* params, uint8_t* dst);
+            typedef void(*BiasActPtr)(const float* src, const DeconvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, const float* bias, const float* params, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
@@ -184,6 +184,16 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        class SynetDeconvolution16bNhwcGemm : public Sse41::SynetDeconvolution16bNhwcGemm
+        {
+        public:
+            SynetDeconvolution16bNhwcGemm(const DeconvParam& p);
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
 #endif
 

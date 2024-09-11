@@ -136,7 +136,7 @@ namespace Simd
             GemmCommon(src16b, buf32f);
             if (!_is1x1)
                 _toImg(buf32f, p, a, p.dstC, 0, p.dstH, dst32f);
-            _biasAct(dst32f, p, a, p.dstC, p.dstH, _bias.data, _params.data, dst);
+            _biasAct(dst32f, p, a, p.dstC, 0, p.dstH, _bias.data, _params.data, dst);
         }
 
         void SynetDeconvolution16bNhwcGemm::GemmCommon(const uint16_t* src, float* dst)
