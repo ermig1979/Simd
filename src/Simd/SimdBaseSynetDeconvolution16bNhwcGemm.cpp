@@ -75,6 +75,7 @@ namespace Simd
             a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH);
             a.macroM = a.macroH * p.dstW;
             a.macroN = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microN), a.microN, a.bufN);
+            a.elem = _elemD;
             _stepS = p.srcH * p.srcW * p.srcC * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * _elemD;
         }
@@ -82,19 +83,19 @@ namespace Simd
         void SynetDeconvolution16bNhwcGemm::SetParams(const float* weight, const float* bias, const float* params)
         {
             const AlgParam& a = _alg;
-            size_t N = DivHi(a.N, a.F);
+            size_t N = AlignHi(a.N, a.F);
             _weight.Resize(a.bufK * a.bufN, true);
             uint16_t* dst = _weight.data;
-            for (size_t n = 0; n < N; n++)
+            for (size_t n = 0; n < N; n += a.F)
             {
                 for (size_t k = 0; k < a.bufK; k += 2)
                 {
-                    const float* src = weight + k * a.N + n * a.F;
+                    const float* src = weight + k * a.N + n;
                     for (size_t f = 0; f < a.F; ++f)
                     {
                         for (size_t i = 0; i < 2; ++i)
                         {
-                            if (n * a.F + f < a.N && k + i < a.K)
+                            if (n + f < a.N && k + i < a.K)
                                 *(dst++) = Float32ToBFloat16(src[i * a.N]);
                             else
                                 *(dst++) = 0;
@@ -103,7 +104,6 @@ namespace Simd
                     }
                 }
             }
-            Float32ToBFloat16(weight, _weight.size, _weight.data);
             SynetDeconvolution16b::SetBias(bias, Alignment());
             SynetDeconvolution16b::SetParams(params, Alignment());
         }
@@ -152,7 +152,7 @@ namespace Simd
                     for (size_t mam = 0; mam < a.M; mam += a.macroM)
                     {
                         size_t macroM = Simd::Min(a.bufM, mam + a.macroM) - mam;
-                        _gemm(src + mam * a.bufK + mak, _param, a, macroM, macroN, macroK, mak == 0 ? 1 : 0, wgt, dst + macroM * a.bufN);
+                        _gemm(src + mam * a.bufK + mak, _param, a, macroM, macroN, macroK, mak == 0 ? 1 : 0, wgt, dst + mam * a.bufN);
                     }
                     wgt += macroK * a.F;
                 }

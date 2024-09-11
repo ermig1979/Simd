@@ -189,14 +189,14 @@ namespace Test
 #if 1
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, b16, b16), c, f1, f2);
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
+        //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
         //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 24, 12, 16, 32, _2, _1, _1, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
         //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 24, 12, 16, 32, _2, _1, _1, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
 #endif
 #else
 #if 1
         //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 24, 12, 16, 32, _2, _1, _1, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 24, 12, 16, 32, _2, _1, _1, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
 #endif
 #endif
 
@@ -210,11 +210,11 @@ namespace Test
         if (TestBase())
             result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Base::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Sse41::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Sse41::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Avx2::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));

@@ -136,7 +136,7 @@ namespace Simd
                 size_t M, N, K;
                 size_t F, microM, microN, microK;
                 size_t macroH, macroM, macroN, macroK;
-                size_t bufM, bufN, bufK;
+                size_t bufM, bufN, bufK, elem;
             };
 
             static bool Preferable(const DeconvParam& p);

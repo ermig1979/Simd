@@ -37,101 +37,51 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convert16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Convert16bNhwcGemm(const uint8_t* src8, const DeconvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
-            const float* src = (float*)src8;
-            size_t srcC8 = Simd::AlignLo(p.srcC, 8);
-            size_t srcC4 = Simd::AlignLo(p.srcC, 4);
-            size_t gap = a.bufK - a.K;
-            for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
+            const float* src = (float*)src8 + yBeg * p.srcW * p.srcC;
+            size_t size = p.srcC, gap = a.bufK - size;
+            size_t size8 = Simd::AlignLo(size, 8);
+            size_t size4 = Simd::AlignLo(size, 4);
+            for (size_t sy = yBeg; sy < yEnd; ++sy)
             {
-                for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
+                for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
-                    uint16_t* row = dst + dr * a.bufK;
-                    for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
+                    size_t sc = 0;
+                    for (; sc < size8; sc += 8)
                     {
-                        size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
-                        if (sy < p.srcH)
-                        {
-                            for (size_t kx = 0; kx < p.kernelX; kx++)
-                            {
-                                size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
-                                if (sx < p.srcW)
-                                {
-                                    const float* ps = src + (sy * p.srcW + sx) * p.srcC;
-                                    size_t sc = 0;
-                                    for (; sc < srcC8; sc += 8)
-                                    {
-                                        __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + sc + 0));
-                                        __m128i d1 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + sc + 4));
-                                        _mm_storeu_si128((__m128i*)(row + sc), _mm_packus_epi32(d0, d1));
-                                    }
-                                    for (; sc < srcC4; sc += 4)
-                                    {
-                                        __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + sc + 0));
-                                        _mm_storel_epi64((__m128i*)(row + sc), _mm_packus_epi32(d0, Sse41::K_ZERO));
-                                    }
-                                    for (; sc < p.srcC; ++sc)
-                                        row[sc] = Base::Float32ToBFloat16(ps[sc]);
-                                    row += p.srcC;
-                                }
-                                else
-                                {
-                                    memset(row, 0, p.srcC * 2);
-                                    row += p.srcC;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            memset(row, 0, p.kernelX * p.srcC * 2);
-                            row += p.kernelX * p.srcC;
-                        }
+                        __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(src + sc + 0));
+                        __m128i d1 = Sse41::Float32ToBFloat16(_mm_loadu_ps(src + sc + 4));
+                        _mm_storeu_si128((__m128i*)(dst + sc), _mm_packus_epi32(d0, d1));
                     }
+                    for (; sc < size4; sc += 4)
+                    {
+                        __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(src + sc + 0));
+                        _mm_storel_epi64((__m128i*)(dst + sc), _mm_packus_epi32(d0, Sse41::K_ZERO));
+                    }
+                    for (; sc < p.srcC; ++sc)
+                        dst[sc] = Base::Float32ToBFloat16(src[sc]);
+                    src += size;
+                    dst += size;
                     for (size_t g = 0; g < gap; ++g)
-                        *(row++) = 0;
+                        *(dst++) = 0;
                 }
             }
         }
 
-        static void Reorder16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Reorder16bNhwcGemm(const uint8_t* src8, const DeconvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
-            const uint16_t* src = (uint16_t*)src8;
-            size_t gap = a.bufK - a.K;
-            for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
+            size_t size = a.K, gap = a.bufK - size;
+            const uint16_t* src = (uint16_t*)src8 + yBeg * p.srcW * p.srcC;
+            for (size_t sy = yBeg; sy < yEnd; ++sy)
             {
-                for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
+                for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
-                    uint16_t* row = dst + dr * a.bufK;
-                    for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
-                    {
-                        size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
-                        if (sy < p.srcH)
-                        {
-                            for (size_t kx = 0; kx < p.kernelX; kx++)
-                            {
-                                size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
-                                if (sx < p.srcW)
-                                {
-                                    const uint16_t* ps = src + (sy * p.srcW + sx) * p.srcC;
-                                    memcpy(row, ps, p.srcC * 2);
-                                    row += p.srcC;
-                                }
-                                else
-                                {
-                                    memset(row, 0, p.srcC * 2);
-                                    row += p.srcC;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            memset(row, 0, p.kernelX * p.srcC * 2);
-                            row += p.kernelX * p.srcC;
-                        }
-                    }
+                    memcpy(dst, src, size * 2);
+                    src += size;
+                    dst += size;                    
                     for (size_t g = 0; g < gap; ++g)
-                        *(row++) = 0;
+                        *(dst++) = 0;
                 }
             }
         }
@@ -366,17 +316,19 @@ namespace Simd
         {
             size_t m1 = M, m = 5, mm = AlignLoAny(m1, m), t = m1 - mm;
             size_t dS = a.bufK, dW = a.bufK * DF, dD = a.bufN;
-            Deconvolution16bNhwcGemm_2xM_Ptr deconvolution_2xN = GetDeconvolution16bNhwcGemm_2xM(m);
-            Deconvolution16bNhwcGemm_2xM_Ptr deconvolution_2xM = GetDeconvolution16bNhwcGemm_2xM(t);
+            Deconvolution16bNhwcGemm_2xM_Ptr deconvolution_2xM = GetDeconvolution16bNhwcGemm_2xM(m);
+            Deconvolution16bNhwcGemm_2xM_Ptr deconvolution_2xT = GetDeconvolution16bNhwcGemm_2xM(t);
 
             for (size_t j = 0; j < N; j += DF)
             {
                 size_t dN = Simd::Min(DF, N - j);
                 size_t i = 0;
                 for (; i < mm; i += m)
-                    deconvolution_2xN(src + i * dS, p, a, K, dN, zero, wgt + j * dW, dst + j + i * dD);
+                    deconvolution_2xM(src + i * dS, p, a, K, dN, zero, wgt, dst + i * dD);
                 for (; i < m1; i += t)
-                    deconvolution_2xM(src + i * dS, p, a, K, dN, zero, wgt + j * dW, dst + j + i * dD);
+                    deconvolution_2xT(src + i * dS, p, a, K, dN, zero, wgt, dst + i * dD);
+                wgt += dW;
+                dst += DF;
             }
         }
 
@@ -434,7 +386,7 @@ namespace Simd
                     if(tail)
                         Postprocess<term, type>(src, bias, params, dc, dst, tail);
                     src += p.dstC;
-                    dst += p.dstC;
+                    dst += p.dstC * a.elem;
                 }
             }
         }
@@ -453,16 +405,16 @@ namespace Simd
             : Base::SynetDeconvolution16bNhwcGemm(p)
         {
             SetAlgParam(F, F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            //if (_src16b)
-            //{
-            //    AlgParam& a = _alg;
-            //    if (_is1x1 && a.K == a.bufK)
-            //        _convert = NULL;
-            //    else
-            //        _convert = Reorder16bNhwcGemm;
-            //}
-            //else
-            //    _convert = Convert16bNhwcGemm;
+            if (_src16b)
+            {
+                AlgParam& a = _alg;
+                if (_is1x1 && a.K == a.bufK)
+                    _convert = NULL;
+                else
+                    _convert = Reorder16bNhwcGemm;
+            }
+            else
+                _convert = Convert16bNhwcGemm;
             _gemm = Deconvolution16bNhwcGemm_2;
             _toImg = RowToImgCommon;
             switch (p.activation)
