@@ -70,10 +70,10 @@ namespace Simd
             a.microK = microK;
             a.bufK = AlignHi(a.K, a.microK);
             a.bufN = AlignHi(a.N, a.microN);
-            a.bufM = p.dstH * AlignHi(p.dstW, a.F);
+            a.bufM = p.srcH * AlignHi(p.srcW, a.F);
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN / 2, a.microK), a.microK, a.bufK);
-            a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH);
-            a.macroM = a.macroH * p.dstW;
+            a.macroH = Simd::RestrictRange(L2 / a.macroK / p.srcW / 2, size_t(1), p.srcH);
+            a.macroM = a.macroH * p.srcW;
             a.macroN = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microN), a.microN, a.bufN);
             a.elem = _elemD;
             _stepS = p.srcH * p.srcW * p.srcC * _elemS;
@@ -135,7 +135,7 @@ namespace Simd
                 _convert(src, p, a, 0, p.srcH, bufS);
             GemmCommon(src16b, buf32f);
             if (!_is1x1)
-                _toImg(buf32f, p, a, p.dstC, 0, p.dstH, dst32f);
+                _toImg(buf32f, p, a, p.dstC, 0, p.srcH, dst32f);
             _biasAct(dst32f, p, a, p.dstC, 0, p.dstH, _bias.data, _params.data, dst);
         }
 
