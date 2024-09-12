@@ -128,7 +128,7 @@ namespace Simd
         {
             const DeconvParam& p = _param;
             const AlgParam& a = _alg;
-            const uint16_t* src16b = _src16b ? (uint16_t*)src : bufS;
+            const uint16_t* src16b = (_src16b && a.bufK == a.K ) ? (uint16_t*)src : bufS;
             float* dst32f = _dst16b ? bufD : (float*)dst;
             float* buf32f = _is1x1 ? dst32f : bufB;
             if (!_src16b || a.bufK != a.K)

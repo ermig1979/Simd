@@ -154,6 +154,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="AmxBf16">
@@ -246,6 +249,12 @@
       <Filter>AmxBf16</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNchwGemm.cpp">
+      <Filter>AmxBf16</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDeconvolution16bNhwcGemm.cpp">
+      <Filter>AmxBf16</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDeconvolution16b.cpp">
       <Filter>AmxBf16</Filter>
     </ClCompile>
   </ItemGroup>
