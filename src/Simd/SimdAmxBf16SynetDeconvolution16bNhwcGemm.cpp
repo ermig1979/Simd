@@ -90,7 +90,7 @@ namespace Simd
         static void Deconvolution16bNhwcGemm_32x32(const uint16_t* src0, const DeconvParam& p, const AlgParam& a,
             size_t dstS, size_t dstC, size_t srcC, int zero, const uint16_t* weight0, float* dst)
         {
-            int dD = a.bufN, dS = a.bufK, strideD = dD * 4, strideW = 64, strideS = dS * 2;
+            int dD = (int)a.bufN, dS = (int)a.bufK, strideD = dD * 4, strideW = 64, strideS = dS * 2;
             const uint16_t* src1 = src0 + 16 * dS;
             const uint16_t* weight1 = weight0 + a.bufK * F;
 
@@ -151,7 +151,7 @@ namespace Simd
 		static void Deconvolution16bNhwcGemm_32x16(const uint16_t* src0, const DeconvParam& p, const AlgParam& a,
             size_t dstS, size_t dstC, size_t srcC, int zero, const uint16_t* weight0, float* dst)
 		{
-			int dD = a.bufN, dS = a.bufK, strideD = dD * 4, strideW = 64, strideS = dS * 2;
+			int dD = (int)a.bufN, dS = (int)a.bufK, strideD = dD * 4, strideW = 64, strideS = dS * 2;
 			const uint16_t* src1 = src0 + 16 * dS;
 
 			TileConf conf;
@@ -194,7 +194,7 @@ namespace Simd
         static void Deconvolution16bNhwcGemm_16x32(const uint16_t* src0, const DeconvParam& p, const AlgParam& a,
             size_t dstS, size_t dstC, size_t srcC, int zero, const uint16_t* weight0, float* dst)
         {
-            int dD = a.bufN, dS = a.bufK, strideD = dD * 4, strideW = 64, strideS = dS * 2;
+            int dD = (int)a.bufN, dS = (int)a.bufK, strideD = dD * 4, strideW = 64, strideS = dS * 2;
             const uint16_t* weight1 = weight0 + a.bufK * F;
 
             TileConf conf;
@@ -237,7 +237,7 @@ namespace Simd
         static void Deconvolution16bNhwcGemm_16x16(const uint16_t* src0, const DeconvParam& p, const AlgParam& a,
             size_t dstS, size_t dstC, size_t srcC, int zero, const uint16_t* weight0, float* dst)
         {
-            int dD = a.bufN, dS = a.bufK, strideD = dD * 4, strideW = 64, strideS = dS * 2;
+            int dD = (int)a.bufN, dS = (int)a.bufK, strideD = dD * 4, strideW = 64, strideS = dS * 2;
 
             TileConf conf;
             conf.rows[0] = uint8_t(dstS);
