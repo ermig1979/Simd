@@ -65,7 +65,6 @@
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemoryStream.h" />
     <ClInclude Include="..\..\src\Simd\SimdMotion.hpp" />
-    <ClInclude Include="..\..\src\Simd\SimdMsa.h" />
     <ClInclude Include="..\..\src\Simd\SimdNeon.h" />
     <ClInclude Include="..\..\src\Simd\SimdNeural.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />

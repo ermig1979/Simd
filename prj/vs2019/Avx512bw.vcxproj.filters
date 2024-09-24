@@ -620,9 +620,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAvx1.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTranspose.h">
       <Filter>Inc</Filter>
     </ClInclude>

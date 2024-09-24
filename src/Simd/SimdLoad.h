@@ -971,6 +971,6 @@ namespace Simd
             return vextq_f32(Load<false>(p - 2), vdupq_n_f32(0.0f), 2);
         }
     }
-#endif//SIMD_NEON_ENABLE
+#endif
 }
-#endif//__SimdLoad_h__
+#endif

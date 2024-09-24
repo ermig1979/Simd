@@ -741,7 +741,7 @@ typedef struct SimdConvolutionParameters
 #ifdef __cplusplus
 extern "C"
 {
-#endif//__cplusplus
+#endif
 
     /*! @ingroup info
 
@@ -8861,6 +8861,6 @@ extern "C"
         size_t width, size_t height, uint8_t* uyvy, size_t uyvyStride);
 #ifdef __cplusplus
 }
-#endif // __cplusplus
+#endif
 
-#endif//__SimdLib_h__
+#endif

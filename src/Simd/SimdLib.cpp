@@ -1714,6 +1714,11 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
                     uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
 {
     SIMD_EMPTY();
+#ifdef SIMD_AMXBF16_ENABLE
+    if (AmxBf16::Enable)
+        AmxBf16::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+    else
+#endif
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
         Avx512bw::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);

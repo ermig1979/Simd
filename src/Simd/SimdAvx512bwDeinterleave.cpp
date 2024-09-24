@@ -97,7 +97,7 @@ namespace Simd
                 DeinterleaveUv<false>(uv, uvStride, width, height, u, uStride, v, vStride);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         const __m512i K8_SHUFFLE_DEINTERLEAVE_BGR = SIMD_MM512_SETR_EPI8(
             0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1,
@@ -162,7 +162,7 @@ namespace Simd
                 DeinterleaveBgr<false>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         const __m512i K8_SHUFFLE_BGRA = SIMD_MM512_SETR_EPI8(
             0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF,
@@ -249,5 +249,5 @@ namespace Simd
                 DeinterleaveBgra<false>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
         }
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 }

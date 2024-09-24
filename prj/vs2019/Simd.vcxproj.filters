@@ -100,9 +100,6 @@
     <ClInclude Include="..\..\src\Simd\SimdMemory.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdMsa.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdNeon.h">
       <Filter>Inc</Filter>
     </ClInclude>

@@ -164,4 +164,4 @@ namespace Simd
 #endif
 }
 
-#endif//__SimdArray_h__
+#endif

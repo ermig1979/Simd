@@ -149,7 +149,6 @@
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
-    <ClInclude Include="..\..\src\Simd\SimdAvx1.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase64.h" />

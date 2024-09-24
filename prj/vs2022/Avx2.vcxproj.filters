@@ -419,9 +419,6 @@
     <ClInclude Include="..\..\src\Simd\SimdArray.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAvx1.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
       <Filter>Inc</Filter>
     </ClInclude>

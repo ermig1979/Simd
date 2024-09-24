@@ -76,7 +76,7 @@ namespace Simd
             Simd::Log<T>(buffer, n, name);
         }
     }
-#endif //SIMD_SSE41_ENABLE
+#endif 
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
@@ -96,7 +96,7 @@ namespace Simd
             Simd::Log<T>(buffer, n, name);
         }
     }
-#endif //SIMD_AVX2_ENABLE
+#endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
@@ -218,7 +218,7 @@ namespace Simd
             std::cout << "} " << std::endl;
         }
     }
-#endif//SIMD_NEON_ENABLE
+#endif
 }
 
 #define SIMD_LOG(value) Log(value, #value)
@@ -235,7 +235,7 @@ namespace Simd
     std::cerr << ss.str() << std::flush; \
 }
 
-#else//SIMD_LOG_ENABLE
+#else
 
 #define SIMD_LOG(value)
 #define SIMD_LOG1(value)
@@ -244,6 +244,6 @@ namespace Simd
 
 #define SIMD_LOG_ERROR(message)
 
-#endif//SIMD_LOG_ENABLE 
+#endif 
 
-#endif//__SimdLog_h__
+#endif
