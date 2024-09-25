@@ -266,7 +266,7 @@ namespace Simd
     namespace Sse41
     {
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
@@ -593,7 +593,7 @@ namespace Simd
             stream.Seek(pos);
         }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
@@ -681,13 +681,13 @@ namespace Simd
             stream.Seek(pos);
         }
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }
 
-#endif//__SimdImageSaveJpeg_h__
+#endif

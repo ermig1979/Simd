@@ -49,6 +49,7 @@ namespace Simd
 
         const int JpegMarkerNone = 0xFF;
         const int JpegMaxDimensions = 1 << 24;
+        const int JpegFastBits = 9;
 
 #ifdef _MSC_VER
 #define JPEG_NOTUSED(v)  (void)(v)
@@ -69,50 +70,83 @@ namespace Simd
 
         //------------------------------------------------------------------------------
 
-        // huffman decoding acceleration
-#define FAST_BITS   9  // larger handles more cases; smaller stomps less cache
-
-        typedef struct
+        struct JpegHuffman
         {
-            uint8_t  fast[1 << FAST_BITS];
-            // weirdly, repacking this into AoS is a 10% speed loss, instead of a win
+            uint8_t  fast[1 << JpegFastBits];
             uint16_t code[256];
             uint8_t  values[256];
             uint8_t  size[257];
             unsigned int maxcode[18];
-            int    delta[17];   // old 'firstsymbol' - old 'firstcode'
-        } jpeg__huffman;
+            int delta[17];
 
-        typedef struct
+            int Build(const int* count)
+            {
+                int i, j, k = 0;
+                for (i = 0; i < 16; ++i)
+                    for (j = 0; j < count[i]; ++j)
+                        size[k++] = (uint8_t)(i + 1);
+                size[k] = 0;
+                unsigned int c = 0;
+                for (j = 1, k = 0; j <= 16; ++j) 
+                {
+                    delta[j] = k - c;
+                    if (size[k] == j) 
+                    {
+                        while (size[k] == j)
+                            code[k++] = (uint16_t)(c++);
+                        if (c - 1 >= (1u << j)) 
+                            return JpegLoadError("bad code lengths", "Corrupt JPEG");
+                    }
+                    maxcode[j] = c << (16 - j);
+                    c <<= 1;
+                }
+                maxcode[j] = 0xffffffff;
+                memset(fast, 255, 1 << JpegFastBits);
+                for (i = 0; i < k; ++i) 
+                {
+                    int s = size[i];
+                    if (s <= JpegFastBits) 
+                    {
+                        int c = code[i] << (JpegFastBits - s);
+                        int m = 1 << (JpegFastBits - s);
+                        for (j = 0; j < m; ++j)
+                            fast[c + j] = (uint8_t)i;
+                    }
+                }
+                return 1;
+            }
+        };
+
+        struct JpegImgComp
+        {
+            int id;
+            int h, v;
+            int tq;
+            int hd, ha;
+            int dc_pred;
+            int x, y, w2, h2;
+            Array8u bufD, bufC, bufL;
+            uint8_t* data;
+            short* coeff;
+            int coeff_w, coeff_h;
+        };
+
+        struct JpegContext
         {
             InputMemoryStream* stream;
             uint32_t img_x, img_y;
             int img_n, img_out_n;
-            jpeg__huffman huff_dc[4];
-            jpeg__huffman huff_ac[4];
+            JpegHuffman huff_dc[4];
+            JpegHuffman huff_ac[4];
             uint16_t dequant[4][64];
-            int16_t fast_ac[4][1 << FAST_BITS];
+            int16_t fast_ac[4][1 << JpegFastBits];
 
             // sizes for components, interleaved MCUs
             int img_h_max, img_v_max;
             int img_mcu_x, img_mcu_y;
             int img_mcu_w, img_mcu_h;
 
-            // definition of jpeg image component
-            struct
-            {
-                int id;
-                int h, v;
-                int tq;
-                int hd, ha;
-                int dc_pred;
-
-                int x, y, w2, h2;
-                Array8u bufD, bufC, bufL;
-                uint8_t* data;
-                short* coeff;   // progressive only
-                int      coeff_w, coeff_h; // number of 8x8 coefficient blocks
-            } img_comp[4];
+            JpegImgComp img_comp[4];
 
             uint32_t   code_buffer; // jpeg entropy-coded buffer
             int            code_bits;   // number of valid bits
@@ -138,56 +172,56 @@ namespace Simd
             void (*idct_block_kernel)(uint8_t* out, int out_stride, short data[64]);
             void (*YCbCr_to_RGB_kernel)(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step);
             uint8_t* (*resample_row_hv_2_kernel)(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs);
-        } jpeg__jpeg;
+        };
 
-        static int jpeg__build_huffman(jpeg__huffman* h, int* count)
-        {
-            int i, j, k = 0;
-            unsigned int code;
-            // build size list for each symbol (from JPEG spec)
-            for (i = 0; i < 16; ++i)
-                for (j = 0; j < count[i]; ++j)
-                    h->size[k++] = (uint8_t)(i + 1);
-            h->size[k] = 0;
+        //static int jpeg__build_huffman(JpegHuffman* h, const int* count)
+        //{
+        //    int i, j, k = 0;
+        //    unsigned int code;
+        //    // build size list for each symbol (from JPEG spec)
+        //    for (i = 0; i < 16; ++i)
+        //        for (j = 0; j < count[i]; ++j)
+        //            h->size[k++] = (uint8_t)(i + 1);
+        //    h->size[k] = 0;
 
-            // compute actual symbols (from jpeg spec)
-            code = 0;
-            k = 0;
-            for (j = 1; j <= 16; ++j) {
-                // compute delta to add to code to compute symbol id
-                h->delta[j] = k - code;
-                if (h->size[k] == j) {
-                    while (h->size[k] == j)
-                        h->code[k++] = (uint16_t)(code++);
-                    if (code - 1 >= (1u << j)) return JpegLoadError("bad code lengths", "Corrupt JPEG");
-                }
-                // compute largest code + 1 for this size, preshifted as needed later
-                h->maxcode[j] = code << (16 - j);
-                code <<= 1;
-            }
-            h->maxcode[j] = 0xffffffff;
+        //    // compute actual symbols (from jpeg spec)
+        //    code = 0;
+        //    k = 0;
+        //    for (j = 1; j <= 16; ++j) {
+        //        // compute delta to add to code to compute symbol id
+        //        h->delta[j] = k - code;
+        //        if (h->size[k] == j) {
+        //            while (h->size[k] == j)
+        //                h->code[k++] = (uint16_t)(code++);
+        //            if (code - 1 >= (1u << j)) return JpegLoadError("bad code lengths", "Corrupt JPEG");
+        //        }
+        //        // compute largest code + 1 for this size, preshifted as needed later
+        //        h->maxcode[j] = code << (16 - j);
+        //        code <<= 1;
+        //    }
+        //    h->maxcode[j] = 0xffffffff;
 
-            // build non-spec acceleration table; 255 is flag for not-accelerated
-            memset(h->fast, 255, 1 << FAST_BITS);
-            for (i = 0; i < k; ++i) {
-                int s = h->size[i];
-                if (s <= FAST_BITS) {
-                    int c = h->code[i] << (FAST_BITS - s);
-                    int m = 1 << (FAST_BITS - s);
-                    for (j = 0; j < m; ++j) {
-                        h->fast[c + j] = (uint8_t)i;
-                    }
-                }
-            }
-            return 1;
-        }
+        //    // build non-spec acceleration table; 255 is flag for not-accelerated
+        //    memset(h->fast, 255, 1 << JpegFastBits);
+        //    for (i = 0; i < k; ++i) {
+        //        int s = h->size[i];
+        //        if (s <= JpegFastBits) {
+        //            int c = h->code[i] << (JpegFastBits - s);
+        //            int m = 1 << (JpegFastBits - s);
+        //            for (j = 0; j < m; ++j) {
+        //                h->fast[c + j] = (uint8_t)i;
+        //            }
+        //        }
+        //    }
+        //    return 1;
+        //}
 
         // build a table that decodes both magnitude and value of small ACs in
         // one go.
-        static void jpeg__build_fast_ac(int16_t* fast_ac, jpeg__huffman* h)
+        static void jpeg__build_fast_ac(int16_t* fast_ac, JpegHuffman* h)
         {
             int i;
-            for (i = 0; i < (1 << FAST_BITS); ++i) {
+            for (i = 0; i < (1 << JpegFastBits); ++i) {
                 uint8_t fast = h->fast[i];
                 fast_ac[i] = 0;
                 if (fast < 255) {
@@ -196,9 +230,9 @@ namespace Simd
                     int magbits = rs & 15;
                     int len = h->size[fast];
 
-                    if (magbits && len + magbits <= FAST_BITS) {
+                    if (magbits && len + magbits <= JpegFastBits) {
                         // magnitude code followed by receive_extend code
-                        int k = ((i << len) & ((1 << FAST_BITS) - 1)) >> (FAST_BITS - magbits);
+                        int k = ((i << len) & ((1 << JpegFastBits) - 1)) >> (JpegFastBits - magbits);
                         int m = 1 << (magbits - 1);
                         if (k < m) k += (~0U << magbits) + 1;
                         // if the result is small enough, we can fit it in fast_ac table
@@ -209,7 +243,7 @@ namespace Simd
             }
         }
 
-        static void jpeg__grow_buffer_unsafe(jpeg__jpeg* j)
+        static void jpeg__grow_buffer_unsafe(JpegContext* j)
         {
             do {
                 unsigned int b = j->nomore ? 0 : j->stream->Get8u();
@@ -232,7 +266,7 @@ namespace Simd
         static const uint32_t jpeg__bmask[17] = { 0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,16383,32767,65535 };
 
         // decode a jpeg huffman value from the bitstream
-        SIMD_INLINE static int jpeg__jpeg_huff_decode(jpeg__jpeg* j, jpeg__huffman* h)
+        SIMD_INLINE static int jpeg__jpeg_huff_decode(JpegContext* j, JpegHuffman* h)
         {
             unsigned int temp;
             int c, k;
@@ -241,7 +275,7 @@ namespace Simd
 
             // look at the top FAST_BITS and determine what symbol ID it is,
             // if the code is <= FAST_BITS
-            c = (j->code_buffer >> (32 - FAST_BITS)) & ((1 << FAST_BITS) - 1);
+            c = (j->code_buffer >> (32 - JpegFastBits)) & ((1 << JpegFastBits) - 1);
             k = h->fast[c];
             if (k < 255) {
                 int s = h->size[k];
@@ -259,7 +293,7 @@ namespace Simd
             // wants to be compared against something shifted to have 16;
             // that way we don't need to shift inside the loop.
             temp = j->code_buffer >> 16;
-            for (k = FAST_BITS + 1; ; ++k)
+            for (k = JpegFastBits + 1; ; ++k)
                 if (temp < h->maxcode[k])
                     break;
             if (k == 17) {
@@ -286,7 +320,7 @@ namespace Simd
 
         // combined JPEG 'receive' and JPEG 'extend', since baseline
         // always extends everything it receives.
-        SIMD_INLINE static int jpeg__extend_receive(jpeg__jpeg* j, int n)
+        SIMD_INLINE static int jpeg__extend_receive(JpegContext* j, int n)
         {
             unsigned int k;
             int sgn;
@@ -302,7 +336,7 @@ namespace Simd
         }
 
         // get some unsigned bits
-        SIMD_INLINE static int jpeg__jpeg_get_bits(jpeg__jpeg* j, int n)
+        SIMD_INLINE static int jpeg__jpeg_get_bits(JpegContext* j, int n)
         {
             unsigned int k;
             if (j->code_bits < n) jpeg__grow_buffer_unsafe(j);
@@ -313,7 +347,7 @@ namespace Simd
             return k;
         }
 
-        SIMD_INLINE static int jpeg__jpeg_get_bit(jpeg__jpeg* j)
+        SIMD_INLINE static int jpeg__jpeg_get_bit(JpegContext* j)
         {
             unsigned int k;
             if (j->code_bits < 1) jpeg__grow_buffer_unsafe(j);
@@ -324,7 +358,7 @@ namespace Simd
         }
 
         // decode one 64-entry block--
-        static int jpeg__jpeg_decode_block(jpeg__jpeg* j, short data[64], jpeg__huffman* hdc, jpeg__huffman* hac, int16_t* fac, int b, uint16_t* dequant)
+        static int jpeg__jpeg_decode_block(JpegContext* j, short data[64], JpegHuffman* hdc, JpegHuffman* hac, int16_t* fac, int b, uint16_t* dequant)
         {
             int diff, dc, k;
             int t;
@@ -347,7 +381,7 @@ namespace Simd
                 unsigned int zig;
                 int c, r, s;
                 if (j->code_bits < 16) jpeg__grow_buffer_unsafe(j);
-                c = (j->code_buffer >> (32 - FAST_BITS)) & ((1 << FAST_BITS) - 1);
+                c = (j->code_buffer >> (32 - JpegFastBits)) & ((1 << JpegFastBits) - 1);
                 r = fac[c];
                 if (r) { // fast-AC path
                     k += (r >> 4) & 15; // run
@@ -378,7 +412,7 @@ namespace Simd
             return 1;
         }
 
-        static int jpeg__jpeg_decode_block_prog_dc(jpeg__jpeg* j, short data[64], jpeg__huffman* hdc, int b)
+        static int jpeg__jpeg_decode_block_prog_dc(JpegContext* j, short data[64], JpegHuffman* hdc, int b)
         {
             int diff, dc;
             int t;
@@ -407,7 +441,7 @@ namespace Simd
 
         // @OPTIMIZE: store non-zigzagged during the decode passes,
         // and only de-zigzag when dequantizing
-        static int jpeg__jpeg_decode_block_prog_ac(jpeg__jpeg* j, short data[64], jpeg__huffman* hac, int16_t* fac)
+        static int jpeg__jpeg_decode_block_prog_ac(JpegContext* j, short data[64], JpegHuffman* hac, int16_t* fac)
         {
             int k;
             if (j->spec_start == 0) return JpegLoadError("can't merge dc and ac", "Corrupt JPEG");
@@ -425,7 +459,7 @@ namespace Simd
                     unsigned int zig;
                     int c, r, s;
                     if (j->code_bits < 16) jpeg__grow_buffer_unsafe(j);
-                    c = (j->code_buffer >> (32 - FAST_BITS)) & ((1 << FAST_BITS) - 1);
+                    c = (j->code_buffer >> (32 - JpegFastBits)) & ((1 << JpegFastBits) - 1);
                     r = fac[c];
                     if (r) { // fast-AC path
                         k += (r >> 4) & 15; // run
@@ -649,7 +683,7 @@ namespace Simd
         // if there's a pending marker from the entropy stream, return that
         // otherwise, fetch from the stream and get a marker. if there's no
         // marker, return 0xff, which is never a valid marker value
-        static uint8_t jpeg__get_marker(jpeg__jpeg* j)
+        static uint8_t jpeg__get_marker(JpegContext* j)
         {
             uint8_t x;
             if (j->marker != JPEG__MARKER_none) { x = j->marker; j->marker = JPEG__MARKER_none; return x; }
@@ -666,7 +700,7 @@ namespace Simd
 
 // after a restart interval, jpeg__jpeg_reset the entropy decoder and
 // the dc prediction
-        static void jpeg__jpeg_reset(jpeg__jpeg* j)
+        static void jpeg__jpeg_reset(JpegContext* j)
         {
             j->code_bits = 0;
             j->code_buffer = 0;
@@ -679,7 +713,7 @@ namespace Simd
             // since we don't even allow 1<<30 pixels
         }
 
-        static int jpeg__parse_entropy_coded_data(jpeg__jpeg* z)
+        static int jpeg__parse_entropy_coded_data(JpegContext* z)
         {
             jpeg__jpeg_reset(z);
             if (!z->progressive) {
@@ -814,7 +848,7 @@ namespace Simd
                 data[i] *= dequant[i];
         }
 
-        static void jpeg__jpeg_finish(jpeg__jpeg* z)
+        static void jpeg__jpeg_finish(JpegContext* z)
         {
             if (z->progressive) {
                 // dequantize and idct the data
@@ -833,7 +867,7 @@ namespace Simd
             }
         }
 
-        static int jpeg__process_marker(jpeg__jpeg* z, int m)
+        static int jpeg__process_marker(JpegContext* z, int m)
         {
             int L;
             switch (m) {
@@ -875,11 +909,13 @@ namespace Simd
                     }
                     L -= 17;
                     if (tc == 0) {
-                        if (!jpeg__build_huffman(z->huff_dc + th, sizes)) return 0;
+                        if (!z->huff_dc[th].Build(sizes)) 
+                            return 0;
                         v = z->huff_dc[th].values;
                     }
                     else {
-                        if (!jpeg__build_huffman(z->huff_ac + th, sizes)) return 0;
+                        if (!z->huff_ac[th].Build(sizes)) 
+                            return 0;
                         v = z->huff_ac[th].values;
                     }
                     for (i = 0; i < n; ++i)
@@ -940,7 +976,7 @@ namespace Simd
         }
 
         // after we see SOS
-        static int jpeg__process_scan_header(jpeg__jpeg* z)
+        static int jpeg__process_scan_header(JpegContext* z)
         {
             int i;
             int Ls = z->stream->GetBe16u();
@@ -980,7 +1016,7 @@ namespace Simd
             return 1;
         }
 
-        static int jpeg__process_frame_header(jpeg__jpeg* z, int scan)
+        static int jpeg__process_frame_header(JpegContext* z, int scan)
         {
             int Lf, p, i, q, h_max = 1, v_max = 1, c;
             Lf = z->stream->GetBe16u();         if (Lf < 11) return JpegLoadError("bad SOF len", "Corrupt JPEG"); // JPEG
@@ -1073,7 +1109,7 @@ namespace Simd
 
 #define jpeg__SOF_progressive(x)   ((x) == 0xc2)
 
-        static int DecodeJpegHeader(jpeg__jpeg* z, int scan)
+        static int DecodeJpegHeader(JpegContext* z, int scan)
         {
             int m;
             z->jfif = 0;
@@ -1100,7 +1136,7 @@ namespace Simd
         }
 
         // decode image to YCbCr format
-        static int jpeg__decode_jpeg_image(jpeg__jpeg* j)
+        static int jpeg__decode_jpeg_image(JpegContext* j)
         {
             int m;
             j->restart_interval = 0;
@@ -1140,8 +1176,7 @@ namespace Simd
 
         // static jfif-centered resampling (across block boundaries)
 
-        typedef uint8_t* (*resample_row_func)(uint8_t* out, uint8_t* in0, uint8_t* in1,
-            int w, int hs);
+        typedef uint8_t* (*ResampleRowPtr)(uint8_t* out, uint8_t* in0, uint8_t* in1, int w, int hs);
 
 #define jpeg__div4(x) ((uint8_t) ((x) >> 2))
 
@@ -1258,7 +1293,7 @@ namespace Simd
         }
 
         // set up the kernels
-        static void jpeg__setup_jpeg(jpeg__jpeg* j)
+        static void jpeg__setup_jpeg(JpegContext* j)
         {
             j->idct_block_kernel = jpeg__idct_block;
             j->YCbCr_to_RGB_kernel = jpeg__YCbCr_to_RGB_row;
@@ -1267,7 +1302,7 @@ namespace Simd
 
         typedef struct
         {
-            resample_row_func resample;
+            ResampleRowPtr resample;
             uint8_t* line0, * line1;
             int hs, vs;   // expansion factor in each axis
             int w_lores; // horizontal pixels pre-expansion
@@ -1282,7 +1317,7 @@ namespace Simd
             return (uint8_t)((t + (t >> 8)) >> 8);
         }
 
-        static int load_jpeg_image(jpeg__jpeg* z, int* out_x, int* out_y, int* comp, int req_comp)
+        static int load_jpeg_image(JpegContext* z, int* out_x, int* out_y, int* comp, int req_comp)
         {
             int n, decode_n, is_rgb;
             z->img_n = 0; // make jpeg__cleanup_jpeg safe
@@ -1464,7 +1499,7 @@ namespace Simd
         bool ImageJpegLoader::FromStream()
         {
             int x, y, comp;
-            jpeg__jpeg j;
+            JpegContext j;
             j.stream = &_stream;
             jpeg__setup_jpeg(&j);
             if (load_jpeg_image(&j, &x, &y, &comp, 4))
@@ -1491,7 +1526,6 @@ namespace Simd
                 default: 
                     break;
                 }
-                //JPEG_FREE(data);
                 return true;
             }
             return false;
