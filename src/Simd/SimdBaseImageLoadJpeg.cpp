@@ -49,7 +49,6 @@ namespace Simd
 
         const int JpegMarkerNone = 0xFF;
         const int JpegMaxDimensions = 1 << 24;
-        const int JpegFastBits = 9;
 
 #ifdef _MSC_VER
 #define JPEG_NOTUSED(v)  (void)(v)
@@ -68,54 +67,71 @@ namespace Simd
             return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
         }
 
-        //------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
-        struct JpegHuffman
+        int JpegHuffman::Build(const int* count)
         {
-            uint8_t  fast[1 << JpegFastBits];
-            uint16_t code[256];
-            uint8_t  values[256];
-            uint8_t  size[257];
-            unsigned int maxcode[18];
-            int delta[17];
-
-            int Build(const int* count)
+            int i, j, k = 0;
+            for (i = 0; i < 16; ++i)
+                for (j = 0; j < count[i]; ++j)
+                    size[k++] = (uint8_t)(i + 1);
+            size[k] = 0;
+            unsigned int c = 0;
+            for (j = 1, k = 0; j <= 16; ++j) 
             {
-                int i, j, k = 0;
-                for (i = 0; i < 16; ++i)
-                    for (j = 0; j < count[i]; ++j)
-                        size[k++] = (uint8_t)(i + 1);
-                size[k] = 0;
-                unsigned int c = 0;
-                for (j = 1, k = 0; j <= 16; ++j) 
+                delta[j] = k - c;
+                if (size[k] == j) 
                 {
-                    delta[j] = k - c;
-                    if (size[k] == j) 
-                    {
-                        while (size[k] == j)
-                            code[k++] = (uint16_t)(c++);
-                        if (c - 1 >= (1u << j)) 
-                            return JpegLoadError("bad code lengths", "Corrupt JPEG");
-                    }
-                    maxcode[j] = c << (16 - j);
-                    c <<= 1;
+                    while (size[k] == j)
+                        code[k++] = (uint16_t)(c++);
+                    if (c - 1 >= (1u << j)) 
+                        return JpegLoadError("bad code lengths", "Corrupt JPEG");
                 }
-                maxcode[j] = 0xffffffff;
-                memset(fast, 255, 1 << JpegFastBits);
-                for (i = 0; i < k; ++i) 
-                {
-                    int s = size[i];
-                    if (s <= JpegFastBits) 
-                    {
-                        int c = code[i] << (JpegFastBits - s);
-                        int m = 1 << (JpegFastBits - s);
-                        for (j = 0; j < m; ++j)
-                            fast[c + j] = (uint8_t)i;
-                    }
-                }
-                return 1;
+                maxcode[j] = c << (16 - j);
+                c <<= 1;
             }
-        };
+            maxcode[j] = 0xffffffff;
+            memset(fast, 255, 1 << JpegFastBits);
+            for (i = 0; i < k; ++i) 
+            {
+                int s = size[i];
+                if (s <= JpegFastBits) 
+                {
+                    int c = code[i] << (JpegFastBits - s);
+                    int m = 1 << (JpegFastBits - s);
+                    for (j = 0; j < m; ++j)
+                        fast[c + j] = (uint8_t)i;
+                }
+            }
+            return 1;
+        }
+
+        void JpegHuffman::BuildFastAc()
+        {
+            for (int i = 0; i < (1 << JpegFastBits); ++i)
+            {
+                uint8_t f = fast[i];
+                fast_ac[i] = 0;
+                if (f < 255)
+                {
+                    int rs = values[f];
+                    int run = (rs >> 4) & 15;
+                    int magbits = rs & 15;
+                    int len = size[f];
+                    if (magbits && len + magbits <= JpegFastBits)
+                    {
+                        int k = ((i << len) & ((1 << JpegFastBits) - 1)) >> (JpegFastBits - magbits);
+                        int m = 1 << (magbits - 1);
+                        if (k < m)
+                            k += (~0U << magbits) + 1;
+                        if (k >= -128 && k <= 127)
+                            fast_ac[i] = (int16_t)((k * 256) + (run * 16) + (len + magbits));
+                    }
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         struct JpegImgComp
         {
@@ -139,7 +155,6 @@ namespace Simd
             JpegHuffman huff_dc[4];
             JpegHuffman huff_ac[4];
             uint16_t dequant[4][64];
-            int16_t fast_ac[4][1 << JpegFastBits];
 
             // sizes for components, interleaved MCUs
             int img_h_max, img_v_max;
@@ -174,76 +189,7 @@ namespace Simd
             uint8_t* (*resample_row_hv_2_kernel)(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs);
         };
 
-        //static int jpeg__build_huffman(JpegHuffman* h, const int* count)
-        //{
-        //    int i, j, k = 0;
-        //    unsigned int code;
-        //    // build size list for each symbol (from JPEG spec)
-        //    for (i = 0; i < 16; ++i)
-        //        for (j = 0; j < count[i]; ++j)
-        //            h->size[k++] = (uint8_t)(i + 1);
-        //    h->size[k] = 0;
-
-        //    // compute actual symbols (from jpeg spec)
-        //    code = 0;
-        //    k = 0;
-        //    for (j = 1; j <= 16; ++j) {
-        //        // compute delta to add to code to compute symbol id
-        //        h->delta[j] = k - code;
-        //        if (h->size[k] == j) {
-        //            while (h->size[k] == j)
-        //                h->code[k++] = (uint16_t)(code++);
-        //            if (code - 1 >= (1u << j)) return JpegLoadError("bad code lengths", "Corrupt JPEG");
-        //        }
-        //        // compute largest code + 1 for this size, preshifted as needed later
-        //        h->maxcode[j] = code << (16 - j);
-        //        code <<= 1;
-        //    }
-        //    h->maxcode[j] = 0xffffffff;
-
-        //    // build non-spec acceleration table; 255 is flag for not-accelerated
-        //    memset(h->fast, 255, 1 << JpegFastBits);
-        //    for (i = 0; i < k; ++i) {
-        //        int s = h->size[i];
-        //        if (s <= JpegFastBits) {
-        //            int c = h->code[i] << (JpegFastBits - s);
-        //            int m = 1 << (JpegFastBits - s);
-        //            for (j = 0; j < m; ++j) {
-        //                h->fast[c + j] = (uint8_t)i;
-        //            }
-        //        }
-        //    }
-        //    return 1;
-        //}
-
-        // build a table that decodes both magnitude and value of small ACs in
-        // one go.
-        static void jpeg__build_fast_ac(int16_t* fast_ac, JpegHuffman* h)
-        {
-            int i;
-            for (i = 0; i < (1 << JpegFastBits); ++i) {
-                uint8_t fast = h->fast[i];
-                fast_ac[i] = 0;
-                if (fast < 255) {
-                    int rs = h->values[fast];
-                    int run = (rs >> 4) & 15;
-                    int magbits = rs & 15;
-                    int len = h->size[fast];
-
-                    if (magbits && len + magbits <= JpegFastBits) {
-                        // magnitude code followed by receive_extend code
-                        int k = ((i << len) & ((1 << JpegFastBits) - 1)) >> (JpegFastBits - magbits);
-                        int m = 1 << (magbits - 1);
-                        if (k < m) k += (~0U << magbits) + 1;
-                        // if the result is small enough, we can fit it in fast_ac table
-                        if (k >= -128 && k <= 127)
-                            fast_ac[i] = (int16_t)((k * 256) + (run * 16) + (len + magbits));
-                    }
-                }
-            }
-        }
-
-        static void jpeg__grow_buffer_unsafe(JpegContext* j)
+        SIMD_INLINE static void jpeg__grow_buffer_unsafe(JpegContext* j)
         {
             do {
                 unsigned int b = j->nomore ? 0 : j->stream->Get8u();
@@ -266,7 +212,7 @@ namespace Simd
         static const uint32_t jpeg__bmask[17] = { 0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,16383,32767,65535 };
 
         // decode a jpeg huffman value from the bitstream
-        SIMD_INLINE static int jpeg__jpeg_huff_decode(JpegContext* j, JpegHuffman* h)
+        SIMD_INLINE static int jpeg__jpeg_huff_decode(JpegContext* j, const JpegHuffman* h)
         {
             unsigned int temp;
             int c, k;
@@ -730,7 +676,7 @@ namespace Simd
                     for (j = 0; j < h; ++j) {
                         for (i = 0; i < w; ++i) {
                             int ha = z->img_comp[n].ha;
-                            if (!jpeg__jpeg_decode_block(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->fast_ac[ha], n, z->dequant[z->img_comp[n].tq])) return 0;
+                            if (!jpeg__jpeg_decode_block(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->huff_ac[ha].fast_ac, n, z->dequant[z->img_comp[n].tq])) return 0;
                             z->idct_block_kernel(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
                             // every data block is an MCU, so countdown the restart interval
                             if (--z->todo <= 0) {
@@ -759,7 +705,7 @@ namespace Simd
                                         int x2 = (i * z->img_comp[n].h + x) * 8;
                                         int y2 = (j * z->img_comp[n].v + y) * 8;
                                         int ha = z->img_comp[n].ha;
-                                        if (!jpeg__jpeg_decode_block(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->fast_ac[ha], n, z->dequant[z->img_comp[n].tq])) return 0;
+                                        if (!jpeg__jpeg_decode_block(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->huff_ac[ha].fast_ac, n, z->dequant[z->img_comp[n].tq])) return 0;
                                         z->idct_block_kernel(z->img_comp[n].data + z->img_comp[n].w2 * y2 + x2, z->img_comp[n].w2, data);
                                     }
                                 }
@@ -795,7 +741,7 @@ namespace Simd
                             }
                             else {
                                 int ha = z->img_comp[n].ha;
-                                if (!jpeg__jpeg_decode_block_prog_ac(z, data, &z->huff_ac[ha], z->fast_ac[ha]))
+                                if (!jpeg__jpeg_decode_block_prog_ac(z, data, &z->huff_ac[ha], z->huff_ac[ha].fast_ac))
                                     return 0;
                             }
                             // every data block is an MCU, so countdown the restart interval
@@ -903,17 +849,20 @@ namespace Simd
                     int tc = q >> 4;
                     int th = q & 15;
                     if (tc > 1 || th > 3) return JpegLoadError("bad DHT header", "Corrupt JPEG");
-                    for (i = 0; i < 16; ++i) {
+                    for (i = 0; i < 16; ++i) 
+                    {
                         sizes[i] = z->stream->Get8u();
                         n += sizes[i];
                     }
                     L -= 17;
-                    if (tc == 0) {
+                    if (tc == 0) 
+                    {
                         if (!z->huff_dc[th].Build(sizes)) 
                             return 0;
                         v = z->huff_dc[th].values;
                     }
-                    else {
+                    else 
+                    {
                         if (!z->huff_ac[th].Build(sizes)) 
                             return 0;
                         v = z->huff_ac[th].values;
@@ -921,7 +870,7 @@ namespace Simd
                     for (i = 0; i < n; ++i)
                         v[i] = z->stream->Get8u();
                     if (tc != 0)
-                        jpeg__build_fast_ac(z->fast_ac[th], z->huff_ac + th);
+                        z->huff_ac[th].BuildFastAc();
                     L -= n;
                 }
                 return L == 0;

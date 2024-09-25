@@ -30,7 +30,25 @@ namespace Simd
 {
     namespace Base
     {
+        const int JpegFastBits = 9;
+
         extern const uint8_t JpegDeZigZag[80];
+
+        //-------------------------------------------------------------------------------------------------
+
+        struct JpegHuffman
+        {
+            uint8_t  fast[1 << JpegFastBits];
+            uint16_t code[256];
+            uint8_t  values[256];
+            uint8_t  size[257];
+            unsigned int maxcode[18];
+            int delta[17];
+            int16_t fast_ac[1 << JpegFastBits];
+
+            int Build(const int* count);
+            void BuildFastAc();
+        };
 
         //-------------------------------------------------------------------------------------------------
 
