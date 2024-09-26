@@ -240,7 +240,7 @@ namespace Test
             beg.srcT = SimdTensorData32f;
             end.dstT = SimdTensorData32f;
 
-            void* context3 = SimdSynetMergedConvolution32fInit(p.batch, p.conv, p.count, SimdFalse, SimdSynetCompatibilityDefault);
+            void* context3 = SimdSynetMergedConvolution32fInit(p.batch, p.conv, p.count, SimdFalse);
 
             Tensor32f dst32f3(dstS, end.dstF);
             Fill(dst32f3, 3.3f);

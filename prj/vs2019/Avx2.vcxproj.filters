@@ -271,18 +271,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2BFloat16.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fBf16.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fBf16Depthwise.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fBf16Output.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fBf16Input.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2NeuralConvolution.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
@@ -648,9 +636,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32fBf16.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTrigonometric.h">

@@ -180,7 +180,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -215,7 +215,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
+        void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
     }
 #endif
 
@@ -251,7 +251,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif
 
@@ -287,7 +287,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
+        void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
     }
 #endif
 
@@ -321,7 +321,7 @@ namespace Simd
             static void Set(const MergConvParam& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
-        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif
 }

@@ -175,18 +175,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41BFloat16.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fBf16.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fBf16Depthwise.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fBf16Input.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fBf16Output.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifference.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
@@ -672,9 +660,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdGrayToY.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32fBf16.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTrigonometric.h">
