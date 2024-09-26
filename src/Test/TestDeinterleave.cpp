@@ -271,11 +271,11 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bgra, b2, g2, r2, a2));
 
-        result = result && Compare(b1, b2, 0, true, 32, 0, "b");
-        result = result && Compare(g1, g2, 0, true, 32, 0, "g");
-        result = result && Compare(r1, r2, 0, true, 32, 0, "r");
+        result = result && Compare(b1, b2, 0, true, 64, 0, "b");
+        result = result && Compare(g1, g2, 0, true, 64, 0, "g");
+        result = result && Compare(r1, r2, 0, true, 64, 0, "r");
         if(alpha)
-            result = result && Compare(a1, a2, 0, true, 32, 0, "a");
+            result = result && Compare(a1, a2, 0, true, 64, 0, "a");
 
         return result;
     }
@@ -313,6 +313,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Avx512bw::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
 #endif 
+
+#ifdef SIMD_AMXBF16_ENABLE
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
+            result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::AmxBf16::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
+#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
