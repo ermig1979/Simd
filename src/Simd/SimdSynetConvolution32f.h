@@ -383,7 +383,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -466,7 +466,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif
 
@@ -553,7 +553,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif
 
@@ -632,14 +632,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    }
-#endif
-
-#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
-    namespace AmxBf16
-    {
-        void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+        void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 #endif
 
@@ -723,7 +716,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif
 }

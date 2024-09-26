@@ -159,7 +159,7 @@ namespace Test
             c.srcT = SimdTensorData32f;
             c.dstT = SimdTensorData32f;
 
-            void* context3 = SimdSynetConvolution32fInit(p.batch, &c, SimdSynetCompatibilityDefault);
+            void* context3 = SimdSynetConvolution32fInit(p.batch, &c);
 
             Tensor32f dst32f3(p.DstShape(), p.conv.dstF), buf32f(Shp( ::SimdSynetConvolution32fExternalBufferSize(context3)));
 

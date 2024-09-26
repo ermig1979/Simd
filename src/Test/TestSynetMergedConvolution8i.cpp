@@ -142,7 +142,7 @@ namespace Test
         SimdConvolutionParameters conv = p.conv[i];
         conv.srcT = SimdTensorData32f;
         conv.dstT = SimdTensorData32f;
-        void* context = SimdSynetConvolution32fInit(p.batch, &conv, SimdSynetCompatibilityDefault);
+        void* context = SimdSynetConvolution32fInit(p.batch, &conv);
         buf.Extend({ SimdSynetConvolution32fExternalBufferSize(context) });
         dst.Reshape(Shp(p.batch, conv.dstH, conv.dstW, conv.dstC), conv.dstF);
         SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());

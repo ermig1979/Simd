@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetConvolution32f.h"
-#include "Simd/SimdSynetConvolution32fBf16.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
@@ -749,16 +748,12 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv)
         {
-            ConvParam param(batch, conv, compatibility);
+            ConvParam param(batch, conv, SimdSynetCompatibilityDefault);
             if (!param.Valid(SimdTensorData32f))
                 return NULL;
-            else if (Base::Bf16Soft(compatibility))
-            {
-                return new Base::SynetConvolution32fBf16Gemm(param);
-            }
-            else if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
+            if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
                 return new SynetConvolution32fDepthwiseDotProduct(param);
             else if (SynetConvolution32fWinograd::Preferable(param))
                 return new SynetConvolution32fWinograd(param);
@@ -776,5 +771,5 @@ namespace Simd
                 return new SynetConvolution32fGemmNN(param);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }

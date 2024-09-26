@@ -382,9 +382,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41YToGray.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fBf16NhwcGemm.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcGemm.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
@@ -675,9 +672,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdGrayToY.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32fBf16.h">

@@ -269,7 +269,7 @@ typedef enum
     SimdCpuInfoAvx2, /*!< Availability of AVX, FMA, AVX2 (x86). */
     SimdCpuInfoAvx512bw, /*!< Availability of AVX-512F, AVX-512BW (x86). */
     SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */
-    SimdCpuInfoAmxBf16, /*!< Availability of AMX-BF16, AMX-INT8 (x86). */
+    SimdCpuInfoAmxBf16, /*!< Availability of AVX-512VBMI, AVX-512FP16, AMX-BF16, AMX-INT8 (x86). */
     SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
     SimdCpuInfoCurrentFrequency, /*!< Gets CPU current frequency (for current CPU core). */
 } SimdCpuInfoType;
@@ -6090,18 +6090,17 @@ extern "C"
 
     /*! @ingroup synet_convolution_fp32
 
-        \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
+        \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
 
         \short Initilizes FP32 convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
-        \param [in] compatibility - a flags of calculation compatibility.
         \return a pointer to FP32 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution32fExternalBufferSize, ::SimdSynetConvolution32fInternalBufferSize, 
             ::SimdSynetConvolution32fInfo, ::SimdSynetConvolution32fSetParams and ::SimdSynetConvolution32fForward.
     */
-    SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
+    SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
 
     /*! @ingroup synet_convolution_fp32
 

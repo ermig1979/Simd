@@ -271,6 +271,7 @@ namespace Simd
 
         void Deconvolution16bNhwcGemm_2(const uint16_t* src, const DeconvParam& p, const AlgParam& a, size_t M, size_t N, size_t K, int zero, const uint16_t* wgt, float* dst)
         {
+            //SIMD_PERF_FUNC();
             size_t m = 32, mm = AlignLoAny(M, m), t = M - mm;
             size_t dS = a.bufK, dW = a.bufK * DF, dD = a.bufN;
             Deconvolution16bNhwcGemmPtr body_2 = Deconvolution16bNhwcGemm_32x32;

@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
-#include "Simd/SimdSynetConvolution32fBf16.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdCpu.h"
@@ -1768,17 +1767,13 @@ namespace Simd
 
 //#define SIMD_BASE_ONLY_GEMM_NN
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv)
         {
-            ConvParam param(batch, conv, compatibility);
+            ConvParam param(batch, conv, SimdSynetCompatibilityDefault);
             if (!param.Valid(SimdTensorData32f))
                 return NULL;
-            else if (Bf16Soft(compatibility))
-            {
-                return new SynetConvolution32fBf16Gemm(param);
-            }
 #if !defined(SIMD_BASE_ONLY_GEMM_NN)
-            else if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
+            if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
                 return new SynetConvolution32fDepthwiseDotProduct(param);
             else if (SynetConvolution32fWinograd::Preferable(param))
                 return new SynetConvolution32fWinograd(param);

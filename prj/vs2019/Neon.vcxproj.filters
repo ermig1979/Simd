@@ -518,9 +518,6 @@
     <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdPoly.h">
       <Filter>Inc</Filter>
     </ClInclude>
