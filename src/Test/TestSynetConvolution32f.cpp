@@ -246,6 +246,8 @@ namespace Test
 #endif
 #if 1
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 256, 48, 48, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 304, 16, 16, 304, _3, _1, _1, _1, _1, 304, aId, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 304, 16, 16, 304, _7, _1, _1, _3, _3, 304, aId, t), f1, f2);
 #endif
 #else
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 256, 44, 44, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
@@ -274,10 +276,43 @@ namespace Test
         return result;
     }
 
+    static float Sum(const float* src, size_t size, __mmask16 mask)
+    {
+        __m512 sum = _mm512_setzero_ps();
+        for (size_t i = 0; i < size; i += 16)
+            sum = _mm512_mask_add_ps(sum, mask, sum, _mm512_maskz_load_ps(mask, src + i));
+        float dst[16] = { 0 };
+        _mm512_storeu_ps(dst, sum);
+        return dst[0];
+    }
+
+    void ZeroLoadTest()
+    {
+        size_t n = 1024 * 64 * 16;
+        std::vector<float> src(n, 0);
+        float dst[16] = { 0 };
+        for (size_t j = 0; j < 100; j++)
+        {
+            {
+                TEST_PERFORMANCE_TEST("zero_mask_load_add")
+                    dst[0] += Sum(src.data(), n, 0);
+            }
+            {
+                TEST_PERFORMANCE_TEST("full_mask_load")
+                    dst[0] += Sum(src.data(), n, -1);
+            }
+        }
+        std::cout << dst[0];
+        std::cout << Test::PerformanceMeasurerStorage::s_storage.ConsoleReport(false, true);
+        exit(0);
+    }
+
     bool SynetConvolution32fForwardAutoTest()
     {
         const float EPS = 0.001f;
         bool result = true;
+
+        //ZeroLoadTest();
 
         if(TestBase())
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Base::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
