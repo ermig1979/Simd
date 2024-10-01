@@ -94,7 +94,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fDirectNchw.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fDirectNhwc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fGemm.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect2f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect2r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect3r.cpp" />

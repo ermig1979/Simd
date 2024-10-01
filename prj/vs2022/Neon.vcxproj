@@ -96,7 +96,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNchw.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNhwc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fGemm.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect3r.cpp" />

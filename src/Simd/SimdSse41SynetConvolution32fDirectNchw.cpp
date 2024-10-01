@@ -33,12 +33,6 @@ namespace Simd
 #if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Sse41
     {
-        SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam & p)
-            : Base::SynetConvolution32fDirectNchw(p)
-        {
-            _convolutionBiasActivation = SetConvolutionBiasActivation();
-        }
-
         template <size_t size> SIMD_INLINE void LoadWeight(const float * src, __m128 * dst)
         {
             for (size_t i = 0; i < size; ++i)
@@ -323,6 +317,14 @@ namespace Simd
             }
         }
 
+        //-------------------------------------------------------------------------------------------------
+
+        SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam& p)
+            : Base::SynetConvolution32fDirectNchw(p)
+        {
+            _convolutionBiasActivation = SetConvolutionBiasActivation();
+        }
+
         bool SynetConvolution32fDirectNchw::Preferable(const ConvParam & p)
         {
             if (!p.IsDilation(1))
@@ -383,6 +385,70 @@ namespace Simd
                 return Base::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
             }
             return NULL;
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SynetConvolution32fDepthwiseDotProduct::SynetConvolution32fDepthwiseDotProduct(const ConvParam& p)
+            : Base::SynetConvolution32fDepthwiseDotProduct(p)
+        {
+        }
+
+        SIMD_INLINE void DotProduct(const float* a, const float* b, size_t offset, __m128& sum)
+        {
+            __m128 _a = _mm_loadu_ps(a + offset);
+            __m128 _b = _mm_loadu_ps(b + offset);
+            sum = _mm_add_ps(_mm_mul_ps(_a, _b), sum);
+        }
+
+        SIMD_INLINE float DotProduct(const float* a, const float* b, size_t size)
+        {
+            float sum = 0;
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            size_t i = 0;
+            if (partialAlignedSize)
+            {
+                __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                if (fullAlignedSize)
+                {
+                    for (; i < fullAlignedSize; i += QF)
+                    {
+                        DotProduct(a, b, i + F * 0, sums[0]);
+                        DotProduct(a, b, i + F * 1, sums[1]);
+                        DotProduct(a, b, i + F * 2, sums[2]);
+                        DotProduct(a, b, i + F * 3, sums[3]);
+                    }
+                    sums[0] = _mm_add_ps(_mm_add_ps(sums[0], sums[1]), _mm_add_ps(sums[2], sums[3]));
+                }
+                for (; i < partialAlignedSize; i += F)
+                    DotProduct(a, b, i, sums[0]);
+                sum += ExtractSum(sums[0]);
+            }
+            for (; i < size; ++i)
+                sum += a[i] * b[i];
+            return sum;
+        }
+
+        void SynetConvolution32fDepthwiseDotProduct::Forward(const float* src, float* buf, float* dst)
+        {
+            for (size_t b = 0; b < _batch; ++b)
+            {
+                if (_bias)
+                {
+                    for (size_t i = 0; i < _count; ++i)
+                        dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size) + _bias[i];
+                }
+                else
+                {
+                    for (size_t i = 0; i < _count; ++i)
+                        dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
+                }
+                if (_param.activation)
+                    ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, ::SimdFalse, dst);
+                src += _sizeS;
+                dst += _sizeD;
+            }
         }
     }
 #endif

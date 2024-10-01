@@ -35,30 +35,6 @@ namespace Simd
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Neon
     {
-        SynetConvolution32fDirectNhwc::SynetConvolution32fDirectNhwc(const ConvParam & p)
-            : Base::SynetConvolution32fDirectNhwc(p)
-        {
-            _convolutionBiasActivation = SetConvolutionBiasActivation();
-        }
-
-        bool SynetConvolution32fDirectNhwc::Preferable(const ConvParam & p)
-        {
-            if (!p.IsDilation(1) || p.trans == 0)
-                return false;
-            if (p.group == 1)
-            {
-                if (p.kernelY > p.srcH || p.kernelX > p.srcW)
-                    return false;
-                double k = double(p.srcC) / p.kernelX / p.kernelY;
-                return k < 2.0;
-            }
-            else if (p.IsDepthwise())
-            {
-                return true;
-            }
-            return false;
-        }
-
         template<::SimdConvolutionActivationType type> SIMD_INLINE float32x4_t Activate(float32x4_t value, const float * params, size_t offset);
 
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationIdentity>(float32x4_t value, const float * params, size_t offset)
@@ -1000,6 +976,32 @@ namespace Simd
             return NULL;
         }
 
+        //-------------------------------------------------------------------------------------------------
+
+        SynetConvolution32fDirectNhwc::SynetConvolution32fDirectNhwc(const ConvParam& p)
+            : Base::SynetConvolution32fDirectNhwc(p)
+        {
+            _convolutionBiasActivation = SetConvolutionBiasActivation();
+        }
+
+        bool SynetConvolution32fDirectNhwc::Preferable(const ConvParam& p)
+        {
+            if (!p.IsDilation(1) || p.trans == 0)
+                return false;
+            if (p.group == 1)
+            {
+                if (p.kernelY > p.srcH || p.kernelX > p.srcW)
+                    return false;
+                double k = double(p.srcC) / p.kernelX / p.kernelY;
+                return k < 2.0;
+            }
+            else if (p.IsDepthwise())
+            {
+                return true;
+            }
+            return false;
+        }
+
         SynetConvolution32fDirectNhwc::ConvolutionBiasActivationPtr SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation()
         {
             const ConvParam & p = _param;
@@ -1024,5 +1026,5 @@ namespace Simd
             return func ? func : Base::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();
         };
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }

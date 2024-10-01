@@ -22,33 +22,54 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetConvolution32f.h"
+#include "Simd/SimdSynetConvolution32fCommon.h"
+#include "Simd/SimdSet.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdAvx2.h"
+#include "Simd/SimdErf.h"
+#include "Simd/SimdGemm.h"
+#include "Simd/SimdSynet.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx2
     {
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv)
+        SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam& p)
+            : Sse41::SynetConvolution32fNhwcDirect(p)
         {
-            ConvParam param(batch, conv, SimdSynetCompatibilityDefault);
-            if (!param.Valid(SimdTensorData32f))
-                return NULL;
-            if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
-                return new SynetConvolution32fDepthwiseDotProduct(param);
-            else if (SynetConvolution32fWinograd::Preferable(param))
-                return new SynetConvolution32fWinograd(param);
-            else if (SynetConvolution32fGemmNT::Preferable(param))
-                return new SynetConvolution32fGemmNT(param);
-            else if (SynetConvolution32fDirectNchw::Preferable(param))
-                return new Avx2::SynetConvolution32fDirectNchw(param);
-            else if (SynetConvolution32fNhwcDirect::Preferable(param))
-                return new SynetConvolution32fNhwcDirect(param);
-            else if (SynetConvolution32fDirectNhwc::Preferable(param))
-                return new SynetConvolution32fDirectNhwc(param);
-            else if (SynetConvolution32fNhwcGroupedBlock1x2::Preferable(param))
-                return new SynetConvolution32fNhwcGroupedBlock1x2(param);
+            if (p.dstC <= Sse41::F)
+                return;
+            //_old.enable = true;
+            if (_old.enable)
+            {
+                if (Set2f(p, _old.convolution))
+                    OldSetAlgParam(F);
+            }
             else
-                return new SynetConvolution32fGemmNN(param);
+            {
+                RunFuncs funcs;
+                for (size_t n = 2; n <= 3; ++n)
+                {
+                    funcs.push_back(RunFunc(Ext() + "-" + ToStr(n)));
+                    SetAlgParam(F, n, funcs.back().alg);
+                    if (!SetRt(p, funcs.back().alg))
+                        return;
+                }
+                _run.Init(funcs);
+            }
+        }
+
+        bool SynetConvolution32fNhwcDirect::SetRt(const ConvParam& p, AlgParam& a)
+        {
+            switch (a.microD)
+            {
+            case 2 * F: return Set2r(p, a);
+            case 3 * F: return Set3r(p, a);
+            default:
+                return false;
+            }
         }
     }
 #endif

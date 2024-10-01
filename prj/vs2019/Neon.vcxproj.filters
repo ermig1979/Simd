@@ -217,9 +217,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNchw.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNhwc.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonGemm32fNN.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
@@ -299,6 +296,15 @@
       <Filter>Neon</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonDescrIntCdu.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fGemm.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDepthwise.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
   </ItemGroup>
