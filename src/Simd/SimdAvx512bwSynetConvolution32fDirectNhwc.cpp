@@ -671,7 +671,6 @@ namespace Simd
             for (size_t dy = 0; dy < p.dstH; ++dy)
             {
                 size_t dx = 0;
-#if 0
                 for (; dx < dstW2; dx += 2)
                 {
                     float* dst0 = dst + 0 * p.dstC, *dst1 = dst + 1 * p.dstC;
@@ -684,10 +683,6 @@ namespace Simd
                             d01 = _mm512_loadu_ps(bias + dc + 1 * F);
                             d02 = _mm512_loadu_ps(bias + dc + 2 * F);
                             d03 = _mm512_loadu_ps(bias + dc + 3 * F);
-                            d10 = _mm512_loadu_ps(bias + dc + 0 * F);
-                            d11 = _mm512_loadu_ps(bias + dc + 1 * F);
-                            d12 = _mm512_loadu_ps(bias + dc + 2 * F);
-                            d13 = _mm512_loadu_ps(bias + dc + 3 * F);
                         }
                         else
                         {
@@ -695,14 +690,12 @@ namespace Simd
                             d01 = _mm512_setzero_ps();
                             d02 = _mm512_setzero_ps();
                             d03 = _mm512_setzero_ps();
-                            d10 = _mm512_setzero_ps();
-                            d11 = _mm512_setzero_ps();
-                            d12 = _mm512_setzero_ps();
-                            d13 = _mm512_setzero_ps();
                         }
+                        d10 = d00; d11 = d01; d12 = d02; d13 = d03;
                         for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
                             size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                            const float* psy = src + sy * p.srcW * dstC + dc;
                             if (sy < p.srcH)
                             {
                                 for (size_t kx = 0; kx < p.kernelX; ++kx)
@@ -711,20 +704,20 @@ namespace Simd
                                     const float* pw = weight + (ky * p.kernelX + kx) * dstC + dc;
                                     __mmask16 mask0 = sx + 0 * p.strideX < p.srcW ? 0xFFFF : 0x0000;
                                     __mmask16 mask1 = sx + 1 * p.strideX < p.srcW ? 0xFFFF : 0x0000;
-                                    const float* ps0 = src + (sy * p.srcW + sx + 0) * dstC + dc, *ps1 = ps0 + dstC;
+                                    const float* ps0 = psy + sx * dstC, *ps1 = ps0 + dstC;
 
                                     w0 = _mm512_loadu_ps(pw + 0 * F);
-                                    d00 = _mm512_mask_fmadd_ps(d00, mask0, _mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0);
-                                    d10 = _mm512_mask_fmadd_ps(d10, mask1, _mm512_maskz_loadu_ps(mask1, ps1 + 0 * F), w0);
+                                    d00 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0, d00, mask0);
+                                    d10 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask1, ps1 + 0 * F), w0, d10, mask1);
                                     w0 = _mm512_loadu_ps(pw + 1 * F);
-                                    d01 = _mm512_mask_fmadd_ps(d01, mask0, _mm512_maskz_loadu_ps(mask0, ps0 + 1 * F), w0);
-                                    d11 = _mm512_mask_fmadd_ps(d11, mask1, _mm512_maskz_loadu_ps(mask1, ps1 + 1 * F), w0);
+                                    d01 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 1 * F), w0, d01, mask0);
+                                    d11 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask1, ps1 + 1 * F), w0, d11, mask1);                                    
                                     w0 = _mm512_loadu_ps(pw + 2 * F);
-                                    d02 = _mm512_mask_fmadd_ps(d02, mask0, _mm512_maskz_loadu_ps(mask0, ps0 + 2 * F), w0);
-                                    d12 = _mm512_mask_fmadd_ps(d12, mask1, _mm512_maskz_loadu_ps(mask1, ps1 + 2 * F), w0);
+                                    d02 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 2 * F), w0, d02, mask0);
+                                    d12 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask1, ps1 + 2 * F), w0, d12, mask1);                                    
                                     w0 = _mm512_loadu_ps(pw + 3 * F);
-                                    d03 = _mm512_mask_fmadd_ps(d03, mask0, _mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0);
-                                    d13 = _mm512_mask_fmadd_ps(d13, mask1, _mm512_maskz_loadu_ps(mask1, ps1 + 0 * F), w0);
+                                    d03 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 3 * F), w0, d03, mask0);
+                                    d13 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask1, ps1 + 3 * F), w0, d13, mask1);
                                 }
                             }
                         }
@@ -743,19 +736,17 @@ namespace Simd
                         {
                             d00 = _mm512_loadu_ps(bias + dc + 0 * F);
                             d01 = _mm512_loadu_ps(bias + dc + 1 * F);
-                            d10 = _mm512_loadu_ps(bias + dc + 0 * F);
-                            d11 = _mm512_loadu_ps(bias + dc + 1 * F);
                         }
                         else
                         {
                             d00 = _mm512_setzero_ps();
                             d01 = _mm512_setzero_ps();
-                            d10 = _mm512_setzero_ps();
-                            d11 = _mm512_setzero_ps();
                         }
+                        d10 = d00; d11 = d01;
                         for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
                             size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                            const float* psy = src + sy * p.srcW * dstC + dc;
                             if (sy < p.srcH)
                             {
                                 for (size_t kx = 0; kx < p.kernelX; ++kx)
@@ -764,14 +755,14 @@ namespace Simd
                                     const float* pw = weight + (ky * p.kernelX + kx) * dstC + dc;
                                     __mmask16 mask0 = sx + 0 * p.strideX < p.srcW ? 0xFFFF : 0x0000;
                                     __mmask16 mask1 = sx + 1 * p.strideX < p.srcW ? 0xFFFF : 0x0000;
-                                    const float* ps0 = src + (sy * p.srcW + sx + 0) * dstC + dc, * ps1 = ps0 + dstC;
+                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + dstC;
 
                                     w0 = _mm512_loadu_ps(pw + 0 * F);
-                                    d00 = _mm512_mask_fmadd_ps(d00, mask0, _mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0);
-                                    d10 = _mm512_mask_fmadd_ps(d10, mask1, _mm512_maskz_loadu_ps(mask1, ps1 + 0 * F), w0);
+                                    d00 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0, d00, mask0);
+                                    d10 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask1, ps1 + 0 * F), w0, d10, mask1);
                                     w0 = _mm512_loadu_ps(pw + 1 * F);
-                                    d01 = _mm512_mask_fmadd_ps(d01, mask0, _mm512_maskz_loadu_ps(mask0, ps0 + 1 * F), w0);
-                                    d11 = _mm512_mask_fmadd_ps(d11, mask1, _mm512_maskz_loadu_ps(mask1, ps1 + 1 * F), w0);
+                                    d01 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 1 * F), w0, d01, mask0);
+                                    d11 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask1, ps1 + 1 * F), w0, d11, mask1);
                                 }
                             }
                         }
@@ -788,6 +779,7 @@ namespace Simd
                         for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
                             size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                            const float* psy = src + sy * p.srcW * dstC + dc;
                             if (sy < p.srcH)
                             {
                                 for (size_t kx = 0; kx < p.kernelX; ++kx)
@@ -796,11 +788,11 @@ namespace Simd
                                     const float* pw = weight + (ky * p.kernelX + kx) * dstC + dc;
                                     __mmask16 mask0 = sx + 0 * p.strideX < p.srcW ? tailC : 0x0000;
                                     __mmask16 mask1 = sx + 1 * p.strideX < p.srcW ? tailC : 0x0000;
-                                    const float* ps0 = src + (sy * p.srcW + sx + 0) * dstC + dc, * ps1 = ps0 + dstC;
+                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + dstC;
 
                                     w0 = _mm512_maskz_loadu_ps(tailC, pw);
-                                    d00 = _mm512_mask_fmadd_ps(d00, mask0, _mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0);
-                                    d10 = _mm512_mask_fmadd_ps(d10, mask1, _mm512_maskz_loadu_ps(mask1, ps1 + 0 * F), w0);
+                                    d00 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0, d00, mask0);
+                                    d10 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask1, ps1 + 0 * F), w0, d10, mask1);
                                 }
                             }
                         }
@@ -809,7 +801,6 @@ namespace Simd
                     }
                     dst += 2 * p.dstC;
                 }
-#endif
                 for (; dx < p.dstW; ++dx)
                 {
                     size_t dc = 0;
