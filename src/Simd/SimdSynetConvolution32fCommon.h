@@ -287,6 +287,65 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        template<::SimdConvolutionActivationType type> SIMD_INLINE float32x4_t Activate(float32x4_t value, const float* params, size_t offset);
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationIdentity>(float32x4_t value, const float* params, size_t offset)
+        {
+            return value;
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationRelu>(float32x4_t value, const float* params, size_t offset)
+        {
+            return vmaxq_f32(vdupq_n_f32(0.0f), value);
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationLeakyRelu>(float32x4_t value, const float* params, size_t offset)
+        {
+            return vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), value), vld1q_dup_f32(params + 0), vminq_f32(vdupq_n_f32(0.0f), value));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationRestrictRange>(float32x4_t value, const float* params, size_t offset)
+        {
+            return vminq_f32(vmaxq_f32(vld1q_dup_f32(params + 0), value), vld1q_dup_f32(params + 1));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationPrelu>(float32x4_t value, const float* params, size_t offset)
+        {
+            return vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), value), Load<false>(params + offset), vminq_f32(vdupq_n_f32(0.0f), value));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationElu>(float32x4_t value, const float* params, size_t offset)
+        {
+            return Neon::Elu(value, vld1q_dup_f32(params + 0));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationHswish>(float32x4_t value, const float* params, size_t offset)
+        {
+            return Neon::SynetHswish32f(value, vld1q_dup_f32(params + 0), vld1q_dup_f32(params + 1));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationMish>(float32x4_t value, const float* params, size_t offset)
+        {
+            return Neon::Mish<1>(value, vld1q_dup_f32(params + 0));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationHardSigmoid>(float32x4_t value, const float* params, size_t offset)
+        {
+            return Neon::SynetHardSigmoid32f(value, vld1q_dup_f32(params + 0), vld1q_dup_f32(params + 1));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationSwish>(float32x4_t value, const float* params, size_t offset)
+        {
+            return Neon::Swish<1>(value, vld1q_dup_f32(params + 0));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationGelu>(float32x4_t value, const float* params, size_t offset)
+        {
+            return Neon::Gelu<1>(value);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <TermType term> struct Term
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params);

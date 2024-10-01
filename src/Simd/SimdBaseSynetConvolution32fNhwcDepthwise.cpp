@@ -32,38 +32,7 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        SynetConvolution32fDirectNhwc::SynetConvolution32fDirectNhwc(const ConvParam & p)
-            : SynetConvolution32f(p)
-        {
-            _batch = p.batch;
-            _sizeS = p.srcC*p.srcH*p.srcW;
-            _sizeD = p.dstC*p.dstH*p.dstW;
-            _convolutionBiasActivation = SetConvolutionBiasActivation();
-        }
-
-        void SynetConvolution32fDirectNhwc::Forward(const float * src, float * buf, float * dst)
-        {
-            for (size_t b = 0; b < _batch; ++b)
-            {
-                _convolutionBiasActivation(src, _param, _weight, _bias, _params, dst);
-                src += _sizeS;
-                dst += _sizeD;
-            }
-        }
-
-        bool SynetConvolution32fDirectNhwc::Preferable(const ConvParam & p)
-        {
-            if (p.trans == 0)
-                return false;
-            if (p.group == 1)
-            {
-                double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
-                return k < 2.0;
-            }
-            return p.IsDepthwise();
-        }
-
-        static void ConvolutionDirectNhwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        static void ConvolutionNhwcDepthwiseDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t group = p.group;
             size_t srcC = p.srcC / group;
@@ -111,10 +80,31 @@ namespace Simd
             }
         }
 
-        SynetConvolution32fDirectNhwc::ConvolutionBiasActivationPtr SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation()
+        //-------------------------------------------------------------------------------------------------
+
+        SynetConvolution32fNhwcDepthwise::SynetConvolution32fNhwcDepthwise(const ConvParam & p)
+            : SynetConvolution32f(p)
         {
-            return ConvolutionDirectNhwcConvolutionBiasActivationDefault;
+            _batch = p.batch;
+            _sizeS = p.srcC*p.srcH*p.srcW;
+            _sizeD = p.dstC*p.dstH*p.dstW;
+            _convolution = ConvolutionNhwcDepthwiseDefault;
         }
+
+        void SynetConvolution32fNhwcDepthwise::Forward(const float * src, float * buf, float * dst)
+        {
+            for (size_t b = 0; b < _batch; ++b)
+            {
+                _convolution(src, _param, _weight, _bias, _params, dst);
+                src += _sizeS;
+                dst += _sizeD;
+            }
+        }
+
+        bool SynetConvolution32fNhwcDepthwise::Preferable(const ConvParam & p)
+        {
+            return p.trans && p.IsDepthwise();
+        }        
     }
 #endif
 }
