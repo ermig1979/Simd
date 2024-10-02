@@ -35,7 +35,7 @@ namespace Simd
     {
         template<::SimdConvolutionActivationType type> void Convolution32fNhwcDepthwiseDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
         {
-            size_t srcW = p.srcW, strideX = p.strideX, dilationX = p.dilationX, kernelX = p.kernelY;
+            size_t srcW = p.srcW, strideX = p.strideX, dilationX = p.dilationX, kernelX = p.kernelY, sX = strideX * p.dstC;
             size_t dstC = p.dstC, dstCF = AlignLo(p.dstC, F), dstC2F = AlignLo(p.dstC, 2 * F), dstC4F = AlignLo(p.dstC, 4 * F);
             size_t dstW2 = AlignLo(p.dstW, 2), dstW4 = AlignLo(p.dstW, 4);
             __m512 d00, d01, d02, d03, d10, d11, d12, d13, d20, d21, d22, d23, d30, d31, d32, d33, w0;
@@ -81,7 +81,7 @@ namespace Simd
                                     __mmask16 mask1 = sx + 1 * strideX < srcW ? 0xFFFF : 0x0000;
                                     __mmask16 mask2 = sx + 2 * strideX < srcW ? 0xFFFF : 0x0000;
                                     __mmask16 mask3 = sx + 3 * strideX < srcW ? 0xFFFF : 0x0000;
-                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + 1 * dstC, * ps2 = ps0 + 2 * dstC, * ps3 = ps0 + 3 * dstC;
+                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + 1 * sX, * ps2 = ps0 + 2 * sX, * ps3 = ps0 + 3 * sX;
 
                                     w0 = _mm512_loadu_ps(pw + 0 * F);
                                     d00 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0, d00, mask0);
@@ -154,7 +154,7 @@ namespace Simd
                                     __mmask16 mask1 = sx + 1 * strideX < srcW ? 0xFFFF : 0x0000;
                                     __mmask16 mask2 = sx + 2 * strideX < srcW ? 0xFFFF : 0x0000;
                                     __mmask16 mask3 = sx + 3 * strideX < srcW ? 0xFFFF : 0x0000;
-                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + 1 * dstC, * ps2 = ps0 + 2 * dstC, * ps3 = ps0 + 3 * dstC;
+                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + 1 * sX, * ps2 = ps0 + 2 * sX, * ps3 = ps0 + 3 * sX;
 
                                     w0 = _mm512_loadu_ps(pw + 0 * F);
                                     d00 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0, d00, mask0);
@@ -180,7 +180,7 @@ namespace Simd
                     }
                     for (; dc < dstC; dc += F)
                     {
-                        __mmask16 tailC = dc < dstCF ? __mmask16(-1) : TailMask16(dstCF - dc);
+                        __mmask16 tailC = dc < dstCF ? __mmask16(-1) : TailMask16(dstC - dc);
                         d00 = bias ? _mm512_maskz_loadu_ps(tailC, bias + dc) : _mm512_setzero_ps();
                         d10 = d00; d20 = d00; d30 = d00;
                         for (size_t ky = 0; ky < p.kernelY; ++ky)
@@ -198,7 +198,7 @@ namespace Simd
                                     __mmask16 mask1 = sx + 1 * strideX < srcW ? tailC : 0x0000;
                                     __mmask16 mask2 = sx + 2 * strideX < srcW ? tailC : 0x0000;
                                     __mmask16 mask3 = sx + 3 * strideX < srcW ? tailC : 0x0000;
-                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + 1 * dstC, * ps2 = ps0 + 2 * dstC, * ps3 = ps0 + 3 * dstC;
+                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + 1 * sX, * ps2 = ps0 + 2 * sX, * ps3 = ps0 + 3 * sX;
 
                                     w0 = _mm512_loadu_ps(pw + 0 * F);
                                     d00 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0, d00, mask0);
@@ -250,7 +250,7 @@ namespace Simd
                                     const float* pw = pwy + kx * dstC;
                                     __mmask16 mask0 = sx + 0 * strideX < srcW ? 0xFFFF : 0x0000;
                                     __mmask16 mask1 = sx + 1 * strideX < srcW ? 0xFFFF : 0x0000;
-                                    const float* ps0 = psy + sx * dstC, *ps1 = ps0 + dstC;
+                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + 1 * sX;
 
                                     w0 = _mm512_loadu_ps(pw + 0 * F);
                                     d00 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0, d00, mask0);
@@ -302,7 +302,7 @@ namespace Simd
                                     const float* pw = pwy + kx * dstC;
                                     __mmask16 mask0 = sx + 0 * strideX < srcW ? 0xFFFF : 0x0000;
                                     __mmask16 mask1 = sx + 1 * strideX < srcW ? 0xFFFF : 0x0000;
-                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + dstC;
+                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + 1 * sX;
 
                                     w0 = _mm512_loadu_ps(pw + 0 * F);
                                     d00 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0, d00, mask0);
@@ -320,7 +320,7 @@ namespace Simd
                     }
                     for (; dc < dstC; dc += F)
                     {
-                        __mmask16 tailC = dc < dstCF ? __mmask16(-1) : TailMask16(dstCF - dc);
+                        __mmask16 tailC = dc < dstCF ? __mmask16(-1) : TailMask16(dstC - dc);
                         d00 = bias ? _mm512_maskz_loadu_ps(tailC, bias + dc) : _mm512_setzero_ps();
                         d10 = d00;
                         for (size_t ky = 0; ky < p.kernelY; ++ky)
@@ -336,7 +336,7 @@ namespace Simd
                                     const float* pw = pwy + kx * dstC;
                                     __mmask16 mask0 = sx + 0 * strideX < srcW ? tailC : 0x0000;
                                     __mmask16 mask1 = sx + 1 * strideX < srcW ? tailC : 0x0000;
-                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + dstC;
+                                    const float* ps0 = psy + sx * dstC, * ps1 = ps0 + 1 * sX;
 
                                     w0 = _mm512_maskz_loadu_ps(tailC, pw);
                                     d00 = _mm512_mask3_fmadd_ps(_mm512_maskz_loadu_ps(mask0, ps0 + 0 * F), w0, d00, mask0);
@@ -428,7 +428,7 @@ namespace Simd
                     }
                     for (; dc < dstC; dc += F)
                     {
-                        __mmask16 tailC = dc < dstCF ? __mmask16(-1) : TailMask16(dstCF - dc);
+                        __mmask16 tailC = dc < dstCF ? __mmask16(-1) : TailMask16(dstC - dc);
                         d00 = bias ? _mm512_maskz_loadu_ps(tailC, bias + dc) : _mm512_setzero_ps();
                         for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {

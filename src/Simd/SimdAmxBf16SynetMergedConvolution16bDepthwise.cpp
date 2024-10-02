@@ -38,24 +38,25 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template <class T> SIMD_INLINE __m512 LoadSrc(const T* src);
+        template <class T> SIMD_INLINE __m512 LoadSrc(const T* src, __mmask16 mask = -1);
 
-        template <> SIMD_INLINE __m512 LoadSrc<float>(const float* src)
+        template <> SIMD_INLINE __m512 LoadSrc<float>(const float* src, __mmask16 mask)
         {
-            return _mm512_loadu_ps(src);
+            return _mm512_maskz_loadu_ps(mask, src);
         }
 
-        template <> SIMD_INLINE __m512 LoadSrc<uint16_t>(const uint16_t* src)
+        template <> SIMD_INLINE __m512 LoadSrc<uint16_t>(const uint16_t* src, __mmask16 mask)
         {
-            return BFloat16ToFloat32(_mm256_loadu_si256((__m256i*)src));
+            return BFloat16ToFloat32(_mm256_maskz_loadu_epi16(mask, src));
         }
 
         //-------------------------------------------------------------------------------------------------
 
-        template<typename T, Term16bType term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution(const uint8_t* src8, const ConvParam& p, const AlgParam& a,
+        template<typename T, Term16bType term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolutionDefault(const uint8_t* src8, const ConvParam& p, const AlgParam& a,
             size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint8_t* dst)
         {
             const T* src = (T*)src8;
+            size_t srcH = p.srcH, srcW = p.srcW, kernelX = p.kernelX, kernelY = p.kernelY;
             size_t strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
             size_t sM = (a.bufH[1] - 1), sD = a.bufH[1] ? a.bufH[1] * p.srcW * F : F, sX = a.bufH[1] ? F : p.srcC, sY = sX * p.srcW, dstC = maC;
             size_t dX = (a.bufH[2] ? a.maC * 2 : p.dstC * a.elem[1]), dY = p.dstW * dX, dy0 = a.bufH[2] ? yBeg : 0, dD = a.bufH[2] ? F * 2 : F * a.elem[1];
@@ -87,17 +88,17 @@ namespace Simd
                         for (size_t dx = 0; dx < p.dstW; ++dx, pd += dX)
                         {
                             __m512 sum = _mm512_setzero_ps();
-                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            for (size_t ky = 0; ky < kernelY; ++ky)
                             {
                                 size_t sy = dy * strideY + ky - padY;
-                                if (sy < p.srcH)
+                                if (sy < srcH)
                                 {
-                                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                    for (size_t kx = 0; kx < kernelX; ++kx)
                                     {
                                         size_t sx = dx * strideX + kx - padX;
-                                        if (sx < p.srcW)
+                                        if (sx < srcW)
                                         {
-                                            const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                            const float* pw = weight + (ky * kernelX + kx) * F;
                                             const T* ps = src + (sy & sM) * sY + sx * sX;
                                             sum = Fmadd<nofma>(LoadSrc(ps), _mm512_loadu_ps(pw), sum);
                                         }
@@ -114,44 +115,47 @@ namespace Simd
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     uint8_t* pd = dst + (dy - dy0) * dY;
-                    if (dy >= noseY && dy < bodyY)
+                    size_t dx = 0;
+                    for (; dx < noseX; dx += 1, pd += dX)
                     {
-                        size_t dx = 0;
-                        for (; dx < noseX; dx += 1, pd += dX)
+                        __m512 sum = _mm512_setzero_ps();
+                        for (size_t ky = 0; ky < kernelY; ++ky)
                         {
-                            __m512 sum = _mm512_setzero_ps();
-                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            size_t sy = dy * strideY + ky - padY;
+                            if (sy < srcH)
                             {
-                                size_t sy = dy * p.strideY + ky - padY;
-                                for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                for (size_t kx = 0; kx < kernelX; ++kx)
                                 {
-                                    size_t sx = dx * p.strideX + kx - padX;
-                                    if (sx < p.srcW)
+                                    size_t sx = dx * strideX + kx - padX;
+                                    if (sx < srcW)
                                     {
-                                        const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                        const float* pw = weight + (ky * kernelX + kx) * F;
                                         const T* ps = src + (sy & sM) * sY + sx * sX;
                                         sum = Fmadd<nofma>(LoadSrc(ps), _mm512_loadu_ps(pw), sum);
                                     }
                                 }
                             }
-                            Save1<term, type>(pd, NULL, sum, _bias, _params);
                         }
-                        for (; dx < bodyX8; dx += 8, pd += 8 * dX)
+                        Save1<term, type>(pd, NULL, sum, _bias, _params);
+                    }
+                    for (; dx < bodyX8; dx += 8, pd += 8 * dX)
+                    {
+                        __m512 sum0 = _mm512_setzero_ps();
+                        __m512 sum1 = _mm512_setzero_ps();
+                        __m512 sum2 = _mm512_setzero_ps();
+                        __m512 sum3 = _mm512_setzero_ps();
+                        __m512 sum4 = _mm512_setzero_ps();
+                        __m512 sum5 = _mm512_setzero_ps();
+                        __m512 sum6 = _mm512_setzero_ps();
+                        __m512 sum7 = _mm512_setzero_ps();
+                        const float* pw = weight;
+                        for (size_t ky = 0; ky < kernelY; ++ky)
                         {
-                            __m512 sum0 = _mm512_setzero_ps();
-                            __m512 sum1 = _mm512_setzero_ps();
-                            __m512 sum2 = _mm512_setzero_ps();
-                            __m512 sum3 = _mm512_setzero_ps();
-                            __m512 sum4 = _mm512_setzero_ps();
-                            __m512 sum5 = _mm512_setzero_ps();
-                            __m512 sum6 = _mm512_setzero_ps();
-                            __m512 sum7 = _mm512_setzero_ps();
-                            const float* pw = weight;
-                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            size_t sy = dy * strideY + ky - padY;
+                            if (sy < srcH)
                             {
-                                size_t sy = dy * strideY + ky - padY;
                                 const T* ps = src + (sy & sM) * sY + (dx * strideX - padX) * sX;
-                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
+                                for (size_t kx = 0; kx < kernelX; ++kx, ps += sX, pw += F)
                                 {
                                     __m512 w0 = _mm512_loadu_ps(pw);
                                     sum0 = Fmadd<nofma>(LoadSrc(ps + 0 * ssX), w0, sum0);
@@ -164,27 +168,32 @@ namespace Simd
                                     sum7 = Fmadd<nofma>(LoadSrc(ps + 7 * ssX), w0, sum7);
                                 }
                             }
-                            Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params);
-                            Save1<term, type>(pd + 1 * dX, NULL, sum1, _bias, _params);
-                            Save1<term, type>(pd + 2 * dX, NULL, sum2, _bias, _params);
-                            Save1<term, type>(pd + 3 * dX, NULL, sum3, _bias, _params);
-                            Save1<term, type>(pd + 4 * dX, NULL, sum4, _bias, _params);
-                            Save1<term, type>(pd + 5 * dX, NULL, sum5, _bias, _params);
-                            Save1<term, type>(pd + 6 * dX, NULL, sum6, _bias, _params);
-                            Save1<term, type>(pd + 7 * dX, NULL, sum7, _bias, _params);
+                            else
+                                pw += kernelX * F;
                         }
-                        for (; dx < bodyX4; dx += 4, pd += 4 * dX)
+                        Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params);
+                        Save1<term, type>(pd + 1 * dX, NULL, sum1, _bias, _params);
+                        Save1<term, type>(pd + 2 * dX, NULL, sum2, _bias, _params);
+                        Save1<term, type>(pd + 3 * dX, NULL, sum3, _bias, _params);
+                        Save1<term, type>(pd + 4 * dX, NULL, sum4, _bias, _params);
+                        Save1<term, type>(pd + 5 * dX, NULL, sum5, _bias, _params);
+                        Save1<term, type>(pd + 6 * dX, NULL, sum6, _bias, _params);
+                        Save1<term, type>(pd + 7 * dX, NULL, sum7, _bias, _params);
+                    }
+                    for (; dx < bodyX4; dx += 4, pd += 4 * dX)
+                    {
+                        __m512 sum0 = _mm512_setzero_ps();
+                        __m512 sum1 = _mm512_setzero_ps();
+                        __m512 sum2 = _mm512_setzero_ps();
+                        __m512 sum3 = _mm512_setzero_ps();
+                        const float* pw = weight;
+                        for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
-                            __m512 sum0 = _mm512_setzero_ps();
-                            __m512 sum1 = _mm512_setzero_ps();
-                            __m512 sum2 = _mm512_setzero_ps();
-                            __m512 sum3 = _mm512_setzero_ps();
-                            const float* pw = weight;
-                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            size_t sy = dy * strideY + ky - padY;
+                            if (sy < srcH)
                             {
-                                size_t sy = dy * strideY + ky - padY;
                                 const T* ps = src + (sy & sM) * sY + (dx * strideX - padX) * sX;
-                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
+                                for (size_t kx = 0; kx < kernelX; ++kx, ps += sX, pw += F)
                                 {
                                     __m512 w0 = _mm512_loadu_ps(pw);
                                     sum0 = Fmadd<nofma>(LoadSrc(ps + 0 * ssX), w0, sum0);
@@ -193,90 +202,80 @@ namespace Simd
                                     sum3 = Fmadd<nofma>(LoadSrc(ps + 3 * ssX), w0, sum3);
                                 }
                             }
-                            Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params);
-                            Save1<term, type>(pd + 1 * dX, NULL, sum1, _bias, _params);
-                            Save1<term, type>(pd + 2 * dX, NULL, sum2, _bias, _params);
-                            Save1<term, type>(pd + 3 * dX, NULL, sum3, _bias, _params);
+                            else
+                                pw += kernelX * F;
                         }
-                        for (; dx < bodyX2; dx += 2, pd += 2 * dX)
+                        Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params);
+                        Save1<term, type>(pd + 1 * dX, NULL, sum1, _bias, _params);
+                        Save1<term, type>(pd + 2 * dX, NULL, sum2, _bias, _params);
+                        Save1<term, type>(pd + 3 * dX, NULL, sum3, _bias, _params);
+                    }
+                    for (; dx < bodyX2; dx += 2, pd += 2 * dX)
+                    {
+                        __m512 sum0 = _mm512_setzero_ps();
+                        __m512 sum1 = _mm512_setzero_ps();
+                        const float* pw = weight;
+                        for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
-                            __m512 sum0 = _mm512_setzero_ps();
-                            __m512 sum1 = _mm512_setzero_ps();
-                            const float* pw = weight;
-                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            size_t sy = dy * strideY + ky - padY;
+                            if (sy < srcH)
                             {
-                                size_t sy = dy * strideY + ky - padY;
                                 const T* ps = src + (sy & sM) * sY + (dx * strideX - padX) * sX;
-                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
+                                for (size_t kx = 0; kx < kernelX; ++kx, ps += sX, pw += F)
                                 {
                                     __m512 w0 = _mm512_loadu_ps(pw);
                                     sum0 = Fmadd<nofma>(LoadSrc(ps + 0 * ssX), w0, sum0);
                                     sum1 = Fmadd<nofma>(LoadSrc(ps + 1 * ssX), w0, sum1);
                                 }
                             }
-                            Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params);
-                            Save1<term, type>(pd + 1 * dX, NULL, sum1, _bias, _params);
+                            else
+                                pw += kernelX * F;
                         }
-                        for (; dx < bodyX; dx += 1, pd += dX)
+                        Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params);
+                        Save1<term, type>(pd + 1 * dX, NULL, sum1, _bias, _params);
+                    }
+                    for (; dx < bodyX; dx += 1, pd += dX)
+                    {
+                        __m512 sum = _mm512_setzero_ps();
+                        const float* pw = weight;
+                        for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
-                            __m512 sum = _mm512_setzero_ps();
-                            const float* pw = weight;
-                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            size_t sy = dy * strideY + ky - padY;
+                            if (sy < srcH)
                             {
-                                size_t sy = dy * strideY + ky - padY;
                                 const T* ps = src + (sy & sM) * sY + (dx * strideX - padX) * sX;
-                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
+                                for (size_t kx = 0; kx < kernelX; ++kx, ps += sX, pw += F)
                                 {
                                     __m512 w0 = _mm512_loadu_ps(pw);
                                     sum = Fmadd<nofma>(LoadSrc(ps), w0, sum);
                                 }
                             }
-                            Save1<term, type>(pd, NULL, sum, _bias, _params);
+                            else
+                                pw += kernelX * F;
                         }
-                        for (; dx < p.dstW; dx += 1, pd += dX)
+                        Save1<term, type>(pd, NULL, sum, _bias, _params);
+                    }
+                    for (; dx < p.dstW; dx += 1, pd += dX)
+                    {
+                        __m512 sum = _mm512_setzero_ps();
+                        for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
-                            __m512 sum = _mm512_setzero_ps();
-                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            size_t sy = dy * strideY + ky - padY;
+                            if (sy < srcH)
                             {
-                                size_t sy = dy * strideY + ky - padY;
-                                for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                for (size_t kx = 0; kx < kernelX; ++kx)
                                 {
                                     size_t sx = dx * strideX + kx - padX;
-                                    if (sx < p.srcW)
+                                    if (sx < srcW)
                                     {
-                                        const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                        const float* pw = weight + (ky * kernelX + kx) * F;
                                         const T* ps = src + (sy & sM) * sY + sx * sX;
                                         sum = Fmadd<nofma>(LoadSrc(ps), _mm512_loadu_ps(pw), sum);
                                     }
                                 }
                             }
-                            Save1<term, type>(pd, NULL, sum, _bias, _params);
                         }
-                    }
-                    else
-                    {
-                        for (size_t dx = 0; dx < p.dstW; ++dx, pd += dX)
-                        {
-                            __m512 sum = _mm512_setzero_ps();
-                            for (size_t ky = 0; ky < p.kernelY; ++ky)
-                            {
-                                size_t sy = dy * strideY + ky - padY;
-                                if (sy < p.srcH)
-                                {
-                                    for (size_t kx = 0; kx < p.kernelX; ++kx)
-                                    {
-                                        size_t sx = dx * strideX + kx - padX;
-                                        if (sx < p.srcW)
-                                        {
-                                            const float* pw = weight + (ky * p.kernelX + kx) * F;
-                                            const T* ps = src + (sy & sM) * sY + sx * sX;
-                                            sum = Fmadd<nofma>(LoadSrc(ps), _mm512_loadu_ps(pw), sum);
-                                        }
-                                    }
-                                }
-                            }
-                            Save1<term, type>(pd, NULL, sum, _bias, _params);
-                        }
+                        Save1<term, type>(pd, NULL, sum, _bias, _params);
                     }
                 }
                 src += sD;
@@ -604,44 +603,27 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
+        template<typename T, Term16bType term, SimdConvolutionActivationType type, bool nofma> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
         {
             if (IsKernel(p, 3) && IsDilation(p, 1) && Aligned(p.dstC, F))
-            {
-                if (Base::FmaAvoid(p.compatibility))
-                    depthwise = p.srcT == SimdTensorData16b ?
-                    DepthwiseConvolution3x3<uint16_t, term, type, true> :
-                    DepthwiseConvolution3x3<float, term, type, true>;
-                else
-                    depthwise = p.srcT == SimdTensorData16b ?
-                    DepthwiseConvolution3x3<uint16_t, term, type, false> :
-                    DepthwiseConvolution3x3<float, term, type, false>;
-            }
+                depthwise = DepthwiseConvolution3x3<T, term, type, nofma>;
             else
-            {
-                if (Base::FmaAvoid(p.compatibility))
-                {
-                    if (p.srcT == SimdTensorData16b)
-                        depthwise = DepthwiseConvolution<uint16_t, term, type, true>;
-                    else
-                        depthwise = DepthwiseConvolution<float, term, type, true>;
-                }
-                else
-                {
-                    if (p.srcT == SimdTensorData16b)
-                        depthwise = DepthwiseConvolution<uint16_t, term, type, false>;
-                    else
-                        depthwise = DepthwiseConvolution<float, term, type, false>;
-                }
-            }
+                depthwise = DepthwiseConvolutionDefault<T, term, type, nofma>;
+        }
+
+        template<typename T, Term16bType term, SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
+        {
+            return Base::FmaAvoid(p.compatibility) ? SetDepthwise<T, term, type, true>(p, depthwise) : SetDepthwise<T, term, type, false>(p, depthwise);
+        }
+
+        template<typename T, SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
+        {
+            return p.dstT == SimdTensorData32f ? SetDepthwise<T, Term16bLast32f, type>(p, depthwise) : SetDepthwise<T, Term16bLast16b, type>(p, depthwise);
         }
 
         template<SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
         {
-            if (p.dstT == SimdTensorData32f)
-                SetDepthwise<Term16bLast32f, type>(p, depthwise);
-            else
-                SetDepthwise<Term16bLast16b, type>(p, depthwise);
+            return p.srcT == SimdTensorData16b ? SetDepthwise<uint16_t, type>(p, depthwise) : SetDepthwise<float, type>(p, depthwise);
         }
 
         void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
