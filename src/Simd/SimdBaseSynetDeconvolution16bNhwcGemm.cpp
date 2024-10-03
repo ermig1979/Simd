@@ -57,7 +57,7 @@ namespace Simd
             return size;
         }
 
-        void SynetDeconvolution16bNhwcGemm::SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3)
+        void SynetDeconvolution16bNhwcGemm::SetAlgParam(size_t F, size_t microN, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
         {
             const DeconvParam& p = _param;
             AlgParam& a = _alg;

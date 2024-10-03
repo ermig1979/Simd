@@ -147,7 +147,7 @@ namespace Simd
             typedef void(*BiasActPtr)(const float* src, const DeconvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, const float* bias, const float* params, uint8_t* dst);
 
         protected:
-            void SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
+            void SetAlgParam(size_t F, size_t microN, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
             void ForwardCommon(const uint8_t* src, uint16_t* bufS, float* bufB, float* bufD, uint8_t* dst);
             void GemmCommon(const uint16_t* src, float* dst);
 
