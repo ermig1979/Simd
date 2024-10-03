@@ -131,6 +131,12 @@ namespace Simd
         {
             _mm256_storeu_si256((__m256i*)dst, _mm256_setzero_si256());
         }
+
+        SIMD_INLINE void SetZero2(uint16_t* dst)
+        {
+            _mm256_storeu_si256((__m256i*)dst + 0, _mm256_setzero_si256());
+            _mm256_storeu_si256((__m256i*)dst + 1, _mm256_setzero_si256());
+        }
     }
 #endif
 
