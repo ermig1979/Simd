@@ -37,6 +37,37 @@ namespace Simd
         Term16bSize
     };
 
+    namespace Base
+    {
+        template <Term16bType term> struct Term16b
+        {
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* ptr, float value, const float* bias, const float* params, size_t offset);
+        };
+
+        template <> struct Term16b<Term16bLast16b>
+        {
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t * ptr, float value, const float* bias, const float* params, size_t offset)
+            {
+                ((uint16_t*)ptr)[offset] = Float32ToBFloat16(Activate<type>(value + bias[offset], params, offset));
+            }
+        };
+
+        template <> struct Term16b<Term16bLast32f>
+        {
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* ptr, float value, const float* bias, const float* params, size_t offset)
+            {
+                ((float*)ptr)[offset] = Activate<type>(value + bias[offset], params, offset);
+            }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float val0, const float* bias, const float* params, size_t offset)
+        {
+            Term16b<term>::template Save<type>(ptr, val0, bias, params, offset + 0);
+        }
+    }
+
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {

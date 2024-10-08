@@ -200,6 +200,29 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class SynetConvolution16bNhwcDepthwise : public SynetConvolution16b
+        {
+        public:
+            SynetConvolution16bNhwcDepthwise(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t InternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p);
+
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const float* weight, const float* bias, const float* params, uint8_t* dst);
+
+        protected:
+            size_t _sizeS, _sizeD;
+            Array32f _weight;
+            ConvolutionPtr _convolution;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution16bNchwGemm : public SynetConvolution16b
         {
         public:

@@ -45,7 +45,7 @@ namespace Simd
             size_t K, size_t dstC, size_t dstS, int zero, const uint16_t* src0, const float* bias, const float* params, float* buf, uint8_t* dst)
         {
             int dB = (int)a.N, dD = int(a.N * a.elem), strideB = dB * 4, strideS = 64;
-            int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : K * 2;
+            int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : (int)K * 2;
             const uint16_t* weight1 = weight0 + K * F;
             const uint16_t* src1 = src0 + K * F;
 
@@ -119,7 +119,7 @@ namespace Simd
             size_t K, size_t dstC, size_t dstS, int zero, const uint16_t* src0, const float* bias, const float* params, float* buf, uint8_t* dst)
         {
             int dB = (int)a.N, dD = int(a.N * a.elem), strideB = dB * 4, strideS = 64;
-            int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : K * 2;
+            int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : (int)K * 2;
             const uint16_t* weight1 = weight0 + K * F;
 
             TileConf conf;
@@ -175,7 +175,7 @@ namespace Simd
             size_t K, size_t dstC, size_t dstS, int zero, const uint16_t* src0, const float* bias, const float* params, float* buf, uint8_t* dst)
         {
             int dB = (int)a.N, dD = int(a.N * a.elem), strideB = dB * 4, strideS = 64;
-            int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : K * 2;
+            int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : (int)K * 2;
             const uint16_t* src1 = src0 + K * F;
 
             TileConf conf;
@@ -231,7 +231,7 @@ namespace Simd
             size_t K, size_t dstC, size_t dstS, int zero, const uint16_t* src0, const float* bias, const float* params, float* buf, uint8_t* dst)
         {
             int dB = (int)a.N, dD = int(a.N * a.elem), strideB = dB * 4, strideS = 64;
-            int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : K * 2;
+            int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : (int)K * 2;
 
             TileConf conf;
             conf.rows[0] = uint8_t(dstC);

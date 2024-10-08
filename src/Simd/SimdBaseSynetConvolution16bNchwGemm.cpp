@@ -43,7 +43,7 @@ namespace Simd
         {
             const float* src = ((float*)src8) + (cBeg * p.srcH + yBeg) * p.srcW;
             size_t N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), j, dS = p.srcH * p.srcW;
-            size_t K = Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
+            size_t K = Simd::Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
             for (j = 0; j < NF; j += a.F)
             {
                 for (k = 0; k < K2; k += 2)
@@ -120,7 +120,7 @@ namespace Simd
         {
             const uint16_t* src = ((uint16_t*)src8) + (cBeg * p.srcH + yBeg) * p.srcW;
             size_t N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), j, dS = p.srcH * p.srcW;
-            size_t K = Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
+            size_t K = Simd::Min(cEnd, a.K) - cBeg, K2 = AlignLo(K, 2), KH = AlignHi(K, a.microK), k;
             for (j = 0; j < NF; j += a.F)
             {
                 for (k = 0; k < K2; k += 2)

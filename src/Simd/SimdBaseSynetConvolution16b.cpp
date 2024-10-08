@@ -134,7 +134,7 @@ namespace Simd
                 _grW = _N;
                 _grS = _K * _M;
                 _grD = _N;
-                _weight.Resize(_K * _N);
+                _weight.Resize(_K * _N * p.group);
             }
             else
             {
@@ -147,7 +147,7 @@ namespace Simd
                 _grW = _M * _K;
                 _grS = _K * _N;
                 _grD = _M * _N;
-                _weight.Resize(_K * _M);
+                _weight.Resize(_K * _M * p.group);
             }
             _batch = p.batch;
             _sizeS = p.srcC * p.srcH * p.srcW;
@@ -320,6 +320,8 @@ namespace Simd
             ConvParam param(batch, conv, compatibility);
             if (!param.Valid(SimdTensorData32f, SimdTensorData16b))
                 return NULL;
+            if (Base::SynetConvolution16bNhwcDepthwise::Preferable(param))
+                return new Base::SynetConvolution16bNhwcDepthwise(param);
             return new SynetConvolution16bGemm(param);
         }
     }

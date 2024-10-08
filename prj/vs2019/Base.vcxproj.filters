@@ -373,6 +373,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution32fNhwcGrouped.cpp">
       <Filter>Base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcDepthwise.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
