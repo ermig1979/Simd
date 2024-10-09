@@ -71,6 +71,20 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+        template <class T> SIMD_INLINE __m128 LoadSrc(const T* src);
+
+        template <> SIMD_INLINE __m128 LoadSrc<float>(const float* src)
+        {
+            return _mm_loadu_ps(src);
+        }
+
+        template <> SIMD_INLINE __m128 LoadSrc<uint16_t>(const uint16_t* src)
+        {
+            return  _mm_castsi128_ps(UnpackU16<0>(K_ZERO, _mm_loadl_epi64((__m128i*)src)));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <Term16bType term> struct Term16b
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m128 value, const __m128* bias, const __m128* params);
