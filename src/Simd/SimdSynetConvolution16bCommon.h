@@ -379,6 +379,20 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        template <class T> SIMD_INLINE __m256 LoadSrc(const T* src);
+
+        template <> SIMD_INLINE __m256 LoadSrc<float>(const float* src)
+        {
+            return _mm256_loadu_ps(src);
+        }
+
+        template <> SIMD_INLINE __m256 LoadSrc<uint16_t>(const uint16_t* src)
+        {
+            return Avx2::BFloat16ToFloat32(_mm256_cvtepu16_epi32(_mm_loadu_si128((__m128i*)src)));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+        
         template <Term16bType term> struct Term16b
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m256 value, const __m256* bias, const __m256* params);
