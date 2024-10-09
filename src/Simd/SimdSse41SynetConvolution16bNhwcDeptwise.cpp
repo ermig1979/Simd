@@ -237,9 +237,352 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<typename T, Term16bType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Convolution16bNhwcDepthwise3x3Edge(const T* src, const ConvParam& p, size_t dy, size_t dx, const float* weight, const float* bias, const float* params, uint8_t* dst)
+        {
+            size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), srcC2F = AlignLo(srcC, 2 * F), srcC4F = AlignLo(srcC, 4 * F);
+            size_t c = 0;
+            for (; c < srcC4F; c += 4 * F)
+            {
+                __m128 d00 = _mm_loadu_ps(bias + c + 0 * F);
+                __m128 d01 = _mm_loadu_ps(bias + c + 1 * F);
+                __m128 d02 = _mm_loadu_ps(bias + c + 2 * F);
+                __m128 d03 = _mm_loadu_ps(bias + c + 3 * F);
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t sy = dy * p.strideY + ky - p.padY;
+                    if (sy < p.srcH)
+                    {
+                        for (size_t kx = 0; kx < 3; ++kx)
+                        {
+                            size_t sx = dx * p.strideX + kx - p.padX;
+                            if (sx < p.srcW)
+                            {
+                                const float* pw = weight + (ky * 3 + kx) * srcC;
+                                const T* ps = src + (sy * p.srcW + sx) * srcC;
+                                d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 0 * F), _mm_loadu_ps(pw + 0 * F)), d00);
+                                d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 1 * F), _mm_loadu_ps(pw + 1 * F)), d01);
+                                d02 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 2 * F), _mm_loadu_ps(pw + 2 * F)), d02);
+                                d03 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 3 * F), _mm_loadu_ps(pw + 3 * F)), d03);
+                            }
+                        }
+                    }
+                }
+                Save1<term, type>(dst, d00, params, c + 0 * F);
+                Save1<term, type>(dst, d01, params, c + 1 * F);
+                Save1<term, type>(dst, d02, params, c + 2 * F);
+                Save1<term, type>(dst, d03, params, c + 3 * F);
+                src += 4 * F;
+                weight += 4 * F;
+            }
+            for (; c < srcC2F; c += 2 * F)
+            {
+                __m128 d00 = _mm_loadu_ps(bias + c + 0 * F);
+                __m128 d01 = _mm_loadu_ps(bias + c + 1 * F);
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t sy = dy * p.strideY + ky - p.padY;
+                    if (sy < p.srcH)
+                    {
+                        for (size_t kx = 0; kx < 3; ++kx)
+                        {
+                            size_t sx = dx * p.strideX + kx - p.padX;
+                            if (sx < p.srcW)
+                            {
+                                const float* pw = weight + (ky * 3 + kx) * srcC;
+                                const T* ps = src + (sy * p.srcW + sx) * srcC;
+                                d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 0 * F), _mm_loadu_ps(pw + 0 * F)), d00);
+                                d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 1 * F), _mm_loadu_ps(pw + 1 * F)), d01);
+                            }
+                        }
+                    }
+                }
+                Save1<term, type>(dst, d00, params, c + 0 * F);
+                Save1<term, type>(dst, d01, params, c + 1 * F);
+                src += 2 * F;
+                weight += 2 * F;
+            }
+            for (; c < srcCF; c += F)
+            {
+                __m128 d00 = _mm_loadu_ps(bias + c);
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t sy = dy * p.strideY + ky - p.padY;
+                    if (sy < p.srcH)
+                    {
+                        for (size_t kx = 0; kx < 3; ++kx)
+                        {
+                            size_t sx = dx * p.strideX + kx - p.padX;
+                            if (sx < p.srcW)
+                            {
+                                const float* pw = weight + (ky * 3 + kx) * srcC;
+                                const T* ps = src + (sy * p.srcW + sx) * srcC;
+                                d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps), _mm_loadu_ps(pw)), d00);
+                            }
+                        }
+                    }
+                }
+                Save1<term, type>(dst, d00, params, c);
+                src += F;
+                weight += F;
+            }
+            if (c < srcC)
+            {
+                c = srcC - F;
+                src -= srcCF - c;
+                weight -= srcCF - c;
+                __m128 d00 = _mm_loadu_ps(bias + c);
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t sy = dy * p.strideY + ky - p.padY;
+                    if (sy < p.srcH)
+                    {
+                        for (size_t kx = 0; kx < 3; ++kx)
+                        {
+                            size_t sx = dx * p.strideX + kx - p.padX;
+                            if (sx < p.srcW)
+                            {
+                                const float* pw = weight + (ky * 3 + kx) * srcC;
+                                const T* ps = src + (sy * p.srcW + sx) * srcC;
+                                d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps), _mm_loadu_ps(pw)), d00);
+                            }
+                        }
+                    }
+                }
+                Save1<term, type>(dst, d00, params, c);
+            }
+        }
+
+        template<typename T, Term16bType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Convolution16bNhwcDepthwise3x3Main1(const T* src, size_t srcS, size_t srcC, const float* weight, const float* bias, const float* params, uint8_t* dst)
+        {
+            size_t srcCF = AlignLo(srcC, F);
+            size_t c = 0;
+            for (; c < srcCF; c += F)
+            {
+                __m128 d00 = _mm_loadu_ps(bias + c);
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    const T* ps = src + ky * srcS;
+                    const float* pw = weight + ky * 3 * srcC;
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 0 * srcC), _mm_loadu_ps(pw + 0 * srcC)), d00);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 1 * srcC), _mm_loadu_ps(pw + 1 * srcC)), d00);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 2 * srcC), _mm_loadu_ps(pw + 2 * srcC)), d00);
+                }
+                Save1<term, type>(dst, d00, params, c);
+                src += F;
+                weight += F;
+            }
+            if (c < srcC)
+            {
+                c = srcC - F;
+                src -= srcCF - c;
+                weight -= srcCF - c;
+                __m128 d00 = _mm_loadu_ps(bias + c);
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    const T* ps = src + ky * srcS;
+                    const float* pw = weight + ky * 3 * srcC;
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 0 * srcC), _mm_loadu_ps(pw + 0 * srcC)), d00);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 1 * srcC), _mm_loadu_ps(pw + 1 * srcC)), d00);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps + 2 * srcC), _mm_loadu_ps(pw + 2 * srcC)), d00);
+                }
+                Save1<term, type>(dst, d00, params, c + 0 * F);
+            }
+        }
+
+        template<typename T, Term16bType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Convolution16bNhwcDepthwise3x3Main2(const T* src, size_t srcS, size_t srcX, size_t srcC, size_t dstC, const float* weight, const float* bias, const float* params, uint8_t* dst)
+        {
+            size_t srcCF = AlignLo(srcC, F);
+            size_t c = 0;
+            __m128 d00, d01, w0;
+            for (; c < srcCF; c += F)
+            {
+                d00 = _mm_loadu_ps(bias + c);
+                d01 = d00;
+                const float* pw = weight + c;
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    const T* ps0 = src + ky * srcS;
+                    const T* ps1 = ps0 + srcX;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + 0 * srcC), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + 0 * srcC), w0), d01);
+                    pw += srcC;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + 1 * srcC), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + 1 * srcC), w0), d01);
+                    pw += srcC;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + 2 * srcC), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + 2 * srcC), w0), d01);
+                    pw += srcC;
+                }
+                Save1<term, type>(dst + 0 * dstC, d00, params, c);
+                Save1<term, type>(dst + 1 * dstC, d01, params, c);
+                src += F;
+            }
+            if (c < srcC)
+            {
+                c = srcC - F;
+                src -= srcCF - c;
+                d00 = _mm_loadu_ps(bias + c);
+                d01 = d00;
+                const float* pw = weight + c;
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    const T* ps0 = src + ky * srcS;
+                    const T* ps1 = ps0 + srcX;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + 0 * srcC), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + 0 * srcC), w0), d01);
+                    pw += srcC;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + 1 * srcC), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + 1 * srcC), w0), d01);
+                    pw += srcC;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + 2 * srcC), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + 2 * srcC), w0), d01);
+                    pw += srcC;
+                }
+                Save1<term, type>(dst + 0 * dstC, d00, params, c);
+                Save1<term, type>(dst + 1 * dstC, d01, params, c);
+            }
+        }
+
+        template<typename T, Term16bType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Convolution16bNhwcDepthwise3x3Main4(const T* src, size_t srcS, size_t srcX, size_t srcC, size_t dstC, const float* weight, const float* bias, const float* params, uint8_t* dst)
+        {
+            size_t srcCF = AlignLo(srcC, F);
+            size_t c = 0;
+            for (; c < srcCF; c += F)
+            {
+                __m128 d00, d01, d02, d03, w0;
+                d00 = _mm_loadu_ps(bias + c);
+                d01 = d00;
+                d02 = d00;
+                d03 = d00;
+                const float* pw = weight + c;
+                const T* ps0 = src + 0 * srcX;
+                const T* ps1 = src + 1 * srcX;
+                const T* ps2 = src + 2 * srcX;
+                const T* ps3 = src + 3 * srcX;
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t offset = ky * srcS;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + offset), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + offset), w0), d01);
+                    d02 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps2 + offset), w0), d02);
+                    d03 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps3 + offset), w0), d03);
+                    pw += srcC, offset += srcC;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + offset), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + offset), w0), d01);
+                    d02 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps2 + offset), w0), d02);
+                    d03 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps3 + offset), w0), d03);
+                    pw += srcC, offset += srcC;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + offset), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + offset), w0), d01);
+                    d02 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps2 + offset), w0), d02);
+                    d03 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps3 + offset), w0), d03);
+                    pw += srcC, offset += srcC;
+                }
+                Save1<term, type>(dst + 0 * dstC, d00, params, c);
+                Save1<term, type>(dst + 1 * dstC, d01, params, c);
+                Save1<term, type>(dst + 2 * dstC, d02, params, c);
+                Save1<term, type>(dst + 3 * dstC, d03, params, c);
+                src += F;
+            }
+            if (c < srcC)
+            {
+                c = srcC - F;
+                src -= srcCF - c;
+                dst -= srcCF - c;
+                __m128 d00, d01, d02, d03, w0;
+                d00 = _mm_loadu_ps(bias + c);
+                d01 = d00;
+                d02 = d00;
+                d03 = d00;
+                const float* pw = weight + c;
+                const T* ps0 = src + 0 * srcX;
+                const T* ps1 = src + 1 * srcX;
+                const T* ps2 = src + 2 * srcX;
+                const T* ps3 = src + 3 * srcX;
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t offset = ky * srcS;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + offset), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + offset), w0), d01);
+                    d02 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps2 + offset), w0), d02);
+                    d03 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps3 + offset), w0), d03);
+                    pw += srcC, offset += srcC;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + offset), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + offset), w0), d01);
+                    d02 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps2 + offset), w0), d02);
+                    d03 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps3 + offset), w0), d03);
+                    pw += srcC, offset += srcC;
+                    w0 = _mm_loadu_ps(pw);
+                    d00 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps0 + offset), w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps1 + offset), w0), d01);
+                    d02 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps2 + offset), w0), d02);
+                    d03 = _mm_add_ps(_mm_mul_ps(LoadSrc(ps3 + offset), w0), d03);
+                    pw += srcC, offset += srcC;
+                }
+                Save1<term, type>(dst + 0 * dstC, d00, params, c);
+                Save1<term, type>(dst + 1 * dstC, d01, params, c);
+                Save1<term, type>(dst + 2 * dstC, d02, params, c);
+                Save1<term, type>(dst + 3 * dstC, d03, params, c);
+            }
+        }
+
+        template<typename T, Term16bType term, SimdConvolutionActivationType type> void Convolution16bNhwcDepthwise3x3(const uint8_t* src8, const ConvParam& p, const float* weight, const float* bias, const float* params, uint8_t* dst)
+        {
+            const T* src = (T*)src8;
+            size_t srcS = p.srcC * p.srcW;
+            size_t srcX = p.srcC * p.strideX;
+            size_t dstH = p.dstH - p.padH;
+            size_t dstW = p.dstW - p.padW;
+            size_t dstW2 = AlignLo(dstW - p.padX, 2) + p.padX;
+            size_t dstW4 = AlignLo(dstW - p.padX, 4) + p.padX;
+            size_t dstC = p.dstC * (term == Term16bLast16b ? 2 : 4);
+            size_t dy = 0;
+            for (; dy < p.padY; ++dy)
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                    Convolution16bNhwcDepthwise3x3Edge<T, term, type>(src, p, dy, dx, weight, bias, params, dst), dst += dstC;
+            for (; dy < dstH; ++dy)
+            {
+                size_t dx = 0;
+                for (; dx < p.padX; ++dx)
+                    Convolution16bNhwcDepthwise3x3Edge<T, term, type>(src, p, dy, dx, weight, bias, params, dst), dst += dstC;
+                size_t offset = ((dy * p.strideY - p.padY) * p.srcW + dx * p.strideX - p.padX) * p.srcC;
+                for (; dx < dstW4; dx += 4)
+                    Convolution16bNhwcDepthwise3x3Main4<T, term, type>(src + offset, srcS, srcX, p.srcC, dstC, weight, bias, params, dst), dst += 4 * dstC, offset += 4 * srcX;
+                for (; dx < dstW2; dx += 2)
+                    Convolution16bNhwcDepthwise3x3Main2<T, term, type>(src + offset, srcS, srcX, p.srcC, dstC, weight, bias, params, dst), dst += 2 * dstC, offset += 2 * srcX;
+                for (; dx < dstW; ++dx)
+                    Convolution16bNhwcDepthwise3x3Main1<T, term, type>(src + offset, srcS, p.srcC, weight, bias, params, dst), dst += dstC, offset += srcX;
+                for (; dx < p.dstW; ++dx)
+                    Convolution16bNhwcDepthwise3x3Edge<T, term, type>(src, p, dy, dx, weight, bias, params, dst), dst += dstC;
+            }
+            for (; dy < p.dstH; ++dy)
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                    Convolution16bNhwcDepthwise3x3Edge<T, term, type>(src, p, dy, dx, weight, bias, params, dst), dst += dstC;
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template<typename T, Term16bType term, SimdConvolutionActivationType type> static void SetConvolution(const ConvParam& p, SynetConvolution16bNhwcDepthwise::ConvolutionPtr& convolution)
         {
-            convolution = Convolution16bNhwcDepthwiseDefault<T, term, type>;
+            if (p.IsKernel(3) && p.IsDilation(1) && p.srcC >= F)
+                convolution = Convolution16bNhwcDepthwise3x3<T, term, type>;
+            else
+                convolution = Convolution16bNhwcDepthwiseDefault<T, term, type>;
         }
 
         template<typename T, SimdConvolutionActivationType type> static void SetConvolution(const ConvParam& p, SynetConvolution16bNhwcDepthwise::ConvolutionPtr& convolution)
