@@ -697,6 +697,20 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        template <class T> SIMD_INLINE __m512 LoadSrc(const T* src, __mmask16 tail = __mmask16(-1));
+
+        template <> SIMD_INLINE __m512 LoadSrc<float>(const float* src, __mmask16 tail)
+        {
+            return _mm512_maskz_loadu_ps(tail, src);
+        }
+
+        template <> SIMD_INLINE __m512 LoadSrc<uint16_t>(const uint16_t* src, __mmask16 tail)
+        {
+            return BFloat16ToFloat32(_mm256_maskz_loadu_epi16(tail, src));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <Term16bType term> struct Term16b
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1));

@@ -40,19 +40,7 @@ namespace Simd
         using AlgParam = Base::SynetMergedConvolution16b::AlgParam;
         using DepthwisePtr = Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr;
 
-        template <class T> SIMD_INLINE __m512 LoadSrc(const T* src);
-
-        template <> SIMD_INLINE __m512 LoadSrc<float>(const float* src)
-        {
-            return _mm512_loadu_ps(src);
-        }
-
-        template <> SIMD_INLINE __m512 LoadSrc<uint16_t>(const uint16_t* src)
-        {
-            return BFloat16ToFloat32(_mm512_cvtepu16_epi32(_mm256_loadu_si256((__m256i*)src)));
-        }
-
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<typename T, Term16bType term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution(const uint8_t* src8, const ConvParam& p, const AlgParam& a,
             size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint8_t* dst)

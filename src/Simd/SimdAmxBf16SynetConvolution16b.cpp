@@ -40,7 +40,7 @@ namespace Simd
             if (SynetConvolution16bNchwGemm::Preferable(param))
                 return new AmxBf16::SynetConvolution16bNchwGemm(param);
             if (Base::SynetConvolution16bNhwcDepthwise::Preferable(param))
-                return new Avx2::SynetConvolution16bNhwcDepthwise(param);
+                return new Avx512bw::SynetConvolution16bNhwcDepthwise(param);
             return new Base::SynetConvolution16bGemm(param);
         }
     }
