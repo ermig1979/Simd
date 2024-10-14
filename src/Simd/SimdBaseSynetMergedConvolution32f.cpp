@@ -438,6 +438,7 @@ namespace Simd
                     break;
             }
             _sizeB[1] = 0;
+            _bufH[1] = 0;
             for (size_t i = 0; i < 2; ++i)
             {
                 size_t dstC = AlignHiAny(p.conv[i].dstC, i == 1 ? _miC : 2 * _miC);
@@ -551,6 +552,7 @@ namespace Simd
                     break;
             }
             _bufH[1] = _bufH[0];
+            _bufH[0] = 0;
             _sizeB[1] = 0;
             for (size_t i = 0; i < 2; ++i)
             {

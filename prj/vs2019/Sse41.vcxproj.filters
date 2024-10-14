@@ -265,15 +265,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect3r.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fCd.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fCdc.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fDc.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct8i.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
@@ -416,6 +407,18 @@
       <Filter>Sse41</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcDeptwise.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32f.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fDepthwise.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fInput.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fOutput.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
   </ItemGroup>

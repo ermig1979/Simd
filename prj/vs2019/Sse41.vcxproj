@@ -123,9 +123,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bOutput.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fCd.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fCdc.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fDc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iInput.cpp" />
