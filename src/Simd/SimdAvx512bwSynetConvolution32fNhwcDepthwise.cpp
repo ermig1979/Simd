@@ -984,6 +984,8 @@ namespace Simd
             }
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template<::SimdConvolutionActivationType type> void Convolution32fNhwcDepthwise_k7p3d1s1w6(const float* src, const ConvParam& p, const float* weight, const float* bias, const float* params, float* dst)
         {
             assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && AlignedAny(p.srcW, 6));
@@ -1103,6 +1105,8 @@ namespace Simd
                 }
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         template<::SimdConvolutionActivationType type> void Convolution32fNhwcDepthwise_k7p3d1s1w8(const float* src, const ConvParam& p, const float* weight, const float* bias, const float* params, float* dst)
         {
