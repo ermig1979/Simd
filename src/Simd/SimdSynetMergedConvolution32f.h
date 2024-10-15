@@ -262,6 +262,14 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
+
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
+
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetMergedConvolution32fCdc : public Avx2::SynetMergedConvolution32fCdc
         {
         public:
