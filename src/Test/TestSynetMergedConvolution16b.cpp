@@ -285,6 +285,7 @@ namespace Test
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 116, 15, 5), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 116), f32, f32, c), f1, f2);
 #endif
 #if 1
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 192, 40, 40), Cnv(a2, 1, 1, 192), Cnv(a1, 5, 1), b16, b16, c), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 16, 16), Cnv(a1, 7, 1), Cnv(a2, 1, 1, 256), f32, f32, c), f1, f2);
         //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 256, 16, 16), Cnv(a1, 7, 1), Cnv(a2, 1, 1, 256), b16, b16, c), f1, f2);
         //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 304, 17, 15), Cnv(a1, 7, 1), Cnv(a2, 1, 1, 1216), b16, b16, c), f1, f2);
