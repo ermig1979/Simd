@@ -889,7 +889,7 @@ namespace Simd
         {
             assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && Aligned(p.srcW, 4));
 
-            size_t dstC = p.dstC, dstCF = AlignLo(p.dstC, F), dstW = p.dstW, srcH = p.srcH, end = dstW - 4;
+            size_t dstC = p.dstC, dstW = p.dstW, srcH = p.srcH, end = dstW - 4;
             __m512 s0, s1, w0, w1, w2, w3, w4, w5, w6, d0, d1, d2, d3, _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
             if (type == SimdConvolutionActivationRestrictRange ||
@@ -902,7 +902,7 @@ namespace Simd
                 {
                     for (size_t dc = 0; dc < dstC; dc += F)
                     {
-                        __mmask16 tail = dc < dstCF ? __mmask16(-1) : TailMask16(dstC - dc);
+                        __mmask16 tail = TailMask16(dstC - dc);
                         if (type == SimdConvolutionActivationPrelu)
                             _params[0] = _mm512_maskz_loadu_ps(tail, params + dc);
                         d0 = bias ? _mm512_maskz_loadu_ps(tail, bias + dc) : _mm512_setzero_ps();
@@ -990,7 +990,7 @@ namespace Simd
         {
             assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && AlignedAny(p.srcW, 6));
 
-            size_t dstC = p.dstC, dstCF = AlignLo(p.dstC, F), dstW = p.dstW, srcH = p.srcH, end = dstW - 6;
+            size_t dstC = p.dstC, dstW = p.dstW, srcH = p.srcH, end = dstW - 6;
             __m512 s0, s1, w0, w1, w2, w3, w4, w5, w6, d0, d1, d2, d3, d4, d5, _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
             if (type == SimdConvolutionActivationRestrictRange ||
@@ -1003,7 +1003,7 @@ namespace Simd
                 {
                     for (size_t dc = 0; dc < dstC; dc += F)
                     {
-                        __mmask16 tail = dc < dstCF ? __mmask16(-1) : TailMask16(dstC - dc);
+                        __mmask16 tail = TailMask16(dstC - dc);
                         if (type == SimdConvolutionActivationPrelu)
                             _params[0] = _mm512_maskz_loadu_ps(tail, params + dc);
                         d0 = bias ? _mm512_maskz_loadu_ps(tail, bias + dc) : _mm512_setzero_ps();
@@ -1112,7 +1112,7 @@ namespace Simd
         {
             assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && Aligned(p.srcW, 8));
 
-            size_t dstC = p.dstC, dstCF = AlignLo(p.dstC, F), dstW = p.dstW, srcH = p.srcH, end = dstW - 8;
+            size_t dstC = p.dstC, dstW = p.dstW, srcH = p.srcH, end = dstW - 8;
             __m512 s0, s1, w0, w1, w2, w3, w4, w5, w6, d0, d1, d2, d3, d4, d5, d6, d7, _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
             if (type == SimdConvolutionActivationRestrictRange ||
@@ -1125,7 +1125,7 @@ namespace Simd
                 {
                     for (size_t dc = 0; dc < dstC; dc += F)
                     {
-                        __mmask16 tail = dc < dstCF ? __mmask16(-1) : TailMask16(dstC - dc);
+                        __mmask16 tail = TailMask16(dstC - dc);
                         if (type == SimdConvolutionActivationPrelu)
                             _params[0] = _mm512_maskz_loadu_ps(tail, params + dc);
                         d0 = bias ? _mm512_maskz_loadu_ps(tail, bias + dc) : _mm512_setzero_ps();
