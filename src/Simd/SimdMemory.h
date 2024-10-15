@@ -82,6 +82,11 @@ namespace Simd
         return size == AlignLo(size, align);
     }
 
+    SIMD_INLINE bool AlignedAny(size_t size, size_t align)
+    {
+        return size == AlignLoAny(size, align);
+    }
+
     SIMD_INLINE bool Aligned(const void * ptr, size_t align)
     {
         return ptr == AlignLo(ptr, align);
