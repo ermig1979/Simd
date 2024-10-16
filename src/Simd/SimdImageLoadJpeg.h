@@ -52,7 +52,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static SIMD_INLINE int JpegLoadError(const char* text, const char* type)
+        SIMD_INLINE int JpegLoadError(const char* text, const char* type)
         {
             std::cout << "JPEG load error: " << text << ", " << type << "!" << std::endl;
             return 0;

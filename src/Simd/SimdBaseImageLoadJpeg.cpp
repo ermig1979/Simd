@@ -56,8 +56,6 @@ namespace Simd
 #define JPEG_NOTUSED(v)  (void)sizeof(v)
 #endif
 
-#define jpeg__errpuc(x,y)  ((unsigned char *)(size_t) (JpegLoadError(x,y)?NULL:NULL))
-
 #define jpeg_lrot(x,y)  (((x) << (y)) | ((x) >> (32 - (y))))
 
 #define JPEG_SIMD_ALIGN(type, name) SIMD_ALIGNED(16) type name
@@ -156,17 +154,16 @@ namespace Simd
             JpegHuffman huff_ac[4];
             uint16_t dequant[4][64];
 
-            // sizes for components, interleaved MCUs
             int img_h_max, img_v_max;
             int img_mcu_x, img_mcu_y;
             int img_mcu_w, img_mcu_h;
 
             JpegImgComp img_comp[4];
 
-            uint32_t   code_buffer; // jpeg entropy-coded buffer
-            int            code_bits;   // number of valid bits
-            unsigned char  marker;      // marker seen while filling entropy buffer
-            int            nomore;      // flag if we saw a marker so must stop
+            uint32_t  code_buffer; // jpeg entropy-coded buffer
+            int code_bits;   // number of valid bits
+            unsigned char marker;      // marker seen while filling entropy buffer
+            int nomore;      // flag if we saw a marker so must stop
 
             int            progressive;
             int            spec_start;
@@ -183,7 +180,6 @@ namespace Simd
 
             Array8u out;
 
-            // kernels
             void (*idct_block_kernel)(uint8_t* out, int out_stride, short data[64]);
             void (*YCbCr_to_RGB_kernel)(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step);
             uint8_t* (*resample_row_hv_2_kernel)(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs);
@@ -478,7 +474,8 @@ namespace Simd
                                 // so we don't have to do anything special here
                             }
                         }
-                        else {
+                        else 
+                        {
                             if (s != 1) return JpegLoadError("bad huffman code", "Corrupt JPEG");
                             // sign bit
                             if (jpeg__jpeg_get_bit(j))
@@ -626,9 +623,7 @@ namespace Simd
         }
 
 #define JPEG__MARKER_none  0xff
-        // if there's a pending marker from the entropy stream, return that
-        // otherwise, fetch from the stream and get a marker. if there's no
-        // marker, return 0xff, which is never a valid marker value
+
         static uint8_t jpeg__get_marker(JpegContext* j)
         {
             uint8_t x;
@@ -690,7 +685,8 @@ namespace Simd
                     }
                     return 1;
                 }
-                else { // interleaved
+                else 
+                {
                     int i, j, k, x, y;
                     JPEG_SIMD_ALIGN(short, data[64]);
                     for (j = 0; j < z->img_mcu_y; ++j) {
