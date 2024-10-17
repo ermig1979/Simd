@@ -132,66 +132,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        struct JpegImgComp
-        {
-            int id;
-            int h, v;
-            int tq;
-            int hd, ha;
-            int dc_pred;
-            int x, y, w2, h2;
-            Array8u bufD, bufC, bufL;
-            uint8_t* data;
-            short* coeff;
-            int coeff_w, coeff_h;
-        };
-
-        struct JpegContext
-        {
-            JpegContext(InputMemoryStream* s)
-                : stream(s)
-                , img_n(0)
-            {
-            }
-
-            InputMemoryStream* stream;
-            uint32_t img_x, img_y;
-            int img_n, img_out_n;
-            JpegHuffman huff_dc[4];
-            JpegHuffman huff_ac[4];
-            uint16_t dequant[4][64];
-
-            int img_h_max, img_v_max;
-            int img_mcu_x, img_mcu_y;
-            int img_mcu_w, img_mcu_h;
-
-            JpegImgComp img_comp[4];
-
-            uint32_t  code_buffer; // jpeg entropy-coded buffer
-            int code_bits;   // number of valid bits
-            unsigned char marker;      // marker seen while filling entropy buffer
-            int nomore;      // flag if we saw a marker so must stop
-
-            int progressive;
-            int spec_start;
-            int spec_end;
-            int succ_high;
-            int succ_low;
-            int eob_run;
-            int jfif;
-            int app14_color_transform; // Adobe APP14 tag
-            int rgb;
-
-            int scan_n, order[4];
-            int restart_interval, todo;
-
-            Array8u out;
-
-            void (*idct_block_kernel)(uint8_t* out, int out_stride, short data[64]);
-            void (*YCbCr_to_RGB_kernel)(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step);
-            uint8_t* (*resample_row_hv_2_kernel)(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs);
-        };
-
         SIMD_INLINE static void jpeg__grow_buffer_unsafe(JpegContext* j)
         {
             do {
@@ -388,8 +328,6 @@ namespace Simd
             return 1;
         }
 
-        // @OPTIMIZE: store non-zigzagged during the decode passes,
-        // and only de-zigzag when dequantizing
         static int jpeg__jpeg_decode_block_prog_ac(JpegContext* j, short data[64], JpegHuffman* hac, int16_t* fac)
         {
             int k;
@@ -737,7 +675,7 @@ namespace Simd
                     int h = (z->img_comp[n].y + 7) >> 3;
                     for (j = 0; j < h; ++j) {
                         for (i = 0; i < w; ++i) {
-                            short* data = z->img_comp[n].coeff + 64 * (i + j * z->img_comp[n].coeff_w);
+                            short* data = z->img_comp[n].coeff + 64 * (i + j * z->img_comp[n].coeffW);
                             if (z->spec_start == 0) {
                                 if (!jpeg__jpeg_decode_block_prog_dc(z, data, &z->huff_dc[z->img_comp[n].hd], n))
                                     return 0;
@@ -770,7 +708,7 @@ namespace Simd
                                     for (x = 0; x < z->img_comp[n].h; ++x) {
                                         int x2 = (i * z->img_comp[n].h + x);
                                         int y2 = (j * z->img_comp[n].v + y);
-                                        short* data = z->img_comp[n].coeff + 64 * (x2 + y2 * z->img_comp[n].coeff_w);
+                                        short* data = z->img_comp[n].coeff + 64 * (x2 + y2 * z->img_comp[n].coeffW);
                                         if (!jpeg__jpeg_decode_block_prog_dc(z, data, &z->huff_dc[z->img_comp[n].hd], n))
                                             return 0;
                                     }
@@ -800,7 +738,7 @@ namespace Simd
                 {
                     for (int i = 0; i < w; ++i) 
                     {
-                        short* data = z->img_comp[n].coeff + 64 * (i + j * z->img_comp[n].coeff_w);
+                        short* data = z->img_comp[n].coeff + 64 * (i + j * z->img_comp[n].coeffW);
                         const uint16_t* dequant = z->dequant[z->img_comp[n].tq];
                         for (int k = 0; k < 64; ++k)
                             data[k] *= dequant[k];
@@ -1031,14 +969,15 @@ namespace Simd
                 if (z->img_comp[i].bufD.Empty())
                     return JpegLoadError("outofmem", "Out of memory");
                 z->img_comp[i].data = z->img_comp[i].bufD.data;
-                if (z->progressive) {
+                if (z->progressive) 
+                {
                     // w2, h2 are multiples of 8 (see above)
-                    z->img_comp[i].coeff_w = z->img_comp[i].w2 / 8;
-                    z->img_comp[i].coeff_h = z->img_comp[i].h2 / 8;
-                    z->img_comp[i].bufC.Resize(z->img_comp[i].w2 * z->img_comp[i].h2 * sizeof(short));
+                    z->img_comp[i].coeffW = z->img_comp[i].w2 / 8;
+                    z->img_comp[i].coeffH = z->img_comp[i].h2 / 8;
+                    z->img_comp[i].bufC.Resize(z->img_comp[i].w2 * z->img_comp[i].h2);
                     if (z->img_comp[i].bufC.Empty())
                         return JpegLoadError("outofmem", "Out of memory");
-                    z->img_comp[i].coeff = (short*)z->img_comp[i].bufC.data;
+                    z->img_comp[i].coeff = z->img_comp[i].bufC.data;
                 }
             }
 
@@ -1461,6 +1400,26 @@ namespace Simd
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgb24;
+            _yuvToBgr = NULL;
+            _yuvToBgra = NULL;
+            _anyToAny = NULL;
+            if (_param.format == SimdPixelFormatGray8)
+                _anyToAny = Base::RgbaToGray;
+            if (_param.format == SimdPixelFormatBgr24)
+            {
+                _yuvToBgr = Base::Yuv444pToBgrV2;
+                _anyToAny = Base::BgraToRgb;
+            }
+            if (_param.format == SimdPixelFormatBgra32)
+            {
+                _yuvToBgra = Base::Yuv444pToBgraV2;
+                _anyToAny = Base::BgraToRgba;
+            }
+            if (_param.format == SimdPixelFormatRgb24)
+            {
+                _yuvToBgr = Base::Yuv444pToRgbV2;
+                _anyToAny = Base::BgraToBgr;
+            }
         }
 
         bool ImageJpegLoader::FromStream()
@@ -1469,51 +1428,36 @@ namespace Simd
             jpeg__setup_jpeg(&jpegContext);
             if (!JpegDecode(&jpegContext))
                 return false;
+            _image.Recreate(jpegContext.img_x, jpegContext.img_y, (Image::Format)_param.format);
             if (IsYuv444(jpegContext))
             {
-                _image.Recreate(jpegContext.img_x, jpegContext.img_y, (Image::Format)_param.format);
                 switch (_param.format)
                 {
+                case SimdPixelFormatGray8:
+                    Base::Copy(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_x, jpegContext.img_y, 1, _image.data, _image.stride);
+                    return true;
                 case SimdPixelFormatBgr24:
-                    Base::Yuv444pToBgrV2(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
+                case SimdPixelFormatRgb24:
+                    _yuvToBgr(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
                         jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y,_image.data, _image.stride, SimdYuvTrect871);
                     return true;
                 case SimdPixelFormatBgra32:
-                    Base::Yuv444pToBgraV2(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
+                    _yuvToBgra(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
                         jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y, _image.data, _image.stride, 0xFF, SimdYuvTrect871);
-                    return true;
-                case SimdPixelFormatRgb24:
-                    Base::Yuv444pToRgbV2(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
-                        jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y, _image.data, _image.stride, SimdYuvTrect871);
                     return true;
                 }
             }
-
             int x, y, comp;
             if (JpegConvert(&jpegContext, &x, &y, &comp, 4))
             {
                 size_t stride = 4 * x;
-                _image.Recreate(x, y, (Image::Format)_param.format);
-                switch (_param.format)
-                {
-                case SimdPixelFormatGray8:
-                    Base::RgbaToGray(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
-                    break;
-                case SimdPixelFormatBgr24:
-                    Base::BgraToRgb(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
-                    break;
-                case SimdPixelFormatBgra32:
-                    Base::BgraToRgba(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
-                    break;
-                case SimdPixelFormatRgb24:
-                    Base::BgraToBgr(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
-                    break;
-                case SimdPixelFormatRgba32:
+                if (_param.format == SimdPixelFormatRgba32)
                     Base::Copy(jpegContext.out.data, stride, x, y, 4, _image.data, _image.stride);
-                    break;
-                default: 
-                    break;
-                }
+                else if (_param.format == SimdPixelFormatGray8 || _param.format == SimdPixelFormatBgr24 ||
+                    _param.format == SimdPixelFormatBgra32 || _param.format == SimdPixelFormatRgb24)
+                    _anyToAny(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
+                else
+                    return false;
                 return true;
             }
             return false;

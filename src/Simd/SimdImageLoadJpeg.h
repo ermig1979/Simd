@@ -52,6 +52,71 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        struct JpegImgComp
+        {
+            int id;
+            int h, v;
+            int tq;
+            int hd, ha;
+            int dc_pred;
+            int x, y, w2, h2;
+            Array8u bufD, bufL;
+            uint8_t* data;
+            Array16i bufC;
+            short* coeff;
+            int coeffW, coeffH;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        struct JpegContext
+        {
+            JpegContext(InputMemoryStream* s)
+                : stream(s)
+                , img_n(0)
+            {
+            }
+
+            InputMemoryStream* stream;
+            uint32_t img_x, img_y;
+            int img_n, img_out_n;
+            JpegHuffman huff_dc[4];
+            JpegHuffman huff_ac[4];
+            uint16_t dequant[4][64];
+
+            int img_h_max, img_v_max;
+            int img_mcu_x, img_mcu_y;
+            int img_mcu_w, img_mcu_h;
+
+            JpegImgComp img_comp[4];
+
+            uint32_t  code_buffer;
+            int code_bits;
+            unsigned char marker;
+            int nomore;
+
+            int progressive;
+            int spec_start;
+            int spec_end;
+            int succ_high;
+            int succ_low;
+            int eob_run;
+            int jfif;
+            int app14_color_transform; // Adobe APP14 tag
+            int rgb;
+
+            int scan_n, order[4];
+            int restart_interval, todo;
+
+            Array8u out;
+
+            void (*idct_block_kernel)(uint8_t* out, int out_stride, short data[64]);
+            void (*YCbCr_to_RGB_kernel)(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step);
+            uint8_t* (*resample_row_hv_2_kernel)(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE int JpegLoadError(const char* text, const char* type)
         {
             std::cout << "JPEG load error: " << text << ", " << type << "!" << std::endl;

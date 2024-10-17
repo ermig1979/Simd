@@ -128,8 +128,8 @@ namespace Simd
             case SimdImageFilePgmBin: return new ImagePgmBinLoader(param);
             case SimdImageFilePpmTxt: return new ImagePpmTxtLoader(param);
             case SimdImageFilePpmBin: return new ImagePpmBinLoader(param);
-            case SimdImageFilePng: return new Base::ImagePngLoader(param);
-            case SimdImageFileJpeg: return new Base::ImageJpegLoader(param);
+            case SimdImageFilePng: return new Sse41::ImagePngLoader(param);
+            case SimdImageFileJpeg: return new Sse41::ImageJpegLoader(param);
             default:
                 return NULL;
             }
