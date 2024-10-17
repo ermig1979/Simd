@@ -26,6 +26,7 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
@@ -147,6 +148,12 @@ namespace Simd
 
         struct JpegContext
         {
+            JpegContext(InputMemoryStream* s)
+                : stream(s)
+                , img_n(0)
+            {
+            }
+
             InputMemoryStream* stream;
             uint32_t img_x, img_y;
             int img_n, img_out_n;
@@ -1073,8 +1080,7 @@ namespace Simd
             return 1;
         }
 
-        // decode image to YCbCr format
-        static int jpeg__decode_jpeg_image(JpegContext* j)
+        static int JpegDecode(JpegContext* j)
         {
             int m;
             j->restart_interval = 0;
@@ -1208,7 +1214,9 @@ namespace Simd
         static void jpeg__YCbCr_to_RGB_row(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step)
         {
             int i;
-            for (i = 0; i < count; ++i) {
+            for (i = 0; i < count; ++i) 
+            {
+#if 0
                 int y_fixed = (y[i] << 20) + (1 << 19); // rounding
                 int r, g, b;
                 int cr = pcr[i] - 128;
@@ -1225,6 +1233,9 @@ namespace Simd
                 out[0] = (uint8_t)r;
                 out[1] = (uint8_t)g;
                 out[2] = (uint8_t)b;
+#else
+                YuvToRgb<Trect871>(y[i], pcb[i], pcr[i], out);
+#endif
                 out[3] = 255;
                 out += step;
             }
@@ -1238,7 +1249,7 @@ namespace Simd
             j->resample_row_hv_2_kernel = jpeg__resample_row_hv_2;
         }
 
-        typedef struct
+        struct JpegResample
         {
             ResampleRowPtr resample;
             uint8_t* line0, * line1;
@@ -1246,7 +1257,7 @@ namespace Simd
             int w_lores; // horizontal pixels pre-expansion
             int ystep;   // how far through vertical expansion we are
             int ypos;    // which pre-expansion row we're on
-        } jpeg__resample;
+        };
 
         // fast 0..255 * 0..255 => 0..255 rounded multiplication
         static uint8_t jpeg__blinn_8x8(uint8_t x, uint8_t y)
@@ -1255,176 +1266,185 @@ namespace Simd
             return (uint8_t)((t + (t >> 8)) >> 8);
         }
 
-        static int JpegLoad(JpegContext* z, int* out_x, int* out_y, int* comp, int req_comp)
+        static int JpegConvert(JpegContext* z, int* out_x, int* out_y, int* comp, int req_comp)
         {
-            int n, decode_n, is_rgb;
-            z->img_n = 0; // make jpeg__cleanup_jpeg safe
-
-            // validate req_comp
             if (req_comp < 0 || req_comp > 4) 
                 return JpegLoadError("bad req_comp", "Internal error");
 
-            // load a jpeg image from whichever source, but leave in YCbCr format
-            if (!jpeg__decode_jpeg_image(z))
-                return 0;
+            int n = req_comp ? req_comp : z->img_n >= 3 ? 3 : 1;
+            int is_rgb = z->img_n == 3 && (z->rgb == 3 || (z->app14_color_transform == 0 && !z->jfif));
 
-            // determine actual number of components to generate
-            n = req_comp ? req_comp : z->img_n >= 3 ? 3 : 1;
-
-            is_rgb = z->img_n == 3 && (z->rgb == 3 || (z->app14_color_transform == 0 && !z->jfif));
-
+            int decode_n;
             if (z->img_n == 3 && n < 3 && !is_rgb)
                 decode_n = 1;
             else
                 decode_n = z->img_n;
 
-            // resample and color-convert
+            unsigned int i;
+            uint8_t* coutput[4] = { NULL, NULL, NULL, NULL };
+
+            JpegResample res_comp[4];
+
+            for (int k = 0; k < decode_n; ++k) 
             {
-                int k;
-                unsigned int i, j;
-                uint8_t* coutput[4] = { NULL, NULL, NULL, NULL };
+                JpegResample* r = &res_comp[k];
 
-                jpeg__resample res_comp[4];
-
-                for (k = 0; k < decode_n; ++k) 
-                {
-                    jpeg__resample* r = &res_comp[k];
-
-                    // allocate line buffer big enough for upsampling off the edges
-                    // with upsample factor of 4
-                    z->img_comp[k].bufL.Resize(z->img_x + 3);
-                    if (z->img_comp[k].bufL.Empty()) 
-                        return JpegLoadError("outofmem", "Out of memory");
-
-                    r->hs = z->img_h_max / z->img_comp[k].h;
-                    r->vs = z->img_v_max / z->img_comp[k].v;
-                    r->ystep = r->vs >> 1;
-                    r->w_lores = (z->img_x + r->hs - 1) / r->hs;
-                    r->ypos = 0;
-                    r->line0 = r->line1 = z->img_comp[k].data;
-
-                    if (r->hs == 1 && r->vs == 1) r->resample = resample_row_1;
-                    else if (r->hs == 1 && r->vs == 2) r->resample = jpeg__resample_row_v_2;
-                    else if (r->hs == 2 && r->vs == 1) r->resample = jpeg__resample_row_h_2;
-                    else if (r->hs == 2 && r->vs == 2) r->resample = z->resample_row_hv_2_kernel;
-                    else                               r->resample = jpeg__resample_row_generic;
-                }
-
-                z->out.Resize(n * z->img_x * z->img_y + 1);
-                if (z->out.Empty()) 
+                z->img_comp[k].bufL.Resize(z->img_x + 3);
+                if (z->img_comp[k].bufL.Empty()) 
                     return JpegLoadError("outofmem", "Out of memory");
 
-                for (j = 0; j < z->img_y; ++j) 
+                r->hs = z->img_h_max / z->img_comp[k].h;
+                r->vs = z->img_v_max / z->img_comp[k].v;
+                r->ystep = r->vs >> 1;
+                r->w_lores = (z->img_x + r->hs - 1) / r->hs;
+                r->ypos = 0;
+                r->line0 = r->line1 = z->img_comp[k].data;
+
+                if (r->hs == 1 && r->vs == 1) 
+                    r->resample = resample_row_1;
+                else if (r->hs == 1 && r->vs == 2) 
+                    r->resample = jpeg__resample_row_v_2;
+                else if (r->hs == 2 && r->vs == 1) 
+                    r->resample = jpeg__resample_row_h_2;
+                else if (r->hs == 2 && r->vs == 2) 
+                    r->resample = z->resample_row_hv_2_kernel;
+                else                               
+                    r->resample = jpeg__resample_row_generic;
+            }
+
+            z->out.Resize(n * z->img_x * z->img_y + 1);
+            if (z->out.Empty()) 
+                return JpegLoadError("outofmem", "Out of memory");
+
+            for (unsigned int j = 0; j < z->img_y; ++j) 
+            {
+                uint8_t* out = z->out.data + n * z->img_x * j;
+                for (int k = 0; k < decode_n; ++k) 
                 {
-                    uint8_t* out = z->out.data + n * z->img_x * j;
-                    for (k = 0; k < decode_n; ++k) {
-                        jpeg__resample* r = &res_comp[k];
-                        int y_bot = r->ystep >= (r->vs >> 1);
-                        coutput[k] = r->resample(z->img_comp[k].bufL.data,
-                            y_bot ? r->line1 : r->line0,
-                            y_bot ? r->line0 : r->line1,
-                            r->w_lores, r->hs);
-                        if (++r->ystep >= r->vs) {
-                            r->ystep = 0;
-                            r->line0 = r->line1;
-                            if (++r->ypos < z->img_comp[k].y)
-                                r->line1 += z->img_comp[k].w2;
-                        }
-                    }
-                    if (n >= 3) {
-                        uint8_t* y = coutput[0];
-                        if (z->img_n == 3) {
-                            if (is_rgb) {
-                                for (i = 0; i < z->img_x; ++i) {
-                                    out[0] = y[i];
-                                    out[1] = coutput[1][i];
-                                    out[2] = coutput[2][i];
-                                    out[3] = 255;
-                                    out += n;
-                                }
-                            }
-                            else {
-                                z->YCbCr_to_RGB_kernel(out, y, coutput[1], coutput[2], z->img_x, n);
-                            }
-                        }
-                        else if (z->img_n == 4) {
-                            if (z->app14_color_transform == 0) { // CMYK
-                                for (i = 0; i < z->img_x; ++i) {
-                                    uint8_t m = coutput[3][i];
-                                    out[0] = jpeg__blinn_8x8(coutput[0][i], m);
-                                    out[1] = jpeg__blinn_8x8(coutput[1][i], m);
-                                    out[2] = jpeg__blinn_8x8(coutput[2][i], m);
-                                    out[3] = 255;
-                                    out += n;
-                                }
-                            }
-                            else if (z->app14_color_transform == 2) { // YCCK
-                                z->YCbCr_to_RGB_kernel(out, y, coutput[1], coutput[2], z->img_x, n);
-                                for (i = 0; i < z->img_x; ++i) {
-                                    uint8_t m = coutput[3][i];
-                                    out[0] = jpeg__blinn_8x8(255 - out[0], m);
-                                    out[1] = jpeg__blinn_8x8(255 - out[1], m);
-                                    out[2] = jpeg__blinn_8x8(255 - out[2], m);
-                                    out += n;
-                                }
-                            }
-                            else { // YCbCr + alpha?  Ignore the fourth channel for now
-                                z->YCbCr_to_RGB_kernel(out, y, coutput[1], coutput[2], z->img_x, n);
-                            }
-                        }
-                        else
-                            for (i = 0; i < z->img_x; ++i) {
-                                out[0] = out[1] = out[2] = y[i];
-                                out[3] = 255; // not used if n==3
-                                out += n;
-                            }
-                    }
-                    else {
-                        if (is_rgb) 
-                        {
-                            if (n == 1)
-                                for (i = 0; i < z->img_x; ++i)
-                                    *out++ = jpeg__compute_y(coutput[0][i], coutput[1][i], coutput[2][i]);
-                            else {
-                                for (i = 0; i < z->img_x; ++i, out += 2) {
-                                    out[0] = jpeg__compute_y(coutput[0][i], coutput[1][i], coutput[2][i]);
-                                    out[1] = 255;
-                                }
-                            }
-                        }
-                        else if (z->img_n == 4 && z->app14_color_transform == 0) {
-                            for (i = 0; i < z->img_x; ++i) {
-                                uint8_t m = coutput[3][i];
-                                uint8_t r = jpeg__blinn_8x8(coutput[0][i], m);
-                                uint8_t g = jpeg__blinn_8x8(coutput[1][i], m);
-                                uint8_t b = jpeg__blinn_8x8(coutput[2][i], m);
-                                out[0] = jpeg__compute_y(r, g, b);
-                                out[1] = 255;
-                                out += n;
-                            }
-                        }
-                        else if (z->img_n == 4 && z->app14_color_transform == 2) {
-                            for (i = 0; i < z->img_x; ++i) {
-                                out[0] = jpeg__blinn_8x8(255 - coutput[0][i], coutput[3][i]);
-                                out[1] = 255;
-                                out += n;
-                            }
-                        }
-                        else {
-                            uint8_t* y = coutput[0];
-                            if (n == 1)
-                                for (i = 0; i < z->img_x; ++i) out[i] = y[i];
-                            else
-                                for (i = 0; i < z->img_x; ++i) { *out++ = y[i]; *out++ = 255; }
-                        }
+                    JpegResample* r = &res_comp[k];
+                    int y_bot = r->ystep >= (r->vs >> 1);
+                    coutput[k] = r->resample(z->img_comp[k].bufL.data,
+                        y_bot ? r->line1 : r->line0,
+                        y_bot ? r->line0 : r->line1,
+                        r->w_lores, r->hs);
+                    if (++r->ystep >= r->vs)
+                    {
+                        r->ystep = 0;
+                        r->line0 = r->line1;
+                        if (++r->ypos < z->img_comp[k].y)
+                            r->line1 += z->img_comp[k].w2;
                     }
                 }
-                *out_x = z->img_x;
-                *out_y = z->img_y;
-                if (comp) 
-                    *comp = z->img_n >= 3 ? 3 : 1; // report original components, not output
-                return 1;
+                if (n >= 3) 
+                {
+                    uint8_t* y = coutput[0];
+                    if (z->img_n == 3) 
+                    {
+                        if (is_rgb) 
+                        {
+                            for (i = 0; i < z->img_x; ++i) 
+                            {
+                                out[0] = y[i];
+                                out[1] = coutput[1][i];
+                                out[2] = coutput[2][i];
+                                out[3] = 255;
+                                out += n;
+                            }
+                        }
+                        else 
+                            z->YCbCr_to_RGB_kernel(out, y, coutput[1], coutput[2], z->img_x, n);
+                    }
+                    else if (z->img_n == 4) 
+                    {
+                        if (z->app14_color_transform == 0) 
+                        { // CMYK
+                            for (i = 0; i < z->img_x; ++i) 
+                            {
+                                uint8_t m = coutput[3][i];
+                                out[0] = jpeg__blinn_8x8(coutput[0][i], m);
+                                out[1] = jpeg__blinn_8x8(coutput[1][i], m);
+                                out[2] = jpeg__blinn_8x8(coutput[2][i], m);
+                                out[3] = 255;
+                                out += n;
+                            }
+                        }
+                        else if (z->app14_color_transform == 2) 
+                        { // YCCK
+                            z->YCbCr_to_RGB_kernel(out, y, coutput[1], coutput[2], z->img_x, n);
+                            for (i = 0; i < z->img_x; ++i) 
+                            {
+                                uint8_t m = coutput[3][i];
+                                out[0] = jpeg__blinn_8x8(255 - out[0], m);
+                                out[1] = jpeg__blinn_8x8(255 - out[1], m);
+                                out[2] = jpeg__blinn_8x8(255 - out[2], m);
+                                out += n;
+                            }
+                        }
+                        else 
+                            z->YCbCr_to_RGB_kernel(out, y, coutput[1], coutput[2], z->img_x, n);
+                    }
+                    else
+                        for (i = 0; i < z->img_x; ++i) 
+                        {
+                            out[0] = out[1] = out[2] = y[i];
+                            out[3] = 255; // not used if n==3
+                            out += n;
+                        }
+                }
+                else 
+                {
+                    if (is_rgb) 
+                    {
+                        if (n == 1)
+                            for (i = 0; i < z->img_x; ++i)
+                                *out++ = jpeg__compute_y(coutput[0][i], coutput[1][i], coutput[2][i]);
+                        else 
+                        {
+                            for (i = 0; i < z->img_x; ++i, out += 2) 
+                            {
+                                out[0] = jpeg__compute_y(coutput[0][i], coutput[1][i], coutput[2][i]);
+                                out[1] = 255;
+                            }
+                        }
+                    }
+                    else if (z->img_n == 4 && z->app14_color_transform == 0)
+                    {
+                        for (i = 0; i < z->img_x; ++i) 
+                        {
+                            uint8_t m = coutput[3][i];
+                            uint8_t r = jpeg__blinn_8x8(coutput[0][i], m);
+                            uint8_t g = jpeg__blinn_8x8(coutput[1][i], m);
+                            uint8_t b = jpeg__blinn_8x8(coutput[2][i], m);
+                            out[0] = jpeg__compute_y(r, g, b);
+                            out[1] = 255;
+                            out += n;
+                        }
+                    }
+                    else if (z->img_n == 4 && z->app14_color_transform == 2)
+                    {
+                        for (i = 0; i < z->img_x; ++i) 
+                        {
+                            out[0] = jpeg__blinn_8x8(255 - coutput[0][i], coutput[3][i]);
+                            out[1] = 255;
+                            out += n;
+                        }
+                    }
+                    else
+                    {
+                        uint8_t* y = coutput[0];
+                        if (n == 1)
+                            for (i = 0; i < z->img_x; ++i) out[i] = y[i];
+                        else
+                            for (i = 0; i < z->img_x; ++i) { *out++ = y[i]; *out++ = 255; }
+                    }
+                }
             }
+            *out_x = z->img_x;
+            *out_y = z->img_y;
+            if (comp) 
+                *comp = z->img_n >= 3 ? 3 : 1;
+            return 1;
+           
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -1438,11 +1458,12 @@ namespace Simd
 
         bool ImageJpegLoader::FromStream()
         {
-            int x, y, comp;
-            JpegContext jpegContext;
-            jpegContext.stream = &_stream;
+            JpegContext jpegContext(&_stream);
             jpeg__setup_jpeg(&jpegContext);
-            if (JpegLoad(&jpegContext, &x, &y, &comp, 4))
+            if (!JpegDecode(&jpegContext))
+                return false;
+            int x, y, comp;
+            if (JpegConvert(&jpegContext, &x, &y, &comp, 4))
             {
                 size_t stride = 4 * x;
                 _image.Recreate(x, y, (Image::Format)_param.format);
