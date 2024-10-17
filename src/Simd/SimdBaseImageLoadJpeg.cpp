@@ -172,15 +172,15 @@ namespace Simd
             unsigned char marker;      // marker seen while filling entropy buffer
             int nomore;      // flag if we saw a marker so must stop
 
-            int            progressive;
-            int            spec_start;
-            int            spec_end;
-            int            succ_high;
-            int            succ_low;
-            int            eob_run;
-            int            jfif;
-            int            app14_color_transform; // Adobe APP14 tag
-            int            rgb;
+            int progressive;
+            int spec_start;
+            int spec_end;
+            int succ_high;
+            int succ_low;
+            int eob_run;
+            int jfif;
+            int app14_color_transform; // Adobe APP14 tag
+            int rgb;
 
             int scan_n, order[4];
             int restart_interval, todo;
@@ -1118,7 +1118,7 @@ namespace Simd
             return 1;
         }
 
-        // static jfif-centered resampling (across block boundaries)
+        //-------------------------------------------------------------------------------------------------
 
         typedef uint8_t* (*ResampleRowPtr)(uint8_t* out, uint8_t* in0, uint8_t* in1, int w, int hs);
 
@@ -1447,6 +1447,13 @@ namespace Simd
            
         }
 
+        SIMD_INLINE bool IsYuv444(const JpegContext & jc)
+        {
+            return jc.img_n == 3 && jc.rgb != 3 && 
+                jc.img_comp[0].h2 == jc.img_comp[1].h2 && jc.img_comp[0].w2 == jc.img_comp[1].w2 &&
+                jc.img_comp[0].h2 == jc.img_comp[2].h2 && jc.img_comp[0].w2 == jc.img_comp[2].w2;
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         ImageJpegLoader::ImageJpegLoader(const ImageLoaderParam& param)
@@ -1462,6 +1469,26 @@ namespace Simd
             jpeg__setup_jpeg(&jpegContext);
             if (!JpegDecode(&jpegContext))
                 return false;
+            if (IsYuv444(jpegContext))
+            {
+                _image.Recreate(jpegContext.img_x, jpegContext.img_y, (Image::Format)_param.format);
+                switch (_param.format)
+                {
+                case SimdPixelFormatBgr24:
+                    Base::Yuv444pToBgrV2(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
+                        jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y,_image.data, _image.stride, SimdYuvTrect871);
+                    return true;
+                case SimdPixelFormatBgra32:
+                    Base::Yuv444pToBgraV2(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
+                        jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y, _image.data, _image.stride, 0xFF, SimdYuvTrect871);
+                    return true;
+                case SimdPixelFormatRgb24:
+                    Base::Yuv444pToRgbV2(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
+                        jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y, _image.data, _image.stride, SimdYuvTrect871);
+                    return true;
+                }
+            }
+
             int x, y, comp;
             if (JpegConvert(&jpegContext, &x, &y, &comp, 4))
             {
