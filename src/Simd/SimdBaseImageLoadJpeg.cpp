@@ -783,60 +783,56 @@ namespace Simd
             }
         }
 
-        static void jpeg__jpeg_dequantize(short* data, uint16_t* dequant)
+        static void JpegFinish(JpegContext* z)
         {
-            int i;
-            for (i = 0; i < 64; ++i)
-                data[i] *= dequant[i];
-        }
-
-        static void jpeg__jpeg_finish(JpegContext* z)
-        {
-            if (z->progressive) {
-                // dequantize and idct the data
-                int i, j, n;
-                for (n = 0; n < z->img_n; ++n) {
-                    int w = (z->img_comp[n].x + 7) >> 3;
-                    int h = (z->img_comp[n].y + 7) >> 3;
-                    for (j = 0; j < h; ++j) {
-                        for (i = 0; i < w; ++i) {
-                            short* data = z->img_comp[n].coeff + 64 * (i + j * z->img_comp[n].coeff_w);
-                            jpeg__jpeg_dequantize(data, z->dequant[z->img_comp[n].tq]);
-                            z->idct_block_kernel(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
-                        }
+            for (int n = 0; n < z->img_n; ++n) 
+            {
+                int w = (z->img_comp[n].x + 7) >> 3;
+                int h = (z->img_comp[n].y + 7) >> 3;
+                for (int j = 0; j < h; ++j) 
+                {
+                    for (int i = 0; i < w; ++i) 
+                    {
+                        short* data = z->img_comp[n].coeff + 64 * (i + j * z->img_comp[n].coeff_w);
+                        const uint16_t* dequant = z->dequant[z->img_comp[n].tq];
+                        for (int k = 0; k < 64; ++k)
+                            data[k] *= dequant[k];
+                        z->idct_block_kernel(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
                     }
                 }
             }
         }
 
-        static int jpeg__process_marker(JpegContext* z, int m)
+        static int JpegProcessMarker(JpegContext* z, int m)
         {
             int L;
-            switch (m) {
-            case JPEG__MARKER_none: // no marker found
+            switch (m) 
+            {
+            case JPEG__MARKER_none:
                 return JpegLoadError("expected marker", "Corrupt JPEG");
 
-            case 0xDD: // DRI - specify restart interval
-                if (z->stream->GetBe16u() != 4) return JpegLoadError("bad DRI len", "Corrupt JPEG");
+            case 0xDD: 
+                if (z->stream->GetBe16u() != 4) 
+                    return JpegLoadError("bad DRI len", "Corrupt JPEG");
                 z->restart_interval = z->stream->GetBe16u();
                 return 1;
-
-            case 0xDB: // DQT - define quantization table
+            case 0xDB: 
                 L = z->stream->GetBe16u() - 2;
-                while (L > 0) {
+                while (L > 0) 
+                {
                     int q = z->stream->Get8u();
                     int p = q >> 4, sixteen = (p != 0);
                     int t = q & 15, i;
-                    if (p != 0 && p != 1) return JpegLoadError("bad DQT type", "Corrupt JPEG");
-                    if (t > 3) return JpegLoadError("bad DQT table", "Corrupt JPEG");
-
+                    if (p != 0 && p != 1) 
+                        return JpegLoadError("bad DQT type", "Corrupt JPEG");
+                    if (t > 3) 
+                        return JpegLoadError("bad DQT table", "Corrupt JPEG");
                     for (i = 0; i < 64; ++i)
                         z->dequant[t][Base::JpegDeZigZag[i]] = (uint16_t)(sixteen ? z->stream->GetBe16u() : z->stream->Get8u());
                     L -= (sixteen ? 129 : 65);
                 }
                 return L == 0;
-
-            case 0xC4: // DHT - define huffman table
+            case 0xC4: 
                 L = z->stream->GetBe16u() - 2;
                 while (L > 0) {
                     uint8_t* v;
@@ -844,7 +840,8 @@ namespace Simd
                     int q = z->stream->Get8u();
                     int tc = q >> 4;
                     int th = q & 15;
-                    if (tc > 1 || th > 3) return JpegLoadError("bad DHT header", "Corrupt JPEG");
+                    if (tc > 1 || th > 3) 
+                        return JpegLoadError("bad DHT header", "Corrupt JPEG");
                     for (i = 0; i < 16; ++i) 
                     {
                         sizes[i] = z->stream->Get8u();
@@ -871,56 +868,52 @@ namespace Simd
                 }
                 return L == 0;
             }
-
-            // check for comment block or APP blocks
-            if ((m >= 0xE0 && m <= 0xEF) || m == 0xFE) {
+            if ((m >= 0xE0 && m <= 0xEF) || m == 0xFE) 
+            {
                 L = z->stream->GetBe16u();
-                if (L < 2) {
+                if (L < 2) 
+                {
                     if (m == 0xFE)
                         return JpegLoadError("bad COM len", "Corrupt JPEG");
                     else
                         return JpegLoadError("bad APP len", "Corrupt JPEG");
                 }
                 L -= 2;
-
-                if (m == 0xE0 && L >= 5) { // JFIF APP0 segment
+                if (m == 0xE0 && L >= 5) 
+                { 
                     static const unsigned char tag[5] = { 'J','F','I','F','\0' };
                     int ok = 1;
-                    int i;
-                    for (i = 0; i < 5; ++i)
+                    for (int i = 0; i < 5; ++i)
                         if (z->stream->Get8u() != tag[i])
                             ok = 0;
                     L -= 5;
                     if (ok)
                         z->jfif = 1;
                 }
-                else if (m == 0xEE && L >= 12) { // Adobe APP14 segment
+                else if (m == 0xEE && L >= 12) 
+                {
                     static const unsigned char tag[6] = { 'A','d','o','b','e','\0' };
                     int ok = 1;
-                    int i;
-                    for (i = 0; i < 6; ++i)
+                    for (int i = 0; i < 6; ++i)
                         if (z->stream->Get8u() != tag[i])
                             ok = 0;
                     L -= 6;
-                    if (ok) {
-                        z->stream->Get8u(); // version
-                        z->stream->GetBe16u(); // flags0
-                        z->stream->GetBe16u(); // flags1
-                        z->app14_color_transform = z->stream->Get8u(); // color transform
+                    if (ok)
+                    {
+                        z->stream->Get8u();
+                        z->stream->GetBe16u();
+                        z->stream->GetBe16u();
+                        z->app14_color_transform = z->stream->Get8u();
                         L -= 6;
                     }
                 }
-
                 if (L > 0)
                     z->stream->Skip(L);
-
                 return 1;
             }
-
             return JpegLoadError("unknown marker", "Corrupt JPEG");
         }
 
-        // after we see SOS
         static int jpeg__process_scan_header(JpegContext* z)
         {
             int i;
@@ -1066,7 +1059,7 @@ namespace Simd
                 return 1;
             m = jpeg__get_marker(z);
             while (!jpeg__SOF(m)) {
-                if (!jpeg__process_marker(z, m)) return 0;
+                if (!JpegProcessMarker(z, m)) return 0;
                 m = jpeg__get_marker(z);
                 while (m == JPEG__MARKER_none) {
                     // some files have extra padding after their blocks, so ok, we'll scan
@@ -1110,12 +1103,12 @@ namespace Simd
                     if (NL != j->img_y) return JpegLoadError("bad DNL height", "Corrupt JPEG");
                 }
                 else {
-                    if (!jpeg__process_marker(j, m)) return 0;
+                    if (!JpegProcessMarker(j, m)) return 0;
                 }
                 m = jpeg__get_marker(j);
             }
             if (j->progressive)
-                jpeg__jpeg_finish(j);
+                JpegFinish(j);
             return 1;
         }
 
@@ -1262,13 +1255,14 @@ namespace Simd
             return (uint8_t)((t + (t >> 8)) >> 8);
         }
 
-        static int load_jpeg_image(JpegContext* z, int* out_x, int* out_y, int* comp, int req_comp)
+        static int JpegLoad(JpegContext* z, int* out_x, int* out_y, int* comp, int req_comp)
         {
             int n, decode_n, is_rgb;
             z->img_n = 0; // make jpeg__cleanup_jpeg safe
 
             // validate req_comp
-            if (req_comp < 0 || req_comp > 4) return JpegLoadError("bad req_comp", "Internal error");
+            if (req_comp < 0 || req_comp > 4) 
+                return JpegLoadError("bad req_comp", "Internal error");
 
             // load a jpeg image from whichever source, but leave in YCbCr format
             if (!jpeg__decode_jpeg_image(z))
@@ -1316,12 +1310,12 @@ namespace Simd
                     else                               r->resample = jpeg__resample_row_generic;
                 }
 
-                // can't error after this so, this is safe
                 z->out.Resize(n * z->img_x * z->img_y + 1);
-                if (z->out.Empty()) return JpegLoadError("outofmem", "Out of memory");
+                if (z->out.Empty()) 
+                    return JpegLoadError("outofmem", "Out of memory");
 
-                // now go ahead and resample
-                for (j = 0; j < z->img_y; ++j) {
+                for (j = 0; j < z->img_y; ++j) 
+                {
                     uint8_t* out = z->out.data + n * z->img_x * j;
                     for (k = 0; k < decode_n; ++k) {
                         jpeg__resample* r = &res_comp[k];
@@ -1427,12 +1421,13 @@ namespace Simd
                 }
                 *out_x = z->img_x;
                 *out_y = z->img_y;
-                if (comp) *comp = z->img_n >= 3 ? 3 : 1; // report original components, not output
+                if (comp) 
+                    *comp = z->img_n >= 3 ? 3 : 1; // report original components, not output
                 return 1;
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImageJpegLoader::ImageJpegLoader(const ImageLoaderParam& param)
             : ImageLoader(param)
@@ -1444,29 +1439,29 @@ namespace Simd
         bool ImageJpegLoader::FromStream()
         {
             int x, y, comp;
-            JpegContext j;
-            j.stream = &_stream;
-            jpeg__setup_jpeg(&j);
-            if (load_jpeg_image(&j, &x, &y, &comp, 4))
+            JpegContext jpegContext;
+            jpegContext.stream = &_stream;
+            jpeg__setup_jpeg(&jpegContext);
+            if (JpegLoad(&jpegContext, &x, &y, &comp, 4))
             {
                 size_t stride = 4 * x;
                 _image.Recreate(x, y, (Image::Format)_param.format);
                 switch (_param.format)
                 {
                 case SimdPixelFormatGray8:
-                    Base::RgbaToGray(j.out.data, x, y, stride, _image.data, _image.stride);
+                    Base::RgbaToGray(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgr24:
-                    Base::BgraToRgb(j.out.data, x, y, stride, _image.data, _image.stride);
+                    Base::BgraToRgb(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgra32:
-                    Base::BgraToRgba(j.out.data, x, y, stride, _image.data, _image.stride);
+                    Base::BgraToRgba(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgb24:
-                    Base::BgraToBgr(j.out.data, x, y, stride, _image.data, _image.stride);
+                    Base::BgraToBgr(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgba32:
-                    Base::Copy(j.out.data, stride, x, y, 4, _image.data, _image.stride);
+                    Base::Copy(jpegContext.out.data, stride, x, y, 4, _image.data, _image.stride);
                     break;
                 default: 
                     break;
