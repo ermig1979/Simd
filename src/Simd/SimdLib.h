@@ -8834,6 +8834,32 @@ extern "C"
 
     /*! @ingroup yuv_conversion
 
+        \fn void void SimdYuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha, SimdYuvType yuvType);
+
+        \short Converts YUV444P image to 32-bit RGBA image.
+
+        The input Y, U, V and output RGBA images must have the same width and height.
+
+        \note This function has a C++ wrappers: Simd::Yuv444pToRgba(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgba, uint8_t alpha, SimdYuvType yuvType = SimdYuvBt601);
+
+        \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] rgba - a pointer to pixels data of output 32-bit RGBA image.
+        \param [in] rgbaStride - a row size of the rgba image.
+        \param [in] alpha - a value of alpha channel.
+        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+    */
+    SIMD_API void SimdYuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha, SimdYuvType yuvType);
+
+    /*! @ingroup yuv_conversion
+
         \fn void SimdYuv420pToUyvy422(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* uyvy, size_t uyvyStride);
 
         \short Converts YUV420P to 16-bit UYVY422 image.

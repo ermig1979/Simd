@@ -118,6 +118,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga9baa23277d1ea47f38b9deb8059c2455"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#ga9baa23277d1ea47f38b9deb8059c2455">SimdYuv444pToRgbV2</a> (const uint8_t *y, size_t yStride, const uint8_t *u, size_t uStride, const uint8_t *v, size_t vStride, size_t width, size_t height, uint8_t *rgb, size_t rgbStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
 <tr class="memdesc:ga9baa23277d1ea47f38b9deb8059c2455"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV444P image to 24-bit RGB image.  <a href="group__yuv__conversion.html#ga9baa23277d1ea47f38b9deb8059c2455">More...</a><br /></td></tr>
 <tr class="separator:ga9baa23277d1ea47f38b9deb8059c2455"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa8fa602673048a7735de69be505d6e27"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#gaa8fa602673048a7735de69be505d6e27">SimdYuv444pToRgbaV2</a> (const uint8_t *y, size_t yStride, const uint8_t *u, size_t uStride, const uint8_t *v, size_t vStride, size_t width, size_t height, uint8_t *rgba, size_t rgbaStride, uint8_t alpha, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
+<tr class="memdesc:gaa8fa602673048a7735de69be505d6e27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV444P image to 32-bit RGBA image.  <a href="group__yuv__conversion.html#gaa8fa602673048a7735de69be505d6e27">More...</a><br /></td></tr>
+<tr class="separator:gaa8fa602673048a7735de69be505d6e27"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga645b92da63fb7e67bbfa3c59fbcc909b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#ga645b92da63fb7e67bbfa3c59fbcc909b">SimdYuv420pToUyvy422</a> (const uint8_t *y, size_t yStride, const uint8_t *u, size_t uStride, const uint8_t *v, size_t vStride, size_t width, size_t height, uint8_t *uyvy, size_t uyvyStride)</td></tr>
 <tr class="memdesc:ga645b92da63fb7e67bbfa3c59fbcc909b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV420P to 16-bit UYVY422 image.  <a href="group__yuv__conversion.html#ga645b92da63fb7e67bbfa3c59fbcc909b">More...</a><br /></td></tr>
 <tr class="separator:ga645b92da63fb7e67bbfa3c59fbcc909b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -189,6 +192,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga742d610f20aa3de99cd0164e2d23395b"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#ga742d610f20aa3de99cd0164e2d23395b">Yuv444pToRgb</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;rgb, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>)</td></tr>
 <tr class="memdesc:ga742d610f20aa3de99cd0164e2d23395b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV444P image to 24-bit RGB image.  <a href="group__yuv__conversion.html#ga742d610f20aa3de99cd0164e2d23395b">More...</a><br /></td></tr>
 <tr class="separator:ga742d610f20aa3de99cd0164e2d23395b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga82d26043bbb041784adfe2e9b1fb813b"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga82d26043bbb041784adfe2e9b1fb813b"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#ga82d26043bbb041784adfe2e9b1fb813b">Yuv444pToRgba</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;rgba, uint8_t alpha=0xFF, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>)</td></tr>
+<tr class="memdesc:ga82d26043bbb041784adfe2e9b1fb813b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV444P image to 32-bit RGBA image.  <a href="group__yuv__conversion.html#ga82d26043bbb041784adfe2e9b1fb813b">More...</a><br /></td></tr>
+<tr class="separator:ga82d26043bbb041784adfe2e9b1fb813b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9841881c75fd1058a7b0b7ae941dfce3"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9841881c75fd1058a7b0b7ae941dfce3"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#ga9841881c75fd1058a7b0b7ae941dfce3">Yuv420pToUyvy422</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;uyvy)</td></tr>
 <tr class="memdesc:ga9841881c75fd1058a7b0b7ae941dfce3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV420P to 16-bit UYVY422 image.  <a href="group__yuv__conversion.html#ga9841881c75fd1058a7b0b7ae941dfce3">More...</a><br /></td></tr>
@@ -1959,6 +1966,115 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="gaa8fa602673048a7735de69be505d6e27" name="gaa8fa602673048a7735de69be505d6e27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa8fa602673048a7735de69be505d6e27">&#9670;&#160;</a></span>SimdYuv444pToRgbaV2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void void SimdYuv444pToRgbaV2 </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>yStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>uStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>vStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>rgba</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>rgbaStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>alpha</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td>
+          <td class="paramname"><em>yuvType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts YUV444P image to 32-bit RGBA image. </p>
+<p >The input Y, U, V and output RGBA images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__yuv__conversion.html#ga82d26043bbb041784adfe2e9b1fb813b" title="Converts YUV444P image to 32-bit RGBA image.">Simd::Yuv444pToRgba</a>(const View&amp; y, const View&amp; u, const View&amp; v, View&amp; rgba, uint8_t alpha, SimdYuvType yuvType = SimdYuvBt601);</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- a pointer to pixels data of input 8-bit image with Y color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>- a pointer to pixels data of input 8-bit image with U color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>- a pointer to pixels data of input 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">rgba</td><td>- a pointer to pixels data of output 32-bit RGBA image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgbaStride</td><td>- a row size of the rgba image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a value of alpha channel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ga645b92da63fb7e67bbfa3c59fbcc909b" name="ga645b92da63fb7e67bbfa3c59fbcc909b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga645b92da63fb7e67bbfa3c59fbcc909b">&#9670;&#160;</a></span>SimdYuv420pToUyvy422()</h2>
 
@@ -3060,6 +3176,73 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>- an input 8-bit image with U color plane. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>- an input 8-bit image with V color plane. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">rgb</td><td>- an output 24-bit RGB image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). By default it is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga82d26043bbb041784adfe2e9b1fb813b" name="ga82d26043bbb041784adfe2e9b1fb813b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga82d26043bbb041784adfe2e9b1fb813b">&#9670;&#160;</a></span>Yuv444pToRgba()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Yuv444pToRgba </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rgba</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>alpha</em> = <code>0xFF</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td>
+          <td class="paramname"><em>yuvType</em> = <code><a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts YUV444P image to 32-bit RGBA image. </p>
+<p >The input Y, U, V and output RGBA images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__yuv__conversion.html#gaa8fa602673048a7735de69be505d6e27" title="Converts YUV444P image to 32-bit RGBA image.">SimdYuv444pToRgbaV2</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- an input 8-bit image with Y color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>- an input 8-bit image with U color plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>- an input 8-bit image with V color plane. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">rgba</td><td>- an output 32-bit RGBA image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a value of alpha channel. It is equal to 255 by default. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). By default it is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. </td></tr>
   </table>
   </dd>

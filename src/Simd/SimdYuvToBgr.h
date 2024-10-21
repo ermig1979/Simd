@@ -224,6 +224,14 @@ namespace Simd
             rgb[2] = YuvToBlue<T>(y, u);
         }
 
+        template<class T> SIMD_INLINE void YuvToRgba(int y, int u, int v, int alpha, uint8_t* rgba)
+        {
+            rgba[0] = YuvToRed<T>(y, v);
+            rgba[1] = YuvToGreen<T>(y, u, v);
+            rgba[2] = YuvToBlue<T>(y, u);
+            rgba[3] = alpha;
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         template<class T> SIMD_INLINE int BgrToY(int blue, int green, int red)
