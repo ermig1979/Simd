@@ -4648,7 +4648,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void Yuv444pToRgba(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgba, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
     {
-        assert(Compatible(y, u, v) && EqualSize(y, bgra) && y.format == View<A>::Gray8 && rgba.format == View<A>::Rgba32);
+        assert(Compatible(y, u, v) && EqualSize(y, rgba) && y.format == View<A>::Gray8 && rgba.format == View<A>::Rgba32);
 
         SimdYuv444pToRgbaV2(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, rgba.data, rgba.stride, alpha, yuvType);
     }
