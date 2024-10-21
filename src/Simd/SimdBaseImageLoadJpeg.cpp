@@ -1420,6 +1420,10 @@ namespace Simd
                 _yuvToBgr = Base::Yuv444pToRgbV2;
                 _anyToAny = Base::BgraToBgr;
             }
+            if (_param.format == SimdPixelFormatRgba32)
+            {
+                _yuvToBgra = Base::Yuv444pToRgbaV2;
+            }
         }
 
         bool ImageJpegLoader::FromStream()
@@ -1442,6 +1446,7 @@ namespace Simd
                         jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y,_image.data, _image.stride, SimdYuvTrect871);
                     return true;
                 case SimdPixelFormatBgra32:
+                case SimdPixelFormatRgba32:
                     _yuvToBgra(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
                         jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y, _image.data, _image.stride, 0xFF, SimdYuvTrect871);
                     return true;
