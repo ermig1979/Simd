@@ -200,6 +200,8 @@ namespace Simd
         public:
             ImageJpegLoader(const ImageLoaderParam& param);
 
+            virtual ~ImageJpegLoader();
+
             virtual bool FromStream();
 
         protected:
@@ -210,6 +212,7 @@ namespace Simd
             YuvToBgrPtr _yuvToBgr;
             YuvToBgraPtr _yuvToBgra;
             AnyToAnyPtr _anyToAny;
+            struct JpegContext* _context;
         };
 
         //---------------------------------------------------------------------

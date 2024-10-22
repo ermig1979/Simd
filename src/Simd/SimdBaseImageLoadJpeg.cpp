@@ -1386,6 +1386,11 @@ namespace Simd
            
         }
 
+        SIMD_INLINE bool CanCopyGray(const JpegContext& jc)
+        {
+            return !(jc.img_n == 3 && (jc.rgb == 3 || (jc.app14_color_transform == 0 && !jc.jfif)));
+        }
+
         SIMD_INLINE bool IsYuv444(const JpegContext & jc)
         {
             return jc.img_n == 3 && jc.rgb != 3 && 
@@ -1397,6 +1402,7 @@ namespace Simd
 
         ImageJpegLoader::ImageJpegLoader(const ImageLoaderParam& param)
             : ImageLoader(param)
+            , _context(NULL)
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgb24;
@@ -1426,41 +1432,49 @@ namespace Simd
             }
         }
 
+        ImageJpegLoader::~ImageJpegLoader()
+        {
+            if (_context)
+                delete _context;
+        }
+
         bool ImageJpegLoader::FromStream()
         {
-            JpegContext jpegContext(&_stream);
-            jpeg__setup_jpeg(&jpegContext);
-            if (!JpegDecode(&jpegContext))
+            _context = new JpegContext(&_stream);
+            jpeg__setup_jpeg(_context);
+            if (!JpegDecode(_context))
                 return false;
-            _image.Recreate(jpegContext.img_x, jpegContext.img_y, (Image::Format)_param.format);
-            if (IsYuv444(jpegContext))
+            _image.Recreate(_context->img_x, _context->img_y, (Image::Format)_param.format);
+            if (CanCopyGray(*_context) && _param.format == SimdPixelFormatGray8)
+            {
+                Base::Copy(_context->img_comp[0].data, _context->img_comp[0].w2, _context->img_x, _context->img_y, 1, _image.data, _image.stride);
+                return true;
+            }
+            if (IsYuv444(*_context))
             {
                 switch (_param.format)
                 {
-                case SimdPixelFormatGray8:
-                    Base::Copy(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_x, jpegContext.img_y, 1, _image.data, _image.stride);
-                    return true;
                 case SimdPixelFormatBgr24:
                 case SimdPixelFormatRgb24:
-                    _yuvToBgr(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
-                        jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y,_image.data, _image.stride, SimdYuvTrect871);
+                    _yuvToBgr(_context->img_comp[0].data, _context->img_comp[0].w2, _context->img_comp[1].data, _context->img_comp[1].w2,
+                        _context->img_comp[2].data, _context->img_comp[2].w2, _context->img_x, _context->img_y, _image.data, _image.stride, SimdYuvTrect871);
                     return true;
                 case SimdPixelFormatBgra32:
                 case SimdPixelFormatRgba32:
-                    _yuvToBgra(jpegContext.img_comp[0].data, jpegContext.img_comp[0].w2, jpegContext.img_comp[1].data, jpegContext.img_comp[1].w2,
-                        jpegContext.img_comp[2].data, jpegContext.img_comp[2].w2, jpegContext.img_x, jpegContext.img_y, _image.data, _image.stride, 0xFF, SimdYuvTrect871);
+                    _yuvToBgra(_context->img_comp[0].data, _context->img_comp[0].w2, _context->img_comp[1].data, _context->img_comp[1].w2,
+                        _context->img_comp[2].data, _context->img_comp[2].w2, _context->img_x, _context->img_y, _image.data, _image.stride, 0xFF, SimdYuvTrect871);
                     return true;
                 }
             }
             int x, y, comp;
-            if (JpegConvert(&jpegContext, &x, &y, &comp, 4))
+            if (JpegConvert(_context, &x, &y, &comp, 4))
             {
                 size_t stride = 4 * x;
                 if (_param.format == SimdPixelFormatRgba32)
-                    Base::Copy(jpegContext.out.data, stride, x, y, 4, _image.data, _image.stride);
+                    Base::Copy(_context->out.data, stride, x, y, 4, _image.data, _image.stride);
                 else if (_param.format == SimdPixelFormatGray8 || _param.format == SimdPixelFormatBgr24 ||
                     _param.format == SimdPixelFormatBgra32 || _param.format == SimdPixelFormatRgb24)
-                    _anyToAny(jpegContext.out.data, x, y, stride, _image.data, _image.stride);
+                    _anyToAny(_context->out.data, x, y, stride, _image.data, _image.stride);
                 else
                     return false;
                 return true;
