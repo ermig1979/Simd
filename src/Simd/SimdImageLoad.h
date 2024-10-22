@@ -205,13 +205,6 @@ namespace Simd
             virtual bool FromStream();
 
         protected:
-            typedef void (*YuvToBgrPtr)(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
-            typedef void (*YuvToBgraPtr)(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, uint8_t alpha, SimdYuvType yuvType);
-            typedef void (*AnyToAnyPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
-
-            YuvToBgrPtr _yuvToBgr;
-            YuvToBgraPtr _yuvToBgra;
-            AnyToAnyPtr _anyToAny;
             struct JpegContext* _context;
         };
 

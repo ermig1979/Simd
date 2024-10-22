@@ -48,9 +48,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        const int JpegMarkerNone = 0xFF;
-        const int JpegMaxDimensions = 1 << 24;
-
 #ifdef _MSC_VER
 #define JPEG_NOTUSED(v)  (void)(v)
 #else
@@ -58,8 +55,6 @@ namespace Simd
 #endif
 
 #define jpeg_lrot(x,y)  (((x) << (y)) | ((x) >> (32 - (y))))
-
-#define JPEG_SIMD_ALIGN(type, name) SIMD_ALIGNED(16) type name
 
         static uint8_t jpeg__compute_y(int r, int g, int b)
         {
@@ -132,15 +127,18 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE static void jpeg__grow_buffer_unsafe(JpegContext* j)
+        SIMD_INLINE static void JpegGrowBufferUnsafe(JpegContext* j)
         {
-            do {
+            do 
+            {
                 unsigned int b = j->nomore ? 0 : j->stream->Get8u();
-                if (b == 0xff) {
+                if (b == 0xff) 
+                {
                     int c = j->stream->Get8u();
                     while (c == 0xff) 
-                        c = j->stream->Get8u(); // consume fill bytes
-                    if (c != 0) {
+                        c = j->stream->Get8u();
+                    if (c != 0) 
+                    {
                         j->marker = (unsigned char)c;
                         j->nomore = 1;
                         return;
@@ -159,8 +157,8 @@ namespace Simd
         {
             unsigned int temp;
             int c, k;
-
-            if (j->code_bits < 16) jpeg__grow_buffer_unsafe(j);
+            if (j->code_bits < 16) 
+                JpegGrowBufferUnsafe(j);
 
             // look at the top FAST_BITS and determine what symbol ID it is,
             // if the code is <= FAST_BITS
@@ -213,7 +211,7 @@ namespace Simd
         {
             unsigned int k;
             int sgn;
-            if (j->code_bits < n) jpeg__grow_buffer_unsafe(j);
+            if (j->code_bits < n) JpegGrowBufferUnsafe(j);
 
             sgn = (int32_t)j->code_buffer >> 31; // sign bit is always in MSB
             k = jpeg_lrot(j->code_buffer, n);
@@ -228,7 +226,7 @@ namespace Simd
         SIMD_INLINE static int jpeg__jpeg_get_bits(JpegContext* j, int n)
         {
             unsigned int k;
-            if (j->code_bits < n) jpeg__grow_buffer_unsafe(j);
+            if (j->code_bits < n) JpegGrowBufferUnsafe(j);
             k = jpeg_lrot(j->code_buffer, n);
             j->code_buffer = k & ~jpeg__bmask[n];
             k &= jpeg__bmask[n];
@@ -239,7 +237,7 @@ namespace Simd
         SIMD_INLINE static int jpeg__jpeg_get_bit(JpegContext* j)
         {
             unsigned int k;
-            if (j->code_bits < 1) jpeg__grow_buffer_unsafe(j);
+            if (j->code_bits < 1) JpegGrowBufferUnsafe(j);
             k = j->code_buffer;
             j->code_buffer <<= 1;
             --j->code_bits;
@@ -252,7 +250,7 @@ namespace Simd
             int diff, dc, k;
             int t;
 
-            if (j->code_bits < 16) jpeg__grow_buffer_unsafe(j);
+            if (j->code_bits < 16) JpegGrowBufferUnsafe(j);
             t = jpeg__jpeg_huff_decode(j, hdc);
             if (t < 0) return JpegLoadError("bad huffman code", "Corrupt JPEG");
 
@@ -269,7 +267,7 @@ namespace Simd
             do {
                 unsigned int zig;
                 int c, r, s;
-                if (j->code_bits < 16) jpeg__grow_buffer_unsafe(j);
+                if (j->code_bits < 16) JpegGrowBufferUnsafe(j);
                 c = (j->code_buffer >> (32 - JpegFastBits)) & ((1 << JpegFastBits) - 1);
                 r = fac[c];
                 if (r) { // fast-AC path
@@ -307,7 +305,7 @@ namespace Simd
             int t;
             if (j->spec_end != 0) return JpegLoadError("can't merge dc and ac", "Corrupt JPEG");
 
-            if (j->code_bits < 16) jpeg__grow_buffer_unsafe(j);
+            if (j->code_bits < 16) JpegGrowBufferUnsafe(j);
 
             if (j->succ_high == 0) {
                 // first scan for DC coefficient, must be first
@@ -345,7 +343,7 @@ namespace Simd
                 do {
                     unsigned int zig;
                     int c, r, s;
-                    if (j->code_bits < 16) jpeg__grow_buffer_unsafe(j);
+                    if (j->code_bits < 16) JpegGrowBufferUnsafe(j);
                     c = (j->code_buffer >> (32 - JpegFastBits)) & ((1 << JpegFastBits) - 1);
                     r = fac[c];
                     if (r) { // fast-AC path
@@ -567,14 +565,12 @@ namespace Simd
             }
         }
 
-#define JPEG__MARKER_none  0xff
-
         static uint8_t jpeg__get_marker(JpegContext* j)
         {
             uint8_t x;
-            if (j->marker != JPEG__MARKER_none) { x = j->marker; j->marker = JPEG__MARKER_none; return x; }
+            if (j->marker != JpegMarkerNone) { x = j->marker; j->marker = JpegMarkerNone; return x; }
             x = j->stream->Get8u();
-            if (x != 0xff) return JPEG__MARKER_none;
+            if (x != 0xff) return JpegMarkerNone;
             while (x == 0xff)
                 x = j->stream->Get8u(); // consume repeated 0xff fill bytes
             return x;
@@ -592,7 +588,7 @@ namespace Simd
             j->code_buffer = 0;
             j->nomore = 0;
             j->img_comp[0].dc_pred = j->img_comp[1].dc_pred = j->img_comp[2].dc_pred = j->img_comp[3].dc_pred = 0;
-            j->marker = JPEG__MARKER_none;
+            j->marker = JpegMarkerNone;
             j->todo = j->restart_interval ? j->restart_interval : 0x7fffffff;
             j->eob_run = 0;
             // no more than 1<<31 MCUs if no restart_interal? that's plenty safe,
@@ -605,7 +601,7 @@ namespace Simd
             if (!z->progressive) {
                 if (z->scan_n == 1) {
                     int i, j;
-                    JPEG_SIMD_ALIGN(short, data[64]);
+                    SIMD_ALIGNED(16) short data[64];
                     int n = z->order[0];
                     // non-interleaved data, we just need to process one block at a time,
                     // in trivial scanline order
@@ -620,7 +616,7 @@ namespace Simd
                             z->idct_block_kernel(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
                             // every data block is an MCU, so countdown the restart interval
                             if (--z->todo <= 0) {
-                                if (z->code_bits < 24) jpeg__grow_buffer_unsafe(z);
+                                if (z->code_bits < 24) JpegGrowBufferUnsafe(z);
                                 // if it's NOT a restart, then just bail, so we get corrupt data
                                 // rather than no data
                                 if (!JPEG__RESTART(z->marker)) return 1;
@@ -633,7 +629,7 @@ namespace Simd
                 else 
                 {
                     int i, j, k, x, y;
-                    JPEG_SIMD_ALIGN(short, data[64]);
+                    SIMD_ALIGNED(16) short data[64];
                     for (j = 0; j < z->img_mcu_y; ++j) {
                         for (i = 0; i < z->img_mcu_x; ++i) {
                             // scan an interleaved mcu... process scan_n components in order
@@ -654,7 +650,7 @@ namespace Simd
                             // after all interleaved components, that's an interleaved MCU,
                             // so now count down the restart interval
                             if (--z->todo <= 0) {
-                                if (z->code_bits < 24) jpeg__grow_buffer_unsafe(z);
+                                if (z->code_bits < 24) JpegGrowBufferUnsafe(z);
                                 if (!JPEG__RESTART(z->marker)) return 1;
                                 jpeg__jpeg_reset(z);
                             }
@@ -687,7 +683,7 @@ namespace Simd
                             }
                             // every data block is an MCU, so countdown the restart interval
                             if (--z->todo <= 0) {
-                                if (z->code_bits < 24) jpeg__grow_buffer_unsafe(z);
+                                if (z->code_bits < 24) JpegGrowBufferUnsafe(z);
                                 if (!JPEG__RESTART(z->marker)) return 1;
                                 jpeg__jpeg_reset(z);
                             }
@@ -717,7 +713,7 @@ namespace Simd
                             // after all interleaved components, that's an interleaved MCU,
                             // so now count down the restart interval
                             if (--z->todo <= 0) {
-                                if (z->code_bits < 24) jpeg__grow_buffer_unsafe(z);
+                                if (z->code_bits < 24) JpegGrowBufferUnsafe(z);
                                 if (!JPEG__RESTART(z->marker)) return 1;
                                 jpeg__jpeg_reset(z);
                             }
@@ -753,7 +749,7 @@ namespace Simd
             int L;
             switch (m) 
             {
-            case JPEG__MARKER_none:
+            case JpegMarkerNone:
                 return JpegLoadError("expected marker", "Corrupt JPEG");
 
             case 0xDD: 
@@ -998,7 +994,7 @@ namespace Simd
             int m;
             z->jfif = 0;
             z->app14_color_transform = -1; // valid values are 0,1,2
-            z->marker = JPEG__MARKER_none; // initialize cached marker to empty
+            z->marker = JpegMarkerNone; // initialize cached marker to empty
             m = jpeg__get_marker(z);
             if (!jpeg__SOI(m)) return JpegLoadError("no SOI", "Corrupt JPEG");
             if (scan) 
@@ -1007,7 +1003,7 @@ namespace Simd
             while (!jpeg__SOF(m)) {
                 if (!JpegProcessMarker(z, m)) return 0;
                 m = jpeg__get_marker(z);
-                while (m == JPEG__MARKER_none) {
+                while (m == JpegMarkerNone) {
                     // some files have extra padding after their blocks, so ok, we'll scan
                     if (z->stream->Eof()) 
                         return JpegLoadError("no SOF", "Corrupt JPEG");
@@ -1029,7 +1025,7 @@ namespace Simd
                 if (jpeg__SOS(m)) {
                     if (!jpeg__process_scan_header(j)) return 0;
                     if (!jpeg__parse_entropy_coded_data(j)) return 0;
-                    if (j->marker == JPEG__MARKER_none) {
+                    if (j->marker == JpegMarkerNone) {
                         // handle 0s at the end of image data from IP Kamera 9060
                         while (!j->stream->Eof()) {
                             int x = j->stream->Get8u();
@@ -1059,8 +1055,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        typedef uint8_t* (*ResampleRowPtr)(uint8_t* out, uint8_t* in0, uint8_t* in1, int w, int hs);
-
 #define jpeg__div4(x) ((uint8_t) ((x) >> 2))
 
         static uint8_t* resample_row_1(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
@@ -1074,7 +1068,6 @@ namespace Simd
 
         static uint8_t* jpeg__resample_row_v_2(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
-            // need to generate two samples vertically for every one in input
             int i;
             JPEG_NOTUSED(hs);
             for (i = 0; i < w; ++i)
@@ -1084,29 +1077,25 @@ namespace Simd
 
         static uint8_t* jpeg__resample_row_h_2(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
-            // need to generate two samples horizontally for every one in input
             int i;
             uint8_t* input = in_near;
-
-            if (w == 1) {
-                // if only one sample, can't do any interpolation
+            if (w == 1) 
+            {
                 out[0] = out[1] = input[0];
                 return out;
             }
-
             out[0] = input[0];
             out[1] = jpeg__div4(input[0] * 3 + input[1] + 2);
-            for (i = 1; i < w - 1; ++i) {
+            for (i = 1; i < w - 1; ++i) 
+            {
                 int n = 3 * input[i] + 2;
                 out[i * 2 + 0] = jpeg__div4(n + input[i - 1]);
                 out[i * 2 + 1] = jpeg__div4(n + input[i + 1]);
             }
             out[i * 2 + 0] = jpeg__div4(input[w - 2] * 3 + input[w - 1] + 2);
             out[i * 2 + 1] = input[w - 1];
-
             JPEG_NOTUSED(in_far);
             JPEG_NOTUSED(hs);
-
             return out;
         }
 
@@ -1114,13 +1103,12 @@ namespace Simd
 
         static uint8_t* jpeg__resample_row_hv_2(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
-            // need to generate 2x2 samples for every one in input
             int i, t0, t1;
-            if (w == 1) {
+            if (w == 1) 
+            {
                 out[0] = out[1] = jpeg__div4(3 * in_near[0] + in_far[0] + 2);
                 return out;
             }
-
             t1 = 3 * in_near[0] + in_far[0];
             out[0] = jpeg__div4(t1 + 2);
             for (i = 1; i < w; ++i) {
@@ -1138,7 +1126,6 @@ namespace Simd
 
         static uint8_t* jpeg__resample_row_generic(uint8_t* out, uint8_t* in_near, uint8_t* in_far, int w, int hs)
         {
-            // resample with nearest-neighbor
             int i, j;
             JPEG_NOTUSED(in_far);
             for (i = 0; i < w; ++i)
@@ -1147,45 +1134,14 @@ namespace Simd
             return out;
         }
 
-        // this is a reduced-precision calculation of YCbCr-to-RGB introduced
-        // to make sure the code produces the same results in both SIMD and scalar
-#define jpeg__float2fixed(x)  (((int) ((x) * 4096.0f + 0.5f)) << 8)
-        static void jpeg__YCbCr_to_RGB_row(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step)
+        static void JpegYuvToRgbRow(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step)
         {
-            int i;
-            for (i = 0; i < count; ++i) 
+            for (int i = 0; i < count; ++i) 
             {
-#if 0
-                int y_fixed = (y[i] << 20) + (1 << 19); // rounding
-                int r, g, b;
-                int cr = pcr[i] - 128;
-                int cb = pcb[i] - 128;
-                r = y_fixed + cr * jpeg__float2fixed(1.40200f);
-                g = y_fixed + (cr * -jpeg__float2fixed(0.71414f)) + ((cb * -jpeg__float2fixed(0.34414f)) & 0xffff0000);
-                b = y_fixed + cb * jpeg__float2fixed(1.77200f);
-                r >>= 20;
-                g >>= 20;
-                b >>= 20;
-                if ((unsigned)r > 255) { if (r < 0) r = 0; else r = 255; }
-                if ((unsigned)g > 255) { if (g < 0) g = 0; else g = 255; }
-                if ((unsigned)b > 255) { if (b < 0) b = 0; else b = 255; }
-                out[0] = (uint8_t)r;
-                out[1] = (uint8_t)g;
-                out[2] = (uint8_t)b;
-#else
                 YuvToRgb<Trect871>(y[i], pcb[i], pcr[i], out);
-#endif
                 out[3] = 255;
                 out += step;
             }
-        }
-
-        // set up the kernels
-        static void jpeg__setup_jpeg(JpegContext* j)
-        {
-            j->idct_block_kernel = jpeg__idct_block;
-            j->YCbCr_to_RGB_kernel = jpeg__YCbCr_to_RGB_row;
-            j->resample_row_hv_2_kernel = jpeg__resample_row_hv_2;
         }
 
         struct JpegResample
@@ -1198,14 +1154,13 @@ namespace Simd
             int ypos;    // which pre-expansion row we're on
         };
 
-        // fast 0..255 * 0..255 => 0..255 rounded multiplication
         static uint8_t jpeg__blinn_8x8(uint8_t x, uint8_t y)
         {
             unsigned int t = x * y + 128;
             return (uint8_t)((t + (t >> 8)) >> 8);
         }
 
-        static int JpegConvert(JpegContext* z, int* out_x, int* out_y, int* comp, int req_comp)
+        static int JpegConvert(JpegContext* z, int req_comp)
         {
             if (req_comp < 0 || req_comp > 4) 
                 return JpegLoadError("bad req_comp", "Internal error");
@@ -1372,16 +1327,17 @@ namespace Simd
                     {
                         uint8_t* y = coutput[0];
                         if (n == 1)
-                            for (i = 0; i < z->img_x; ++i) out[i] = y[i];
+                            for (i = 0; i < z->img_x; ++i) 
+                                out[i] = y[i];
                         else
-                            for (i = 0; i < z->img_x; ++i) { *out++ = y[i]; *out++ = 255; }
+                            for (i = 0; i < z->img_x; ++i) 
+                            { 
+                                *out++ = y[i]; 
+                                *out++ = 255; 
+                            }
                     }
                 }
             }
-            *out_x = z->img_x;
-            *out_y = z->img_y;
-            if (comp) 
-                *comp = z->img_n >= 3 ? 3 : 1;
             return 1;
            
         }
@@ -1398,37 +1354,44 @@ namespace Simd
                 jc.img_comp[0].h2 == jc.img_comp[2].h2 && jc.img_comp[0].w2 == jc.img_comp[2].w2;
         }
 
+        SIMD_INLINE  void JpegSetKernels(JpegContext* j)
+        {
+            j->idct_block_kernel = jpeg__idct_block;
+            j->YCbCr_to_RGB_kernel = JpegYuvToRgbRow;
+            j->resample_row_hv_2_kernel = jpeg__resample_row_hv_2;
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         ImageJpegLoader::ImageJpegLoader(const ImageLoaderParam& param)
             : ImageLoader(param)
-            , _context(NULL)
+            , _context(new JpegContext(&_stream))
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgb24;
-            _yuvToBgr = NULL;
-            _yuvToBgra = NULL;
-            _anyToAny = NULL;
+            _context->yuv444pToBgr = NULL;
+            _context->yuv444pToBgra = NULL;
+            _context->anyToAny = NULL;
             if (_param.format == SimdPixelFormatGray8)
-                _anyToAny = Base::RgbaToGray;
+                _context->anyToAny = Base::RgbaToGray;
             if (_param.format == SimdPixelFormatBgr24)
             {
-                _yuvToBgr = Base::Yuv444pToBgrV2;
-                _anyToAny = Base::BgraToRgb;
+                _context->yuv444pToBgr = Base::Yuv444pToBgrV2;
+                _context->anyToAny = Base::BgraToRgb;
             }
             if (_param.format == SimdPixelFormatBgra32)
             {
-                _yuvToBgra = Base::Yuv444pToBgraV2;
-                _anyToAny = Base::BgraToRgba;
+                _context->yuv444pToBgra = Base::Yuv444pToBgraV2;
+                _context->anyToAny = Base::BgraToRgba;
             }
             if (_param.format == SimdPixelFormatRgb24)
             {
-                _yuvToBgr = Base::Yuv444pToRgbV2;
-                _anyToAny = Base::BgraToBgr;
+                _context->yuv444pToBgr = Base::Yuv444pToRgbV2;
+                _context->anyToAny = Base::BgraToBgr;
             }
             if (_param.format == SimdPixelFormatRgba32)
             {
-                _yuvToBgra = Base::Yuv444pToRgbaV2;
+                _context->yuv444pToBgra = Base::Yuv444pToRgbaV2;
             }
         }
 
@@ -1440,8 +1403,7 @@ namespace Simd
 
         bool ImageJpegLoader::FromStream()
         {
-            _context = new JpegContext(&_stream);
-            jpeg__setup_jpeg(_context);
+            JpegSetKernels(_context);
             if (!JpegDecode(_context))
                 return false;
             _image.Recreate(_context->img_x, _context->img_y, (Image::Format)_param.format);
@@ -1456,25 +1418,24 @@ namespace Simd
                 {
                 case SimdPixelFormatBgr24:
                 case SimdPixelFormatRgb24:
-                    _yuvToBgr(_context->img_comp[0].data, _context->img_comp[0].w2, _context->img_comp[1].data, _context->img_comp[1].w2,
+                    _context->yuv444pToBgr(_context->img_comp[0].data, _context->img_comp[0].w2, _context->img_comp[1].data, _context->img_comp[1].w2,
                         _context->img_comp[2].data, _context->img_comp[2].w2, _context->img_x, _context->img_y, _image.data, _image.stride, SimdYuvTrect871);
                     return true;
                 case SimdPixelFormatBgra32:
                 case SimdPixelFormatRgba32:
-                    _yuvToBgra(_context->img_comp[0].data, _context->img_comp[0].w2, _context->img_comp[1].data, _context->img_comp[1].w2,
+                    _context->yuv444pToBgra(_context->img_comp[0].data, _context->img_comp[0].w2, _context->img_comp[1].data, _context->img_comp[1].w2,
                         _context->img_comp[2].data, _context->img_comp[2].w2, _context->img_x, _context->img_y, _image.data, _image.stride, 0xFF, SimdYuvTrect871);
                     return true;
                 }
             }
-            int x, y, comp;
-            if (JpegConvert(_context, &x, &y, &comp, 4))
+            if (JpegConvert(_context, 4))
             {
-                size_t stride = 4 * x;
+                size_t stride = 4 * _context->img_x;
                 if (_param.format == SimdPixelFormatRgba32)
-                    Base::Copy(_context->out.data, stride, x, y, 4, _image.data, _image.stride);
+                    Base::Copy(_context->out.data, stride, _context->img_x, _context->img_y, 4, _image.data, _image.stride);
                 else if (_param.format == SimdPixelFormatGray8 || _param.format == SimdPixelFormatBgr24 ||
                     _param.format == SimdPixelFormatBgra32 || _param.format == SimdPixelFormatRgb24)
-                    _anyToAny(_context->out.data, x, y, stride, _image.data, _image.stride);
+                    _context->anyToAny(_context->out.data, _context->img_x, _context->img_y, stride, _image.data, _image.stride);
                 else
                     return false;
                 return true;
