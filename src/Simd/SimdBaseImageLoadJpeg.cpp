@@ -48,16 +48,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-#ifdef _MSC_VER
-#define JPEG_NOTUSED(v)  (void)(v)
-#else
-#define JPEG_NOTUSED(v)  (void)sizeof(v)
-#endif
-
-#define jpeg_lrot(x,y)  (((x) << (y)) | ((x) >> (32 - (y))))
-
-        //-------------------------------------------------------------------------------------------------
-
         int JpegHuffman::Build(const int* count)
         {
             int i, j, k = 0;
@@ -179,13 +169,18 @@ namespace Simd
             return h->values[c];
         }
 
-        SIMD_INLINE static int JpegExtendReceive(JpegContext* j, int n)
+        SIMD_INLINE uint32_t JpegLrot(uint32_t value, int shift)
+        {
+            return (value << shift) | (value >> (32 - shift));
+        }
+
+        SIMD_INLINE int JpegExtendReceive(JpegContext* j, int n)
         {
             static const int _jbias[16] = { 0,-1,-3,-7,-15,-31,-63,-127,-255,-511,-1023,-2047,-4095,-8191,-16383,-32767 };// bias[n] = (-1<<n) + 1
             if (j->code_bits < n) 
                 JpegGrowBufferUnsafe(j);
             int sgn = (int32_t)j->code_buffer >> 31;
-            unsigned int k = jpeg_lrot(j->code_buffer, n);
+            unsigned int k = JpegLrot(j->code_buffer, n);
             if (n < 0 || n >= (int)(sizeof(JpegBmask) / sizeof(*JpegBmask))) 
                 return 0;
             j->code_buffer = k & ~JpegBmask[n];
@@ -194,18 +189,18 @@ namespace Simd
             return k + (_jbias[n] & ~sgn);
         }
 
-        SIMD_INLINE static int JpegGetBits(JpegContext* j, int n)
+        SIMD_INLINE int JpegGetBits(JpegContext* j, int n)
         {
             if (j->code_bits < n) 
                 JpegGrowBufferUnsafe(j);
-            unsigned int k = jpeg_lrot(j->code_buffer, n);
+            unsigned int k = JpegLrot(j->code_buffer, n);
             j->code_buffer = k & ~JpegBmask[n];
             k &= JpegBmask[n];
             j->code_bits -= n;
             return k;
         }
 
-        SIMD_INLINE static int JpegGetBit(JpegContext* j)
+        SIMD_INLINE int JpegGetBit(JpegContext* j)
         {
             if (j->code_bits < 1) 
                 JpegGrowBufferUnsafe(j);
@@ -269,68 +264,72 @@ namespace Simd
             return 1;
         }
 
-        static int jpeg__jpeg_decode_block_prog_dc(JpegContext* j, short data[64], JpegHuffman* hdc, int b)
+        static int JpegDecodeBlockProgDc(JpegContext* j, short data[64], JpegHuffman* hdc, int b)
         {
-            int diff, dc;
-            int t;
-            if (j->spec_end != 0) return JpegLoadError("can't merge dc and ac", "Corrupt JPEG");
-
-            if (j->code_bits < 16) JpegGrowBufferUnsafe(j);
-
-            if (j->succ_high == 0) {
-                // first scan for DC coefficient, must be first
-                memset(data, 0, 64 * sizeof(data[0])); // 0 all the ac values now
-                t = JpegHuffmanDecode(j, hdc);
-                if (t == -1) return JpegLoadError("can't merge dc and ac", "Corrupt JPEG");
-                diff = t ? JpegExtendReceive(j, t) : 0;
-
-                dc = j->img_comp[b].dc_pred + diff;
+            if (j->spec_end != 0) 
+                return JpegLoadError("can't merge dc and ac", "Corrupt JPEG");
+            if (j->code_bits < 16) 
+                JpegGrowBufferUnsafe(j);
+            if (j->succ_high == 0) 
+            {
+                memset(data, 0, 64 * sizeof(data[0]));
+                int t = JpegHuffmanDecode(j, hdc);
+                if (t == -1) 
+                    return JpegLoadError("can't merge dc and ac", "Corrupt JPEG");
+                int diff = t ? JpegExtendReceive(j, t) : 0;
+                int dc = j->img_comp[b].dc_pred + diff;
                 j->img_comp[b].dc_pred = dc;
                 data[0] = (short)(dc << j->succ_low);
             }
-            else {
-                // refinement scan for DC coefficient
+            else 
+            {
                 if (JpegGetBit(j))
                     data[0] += (short)(1 << j->succ_low);
             }
             return 1;
         }
 
-        static int jpeg__jpeg_decode_block_prog_ac(JpegContext* j, short data[64], JpegHuffman* hac, int16_t* fac)
+        static int JpegDecodeBlockProgAc(JpegContext* j, short data[64], JpegHuffman* hac, int16_t* fac)
         {
-            int k;
-            if (j->spec_start == 0) return JpegLoadError("can't merge dc and ac", "Corrupt JPEG");
-
-            if (j->succ_high == 0) {
+            if (j->spec_start == 0) 
+                return JpegLoadError("can't merge dc and ac", "Corrupt JPEG");
+            if (j->succ_high == 0) 
+            {
                 int shift = j->succ_low;
-
-                if (j->eob_run) {
+                if (j->eob_run) 
+                {
                     --j->eob_run;
                     return 1;
                 }
-
-                k = j->spec_start;
-                do {
+                int k = j->spec_start;
+                do 
+                {
                     unsigned int zig;
                     int c, r, s;
-                    if (j->code_bits < 16) JpegGrowBufferUnsafe(j);
+                    if (j->code_bits < 16) 
+                        JpegGrowBufferUnsafe(j);
                     c = (j->code_buffer >> (32 - JpegFastBits)) & ((1 << JpegFastBits) - 1);
                     r = fac[c];
-                    if (r) { // fast-AC path
-                        k += (r >> 4) & 15; // run
-                        s = r & 15; // combined length
+                    if (r) 
+                    { 
+                        k += (r >> 4) & 15;
+                        s = r & 15;
                         j->code_buffer <<= s;
                         j->code_bits -= s;
                         zig = Base::JpegDeZigZag[k++];
                         data[zig] = (short)((r >> 8) << shift);
                     }
-                    else {
+                    else 
+                    {
                         int rs = JpegHuffmanDecode(j, hac);
-                        if (rs < 0) return JpegLoadError("bad huffman code", "Corrupt JPEG");
+                        if (rs < 0) 
+                            return JpegLoadError("bad huffman code", "Corrupt JPEG");
                         s = rs & 15;
                         r = rs >> 4;
-                        if (s == 0) {
-                            if (r < 15) {
+                        if (s == 0) 
+                        {
+                            if (r < 15) 
+                            {
                                 j->eob_run = (1 << r);
                                 if (r)
                                     j->eob_run += JpegGetBits(j, r);
@@ -339,7 +338,8 @@ namespace Simd
                             }
                             k += 16;
                         }
-                        else {
+                        else 
+                        {
                             k += r;
                             zig = Base::JpegDeZigZag[k++];
                             data[zig] = (short)(JpegExtendReceive(j, s) << shift);
@@ -347,70 +347,71 @@ namespace Simd
                     }
                 } while (k <= j->spec_end);
             }
-            else {
-                // refinement scan for these AC coefficients
-
+            else 
+            {
                 short bit = (short)(1 << j->succ_low);
-
-                if (j->eob_run) {
+                if (j->eob_run) 
+                {
                     --j->eob_run;
-                    for (k = j->spec_start; k <= j->spec_end; ++k) {
+                    for (int k = j->spec_start; k <= j->spec_end; ++k)
+                    {
                         short* p = &data[Base::JpegDeZigZag[k]];
-                        if (*p != 0)
-                            if (JpegGetBit(j))
-                                if ((*p & bit) == 0) {
-                                    if (*p > 0)
-                                        *p += bit;
-                                    else
-                                        *p -= bit;
-                                }
+                        if (*p != 0 && JpegGetBit(j) && (*p & bit) == 0)
+                        {
+                            if (*p > 0)
+                                *p += bit;
+                            else
+                                *p -= bit;
+                        }
                     }
                 }
-                else {
-                    k = j->spec_start;
-                    do {
+                else 
+                {
+                    int k = j->spec_start;
+                    do 
+                    {
                         int r, s;
-                        int rs = JpegHuffmanDecode(j, hac); // @OPTIMIZE see if we can use the fast path here, advance-by-r is so slow, eh
-                        if (rs < 0) return JpegLoadError("bad huffman code", "Corrupt JPEG");
+                        int rs = JpegHuffmanDecode(j, hac);
+                        if (rs < 0) 
+                            return JpegLoadError("bad huffman code", "Corrupt JPEG");
                         s = rs & 15;
                         r = rs >> 4;
-                        if (s == 0) {
-                            if (r < 15) {
+                        if (s == 0) 
+                        {
+                            if (r < 15) 
+                            {
                                 j->eob_run = (1 << r) - 1;
                                 if (r)
                                     j->eob_run += JpegGetBits(j, r);
-                                r = 64; // force end of block
-                            }
-                            else {
-                                // r=15 s=0 should write 16 0s, so we just do
-                                // a run of 15 0s and then write s (which is 0),
-                                // so we don't have to do anything special here
+                                r = 64;
                             }
                         }
                         else 
                         {
-                            if (s != 1) return JpegLoadError("bad huffman code", "Corrupt JPEG");
-                            // sign bit
+                            if (s != 1) 
+                                return JpegLoadError("bad huffman code", "Corrupt JPEG");
                             if (JpegGetBit(j))
                                 s = bit;
                             else
                                 s = -bit;
                         }
-
-                        // advance by r
-                        while (k <= j->spec_end) {
+                        while (k <= j->spec_end) 
+                        {
                             short* p = &data[Base::JpegDeZigZag[k++]];
-                            if (*p != 0) {
-                                if (JpegGetBit(j))
-                                    if ((*p & bit) == 0) {
-                                        if (*p > 0)
-                                            *p += bit;
-                                        else
-                                            *p -= bit;
-                                    }
+                            if (*p != 0) 
+                            {
+                                if (JpegGetBit(j) && (*p & bit) == 0) 
+                                {
+                                    if (*p > 0)
+                                        *p += bit;
+                                    else
+                                        *p -= bit;
+                                }
                             }
-                            else {
-                                if (r == 0) {
+                            else
+                            {
+                                if (r == 0) 
+                                {
                                     *p = (short)s;
                                     break;
                                 }
@@ -421,17 +422,6 @@ namespace Simd
                 }
             }
             return 1;
-        }
-
-        // take a -128..127 value and jpeg__clamp it and convert to 0..255
-        SIMD_INLINE static uint8_t jpeg__clamp(int x)
-        {
-            // trick to use a single test to catch both cases
-            if ((unsigned int)x > 255) {
-                if (x < 0) return 0;
-                if (x > 255) return 255;
-            }
-            return (uint8_t)x;
         }
 
 #define jpeg__f2f(x)  ((int) (((x) * 4096 + 0.5)))
@@ -509,7 +499,8 @@ namespace Simd
                 }
             }
 
-            for (i = 0, v = val, o = out; i < 8; ++i, v += 8, o += out_stride) {
+            for (i = 0, v = val, o = out; i < 8; ++i, v += 8, o += out_stride) 
+            {
                 // no fast case since the first 1D IDCT spread components out
                 JPEG__IDCT_1D(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7])
                     // constants scaled things up by 1<<12, plus we had 1<<2 from first
@@ -522,16 +513,14 @@ namespace Simd
                 x1 += 65536 + (128 << 17);
                 x2 += 65536 + (128 << 17);
                 x3 += 65536 + (128 << 17);
-                // tried computing the shifts into temps, or'ing the temps to see
-                // if any were out of range, but that was slower
-                o[0] = jpeg__clamp((x0 + t3) >> 17);
-                o[7] = jpeg__clamp((x0 - t3) >> 17);
-                o[1] = jpeg__clamp((x1 + t2) >> 17);
-                o[6] = jpeg__clamp((x1 - t2) >> 17);
-                o[2] = jpeg__clamp((x2 + t1) >> 17);
-                o[5] = jpeg__clamp((x2 - t1) >> 17);
-                o[3] = jpeg__clamp((x3 + t0) >> 17);
-                o[4] = jpeg__clamp((x3 - t0) >> 17);
+                o[0] = RestrictRange((x0 + t3) >> 17);
+                o[7] = RestrictRange((x0 - t3) >> 17);
+                o[1] = RestrictRange((x1 + t2) >> 17);
+                o[6] = RestrictRange((x1 - t2) >> 17);
+                o[2] = RestrictRange((x2 + t1) >> 17);
+                o[5] = RestrictRange((x2 - t1) >> 17);
+                o[3] = RestrictRange((x3 + t0) >> 17);
+                o[4] = RestrictRange((x3 - t0) >> 17);
             }
         }
 
@@ -649,12 +638,12 @@ namespace Simd
                         for (i = 0; i < w; ++i) {
                             short* data = z->img_comp[n].coeff + 64 * (i + j * z->img_comp[n].coeffW);
                             if (z->spec_start == 0) {
-                                if (!jpeg__jpeg_decode_block_prog_dc(z, data, &z->huff_dc[z->img_comp[n].hd], n))
+                                if (!JpegDecodeBlockProgDc(z, data, &z->huff_dc[z->img_comp[n].hd], n))
                                     return 0;
                             }
                             else {
                                 int ha = z->img_comp[n].ha;
-                                if (!jpeg__jpeg_decode_block_prog_ac(z, data, &z->huff_ac[ha], z->huff_ac[ha].fast_ac))
+                                if (!JpegDecodeBlockProgAc(z, data, &z->huff_ac[ha], z->huff_ac[ha].fast_ac))
                                     return 0;
                             }
                             // every data block is an MCU, so countdown the restart interval
@@ -681,7 +670,7 @@ namespace Simd
                                         int x2 = (i * z->img_comp[n].h + x);
                                         int y2 = (j * z->img_comp[n].v + y);
                                         short* data = z->img_comp[n].coeff + 64 * (x2 + y2 * z->img_comp[n].coeffW);
-                                        if (!jpeg__jpeg_decode_block_prog_dc(z, data, &z->huff_dc[z->img_comp[n].hd], n))
+                                        if (!JpegDecodeBlockProgDc(z, data, &z->huff_dc[z->img_comp[n].hd], n))
                                             return 0;
                                     }
                                 }
