@@ -264,8 +264,6 @@ namespace Simd
         {
         public:
             ImageJpegLoader(const ImageLoaderParam& param);
-
-            virtual bool FromStream();
         };
 
         //---------------------------------------------------------------------
@@ -311,6 +309,14 @@ namespace Simd
 
         protected:
             virtual void SetConverters();
+        };
+
+        class ImageJpegLoader : public Sse41::ImageJpegLoader
+        {
+        public:
+            ImageJpegLoader(const ImageLoaderParam& param);
+
+            virtual bool FromStream();
         };
 
         //---------------------------------------------------------------------

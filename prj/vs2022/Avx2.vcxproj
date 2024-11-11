@@ -48,6 +48,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoad.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoadJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSavePng.cpp" />
