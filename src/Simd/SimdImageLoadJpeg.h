@@ -34,6 +34,10 @@ namespace Simd
         const int JpegMaxDimensions = 1 << 24;
 
         const int JpegMarkerNone = 0xFF;
+        const int JpegMarkerSoi = 0xD8;
+        const int JpegMarkerEoi = 0xD9;
+        const int JpegMarkerSos = 0xDA;
+        const int JpegMarkerDnl = 0xDC;
 
         extern const uint8_t JpegDeZigZag[80];
 

@@ -808,119 +808,123 @@ namespace Simd
             return JpegLoadError("unknown marker", "Corrupt JPEG");
         }
 
-        static int jpeg__process_scan_header(JpegContext* z)
+        static int JpegProcessScanHeader(JpegContext* z)
         {
-            int i;
             int Ls = z->stream->GetBe16u();
             z->scan_n = z->stream->Get8u();
-            if (z->scan_n < 1 || z->scan_n > 4 || z->scan_n > (int)z->img_n) return JpegLoadError("bad SOS component count", "Corrupt JPEG");
-            if (Ls != 6 + 2 * z->scan_n) return JpegLoadError("bad SOS len", "Corrupt JPEG");
-            for (i = 0; i < z->scan_n; ++i) {
+            if (z->scan_n < 1 || z->scan_n > 4 || z->scan_n > (int)z->img_n) 
+                return JpegLoadError("bad SOS component count", "Corrupt JPEG");
+            if (Ls != 6 + 2 * z->scan_n) 
+                return JpegLoadError("bad SOS len", "Corrupt JPEG");
+            for (int i = 0; i < z->scan_n; ++i) 
+            {
                 int id = z->stream->Get8u(), which;
                 int q = z->stream->Get8u();
                 for (which = 0; which < z->img_n; ++which)
                     if (z->img_comp[which].id == id)
                         break;
-                if (which == z->img_n) return 0; // no match
-                z->img_comp[which].hd = q >> 4;   if (z->img_comp[which].hd > 3) return JpegLoadError("bad DC huff", "Corrupt JPEG");
-                z->img_comp[which].ha = q & 15;   if (z->img_comp[which].ha > 3) return JpegLoadError("bad AC huff", "Corrupt JPEG");
+                if (which == z->img_n) 
+                    return 0;
+                z->img_comp[which].hd = q >> 4;   
+                if (z->img_comp[which].hd > 3) 
+                    return JpegLoadError("bad DC huff", "Corrupt JPEG");
+                z->img_comp[which].ha = q & 15;   
+                if (z->img_comp[which].ha > 3) 
+                    return JpegLoadError("bad AC huff", "Corrupt JPEG");
                 z->order[i] = which;
             }
-
+            z->spec_start = z->stream->Get8u();
+            z->spec_end = z->stream->Get8u();
+            int aa = z->stream->Get8u();
+            z->succ_high = (aa >> 4);
+            z->succ_low = (aa & 15);
+            if (z->progressive) 
             {
-                int aa;
-                z->spec_start = z->stream->Get8u();
-                z->spec_end = z->stream->Get8u(); // should be 63, but might be 0
-                aa = z->stream->Get8u();
-                z->succ_high = (aa >> 4);
-                z->succ_low = (aa & 15);
-                if (z->progressive) {
-                    if (z->spec_start > 63 || z->spec_end > 63 || z->spec_start > z->spec_end || z->succ_high > 13 || z->succ_low > 13)
-                        return JpegLoadError("bad SOS", "Corrupt JPEG");
-                }
-                else {
-                    if (z->spec_start != 0) return JpegLoadError("bad SOS", "Corrupt JPEG");
-                    if (z->succ_high != 0 || z->succ_low != 0) return JpegLoadError("bad SOS", "Corrupt JPEG");
-                    z->spec_end = 63;
-                }
+                if (z->spec_start > 63 || z->spec_end > 63 || z->spec_start > z->spec_end || z->succ_high > 13 || z->succ_low > 13)
+                    return JpegLoadError("bad SOS", "Corrupt JPEG");
             }
-
+            else 
+            {
+                if (z->spec_start != 0) 
+                    return JpegLoadError("bad SOS", "Corrupt JPEG");
+                if (z->succ_high != 0 || z->succ_low != 0) 
+                    return JpegLoadError("bad SOS", "Corrupt JPEG");
+                z->spec_end = 63;
+            }
             return 1;
         }
 
-        static int jpeg__process_frame_header(JpegContext* z, int scan)
+        static int JpegProcessFrameHeader(JpegContext* z, int scan)
         {
-            int Lf, p, i, q, h_max = 1, v_max = 1, c;
-            Lf = z->stream->GetBe16u();         if (Lf < 11) return JpegLoadError("bad SOF len", "Corrupt JPEG"); // JPEG
-            p = z->stream->Get8u();            if (p != 8) return JpegLoadError("only 8-bit", "JPEG format not supported: 8-bit only"); // JPEG baseline
-            z->img_y = z->stream->GetBe16u();   if (z->img_y == 0) return JpegLoadError("no header height", "JPEG format not supported: delayed height"); // Legal, but we don't handle it--but neither does IJG
-            z->img_x = z->stream->GetBe16u();   if (z->img_x == 0) return JpegLoadError("0 width", "Corrupt JPEG"); // JPEG requires
-            if (z->img_y > JpegMaxDimensions) return JpegLoadError("too large", "Very large image (corrupt?)");
-            if (z->img_x > JpegMaxDimensions) return JpegLoadError("too large", "Very large image (corrupt?)");
-            c = z->stream->Get8u();
-            if (c != 3 && c != 1 && c != 4) return JpegLoadError("bad component count", "Corrupt JPEG");
+            int Lf = z->stream->GetBe16u();         
+            if (Lf < 11) 
+                return JpegLoadError("bad SOF len", "Corrupt JPEG");
+            int p = z->stream->Get8u();            
+            if (p != 8) 
+                return JpegLoadError("only 8-bit", "JPEG format not supported: 8-bit only");
+            z->img_y = z->stream->GetBe16u();   
+            if (z->img_y == 0) 
+                return JpegLoadError("no header height", "JPEG format not supported: delayed height"); 
+            z->img_x = z->stream->GetBe16u();   
+            if (z->img_x == 0) 
+                return JpegLoadError("0 width", "Corrupt JPEG"); 
+            if (z->img_y > JpegMaxDimensions || z->img_x > JpegMaxDimensions) 
+                return JpegLoadError("too large", "Very large image (corrupt?)");
+            int c = z->stream->Get8u();
+            if (c != 3 && c != 1 && c != 4) 
+                return JpegLoadError("bad component count", "Corrupt JPEG");
             z->img_n = c;
-            for (i = 0; i < c; ++i) {
+            for (int i = 0; i < c; ++i)
                 z->img_comp[i].data = NULL;
-                //z->img_comp[i].linebuf = NULL;
-            }
-
-            if (Lf != 8 + 3 * z->img_n) return JpegLoadError("bad SOF len", "Corrupt JPEG");
-
+            if (Lf != 8 + 3 * z->img_n) 
+                return JpegLoadError("bad SOF len", "Corrupt JPEG");
             z->rgb = 0;
-            for (i = 0; i < z->img_n; ++i) {
+            for (int i = 0; i < z->img_n; ++i) 
+            {
                 static const unsigned char rgb[3] = { 'R', 'G', 'B' };
                 z->img_comp[i].id = z->stream->Get8u();
                 if (z->img_n == 3 && z->img_comp[i].id == rgb[i])
                     ++z->rgb;
-                q = z->stream->Get8u();
-                z->img_comp[i].h = (q >> 4);  if (!z->img_comp[i].h || z->img_comp[i].h > 4) return JpegLoadError("bad H", "Corrupt JPEG");
-                z->img_comp[i].v = q & 15;    if (!z->img_comp[i].v || z->img_comp[i].v > 4) return JpegLoadError("bad V", "Corrupt JPEG");
-                z->img_comp[i].tq = z->stream->Get8u();  if (z->img_comp[i].tq > 3) return JpegLoadError("bad TQ", "Corrupt JPEG");
+                int q = z->stream->Get8u();
+                z->img_comp[i].h = (q >> 4);  
+                if (!z->img_comp[i].h || z->img_comp[i].h > 4) 
+                    return JpegLoadError("bad H", "Corrupt JPEG");
+                z->img_comp[i].v = q & 15;    
+                if (!z->img_comp[i].v || z->img_comp[i].v > 4) 
+                    return JpegLoadError("bad V", "Corrupt JPEG");
+                z->img_comp[i].tq = z->stream->Get8u();  
+                if (z->img_comp[i].tq > 3) 
+                    return JpegLoadError("bad TQ", "Corrupt JPEG");
             }
-
             if (scan) 
                 return 1;
-
-            if (z->img_x* z->img_y * z->img_n > INT_MAX) return JpegLoadError("too large", "Image too large to decode");
-
-            for (i = 0; i < z->img_n; ++i) {
-                if (z->img_comp[i].h > h_max) h_max = z->img_comp[i].h;
-                if (z->img_comp[i].v > v_max) v_max = z->img_comp[i].v;
+            if (z->img_x* z->img_y * z->img_n > INT_MAX) 
+                return JpegLoadError("too large", "Image too large to decode");
+            int h_max = 1, v_max = 1;
+            for (int i = 0; i < z->img_n; ++i) 
+            {
+                h_max = Max(z->img_comp[i].h, h_max);
+                v_max = Max(z->img_comp[i].v, v_max);
             }
-
-            // compute interleaved mcu info
             z->img_h_max = h_max;
             z->img_v_max = v_max;
             z->img_mcu_w = h_max * 8;
             z->img_mcu_h = v_max * 8;
-            // these sizes can't be more than 17 bits
             z->img_mcu_x = (z->img_x + z->img_mcu_w - 1) / z->img_mcu_w;
             z->img_mcu_y = (z->img_y + z->img_mcu_h - 1) / z->img_mcu_h;
-
-            for (i = 0; i < z->img_n; ++i) {
-                // number of effective pixels (e.g. for non-interleaved MCU)
+            for (int i = 0; i < z->img_n; ++i) 
+            {
                 z->img_comp[i].x = (z->img_x * z->img_comp[i].h + h_max - 1) / h_max;
                 z->img_comp[i].y = (z->img_y * z->img_comp[i].v + v_max - 1) / v_max;
-                // to simplify generation, we'll allocate enough memory to decode
-                // the bogus oversized data from using interleaved MCUs and their
-                // big blocks (e.g. a 16x16 iMCU on an image of width 33); we won't
-                // discard the extra data until colorspace conversion
-                //
-                // img_mcu_x, img_mcu_y: <=17 bits; comp[i].h and .v are <=4 (checked earlier)
-                // so these muls can't overflow with 32-bit ints (which we require)
                 z->img_comp[i].w2 = z->img_mcu_x * z->img_comp[i].h * 8;
                 z->img_comp[i].h2 = z->img_mcu_y * z->img_comp[i].v * 8;
                 z->img_comp[i].coeff = 0;
-                //z->img_comp[i].raw_coeff = 0;
-                //z->img_comp[i].linebuf = NULL;
                 z->img_comp[i].bufD.Resize(z->img_comp[i].w2 * z->img_comp[i].h2);
                 if (z->img_comp[i].bufD.Empty())
                     return JpegLoadError("outofmem", "Out of memory");
                 z->img_comp[i].data = z->img_comp[i].bufD.data;
                 if (z->progressive) 
                 {
-                    // w2, h2 are multiples of 8 (see above)
                     z->img_comp[i].coeffW = z->img_comp[i].w2 / 8;
                     z->img_comp[i].coeffH = z->img_comp[i].h2 / 8;
                     z->img_comp[i].bufC.Resize(z->img_comp[i].w2 * z->img_comp[i].h2);
@@ -929,57 +933,49 @@ namespace Simd
                     z->img_comp[i].coeff = z->img_comp[i].bufC.data;
                 }
             }
-
             return 1;
         }
 
-        // use comparisons since in some cases we handle more than one case (e.g. SOF)
-#define jpeg__DNL(x)         ((x) == 0xdc)
-#define jpeg__SOI(x)         ((x) == 0xd8)
-#define jpeg__EOI(x)         ((x) == 0xd9)
-#define jpeg__SOF(x)         ((x) == 0xc0 || (x) == 0xc1 || (x) == 0xc2)
-#define jpeg__SOS(x)         ((x) == 0xda)
-
-#define jpeg__SOF_progressive(x)   ((x) == 0xc2)
-
         static int DecodeJpegHeader(JpegContext* z, int scan)
         {
-            int m;
             z->jfif = 0;
-            z->app14_color_transform = -1; // valid values are 0,1,2
-            z->marker = JpegMarkerNone; // initialize cached marker to empty
-            m = JpegGetMarker(z);
-            if (!jpeg__SOI(m)) return JpegLoadError("no SOI", "Corrupt JPEG");
+            z->app14_color_transform = -1;
+            z->marker = JpegMarkerNone;
+            int m = JpegGetMarker(z);
+            if (m != JpegMarkerSoi)
+                return JpegLoadError("no SOI", "Corrupt JPEG");
             if (scan) 
                 return 1;
             m = JpegGetMarker(z);
-            while (!jpeg__SOF(m)) {
-                if (!JpegProcessMarker(z, m)) return 0;
+            while (!(m == 0xC0 || m == 0xC1 || m == 0xC2))
+            {
+                if (!JpegProcessMarker(z, m)) 
+                    return 0;
                 m = JpegGetMarker(z);
-                while (m == JpegMarkerNone) {
-                    // some files have extra padding after their blocks, so ok, we'll scan
+                while (m == JpegMarkerNone) 
+                {
                     if (z->stream->Eof()) 
                         return JpegLoadError("no SOF", "Corrupt JPEG");
                     m = JpegGetMarker(z);
                 }
             }
-            z->progressive = jpeg__SOF_progressive(m);
-            if (!jpeg__process_frame_header(z, scan)) return 0;
+            z->progressive = (m == 0xC2);
+            if (!JpegProcessFrameHeader(z, scan)) 
+                return 0;
             return 1;
         }
 
         static int JpegDecode(JpegContext* j)
         {
-            int m;
             j->restart_interval = 0;
             if (!DecodeJpegHeader(j, 0)) 
                 return 0;
-            m = JpegGetMarker(j);
-            while (!jpeg__EOI(m)) 
+            int m = JpegGetMarker(j);
+            while (m != JpegMarkerEoi)
             {
-                if (jpeg__SOS(m)) 
+                if (m == JpegMarkerSos)
                 {
-                    if (!jpeg__process_scan_header(j)) 
+                    if (!JpegProcessScanHeader(j)) 
                         return 0;
                     if (!JpegParseEntropyCodedData(j))
                         return 0;
@@ -988,7 +984,7 @@ namespace Simd
                         while (!j->stream->Eof()) 
                         {
                             int x = j->stream->Get8u();
-                            if (x == 255) 
+                            if (x == 0xFF) 
                             {
                                 j->marker = j->stream->Get8u();
                                 break;
@@ -996,7 +992,7 @@ namespace Simd
                         }
                     }
                 }
-                else if (jpeg__DNL(m))
+                else if (m == JpegMarkerDnl)
                 {
                     int Ld = j->stream->GetBe16u();
                     uint32_t NL = j->stream->GetBe16u();
