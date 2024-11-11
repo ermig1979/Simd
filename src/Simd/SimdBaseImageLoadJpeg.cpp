@@ -444,103 +444,7 @@ namespace Simd
             return 1;
         }
 
-#define jpeg__f2f(x)  ((int) (((x) * 4096 + 0.5)))
-
-#define JPEG__IDCT_1D(s0,s1,s2,s3,s4,s5,s6,s7) \
-   int t0,t1,t2,t3,p1,p2,p3,p4,p5,x0,x1,x2,x3; \
-   p2 = s2;                                    \
-   p3 = s6;                                    \
-   p1 = (p2+p3) * jpeg__f2f(0.5411961f);       \
-   t2 = p1 + p3*jpeg__f2f(-1.847759065f);      \
-   t3 = p1 + p2*jpeg__f2f( 0.765366865f);      \
-   p2 = s0;                                    \
-   p3 = s4;                                    \
-   t0 = (p2+p3) * 4096;               \
-   t1 = (p2-p3) * 4096;               \
-   x0 = t0+t3;                                 \
-   x3 = t0-t3;                                 \
-   x1 = t1+t2;                                 \
-   x2 = t1-t2;                                 \
-   t0 = s7;                                    \
-   t1 = s5;                                    \
-   t2 = s3;                                    \
-   t3 = s1;                                    \
-   p3 = t0+t2;                                 \
-   p4 = t1+t3;                                 \
-   p1 = t0+t3;                                 \
-   p2 = t1+t2;                                 \
-   p5 = (p3+p4)*jpeg__f2f( 1.175875602f);      \
-   t0 = t0*jpeg__f2f( 0.298631336f);           \
-   t1 = t1*jpeg__f2f( 2.053119869f);           \
-   t2 = t2*jpeg__f2f( 3.072711026f);           \
-   t3 = t3*jpeg__f2f( 1.501321110f);           \
-   p1 = p5 + p1*jpeg__f2f(-0.899976223f);      \
-   p2 = p5 + p2*jpeg__f2f(-2.562915447f);      \
-   p3 = p3*jpeg__f2f(-1.961570560f);           \
-   p4 = p4*jpeg__f2f(-0.390180644f);           \
-   t3 += p1+p4;                                \
-   t2 += p2+p3;                                \
-   t1 += p2+p4;                                \
-   t0 += p1+p3;
-#if 0
-        SIMD_INLINE void JpegIdctVer(const short * src, int * dst)
-        {
-            if (src[8] == 0 && src[16] == 0 && src[24] == 0 && src[32] == 0 && src[40] == 0 && src[48] == 0 && src[56] == 0)
-            {
-                int val = src[0] * 4;
-                dst[0] = dst[8] = dst[16] = dst[24] = dst[32] = dst[40] = dst[48] = dst[56] = val;
-            }
-            else
-            {
-                int t0, t1, t2, t3, p1, p2, p3, p4, p5, x0, x1, x2, x3; 
-                p2 = src[16];
-                p3 = src[48];
-                p1 = (p2 + p3) * JpegIdctK00;
-                t2 = p1 + p3 * JpegIdctK01;
-                t3 = p1 + p2 * JpegIdctK02;
-                p2 = src[0];                                    \
-                p3 = s4;                                    \
-                t0 = (p2 + p3) * 4096;               \
-                t1 = (p2 - p3) * 4096;               \
-                x0 = t0 + t3;                                 \
-                x3 = t0 - t3;                                 \
-                x1 = t1 + t2;                                 \
-                x2 = t1 - t2;                                 \
-                t0 = s7;                                    \
-                t1 = s5;                                    \
-                t2 = s3;                                    \
-                t3 = s1;                                    \
-                p3 = t0 + t2;                                 \
-                p4 = t1 + t3;                                 \
-                p1 = t0 + t3;                                 \
-                p2 = t1 + t2;                                 \
-                p5 = (p3 + p4) * jpeg__f2f(1.175875602f);      \
-                t0 = t0 * jpeg__f2f(0.298631336f);           \
-                t1 = t1 * jpeg__f2f(2.053119869f);           \
-                t2 = t2 * jpeg__f2f(3.072711026f);           \
-                t3 = t3 * jpeg__f2f(1.501321110f);           \
-                p1 = p5 + p1 * jpeg__f2f(-0.899976223f);      \
-                p2 = p5 + p2 * jpeg__f2f(-2.562915447f);      \
-                p3 = p3 * jpeg__f2f(-1.961570560f);           \
-                p4 = p4 * jpeg__f2f(-0.390180644f);           \
-                t3 += p1 + p4;                                \
-                t2 += p2 + p3;                                \
-                t1 += p2 + p4;                                \
-                t0 += p1 + p3;
-
-                x0 += 512; x1 += 512; x2 += 512; x3 += 512;
-                dst[0] = (x0 + t3) >> 10;
-                dst[56] = (x0 - t3) >> 10;
-                dst[8] = (x1 + t2) >> 10;
-                dst[48] = (x1 - t2) >> 10;
-                dst[16] = (x2 + t1) >> 10;
-                dst[40] = (x2 - t1) >> 10;
-                dst[24] = (x3 + t0) >> 10;
-                dst[32] = (x3 - t0) >> 10;
-            }
-        }
-
-        template<class S, class D, int s, int r> SIMD_INLINE void JpegIdct(const S* src, D* dst, size_t stride)
+        template<class S, class D, int s> SIMD_INLINE void JpegIdct(const S* src, D* dst)
         {
             if (s == 8 && src[8] == 0 && src[16] == 0 && src[24] == 0 && src[32] == 0 && src[40] == 0 && src[48] == 0 && src[56] == 0)
             {
@@ -559,109 +463,64 @@ namespace Simd
                 p3 = src[s * 4];
                 t0 = (p2 + p3) * 4096;
                 t1 = (p2 - p3) * 4096;
+                int r = (s == 8 ? 512 : 65536 + (128 << 17));
+                x0 = t0 + t3 + r;
+                x3 = t0 - t3 + r;
+                x1 = t1 + t2 + r;
+                x2 = t1 - t2 + r;
+                t0 = src[s * 7];
+                t1 = src[s * 5];
+                t2 = src[s * 3];
+                t3 = src[s * 1];
+                p3 = t0 + t2;
+                p4 = t1 + t3;
+                p1 = t0 + t3;
+                p2 = t1 + t2;
+                p5 = (p3 + p4) * JpegIdctK03;
+                t0 = t0 * JpegIdctK04;
+                t1 = t1 * JpegIdctK05;
+                t2 = t2 * JpegIdctK06;
+                t3 = t3 * JpegIdctK07;
+                p1 = p5 + p1 * JpegIdctK08;
+                p2 = p5 + p2 * JpegIdctK09;
+                p3 = p3 * JpegIdctK10;
+                p4 = p4 * JpegIdctK11;
+                t3 += p1 + p4;
+                t2 += p2 + p3;
+                t1 += p2 + p4;
+                t0 += p1 + p3;
                 if (s == 8)
                 {
-                    x0 = t0 + t3 + 512;
-                    x3 = t0 - t3 + 512;
-                    x1 = t1 + t2 + 512;
-                    x2 = t1 - t2 + 512;
+                    dst[0] = (x0 + t3) >> 10;
+                    dst[56] = (x0 - t3) >> 10;
+                    dst[8] = (x1 + t2) >> 10;
+                    dst[48] = (x1 - t2) >> 10;
+                    dst[16] = (x2 + t1) >> 10;
+                    dst[40] = (x2 - t1) >> 10;
+                    dst[24] = (x3 + t0) >> 10;
+                    dst[32] = (x3 - t0) >> 10;
                 }
                 else
                 {
-                    x0 = t0 + t3 + 65536 + (128 << 17);
-                    x3 = t0 - t3 + 65536 + (128 << 17);
-                    x1 = t1 + t2 + 65536 + (128 << 17);
-                    x2 = t1 - t2 + 65536 + (128 << 17);
+                    dst[0] = RestrictRange((x0 + t3) >> 17);
+                    dst[7] = RestrictRange((x0 - t3) >> 17);
+                    dst[1] = RestrictRange((x1 + t2) >> 17);
+                    dst[6] = RestrictRange((x1 - t2) >> 17);
+                    dst[2] = RestrictRange((x2 + t1) >> 17);
+                    dst[5] = RestrictRange((x2 - t1) >> 17);
+                    dst[3] = RestrictRange((x3 + t0) >> 17);
+                    dst[4] = RestrictRange((x3 - t0) >> 17);
                 }
-                    t0 = s7;                                    \
-                    t1 = s5;                                    \
-                    t2 = s3;                                    \
-                    t3 = s1;                                    \
-                    p3 = t0 + t2;                                 \
-                    p4 = t1 + t3;                                 \
-                    p1 = t0 + t3;                                 \
-                    p2 = t1 + t2;                                 \
-                    p5 = (p3 + p4) * jpeg__f2f(1.175875602f);      \
-                    t0 = t0 * jpeg__f2f(0.298631336f);           \
-                    t1 = t1 * jpeg__f2f(2.053119869f);           \
-                    t2 = t2 * jpeg__f2f(3.072711026f);           \
-                    t3 = t3 * jpeg__f2f(1.501321110f);           \
-                    p1 = p5 + p1 * jpeg__f2f(-0.899976223f);      \
-                    p2 = p5 + p2 * jpeg__f2f(-2.562915447f);      \
-                    p3 = p3 * jpeg__f2f(-1.961570560f);           \
-                    p4 = p4 * jpeg__f2f(-0.390180644f);           \
-                    t3 += p1 + p4;                                \
-                    t2 += p2 + p3;                                \
-                    t1 += p2 + p4;                                \
-                    t0 += p1 + p3;
-
-                x0 += 512; x1 += 512; x2 += 512; x3 += 512;
-                dst[0] = (x0 + t3) >> 10;
-                dst[56] = (x0 - t3) >> 10;
-                dst[8] = (x1 + t2) >> 10;
-                dst[48] = (x1 - t2) >> 10;
-                dst[16] = (x2 + t1) >> 10;
-                dst[40] = (x2 - t1) >> 10;
-                dst[24] = (x3 + t0) >> 10;
-                dst[32] = (x3 - t0) >> 10;
             }
         }
-#endif
+
         static void JpegIdctBlock(uint8_t* dst, int stride, short src[64])
         {
-            int i, val[64], * v = val;
-            short* d = src;
-            for (i = 0; i < 8; ++i, ++d, ++v) 
-            {
-                // if all zeroes, shortcut -- this avoids dequantizing 0s and IDCTing
-                if (d[8] == 0 && d[16] == 0 && d[24] == 0 && d[32] == 0 && d[40] == 0 && d[48] == 0 && d[56] == 0) 
-                {
-                    //    no shortcut                 0     seconds
-                    //    (1|2|3|4|5|6|7)==0          0     seconds
-                    //    all separate               -0.047 seconds
-                    //    1 && 2|3 && 4|5 && 6|7:    -0.047 seconds
-                    int dcterm = d[0] * 4;
-                    v[0] = v[8] = v[16] = v[24] = v[32] = v[40] = v[48] = v[56] = dcterm;
-                }
-                else 
-                {
-                    JPEG__IDCT_1D(d[0], d[8], d[16], d[24], d[32], d[40], d[48], d[56]);
-                        // constants scaled things up by 1<<12; let's bring them back
-                        // down, but keep 2 extra bits of precision
-                    x0 += 512; x1 += 512; x2 += 512; x3 += 512;
-                    v[0] = (x0 + t3) >> 10;
-                    v[56] = (x0 - t3) >> 10;
-                    v[8] = (x1 + t2) >> 10;
-                    v[48] = (x1 - t2) >> 10;
-                    v[16] = (x2 + t1) >> 10;
-                    v[40] = (x2 - t1) >> 10;
-                    v[24] = (x3 + t0) >> 10;
-                    v[32] = (x3 - t0) >> 10;
-                }
-            }
-            for (i = 0, v = val; i < 8; ++i, v += 8, dst += stride) 
-            {
-                // no fast case since the first 1D IDCT spread components out
-                JPEG__IDCT_1D(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7]);
-                    // constants scaled things up by 1<<12, plus we had 1<<2 from first
-                    // loop, plus horizontal and vertical each scale by sqrt(8) so together
-                    // we've got an extra 1<<3, so 1<<17 total we need to remove.
-                    // so we want to round that, which means adding 0.5 * 1<<17,
-                    // aka 65536. Also, we'll end up with -128 to 127 that we want
-                    // to encode as 0..255 by adding 128, so we'll add that before the shift
-                x0 += 65536 + (128 << 17);
-                x1 += 65536 + (128 << 17);
-                x2 += 65536 + (128 << 17);
-                x3 += 65536 + (128 << 17);
-                dst[0] = RestrictRange((x0 + t3) >> 17);
-                dst[7] = RestrictRange((x0 - t3) >> 17);
-                dst[1] = RestrictRange((x1 + t2) >> 17);
-                dst[6] = RestrictRange((x1 - t2) >> 17);
-                dst[2] = RestrictRange((x2 + t1) >> 17);
-                dst[5] = RestrictRange((x2 - t1) >> 17);
-                dst[3] = RestrictRange((x3 + t0) >> 17);
-                dst[4] = RestrictRange((x3 - t0) >> 17);
-            }
+            int buf[64];
+            for (int i = 0; i < 8; ++i)
+                JpegIdct<short, int, 8>(src + i, buf + i);
+            for (int i = 0; i < 8; ++i, dst += stride) 
+                JpegIdct<int, uint8_t, 1>(buf + 8 * i, dst);
         }
 
         static uint8_t JpegGetMarker(JpegContext* j)
