@@ -170,49 +170,97 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        //void JpegYuv420pToBgra(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType)
-        //{
-        //    size_t hL = height - 1, w2 = (width + 1) / 2;
-        //    Array8u buf(width * 2 + 6);
-        //    uint8_t* bu = buf.data, * bv = buf.data + width + 3;
-        //    for (size_t row = 0; row < height; row += 1)
-        //    {
-        //        int odd = row & 1;
-        //        JpegResampleRowHv2(bu, u, odd ? (row == hL ? u : u + uStride) : (row == 0 ? u : u - uStride), (int)w2, 0);
-        //        JpegResampleRowHv2(bv, v, odd ? (row == hL ? v : v + uStride) : (row == 0 ? v : v - uStride), (int)w2, 0);
-        //        for (size_t col = 0; col < width; ++col)
-        //            YuvToBgra<Trect871>(y[col], bu[col], bv[col], alpha, bgra + col * 4);
-        //        y += yStride;
-        //        bgra += bgraStride;
-        //        if (odd)
-        //        {
-        //            u += uStride;
-        //            v += vStride;
-        //        }
-        //    }
-        //}
+        SIMD_INLINE void YuvToBgra16(__m128i y16, __m128i u16, __m128i v16, const __m128i& a_0, __m128i* bgra)
+        {
+            const __m128i b16 = YuvToBlue16<Base::Trect871>(y16, u16);
+            const __m128i g16 = YuvToGreen16<Base::Trect871>(y16, u16, v16);
+            const __m128i r16 = YuvToRed16<Base::Trect871>(y16, v16);
+            const __m128i bg8 = _mm_or_si128(b16, _mm_slli_si128(g16, 1));
+            const __m128i ra8 = _mm_or_si128(r16, a_0);
+            _mm_storeu_si128(bgra + 0, _mm_unpacklo_epi16(bg8, ra8));
+            _mm_storeu_si128(bgra + 1, _mm_unpackhi_epi16(bg8, ra8));
+        }
 
-        //void JpegYuv420pToRgba(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha, SimdYuvType)
-        //{
-        //    size_t hL = height - 1, w2 = (width + 1) / 2;
-        //    Array8u buf(width * 2 + 6);
-        //    uint8_t* bu = buf.data, * bv = buf.data + width + 3;
-        //    for (size_t row = 0; row < height; row += 1)
-        //    {
-        //        int odd = row & 1;
-        //        JpegResampleRowHv2(bu, u, odd ? (row == hL ? u : u + uStride) : (row == 0 ? u : u - uStride), (int)w2, 0);
-        //        JpegResampleRowHv2(bv, v, odd ? (row == hL ? v : v + uStride) : (row == 0 ? v : v - uStride), (int)w2, 0);
-        //        for (size_t col = 0; col < width; ++col)
-        //            YuvToRgba<Trect871>(y[col], bu[col], bv[col], alpha, rgba + col * 4);
-        //        y += yStride;
-        //        rgba += rgbaStride;
-        //        if (odd)
-        //        {
-        //            u += uStride;
-        //            v += vStride;
-        //        }
-        //    }
-        //}
+        SIMD_INLINE void YuvToBgra(const uint8_t* y, const uint8_t* u, const uint8_t* v, const __m128i& a_0, uint8_t* bgra)
+        {
+            __m128i y8 = _mm_loadu_si128((__m128i*)y);
+            __m128i u8 = _mm_loadu_si128((__m128i*)u);
+            __m128i v8 = _mm_loadu_si128((__m128i*)v);
+            YuvToBgra16(UnpackY<Base::Trect871, 0>(y8), UnpackUV<Base::Trect871, 0>(u8), UnpackUV<Base::Trect871, 0>(v8), a_0, (__m128i*)bgra + 0);
+            YuvToBgra16(UnpackY<Base::Trect871, 1>(y8), UnpackUV<Base::Trect871, 1>(u8), UnpackUV<Base::Trect871, 1>(v8), a_0, (__m128i*)bgra + 2);
+        }
+
+        void JpegYuv420pToBgra(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType)
+        {
+            size_t hL = height - 1, w2 = (width + 1) / 2, wA = AlignLo(width, A);
+            Array8u buf(width * 2 + 6);
+            uint8_t* bu = buf.data, * bv = buf.data + width + 3;
+            __m128i a_0 = _mm_slli_si128(_mm_set1_epi16(alpha), 1);
+            for (size_t row = 0; row < height; row += 1)
+            {
+                int odd = row & 1;
+                JpegResampleRowHv2(bu, u, odd ? (row == hL ? u : u + uStride) : (row == 0 ? u : u - uStride), (int)w2, 0);
+                JpegResampleRowHv2(bv, v, odd ? (row == hL ? v : v + uStride) : (row == 0 ? v : v - uStride), (int)w2, 0);
+                for (size_t col = 0; col < wA; col += A)
+                    YuvToBgra(y + col, bu + col, bv + col, a_0, bgra + col * 4);
+                for (size_t col = wA; col < width; ++col)
+                    Base::YuvToBgra<Base::Trect871>(y[col], bu[col], bv[col], alpha, bgra + col * 4);
+                y += yStride;
+                bgra += bgraStride;
+                if (odd)
+                {
+                    u += uStride;
+                    v += vStride;
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void YuvToRgba16(__m128i y16, __m128i u16, __m128i v16, const __m128i& a_0, __m128i* rgba)
+        {
+            const __m128i b16 = YuvToBlue16<Base::Trect871>(y16, u16);
+            const __m128i g16 = YuvToGreen16<Base::Trect871>(y16, u16, v16);
+            const __m128i r16 = YuvToRed16<Base::Trect871>(y16, v16);
+            const __m128i rg8 = _mm_or_si128(r16, _mm_slli_si128(g16, 1));
+            const __m128i ba8 = _mm_or_si128(b16, a_0);
+            _mm_storeu_si128(rgba + 0, _mm_unpacklo_epi16(rg8, ba8));
+            _mm_storeu_si128(rgba + 1, _mm_unpackhi_epi16(rg8, ba8));
+        }
+
+        SIMD_INLINE void YuvToRgba(const uint8_t* y, const uint8_t* u, const uint8_t* v, const __m128i& a_0, uint8_t* rgba)
+        {
+            __m128i y8 = _mm_loadu_si128((__m128i*)y);
+            __m128i u8 = _mm_loadu_si128((__m128i*)u);
+            __m128i v8 = _mm_loadu_si128((__m128i*)v);
+            YuvToRgba16(UnpackY<Base::Trect871, 0>(y8), UnpackUV<Base::Trect871, 0>(u8), UnpackUV<Base::Trect871, 0>(v8), a_0, (__m128i*)rgba + 0);
+            YuvToRgba16(UnpackY<Base::Trect871, 1>(y8), UnpackUV<Base::Trect871, 1>(u8), UnpackUV<Base::Trect871, 1>(v8), a_0, (__m128i*)rgba + 2);
+        }
+
+        void JpegYuv420pToRgba(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha, SimdYuvType)
+        {
+            size_t hL = height - 1, w2 = (width + 1) / 2, wA = AlignLo(width, A);
+            Array8u buf(width * 2 + 6);
+            uint8_t* bu = buf.data, * bv = buf.data + width + 3;
+            __m128i a_0 = _mm_slli_si128(_mm_set1_epi16(alpha), 1);
+            for (size_t row = 0; row < height; row += 1)
+            {
+                int odd = row & 1;
+                JpegResampleRowHv2(bu, u, odd ? (row == hL ? u : u + uStride) : (row == 0 ? u : u - uStride), (int)w2, 0);
+                JpegResampleRowHv2(bv, v, odd ? (row == hL ? v : v + uStride) : (row == 0 ? v : v - uStride), (int)w2, 0);
+                for (size_t col = 0; col < wA; col += A)
+                    YuvToRgba(y + col, bu + col, bv + col, a_0, rgba + col * 4);
+                for (size_t col = wA; col < width; ++col)
+                    Base::YuvToRgba<Base::Trect871>(y[col], bu[col], bv[col], alpha, rgba + col * 4);
+                y += yStride;
+                rgba += rgbaStride;
+                if (odd)
+                {
+                    u += uStride;
+                    v += vStride;
+                }
+            }
+        }
 
         //-------------------------------------------------------------------------------------------------
 
@@ -221,7 +269,6 @@ namespace Simd
         {
             //_context->idctBlock = JpegIdctBlock;
             _context->resampleRowHv2 = JpegResampleRowHv2;
-            //_context->yuvToRgbRow = JpegYuvToRgbRow;
             if (_param.format == SimdPixelFormatGray8)
                 _context->rgbaToAny = Sse41::RgbaToGray;
             if (_param.format == SimdPixelFormatBgr24)
@@ -233,7 +280,7 @@ namespace Simd
             if (_param.format == SimdPixelFormatBgra32)
             {
                 _context->yuv444pToBgra = Sse41::Yuv444pToBgraV2;
-                //_context->yuv420pToBgra = Base::JpegYuv420pToBgra;
+                _context->yuv420pToBgra = Sse41::JpegYuv420pToBgra;
                 _context->rgbaToAny = Sse41::BgraToRgba;
             }
             if (_param.format == SimdPixelFormatRgb24)
@@ -245,7 +292,7 @@ namespace Simd
             if (_param.format == SimdPixelFormatRgba32)
             {
                 _context->yuv444pToBgra = Sse41::Yuv444pToRgbaV2;
-                //_context->yuv420pToBgra = Base::JpegYuv420pToRgba;
+                _context->yuv420pToBgra = Sse41::JpegYuv420pToRgba;
             }
         }
     }
