@@ -72,6 +72,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        typedef void (*IdctBlockPtr)(uint8_t* out, int out_stride, short data[64]);
         typedef uint8_t* (*ResampleRowPtr)(uint8_t* out, const uint8_t* in0, const uint8_t* in1, int w, int hs);
         typedef void (*YuvToRgbRowPtr)(uint8_t* out, const uint8_t* y, const uint8_t* pcb, const uint8_t* pcr, int count, int step);
         typedef void (*YuvToBgrPtr)(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
@@ -115,8 +116,7 @@ namespace Simd
 
             Array8u out;
 
-            void (*idct_block_kernel)(uint8_t* out, int out_stride, short data[64]);
-
+            IdctBlockPtr idctBlock;
             ResampleRowPtr resampleRowHv2;
             YuvToRgbRowPtr yuvToRgbRow;
 

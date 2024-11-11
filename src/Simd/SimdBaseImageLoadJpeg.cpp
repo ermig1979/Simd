@@ -540,30 +540,29 @@ namespace Simd
             return x;
         }
 
-        static int jpeg__parse_entropy_coded_data(JpegContext* z)
+        static int JpegParseEntropyCodedData(JpegContext* z)
         {
             z->Reset();
-            if (!z->progressive) {
-                if (z->scan_n == 1) {
-                    int i, j;
-                    SIMD_ALIGNED(16) short data[64];
+            if (!z->progressive)
+            {
+                SIMD_ALIGNED(16) short data[64];
+                if (z->scan_n == 1) 
+                {
                     int n = z->order[0];
-                    // non-interleaved data, we just need to process one block at a time,
-                    // in trivial scanline order
-                    // number of blocks to do just depends on how many actual "pixels" this
-                    // component has, independent of interleaved MCU blocking and such
                     int w = (z->img_comp[n].x + 7) >> 3;
                     int h = (z->img_comp[n].y + 7) >> 3;
-                    for (j = 0; j < h; ++j) {
-                        for (i = 0; i < w; ++i) {
+                    for (int j = 0; j < h; ++j) 
+                    {
+                        for (int i = 0; i < w; ++i) 
+                        {
                             int ha = z->img_comp[n].ha;
-                            if (!JpegDecodeBlock(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->huff_ac[ha].fast_ac, n, z->dequant[z->img_comp[n].tq])) return 0;
-                            z->idct_block_kernel(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
-                            // every data block is an MCU, so countdown the restart interval
-                            if (--z->todo <= 0) {
-                                if (z->code_bits < 24) JpegGrowBufferUnsafe(z);
-                                // if it's NOT a restart, then just bail, so we get corrupt data
-                                // rather than no data
+                            if (!JpegDecodeBlock(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->huff_ac[ha].fast_ac, n, z->dequant[z->img_comp[n].tq])) 
+                                return 0;
+                            z->idctBlock(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
+                            if (--z->todo <= 0) 
+                            {
+                                if (z->code_bits < 24) 
+                                    JpegGrowBufferUnsafe(z);
                                 if (!z->NeedRestart()) 
                                     return 1;
                                 z->Reset();
@@ -574,29 +573,30 @@ namespace Simd
                 }
                 else 
                 {
-                    int i, j, k, x, y;
-                    SIMD_ALIGNED(16) short data[64];
-                    for (j = 0; j < z->img_mcu_y; ++j) {
-                        for (i = 0; i < z->img_mcu_x; ++i) {
-                            // scan an interleaved mcu... process scan_n components in order
-                            for (k = 0; k < z->scan_n; ++k) {
+                    for (int j = 0; j < z->img_mcu_y; ++j) 
+                    {
+                        for (int i = 0; i < z->img_mcu_x; ++i)
+                        {
+                            for (int k = 0; k < z->scan_n; ++k)
+                            {
                                 int n = z->order[k];
-                                // scan out an mcu's worth of this component; that's just determined
-                                // by the basic H and V specified for the component
-                                for (y = 0; y < z->img_comp[n].v; ++y) {
-                                    for (x = 0; x < z->img_comp[n].h; ++x) {
+                                for (int y = 0; y < z->img_comp[n].v; ++y)
+                                {
+                                    for (int x = 0; x < z->img_comp[n].h; ++x)
+                                    {
                                         int x2 = (i * z->img_comp[n].h + x) * 8;
                                         int y2 = (j * z->img_comp[n].v + y) * 8;
                                         int ha = z->img_comp[n].ha;
-                                        if (!JpegDecodeBlock(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->huff_ac[ha].fast_ac, n, z->dequant[z->img_comp[n].tq])) return 0;
-                                        z->idct_block_kernel(z->img_comp[n].data + z->img_comp[n].w2 * y2 + x2, z->img_comp[n].w2, data);
+                                        if (!JpegDecodeBlock(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->huff_ac[ha].fast_ac, n, z->dequant[z->img_comp[n].tq])) 
+                                            return 0;
+                                        z->idctBlock(z->img_comp[n].data + z->img_comp[n].w2 * y2 + x2, z->img_comp[n].w2, data);
                                     }
                                 }
                             }
-                            // after all interleaved components, that's an interleaved MCU,
-                            // so now count down the restart interval
-                            if (--z->todo <= 0) {
-                                if (z->code_bits < 24) JpegGrowBufferUnsafe(z);
+                            if (--z->todo <= 0) 
+                            {
+                                if (z->code_bits < 24) 
+                                    JpegGrowBufferUnsafe(z);
                                 if (!z->NeedRestart())
                                     return 1;
                                 z->Reset();
@@ -606,31 +606,33 @@ namespace Simd
                     return 1;
                 }
             }
-            else {
-                if (z->scan_n == 1) {
-                    int i, j;
+            else 
+            {
+                if (z->scan_n == 1) 
+                {
                     int n = z->order[0];
-                    // non-interleaved data, we just need to process one block at a time,
-                    // in trivial scanline order
-                    // number of blocks to do just depends on how many actual "pixels" this
-                    // component has, independent of interleaved MCU blocking and such
                     int w = (z->img_comp[n].x + 7) >> 3;
                     int h = (z->img_comp[n].y + 7) >> 3;
-                    for (j = 0; j < h; ++j) {
-                        for (i = 0; i < w; ++i) {
+                    for (int j = 0; j < h; ++j) 
+                    {
+                        for (int i = 0; i < w; ++i) 
+                        {
                             short* data = z->img_comp[n].coeff + 64 * (i + j * z->img_comp[n].coeffW);
-                            if (z->spec_start == 0) {
+                            if (z->spec_start == 0) 
+                            {
                                 if (!JpegDecodeBlockProgDc(z, data, &z->huff_dc[z->img_comp[n].hd], n))
                                     return 0;
                             }
-                            else {
+                            else 
+                            {
                                 int ha = z->img_comp[n].ha;
                                 if (!JpegDecodeBlockProgAc(z, data, &z->huff_ac[ha], z->huff_ac[ha].fast_ac))
                                     return 0;
                             }
-                            // every data block is an MCU, so countdown the restart interval
-                            if (--z->todo <= 0) {
-                                if (z->code_bits < 24) JpegGrowBufferUnsafe(z);
+                            if (--z->todo <= 0) 
+                            {
+                                if (z->code_bits < 24) 
+                                    JpegGrowBufferUnsafe(z);
                                 if (!z->NeedRestart())
                                     return 1;
                                 z->Reset();
@@ -639,17 +641,19 @@ namespace Simd
                     }
                     return 1;
                 }
-                else { // interleaved
-                    int i, j, k, x, y;
-                    for (j = 0; j < z->img_mcu_y; ++j) {
-                        for (i = 0; i < z->img_mcu_x; ++i) {
-                            // scan an interleaved mcu... process scan_n components in order
-                            for (k = 0; k < z->scan_n; ++k) {
+                else 
+                {
+                    for (int j = 0; j < z->img_mcu_y; ++j)
+                    {
+                        for (int i = 0; i < z->img_mcu_x; ++i)
+                        {
+                            for (int k = 0; k < z->scan_n; ++k)
+                            {
                                 int n = z->order[k];
-                                // scan out an mcu's worth of this component; that's just determined
-                                // by the basic H and V specified for the component
-                                for (y = 0; y < z->img_comp[n].v; ++y) {
-                                    for (x = 0; x < z->img_comp[n].h; ++x) {
+                                for (int y = 0; y < z->img_comp[n].v; ++y)
+                                {
+                                    for (int x = 0; x < z->img_comp[n].h; ++x)
+                                    {
                                         int x2 = (i * z->img_comp[n].h + x);
                                         int y2 = (j * z->img_comp[n].v + y);
                                         short* data = z->img_comp[n].coeff + 64 * (x2 + y2 * z->img_comp[n].coeffW);
@@ -658,10 +662,10 @@ namespace Simd
                                     }
                                 }
                             }
-                            // after all interleaved components, that's an interleaved MCU,
-                            // so now count down the restart interval
-                            if (--z->todo <= 0) {
-                                if (z->code_bits < 24) JpegGrowBufferUnsafe(z);
+                            if (--z->todo <= 0) 
+                            {
+                                if (z->code_bits < 24) 
+                                    JpegGrowBufferUnsafe(z);
                                 if (!z->NeedRestart())
                                     return 1;
                                 z->Reset();
@@ -687,7 +691,7 @@ namespace Simd
                         const uint16_t* dequant = z->dequant[z->img_comp[n].tq];
                         for (int k = 0; k < 64; ++k)
                             data[k] *= dequant[k];
-                        z->idct_block_kernel(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
+                        z->idctBlock(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
                     }
                 }
             }
@@ -977,7 +981,7 @@ namespace Simd
                 {
                     if (!jpeg__process_scan_header(j)) 
                         return 0;
-                    if (!jpeg__parse_entropy_coded_data(j)) 
+                    if (!JpegParseEntropyCodedData(j))
                         return 0;
                     if (j->marker == JpegMarkerNone) 
                     {
@@ -1336,7 +1340,7 @@ namespace Simd
             : ImageLoader(param)
             , _context(new JpegContext(&_stream))
         {
-            _context->idct_block_kernel = JpegIdctBlock;
+            _context->idctBlock = JpegIdctBlock;
             _context->resampleRowHv2 = JpegResampleRowHv2;
             _context->yuvToRgbRow = JpegYuvToRgbRow;
             if (_param.format == SimdPixelFormatNone)
