@@ -29,6 +29,8 @@
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdYuvToBgr.h"
 #include "Simd/SimdInterleave.h"
+#include "Simd/SimdSet.h"
+#include "Simd/SimdStore.h"
 
 namespace Simd
 {
@@ -41,8 +43,6 @@ namespace Simd
 
             __m128i row0, row1, row2, row3, row4, row5, row6, row7;
             __m128i tmp;
-
-#define dct_const(x,y)  _mm_setr_epi16((x),(y),(x),(y),(x),(y),(x),(y))
 
 #define dct_rot(out0,out1, x,y,c0,c1) \
       __m128i c0##lo = _mm_unpacklo_epi16((x),(y)); \
@@ -110,17 +110,16 @@ namespace Simd
          dct_bfly32o(row3,row4, x3,x4,bias,shift); \
       }
 
-            __m128i rot0_0 = dct_const(jpeg__f2f(0.5411961f), jpeg__f2f(0.5411961f) + jpeg__f2f(-1.847759065f));
-            __m128i rot0_1 = dct_const(jpeg__f2f(0.5411961f) + jpeg__f2f(0.765366865f), jpeg__f2f(0.5411961f));
-            __m128i rot1_0 = dct_const(jpeg__f2f(1.175875602f) + jpeg__f2f(-0.899976223f), jpeg__f2f(1.175875602f));
-            __m128i rot1_1 = dct_const(jpeg__f2f(1.175875602f), jpeg__f2f(1.175875602f) + jpeg__f2f(-2.562915447f));
-            __m128i rot2_0 = dct_const(jpeg__f2f(-1.961570560f) + jpeg__f2f(0.298631336f), jpeg__f2f(-1.961570560f));
-            __m128i rot2_1 = dct_const(jpeg__f2f(-1.961570560f), jpeg__f2f(-1.961570560f) + jpeg__f2f(3.072711026f));
-            __m128i rot3_0 = dct_const(jpeg__f2f(-0.390180644f) + jpeg__f2f(2.053119869f), jpeg__f2f(-0.390180644f));
-            __m128i rot3_1 = dct_const(jpeg__f2f(-0.390180644f), jpeg__f2f(-0.390180644f) + jpeg__f2f(1.501321110f));
-
-            __m128i bias_0 = _mm_set1_epi32(512);
-            __m128i bias_1 = _mm_set1_epi32(65536 + (128 << 17));
+            const __m128i rot0_0 = SetInt16(Base::JpegIdctK00, Base::JpegIdctK00 + Base::JpegIdctK01);
+            const __m128i rot0_1 = SetInt16(Base::JpegIdctK00 + Base::JpegIdctK02, Base::JpegIdctK00);
+            const __m128i rot1_0 = SetInt16(Base::JpegIdctK03 + Base::JpegIdctK08, Base::JpegIdctK03);
+            const __m128i rot1_1 = SetInt16(Base::JpegIdctK03, Base::JpegIdctK03 + Base::JpegIdctK09);
+            const __m128i rot2_0 = SetInt16(Base::JpegIdctK10 + Base::JpegIdctK04, Base::JpegIdctK10);
+            const __m128i rot2_1 = SetInt16(Base::JpegIdctK10, Base::JpegIdctK10 + Base::JpegIdctK06);
+            const __m128i rot3_0 = SetInt16(Base::JpegIdctK11 + Base::JpegIdctK05, Base::JpegIdctK11);
+            const __m128i rot3_1 = SetInt16(Base::JpegIdctK11, Base::JpegIdctK11 + Base::JpegIdctK07);
+            const __m128i bias_0 = _mm_set1_epi32(512);
+            const __m128i bias_1 = _mm_set1_epi32(65536 + (128 << 17));
             row0 = _mm_load_si128((const __m128i*) (src + 0 * 8));
             row1 = _mm_load_si128((const __m128i*) (src + 1 * 8));
             row2 = _mm_load_si128((const __m128i*) (src + 2 * 8));
@@ -150,29 +149,28 @@ namespace Simd
 
             dct_pass(bias_1, 17);
             {
-                __m128i p0 = _mm_packus_epi16(row0, row1); // a0a1a2a3...a7b0b1b2b3...b7
+                __m128i p0 = _mm_packus_epi16(row0, row1);
                 __m128i p1 = _mm_packus_epi16(row2, row3);
                 __m128i p2 = _mm_packus_epi16(row4, row5);
                 __m128i p3 = _mm_packus_epi16(row6, row7);
 
-                dct_interleave8(p0, p2); // a0e0a1e1...
-                dct_interleave8(p1, p3); // c0g0c1g1...
+                dct_interleave8(p0, p2);
+                dct_interleave8(p1, p3);
 
-                dct_interleave8(p0, p1); // a0c0e0g0...
-                dct_interleave8(p2, p3); // b0d0f0h0...
+                dct_interleave8(p0, p1);
+                dct_interleave8(p2, p3);
 
-                dct_interleave8(p0, p2); // a0b0c0d0...
-                dct_interleave8(p1, p3); // a4b4c4d4...
+                dct_interleave8(p0, p2);
+                dct_interleave8(p1, p3);
 
-                // store
-                _mm_storel_epi64((__m128i*) dst, p0); dst += stride;
-                _mm_storel_epi64((__m128i*) dst, _mm_shuffle_epi32(p0, 0x4e)); dst += stride;
-                _mm_storel_epi64((__m128i*) dst, p2); dst += stride;
-                _mm_storel_epi64((__m128i*) dst, _mm_shuffle_epi32(p2, 0x4e)); dst += stride;
-                _mm_storel_epi64((__m128i*) dst, p1); dst += stride;
-                _mm_storel_epi64((__m128i*) dst, _mm_shuffle_epi32(p1, 0x4e)); dst += stride;
-                _mm_storel_epi64((__m128i*) dst, p3); dst += stride;
-                _mm_storel_epi64((__m128i*) dst, _mm_shuffle_epi32(p3, 0x4e));
+                StoreHalf<0>((__m128i*)(dst + 0 * stride), p0);
+                StoreHalf<1>((__m128i*)(dst + 1 * stride), p0);
+                StoreHalf<0>((__m128i*)(dst + 2 * stride), p2);
+                StoreHalf<1>((__m128i*)(dst + 3 * stride), p2);
+                StoreHalf<0>((__m128i*)(dst + 4 * stride), p1);
+                StoreHalf<1>((__m128i*)(dst + 5 * stride), p1);
+                StoreHalf<0>((__m128i*)(dst + 6 * stride), p3);
+                StoreHalf<1>((__m128i*)(dst + 7 * stride), p3);
             }
 
 #undef dct_const
