@@ -514,7 +514,7 @@ namespace Simd
             }
         }
 
-        static void JpegIdctBlock(uint8_t* dst, int stride, short src[64])
+        static void JpegIdctBlock(const int16_t* src, uint8_t* dst, int stride)
         {
             int buf[64];
             for (int i = 0; i < 8; ++i)
@@ -558,7 +558,7 @@ namespace Simd
                             int ha = z->img_comp[n].ha;
                             if (!JpegDecodeBlock(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->huff_ac[ha].fast_ac, n, z->dequant[z->img_comp[n].tq])) 
                                 return 0;
-                            z->idctBlock(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
+                            z->idctBlock(data, z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2);
                             if (--z->todo <= 0) 
                             {
                                 if (z->code_bits < 24) 
@@ -589,7 +589,7 @@ namespace Simd
                                         int ha = z->img_comp[n].ha;
                                         if (!JpegDecodeBlock(z, data, z->huff_dc + z->img_comp[n].hd, z->huff_ac + ha, z->huff_ac[ha].fast_ac, n, z->dequant[z->img_comp[n].tq])) 
                                             return 0;
-                                        z->idctBlock(z->img_comp[n].data + z->img_comp[n].w2 * y2 + x2, z->img_comp[n].w2, data);
+                                        z->idctBlock(data, z->img_comp[n].data + z->img_comp[n].w2 * y2 + x2, z->img_comp[n].w2);
                                     }
                                 }
                             }
@@ -691,7 +691,7 @@ namespace Simd
                         const uint16_t* dequant = z->dequant[z->img_comp[n].tq];
                         for (int k = 0; k < 64; ++k)
                             data[k] *= dequant[k];
-                        z->idctBlock(z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2, data);
+                        z->idctBlock(data, z->img_comp[n].data + z->img_comp[n].w2 * j * 8 + i * 8, z->img_comp[n].w2);
                     }
                 }
             }
