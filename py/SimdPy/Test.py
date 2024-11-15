@@ -139,7 +139,7 @@ def SynetSetInputTest(args) :
 	lower = [0.0, 0.0, 0.0]
 	upper = [1.0, 1.0, 1.0]
 	input = Simd.Lib.Allocate(channels * height * width * 4, Simd.Lib.Alignment())
-	Simd.SynetSetInput(resized, lower, upper, input, channels, Simd.TensorFormat.Nhwc)
+	Simd.SynetSetInput(resized, lower, upper, input, channels, Simd.TensorFormat.Nhwc, True)
 	Simd.Lib.Free(input)
 
 ###################################################################################################

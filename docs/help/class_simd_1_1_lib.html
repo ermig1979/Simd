@@ -180,9 +180,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:addd522c6d962766caaffb961dd1fd354"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#addd522c6d962766caaffb961dd1fd354">ResizerRun</a> (ctypes.c_void_p resizer, ctypes.c_void_p src, int srcStride, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:addd522c6d962766caaffb961dd1fd354"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs image resizing.  <a href="class_simd_1_1_lib.html#addd522c6d962766caaffb961dd1fd354">More...</a><br /></td></tr>
 <tr class="separator:addd522c6d962766caaffb961dd1fd354"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7662edaad02786963442c8692ba6555d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a7662edaad02786963442c8692ba6555d">SynetSetInput</a> (ctypes.c_void_p src, int width, int height, int stride, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> srcFormat, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> dstFormat)</td></tr>
-<tr class="memdesc:a7662edaad02786963442c8692ba6555d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="class_simd_1_1_lib.html#a7662edaad02786963442c8692ba6555d">More...</a><br /></td></tr>
-<tr class="separator:a7662edaad02786963442c8692ba6555d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">SynetSetInput</a> (ctypes.c_void_p src, int width, int height, int stride, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> srcFormat, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> dstFormat, isRgb=False)</td></tr>
+<tr class="memdesc:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">More...</a><br /></td></tr>
+<tr class="separator:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a002986d558780814cb005d6abd85d371"><td class="memItemLeft" align="right" valign="top">ctypes.c_void_p&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a002986d558780814cb005d6abd85d371">WarpAffineInit</a> (int srcW, int srcH, int srcS, int dstW, int dstH, int dstS, channels, array.array('f') mat, <a class="el" href="class_simd_1_1_warp_affine_flags.html">Simd.WarpAffineFlags</a> flags, array.array('B') border)</td></tr>
 <tr class="memdesc:a002986d558780814cb005d6abd85d371"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates wrap affine context.  <a href="class_simd_1_1_lib.html#a002986d558780814cb005d6abd85d371">More...</a><br /></td></tr>
 <tr class="separator:a002986d558780814cb005d6abd85d371"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2357,8 +2357,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a7662edaad02786963442c8692ba6555d" name="a7662edaad02786963442c8692ba6555d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7662edaad02786963442c8692ba6555d">&#9670;&#160;</a></span>SynetSetInput()</h2>
+<a id="a2f8ccc1ac4ad623e2d9aa6776651ad6d" name="a2f8ccc1ac4ad623e2d9aa6776651ad6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f8ccc1ac4ad623e2d9aa6776651ad6d">&#9670;&#160;</a></span>SynetSetInput()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2421,7 +2421,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a>&#160;</td>
-          <td class="paramname"><em>dstFormat</em>&#160;</td>
+          <td class="paramname"><em>dstFormat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>isRgb</em> = <code>False</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2444,6 +2450,7 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image tensor. </td></tr>
     <tr><td class="paramname">channels</td><td>- a number of channels in the output image tensor. It can be 1 or 3. </td></tr>
     <tr><td class="paramname">dstFormat</td><td>- a format of output image tensor. There are supported following tensor formats: <a class="el" href="class_simd_1_1_tensor_format.html#a0d6eadaeb9b76db3d65a4a0d23546348" title="NCHW (N - batch, C - channels, H - height, W - width) 4D-tensor format of (input/output) image.">Simd.TensorFormat.Nchw</a>, <a class="el" href="class_simd_1_1_tensor_format.html#aff67f159c248dc607e683100ca718db3" title="NHWC (N - batch, H - height, W - width, C - channels) 4D-tensor format of (input/output) image.">Simd.TensorFormat.Nhwc</a>. </td></tr>
+    <tr><td class="paramname">isRgb</td><td>- is channel order of output tensor is RGB or BGR. Its default value is false. </td></tr>
   </table>
   </dd>
 </dl>

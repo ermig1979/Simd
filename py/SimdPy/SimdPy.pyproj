@@ -13,7 +13,7 @@
     <Name>SimdPy</Name>
     <RootNamespace>simple</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>-b=. -r=../../../.. -i=Abs</CommandLineArguments>
+    <CommandLineArguments>-b=. -r=../../../.. </CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>

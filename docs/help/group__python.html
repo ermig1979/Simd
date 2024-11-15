@@ -108,9 +108,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga744077e3af639bdc57ddd80d9c999ff2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_image.html">Image</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga744077e3af639bdc57ddd80d9c999ff2">Resized</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, int width, int height, method=<a class="el" href="class_simd_1_1_resize_method.html#a4ca04a83471ed28470ccc779c907efdb">Simd.ResizeMethod.Bilinear</a>)</td></tr>
 <tr class="memdesc:ga744077e3af639bdc57ddd80d9c999ff2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function gets resized image.  <a href="group__python.html#ga744077e3af639bdc57ddd80d9c999ff2">More...</a><br /></td></tr>
 <tr class="separator:ga744077e3af639bdc57ddd80d9c999ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2a5563a7b128b11146229648c314b15d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga2a5563a7b128b11146229648c314b15d">SynetSetInput</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> format)</td></tr>
-<tr class="memdesc:ga2a5563a7b128b11146229648c314b15d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__python.html#ga2a5563a7b128b11146229648c314b15d">More...</a><br /></td></tr>
-<tr class="separator:ga2a5563a7b128b11146229648c314b15d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga96dc30a7b68145067849f65eed110c5f"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga96dc30a7b68145067849f65eed110c5f">SynetSetInput</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> format, isRgb=False)</td></tr>
+<tr class="memdesc:ga96dc30a7b68145067849f65eed110c5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__python.html#ga96dc30a7b68145067849f65eed110c5f">More...</a><br /></td></tr>
+<tr class="separator:ga96dc30a7b68145067849f65eed110c5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4eb47f7dfc051e1de6f04aa2da19acdf"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__python.html#ga4eb47f7dfc051e1de6f04aa2da19acdf">WarpAffine</a> (<a class="el" href="class_simd_1_1_image.html">Image</a> src, array.array('f') mat, <a class="el" href="class_simd_1_1_image.html">Image</a> dst, flags=(<a class="el" href="class_simd_1_1_warp_affine_flags.html#a873a6aba6a5f9b7eb4dc4d189e0dc071">Simd.WarpAffineFlags.ChannelByte</a>|<a class="el" href="class_simd_1_1_warp_affine_flags.html#a435357d60512378935f0b93bd8480a1a">Simd.WarpAffineFlags.InterpBilinear</a>|<a class="el" href="class_simd_1_1_warp_affine_flags.html#a0a80ede35a765cfff820946b7a9c81e8">Simd.WarpAffineFlags.BorderConstant</a>), border=array.array('B', []))</td></tr>
 <tr class="memdesc:ga4eb47f7dfc051e1de6f04aa2da19acdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs warp affine for current image.  <a href="group__python.html#ga4eb47f7dfc051e1de6f04aa2da19acdf">More...</a><br /></td></tr>
 <tr class="separator:ga4eb47f7dfc051e1de6f04aa2da19acdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -252,8 +252,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga2a5563a7b128b11146229648c314b15d" name="ga2a5563a7b128b11146229648c314b15d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga2a5563a7b128b11146229648c314b15d">&#9670;&#160;</a></span>SynetSetInput()</h2>
+<a id="ga96dc30a7b68145067849f65eed110c5f" name="ga96dc30a7b68145067849f65eed110c5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga96dc30a7b68145067849f65eed110c5f">&#9670;&#160;</a></span>SynetSetInput()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -292,7 +292,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a>&#160;</td>
-          <td class="paramname"><em>format</em>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>isRgb</em> = <code>False</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -311,6 +317,7 @@ Functions</h2></td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image tensor. </td></tr>
     <tr><td class="paramname">channels</td><td>- a number of channels in the output image tensor. It can be 1 or 3. </td></tr>
     <tr><td class="paramname">format</td><td>- a format of output image tensor. There are supported following tensor formats: <a class="el" href="class_simd_1_1_tensor_format.html#a0d6eadaeb9b76db3d65a4a0d23546348" title="NCHW (N - batch, C - channels, H - height, W - width) 4D-tensor format of (input/output) image.">Simd.TensorFormat.Nchw</a>, <a class="el" href="class_simd_1_1_tensor_format.html#aff67f159c248dc607e683100ca718db3" title="NHWC (N - batch, H - height, W - width, C - channels) 4D-tensor format of (input/output) image.">Simd.TensorFormat.Nhwc</a>. </td></tr>
+    <tr><td class="paramname">isRgb</td><td>- is channel order of output tensor is RGB or BGR. Its default value is false. </td></tr>
   </table>
   </dd>
 </dl>

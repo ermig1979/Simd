@@ -3928,7 +3928,7 @@ namespace Simd
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
         \param [in] format - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [in] isRgb - is channel order of output tensor is RGB or BGR. It default value is false.
+        \param [in] isRgb - is channel order of output tensor is RGB or BGR. Its default value is false.
     */
     template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false)
     {
