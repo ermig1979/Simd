@@ -6952,11 +6952,11 @@ SIMD_API void SimdYuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_
 //        Avx512bw::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
 //    else
 //#endif
-//#ifdef SIMD_AVX2_ENABLE
-//    if (Avx2::Enable && width >= Avx2::A)
-//        Avx2::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
-//    else
-//#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
+    else
+#endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
