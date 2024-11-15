@@ -3902,7 +3902,7 @@ namespace Simd
 
     /*! @ingroup synet_conversion
 
-        \fn void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format)
+        \fn void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false)
 
         \short Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -3922,19 +3922,29 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdSynetSetInput.
 
-        \param [in] src - an input image.There are supported following image formats: View<A>::Gray8, View<A>::Bgr24, View<A>::Bgra32, View<A>::Rgb24.
+        \param [in] src - an input image.There are supported following image formats: View<A>::Gray8, View<A>::Bgr24, View<A>::Bgra32, View<A>::Rgb24, View<A>::Rgba32.
         \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
         \param [in] format - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
+        \param [in] isRgb - is channel order of output tensor is RGB or BGR. It default value is false.
     */
-    template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format)
+    template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false)
     {
-        assert(src.format == View<A>::Gray8 || src.format == View<A>::Bgr24 || src.format == View<A>::Bgra32 || src.format == View<A>::Rgb24);
         assert(format == SimdTensorFormatNchw || format == SimdTensorFormatNhwc);
-
-        SimdSynetSetInput(src.data, src.width, src.height, src.stride, (SimdPixelFormatType)src.format, lower, upper, dst, channels, format);
+        SimdPixelFormatType srcFormat;
+        switch (src.format)
+        {
+        case View<A>::Gray8: srcFormat = SimdPixelFormatGray8; break;
+        case View<A>::Bgr24: srcFormat = isRgb ? SimdPixelFormatRgb24 : SimdPixelFormatBgr24; break;
+        case View<A>::Bgra32: srcFormat = isRgb ? SimdPixelFormatRgba32 : SimdPixelFormatBgra32; break;
+        case View<A>::Rgb24: srcFormat = isRgb ? SimdPixelFormatBgr24 : SimdPixelFormatRgb24; break;
+        case View<A>::Rgba32: srcFormat = isRgb ? SimdPixelFormatBgra32 : SimdPixelFormatRgba32; break;
+        deafult :
+            assert(0);
+        }
+        SimdSynetSetInput(src.data, src.width, src.height, src.stride, srcFormat, lower, upper, dst, channels, format);
     }
 
     /*! @ingroup texture_estimation

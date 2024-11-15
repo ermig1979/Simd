@@ -7613,8 +7613,11 @@ extern "C"
         upper[c] = (1 - mean[c]) / std[c];
         lower[c] = - mean[c] / std[c];
         \endverbatim
-
-        \note This function has a C++ wrappers: Simd::SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format).
+        Also this algorithm assumes that channel order of output tensor is BGR. 
+        In case of RGB channel order you need to change parameter srcFormat: ::SimdPixelFormatBgr24 <-> ::SimdPixelFormatRgb24, ::SimdPixelFormatBgra32 <-> ::SimdPixelFormatRgba32. 
+        Note that real format of pixel data of input image is not need to change.
+        
+        \note This function has a C++ wrappers: Simd::SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false).
 
         \param [in] src - a pointer to pixels data of input image.
         \param [in] width - a width of input image and output image tensor.

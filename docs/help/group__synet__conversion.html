@@ -59,10 +59,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga579496daf24d20e8370e0cccfe45f94c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga579496daf24d20e8370e0cccfe45f94c">SimdSynetSetInput</a> (const uint8_t *src, size_t width, size_t height, size_t stride, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> srcFormat, const float *lower, const float *upper, float *dst, size_t channels, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> dstFormat)</td></tr>
 <tr class="memdesc:ga579496daf24d20e8370e0cccfe45f94c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__synet__conversion.html#ga579496daf24d20e8370e0cccfe45f94c">More...</a><br /></td></tr>
 <tr class="separator:ga579496daf24d20e8370e0cccfe45f94c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga5bc210e89b6190c85c9cbcc75d8a1205"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:ga5bc210e89b6190c85c9cbcc75d8a1205"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga5bc210e89b6190c85c9cbcc75d8a1205">SynetSetInput</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const float *lower, const float *upper, float *dst, size_t channels, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:ga5bc210e89b6190c85c9cbcc75d8a1205"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__synet__conversion.html#ga5bc210e89b6190c85c9cbcc75d8a1205">More...</a><br /></td></tr>
-<tr class="separator:ga5bc210e89b6190c85c9cbcc75d8a1205"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga14b0273be5339a8508c07ead72aed097"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga14b0273be5339a8508c07ead72aed097"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga14b0273be5339a8508c07ead72aed097">SynetSetInput</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const float *lower, const float *upper, float *dst, size_t channels, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, bool isRgb=false)</td></tr>
+<tr class="memdesc:ga14b0273be5339a8508c07ead72aed097"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__synet__conversion.html#ga14b0273be5339a8508c07ead72aed097">More...</a><br /></td></tr>
+<tr class="separator:ga14b0273be5339a8508c07ead72aed097"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions to acceleratе conversion in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
@@ -336,7 +336,8 @@ Functions</h2></td></tr>
             dst[(c*height + y)*width + x] = src[stride*y + width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
 </pre><p >Note that there are following relationships: </p><pre class="fragment">upper[c] = (1 - mean[c]) / std[c];
 lower[c] = - mean[c] / std[c];
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SynetSetInput(const View&lt;A&gt; &amp; src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format).</dd></dl>
+</pre><p> Also this algorithm assumes that channel order of output tensor is BGR. In case of RGB channel order you need to change parameter srcFormat: <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393afc326697127f235517ffa5887ed4ab71">SimdPixelFormatBgr24</a> &lt;-&gt; <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393ab8728eeaf379df98637a870290bb2dac">SimdPixelFormatRgb24</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393ae44d7b4e3041b9007d284ea7458b5434">SimdPixelFormatBgra32</a> &lt;-&gt; <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a202b9f3345228a42203de97ba5e3ad43">SimdPixelFormatRgba32</a>. Note that real format of pixel data of input image is not need to change.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__synet__conversion.html#ga14b0273be5339a8508c07ead72aed097" title="Sets image to the input of neural network of Synet Framework.">Simd::SynetSetInput</a>(const View &amp; src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input image. </td></tr>
@@ -355,8 +356,8 @@ lower[c] = - mean[c] / std[c];
 
 </div>
 </div>
-<a id="ga5bc210e89b6190c85c9cbcc75d8a1205" name="ga5bc210e89b6190c85c9cbcc75d8a1205"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga5bc210e89b6190c85c9cbcc75d8a1205">&#9670;&#160;</a></span>SynetSetInput()</h2>
+<a id="ga14b0273be5339a8508c07ead72aed097" name="ga14b0273be5339a8508c07ead72aed097"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga14b0273be5339a8508c07ead72aed097">&#9670;&#160;</a></span>SynetSetInput()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -395,7 +396,13 @@ lower[c] = - mean[c] / std[c];
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
-          <td class="paramname"><em>format</em>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isRgb</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -415,12 +422,13 @@ lower[c] = - mean[c] / std[c];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__synet__conversion.html#ga579496daf24d20e8370e0cccfe45f94c" title="Sets image to the input of neural network of Synet Framework.">SimdSynetSetInput</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image.There are supported following image formats: <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View&lt;A&gt;::Gray8</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View&lt;A&gt;::Bgr24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View&lt;A&gt;::Bgra32</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View&lt;A&gt;::Rgb24</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image.There are supported following image formats: <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View&lt;A&gt;::Gray8</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View&lt;A&gt;::Bgr24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View&lt;A&gt;::Bgra32</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View&lt;A&gt;::Rgb24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0">View&lt;A&gt;::Rgba32</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lower</td><td>- a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">upper</td><td>- a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the output image tensor. It can be 1 or 3. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of output image tensor. There are supported following tensor formats: <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">isRgb</td><td>- is channel order of output tensor is RGB or BGR. It default value is false. </td></tr>
   </table>
   </dd>
 </dl>
