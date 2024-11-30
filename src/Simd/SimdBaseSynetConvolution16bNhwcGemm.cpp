@@ -83,6 +83,7 @@ namespace Simd
             a.sumBuf = (_dst16b && a.macroK < a.K) || a.microK > 2 ? 1 : 0;
             if (a.sumBuf == 0 && a.macroD > p.dstC)
                 a.macroD = p.dstC;
+            a.dB = (a.sumBuf ? a.macroD : p.dstC);
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
@@ -168,7 +169,7 @@ namespace Simd
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
                         size_t bufOffs = (a.macroK < a.bufK || _convert == NULL) ? 
                             yBeg * (_convert ? AlignHi(p.dstW, a.F) : p.dstW) * a.bufK + (a.reorderType ? mak * a.F : mak) : 0;
-                        size_t sumOffs = a.macroK < a.bufK ? yBeg * p.dstW * a.macroD : 0;
+                        size_t sumOffs = a.macroK < a.bufK ? yBeg * p.dstW * a.dB : 0;
                         size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
                         if (dc == 0 && mak == 0 && _convert)
                         {
@@ -196,6 +197,8 @@ namespace Simd
                 if (p.activation == ::SimdConvolutionActivationPrelu)
                     params += macroD;
                 dst += macroD * _elemD;
+                if (!a.sumBuf)
+                    sum += macroD;
             }
         }
 

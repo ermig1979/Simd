@@ -140,7 +140,7 @@ namespace Simd
                 size_t batch, K, M;
                 size_t F, microD, microM, microK;
                 size_t macroD, macroH, macroK;
-                size_t bufD, bufM, bufK, elem;
+                size_t bufD, bufM, bufK, elem, dB;
                 int reorderType, sumBuf;
             };
 

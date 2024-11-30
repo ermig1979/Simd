@@ -231,7 +231,7 @@ namespace Simd
         template<Term16bType term, SimdConvolutionActivationType type> void Convolution16bNhwcGemm_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, uint8_t* dst)
         {
-            int dB = (int)a.macroD, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
+            int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
             int stepS = a.reorderType ? 512 : 32, strideS = a.reorderType ? 64 : dS * 2;
             const uint16_t* src1 = src0 + 16 * dS;
             const uint16_t* weight1 = weight0 + a.bufK * F;
@@ -305,7 +305,7 @@ namespace Simd
         template<Term16bType term, SimdConvolutionActivationType type> void Convolution16bNhwcGemm_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, uint8_t* dst)
         {
-            int dB = (int)a.macroD, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
+            int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
             int stepS = a.reorderType ? 512 : 32, strideS = a.reorderType ? 64 : dS * 2;
             const uint16_t* src1 = src0 + 16 * dS;
 
@@ -362,7 +362,7 @@ namespace Simd
         template<Term16bType term, SimdConvolutionActivationType type> void Convolution16bNhwcGemm_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, uint8_t* dst)
         {
-            int dB = (int)a.macroD, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
+            int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
             int stepS = a.reorderType ? 512 : 32, strideS = a.reorderType ? 64 : dS * 2;
             const uint16_t* weight1 = weight0 + a.bufK * F;
 
@@ -419,7 +419,7 @@ namespace Simd
         template<Term16bType term, SimdConvolutionActivationType type> void Convolution16bNhwcGemm_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, uint8_t* dst)
         {
-            int dB = (int)a.macroD, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
+            int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
             int stepS = a.reorderType ? 512 : 32, strideS = a.reorderType ? 64 : dS * 2;
 
             TileConf conf;
@@ -469,7 +469,7 @@ namespace Simd
             size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* buf, uint8_t* dst)
         {
             size_t n = 32, n1 = dstH * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * DF;
-            size_t dB = a.macroK < a.bufK ? a.macroD : 0, dD = p.dstC * a.elem, dS = a.bufK;
+            size_t dB = a.macroK < a.bufK ? a.dB : 0, dD = p.dstC * a.elem, dS = a.bufK;
             Convolution16bNhwcGemmPtr body_2 = Convolution16bNhwcGemm_32x32<term, type>;
             Convolution16bNhwcGemmPtr tail_2 = m > 16 ? Convolution16bNhwcGemm_32x32<term, type> : Convolution16bNhwcGemm_16x32<term, type>;
             Convolution16bNhwcGemmPtr body_1 = Convolution16bNhwcGemm_32x16<term, type>;
