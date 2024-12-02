@@ -67,7 +67,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void InnerProduct16bGemmNN_ReorderA(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t K, uint16_t* dst)
+        void InnerProduct16bGemmNN_ReorderA(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t K, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
             size_t KDF = Simd::AlignLo(p.K, DF);

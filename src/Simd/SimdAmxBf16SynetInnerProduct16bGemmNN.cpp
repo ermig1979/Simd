@@ -348,7 +348,9 @@ namespace Simd
             SetAlgParam(F, F * 2, F * 2, F * 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_sizeA)
             {
-                if (p.typeA == SimdTensorData32f)
+                if (p.typeA == SimdTensorData16b)
+                    _prepA = Avx512bw::InnerProduct16bGemmNN_ReorderA;
+                else
                     _prepA = InnerProduct16bGemmNN_ConvertA;
             }
             if (p.typeC == SimdTensorData16b)

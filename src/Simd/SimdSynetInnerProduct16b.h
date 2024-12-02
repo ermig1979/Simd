@@ -231,6 +231,10 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        void InnerProduct16bGemmNN_ReorderA(const uint8_t* src8, const InnerProductParam16b& p, const Base::SynetInnerProduct16bGemmNN::AlgParam& a, size_t M, size_t K, uint16_t* dst);
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetInnerProduct16bGemmNN : public Avx2::SynetInnerProduct16bGemmNN
         {
         public:
