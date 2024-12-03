@@ -85,7 +85,7 @@ namespace Simd
             const B* b = (const B*)b8;
             D* dst = (D*)dst8;
             size_t sizeF = AlignLo(size, F), i = 0;
-            __mmask32 tail = TailMask32(size - sizeF);
+            __mmask16 tail = TailMask16(size - sizeF);
 
             for (; i < sizeF; i += F)
                 Add16bF(a + i, b + i, dst + i, __mmask16(-1));
@@ -112,7 +112,7 @@ namespace Simd
 
             for (; i < sizeDF; i += DF)
                 Add16bDF(a + i, b + i, dst + i, __mmask32(-1));
-            for (; i < size; ++i)
+            if(i < size)
                 Add16bDF(a + i, b + i, dst + i, tail);
         }
 
