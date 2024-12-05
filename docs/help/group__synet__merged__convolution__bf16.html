@@ -50,9 +50,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gaee4be03fd33b0b626b8c240cf1ad1935"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__bf16.html#gaee4be03fd33b0b626b8c240cf1ad1935">SimdSynetMergedConvolution16bInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
-<tr class="memdesc:gaee4be03fd33b0b626b8c240cf1ad1935"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes BF16 merged convolution algorithm.  <a href="group__synet__merged__convolution__bf16.html#gaee4be03fd33b0b626b8c240cf1ad1935">More...</a><br /></td></tr>
-<tr class="separator:gaee4be03fd33b0b626b8c240cf1ad1935"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga823d8453c012ec9197a32c31e8533716"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__bf16.html#ga823d8453c012ec9197a32c31e8533716">SimdSynetMergedConvolution16bInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> add)</td></tr>
+<tr class="memdesc:ga823d8453c012ec9197a32c31e8533716"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes BF16 merged convolution algorithm.  <a href="group__synet__merged__convolution__bf16.html#ga823d8453c012ec9197a32c31e8533716">More...</a><br /></td></tr>
+<tr class="separator:ga823d8453c012ec9197a32c31e8533716"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5d665fe0f3d55e7e1bd2aad0608fb065"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__bf16.html#ga5d665fe0f3d55e7e1bd2aad0608fb065">SimdSynetMergedConvolution16bExternalBufferSize</a> (const void *context)</td></tr>
 <tr class="memdesc:ga5d665fe0f3d55e7e1bd2aad0608fb065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size in bytes of external temporary buffer required for BF16 merged convolution algorithm.  <a href="group__synet__merged__convolution__bf16.html#ga5d665fe0f3d55e7e1bd2aad0608fb065">More...</a><br /></td></tr>
 <tr class="separator:ga5d665fe0f3d55e7e1bd2aad0608fb065"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -62,6 +62,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga21ed275291baa407a917a0c83ebbaa2b"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__bf16.html#ga21ed275291baa407a917a0c83ebbaa2b">SimdSynetMergedConvolution16bInfo</a> (const void *context)</td></tr>
 <tr class="memdesc:ga21ed275291baa407a917a0c83ebbaa2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets description of internal implementation of BF16 merged convolution algorithm.  <a href="group__synet__merged__convolution__bf16.html#ga21ed275291baa407a917a0c83ebbaa2b">More...</a><br /></td></tr>
 <tr class="separator:ga21ed275291baa407a917a0c83ebbaa2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf2d799425500289c8646ba5055b2d882"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__bf16.html#gaf2d799425500289c8646ba5055b2d882">SimdSynetMergedConvolution16bSetParams</a> (void *context, const float *const *weight, const float *const *bias, const float *const *params)</td></tr>
+<tr class="memdesc:gaf2d799425500289c8646ba5055b2d882"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, beases and parameters of activation function required for BF16 merged convolution algorithm.  <a href="group__synet__merged__convolution__bf16.html#gaf2d799425500289c8646ba5055b2d882">More...</a><br /></td></tr>
+<tr class="separator:gaf2d799425500289c8646ba5055b2d882"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad4f3db9d3195acac1af7b332ce7bfd1d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__bf16.html#gad4f3db9d3195acac1af7b332ce7bfd1d">SimdSynetMergedConvolution16bForward</a> (void *context, const uint8_t *src, uint8_t *buf, uint8_t *dst)</td></tr>
 <tr class="memdesc:gad4f3db9d3195acac1af7b332ce7bfd1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of BF16 merged convolution algorithm.  <a href="group__synet__merged__convolution__bf16.html#gad4f3db9d3195acac1af7b332ce7bfd1d">More...</a><br /></td></tr>
 <tr class="separator:gad4f3db9d3195acac1af7b332ce7bfd1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -69,8 +72,8 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >A framework to accelerate BF16 merged convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="gaee4be03fd33b0b626b8c240cf1ad1935" name="gaee4be03fd33b0b626b8c240cf1ad1935"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaee4be03fd33b0b626b8c240cf1ad1935">&#9670;&#160;</a></span>SimdSynetMergedConvolution16bInit()</h2>
+<a id="ga823d8453c012ec9197a32c31e8533716" name="ga823d8453c012ec9197a32c31e8533716"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga823d8453c012ec9197a32c31e8533716">&#9670;&#160;</a></span>SimdSynetMergedConvolution16bInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -96,8 +99,8 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
-          <td class="paramname"><em>compatibility</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>add</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -113,11 +116,11 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">convs</td><td>- an array with convolutions parameters. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a number of merged convolutions. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of calculation compatibility. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">add</td><td>- a flag that signilizes if we need to add source to output value. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to BF16 merged convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__merged__convolution__bf16.html#ga5d665fe0f3d55e7e1bd2aad0608fb065" title="Gets size in bytes of external temporary buffer required for BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bExternalBufferSize</a>, <a class="el" href="group__synet__merged__convolution__bf16.html#ga5905cb72a74b45e487301e6f867ab7e4" title="Gets size in bytes of internal buffer used inside BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInternalBufferSize</a>, <a class="el" href="group__synet__merged__convolution__bf16.html#ga21ed275291baa407a917a0c83ebbaa2b" title="Gets description of internal implementation of BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInfo</a>, SimdSynetMergedConvolution16bSetParams and <a class="el" href="group__synet__merged__convolution__bf16.html#gad4f3db9d3195acac1af7b332ce7bfd1d" title="Performs forward propagation of BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to BF16 merged convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__merged__convolution__bf16.html#ga5d665fe0f3d55e7e1bd2aad0608fb065" title="Gets size in bytes of external temporary buffer required for BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bExternalBufferSize</a>, <a class="el" href="group__synet__merged__convolution__bf16.html#ga5905cb72a74b45e487301e6f867ab7e4" title="Gets size in bytes of internal buffer used inside BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInternalBufferSize</a>, <a class="el" href="group__synet__merged__convolution__bf16.html#ga21ed275291baa407a917a0c83ebbaa2b" title="Gets description of internal implementation of BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInfo</a>, <a class="el" href="group__synet__merged__convolution__bf16.html#gaf2d799425500289c8646ba5055b2d882" title="Sets weights, beases and parameters of activation function required for BF16 merged convolution algor...">SimdSynetMergedConvolution16bSetParams</a> and <a class="el" href="group__synet__merged__convolution__bf16.html#gad4f3db9d3195acac1af7b332ce7bfd1d" title="Performs forward propagation of BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -140,7 +143,7 @@ Functions</h2></td></tr>
 <p>Gets size in bytes of external temporary buffer required for BF16 merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__bf16.html#gaee4be03fd33b0b626b8c240cf1ad1935" title="Initilizes BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__bf16.html#ga823d8453c012ec9197a32c31e8533716" title="Initilizes BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -167,7 +170,7 @@ Functions</h2></td></tr>
 <p>Gets size in bytes of internal buffer used inside BF16 merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__bf16.html#gaee4be03fd33b0b626b8c240cf1ad1935" title="Initilizes BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__bf16.html#ga823d8453c012ec9197a32c31e8533716" title="Initilizes BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -194,11 +197,62 @@ Functions</h2></td></tr>
 <p>Gets description of internal implementation of BF16 merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__bf16.html#gaee4be03fd33b0b626b8c240cf1ad1935" title="Initilizes BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__bf16.html#ga823d8453c012ec9197a32c31e8533716" title="Initilizes BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>string with description of internal implementation of BF16 merged convolution algorithm. </dd></dl>
+
+</div>
+</div>
+<a id="gaf2d799425500289c8646ba5055b2d882" name="gaf2d799425500289c8646ba5055b2d882"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf2d799425500289c8646ba5055b2d882">&#9670;&#160;</a></span>SimdSynetMergedConvolution16bSetParams()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetMergedConvolution16bSetParams </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *const *&#160;</td>
+          <td class="paramname"><em>weight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *const *&#160;</td>
+          <td class="paramname"><em>bias</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *const *&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets weights, beases and parameters of activation function required for BF16 merged convolution algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to BF16 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__bf16.html#ga823d8453c012ec9197a32c31e8533716" title="Initilizes BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to the array with pointers to parameters of the activation functions (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -243,7 +297,7 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of BF16 merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__bf16.html#gaee4be03fd33b0b626b8c240cf1ad1935" title="Initilizes BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__bf16.html#ga823d8453c012ec9197a32c31e8533716" title="Initilizes BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size in bytes of the external temporary buffer is determined by function <a class="el" href="group__synet__merged__convolution__bf16.html#ga5d665fe0f3d55e7e1bd2aad0608fb065" title="Gets size in bytes of external temporary buffer required for BF16 merged convolution algorithm.">SimdSynetMergedConvolution16bExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output image. </td></tr>

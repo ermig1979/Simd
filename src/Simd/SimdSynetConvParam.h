@@ -298,7 +298,7 @@ namespace Simd
         size_t count;
         SimdBool add;
 
-        MergConvParam(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
+        MergConvParam(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility = SimdSynetCompatibilityDefault)
         {
             assert(count <= 3);
             this->count = count;
@@ -381,6 +381,8 @@ namespace Simd
             if (detail)
             {
                 ss << "-" << ToChar(conv[0].srcT) << ToChar(conv[count - 1].dstT);
+                if (count == 3)
+                    ss << add;
             }
             return ss.str();
         }

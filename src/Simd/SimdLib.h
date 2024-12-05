@@ -6895,7 +6895,7 @@ extern "C"
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signilizes if we need to add output to source value.
+        \param [in] add - a flag that signilizes if we need to add source to output value.
         \return a pointer to FP32 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution32fExternalBufferSize, ::SimdSynetMergedConvolution32fInternalBufferSize, 
             ::SimdSynetMergedConvolution32fInfo, ::SimdSynetMergedConvolution32fSetParams and ::SimdSynetMergedConvolution32fForward.
@@ -6964,19 +6964,19 @@ extern "C"
 
     /*! @ingroup synet_merged_convolution_bf16
 
-        \fn void * SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+        \fn void * SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
 
         \short Initilizes BF16 merged convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] add - a flag that signilizes if we need to add source to output value.
         \return a pointer to BF16 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution16bExternalBufferSize, ::SimdSynetMergedConvolution16bInternalBufferSize, 
             ::SimdSynetMergedConvolution16bInfo, ::SimdSynetMergedConvolution16bSetParams and ::SimdSynetMergedConvolution16bForward.
     */
-    SIMD_API void* SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+    SIMD_API void* SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
 
     /*! @ingroup synet_merged_convolution_bf16
 
@@ -7013,17 +7013,16 @@ extern "C"
 
     /*! @ingroup synet_merged_convolution_bf16
 
-        \fn void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
+        \fn void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, const float* const* bias, const float* const* params);
 
         \short Sets weights, beases and parameters of activation function required for BF16 merged convolution algorithm.
 
         \param [in, out] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
     */
-    SIMD_API void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params);
+    SIMD_API void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, const float* const* bias, const float* const* params);
 
     /*! @ingroup synet_merged_convolution_bf16
 

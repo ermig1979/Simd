@@ -155,6 +155,75 @@ namespace Test
             }
         }
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    struct Cnv
+    {
+        SimdConvolutionActivationType a;
+        Size k, s;
+        size_t d;
+        Cnv(SimdConvolutionActivationType a_, size_t k_, size_t s_, size_t d_ = -1) : a(a_), k(k_, k_), s(s_, s_), d(d_) {}
+        Cnv(SimdConvolutionActivationType a_, Size k_, Size s_, size_t d_ = -1) : a(a_), k(k_), s(s_), d(d_) {}
+    };
+
+    struct MergeConvParam
+    {
+        SimdBool add;
+        size_t batch, count;
+        SimdConvolutionParameters conv[3];
+        mutable float* weight[3], * bias[3], * params[3];
+
+        MergeConvParam(const Shape& in, const Cnv& c0, const Cnv& c1, const Cnv& c2, SimdBool a, SimdTensorDataType s = SimdTensorData32f, SimdTensorDataType d = SimdTensorData32f)
+        {
+            count = 3;
+            batch = in[0];
+            add = a;
+            SetConv(conv + 0, c0, in);
+            SetConv(conv + 1, c1);
+            SetConv(conv + 2, c2);
+            conv[0].srcT = s;
+            conv[2].dstT = d;
+        }
+
+        MergeConvParam(const Shape& in, const Cnv& c0, const Cnv& c1, SimdTensorDataType s = SimdTensorData32f, SimdTensorDataType d = SimdTensorData32f)
+        {
+            count = 2;
+            batch = in[0];
+            add = SimdFalse;
+            SetConv(conv + 0, c0, in);
+            SetConv(conv + 1, c1);
+            conv[0].srcT = s;
+            conv[1].dstT = d;
+        }
+
+    private:
+        static void SetConv(SimdConvolutionParameters* conv, const Cnv& c, const Shape& s = Shape())
+        {
+            conv[0].srcC = s.empty() ? conv[-1].dstC : s[1];
+            conv[0].srcH = s.empty() ? conv[-1].dstH : s[2];
+            conv[0].srcW = s.empty() ? conv[-1].dstW : s[3];
+            conv[0].dstC = c.d == -1 ? conv[0].srcC : c.d;
+            conv[0].kernelY = c.k.y;
+            conv[0].kernelX = c.k.x;
+            conv[0].dilationY = 1;
+            conv[0].dilationX = 1;
+            conv[0].strideY = c.s.y;
+            conv[0].strideX = c.s.x;
+            conv[0].padY = c.s.y == 1 || (conv[0].srcH & 1) ? (c.k.y - 1) / 2 : (c.k.y - 1) / 2 - 1;
+            conv[0].padX = c.s.x == 1 || (conv[0].srcW & 1) ? (c.k.x - 1) / 2 : (c.k.x - 1) / 2 - 1;
+            conv[0].padH = (c.k.y - 1) / 2;
+            conv[0].padW = (c.k.x - 1) / 2;
+            conv[0].group = c.d == -1 ? conv[0].srcC : 1;
+            conv[0].activation = c.a;
+            conv[0].dstH = (conv[0].srcH + conv[0].padY + conv[0].padH - conv[0].kernelY) / conv[0].strideY + 1;
+            conv[0].dstW = (conv[0].srcW + conv[0].padX + conv[0].padW - conv[0].kernelX) / conv[0].strideX + 1;
+            conv[0].srcT = SimdTensorData32f;
+            conv[0].srcF = SimdTensorFormatNhwc;
+            conv[0].dstT = SimdTensorData32f;
+            conv[0].dstF = SimdTensorFormatNhwc;
+        }
+    };
 }
 
-#endif//__TestSynetConvolutionParam_h__
+#endif

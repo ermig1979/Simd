@@ -110,6 +110,14 @@ namespace Simd
             }
         }
 
+        static void ConvertBf16ToFp32(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, float* dst)
+        {
+            const uint16_t* src = (uint16_t*)src8;
+            size_t rowSize = p.srcW * p.srcC;
+            for (size_t y = yBeg; y < yEnd; ++y)
+                BFloat16ToFloat32(src + y * rowSize, rowSize, dst + y * rowSize);
+        }
+
         //-----------------------------------------------------------------------------------------
 
         SynetMergedConvolution16bCdc::SynetMergedConvolution16bCdc(const MergConvParam& p)
@@ -117,11 +125,13 @@ namespace Simd
         {
             SetSize(F, 2);
             if (!_src16b)
-                _convert = ConvertFp32ToBf16;
+                _toBf16 = ConvertFp32ToBf16;
             else if (!Aligned(p.conv[0].srcC, 2))
-                _convert = ReorderBf16;
+                _toBf16 = ReorderBf16;
             else
-                _convert = NULL;
+                _toBf16 = NULL;
+            if (_src16b)
+                _toFp32 = ConvertBf16ToFp32;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
             SetOutput(_param.conv[2], _output);
@@ -134,11 +144,11 @@ namespace Simd
         {
             SetSize(F, 2);
             if (!_src16b)
-                _convert = ConvertFp32ToBf16;
+                _toBf16 = ConvertFp32ToBf16;
             else if (!Aligned(p.conv[0].srcC, 2))
-                _convert = ReorderBf16;
+                _toBf16 = ReorderBf16;
             else
-                _convert = NULL;
+                _toBf16 = NULL;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
         }
@@ -155,9 +165,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void* SynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility)
+        void* SynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add)
         {
-            MergConvParam param(batch, convs, count, SimdFalse, compatibility);
+            MergConvParam param(batch, convs, count, add);
             if (!param.Valid(SimdTensorData32f, SimdTensorData16b))
                 return NULL;
             if (SynetMergedConvolution16bCdc::Preferable(param))
