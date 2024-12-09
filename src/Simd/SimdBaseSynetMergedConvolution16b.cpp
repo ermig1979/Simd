@@ -712,7 +712,7 @@ namespace Simd
                 if (c.group == 1)
                     size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC * 2) * 2;
                 else
-                    size += c.kernelY * c.kernelX * c.srcC * 4;
+                    size += c.kernelY * c.kernelX * AlignHi(c.srcC, a.miC) * 4;
             }
             size_t count = size / (L3 / 2) + 1;
             a.maC = AlignHi(AlignHi(c0.dstC / count, 2 * a.miC), a.miK);
@@ -815,7 +815,7 @@ namespace Simd
                 if (c.group == 1)
                     size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC * 2) * 2;
                 else
-                    size += c.kernelY * c.kernelX * c.srcC * 4;
+                    size += c.kernelY * c.kernelX * AlignHi(c.srcC, a.miC) * 4;
             }
             size_t count = size / (L3 / 2) + 1;
             a.maC = AlignHiAny(c0.dstC / count, 2 * a.miC);
@@ -915,11 +915,10 @@ namespace Simd
                 if (c.group == 1)
                     size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC * 2) * 2;
                 else
-                    size += c.kernelY * c.kernelX * c.srcC * 4;
+                    size += c.kernelY * c.kernelX * AlignHi(c.srcC, a.miC) * 4;
             }
             size_t count = size / (L3 / 2) + 1;
             a.maC = AlignHi(AlignHi(c0.dstC / count, 2 * a.miC), a.miK);
-
             for (size_t yStep = c0.dstH; yStep >= 1; yStep--)
             {
                 a.yStep[2] = Simd::Max<size_t>(1, yStep);
