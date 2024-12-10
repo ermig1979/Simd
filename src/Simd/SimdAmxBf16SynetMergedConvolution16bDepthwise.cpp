@@ -1067,10 +1067,15 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static SIMD_INLINE bool Preferable_k7p3d1s1w4(const ConvParam& p)
+        {
+            return p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 7;
+        }
+
         template<typename T, Term16bType term, SimdConvolutionActivationType type> static void DepthwiseConvolution_k7p3d1s1w4(const uint8_t* src8, 
             const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint8_t* dst)
         {
-            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && Aligned(p.srcW, 4));
+            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 7);
             const T* src = (T*)src8;
             size_t srcH = p.srcH, srcW = p.srcW;
             size_t sM = (a.bufH[1] - 1), sD = a.bufH[1] ? a.bufH[1] * p.srcW * F : F, sX = a.bufH[1] ? F : p.srcC, sY = sX * p.srcW, dstC = maC;
@@ -1095,7 +1100,7 @@ namespace Simd
                 __mmask32 tailC = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
-                    for (size_t dx = 0; dx < dstW; dx += 4)
+                    for (size_t dx = 0;; dx += Min<size_t>(4, endW - dx))
                     {
                         d0 = _mm512_setzero_ps();
                         d1 = _mm512_setzero_ps();
@@ -1173,6 +1178,8 @@ namespace Simd
                         Save1<term, type>(pd + 1 * dX, dD, d1, _bias, _params, tailC);
                         Save1<term, type>(pd + 2 * dX, dD, d2, _bias, _params, tailC);
                         Save1<term, type>(pd + 3 * dX, dD, d3, _bias, _params, tailC);
+                        if(dx == endW)
+                            break;
                     }
                 }
                 src += sD;
@@ -1183,10 +1190,16 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static SIMD_INLINE bool Preferable_k7p3d1s1w6(const ConvParam& p)
+        {
+            return p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) &&
+                (p.srcW > 8 && AlignHiAny(p.srcW, 6) < AlignHiAny(p.srcW, 4) * 1.2);
+        }
+
         template<typename T, Term16bType term, SimdConvolutionActivationType type> static void DepthwiseConvolution_k7p3d1s1w6(const uint8_t* src8,
             const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint8_t* dst)
         {
-            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && AlignedAny(p.srcW, 6));
+            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 11);
             const T* src = (T*)src8;
             size_t srcH = p.srcH, srcW = p.srcW;
             size_t sM = (a.bufH[1] - 1), sD = a.bufH[1] ? a.bufH[1] * p.srcW * F : F, sX = a.bufH[1] ? F : p.srcC, sY = sX * p.srcW, dstC = maC;
@@ -1211,7 +1224,7 @@ namespace Simd
                 __mmask32 tailC = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
-                    for (size_t dx = 0; dx < dstW; dx += 6)
+                    for (size_t dx = 0;; dx += Min<size_t>(6, endW - dx))
                     {
                         d0 = _mm512_setzero_ps();
                         d1 = _mm512_setzero_ps();
@@ -1311,6 +1324,8 @@ namespace Simd
                         Save1<term, type>(pd + 3 * dX, dD, d3, _bias, _params, tailC);
                         Save1<term, type>(pd + 4 * dX, dD, d4, _bias, _params, tailC);
                         Save1<term, type>(pd + 5 * dX, dD, d5, _bias, _params, tailC);
+                        if (dx == endW)
+                            break;
                     }
                 }
                 src += sD;
@@ -1321,10 +1336,16 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static SIMD_INLINE bool Preferable_k7p3d1s1w8(const ConvParam& p)
+        {
+            return p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) &&
+                (p.srcW > 12 && AlignHiAny(p.srcW, 8) < AlignHiAny(p.srcW, 6) * 1.2);
+        }
+
         template<typename T, Term16bType term, SimdConvolutionActivationType type> static void DepthwiseConvolution_k7p3d1s1w8(const uint8_t* src8,
             const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint8_t* dst)
         {
-            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && Aligned(p.srcW, 8));
+            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 15);
             const T* src = (T*)src8;
             size_t srcH = p.srcH, srcW = p.srcW;
             size_t sM = (a.bufH[1] - 1), sD = a.bufH[1] ? a.bufH[1] * p.srcW * F : F, sX = a.bufH[1] ? F : p.srcC, sY = sX * p.srcW, dstC = maC;
@@ -1349,7 +1370,7 @@ namespace Simd
                 __mmask32 tailC = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
-                    for (size_t dx = 0; dx < dstW; dx += 8)
+                    for (size_t dx = 0;; dx += Min<size_t>(8, endW - dx))
                     {
                         d0 = _mm512_setzero_ps();
                         d1 = _mm512_setzero_ps();
@@ -1472,6 +1493,8 @@ namespace Simd
                         Save1<term, type>(pd + 5 * dX, dD, d5, _bias, _params, tailC);
                         Save1<term, type>(pd + 6 * dX, dD, d6, _bias, _params, tailC);
                         Save1<term, type>(pd + 7 * dX, dD, d7, _bias, _params, tailC);
+                        if (dx == endW)
+                            break;
                     }
                 }
                 src += sD;
@@ -1624,11 +1647,11 @@ namespace Simd
         {
             if (p.IsKernel(5) && p.IsPad(2) && p.IsStride(1) && p.IsDilation(1) && Aligned(p.srcW, 8))
                 depthwise = DepthwiseConvolution_k5p2d1s1w8<T, term, type>;
-            else if (p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && Aligned(p.srcW, 8))
+            else if (Preferable_k7p3d1s1w8(p))
                 depthwise = DepthwiseConvolution_k7p3d1s1w8<T, term, type>;
-            else if (p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && AlignedAny(p.srcW, 6))
+            else if (Preferable_k7p3d1s1w6(p))
                 depthwise = DepthwiseConvolution_k7p3d1s1w6<T, term, type>;
-            else if (p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && Aligned(p.srcW, 4))
+            else if (Preferable_k7p3d1s1w4(p))
                 depthwise = DepthwiseConvolution_k7p3d1s1w4<T, term, type>;
             else if (IsKernel(p, 3) && IsDilation(p, 1) && Aligned(p.dstC, F))
                 depthwise = DepthwiseConvolution3x3<T, term, type, nofma>;
