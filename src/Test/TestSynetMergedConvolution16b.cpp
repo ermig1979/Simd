@@ -87,7 +87,7 @@ namespace Test
         Tensor32f weight[3], bias[3], params[3], buf32f;
         Tensor32f src32f(srcS, beg.srcF), dst32f1(dstS, end.dstF), dst32f2(dstS, end.dstF), dst32f3(dstS, end.dstF);
         Tensor16u src16u(srcS, beg.srcF), dst16u1(dstS, end.dstF), dst16u2(dstS, end.dstF);
-        Tensor8u buf8u;
+        Tensor8u buf8u1, buf8u2;
 
         srand(0);
         FillRandom(src32f.Data(), src32f.Size(), -1.0, 1.0f);
@@ -143,17 +143,19 @@ namespace Test
         if (context1 == NULL || context2 == NULL)
             return result;
 
-        buf8u.Extend({ ::SimdSynetMergedConvolution16bExternalBufferSize(context1) });
-        buf8u.Extend({ ::SimdSynetMergedConvolution16bExternalBufferSize(context2) });
+        buf8u1.Extend({ ::SimdSynetMergedConvolution16bExternalBufferSize(context1) });
+        buf8u2.Extend({ ::SimdSynetMergedConvolution16bExternalBufferSize(context2) });
+        Fill(buf8u1, uint8_t(1));
+        Fill(buf8u2, uint8_t(2));
 
         ::SimdSynetMergedConvolution16bSetParams(context1, p.weight, p.bias, p.params);
         ::SimdSynetMergedConvolution16bSetParams(context2, p.weight, p.bias, p.params);
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, buf8u.Data(), dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, buf8u1.Data(), dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, buf8u.Data(), dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, buf8u2.Data(), dst2));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
@@ -251,15 +253,29 @@ namespace Test
         }
 #endif
 #if 1
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), f, f32, f32), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), t, f32, f32), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), t, b16, f32), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), t, f32, b16), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), t, b16, b16), f1, f2);
+        {
+            Param p(Shp(1, 68, 56, 56), Cnv(aHs, 1, 1, 84), Cnv(aId, 5, 2), Cnv(aHs, 1, 1, 100), f, f32, f32);
+            p.conv[1].padX = 2; p.conv[1].padY = 2;
+            Param::SetDst(p.conv + 1); Param::SetDst(p.conv + 2);
+            result = result && SynetMergedConvolution16bForwardAutoTest(eps, p, f1, f2);
+        }
+#endif
+#if 0
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 68, 56, 56), Cnv(aHs, 1, 1, 84), Cnv(aId, 5, 2), Cnv(aHs, 1, 1, 100), f, f32, f32), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), f, f32, f32), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), t, f32, f32), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), t, b16, f32), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), t, f32, b16), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), t, b16, b16), f1, f2);
         //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 512, 127, 127), Cnv(a0, 1, 1, 1024), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 512), t, f32, f32), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(2, 128, 15, 15), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 128), f, f32, f32), f1, f2);
+        {
+            Param p(Shp(1, 68, 56, 56), Cnv(aHs, 1, 1, 84), Cnv(aId, 5, 2), Cnv(aHs, 1, 1, 100), f, f32, f32);
+            p.conv[1].padX = 2; p.conv[1].padY = 2;
+            Param::SetDst(p.conv + 1); Param::SetDst(p.conv + 2);
+            result = result && SynetMergedConvolution16bForwardAutoTest(eps, p, f1, f2);
+        }
 #endif
         return result;
     }

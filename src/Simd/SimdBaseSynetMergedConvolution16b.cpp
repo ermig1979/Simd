@@ -728,7 +728,7 @@ namespace Simd
 
                 a.yStep[0] = a.yStep[1];
                 a.yStart[0] = Simd::Min(a.yStart[1], c0.srcH);
-                a.bufH[0] = _src16b && Aligned(c0.srcC, a.miK) ? 0 : Pow2Hi(Simd::Max(a.yStep[1], a.yStart[0]));
+                a.bufH[0] = _src16b && Aligned(c0.srcC, a.miK) ? 0 : a.bufH[1];// Pow2Hi(Simd::Max(a.yStep[0], a.yStart[0]));
 
                 _sizeB[0] = _src16b && Aligned(c0.srcC, a.miK) ? 0 : a.bufH[0] * p.conv[0].srcW * AlignHi(p.conv[0].srcC, a.miK);
                 _sizeB[1] = a.bufH[1] * p.conv[1].srcW * a.maC;

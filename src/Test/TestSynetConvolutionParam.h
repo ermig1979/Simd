@@ -197,6 +197,12 @@ namespace Test
             conv[1].dstT = d;
         }
 
+        static void SetDst(SimdConvolutionParameters* conv)
+        {
+            conv[0].dstH = (conv[0].srcH + conv[0].padY + conv[0].padH - conv[0].kernelY) / conv[0].strideY + 1;
+            conv[0].dstW = (conv[0].srcW + conv[0].padX + conv[0].padW - conv[0].kernelX) / conv[0].strideX + 1;
+        }
+
     private:
         static void SetConv(SimdConvolutionParameters* conv, const Cnv& c, const Shape& s = Shape())
         {
@@ -216,8 +222,7 @@ namespace Test
             conv[0].padW = (c.k.x - 1) / 2;
             conv[0].group = c.d == -1 ? conv[0].srcC : 1;
             conv[0].activation = c.a;
-            conv[0].dstH = (conv[0].srcH + conv[0].padY + conv[0].padH - conv[0].kernelY) / conv[0].strideY + 1;
-            conv[0].dstW = (conv[0].srcW + conv[0].padX + conv[0].padW - conv[0].kernelX) / conv[0].strideX + 1;
+            SetDst(conv);
             conv[0].srcT = SimdTensorData32f;
             conv[0].srcF = SimdTensorFormatNhwc;
             conv[0].dstT = SimdTensorData32f;
