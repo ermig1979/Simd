@@ -43,15 +43,10 @@ namespace Simd
         {
             const float* src = (float*)src8;
             size_t srcC = AlignHi(p.srcC, a.miK);
-            size_t bufH = a.bufH[0], mask = bufH - 1;
             if (srcC == p.srcC)
             {
                 size_t size = p.srcW * p.srcC;
-                size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
-                if (yInt > yBeg)
-                    Float32ToBFloat16(src + yBeg * size, (yInt - yBeg) * size, dst + (yBeg & mask) * size);
-                if (yEnd > yInt)
-                    Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
+                Float32ToBFloat16(src + yBeg * size, (yEnd - yBeg) * size, dst);
             }
             else
             {
@@ -67,7 +62,7 @@ namespace Simd
                 for (size_t y = yBeg; y < yEnd; ++y)
                 {
                     const float* ps = src + y * p.srcW * p.srcC;
-                    uint16_t* pd = dst + (y & mask) * p.srcW * srcC;
+                    uint16_t* pd = dst + (y - yBeg) * p.srcW * srcC;
                     for (size_t x = 0; x < p.srcW; ++x)
                     {
                         size_t c = 0;
@@ -87,14 +82,13 @@ namespace Simd
         static void ReorderBf16(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
-            size_t bufH = a.bufH[0], mask = bufH - 1;
             size_t srcC = AlignHi(p.srcC, a.miK);
             size_t srcCDF = Simd::AlignLo(p.srcC, DF);
             __mmask32 tailC = TailMask32(p.srcC - srcCDF);
             for (size_t y = yBeg; y < yEnd; ++y)
             {
                 const uint16_t* ps = src + y * p.srcW * p.srcC;
-                uint16_t* pd = dst + (y & mask) * p.srcW * srcC;
+                uint16_t* pd = dst + (y - yBeg) * p.srcW * srcC;
                 for (size_t x = 0; x < p.srcW; ++x)
                 {
                     size_t c = 0;

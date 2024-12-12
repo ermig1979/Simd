@@ -236,7 +236,7 @@ namespace Simd
         template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, 
             size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
-            size_t dstM = a.bufH[1] - 1, dstS = a.bufH[1] * p.dstW * F, srcM = a.bufH[0] - 1, srcC = AlignHi(p.srcC, a.miK);
+            size_t dstM = a.bufH[1] - 1, dstS = a.bufH[1] * p.dstW * F, srcC = AlignHi(p.srcC, a.miK), y0 = a.bufH[0] ? yBeg : 0;
             __m512 _bias[2], _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
             _params[1] = _mm512_set1_ps(params[1]);
@@ -263,7 +263,7 @@ namespace Simd
                 {
                     if (yInt > yBeg)
                     {
-                        const uint16_t* src0 = src + (yBeg & srcM) * p.srcW * srcC;
+                        const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                         float* dst0 = dst + (yBeg & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
                         for (size_t j = 0; j < in; j += n, src0 += srcC * n, dst0 += F * n, dst1 += F * n)
                             conv_2x2(src0, p, a, n, dC, weight, _bias, _params, dst0, dst1);
@@ -272,7 +272,7 @@ namespace Simd
                     }
                     if (yEnd > yInt)
                     {
-                        const uint16_t* src0 = src + (yInt & srcM) * p.srcW * srcC;
+                        const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                         float* dst0 = dst + (yInt & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
                         for (size_t j = 0; j < en; j += n, src0 += srcC * n, dst0 += F * n, dst1 += F * n)
                             conv_2x2(src0, p, a, n, dC, weight, _bias, _params, dst0, dst1);
@@ -284,7 +284,7 @@ namespace Simd
                 {
                     if (yInt > yBeg)
                     {
-                        const uint16_t* src0 = src + (yBeg & srcM) * p.srcW * srcC;
+                        const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                         float* dst0 = dst + (yBeg & dstM) * p.dstW * F;
                         for (size_t j = 0; j < in; j += n, src0 += srcC * n, dst0 += F * n)
                             conv_2x1(src0, p, a, n, dC, weight, _bias, _params, dst0, NULL);
@@ -293,7 +293,7 @@ namespace Simd
                     }
                     if (yEnd > yInt)
                     {
-                        const uint16_t* src0 = src + (yInt & srcM) * p.srcW * srcC;
+                        const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                         float* dst0 = dst + (yInt & dstM) * p.dstW * F;
                         for (size_t j = 0; j < en; j += n, src0 += srcC * n, dst0 += F * n)
                             conv_2x1(src0, p, a, n, dC, weight, _bias, _params, dst0, NULL);
