@@ -885,11 +885,16 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static SIMD_INLINE bool Preferable_k7p3d1s1w4(const ConvParam& p)
+        {
+            return p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 7;
+        }
+
         template<::SimdConvolutionActivationType type> void Convolution32fNhwcDepthwise_k7p3d1s1w4(const float* src, const ConvParam& p, const float* weight, const float* bias, const float* params, float* dst)
         {
-            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && Aligned(p.srcW, 4));
+            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 7);
 
-            size_t dstC = p.dstC, dstW = p.dstW, srcH = p.srcH, end = dstW - 4;
+            size_t dstC = p.dstC, dstW = p.dstW, srcH = p.srcH, endW = dstW - 4;
             __m512 s0, s1, w0, w1, w2, w3, w4, w5, w6, d0, d1, d2, d3, _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
             if (type == SimdConvolutionActivationRestrictRange ||
@@ -898,7 +903,7 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t dy = 0; dy < p.dstH; ++dy)
             {
-                for (size_t dx = 0; dx < dstW; dx += 4)
+                for (size_t dx = 0;; dx += Min<size_t>(4, endW - dx))
                 {
                     for (size_t dc = 0; dc < dstC; dc += F)
                     {
@@ -958,7 +963,7 @@ namespace Simd
                                 d1 = _mm512_fmadd_ps(s0, w5, d1);
                                 d2 = _mm512_fmadd_ps(s0, w4, d2);
                                 d3 = _mm512_fmadd_ps(s0, w3, d3);
-                                if (dx < end)
+                                if (dx < endW)
                                 {
                                     s1 = _mm512_maskz_loadu_ps(tail, ps + 7 * dstC);
                                     d1 = _mm512_fmadd_ps(s1, w6, d1);
@@ -980,6 +985,8 @@ namespace Simd
                         _mm512_mask_storeu_ps(pd + 2 * dstC, tail, Activate<type>(d2, _params, 0));
                         _mm512_mask_storeu_ps(pd + 3 * dstC, tail, Activate<type>(d3, _params, 0));
                     }
+                    if (dx == endW)
+                        break;
                 }
             }
         }
@@ -1256,7 +1263,7 @@ namespace Simd
                 return Convolution32fNhwcDepthwise_k7p3d1s1w8<type>;
             else if (p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && AlignedAny(p.srcW, 6))
                 return Convolution32fNhwcDepthwise_k7p3d1s1w6<type>;
-            else if (p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && Aligned(p.srcW, 4))
+            else if (Preferable_k7p3d1s1w4(p))
                 return Convolution32fNhwcDepthwise_k7p3d1s1w4<type>;
             else if (p.IsKernel(3) && p.IsDilation(1))
                 return Convolution32fNhwcDepthwise3x3<type>;
