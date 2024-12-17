@@ -277,6 +277,8 @@ namespace Simd
         void SetInput(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
 
         void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
+        bool SetDepthwise5x5(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
+        bool SetDepthwise7x7(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
 
         void SetOutput(const ConvParam& p, Base::SynetMergedConvolution16b::OutputConvolutionPtr* output);
 

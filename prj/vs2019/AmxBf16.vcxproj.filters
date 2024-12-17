@@ -233,5 +233,11 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16Deinterleave.cpp">
       <Filter>AmxBf16</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bDepthwise7x7.cpp">
+      <Filter>AmxBf16</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bDepthwise5x5.cpp">
+      <Filter>AmxBf16</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
