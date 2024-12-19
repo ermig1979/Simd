@@ -441,10 +441,10 @@ namespace Test
             result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Avx2::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
 #endif
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw())
-//            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Avx512bw::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
+            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Avx512bw::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
+#endif
 
         return result;
     }

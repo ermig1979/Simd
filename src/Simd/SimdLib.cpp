@@ -6054,7 +6054,7 @@ SIMD_API void SimdSynetTiledScale2D32f(const float* src, size_t channels, size_t
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetTiledScale2D32fPtr) (const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
-    const static SimdSynetTiledScale2D32fPtr simdSynetTiledScale2D32f = SIMD_FUNC2(SynetTiledScale2D32f, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC;
+    const static SimdSynetTiledScale2D32fPtr simdSynetTiledScale2D32f = SIMD_FUNC3(SynetTiledScale2D32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     simdSynetTiledScale2D32f(src, channels, height, width, format, ver, hor, dst);
 #else
