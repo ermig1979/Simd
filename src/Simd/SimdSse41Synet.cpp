@@ -455,6 +455,51 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst)
+        {
+            if (format == SimdTensorFormatNchw)
+            {
+                size_t widthF = AlignLo(width, F);
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    for (size_t y = 0; y < height; ++y)
+                    {
+                        __m128 _hor = _mm_set1_ps(hor[y]);
+                        size_t x = 0;
+                        for (; x < widthF; x += F)
+                            _mm_storeu_ps(dst + x, _mm_mul_ps(_mm_loadu_ps(src + x), _mm_mul_ps(_mm_loadu_ps(ver + x), _hor)));
+                        for (; x < width; x += 1)
+                            _mm_store_ss(dst + x, _mm_mul_ss(_mm_load_ss(src + x), _mm_mul_ss(_mm_load_ss(ver + x), _hor)));
+                        src += width, dst += width;
+                    }
+                    hor += height;
+                    ver += width;
+                }
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                size_t channelsF = AlignLo(channels, F);
+                for (size_t y = 0; y < height; ++y)
+                {
+                    const float* pVer = ver;
+                    for (size_t x = 0; x < width; ++x)
+                    {
+                        size_t c = 0;
+                        for (; c < channelsF; c += F)
+                            _mm_storeu_ps(dst + c, _mm_mul_ps(_mm_loadu_ps(src + c), _mm_mul_ps(_mm_loadu_ps(pVer + c), _mm_loadu_ps(hor + c))));
+                        for (; c < channels; c += 1)
+                            _mm_store_ss(dst + c, _mm_mul_ss(_mm_load_ss(src + c), _mm_mul_ss(_mm_load_ss(pVer + c), _mm_load_ss(hor + c))));
+                        src += channels, dst += channels, pVer += channels;
+                    }
+                    hor += channels;
+                }
+            }
+            else
+                assert(0);
+        }
    }
 #endif
 }

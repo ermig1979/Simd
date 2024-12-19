@@ -524,6 +524,8 @@ namespace Simd
 
         void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
+        void SynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
+
         void TextureBoostedSaturatedGradient(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             uint8_t saturation, uint8_t boost, uint8_t* dx, size_t dxStride, uint8_t* dy, size_t dyStride);
 

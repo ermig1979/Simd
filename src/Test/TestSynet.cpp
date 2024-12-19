@@ -431,11 +431,11 @@ namespace Test
         if (TestBase())
             result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Base::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Sse41::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Sse41::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Avx2::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
