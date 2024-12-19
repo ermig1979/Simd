@@ -38,10 +38,119 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        static SIMD_INLINE bool Preferable_k5p2d1s1w4(const ConvParam& p)
+        {
+            return p.IsKernel(5) && p.IsPad(2) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 6;
+        }
+
+        template<typename T, Term16bType term, SimdConvolutionActivationType type> static void DepthwiseConvolution_k5p2d1s1w4(const uint8_t* src8,
+            const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint8_t* dst)
+        {
+            assert(p.IsKernel(5) && p.IsPad(2) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 6);
+            const T* src = (T*)src8;
+            size_t srcH = p.srcH, srcW = p.srcW;
+            size_t sM = (a.bufH[1] - 1), sD = a.bufH[1] ? a.bufH[1] * p.srcW * F : F, sX = a.bufH[1] ? F : p.srcC, sY = sX * p.srcW, dstC = maC;
+            size_t dX = (a.bufH[2] ? a.maC * 2 : p.dstC * a.elem[1]), dY = p.dstW * dX, dy0 = a.bufH[2] ? yBeg : 0, dD = a.bufH[2] ? F * 2 : F * a.elem[1];
+            size_t wD = 25 * F, dstCF = AlignLo(dstC, F), dstW = p.dstW, endW = dstW - 4;
+            size_t dstCe = a.bufH[2] ? AlignHi(dstC, DF) : dstC;
+
+            __m512 s0, s1, w0, w1, w2, w3, w4, d0, d1, d2, d3;
+
+            __m512 _params[2], _bias[1];
+            _params[0] = _mm512_set1_ps(params[0]);
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
+                _params[1] = _mm512_set1_ps(params[1]);
+            for (size_t dc = 0; dc < dstCe; dc += F)
+            {
+                _bias[0] = _mm512_loadu_ps(bias + dc);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_loadu_ps(params + dc);
+                __mmask16 tailS = TailMask16(dstC - dc);
+                __mmask32 tailC = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
+                for (size_t dy = yBeg; dy < yEnd; ++dy)
+                {
+                    for (size_t dx = 0;; dx += Min<size_t>(4, endW - dx))
+                    {
+                        d0 = _mm512_setzero_ps();
+                        d1 = _mm512_setzero_ps();
+                        d2 = _mm512_setzero_ps();
+                        d3 = _mm512_setzero_ps();
+                        for (size_t ky = 0; ky < 5; ++ky)
+                        {
+                            size_t sy = dy + ky - 2;
+                            const T* ps = src + (sy & sM) * sY + (dx - 2) * sX;
+                            const float* pw = weight + ky * 5 * F;
+                            if (sy < srcH)
+                            {
+                                w0 = _mm512_maskz_loadu_ps(tailS, pw + 0 * F);
+                                w1 = _mm512_maskz_loadu_ps(tailS, pw + 1 * F);
+                                if (dx)
+                                {
+                                    s0 = LoadSrc(ps + 0 * sX, tailS);
+                                    d0 = _mm512_fmadd_ps(s0, w0, d0);
+
+                                    s1 = LoadSrc(ps + 1 * sX, tailS);
+                                    d0 = _mm512_fmadd_ps(s1, w1, d0);
+                                    d1 = _mm512_fmadd_ps(s1, w0, d1);
+                                }
+                                s0 = LoadSrc(ps + 2 * sX, tailS);
+                                w2 = _mm512_maskz_loadu_ps(tailS, pw + 2 * F);
+                                d0 = _mm512_fmadd_ps(s0, w2, d0);
+                                d1 = _mm512_fmadd_ps(s0, w1, d1);
+                                d2 = _mm512_fmadd_ps(s0, w0, d2);
+
+                                s1 = LoadSrc(ps + 3 * sX, tailS);
+                                w3 = _mm512_maskz_loadu_ps(tailS, pw + 3 * F);
+                                d0 = _mm512_fmadd_ps(s1, w3, d0);
+                                d1 = _mm512_fmadd_ps(s1, w2, d1);
+                                d2 = _mm512_fmadd_ps(s1, w1, d2);
+                                d3 = _mm512_fmadd_ps(s1, w0, d3);
+
+                                s0 = LoadSrc(ps + 4 * sX, tailS);
+                                w4 = _mm512_maskz_loadu_ps(tailS, pw + 4 * F);
+                                d0 = _mm512_fmadd_ps(s0, w4, d0);
+                                d1 = _mm512_fmadd_ps(s0, w3, d1);
+                                d2 = _mm512_fmadd_ps(s0, w2, d2);
+                                d3 = _mm512_fmadd_ps(s0, w1, d3);
+
+                                s1 = LoadSrc(ps + 5 * sX, tailS);
+                                d1 = _mm512_fmadd_ps(s1, w4, d1);
+                                d2 = _mm512_fmadd_ps(s1, w3, d2);
+                                d3 = _mm512_fmadd_ps(s1, w2, d3);
+                                if (dx < endW)
+                                {
+                                    s0 = LoadSrc(ps + 6 * sX, tailS);
+                                    d2 = _mm512_fmadd_ps(s0, w4, d2);
+                                    d3 = _mm512_fmadd_ps(s0, w3, d3);
+
+                                    s1 = LoadSrc(ps + 7 * sX, tailS);
+                                    d3 = _mm512_fmadd_ps(s1, w4, d3);
+                                }
+                            }
+                        }
+                        uint8_t* pd = dst + (dy - dy0) * dY + dx * dX;
+                        Save1<term, type>(pd + 0 * dX, dD, d0, _bias, _params, tailC);
+                        Save1<term, type>(pd + 1 * dX, dD, d1, _bias, _params, tailC);
+                        Save1<term, type>(pd + 2 * dX, dD, d2, _bias, _params, tailC);
+                        Save1<term, type>(pd + 3 * dX, dD, d3, _bias, _params, tailC);
+                        if (dx == endW)
+                            break;
+                    }
+                }
+                src += sD;
+                dst += dD;
+                weight += wD;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         static SIMD_INLINE bool Preferable_k5p2d1s1w6(const ConvParam& p)
         {
-            return p.IsKernel(5) && p.IsPad(2) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 8;
-                //(p.srcW > 10 && AlignHiAny(p.srcW, 8) < AlignHiAny(p.srcW, 6) * 1.2);
+            return p.IsKernel(5) && p.IsPad(2) && p.IsStride(1) && p.IsDilation(1) &&
+                (p.srcW >= 8 && AlignHiAny(p.srcW, 6) < AlignHiAny(p.srcW, 4) * 1.2);
         }
 
         template<typename T, Term16bType term, SimdConvolutionActivationType type> static void DepthwiseConvolution_k5p2d1s1w6(const uint8_t* src8,
@@ -322,6 +431,11 @@ namespace Simd
             else if (Preferable_k5p2d1s1w6(p))
             {
                 depthwise = DepthwiseConvolution_k5p2d1s1w6<T, term, type>;
+                return true;
+            }
+            else if (Preferable_k5p2d1s1w4(p))
+            {
+                depthwise = DepthwiseConvolution_k5p2d1s1w4<T, term, type>;
                 return true;
             }
             else
