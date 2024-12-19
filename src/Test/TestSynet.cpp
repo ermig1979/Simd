@@ -352,5 +352,101 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncTs2d32f
+        {
+            typedef void(*FuncPtr)(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncTs2d32f(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(SimdTensorFormatType format)
+            {
+                desc = desc + "[" + ToString(format) + "]";
+            }
+
+            void Call(const Tensor32f& src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const Tensor32f& ver, const Tensor32f& hor, Tensor32f& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), channels, height, width, format, ver.Data(), hor.Data(), dst.Data());
+            }
+        };
+    }
+
+#define FUNC_TS2D32F(function) FuncTs2d32f(function, #function)
+
+    bool SynetTiledScale2D32fAutoTest(size_t channels, size_t height, size_t width, SimdTensorFormatType format, FuncTs2d32f f1, FuncTs2d32f f2)
+    {
+        bool result = true;
+
+        f1.Update(format);
+        f2.Update(format);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << ", " << height << ", " << width << "].");
+
+        Tensor32f src(ToShape(channels, height, width, format));
+        Tensor32f ver(ToShape(channels, 1, width, format));
+        Tensor32f hor(ToShape(channels, height, 1, format));
+        Tensor32f dst1(ToShape(channels, height, width, format));
+        Tensor32f dst2(ToShape(channels, height, width, format));
+
+        FillRandom(src.Data(), src.Size(), -10.0, 10.0);
+        FillRandom(ver.Data(), ver.Size(), -10.0, 10.0);
+        FillRandom(hor.Data(), hor.Size(), -10.0, 10.0);
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, channels, height, width, format, ver, hor, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, channels, height, width, format, ver, hor, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetTiledScale2D32fAutoTest(const FuncTs2d32f& f1, const FuncTs2d32f& f2)
+    {
+        bool result = true;
+
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNhwc && result; format = (SimdTensorFormatType)((int)format + 1))
+        {
+            result = result && SynetTiledScale2D32fAutoTest(C, (int)sqrt(H), (int)sqrt(W), format, f1, f2);
+            result = result && SynetTiledScale2D32fAutoTest(C - O, (int)sqrt(H) + O / 2, (int)sqrt(W) + O / 2, format, f1, f2);
+        }
+
+        return result;
+    }
+
+    bool SynetTiledScale2D32fAutoTest()
+    {
+        bool result = true;
+
+        if (TestBase())
+            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Base::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable && TestSse41())
+//            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Sse41::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable && TestAvx2())
+//            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Avx2::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
+//#endif
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable && TestAvx512bw())
+//            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Avx512bw::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
+//#endif
+
+        return result;
+    }
 #endif
 }

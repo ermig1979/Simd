@@ -349,6 +349,7 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetEltwiseLayerForward);
     TEST_ADD_GROUP_A0(SynetLrnLayerCrossChannels);
     TEST_ADD_GROUP_A0(SynetShuffleLayerForward);
+    TEST_ADD_GROUP_A0(SynetTiledScale2D32f);
 
     TEST_ADD_GROUP_A0(SynetElu32f);
     TEST_ADD_GROUP_A0(SynetGelu32f);

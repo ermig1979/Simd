@@ -62,6 +62,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga16ad436edc5feea4bcd1d65dc88c5595"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga16ad436edc5feea4bcd1d65dc88c5595">SimdSynetSoftmaxLayerForward</a> (const float *src, size_t outer, size_t count, size_t inner, float *dst)</td></tr>
 <tr class="memdesc:ga16ad436edc5feea4bcd1d65dc88c5595"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SoftmaxLayer.  <a href="group__synet__other.html#ga16ad436edc5feea4bcd1d65dc88c5595">More...</a><br /></td></tr>
 <tr class="separator:ga16ad436edc5feea4bcd1d65dc88c5595"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga39276f82df6e280c338005a96bdb48b6"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga39276f82df6e280c338005a96bdb48b6">SimdSynetTiledScale2D32f</a> (const float *src, size_t channels, size_t height, size_t width, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, const float *ver, const float *hor, float *dst)</td></tr>
+<tr class="memdesc:ga39276f82df6e280c338005a96bdb48b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of TiledScale2DLayer for FP32 tensor type.  <a href="group__synet__other.html#ga39276f82df6e280c338005a96bdb48b6">More...</a><br /></td></tr>
+<tr class="separator:ga39276f82df6e280c338005a96bdb48b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga16bd8eb0d6a66396e970cfe3917dffee"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga16bd8eb0d6a66396e970cfe3917dffee">SimdSynetUnaryOperation32f</a> (const float *src, size_t size, <a class="el" href="group__synet__types.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a> type, float *dst)</td></tr>
 <tr class="memdesc:ga16bd8eb0d6a66396e970cfe3917dffee"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of UnaryOperationLayer.  <a href="group__synet__other.html#ga16bd8eb0d6a66396e970cfe3917dffee">More...</a><br /></td></tr>
 <tr class="separator:ga16bd8eb0d6a66396e970cfe3917dffee"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -378,6 +381,90 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax dimmension. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- an inner size of input and output arrays. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to outer*count*inner. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga39276f82df6e280c338005a96bdb48b6" name="ga39276f82df6e280c338005a96bdb48b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga39276f82df6e280c338005a96bdb48b6">&#9670;&#160;</a></span>SimdSynetTiledScale2D32f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetTiledScale2D32f </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>ver</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>hor</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of TiledScale2DLayer for FP32 tensor type. </p>
+<p >Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+    for(h = 0; h &lt; height; ++h)
+        for(w = 0; w &lt; width; ++w)
+            dst[(c*height + h)*width + w] = src[(c*height + h)*width + w] * hor[c*height + h] * ver[c*width + w];
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * height * width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ver</td><td>- a pointer to the 32-bit float array with vertical scale coefficients. The size of the array is equal to channels * width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hor</td><td>- a pointer to the 32-bit float array with horisontal scale coefficients. The size of the array is equal to channels. * height. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * height * width. Input and output image tensors can be the same. </td></tr>
   </table>
   </dd>
 </dl>

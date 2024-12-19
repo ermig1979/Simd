@@ -7758,6 +7758,33 @@ extern "C"
 
     /*! @ingroup synet_other
 
+        \fn void SimdSynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
+
+        \short This function is used for forward propagation of TiledScale2DLayer for FP32 tensor type.
+
+        Algorithm's details (example for NCHW tensor format):
+        \verbatim
+        for(c = 0; c < channels; ++c)
+            for(h = 0; h < height; ++h)
+                for(w = 0; w < width; ++w)
+                    dst[(c*height + h)*width + w] = src[(c*height + h)*width + w] * hor[c*height + h] * ver[c*width + w];
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * height * width.
+        \param [in] channels - a number of channels in the (input/output) image tensor.
+        \param [in] height - a height of (input/output) image tensor.
+        \param [in] width - a width of (input/output) image tensor.
+        \param [in] format - a format of (input/output) image tensor.
+        \param [in] ver - a pointer to the 32-bit float array with vertical scale coefficients. The size of the array is equal to channels * width.
+        \param [in] hor - a pointer to the 32-bit float array with horisontal scale coefficients. The size of the array is equal to channels. * height.
+        \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * height * width. Input and output image tensors can be the same.
+    */
+    SIMD_API void SimdSynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
+
+    /*! @ingroup synet_other
+
         \fn void SimdSynetUnaryOperation32f(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 
         \short This function is used for forward propagation of UnaryOperationLayer.

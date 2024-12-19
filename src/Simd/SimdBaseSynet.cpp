@@ -306,7 +306,42 @@ namespace Simd
             default:
                 assert(0);
             }
+        }
 
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst)
+        {
+            if (format == SimdTensorFormatNchw)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    for (size_t y = 0; y < height; ++y)
+                    {
+                        for (size_t x = 0; x < width; ++x)
+                            dst[x] = src[x] * ver[x] * hor[0];
+                        src += width, dst += width;
+                        hor += 1;
+                    }
+                    ver += width;
+                }
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                for (size_t y = 0; y < height; ++y)
+                {
+                    const float* pVer = ver;
+                    for (size_t x = 0; x < width; ++x)
+                    {
+                        for (size_t c = 0; c < channels; ++c)
+                            dst[c] = src[c] * pVer[c] * hor[c];
+                        src += channels, dst += channels, pVer += channels;
+                    }
+                    hor += channels;
+                }
+            }
+            else
+                assert(0);
         }
     }
 #endif
