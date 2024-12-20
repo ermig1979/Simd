@@ -81,6 +81,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetInnerProduct16bGemmNN.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bDepthwise3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bDepthwise5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bDepthwise7x7.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bInput.cpp" />
