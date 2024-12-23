@@ -298,6 +298,184 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<int H, int I> static void ZeroSrc(__m512 buf[3][H + 2])
+        {
+            buf[I][0] = _mm512_setzero_ps();
+            buf[I][1] = _mm512_setzero_ps();
+            if (H > 0) buf[I][2] = _mm512_setzero_ps();
+            if (H > 1) buf[I][3] = _mm512_setzero_ps();
+            if (H > 2) buf[I][4] = _mm512_setzero_ps();
+            if (H > 3) buf[I][5] = _mm512_setzero_ps();
+        }
+
+        template<typename T, int H, int I> static void LoadSrc(const T* src, size_t yB, size_t sM, size_t sY, __mmask16 mask0, __mmask16 mask1, __mmask16 mask2, __m512 buf[3][H + 2])
+        {
+            buf[I][0] = _mm512_maskz_loadu_ps(mask0, src + ((yB + 0) & sM) * sY);
+            buf[I][1] = _mm512_maskz_loadu_ps(mask1, src + ((yB + 1) & sM) * sY);
+            if (H > 0) buf[I][2] = _mm512_maskz_loadu_ps(H == 1 ? mask2 : mask1, src + ((yB + 2) & sM) * sY);
+            if (H > 1) buf[I][3] = _mm512_maskz_loadu_ps(H == 2 ? mask2 : mask1, src + ((yB + 3) & sM) * sY);
+            if (H > 2) buf[I][4] = _mm512_maskz_loadu_ps(H == 3 ? mask2 : mask1, src + ((yB + 4) & sM) * sY);
+            if (H > 3) buf[I][5] = _mm512_maskz_loadu_ps(mask2, src + ((yB + 5) & sM) * sY);
+        }
+
+        template<int H, int I0, int I1, int I2> static void Convolution3x3(__m512 src[3][H + 2], const __m512* weight, __m512 dst[H])
+        {
+            if (H > 0) dst[0] = _mm512_setzero_ps();
+            if (H > 1) dst[1] = _mm512_setzero_ps();
+            if (H > 2) dst[2] = _mm512_setzero_ps();
+            if (H > 3) dst[3] = _mm512_setzero_ps();
+
+            if (H > 0) dst[0] = _mm512_fmadd_ps(src[I0][0], weight[0], dst[0]);
+            if (H > 1) dst[1] = _mm512_fmadd_ps(src[I0][1], weight[0], dst[1]);
+            if (H > 2) dst[2] = _mm512_fmadd_ps(src[I0][2], weight[0], dst[2]);
+            if (H > 3) dst[3] = _mm512_fmadd_ps(src[I0][3], weight[0], dst[3]);
+
+            if (H > 0) dst[0] = _mm512_fmadd_ps(src[I1][0], weight[1], dst[0]);
+            if (H > 1) dst[1] = _mm512_fmadd_ps(src[I1][1], weight[1], dst[1]);
+            if (H > 2) dst[2] = _mm512_fmadd_ps(src[I1][2], weight[1], dst[2]);
+            if (H > 3) dst[3] = _mm512_fmadd_ps(src[I1][3], weight[1], dst[3]);
+
+            if (H > 0) dst[0] = _mm512_fmadd_ps(src[I2][0], weight[2], dst[0]);
+            if (H > 1) dst[1] = _mm512_fmadd_ps(src[I2][1], weight[2], dst[1]);
+            if (H > 2) dst[2] = _mm512_fmadd_ps(src[I2][2], weight[2], dst[2]);
+            if (H > 3) dst[3] = _mm512_fmadd_ps(src[I2][3], weight[2], dst[3]);
+
+
+            if (H > 0) dst[0] = _mm512_fmadd_ps(src[I0][1], weight[3], dst[0]);
+            if (H > 1) dst[1] = _mm512_fmadd_ps(src[I0][2], weight[3], dst[1]);
+            if (H > 2) dst[2] = _mm512_fmadd_ps(src[I0][3], weight[3], dst[2]);
+            if (H > 3) dst[3] = _mm512_fmadd_ps(src[I0][4], weight[3], dst[3]);
+
+            if (H > 0) dst[0] = _mm512_fmadd_ps(src[I1][1], weight[4], dst[0]);
+            if (H > 1) dst[1] = _mm512_fmadd_ps(src[I1][2], weight[4], dst[1]);
+            if (H > 2) dst[2] = _mm512_fmadd_ps(src[I1][3], weight[4], dst[2]);
+            if (H > 3) dst[3] = _mm512_fmadd_ps(src[I1][4], weight[4], dst[3]);
+
+            if (H > 0) dst[0] = _mm512_fmadd_ps(src[I2][1], weight[5], dst[0]);
+            if (H > 1) dst[1] = _mm512_fmadd_ps(src[I2][2], weight[5], dst[1]);
+            if (H > 2) dst[2] = _mm512_fmadd_ps(src[I2][3], weight[5], dst[2]);
+            if (H > 3) dst[3] = _mm512_fmadd_ps(src[I2][4], weight[5], dst[3]);
+
+
+            if (H > 0) dst[0] = _mm512_fmadd_ps(src[I0][2], weight[6], dst[0]);
+            if (H > 1) dst[1] = _mm512_fmadd_ps(src[I0][3], weight[6], dst[1]);
+            if (H > 2) dst[2] = _mm512_fmadd_ps(src[I0][4], weight[6], dst[2]);
+            if (H > 3) dst[3] = _mm512_fmadd_ps(src[I0][5], weight[6], dst[3]);
+
+            if (H > 0) dst[0] = _mm512_fmadd_ps(src[I1][2], weight[7], dst[0]);
+            if (H > 1) dst[1] = _mm512_fmadd_ps(src[I1][3], weight[7], dst[1]);
+            if (H > 2) dst[2] = _mm512_fmadd_ps(src[I1][4], weight[7], dst[2]);
+            if (H > 3) dst[3] = _mm512_fmadd_ps(src[I1][5], weight[7], dst[3]);
+
+            if (H > 0) dst[0] = _mm512_fmadd_ps(src[I2][2], weight[8], dst[0]);
+            if (H > 1) dst[1] = _mm512_fmadd_ps(src[I2][3], weight[8], dst[1]);
+            if (H > 2) dst[2] = _mm512_fmadd_ps(src[I2][4], weight[8], dst[2]);
+            if (H > 3) dst[3] = _mm512_fmadd_ps(src[I2][5], weight[8], dst[3]);
+        }
+
+        template<typename T, Term16bType term, SimdConvolutionActivationType type, int H> static void DepthwiseConvolution3x3xH(const T* src, size_t dstH, size_t dstW,
+            size_t yB, size_t sM, size_t sY, size_t sX, __mmask16 tailS, const __m512* weight, const __m512* bias, const __m512* params, uint8_t* dst, size_t dY, size_t dX, __mmask32 tailD)
+        {
+            size_t endW = dstW - 1;
+            __m512 s[3][H + 2], d[H];
+            __mmask16 mask0 = yB == 0 ? 0 : tailS;
+            __mmask16 mask2 = yB + H == dstH ? 0 : tailS;
+
+            LoadSrc<T, H, 0>(src, yB, sM, sY, mask0, tailS, mask2, s), src += sX;
+            LoadSrc<T, H, 1>(src, yB, sM, sY, mask0, tailS, mask2, s), src += sX;
+            for (size_t dx = 0; dx < dstW; dx += 1)
+            {
+                switch (dx % 3)
+                {
+                case 0:
+                    if (dx == endW)
+                        ZeroSrc<H, 0>(s);
+                    else
+                        LoadSrc<T, H, 0>(src, yB, sM, sY, mask0, tailS, mask2, s);
+                    Convolution3x3<H, 1, 2, 0>(s, weight, d);
+                    break;
+                case 1:
+                    if (dx == endW)
+                        ZeroSrc<H, 1>(s);
+                    else
+                        LoadSrc<T, H, 1>(src, yB, sM, sY, mask0, tailS, mask2, s);
+                    Convolution3x3<H, 2, 0, 1>(s, weight, d);
+                    break;
+                case 2:
+                    if (dx == endW)
+                        ZeroSrc<H, 2>(s);
+                    else
+                        LoadSrc<T, H, 2>(src, yB, sM, sY, mask0, tailS, mask2, s);
+                    Convolution3x3<H, 0, 1, 2>(s, weight, d);
+                    break;
+                }
+                if (H > 0) Save1<term, type>(dst + 0 * dY, 0, d[0], bias, params, tailD);
+                if (H > 1) Save1<term, type>(dst + 1 * dY, 0, d[1], bias, params, tailD);
+                if (H > 2) Save1<term, type>(dst + 2 * dY, 0, d[2], bias, params, tailD);
+                if (H > 3) Save1<term, type>(dst + 3 * dY, 0, d[3], bias, params, tailD);
+                src += sX;
+                dst += dX;
+            }
+        }
+
+        template<typename T> using DepthwiseConvolution3x3xH_Ptr = void (*)(const T * src, size_t dstH, size_t dstW, size_t yB, size_t sM, size_t sY, size_t sX, __mmask16 tailS, 
+            const __m512 * weight, const __m512 * bias, const __m512 * params, uint8_t * dst, size_t dY, size_t dX, __mmask32 tailD);
+
+        template<typename T, Term16bType term, SimdConvolutionActivationType type> DepthwiseConvolution3x3xH_Ptr<T> GetDepthwiseConvolution3x3xH(int H)
+        {
+            switch (H)
+            {
+            case 1: return DepthwiseConvolution3x3xH<T, term, type, 1>;
+            case 2: return DepthwiseConvolution3x3xH<T, term, type, 2>;
+            case 3: return DepthwiseConvolution3x3xH<T, term, type, 3>;
+            case 4: return DepthwiseConvolution3x3xH<T, term, type, 4>;
+            default:
+                return NULL;
+            }
+        }
+
+        template<typename T, Term16bType term, SimdConvolutionActivationType type> static void DepthwiseConvolution3x3_V2(const uint8_t* src8,
+            const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint8_t* dst)
+        {
+            assert(p.IsKernel(3) && p.IsPad(1) && p.IsStride(1) && p.IsDilation(1));
+            const T* src = (T*)src8;
+            size_t N = 4, M = (yEnd - yBeg) % N, yBody = AlignLoAny(yEnd - yBeg, N) + yBeg;
+            DepthwiseConvolution3x3xH_Ptr<T> body = GetDepthwiseConvolution3x3xH<T, term, type>(N);
+            DepthwiseConvolution3x3xH_Ptr<T> tail = GetDepthwiseConvolution3x3xH<T, term, type>(M);
+            size_t srcH = p.srcH, srcW = p.srcW;
+            size_t sM = (a.bufH[1] - 1), sD = a.bufH[1] ? a.bufH[1] * p.srcW * F : F, sX = a.bufH[1] ? F : p.srcC, sY = sX * p.srcW, dstC = maC;
+            size_t dX = (a.bufH[2] ? a.maC * 2 : p.dstC * a.elem[1]), dY = p.dstW * dX, dy0 = a.bufH[2] ? yBeg : 0, dD = a.bufH[2] ? F * 2 : F * a.elem[1];
+            size_t wD = 9 * F, dstCF = AlignLo(dstC, F), dstW = p.dstW, endW = dstW - 8;
+            size_t dstCe = a.bufH[2] ? AlignHi(dstC, DF) : dstC;
+
+            __m512 _params[2], _bias[1], _weight[9];
+            _params[0] = _mm512_set1_ps(params[0]);
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
+                _params[1] = _mm512_set1_ps(params[1]);
+            for (size_t dc = 0; dc < dstCe; dc += F)
+            {
+                for (size_t i = 0; i < 9; ++i)
+                    _weight[i] = _mm512_loadu_ps(weight + i * F);
+                _bias[0] = _mm512_loadu_ps(bias + dc);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_loadu_ps(params + dc);
+                __mmask16 tailS = TailMask16(dstC - dc);
+                __mmask32 tailD = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
+                size_t dy = yBeg;
+                for (; dy < yBody; dy += N)
+                    body(src, p.dstH, p.dstW, dy, sM, sY, sX, tailS, _weight, _bias, _params, dst + (dy - dy0) * dY, dY, dX, tailD);
+                if(M)
+                    tail(src, p.dstH, p.dstW, dy, sM, sY, sX, tailS, _weight, _bias, _params, dst + (dy - dy0) * dY, dY, dX, tailD);
+                src += sD;
+                dst += dD;
+                weight += wD;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template<typename T, Term16bType term, SimdConvolutionActivationType type> static bool SetDepthwise3x3(const ConvParam& p, DepthwisePtr& depthwise)
         {
             if (IsKernel(p, 3) && IsDilation(p, 1) && Aligned(p.dstC, F))
