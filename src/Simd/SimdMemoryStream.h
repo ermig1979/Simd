@@ -2,7 +2,8 @@
 * Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2023 Yermalayeu Ihar,
-*               2022-2022 Fabien Spindler.
+*               2022-2022 Fabien Spindler,
+*               2024-2024 Ties Dirksen.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -196,7 +197,7 @@ namespace Simd
             if (!SkipGap())
                 return false;
             value = 0;
-            while (!IsGap(_data[_pos]) && _pos < _size)
+            while (_pos < _size && !IsGap(_data[_pos]))
             {
                 if (_data[_pos] >= '0' && _data[_pos] <= '9')
                     value = value * 10 + Unsigned(_data[_pos] - '0');
@@ -219,21 +220,21 @@ namespace Simd
 
         SIMD_INLINE bool SkipValue(uint8_t value)
         {
-            while (_data[_pos] == value && _pos < _size)
+            while (_pos < _size && _data[_pos] == value)
                 _pos++;
             return _pos < _size;
         }
 
         SIMD_INLINE bool SkipNotGap()
         {
-            while (!IsGap(_data[_pos]) && _pos < _size)
+            while (_pos < _size && !IsGap(_data[_pos]))
                 _pos++;
             return _pos < _size;
         }        
         
         SIMD_INLINE bool SkipGap()
         {
-            while (IsGap(_data[_pos]) && _pos < _size)
+            while (_pos < _size && IsGap(_data[_pos]))
                 _pos++;
             return _pos < _size;
         }
@@ -278,7 +279,7 @@ namespace Simd
         SIMD_INLINE void FillBits()
         {
             static const size_t canReadByte = (sizeof(_bitBuffer) - 1) * 8;
-            while (_bitCount <= canReadByte && _pos < _size)
+            while (_pos < _size && _bitCount <= canReadByte)
             {
                 _bitBuffer |= (size_t)_data[_pos++] << _bitCount;
                 _bitCount += 8;
