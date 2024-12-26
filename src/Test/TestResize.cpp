@@ -144,7 +144,7 @@ namespace Test
             assert(0);
 
         View src(srcW, srcH, format, NULL, TEST_ALIGN(srcW));
-        if (format == View::Float)
+        if (type == SimdResizeChannelFloat)
             FillRandom32f(src);
         else if (type == SimdResizeChannelShort)
             FillRandom16u(src);
@@ -184,9 +184,9 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, channels, type, method));
 
-        if (format == View::Float)
+        if (type == SimdResizeChannelFloat)
             result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
-        else if (format == View::Float)
+        else if (type == SimdResizeChannelBf16)
         {
             View dst32f1(dstW, dstH, View::Float), dst32f2(dstW, dstH, View::Float);
             for (size_t row = 0; row < dstH; row++)
@@ -196,7 +196,7 @@ namespace Test
             }
             result = result && Compare(dst32f1, dst32f2, EPS, true, 64, DifferenceAbsolute);
         }
-        else if(format == View::Int16)
+        else if(type == SimdResizeChannelShort)
             result = result && Compare(dst1, dst2, 1, true, 64);
         else
             result = result && Compare(dst1, dst2, 0, true, 64);
@@ -250,6 +250,8 @@ namespace Test
     bool ResizerAutoTest(const FuncRS & f1, const FuncRS & f2)
     {
         bool result = true;
+
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 16, f1, f2);
 
         result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelBf16, 1, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelBf16, 3, f1, f2);

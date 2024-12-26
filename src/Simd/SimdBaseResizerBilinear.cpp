@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdCopy.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
@@ -128,7 +129,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ResizerShortBilinear::ResizerShortBilinear(const ResParam& param)
             : Resizer(param)
@@ -247,25 +248,11 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
-        ResizerFloatBilinear::ResizerFloatBilinear(const ResParam & param)
-            : Resizer(param)
+        static void EstimateIndexAlpha(const ResParam& param, size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, float* alphas)
         {
-            _ay.Resize(_param.dstH, false, _param.align);
-            _iy.Resize(_param.dstH, false, _param.align);
-            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy.data, _ay.data);
-            size_t rs = _param.dstW * _param.channels;
-            _ax.Resize(rs, false, _param.align);
-            _ix.Resize(rs, false, _param.align);
-            EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, _ix.data, _ax.data);
-            _bx[0].Resize(rs, false, _param.align);
-            _bx[1].Resize(rs, false, _param.align);
-        }
-
-        void ResizerFloatBilinear::EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t * indices, float * alphas)
-        {
-            if (_param.method == SimdResizeMethodBilinear)
+            if (param.method == SimdResizeMethodBilinear)
             {
                 float scale = (float)srcSize / dstSize;
                 for (size_t i = 0; i < dstSize; ++i)
@@ -290,8 +277,8 @@ namespace Simd
                         alphas[offset] = alpha;
                     }
                 }
-            }            
-            else if (_param.method == SimdResizeMethodBilinearCaffe)
+            }
+            else if (param.method == SimdResizeMethodBilinearCaffe)
             {
                 float scale = dstSize > 1 ? float(srcSize - 1) / float(dstSize - 1) : 0.0f;
                 for (size_t i = 0; i < dstSize; ++i)
@@ -312,7 +299,7 @@ namespace Simd
                     }
                 }
             }
-            else if (_param.method == SimdResizeMethodBilinearPytorch)
+            else if (param.method == SimdResizeMethodBilinearPytorch)
             {
                 float scale = (float)srcSize / dstSize;
                 for (size_t i = 0; i < dstSize; ++i)
@@ -340,6 +327,22 @@ namespace Simd
             }
             else
                 assert(0);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        ResizerFloatBilinear::ResizerFloatBilinear(const ResParam & param)
+            : Resizer(param)
+        {
+            _ay.Resize(_param.dstH, false, _param.align);
+            _iy.Resize(_param.dstH, false, _param.align);
+            EstimateIndexAlpha(_param, _param.srcH, _param.dstH, 1, _iy.data, _ay.data);
+            size_t rs = _param.dstW * _param.channels;
+            _ax.Resize(rs, false, _param.align);
+            _ix.Resize(rs, false, _param.align);
+            EstimateIndexAlpha(_param, _param.srcW, _param.dstW, _param.channels, _ix.data, _ax.data);
+            _bx[0].Resize(rs, false, _param.align);
+            _bx[1].Resize(rs, false, _param.align);
         }
 
         void ResizerFloatBilinear::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
@@ -384,6 +387,67 @@ namespace Simd
 
                 for (size_t dx = 0; dx < rs; dx++)
                     dst[dx] = pbx[0][dx]*fy0 + pbx[1][dx]*fy1;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        ResizerBf16Bilinear::ResizerBf16Bilinear(const ResParam& param)
+            : Resizer(param)
+        {
+            _ay.Resize(_param.dstH, false, _param.align);
+            _iy.Resize(_param.dstH, false, _param.align);
+            EstimateIndexAlpha(_param, _param.srcH, _param.dstH, 1, _iy.data, _ay.data);
+            size_t rs = _param.dstW * _param.channels;
+            _ax.Resize(rs, false, _param.align);
+            _ix.Resize(rs, false, _param.align);
+            EstimateIndexAlpha(_param, _param.srcW, _param.dstW, _param.channels, _ix.data, _ax.data);
+            _bx[0].Resize(rs, false, _param.align);
+            _bx[1].Resize(rs, false, _param.align);
+        }
+
+        void ResizerBf16Bilinear::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            Run((const uint16_t*)src, srcStride / sizeof(uint16_t), (uint16_t*)dst, dstStride / sizeof(uint16_t));
+        }
+
+        void ResizerBf16Bilinear::Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
+        {
+            size_t cn = _param.channels;
+            size_t rs = _param.dstW * cn;
+            float* pbx[2] = { _bx[0].data, _bx[1].data };
+            int32_t prev = -2;
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                float fy1 = _ay[dy];
+                float fy0 = 1.0f - fy1;
+                int32_t sy = _iy[dy];
+                int32_t k = 0;
+
+                if (sy == prev)
+                    k = 2;
+                else if (sy == prev + 1)
+                {
+                    Swap(pbx[0], pbx[1]);
+                    k = 1;
+                }
+
+                prev = sy;
+
+                for (; k < 2; k++)
+                {
+                    float* pb = pbx[k];
+                    const uint16_t* ps = src + (sy + k) * srcStride;
+                    for (size_t dx = 0; dx < rs; dx++)
+                    {
+                        int32_t sx = _ix[dx];
+                        float fx = _ax[dx];
+                        pb[dx] = BFloat16ToFloat32(ps[sx]) * (1.0f - fx) + BFloat16ToFloat32(ps[sx + cn]) * fx;
+                    }
+                }
+
+                for (size_t dx = 0; dx < rs; dx++)
+                    dst[dx] = Float32ToBFloat16(pbx[0][dx] * fy0 + pbx[1][dx] * fy1);
             }
         }
     }
