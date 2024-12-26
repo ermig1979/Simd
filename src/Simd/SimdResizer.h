@@ -350,6 +350,15 @@ namespace Simd
         public:
             ResizerFloatBilinear(const ResParam& param);
         };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerBf16Bilinear : public Base::ResizerBf16Bilinear
+        {
+            virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+        public:
+            ResizerBf16Bilinear(const ResParam& param);
+        };
         
         //-------------------------------------------------------------------------------------------------
 

@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdResizerCommon.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
@@ -668,6 +669,91 @@ namespace Simd
                 }
                 for (; dx < rs; dx++)
                     dst[dx] = pbx[0][dx] * fy0 + pbx[1][dx] * fy1;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        ResizerBf16Bilinear::ResizerBf16Bilinear(const ResParam& param)
+            : Base::ResizerBf16Bilinear(param)
+        {
+        }
+
+        void ResizerBf16Bilinear::Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
+        {
+            size_t cn = _param.channels;
+            size_t rs = _param.dstW * cn;
+            float* pbx[2] = { _bx[0].data, _bx[1].data };
+            int32_t prev = -2;
+            size_t rsh = AlignLo(rs, Sse41::F);
+            __m128 _1 = _mm_set1_ps(1.0f);
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                float fy1 = _ay[dy];
+                float fy0 = 1.0f - fy1;
+                int32_t sy = _iy[dy];
+                int32_t k = 0;
+
+                if (sy == prev)
+                    k = 2;
+                else if (sy == prev + 1)
+                {
+                    Swap(pbx[0], pbx[1]);
+                    k = 1;
+                }
+
+                prev = sy;
+
+                for (; k < 2; k++)
+                {
+                    float* pb = pbx[k];
+                    const uint16_t* ps = src + (sy + k) * srcStride;
+                    size_t dx = 0;
+                    //if (cn == 1)
+                    //{
+                    //    for (; dx < rsh; dx += Sse41::F)
+                    //    {
+                    //        __m128 s01 = Sse41::Load(ps + _ix[dx + 0], ps + _ix[dx + 1]);
+                    //        __m128 s23 = Sse41::Load(ps + _ix[dx + 2], ps + _ix[dx + 3]);
+                    //        __m128 fx1 = _mm_load_ps(_ax.data + dx);
+                    //        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                    //        __m128 m0 = _mm_mul_ps(fx0, _mm_shuffle_ps(s01, s23, 0x88));
+                    //        __m128 m1 = _mm_mul_ps(fx1, _mm_shuffle_ps(s01, s23, 0xDD));
+                    //        _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                    //    }
+                    //}
+                    //if (cn == 3 && rs > 3)
+                    //{
+                    //    size_t rs3 = rs - 3;
+                    //    for (; dx < rs3; dx += 3)
+                    //    {
+                    //        __m128 s0 = _mm_loadu_ps(ps + _ix[dx] + 0);
+                    //        __m128 s1 = _mm_loadu_ps(ps + _ix[dx] + 3);
+                    //        __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
+                    //        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                    //        _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
+                    //    }
+                    //}
+                    for (; dx < rs; dx++)
+                    {
+                        int32_t sx = _ix[dx];
+                        float fx = _ax[dx];
+                        pb[dx] = Base::BFloat16ToFloat32(ps[sx]) * (1.0f - fx) + Base::BFloat16ToFloat32(ps[sx + cn]) * fx;
+                    }
+                }
+
+                size_t dx = 0;
+                __m128 _fy0 = _mm_set1_ps(fy0);
+                __m128 _fy1 = _mm_set1_ps(fy1);
+                for (; dx < rsh; dx += Sse41::F)
+                {
+                    __m128 m0 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx), _fy0);
+                    __m128 m1 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx), _fy1);
+                    __m128i d0 = Float32ToBFloat16(_mm_add_ps(m0, m1));
+                    _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(d0, K_ZERO));
+                }
+                for (; dx < rs; dx++)
+                    dst[dx] = Base::Float32ToBFloat16(pbx[0][dx] * fy0 + pbx[1][dx] * fy1);
             }
         }
     }
