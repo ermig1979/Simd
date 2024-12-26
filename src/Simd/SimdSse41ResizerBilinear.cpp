@@ -681,7 +681,7 @@ namespace Simd
 
         void ResizerBf16Bilinear::Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
-            size_t cn = _param.channels;
+            size_t cn = _param.channels, cnF = AlignLo(cn, F);
             size_t rs = _param.dstW * cn;
             float* pbx[2] = { _bx[0].data, _bx[1].data };
             int32_t prev = -2;
@@ -709,31 +709,20 @@ namespace Simd
                     float* pb = pbx[k];
                     const uint16_t* ps = src + (sy + k) * srcStride;
                     size_t dx = 0;
-                    //if (cn == 1)
-                    //{
-                    //    for (; dx < rsh; dx += Sse41::F)
-                    //    {
-                    //        __m128 s01 = Sse41::Load(ps + _ix[dx + 0], ps + _ix[dx + 1]);
-                    //        __m128 s23 = Sse41::Load(ps + _ix[dx + 2], ps + _ix[dx + 3]);
-                    //        __m128 fx1 = _mm_load_ps(_ax.data + dx);
-                    //        __m128 fx0 = _mm_sub_ps(_1, fx1);
-                    //        __m128 m0 = _mm_mul_ps(fx0, _mm_shuffle_ps(s01, s23, 0x88));
-                    //        __m128 m1 = _mm_mul_ps(fx1, _mm_shuffle_ps(s01, s23, 0xDD));
-                    //        _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
-                    //    }
-                    //}
-                    //if (cn == 3 && rs > 3)
-                    //{
-                    //    size_t rs3 = rs - 3;
-                    //    for (; dx < rs3; dx += 3)
-                    //    {
-                    //        __m128 s0 = _mm_loadu_ps(ps + _ix[dx] + 0);
-                    //        __m128 s1 = _mm_loadu_ps(ps + _ix[dx] + 3);
-                    //        __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
-                    //        __m128 fx0 = _mm_sub_ps(_1, fx1);
-                    //        _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
-                    //    }
-                    //}
+                    if (cn == cnF)
+                    {
+                        for (; dx < rsh; dx += Sse41::F)
+                        {
+                            const uint16_t* ps0 = ps + _ix[dx];
+                            __m128 s0 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)ps0)));
+                            __m128 s1 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(ps0 + cn))));
+                            __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                            __m128 fx0 = _mm_sub_ps(_1, fx1);
+                            __m128 m0 = _mm_mul_ps(fx0, s0);
+                            __m128 m1 = _mm_mul_ps(fx1, s1);
+                            _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                        }
+                    }
                     for (; dx < rs; dx++)
                     {
                         int32_t sx = _ix[dx];
