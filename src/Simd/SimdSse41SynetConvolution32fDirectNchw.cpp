@@ -332,6 +332,8 @@ namespace Simd
             if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
                 return false;
             double k = double(p.srcC) / p.group * p.strideX * p.strideX * p.strideY / p.kernelX / p.kernelY;
+            if (p.srcC == 1 && p.dstC == 1 && p.IsStride(1) && p.IsDilation(1))
+                return true;
             return k < 2.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3)) && p.trans == 0;
         }
 

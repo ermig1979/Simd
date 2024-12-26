@@ -244,7 +244,7 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(12, 2000, 5, 5, 255, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(24, 2048, 6, 6, 255, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 816, 14, 14, 816, _5, _1, _1, _2, _2, 816, aRe, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 304, 16, 16, 304, _3, _1, _1, _1, _1, 304, aRe, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 304, 16, 16, 304, _7, _1, _1, _3, _3, 304, aPr, t), f1, f2);
@@ -252,6 +252,9 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 608, 7, 7, 608, _7, _1, _1, _3, _3, 608, aRe, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 152, 32, 32, 152, _7, _1, _1, _3, _3, 152, aRe, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 76, 64, 64, 76, _7, _1, _1, _3, _3, 76, aRe, t), f1, f2);
+#endif
+#if 1
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 1, 80, 240, 1, _3, _1, _1, _1, _1, 1, aRe, t), f1, f2);
 #endif
 #else
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 256, 44, 44, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
@@ -270,7 +273,7 @@ namespace Test
         const SimdBool tF = SimdFalse, tT = SimdTrue;
 
 #ifdef NDEBUG
-        //result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationGelu, tF, f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationGelu, tF, f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationRelu, tT, f1, f2);
 #else
         //result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationGelu, tF, f1, f2);
