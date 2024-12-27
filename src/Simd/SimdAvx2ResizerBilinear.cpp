@@ -896,7 +896,7 @@ namespace Simd
                             _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
                         }
                     }
-                    else if (Avx2::SlowGather)
+                    else if (!Avx2::SlowGather)
                     {
                         __m256 _1 = _mm256_set1_ps(1.0f);
                         __m256i _cn = _mm256_set1_epi32((int)cn);

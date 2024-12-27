@@ -199,6 +199,7 @@ namespace Simd
         class ResizerBf16Bilinear : public Resizer
         {
         protected:
+            bool _rowBuf;
             Array32i _ix, _iy;
             Array32f _ax, _ay, _bx[2];
 

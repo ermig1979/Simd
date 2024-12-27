@@ -250,7 +250,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static void EstimateIndexAlpha(const ResParam& param, size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, float* alphas)
+        static void EstimateIndexAlpha(const ResParam& param, size_t srcSize, size_t dstSize, size_t channels, size_t iaChannels, int32_t* indices, float* alphas)
         {
             if (param.method == SimdResizeMethodBilinear)
             {
@@ -270,9 +270,9 @@ namespace Simd
                         index = srcSize - 2;
                         alpha = 1;
                     }
-                    for (size_t c = 0; c < channels; c++)
+                    for (size_t c = 0; c < iaChannels; c++)
                     {
-                        size_t offset = i * channels + c;
+                        size_t offset = i * iaChannels + c;
                         indices[offset] = (int32_t)(channels * index + c);
                         alphas[offset] = alpha;
                     }
@@ -291,9 +291,9 @@ namespace Simd
                         index = srcSize - 2;
                         alpha = 1;
                     }
-                    for (size_t c = 0; c < channels; c++)
+                    for (size_t c = 0; c < iaChannels; c++)
                     {
-                        size_t offset = i * channels + c;
+                        size_t offset = i * iaChannels + c;
                         indices[offset] = (int32_t)(channels * index + c);
                         alphas[offset] = alpha;
                     }
@@ -317,9 +317,9 @@ namespace Simd
                         index = srcSize - 2;
                         alpha = 1;
                     }
-                    for (size_t c = 0; c < channels; c++)
+                    for (size_t c = 0; c < iaChannels; c++)
                     {
-                        size_t offset = i * channels + c;
+                        size_t offset = i * iaChannels + c;
                         indices[offset] = (int32_t)(channels * index + c);
                         alphas[offset] = alpha;
                     }
@@ -336,11 +336,11 @@ namespace Simd
         {
             _ay.Resize(_param.dstH, false, _param.align);
             _iy.Resize(_param.dstH, false, _param.align);
-            EstimateIndexAlpha(_param, _param.srcH, _param.dstH, 1, _iy.data, _ay.data);
+            EstimateIndexAlpha(_param, _param.srcH, _param.dstH, 1, 1, _iy.data, _ay.data);
             size_t rs = _param.dstW * _param.channels;
             _ax.Resize(rs, false, _param.align);
             _ix.Resize(rs, false, _param.align);
-            EstimateIndexAlpha(_param, _param.srcW, _param.dstW, _param.channels, _ix.data, _ax.data);
+            EstimateIndexAlpha(_param, _param.srcW, _param.dstW, _param.channels, _param.channels, _ix.data, _ax.data);
             _bx[0].Resize(rs, false, _param.align);
             _bx[1].Resize(rs, false, _param.align);
         }
@@ -395,15 +395,19 @@ namespace Simd
         ResizerBf16Bilinear::ResizerBf16Bilinear(const ResParam& param)
             : Resizer(param)
         {
+            _rowBuf = !(_param.align >= 16 && (_param.channels >= _param.align / 4 || _param.channels == 64));
             _ay.Resize(_param.dstH, false, _param.align);
             _iy.Resize(_param.dstH, false, _param.align);
-            EstimateIndexAlpha(_param, _param.srcH, _param.dstH, 1, _iy.data, _ay.data);
-            size_t rs = _param.dstW * _param.channels;
+            EstimateIndexAlpha(_param, _param.srcH, _param.dstH, 1, 1, _iy.data, _ay.data);
+            size_t rs = _param.dstW * (_rowBuf ? _param.channels : 1);
             _ax.Resize(rs, false, _param.align);
             _ix.Resize(rs, false, _param.align);
-            EstimateIndexAlpha(_param, _param.srcW, _param.dstW, _param.channels, _ix.data, _ax.data);
-            _bx[0].Resize(rs, false, _param.align);
-            _bx[1].Resize(rs, false, _param.align);
+            EstimateIndexAlpha(_param, _param.srcW, _param.dstW, _param.channels, _rowBuf ? _param.channels : 1, _ix.data, _ax.data);
+            if (_rowBuf)
+            {
+                _bx[0].Resize(rs, false, _param.align);
+                _bx[1].Resize(rs, false, _param.align);
+            }
         }
 
         void ResizerBf16Bilinear::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)

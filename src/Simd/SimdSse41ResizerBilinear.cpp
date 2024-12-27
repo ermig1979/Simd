@@ -681,68 +681,109 @@ namespace Simd
 
         void ResizerBf16Bilinear::Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
-            size_t cn = _param.channels, cnF = AlignLo(cn, F);
-            size_t rs = _param.dstW * cn;
-            float* pbx[2] = { _bx[0].data, _bx[1].data };
-            int32_t prev = -2;
-            size_t rsh = AlignLo(rs, Sse41::F);
+            size_t cn = _param.channels, cnF = AlignLo(cn, F), cnT = cn - cnF;
             __m128 _1 = _mm_set1_ps(1.0f);
-            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            if (_rowBuf)
             {
-                float fy1 = _ay[dy];
-                float fy0 = 1.0f - fy1;
-                int32_t sy = _iy[dy];
-                int32_t k = 0;
-
-                if (sy == prev)
-                    k = 2;
-                else if (sy == prev + 1)
+                size_t rs = _param.dstW * cn, rsF = AlignLo(rs, Sse41::F);
+                float* pbx[2] = { _bx[0].data, _bx[1].data };
+                int32_t prev = -2;
+                for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
                 {
-                    Swap(pbx[0], pbx[1]);
-                    k = 1;
-                }
+                    float fy1 = _ay[dy];
+                    float fy0 = 1.0f - fy1;
+                    int32_t sy = _iy[dy];
+                    int32_t k = 0;
 
-                prev = sy;
-
-                for (; k < 2; k++)
-                {
-                    float* pb = pbx[k];
-                    const uint16_t* ps = src + (sy + k) * srcStride;
-                    size_t dx = 0;
-                    if (cn == cnF)
+                    if (sy == prev)
+                        k = 2;
+                    else if (sy == prev + 1)
                     {
-                        for (; dx < rsh; dx += Sse41::F)
+                        Swap(pbx[0], pbx[1]);
+                        k = 1;
+                    }
+
+                    prev = sy;
+
+                    for (; k < 2; k++)
+                    {
+                        float* pb = pbx[k];
+                        const uint16_t* ps = src + (sy + k) * srcStride;
+                        size_t dx = 0;
+                        if (cn == cnF)
                         {
-                            const uint16_t* ps0 = ps + _ix[dx];
-                            __m128 s0 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)ps0)));
-                            __m128 s1 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(ps0 + cn))));
-                            __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
-                            __m128 fx0 = _mm_sub_ps(_1, fx1);
-                            __m128 m0 = _mm_mul_ps(fx0, s0);
-                            __m128 m1 = _mm_mul_ps(fx1, s1);
-                            _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                            for (; dx < rsF; dx += Sse41::F)
+                            {
+                                const uint16_t* ps0 = ps + _ix[dx];
+                                __m128 s0 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)ps0)));
+                                __m128 s1 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(ps0 + cn))));
+                                __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                                __m128 fx0 = _mm_sub_ps(_1, fx1);
+                                __m128 m0 = _mm_mul_ps(fx0, s0);
+                                __m128 m1 = _mm_mul_ps(fx1, s1);
+                                _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                            }
+                        }
+                        for (; dx < rs; dx++)
+                        {
+                            int32_t sx = _ix[dx];
+                            float fx = _ax[dx];
+                            pb[dx] = Base::BFloat16ToFloat32(ps[sx]) * (1.0f - fx) + Base::BFloat16ToFloat32(ps[sx + cn]) * fx;
                         }
                     }
-                    for (; dx < rs; dx++)
+
+                    size_t dx = 0;
+                    __m128 _fy0 = _mm_set1_ps(fy0);
+                    __m128 _fy1 = _mm_set1_ps(fy1);
+                    for (; dx < rsF; dx += Sse41::F)
                     {
-                        int32_t sx = _ix[dx];
-                        float fx = _ax[dx];
-                        pb[dx] = Base::BFloat16ToFloat32(ps[sx]) * (1.0f - fx) + Base::BFloat16ToFloat32(ps[sx + cn]) * fx;
+                        __m128 m0 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx), _fy0);
+                        __m128 m1 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx), _fy1);
+                        __m128i d0 = Float32ToBFloat16(_mm_add_ps(m0, m1));
+                        _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(d0, K_ZERO));
+                    }
+                    for (; dx < rs; dx++)
+                        dst[dx] = Base::Float32ToBFloat16(pbx[0][dx] * fy0 + pbx[1][dx] * fy1);
+                }
+            }
+            else
+            {
+                for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+                {
+                    __m128 fy1 = _mm_set1_ps(_ay[dy]);
+                    __m128 fy0 = _mm_sub_ps(_1, fy1);
+                    const uint16_t* src0 = src + _iy[dy] * srcStride, * src1 = src0 + srcStride;
+                    for (size_t dx = 0; dx < _param.dstW; dx++)
+                    {
+                        size_t os = _ix[dx], end = os + cnF, od = dx * cn;
+                        __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                        for (; os < end; os += F, od += F)
+                        {
+                            __m128 s00 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src0 + os))));
+                            __m128 s01 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src0 + os + cn))));
+                            __m128 s10 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src1 + os))));
+                            __m128 s11 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src1 + os + cn))));
+                            __m128 r0 = _mm_add_ps(_mm_mul_ps(fx0, s00), _mm_mul_ps(fx1, s01));
+                            __m128 r1 = _mm_add_ps(_mm_mul_ps(fx0, s10), _mm_mul_ps(fx1, s11));
+                            __m128i d0 = Float32ToBFloat16(_mm_add_ps(_mm_mul_ps(r0, fy0), _mm_mul_ps(r1, fy1)));
+                            _mm_storel_epi64((__m128i*)(dst + od), _mm_packus_epi32(d0, K_ZERO));
+                        }
+                        if (cnT)
+                        {
+                            os += cnT - F;
+                            od += cnT - F;
+                            __m128 s00 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src0 + os))));
+                            __m128 s01 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src0 + os + cn))));
+                            __m128 s10 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src1 + os))));
+                            __m128 s11 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src1 + os + cn))));
+                            __m128 r0 = _mm_add_ps(_mm_mul_ps(fx0, s00), _mm_mul_ps(fx1, s01));
+                            __m128 r1 = _mm_add_ps(_mm_mul_ps(fx0, s10), _mm_mul_ps(fx1, s11));
+                            __m128i d0 = Float32ToBFloat16(_mm_add_ps(_mm_mul_ps(r0, fy0), _mm_mul_ps(r1, fy1)));
+                            _mm_storel_epi64((__m128i*)(dst + od), _mm_packus_epi32(d0, K_ZERO));
+                        }
                     }
                 }
-
-                size_t dx = 0;
-                __m128 _fy0 = _mm_set1_ps(fy0);
-                __m128 _fy1 = _mm_set1_ps(fy1);
-                for (; dx < rsh; dx += Sse41::F)
-                {
-                    __m128 m0 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx), _fy0);
-                    __m128 m1 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx), _fy1);
-                    __m128i d0 = Float32ToBFloat16(_mm_add_ps(m0, m1));
-                    _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(d0, K_ZERO));
-                }
-                for (; dx < rs; dx++)
-                    dst[dx] = Base::Float32ToBFloat16(pbx[0][dx] * fy0 + pbx[1][dx] * fy1);
             }
         }
     }

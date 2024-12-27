@@ -246,10 +246,17 @@ namespace Test
     {
         bool result = true;
 
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 64, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 16, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 64, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 16, f1, f2);
-        result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelFloat, 16, f1, f2);
-        result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelBf16, 16, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 10, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 10, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 3, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 4, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 3, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 2, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 1, f1, f2);
 
         return result;
 
