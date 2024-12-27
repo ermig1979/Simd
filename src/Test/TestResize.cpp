@@ -223,9 +223,9 @@ namespace Test
         bool result = true;
 
         result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
-        //result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
-        //result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
 
 #if 0

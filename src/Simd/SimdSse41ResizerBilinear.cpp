@@ -679,6 +679,9 @@ namespace Simd
         {
         }
 
+        __m128i K8_IDX_20 = SIMD_MM_SETR_EPI8(-1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB);
+        __m128i K8_IDX_21 = SIMD_MM_SETR_EPI8(-1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF);
+
         void ResizerBf16Bilinear::Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
             size_t cn = _param.channels, cnF = AlignLo(cn, F), cnT = cn - cnF;
@@ -722,6 +725,52 @@ namespace Simd
                                 __m128 m0 = _mm_mul_ps(fx0, s0);
                                 __m128 m1 = _mm_mul_ps(fx1, s1);
                                 _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                            }
+                        }
+                        if (cn == 1)
+                        {
+                            for (; dx < rsF; dx += Sse41::F)
+                            {
+                                SIMD_ALIGNED(16) uint32_t buf[4];
+                                buf[0] = *(uint32_t*)(ps + _ix[dx + 0]);
+                                buf[1] = *(uint32_t*)(ps + _ix[dx + 1]);
+                                buf[2] = *(uint32_t*)(ps + _ix[dx + 2]);
+                                buf[3] = *(uint32_t*)(ps + _ix[dx + 3]);
+                                __m128i _src = _mm_loadu_si128((__m128i*)buf);
+                                __m128 s0 = BFloat16ToFloat32Even(_src);
+                                __m128 s1 = BFloat16ToFloat32Odd(_src);
+                                __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                                __m128 fx0 = _mm_sub_ps(_1, fx1);
+                                __m128 m0 = _mm_mul_ps(fx0, s0);
+                                __m128 m1 = _mm_mul_ps(fx1, s1);
+                                _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                            }
+                        }
+                        if (cn == 2)
+                        {
+                            for (; dx < rsF; dx += Sse41::F)
+                            {
+                                __m128i _src = Load((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 2]));
+                                __m128 s0 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, K8_IDX_20));
+                                __m128 s1 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, K8_IDX_21));
+                                __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                                __m128 fx0 = _mm_sub_ps(_1, fx1);
+                                __m128 m0 = _mm_mul_ps(fx0, s0);
+                                __m128 m1 = _mm_mul_ps(fx1, s1);
+                                _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                            }
+                        }
+                        if (cn == 3 && rs > 3)
+                        {
+                            size_t rs3 = rs - 3;
+                            for (; dx < rs3; dx += 3)
+                            {
+                                const uint16_t* ps0 = ps + _ix[dx];
+                                __m128 s0 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)ps0)));
+                                __m128 s1 = BFloat16ToFloat32(UnpackU16<0>(_mm_loadl_epi64((__m128i*)(ps0 + 3))));
+                                __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
+                                __m128 fx0 = _mm_sub_ps(_1, fx1);
+                                _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
                             }
                         }
                         for (; dx < rs; dx++)
