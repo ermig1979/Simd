@@ -180,7 +180,7 @@ namespace Test
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, channels, type, method));
 
         if (type == SimdResizeChannelFloat)
-            result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
+            result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceBoth);
         else if (type == SimdResizeChannelBf16)
         {
             View dst32f1(dstW, dstH, View::Float), dst32f2(dstW, dstH, View::Float);
@@ -189,7 +189,7 @@ namespace Test
                 SimdBFloat16ToFloat32(dst1.Row<uint16_t>(row), dstW, dst32f1.Row<float>(row));
                 SimdBFloat16ToFloat32(dst2.Row<uint16_t>(row), dstW, dst32f2.Row<float>(row));
             }
-            result = result && Compare(dst32f1, dst32f2, EPS*8.0f, true, 64, DifferenceAbsolute);
+            result = result && Compare(dst32f1, dst32f2, EPS*8.0f, true, 64, DifferenceBoth);
         }
         else if(type == SimdResizeChannelShort)
             result = result && Compare(dst1, dst2, 1, true, 64);
