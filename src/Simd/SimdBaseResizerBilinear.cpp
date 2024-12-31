@@ -395,7 +395,7 @@ namespace Simd
         ResizerBf16Bilinear::ResizerBf16Bilinear(const ResParam& param)
             : Resizer(param)
         {
-            _rowBuf = !(_param.align >= 16 && (_param.channels >= _param.align / 4 || _param.channels == 64));
+            _rowBuf = !(_param.align >= 16 && (_param.channels >= _param.align / 4 || _param.channels == 64)) || _param.dstH >= _param.srcH;
             _ay.Resize(_param.dstH, false, _param.align);
             _iy.Resize(_param.dstH, false, _param.align);
             EstimateIndexAlpha(_param, _param.srcH, _param.dstH, 1, 1, _iy.data, _ay.data);
