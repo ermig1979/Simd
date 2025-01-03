@@ -409,7 +409,7 @@ namespace Simd
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
-#endif //SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
@@ -449,6 +449,8 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
 
+        //-------------------------------------------------------------------------------------------------
+
         class ResizerShortBilinear : public Sse41::ResizerShortBilinear
         {
         protected:
@@ -460,11 +462,22 @@ namespace Simd
             ResizerShortBilinear(const ResParam& param);
         };
 
+        //-------------------------------------------------------------------------------------------------
+
         class ResizerFloatBilinear : public Sse41::ResizerFloatBilinear
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
         public:
             ResizerFloatBilinear(const ResParam & param);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerBf16Bilinear : public Sse41::ResizerBf16Bilinear
+        {
+            virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+        public:
+            ResizerBf16Bilinear(const ResParam& param);
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -508,7 +521,7 @@ namespace Simd
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
-#endif //SIMD_AVX2_ENABLE 
+#endif 
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
