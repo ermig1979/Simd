@@ -963,7 +963,7 @@ namespace Simd
             __m128 _1 = _mm_set1_ps(1.0f);
             if (_rowBuf)
             {
-                size_t rs = _param.dstW * cn, rsF = AlignLo(rs, Sse41::F);
+                size_t rs = _param.dstW * cn, rsH = AlignLo(rs, Sse41::F), rsF = AlignLo(rs, F);
                 float* pbx[2] = { _bx[0].data, _bx[1].data };
                 int32_t prev = -2;
                 for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
@@ -990,7 +990,7 @@ namespace Simd
                         size_t dx = 0;
                         if (cn == 1)
                         {
-                            for (; dx < rsF; dx += Sse41::F)
+                            for (; dx < rsH; dx += Sse41::F)
                             {
                                 SIMD_ALIGNED(16) uint32_t buf[4];
                                 buf[0] = *(uint32_t*)(ps + _ix[dx + 0]);
@@ -1009,7 +1009,7 @@ namespace Simd
                         }
                         if (cn == 2)
                         {
-                            for (; dx < rsF; dx += Sse41::F)
+                            for (; dx < rsH; dx += Sse41::F)
                             {
                                 __m128i _src = Sse41::Load((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 2]));
                                 __m128 s0 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, K8_IDX_20));
@@ -1053,12 +1053,17 @@ namespace Simd
                     }
 
                     size_t dx = 0;
-                    __m128 _fy0 = _mm_set1_ps(fy0);
-                    __m128 _fy1 = _mm_set1_ps(fy1);
-                    for (; dx < rsF; dx += Sse41::F)
+                    __m256 _fy0 = _mm256_set1_ps(fy0);
+                    __m256 _fy1 = _mm256_set1_ps(fy1);
+                    for (; dx < rsF; dx += F)
                     {
-                        __m128 m0 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx), _fy0);
-                        __m128 m1 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx), _fy1);
+                        __m256i d0 = Float32ToBFloat16(_mm256_fmadd_ps(_mm256_loadu_ps(pbx[0] + dx), _fy0, _mm256_mul_ps(_mm256_loadu_ps(pbx[1] + dx), _fy1)));
+                        _mm_storeu_si128((__m128i*)(dst + dx), _mm256_castsi256_si128(_mm256_permute4x64_epi64(_mm256_packus_epi32(d0, K_ZERO), 0xD8)));
+                    }
+                    for (; dx < rsH; dx += Sse41::F)
+                    {
+                        __m128 m0 = _mm_mul_ps(_mm_loadu_ps(pbx[0] + dx), _mm256_castps256_ps128(_fy0));
+                        __m128 m1 = _mm_mul_ps(_mm_loadu_ps(pbx[1] + dx), _mm256_castps256_ps128(_fy1));
                         __m128i d0 = Sse41::Float32ToBFloat16(_mm_add_ps(m0, m1));
                         _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(d0, Sse41::K_ZERO));
                     }

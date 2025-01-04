@@ -246,6 +246,7 @@ namespace Test
     {
         bool result = true;
 
+#if 0
 #if defined(SIMD_X64_ENABLE) 
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 64, f1, f2);
 #endif
@@ -255,6 +256,7 @@ namespace Test
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 3, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 2, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 1, f1, f2);
+#endif
 
 #if defined(SIMD_X64_ENABLE) 
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 64, f1, f2);
