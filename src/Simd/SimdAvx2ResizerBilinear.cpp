@@ -997,7 +997,20 @@ namespace Simd
                         float* pb = pbx[k];
                         const uint16_t* ps = src + (sy + k) * srcStride;
                         size_t dx = 0;
-                        if (cn >= 4)
+                        if (cn >= 8)
+                        {
+                            for (; dx < rs;)
+                            {
+                                const uint16_t* ps0 = ps + _ix[dx];
+                                __m256 fx1 = _mm256_set1_ps(_ax[dx]);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                for (size_t end = dx + cnF; dx < end; dx +=F, ps0 += F)
+                                    _mm256_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
+                                if (cnTF)
+                                    _mm256_storeu_ps(pb + dx + cnLF, BilinearRowSumBf16(ps0 + cnLF, cn, fx0, fx1)), dx += cnTF;
+                            }
+                        }
+                        else if (cn >= 4)
                         {
                             for (; dx < rs;)
                             {
