@@ -1025,6 +1025,39 @@ namespace Simd
                         }                        
                         if (cn == 1)
                         {
+                            if (Avx2::SlowGather)
+                            {
+                                for (; dx < rsF; dx += F)
+                                {
+                                    SIMD_ALIGNED(32) uint32_t buf[8];
+                                    buf[0] = *(uint32_t*)(ps + _ix[dx + 0]);
+                                    buf[1] = *(uint32_t*)(ps + _ix[dx + 1]);
+                                    buf[2] = *(uint32_t*)(ps + _ix[dx + 2]);
+                                    buf[3] = *(uint32_t*)(ps + _ix[dx + 3]);
+                                    buf[4] = *(uint32_t*)(ps + _ix[dx + 4]);
+                                    buf[5] = *(uint32_t*)(ps + _ix[dx + 5]);
+                                    buf[6] = *(uint32_t*)(ps + _ix[dx + 6]);
+                                    buf[7] = *(uint32_t*)(ps + _ix[dx + 7]);
+                                    __m256i _src = _mm256_loadu_si256((__m256i*)buf);
+                                    __m256 s0 = BFloat16ToFloat32Even(_src);
+                                    __m256 s1 = BFloat16ToFloat32Odd(_src);
+                                    __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
+                                    __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                    _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
+                                }
+                            }
+                            else
+                            {
+                                for (; dx < rsF; dx += F)
+                                {
+                                    __m256i _src = _mm256_i32gather_epi32((int*)ps, _mm256_loadu_si256((__m256i*)(_ix.data + dx)), 2);
+                                    __m256 s0 = BFloat16ToFloat32Even(_src);
+                                    __m256 s1 = BFloat16ToFloat32Odd(_src);
+                                    __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
+                                    __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                    _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
+                                }
+                            }
                             for (; dx < rsH; dx += Sse41::F)
                             {
                                 SIMD_ALIGNED(16) uint32_t buf[4];
