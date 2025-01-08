@@ -41,8 +41,10 @@ namespace Simd
                 return new ResizerByteBilinear(param);
             else if (param.IsShortBilinear() && dstX > F)
                 return new ResizerShortBilinear(param);
-            if (param.IsFloatBilinear())
+            else if (param.IsFloatBilinear())
                 return new ResizerFloatBilinear(param);
+            else if (param.IsBf16Bilinear())
+                return new ResizerBf16Bilinear(param);
             else if (param.IsByteBicubic())
                 return new ResizerByteBicubic(param);
             else if (param.IsByteArea2x2())
