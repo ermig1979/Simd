@@ -150,6 +150,11 @@ namespace Simd
             return _mm256_insertf128_ps(_mm256_castps128_ps256(Sse41::Load(p0, p1)), Sse41::Load(p2, p3), 1);
         }
 
+        SIMD_INLINE __m256i Load(const __m128i* p0, const __m128i* p1, const __m128i* p2, const __m128i* p3)
+        {
+            return _mm256_insertf128_si256(_mm256_castsi128_si256(Sse41::Load(p0, p1)), Sse41::Load(p2, p3), 1);
+        }
+
         SIMD_INLINE __m256 Load(const float* ptr, size_t size)
         {
             SIMD_ALIGNED(32) float buf[F] = { 0 };

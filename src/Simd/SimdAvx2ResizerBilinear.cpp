@@ -947,8 +947,12 @@ namespace Simd
         {
         }
 
-        __m128i K8_IDX_20 = SIMD_MM_SETR_EPI8(-1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB);
-        __m128i K8_IDX_21 = SIMD_MM_SETR_EPI8(-1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF);
+        __m256i K8_IDX_20 = SIMD_MM256_SETR_EPI8(
+            -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB,
+            -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB);
+        __m256i K8_IDX_21 = SIMD_MM256_SETR_EPI8(
+            -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF,
+            -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF);
 
         SIMD_INLINE __m128 BilinearRowSumBf16(const uint16_t* src, size_t channels, __m128 fx0, __m128 fx1)
         {
@@ -1075,11 +1079,20 @@ namespace Simd
                         }
                         if (cn == 2)
                         {
+                            for (; dx < rsF; dx += F)
+                            {
+                                __m256i _src = Load((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 2]), (__m128i*)(ps + _ix[dx + 4]), (__m128i*)(ps + _ix[dx + 6]));
+                                __m256 s0 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_20));
+                                __m256 s1 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_21));
+                                __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
+                            }
                             for (; dx < rsH; dx += Sse41::F)
                             {
                                 __m128i _src = Sse41::Load((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 2]));
-                                __m128 s0 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, K8_IDX_20));
-                                __m128 s1 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, K8_IDX_21));
+                                __m128 s0 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, _mm256_castsi256_si128(K8_IDX_20)));
+                                __m128 s1 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, _mm256_castsi256_si128(K8_IDX_21)));
                                 __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
                                 __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
                                 _mm_storeu_ps(pb + dx, _mm_fmadd_ps(fx0, s0, _mm_mul_ps(fx1, s1)));
