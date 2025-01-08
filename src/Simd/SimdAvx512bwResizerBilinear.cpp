@@ -900,11 +900,19 @@ namespace Simd
             return _mm512_fmadd_ps(fx0, s0, _mm512_mul_ps(fx1, s1));
         }
 
+        SIMD_INLINE __m512 BilinearRowSumBf16(const uint16_t* src0, const uint16_t* src1, __mmask8 mask, size_t channels, __m512 fx0, __m512 fx1)
+        {
+            __m256i _src0 = _mm256_inserti32x4(_mm256_castsi128_si256(_mm_maskz_loadu_epi16(mask, src0)), _mm_maskz_loadu_epi16(mask, src1), 1);
+            __m256i _src1 = _mm256_inserti32x4(_mm256_castsi128_si256(_mm_maskz_loadu_epi16(mask, src0 + channels)), _mm_maskz_loadu_epi16(mask, src1 + channels), 1);
+            __m512 s0 = BFloat16ToFloat32(_mm512_cvtepu16_epi32(_src0));
+            __m512 s1 = BFloat16ToFloat32(_mm512_cvtepu16_epi32(_src1));
+            return _mm512_fmadd_ps(fx0, s0, _mm512_mul_ps(fx1, s1));
+        }
+
         void ResizerBf16Bilinear::Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
             size_t cn = _param.channels, cnF = AlignLo(cn, F), cnH = AlignLo(cn, F / 2);
             __mmask16 cnMF = TailMask16(cn - cnF);
-            __mmask8 cnMH = TailMask16(cn - cnH);
             __m512 _1 = _mm512_set1_ps(1.0f);
             if (_rowBuf)
             {
@@ -1080,6 +1088,7 @@ namespace Simd
             {
                 if (cn <= HF)
                 {
+                    __mmask8 cnMH = TailMask16(cn);
                     for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
                     {
                         __m256 fy1 = _mm256_set1_ps(_ay[dy]);
@@ -1090,13 +1099,13 @@ namespace Simd
                             size_t os = _ix[dx], eH = os + cnH, od = dx * cn;
                             __m256 fx1 = _mm256_set1_ps(_ax[dx]);
                             __m256 fx0 = _mm256_sub_ps(_mm512_castps512_ps256(_1), fx1);
-                            for (; os < eH; os += F, od += HF)
-                            {
-                                __m256 r0 = BilinearRowSumBf16(src0 + os, -1, cn, fx0, fx1);
-                                __m256 r1 = BilinearRowSumBf16(src1 + os, -1, cn, fx0, fx1);
-                                __m256i d0 = Avx2::Float32ToBFloat16(_mm256_fmadd_ps(r0, fy0, _mm256_mul_ps(r1, fy1)));
-                                _mm_mask_storeu_epi16(dst + od, -1, _mm256_castsi256_si128(_mm256_permute4x64_epi64(_mm256_packus_epi32(d0, Avx2::K_ZERO), 0xD8)));
-                            }
+                            //for (; os < eH; os += HF, od += HF)
+                            //{
+                            //    __m256 r0 = BilinearRowSumBf16(src0 + os, -1, cn, fx0, fx1);
+                            //    __m256 r1 = BilinearRowSumBf16(src1 + os, -1, cn, fx0, fx1);
+                            //    __m256i d0 = Avx2::Float32ToBFloat16(_mm256_fmadd_ps(r0, fy0, _mm256_mul_ps(r1, fy1)));
+                            //    _mm_mask_storeu_epi16(dst + od, -1, _mm256_castsi256_si128(_mm256_permute4x64_epi64(_mm256_packus_epi32(d0, Avx2::K_ZERO), 0xD8)));
+                            //}
                             if (cnMH)
                             {
                                 __m256 r0 = BilinearRowSumBf16(src0 + os, cnMH, cn, fx0, fx1);

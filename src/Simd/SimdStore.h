@@ -420,8 +420,22 @@ namespace Simd
             Sse41::Store<align>(p2, _mm512_extracti64x2_epi64(a, 2));
             Sse41::Store<align>(p3, _mm512_extracti64x2_epi64(a, 3));
         }
+
+        SIMD_INLINE void Store(uint16_t* p0, uint16_t* p1, __mmask16 mask, __m512i a)
+        {
+            _mm256_mask_storeu_epi16(p0, mask, _mm512_extracti64x4_epi64(a, 0));
+            _mm256_mask_storeu_epi16(p1, mask, _mm512_extracti64x4_epi64(a, 1));
+        }
+
+        SIMD_INLINE void Store(uint16_t* p0, uint16_t* p1, uint16_t* p2, uint16_t* p3, __mmask8 mask, __m512i a)
+        {
+            _mm_mask_storeu_epi16(p0, mask, _mm512_extracti64x2_epi64(a, 0));
+            _mm_mask_storeu_epi16(p1, mask, _mm512_extracti64x2_epi64(a, 1));
+            _mm_mask_storeu_epi16(p2, mask, _mm512_extracti64x2_epi64(a, 2));
+            _mm_mask_storeu_epi16(p3, mask, _mm512_extracti64x2_epi64(a, 3));
+        }
     }
-#endif//SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE
     namespace Neon

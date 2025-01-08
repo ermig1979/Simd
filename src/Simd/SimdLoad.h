@@ -451,9 +451,20 @@ namespace Simd
             return _mm512_inserti32x8(_mm512_castsi256_si512(_mm256_maskz_loadu_epi8(mask, p0)), _mm256_maskz_loadu_epi8(mask, p1), 1);
         }
 
+        SIMD_INLINE __m512i Load(const uint16_t* p0, const uint16_t* p1, __mmask16 mask)
+        {
+            return _mm512_inserti32x8(_mm512_castsi256_si512(_mm256_maskz_loadu_epi16(mask, p0)), _mm256_maskz_loadu_epi16(mask, p1), 1);
+        }
+
         template<bool align> SIMD_INLINE __m512i Load(const __m128i* p0, const __m128i* p1, const __m128i* p2, const __m128i* p3)
         {
             return _mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(Sse41::Load<align>(p0)), Sse41::Load<align>(p1), 1), Sse41::Load<align>(p2), 2), Sse41::Load<align>(p3), 3);
+        }
+
+        SIMD_INLINE __m512i Load(const uint16_t* p0, const uint16_t* p1, const uint16_t* p2, const uint16_t* p3, __mmask8 mask)
+        {
+            return _mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(_mm_maskz_loadu_epi16(mask, p0)),
+                _mm_maskz_loadu_epi16(mask, p1), 1), _mm_maskz_loadu_epi16(mask, p2), 2), _mm_maskz_loadu_epi16(mask, p3), 3);
         }
 
         template <bool align, bool mask> SIMD_INLINE __m128i Load(const uint8_t* p, __mmask16 m)
@@ -471,7 +482,7 @@ namespace Simd
             return _mm_maskz_loadu_epi8(m, p);
         }
     }
-#endif//SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
