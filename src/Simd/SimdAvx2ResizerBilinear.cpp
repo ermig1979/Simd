@@ -954,6 +954,13 @@ namespace Simd
             -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF,
             -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF);
 
+        const __m256i K8_IDX_30 = SIMD_MM256_SETR_EPI8(
+            -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, -1, -1, 
+            -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, -1, -1);
+        const __m256i K8_IDX_31 = SIMD_MM256_SETR_EPI8(
+            -1, -1, 0x6, 0x7, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, -1, -1, 
+            -1, -1, 0x6, 0x7, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, -1, -1);
+
         SIMD_INLINE __m128 BilinearRowSumBf16(const uint16_t* src, size_t channels, __m128 fx0, __m128 fx1)
         {
             __m128 s0 = Sse41::BFloat16ToFloat32(Sse41::UnpackU16<0>(_mm_loadl_epi64((__m128i*)src)));
@@ -977,6 +984,7 @@ namespace Simd
             if (_rowBuf)
             {
                 size_t rs = _param.dstW * cn, rsH = AlignLo(rs, Sse41::F), rsF = AlignLo(rs, F);
+                size_t rs3 = AlignLoAny(rs - 1, 3), rs6 = AlignLoAny(rs - 1, 6);
                 float* pbx[2] = { _bx[0].data, _bx[1].data };
                 int32_t prev = -2;
                 for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
@@ -1098,9 +1106,17 @@ namespace Simd
                                 _mm_storeu_ps(pb + dx, _mm_fmadd_ps(fx0, s0, _mm_mul_ps(fx1, s1)));
                             }
                         }
-                        if (cn == 3 && rs > 3)
+                        if (cn == 3 && rs >= 3)
                         {
-                            size_t rs3 = rs - 3;
+                            for (; dx < rs6; dx += 6)
+                            {
+                                __m256 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 3);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                __m256i _src = Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 3]));
+                                __m256 s0 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_30));
+                                __m256 s1 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_31));
+                                _mm256_storeu_ps(pb + dx, _mm256_permutevar8x32_ps(_mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)), RSB_3_P1));
+                            }
                             for (; dx < rs3; dx += 3)
                             {
                                 __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
