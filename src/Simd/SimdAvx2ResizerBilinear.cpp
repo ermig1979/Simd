@@ -979,11 +979,11 @@ namespace Simd
         {
             size_t cn = _param.channels, 
                 cnH = AlignLo(cn, Sse41::F), cnTH = cn - cnH, cnLH = cnTH - Sse41::F,
-                cnF = AlignLo(cn, F), cnTF = cn - cnF, cnLF = cnTF - F;
+                cnD = AlignLo(cn, DF), cnF = AlignLo(cn, F), cnTF = cn - cnF, cnLF = cnTF - F;
             __m256 _1 = _mm256_set1_ps(1.0f);
             if (_rowBuf)
             {
-                size_t rs = _param.dstW * cn, rsH = AlignLo(rs, Sse41::F), rsF = AlignLo(rs, F);
+                size_t rs = _param.dstW * cn, rsH = AlignLo(rs, Sse41::F), rsF = AlignLo(rs, F), rsD = AlignLo(rs, DF);
                 size_t rs3 = AlignLoAny(rs - 1, 3), rs6 = AlignLoAny(rs - 1, 6);
                 float* pbx[2] = { _bx[0].data, _bx[1].data };
                 int32_t prev = -2;
@@ -1009,32 +1009,6 @@ namespace Simd
                         float* pb = pbx[k];
                         const uint16_t* ps = src + (sy + k) * srcStride;
                         size_t dx = 0;
-                        if (cn >= 8)
-                        {
-                            for (; dx < rs;)
-                            {
-                                const uint16_t* ps0 = ps + _ix[dx];
-                                __m256 fx1 = _mm256_set1_ps(_ax[dx]);
-                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                                for (size_t end = dx + cnF; dx < end; dx +=F, ps0 += F)
-                                    _mm256_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
-                                if (cnTF)
-                                    _mm256_storeu_ps(pb + dx + cnLF, BilinearRowSumBf16(ps0 + cnLF, cn, fx0, fx1)), dx += cnTF;
-                            }
-                        }
-                        else if (cn >= 4)
-                        {
-                            for (; dx < rs;)
-                            {
-                                const uint16_t* ps0 = ps + _ix[dx];
-                                __m128 fx1 = _mm_set1_ps(_ax[dx]);
-                                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
-                                for (size_t end = dx + cnH; dx < end; dx += Sse41::F, ps0 += Sse41::F)
-                                    _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
-                                if (cnTH)
-                                    _mm_storeu_ps(pb + dx + cnLH, BilinearRowSumBf16(ps0 + cnLH, cn, fx0, fx1)), dx += cnTH;
-                            }
-                        }                        
                         if (cn == 1)
                         {
                             if (Avx2::SlowGather)
@@ -1085,7 +1059,7 @@ namespace Simd
                                 _mm_storeu_ps(pb + dx, _mm_fmadd_ps(fx0, s0, _mm_mul_ps(fx1, s1)));
                             }
                         }
-                        if (cn == 2)
+                        else if (cn == 2)
                         {
                             for (; dx < rsF; dx += F)
                             {
@@ -1106,7 +1080,7 @@ namespace Simd
                                 _mm_storeu_ps(pb + dx, _mm_fmadd_ps(fx0, s0, _mm_mul_ps(fx1, s1)));
                             }
                         }
-                        if (cn == 3 && rs >= 3)
+                        else if (cn == 3 && rs >= 3)
                         {
                             for (; dx < rs6; dx += 6)
                             {
@@ -1124,6 +1098,49 @@ namespace Simd
                                 _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps + _ix[dx], cn, fx0, fx1));
                             }
                         }
+                        else if (cn == 4)
+                        {
+                            for (; dx < rsF; dx += F)
+                            {
+                                __m256 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 4);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                __m256i _src = Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 4]));
+                                _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, BFloat16ToFloat32<0>(_src), _mm256_mul_ps(fx1, BFloat16ToFloat32<1>(_src))));
+                            }
+                            for (; dx < rs; dx += 4)
+                            {
+                                __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                                __m128i _src = _mm_loadu_si128((__m128i*)(ps + _ix[dx]));
+                                _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, Sse41::BFloat16ToFloat32<0>(_src)), _mm_mul_ps(fx1, Sse41::BFloat16ToFloat32<1>(_src))));
+                            }
+                        }
+                        if (cn >= 8)
+                        {
+                            for (; dx < rs;)
+                            {
+                                const uint16_t* ps0 = ps + _ix[dx];
+                                __m256 fx1 = _mm256_set1_ps(_ax[dx]);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                for (size_t end = dx + cnF; dx < end; dx +=F, ps0 += F)
+                                    _mm256_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
+                                if (cnTF)
+                                    _mm256_storeu_ps(pb + dx + cnLF, BilinearRowSumBf16(ps0 + cnLF, cn, fx0, fx1)), dx += cnTF;
+                            }
+                        }
+                        else if (cn > 4)
+                        {
+                            for (; dx < rs;)
+                            {
+                                const uint16_t* ps0 = ps + _ix[dx];
+                                __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                                for (size_t end = dx + cnH; dx < end; dx += Sse41::F, ps0 += Sse41::F)
+                                    _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
+                                if (cnTH)
+                                    _mm_storeu_ps(pb + dx + cnLH, BilinearRowSumBf16(ps0 + cnLH, cn, fx0, fx1)), dx += cnTH;
+                            }
+                        }                        
                         for (; dx < rs; dx++)
                         {
                             int32_t sx = _ix[dx];
@@ -1135,6 +1152,12 @@ namespace Simd
                     size_t dx = 0;
                     __m256 _fy0 = _mm256_set1_ps(fy0);
                     __m256 _fy1 = _mm256_set1_ps(fy1);
+                    for (; dx < rsD; dx += DF)
+                    {
+                        __m256i d0 = Float32ToBFloat16(_mm256_fmadd_ps(_mm256_loadu_ps(pbx[0] + dx + 0), _fy0, _mm256_mul_ps(_mm256_loadu_ps(pbx[1] + dx + 0), _fy1)));
+                        __m256i d1 = Float32ToBFloat16(_mm256_fmadd_ps(_mm256_loadu_ps(pbx[0] + dx + F), _fy0, _mm256_mul_ps(_mm256_loadu_ps(pbx[1] + dx + F), _fy1)));
+                        _mm256_storeu_si256((__m256i*)(dst + dx), _mm256_permute4x64_epi64(_mm256_packus_epi32(d0, d1), 0xD8));
+                    }
                     for (; dx < rsF; dx += F)
                     {
                         __m256i d0 = Float32ToBFloat16(_mm256_fmadd_ps(_mm256_loadu_ps(pbx[0] + dx), _fy0, _mm256_mul_ps(_mm256_loadu_ps(pbx[1] + dx), _fy1)));
@@ -1152,7 +1175,7 @@ namespace Simd
             }
             else
             {
-                if (cnF)
+                if (cnD)
                 {
                     for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
                     {
@@ -1161,20 +1184,68 @@ namespace Simd
                         const uint16_t* src0 = src + _iy[dy] * srcStride, * src1 = src0 + srcStride;
                         for (size_t dx = 0; dx < _param.dstW; dx++)
                         {
-                            size_t os = _ix[dx], end = os + cnF, od = dx * cn;
+                            size_t os = _ix[dx], eD = os + cnD, eF = os + cnF, od = dx * cn;
                             __m256 fx1 = _mm256_set1_ps(_ax[dx]);
                             __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                            for (; os < end; os += F, od += F)
+                            for (; os < eD; os += DF, od += DF)
+                            {
+                                __m256i s00 = _mm256_loadu_si256((__m256i*)(src0 + os));
+                                __m256i s01 = _mm256_loadu_si256((__m256i*)(src0 + os + cn));
+                                __m256i s10 = _mm256_loadu_si256((__m256i*)(src1 + os));
+                                __m256i s11 = _mm256_loadu_si256((__m256i*)(src1 + os + cn));
+
+                                __m256 r0e = _mm256_fmadd_ps(fx0, BFloat16ToFloat32Even(s00), _mm256_mul_ps(fx1, BFloat16ToFloat32Even(s01)));
+                                __m256 r1e = _mm256_fmadd_ps(fx0, BFloat16ToFloat32Even(s10), _mm256_mul_ps(fx1, BFloat16ToFloat32Even(s11)));
+                                __m256 even = _mm256_fmadd_ps(r0e, fy0, _mm256_mul_ps(r1e, fy1));
+
+                                __m256 r0o = _mm256_fmadd_ps(fx0, BFloat16ToFloat32Odd(s00), _mm256_mul_ps(fx1, BFloat16ToFloat32Odd(s01)));
+                                __m256 r1o = _mm256_fmadd_ps(fx0, BFloat16ToFloat32Odd(s10), _mm256_mul_ps(fx1, BFloat16ToFloat32Odd(s11)));
+                                __m256 odd = _mm256_fmadd_ps(r0o, fy0, _mm256_mul_ps(r1o, fy1));
+
+                                _mm256_storeu_si256((__m256i*)(dst + od), Float32ToBFloat16Interlived(even, odd));
+                            }
+                            for (; os < eF; os += F, od += F)
                             {
                                 __m256 r0 = BilinearRowSumBf16(src0 + os, cn, fx0, fx1);
                                 __m256 r1 = BilinearRowSumBf16(src1 + os, cn, fx0, fx1);
                                 __m256i d0 = Float32ToBFloat16(_mm256_fmadd_ps(r0, fy0, _mm256_mul_ps(r1, fy1)));
                                 _mm_storeu_si128((__m128i*)(dst + od), _mm256_castsi256_si128(_mm256_permute4x64_epi64(_mm256_packus_epi32(d0, K_ZERO), 0xD8)));
                             }
-                            if (cnTH)
+                            if (cnTF)
                             {
-                                os += cnLH;
-                                od += cnLH;
+                                os += cnLF;
+                                od += cnLF;
+                                __m256 r0 = BilinearRowSumBf16(src0 + os, cn, fx0, fx1);
+                                __m256 r1 = BilinearRowSumBf16(src1 + os, cn, fx0, fx1);
+                                __m256i d0 = Float32ToBFloat16(_mm256_fmadd_ps(r0, fy0, _mm256_mul_ps(r1, fy1)));
+                                _mm_storeu_si128((__m128i*)(dst + od), _mm256_castsi256_si128(_mm256_permute4x64_epi64(_mm256_packus_epi32(d0, K_ZERO), 0xD8)));
+                            }
+                        }
+                    }
+                }
+                else if (cnF)
+                {
+                    for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+                    {
+                        __m256 fy1 = _mm256_set1_ps(_ay[dy]);
+                        __m256 fy0 = _mm256_sub_ps(_1, fy1);
+                        const uint16_t* src0 = src + _iy[dy] * srcStride, * src1 = src0 + srcStride;
+                        for (size_t dx = 0; dx < _param.dstW; dx++)
+                        {
+                            size_t os = _ix[dx], eF = os + cnF, od = dx * cn;
+                            __m256 fx1 = _mm256_set1_ps(_ax[dx]);
+                            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                            for (; os < eF; os += F, od += F)
+                            {
+                                __m256 r0 = BilinearRowSumBf16(src0 + os, cn, fx0, fx1);
+                                __m256 r1 = BilinearRowSumBf16(src1 + os, cn, fx0, fx1);
+                                __m256i d0 = Float32ToBFloat16(_mm256_fmadd_ps(r0, fy0, _mm256_mul_ps(r1, fy1)));
+                                _mm_storeu_si128((__m128i*)(dst + od), _mm256_castsi256_si128(_mm256_permute4x64_epi64(_mm256_packus_epi32(d0, K_ZERO), 0xD8)));
+                            }
+                            if (cnTF)
+                            {
+                                os += cnLF;
+                                od += cnLF;
                                 __m256 r0 = BilinearRowSumBf16(src0 + os, cn, fx0, fx1);
                                 __m256 r1 = BilinearRowSumBf16(src1 + os, cn, fx0, fx1);
                                 __m256i d0 = Float32ToBFloat16(_mm256_fmadd_ps(r0, fy0, _mm256_mul_ps(r1, fy1)));
@@ -1192,10 +1263,10 @@ namespace Simd
                         const uint16_t* src0 = src + _iy[dy] * srcStride, * src1 = src0 + srcStride;
                         for (size_t dx = 0; dx < _param.dstW; dx++)
                         {
-                            size_t os = _ix[dx], end = os + cnH, od = dx * cn;
+                            size_t os = _ix[dx], eF = os + cnH, od = dx * cn;
                             __m128 fx1 = _mm_set1_ps(_ax[dx]);
                             __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
-                            for (; os < end; os += Sse41::F, od += Sse41::F)
+                            for (; os < eF; os += Sse41::F, od += Sse41::F)
                             {
                                 __m128 r0 = BilinearRowSumBf16(src0 + os, cn, fx0, fx1);
                                 __m128 r1 = BilinearRowSumBf16(src1 + os, cn, fx0, fx1);
