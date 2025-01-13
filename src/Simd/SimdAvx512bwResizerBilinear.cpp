@@ -914,175 +914,171 @@ namespace Simd
             size_t cn = _param.channels, cnD = AlignLo(cn, DF), cnF = AlignLo(cn, F), cnH = AlignLo(cn, F / 2);
             __mmask16 cnMF = TailMask16(cn - cnF);
             __m512 _1 = _mm512_set1_ps(1.0f);
-            if (_rowBuf || cn <= 8)
+            if (_rowBuf)
             {
-                Avx2::ResizerBf16Bilinear::Run(src, srcStride, dst, dstStride);
-                //size_t rs = _param.dstW * cn, rsH = AlignLo(rs, Sse41::F), rsF = AlignLo(rs, F);
-                //size_t rs3 = AlignLoAny(rs - 1, 3), rs6 = AlignLoAny(rs - 1, 6);
-                //float* pbx[2] = { _bx[0].data, _bx[1].data };
-                //int32_t prev = -2;
-                //for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
-                //{
-                //    float fy1 = _ay[dy];
-                //    float fy0 = 1.0f - fy1;
-                //    int32_t sy = _iy[dy];
-                //    int32_t k = 0;
+                if (cn > 1)
+                {
+                    Avx2::ResizerBf16Bilinear::Run(src, srcStride, dst, dstStride);
+                    return;
+                }
+                size_t rs = _param.dstW * cn, rsQ = AlignLo(rs, Sse41::F), rsH = AlignLo(rs, Avx2::F), rsF = AlignLo(rs, F), rsD = AlignLo(rs, DF);
+                size_t rs3 = AlignLoAny(rs - 1, 3), rs6 = AlignLoAny(rs - 1, 6);
+                __mmask16 rsMF = TailMask16(rs - rsF);
+                float* pbx[2] = { _bx[0].data, _bx[1].data };
+                int32_t prev = -2;
+                for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+                {
+                    float fy1 = _ay[dy];
+                    float fy0 = 1.0f - fy1;
+                    int32_t sy = _iy[dy];
+                    int32_t k = 0;
 
-                //    if (sy == prev)
-                //        k = 2;
-                //    else if (sy == prev + 1)
-                //    {
-                //        Swap(pbx[0], pbx[1]);
-                //        k = 1;
-                //    }
+                    if (sy == prev)
+                        k = 2;
+                    else if (sy == prev + 1)
+                    {
+                        Swap(pbx[0], pbx[1]);
+                        k = 1;
+                    }
 
-                //    prev = sy;
+                    prev = sy;
 
-                //    for (; k < 2; k++)
-                //    {
-                //        float* pb = pbx[k];
-                //        const uint16_t* ps = src + (sy + k) * srcStride;
-                //        size_t dx = 0;
-                //        if (cn >= 8)
-                //        {
-                //            for (; dx < rs;)
-                //            {
-                //                const uint16_t* ps0 = ps + _ix[dx];
-                //                __m256 fx1 = _mm256_set1_ps(_ax[dx]);
-                //                __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                //                for (size_t end = dx + cnF; dx < end; dx += F, ps0 += F)
-                //                    _mm256_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
-                //                if (cnTF)
-                //                    _mm256_storeu_ps(pb + dx + cnLF, BilinearRowSumBf16(ps0 + cnLF, cn, fx0, fx1)), dx += cnTF;
-                //            }
-                //        }
-                //        else if (cn >= 4)
-                //        {
-                //            for (; dx < rs;)
-                //            {
-                //                const uint16_t* ps0 = ps + _ix[dx];
-                //                __m128 fx1 = _mm_set1_ps(_ax[dx]);
-                //                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
-                //                for (size_t end = dx + cnH; dx < end; dx += Sse41::F, ps0 += Sse41::F)
-                //                    _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
-                //                if (cnTH)
-                //                    _mm_storeu_ps(pb + dx + cnLH, BilinearRowSumBf16(ps0 + cnLH, cn, fx0, fx1)), dx += cnTH;
-                //            }
-                //        }
-                //        if (cn == 1)
-                //        {
-                //            if (Avx2::SlowGather)
-                //            {
-                //                for (; dx < rsF; dx += F)
-                //                {
-                //                    SIMD_ALIGNED(32) uint32_t buf[8];
-                //                    buf[0] = *(uint32_t*)(ps + _ix[dx + 0]);
-                //                    buf[1] = *(uint32_t*)(ps + _ix[dx + 1]);
-                //                    buf[2] = *(uint32_t*)(ps + _ix[dx + 2]);
-                //                    buf[3] = *(uint32_t*)(ps + _ix[dx + 3]);
-                //                    buf[4] = *(uint32_t*)(ps + _ix[dx + 4]);
-                //                    buf[5] = *(uint32_t*)(ps + _ix[dx + 5]);
-                //                    buf[6] = *(uint32_t*)(ps + _ix[dx + 6]);
-                //                    buf[7] = *(uint32_t*)(ps + _ix[dx + 7]);
-                //                    __m256i _src = _mm256_loadu_si256((__m256i*)buf);
-                //                    __m256 s0 = BFloat16ToFloat32Even(_src);
-                //                    __m256 s1 = BFloat16ToFloat32Odd(_src);
-                //                    __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
-                //                    __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                //                    _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
-                //                }
-                //            }
-                //            else
-                //            {
-                //                for (; dx < rsF; dx += F)
-                //                {
-                //                    __m256i _src = _mm256_i32gather_epi32((int*)ps, _mm256_loadu_si256((__m256i*)(_ix.data + dx)), 2);
-                //                    __m256 s0 = BFloat16ToFloat32Even(_src);
-                //                    __m256 s1 = BFloat16ToFloat32Odd(_src);
-                //                    __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
-                //                    __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                //                    _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
-                //                }
-                //            }
-                //            for (; dx < rsH; dx += Sse41::F)
-                //            {
-                //                SIMD_ALIGNED(16) uint32_t buf[4];
-                //                buf[0] = *(uint32_t*)(ps + _ix[dx + 0]);
-                //                buf[1] = *(uint32_t*)(ps + _ix[dx + 1]);
-                //                buf[2] = *(uint32_t*)(ps + _ix[dx + 2]);
-                //                buf[3] = *(uint32_t*)(ps + _ix[dx + 3]);
-                //                __m128i _src = _mm_loadu_si128((__m128i*)buf);
-                //                __m128 s0 = Sse41::BFloat16ToFloat32Even(_src);
-                //                __m128 s1 = Sse41::BFloat16ToFloat32Odd(_src);
-                //                __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
-                //                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
-                //                _mm_storeu_ps(pb + dx, _mm_fmadd_ps(fx0, s0, _mm_mul_ps(fx1, s1)));
-                //            }
-                //        }
-                //        if (cn == 2)
-                //        {
-                //            for (; dx < rsF; dx += F)
-                //            {
-                //                __m256i _src = Load((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 2]), (__m128i*)(ps + _ix[dx + 4]), (__m128i*)(ps + _ix[dx + 6]));
-                //                __m256 s0 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_20));
-                //                __m256 s1 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_21));
-                //                __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
-                //                __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                //                _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
-                //            }
-                //            for (; dx < rsH; dx += Sse41::F)
-                //            {
-                //                __m128i _src = Sse41::Load((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 2]));
-                //                __m128 s0 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, _mm256_castsi256_si128(K8_IDX_20)));
-                //                __m128 s1 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, _mm256_castsi256_si128(K8_IDX_21)));
-                //                __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
-                //                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
-                //                _mm_storeu_ps(pb + dx, _mm_fmadd_ps(fx0, s0, _mm_mul_ps(fx1, s1)));
-                //            }
-                //        }
-                //        if (cn == 3 && rs >= 3)
-                //        {
-                //            for (; dx < rs6; dx += 6)
-                //            {
-                //                __m256 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 3);
-                //                __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                //                __m256i _src = Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 3]));
-                //                __m256 s0 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_30));
-                //                __m256 s1 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_31));
-                //                _mm256_storeu_ps(pb + dx, _mm256_permutevar8x32_ps(_mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)), RSB_3_P1));
-                //            }
-                //            for (; dx < rs3; dx += 3)
-                //            {
-                //                __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
-                //                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
-                //                _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps + _ix[dx], cn, fx0, fx1));
-                //            }
-                //        }
-                //        for (; dx < rs; dx++)
-                //        {
-                //            int32_t sx = _ix[dx];
-                //            float fx = _ax[dx];
-                //            pb[dx] = Base::BFloat16ToFloat32(ps[sx]) * (1.0f - fx) + Base::BFloat16ToFloat32(ps[sx + cn]) * fx;
-                //        }
-                //    }
+                    for (; k < 2; k++)
+                    {
+                        float* pb = pbx[k];
+                        const uint16_t* ps = src + (sy + k) * srcStride;
+                        size_t dx = 0;
+                        if (cn == 1)
+                        {
+                            for (; dx < rsF; dx += F)
+                            {
+                                __m512i _src = _mm512_i32gather_epi32(_mm512_loadu_si512(_ix.data + dx), (int*)ps, 2);
+                                __m512 s0 = BFloat16ToFloat32Even(_src);
+                                __m512 s1 = BFloat16ToFloat32Odd(_src);
+                                __m512 fx1 = _mm512_loadu_ps(_ax.data + dx);
+                                __m512 fx0 = _mm512_sub_ps(_1, fx1);
+                                _mm512_storeu_ps(pb + dx, _mm512_fmadd_ps(fx0, s0, _mm512_mul_ps(fx1, s1)));
+                            }
+                            if (dx < rs)
+                            {
+                                __m512i _src = _mm512_mask_i32gather_epi32(_mm512_setzero_si512(), rsMF, _mm512_maskz_loadu_epi32(rsMF, _ix.data + dx), (int*)ps, 2);
+                                __m512 s0 = BFloat16ToFloat32Even(_src);
+                                __m512 s1 = BFloat16ToFloat32Odd(_src);
+                                __m512 fx1 = _mm512_maskz_loadu_ps(rsMF, _ax.data + dx);
+                                __m512 fx0 = _mm512_sub_ps(_1, fx1);
+                                _mm512_mask_storeu_ps(pb + dx, rsMF, _mm512_fmadd_ps(fx0, s0, _mm512_mul_ps(fx1, s1)));
+                            }
+                        }
+                    //    else if (cn == 2)
+                    //    {
+                    //        for (; dx < rsF; dx += F)
+                    //        {
+                    //            __m256i _src = Load((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 2]), (__m128i*)(ps + _ix[dx + 4]), (__m128i*)(ps + _ix[dx + 6]));
+                    //            __m256 s0 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_20));
+                    //            __m256 s1 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_21));
+                    //            __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
+                    //            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                    //            _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
+                    //        }
+                    //        for (; dx < rsH; dx += Sse41::F)
+                    //        {
+                    //            __m128i _src = Sse41::Load((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 2]));
+                    //            __m128 s0 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, _mm256_castsi256_si128(K8_IDX_20)));
+                    //            __m128 s1 = _mm_castsi128_ps(_mm_shuffle_epi8(_src, _mm256_castsi256_si128(K8_IDX_21)));
+                    //            __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                    //            __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                    //            _mm_storeu_ps(pb + dx, _mm_fmadd_ps(fx0, s0, _mm_mul_ps(fx1, s1)));
+                    //        }
+                    //    }
+                    //    else if (cn == 3 && rs >= 3)
+                    //    {
+                    //        for (; dx < rs6; dx += 6)
+                    //        {
+                    //            __m256 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 3);
+                    //            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                    //            __m256i _src = Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 3]));
+                    //            __m256 s0 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_30));
+                    //            __m256 s1 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_31));
+                    //            _mm256_storeu_ps(pb + dx, _mm256_permutevar8x32_ps(_mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)), RSB_3_P1));
+                    //        }
+                    //        for (; dx < rs3; dx += 3)
+                    //        {
+                    //            __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
+                    //            __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                    //            _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps + _ix[dx], cn, fx0, fx1));
+                    //        }
+                    //    }
+                    //    else if (cn == 4)
+                    //    {
+                    //        for (; dx < rsF; dx += F)
+                    //        {
+                    //            __m256 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 4);
+                    //            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                    //            __m256i _src = Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 4]));
+                    //            _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, BFloat16ToFloat32<0>(_src), _mm256_mul_ps(fx1, BFloat16ToFloat32<1>(_src))));
+                    //        }
+                    //        for (; dx < rs; dx += 4)
+                    //        {
+                    //            __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                    //            __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                    //            __m128i _src = _mm_loadu_si128((__m128i*)(ps + _ix[dx]));
+                    //            _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, Sse41::BFloat16ToFloat32<0>(_src)), _mm_mul_ps(fx1, Sse41::BFloat16ToFloat32<1>(_src))));
+                    //        }
+                    //    }
+                    //    if (cn >= 8)
+                    //    {
+                    //        for (; dx < rs;)
+                    //        {
+                    //            const uint16_t* ps0 = ps + _ix[dx];
+                    //            __m256 fx1 = _mm256_set1_ps(_ax[dx]);
+                    //            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                    //            for (size_t end = dx + cnF; dx < end; dx += F, ps0 += F)
+                    //                _mm256_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
+                    //            if (cnTF)
+                    //                _mm256_storeu_ps(pb + dx + cnLF, BilinearRowSumBf16(ps0 + cnLF, cn, fx0, fx1)), dx += cnTF;
+                    //        }
+                    //    }
+                    //    else if (cn > 4)
+                    //    {
+                    //        for (; dx < rs;)
+                    //        {
+                    //            const uint16_t* ps0 = ps + _ix[dx];
+                    //            __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                    //            __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                    //            for (size_t end = dx + cnH; dx < end; dx += Sse41::F, ps0 += Sse41::F)
+                    //                _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
+                    //            if (cnTH)
+                    //                _mm_storeu_ps(pb + dx + cnLH, BilinearRowSumBf16(ps0 + cnLH, cn, fx0, fx1)), dx += cnTH;
+                    //        }
+                    //    }
+                    //    for (; dx < rs; dx++)
+                    //    {
+                    //        int32_t sx = _ix[dx];
+                    //        float fx = _ax[dx];
+                    //        pb[dx] = Base::BFloat16ToFloat32(ps[sx]) * (1.0f - fx) + Base::BFloat16ToFloat32(ps[sx + cn]) * fx;
+                    //    }
+                    }
 
-                //    size_t dx = 0;
-                //    __m256 _fy0 = _mm256_set1_ps(fy0);
-                //    __m256 _fy1 = _mm256_set1_ps(fy1);
-                //    for (; dx < rsF; dx += F)
-                //    {
-                //        __m256i d0 = Float32ToBFloat16(_mm256_fmadd_ps(_mm256_loadu_ps(pbx[0] + dx), _fy0, _mm256_mul_ps(_mm256_loadu_ps(pbx[1] + dx), _fy1)));
-                //        _mm_storeu_si128((__m128i*)(dst + dx), _mm256_castsi256_si128(_mm256_permute4x64_epi64(_mm256_packus_epi32(d0, K_ZERO), 0xD8)));
-                //    }
-                //    for (; dx < rsH; dx += Sse41::F)
-                //    {
-                //        __m128i d0 = Sse41::Float32ToBFloat16(_mm_fmadd_ps(_mm_loadu_ps(pbx[0] + dx), _mm256_castps256_ps128(_fy0),
-                //            _mm_mul_ps(_mm_loadu_ps(pbx[1] + dx), _mm256_castps256_ps128(_fy1))));
-                //        _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(d0, Sse41::K_ZERO));
-                //    }
-                //    for (; dx < rs; dx++)
-                //        dst[dx] = Base::Float32ToBFloat16(pbx[0][dx] * fy0 + pbx[1][dx] * fy1);
-                //}
+                    size_t dx = 0;
+                    __m512 _fy0 = _mm512_set1_ps(fy0);
+                    __m512 _fy1 = _mm512_set1_ps(fy1);
+                    for (; dx < rsD; dx += DF)
+                    {
+                        __m512i d0 = Float32ToBFloat16(_mm512_fmadd_ps(_mm512_loadu_ps(pbx[0] + dx + 0), _fy0, _mm512_mul_ps(_mm512_loadu_ps(pbx[1] + dx + 0), _fy1)));
+                        __m512i d1 = Float32ToBFloat16(_mm512_fmadd_ps(_mm512_loadu_ps(pbx[0] + dx + F), _fy0, _mm512_mul_ps(_mm512_loadu_ps(pbx[1] + dx + F), _fy1)));
+                        _mm512_storeu_si512((__m512i*)(dst + dx), _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, d1)));
+                    }
+                    for (; dx < rsF; dx += F)
+                    {
+                        __m512i d0 = Float32ToBFloat16(_mm512_fmadd_ps(_mm512_loadu_ps(pbx[0] + dx + 0), _fy0, _mm512_mul_ps(_mm512_loadu_ps(pbx[1] + dx + 0), _fy1)));
+                        _mm256_storeu_si256((__m256i*)(dst + dx), _mm512_castsi512_si256(_mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, K_ZERO))));
+                    }
+                    if (dx < rs)
+                    {
+                        __m512i d0 = Float32ToBFloat16(_mm512_fmadd_ps(_mm512_loadu_ps(pbx[0] + dx + 0), _fy0, _mm512_mul_ps(_mm512_loadu_ps(pbx[1] + dx + 0), _fy1)));
+                        _mm256_mask_storeu_epi16(dst + dx, rsMF, _mm512_castsi512_si256(_mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, K_ZERO))));
+                    }
+                }
             }
             else
             {
