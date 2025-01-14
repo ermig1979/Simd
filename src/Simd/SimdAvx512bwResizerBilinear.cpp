@@ -876,19 +876,23 @@ namespace Simd
             -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF,
             -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF);
 
-        //const __m256i K8_IDX_30 = SIMD_MM256_SETR_EPI8(
-        //    -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, -1, -1,
-        //    -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, -1, -1);
-        //const __m256i K8_IDX_31 = SIMD_MM256_SETR_EPI8(
-        //    -1, -1, 0x6, 0x7, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, -1, -1,
-        //    -1, -1, 0x6, 0x7, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, -1, -1);
+        const __m512i K8_IDX_30 = SIMD_MM512_SETR_EPI8(
+            -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, -1, -1,
+            -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, -1, -1,
+            -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, -1, -1,
+            -1, -1, 0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, -1, -1);
+        const __m512i K8_IDX_31 = SIMD_MM512_SETR_EPI8(
+            -1, -1, 0x6, 0x7, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, -1, -1,
+            -1, -1, 0x6, 0x7, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, -1, -1,
+            -1, -1, 0x6, 0x7, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, -1, -1,
+            -1, -1, 0x6, 0x7, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, -1, -1);
 
-        //SIMD_INLINE __m128 BilinearRowSumBf16(const uint16_t* src, size_t channels, __m128 fx0, __m128 fx1)
-        //{
-        //    __m128 s0 = Sse41::BFloat16ToFloat32(Sse41::UnpackU16<0>(_mm_loadl_epi64((__m128i*)src)));
-        //    __m128 s1 = Sse41::BFloat16ToFloat32(Sse41::UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src + channels))));
-        //    return _mm_fmadd_ps(fx0, s0, _mm_mul_ps(fx1, s1));
-        //}
+        SIMD_INLINE __m128 BilinearRowSumBf16(const uint16_t* src, size_t channels, __m128 fx0, __m128 fx1)
+        {
+            __m128 s0 = Sse41::BFloat16ToFloat32(Sse41::UnpackU16<0>(_mm_loadl_epi64((__m128i*)src)));
+            __m128 s1 = Sse41::BFloat16ToFloat32(Sse41::UnpackU16<0>(_mm_loadl_epi64((__m128i*)(src + channels))));
+            return _mm_fmadd_ps(fx0, s0, _mm_mul_ps(fx1, s1));
+        }
 
         SIMD_INLINE __m256 BilinearRowSumBf16(const uint16_t* src, __mmask8 mask, size_t channels, __m256 fx0, __m256 fx1)
         {
@@ -920,13 +924,13 @@ namespace Simd
             __m512 _1 = _mm512_set1_ps(1.0f);
             if (_rowBuf)
             {
-                if (cn > 2)
+                if (cn > 3)
                 {
                     Avx2::ResizerBf16Bilinear::Run(src, srcStride, dst, dstStride);
                     return;
                 }
                 size_t rs = _param.dstW * cn, rsQ = AlignLo(rs, Sse41::F), rsH = AlignLo(rs, Avx2::F), rsF = AlignLo(rs, F), rsD = AlignLo(rs, DF);
-                size_t rs3 = AlignLoAny(rs - 1, 3), rs6 = AlignLoAny(rs - 1, 6);
+                size_t rs3 = AlignLoAny(rs - 1, 3), rs6 = AlignLoAny(rs - 1, 6), rs12 = AlignLoAny(rs - 1, 12);
                 __mmask16 rsMF = TailMask16(rs - rsF);
                 float* pbx[2] = { _bx[0].data, _bx[1].data };
                 int32_t prev = -2;
@@ -994,24 +998,34 @@ namespace Simd
                                 _mm512_storeu_ps(pb + dx, _mm512_fmadd_ps(fx0, s0, _mm512_mul_ps(fx1, s1)));
                             }
                         }
-                    //    else if (cn == 3 && rs >= 3)
-                    //    {
-                    //        for (; dx < rs6; dx += 6)
-                    //        {
-                    //            __m256 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 3);
-                    //            __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                    //            __m256i _src = Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 3]));
-                    //            __m256 s0 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_30));
-                    //            __m256 s1 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, K8_IDX_31));
-                    //            _mm256_storeu_ps(pb + dx, _mm256_permutevar8x32_ps(_mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)), RSB_3_P1));
-                    //        }
-                    //        for (; dx < rs3; dx += 3)
-                    //        {
-                    //            __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
-                    //            __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
-                    //            _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps + _ix[dx], cn, fx0, fx1));
-                    //        }
-                    //    }
+                        else if (cn == 3 && rs >= 3)
+                        {
+                            //for (; dx < rs12; dx += 12)
+                            //{
+                            //    const float *pax = _ax.data + dx;
+                            //    __m512 fx1 = Load<false>(pax + 0, pax + 3, pax + 6, pax + 9);
+                            //    __m512 fx0 = _mm512_sub_ps(_1, fx1);
+                            //    __m512i _src = Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 3]), (__m128i*)(ps + _ix[dx + 6]), (__m128i*)(ps + _ix[dx + 9]));
+                            //    __m512 s0 = _mm512_castsi512_ps(_mm512_shuffle_epi8(_src, K8_IDX_30));
+                            //    __m512 s1 = _mm512_castsi512_ps(_mm512_shuffle_epi8(_src, K8_IDX_31));
+                            //    _mm512_storeu_ps(pb + dx, _mm512_permutexvar_ps(RSB_3_P1, _mm512_fmadd_ps(fx0, s0, _mm512_mul_ps(fx1, s1))));
+                            //}
+                            for (; dx < rs6; dx += 6)
+                            {
+                                __m256 fx1 = Avx2::Load<false>(_ax.data + dx, _ax.data + dx + 3);
+                                __m256 fx0 = _mm256_sub_ps(_mm512_castps512_ps256(_1), fx1);
+                                __m256i _src = Avx2::Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 3]));
+                                __m256 s0 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, _mm512_castsi512_si256(K8_IDX_30)));
+                                __m256 s1 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, _mm512_castsi512_si256(K8_IDX_31)));
+                                _mm256_storeu_ps(pb + dx, _mm256_permutevar8x32_ps(_mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)), _mm512_castsi512_si256(RSB_3_P1)));
+                            }
+                            for (; dx < rs3; dx += 3)
+                            {
+                                __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
+                                __m128 fx0 = _mm_sub_ps(_mm512_castps512_ps128(_1), fx1);
+                                _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps + _ix[dx], cn, fx0, fx1));
+                            }
+                        }
                     //    else if (cn == 4)
                     //    {
                     //        for (; dx < rsF; dx += F)
@@ -1055,12 +1069,12 @@ namespace Simd
                     //                _mm_storeu_ps(pb + dx + cnLH, BilinearRowSumBf16(ps0 + cnLH, cn, fx0, fx1)), dx += cnTH;
                     //        }
                     //    }
-                    //    for (; dx < rs; dx++)
-                    //    {
-                    //        int32_t sx = _ix[dx];
-                    //        float fx = _ax[dx];
-                    //        pb[dx] = Base::BFloat16ToFloat32(ps[sx]) * (1.0f - fx) + Base::BFloat16ToFloat32(ps[sx + cn]) * fx;
-                    //    }
+                        for (; dx < rs; dx++)
+                        {
+                            int32_t sx = _ix[dx];
+                            float fx = _ax[dx];
+                            pb[dx] = Base::BFloat16ToFloat32(ps[sx]) * (1.0f - fx) + Base::BFloat16ToFloat32(ps[sx + cn]) * fx;
+                        }
                     }
 
                     size_t dx = 0;
