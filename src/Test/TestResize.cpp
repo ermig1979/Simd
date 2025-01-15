@@ -244,6 +244,7 @@ namespace Test
 
     bool ResizerAutoTest(const FuncRS & f1, const FuncRS & f2)
     {
+        //return ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 2, f1, f2);
         bool result = true;
 
 #if 1
