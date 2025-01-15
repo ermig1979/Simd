@@ -183,6 +183,7 @@ namespace Simd
         class ResizerFloatBilinear : public Resizer
         {
         protected:
+            bool _rowBuf;
             Array32i _ix, _iy;
             Array32f _ax, _ay, _bx[2];
 
@@ -347,6 +348,7 @@ namespace Simd
 
         class ResizerFloatBilinear : public Base::ResizerFloatBilinear
         {
+        protected:
             virtual void Run(const float* src, size_t srcStride, float* dst, size_t dstStride);
         public:
             ResizerFloatBilinear(const ResParam& param);
@@ -467,6 +469,7 @@ namespace Simd
 
         class ResizerFloatBilinear : public Sse41::ResizerFloatBilinear
         {
+        protected:
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
         public:
             ResizerFloatBilinear(const ResParam & param);
@@ -581,6 +584,7 @@ namespace Simd
 
         class ResizerFloatBilinear : public Avx2::ResizerFloatBilinear
         {
+        protected:
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
         public:
             ResizerFloatBilinear(const ResParam & param);
@@ -677,6 +681,7 @@ namespace Simd
 
         class ResizerFloatBilinear : public Base::ResizerFloatBilinear
         {
+        protected:
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
         public:
             ResizerFloatBilinear(const ResParam & param);

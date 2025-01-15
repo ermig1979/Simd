@@ -334,15 +334,22 @@ namespace Simd
         ResizerFloatBilinear::ResizerFloatBilinear(const ResParam & param)
             : Resizer(param)
         {
+            _rowBuf = _param.align < 16 || _param.channels < 4 || _param.dstH >= _param.srcH;
+#if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+            _rowBuf = true;
+#endif
             _ay.Resize(_param.dstH, false, _param.align);
             _iy.Resize(_param.dstH, false, _param.align);
             EstimateIndexAlpha(_param, _param.srcH, _param.dstH, 1, 1, _iy.data, _ay.data);
-            size_t rs = _param.dstW * _param.channels;
+            size_t rs = _param.dstW * (_rowBuf ? _param.channels : 1);
             _ax.Resize(rs, false, _param.align);
             _ix.Resize(rs, false, _param.align);
-            EstimateIndexAlpha(_param, _param.srcW, _param.dstW, _param.channels, _param.channels, _ix.data, _ax.data);
-            _bx[0].Resize(rs, false, _param.align);
-            _bx[1].Resize(rs, false, _param.align);
+            EstimateIndexAlpha(_param, _param.srcW, _param.dstW, _param.channels, _rowBuf ? _param.channels : 1, _ix.data, _ax.data);
+            if (_rowBuf)
+            {
+                _bx[0].Resize(rs, false, _param.align);
+                _bx[1].Resize(rs, false, _param.align);
+            }
         }
 
         void ResizerFloatBilinear::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
