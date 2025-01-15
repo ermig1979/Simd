@@ -337,6 +337,9 @@ namespace Simd
             _rowBuf = _param.align < 16 || _param.channels < 4 || _param.dstH >= _param.srcH;
 #if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
             _rowBuf = true;
+#else
+            if ((_param.align == 16 && _param.channels < 2))
+                _rowBuf = false;
 #endif
             _ay.Resize(_param.dstH, false, _param.align);
             _iy.Resize(_param.dstH, false, _param.align);
