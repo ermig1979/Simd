@@ -604,7 +604,7 @@ namespace Simd
                 size_t rs = _param.dstW * cn;
                 float* pbx[2] = { _bx[0].data, _bx[1].data };
                 int32_t prev = -2;
-                size_t rsh = AlignLo(rs, Sse41::F);
+                size_t rsF = AlignLo(rs, F);
                 for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
                 {
                     float fy1 = _ay[dy];
@@ -629,14 +629,27 @@ namespace Simd
                         size_t dx = 0;
                         if (cn == 1)
                         {
-                            for (; dx < rsh; dx += Sse41::F)
+                            for (; dx < rsF; dx += F)
                             {
-                                __m128 s01 = Sse41::Load(ps + _ix[dx + 0], ps + _ix[dx + 1]);
-                                __m128 s23 = Sse41::Load(ps + _ix[dx + 2], ps + _ix[dx + 3]);
-                                __m128 fx1 = _mm_load_ps(_ax.data + dx);
+                                __m128 s01 = Load(ps + _ix[dx + 0], ps + _ix[dx + 1]);
+                                __m128 s23 = Load(ps + _ix[dx + 2], ps + _ix[dx + 3]);
+                                __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
                                 __m128 fx0 = _mm_sub_ps(_1, fx1);
                                 __m128 m0 = _mm_mul_ps(fx0, _mm_shuffle_ps(s01, s23, 0x88));
                                 __m128 m1 = _mm_mul_ps(fx1, _mm_shuffle_ps(s01, s23, 0xDD));
+                                _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                            }
+                        }
+                        else if (cn == 2)
+                        {
+                            for (; dx < rsF; dx += F)
+                            {
+                                __m128 s0 = _mm_loadu_ps(ps + _ix[dx + 0]);
+                                __m128 s1 = _mm_loadu_ps(ps + _ix[dx + 2]);
+                                __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                                __m128 fx0 = _mm_sub_ps(_1, fx1);
+                                __m128 m0 = _mm_mul_ps(fx0, _mm_shuffle_ps(s0, s1, 0x44));
+                                __m128 m1 = _mm_mul_ps(fx1, _mm_shuffle_ps(s0, s1, 0xEE));
                                 _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
                             }
                         }
@@ -645,8 +658,9 @@ namespace Simd
                             size_t rs3 = rs - 3;
                             for (; dx < rs3; dx += 3)
                             {
-                                __m128 s0 = _mm_loadu_ps(ps + _ix[dx] + 0);
-                                __m128 s1 = _mm_loadu_ps(ps + _ix[dx] + 3);
+                                const float * ps0 = ps + _ix[dx];
+                                __m128 s0 = _mm_loadu_ps(ps0 + 0);
+                                __m128 s1 = _mm_loadu_ps(ps0 + 3);
                                 __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
                                 __m128 fx0 = _mm_sub_ps(_1, fx1);
                                 _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
@@ -663,7 +677,7 @@ namespace Simd
                     size_t dx = 0;
                     __m128 _fy0 = _mm_set1_ps(fy0);
                     __m128 _fy1 = _mm_set1_ps(fy1);
-                    for (; dx < rsh; dx += Sse41::F)
+                    for (; dx < rsF; dx += F)
                     {
                         __m128 m0 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx), _fy0);
                         __m128 m1 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx), _fy1);
