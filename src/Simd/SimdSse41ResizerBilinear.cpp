@@ -674,6 +674,20 @@ namespace Simd
                                 _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, _mm_loadu_ps(ps0 + 0)), _mm_mul_ps(fx1, _mm_loadu_ps(ps0 + 4))));
                             }
                         }
+                        else
+                        {
+                            for (; dx < rs;)
+                            {
+                                const float* ps0 = ps + _ix[dx];
+                                size_t eF = dx + cnF;
+                                __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                                __m128 fx0 = _mm_sub_ps(_1, fx1);
+                                for (; dx < eF; dx += F, ps0 += F)
+                                    _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, _mm_loadu_ps(ps0)), _mm_mul_ps(fx1, _mm_loadu_ps(ps0 + cn))));
+                                if (cnT)
+                                    _mm_storeu_ps(pb + dx + cnL, _mm_add_ps(_mm_mul_ps(fx0, _mm_loadu_ps(ps0 + cnL)), _mm_mul_ps(fx1, _mm_loadu_ps(ps0 + cnL + cn)))), dx += cnT;
+                            }
+                        }
                         for (; dx < rs; dx++)
                         {
                             int32_t sx = _ix[dx];
