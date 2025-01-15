@@ -598,7 +598,7 @@ namespace Simd
         void ResizerFloatBilinear::Run(const float* src, size_t srcStride, float* dst, size_t dstStride)
         {
             size_t cn = _param.channels, cnF = AlignLo(cn, F), cnT = cn - cnF, cnL = cnT - F;
-            size_t dw = _param.dstW, dw2= AlignLo(dw, 2), dw4 = AlignLo(dw, 4);
+            size_t dw = _param.dstW, dw2 = AlignLo(dw, 2), dw4 = AlignLo(dw, 4), dw1 = dw - 1;
             __m128 _1 = _mm_set1_ps(1.0f);
             if (_rowBuf)
             {
@@ -768,6 +768,31 @@ namespace Simd
                             __m128 s1 = _mm_loadu_ps(src1 + os);
                             __m128 r1 = _mm_add_ps(_mm_mul_ps(s1, fx0), _mm_mul_ps(_mm_shuffle_ps(s1, s1, 0xEE), fx1));
                             StoreHalf<0>(dst + od, _mm_add_ps(_mm_mul_ps(r0, fy0), _mm_mul_ps(r1, fy1)));
+                        }
+                    }
+                    else if (cn == 3)
+                    {
+                        size_t dx = 0, od = 0;
+                        for (; dx < dw1; dx += 1, od += 3)
+                        {
+                            size_t os = _ix[dx];
+                            __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                            __m128 fx0 = _mm_sub_ps(_1, fx1);
+                            __m128 r0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src0 + os + 3), fx1));
+                            __m128 r1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src1 + os + 3), fx1));
+                            _mm_storeu_ps(dst + od, _mm_add_ps(_mm_mul_ps(r0, fy0), _mm_mul_ps(r1, fy1)));
+                        }
+                        if (dx < dw)
+                        {
+                            size_t os = _ix[dx];
+                            __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                            __m128 fx0 = _mm_sub_ps(_1, fx1);
+                            for (size_t ed = od + 3; od < ed; od++, os++)
+                            {
+                                __m128 r0 = _mm_add_ps(_mm_mul_ps(_mm_load_ss(src0 + os), fx0), _mm_mul_ps(_mm_load_ss(src0 + os + 3), fx1));
+                                __m128 r1 = _mm_add_ps(_mm_mul_ps(_mm_load_ss(src1 + os), fx0), _mm_mul_ps(_mm_load_ss(src1 + os + 3), fx1));
+                                _mm_store_ss(dst + od, _mm_add_ps(_mm_mul_ps(r0, fy0), _mm_mul_ps(r1, fy1)));
+                            }
                         }
                     }
                     else
