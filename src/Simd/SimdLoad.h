@@ -43,6 +43,11 @@ namespace Simd
             return _mm_load_ps(p);
         }
 
+        SIMD_INLINE __m128 LoadHalf(const float* p)
+        {
+            return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)p));
+        }
+
         SIMD_INLINE __m128 Load(const float * p0, const float * p1)
         {
             return _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)p0), (__m64*)p1);
@@ -96,7 +101,7 @@ namespace Simd
 
         SIMD_INLINE __m128i LoadHalf(const __m128i* p)
         {
-            return _mm_castps_si128(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)p));
+            return _mm_loadl_epi64(p);
         }
 
         SIMD_INLINE __m128i Load(const __m128i* p0, const __m128i* p1)
