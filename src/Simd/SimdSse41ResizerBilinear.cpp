@@ -631,12 +631,12 @@ namespace Simd
                         {
                             for (; dx < rsF; dx += F)
                             {
-                                __m128 s01 = Load(ps + _ix[dx + 0], ps + _ix[dx + 1]);
-                                __m128 s23 = Load(ps + _ix[dx + 2], ps + _ix[dx + 3]);
+                                __m128 s0 = Load(ps + _ix[dx + 0], ps + _ix[dx + 1]);
+                                __m128 s1 = Load(ps + _ix[dx + 2], ps + _ix[dx + 3]);
                                 __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
                                 __m128 fx0 = _mm_sub_ps(_1, fx1);
-                                __m128 m0 = _mm_mul_ps(fx0, _mm_shuffle_ps(s01, s23, 0x88));
-                                __m128 m1 = _mm_mul_ps(fx1, _mm_shuffle_ps(s01, s23, 0xDD));
+                                __m128 m0 = _mm_mul_ps(fx0, _mm_shuffle_ps(s0, s1, 0x88));
+                                __m128 m1 = _mm_mul_ps(fx1, _mm_shuffle_ps(s0, s1, 0xDD));
                                 _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
                             }
                         }
@@ -653,17 +653,25 @@ namespace Simd
                                 _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
                             }
                         }
-                        if (cn == 3 && rs > 3)
+                        else if (cn == 3 && rs > 3)
                         {
                             size_t rs3 = rs - 3;
                             for (; dx < rs3; dx += 3)
                             {
                                 const float * ps0 = ps + _ix[dx];
-                                __m128 s0 = _mm_loadu_ps(ps0 + 0);
-                                __m128 s1 = _mm_loadu_ps(ps0 + 3);
                                 __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
                                 __m128 fx0 = _mm_sub_ps(_1, fx1);
-                                _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
+                                _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, _mm_loadu_ps(ps0 + 0)), _mm_mul_ps(fx1, _mm_loadu_ps(ps0 + 3))));
+                            }
+                        }
+                        else if (cn == 4)
+                        {
+                            for (; dx < rsF; dx += F)
+                            {
+                                const float* ps0 = ps + _ix[dx];
+                                __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
+                                __m128 fx0 = _mm_sub_ps(_1, fx1);
+                                _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, _mm_loadu_ps(ps0 + 0)), _mm_mul_ps(fx1, _mm_loadu_ps(ps0 + 4))));
                             }
                         }
                         for (; dx < rs; dx++)
