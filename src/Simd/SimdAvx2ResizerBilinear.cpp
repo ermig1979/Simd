@@ -921,6 +921,25 @@ namespace Simd
                                 _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
                             }
                         }
+                        else if (cn == 4)
+                        {
+                            for (; dx < rsF; dx += F)
+                            {
+                                __m256 s0 = Load<false>(ps + _ix[dx + 0] + 0, ps + _ix[dx + 4] + 0);
+                                __m256 s1 = Load<false>(ps + _ix[dx + 0] + 4, ps + _ix[dx + 4] + 4);
+                                __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
+                            }
+                            for (; dx < rsH; dx += HF)
+                            {
+                                __m128 s0 = _mm_loadu_ps(ps + _ix[dx] + 0);
+                                __m128 s1 = _mm_loadu_ps(ps + _ix[dx] + 4);
+                                __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
+                                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                                _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
+                            }
+                        }
                         else if (!Avx2::SlowGather)
                         {
                             __m256i _cn = _mm256_set1_epi32((int)cn);
