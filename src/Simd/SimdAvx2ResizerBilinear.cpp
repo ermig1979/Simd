@@ -804,6 +804,8 @@ namespace Simd
         {
         }
 
+        const __m256i RFB_2_WU = SIMD_MM256_SETR_EPI32(0, 0, 1, 1, 2, 2, 3, 3);
+
         void ResizerFloatBilinear::Run(const float * src, size_t srcStride, float * dst, size_t dstStride)
         {
             size_t cn = _param.channels,
@@ -1006,7 +1008,7 @@ namespace Simd
             }
             else
             {
-                if (cn > 1)
+                if (cn > 2)
                 {
                     Sse41::ResizerFloatBilinear::Run(src, srcStride, dst, dstStride);
                     return;
@@ -1070,6 +1072,46 @@ namespace Simd
                             __m128 r0 = _mm_add_ps(_mm_mul_ps(_mm_load_ss(src0 + os), fx0), _mm_mul_ps(_mm_load_ss(src0 + os + 1), fx1));
                             __m128 r1 = _mm_add_ps(_mm_mul_ps(_mm_load_ss(src1 + os), fx0), _mm_mul_ps(_mm_load_ss(src1 + os + 1), fx1));
                             _mm_store_ss(dst + dx, _mm_add_ps(_mm_mul_ps(r0, fy0), _mm_mul_ps(r1, fy1)));
+                        }
+                    }
+                    else if (cn == 2)
+                    {
+                        size_t dx = 0, od = 0;
+                        for (; dx < dw8; dx += 4, od += 8)
+                        {
+                            __m256 fx1 = _mm256_permutevar8x32_ps(_mm256_castps128_ps256(_mm_loadu_ps(_ax.data + dx)), RFB_2_WU);
+                            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                            __m256 s00 = Load<false>(src0 + _ix[dx + 0], src0 + _ix[dx + 4]);
+                            __m256 s01 = Load<false>(src0 + _ix[dx + 2], src0 + _ix[dx + 6]);
+                            __m256 r0 = _mm256_fmadd_ps(_mm256_shuffle_ps(s00, s01, 0x44), fx0, _mm256_mul_ps(_mm256_shuffle_ps(s00, s01, 0xEE), fx1));
+                            __m256 s10 = Load<false>(src1 + _ix[dx + 0], src1 + _ix[dx + 4]);
+                            __m256 s11 = Load<false>(src1 + _ix[dx + 2], src1 + _ix[dx + 6]);
+                            __m256 r1 = _mm256_fmadd_ps(_mm256_shuffle_ps(s10, s11, 0x44), fx0, _mm256_mul_ps(_mm256_shuffle_ps(s10, s11, 0xEE), fx1));
+                            _mm256_store_ps(dst + dx, _mm256_fmadd_ps(r0, fx0, _mm256_mul_ps(r1, fx1)));
+                        }
+                        for (; dx < dw4; dx += 2, od += 4)
+                        {
+                            __m128 fx = Sse41::LoadHalf(_ax.data + dx);
+                            __m128 fx1 = _mm_unpacklo_ps(fx, fx);
+                            __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                            __m128 s00 = _mm_loadu_ps(src0 + _ix[dx + 0]);
+                            __m128 s01 = _mm_loadu_ps(src0 + _ix[dx + 1]);
+                            __m128 r0 = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(s00, s01, 0x44), fx0), _mm_mul_ps(_mm_shuffle_ps(s00, s01, 0xEE), fx1));
+                            __m128 s10 = _mm_loadu_ps(src1 + _ix[dx + 0]);
+                            __m128 s11 = _mm_loadu_ps(src1 + _ix[dx + 1]);
+                            __m128 r1 = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(s10, s11, 0x44), fx0), _mm_mul_ps(_mm_shuffle_ps(s10, s11, 0xEE), fx1));
+                            _mm_storeu_ps(dst + od, _mm_add_ps(_mm_mul_ps(r0, fy0), _mm_mul_ps(r1, fy1)));
+                        }
+                        for (; dx < dw; dx++, od += 2)
+                        {
+                            size_t os = _ix[dx];
+                            __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                            __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                            __m128 s0 = _mm_loadu_ps(src0 + os);
+                            __m128 r0 = _mm_add_ps(_mm_mul_ps(s0, fx0), _mm_mul_ps(_mm_shuffle_ps(s0, s0, 0xEE), fx1));
+                            __m128 s1 = _mm_loadu_ps(src1 + os);
+                            __m128 r1 = _mm_add_ps(_mm_mul_ps(s1, fx0), _mm_mul_ps(_mm_shuffle_ps(s1, s1, 0xEE), fx1));
+                            Sse41::StoreHalf<0>(dst + od, _mm_add_ps(_mm_mul_ps(r0, fy0), _mm_mul_ps(r1, fy1)));
                         }
                     }
                 }
