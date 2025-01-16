@@ -813,6 +813,7 @@ namespace Simd
             if (_rowBuf)
             {
                 size_t rs = _param.dstW * cn, rsH = AlignLo(rs, HF), rsF = AlignLo(rs, F);
+                size_t rs3 = rs - 3, rs6 = AlignLoAny(rs3, 6), rscn = rs - cn, cnHF = cn - HF;
                 float* pbx[2] = { _bx[0].data, _bx[1].data };
                 int32_t prev = -2;
                 for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
@@ -900,10 +901,8 @@ namespace Simd
                                 _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
                             }
                         }
-                        else if (cn == 3 && rs > 3)
+                        else if (cn == 3)
                         {
-                            size_t rs3 = rs - 3;
-                            size_t rs6 = AlignLoAny(rs3, 6);
                             for (; dx < rs6; dx += 6)
                             {
                                 __m256 s0 = Load<false>(ps + _ix[dx + 0] + 0, ps + _ix[dx + 3] + 0);
@@ -938,6 +937,27 @@ namespace Simd
                                 __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
                                 __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
                                 _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
+                            }
+                        }
+                        else if (cn < 8)
+                        {
+                            for (; dx < rscn; dx += cn)
+                            {
+                                const float* ps0 = ps + _ix[dx];
+                                __m256 s0 = _mm256_loadu_ps(ps0);
+                                __m256 s1 = _mm256_loadu_ps(ps0 + cn);
+                                __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
+                            }
+                            for (; dx < rs; dx += cn)
+                            {
+                                const float* ps0 = ps + _ix[dx], * ps1 = ps0 + cn;
+                                __m256 s0 = Load<false>(ps0, ps0 + cnHF);
+                                __m256 s1 = Load<false>(ps1, ps1 + cnHF);
+                                __m256 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + cnHF);
+                                __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                                Store<false>(pb + dx, pb + dx + cnHF, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
                             }
                         }
                         else if (!Avx2::SlowGather)
