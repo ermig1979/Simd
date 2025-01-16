@@ -960,18 +960,20 @@ namespace Simd
                                 Store<false>(pb + dx, pb + dx + cnHF, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
                             }
                         }
-                        else if (!Avx2::SlowGather)
+                        else
                         {
-                            __m256i _cn = _mm256_set1_epi32((int)cn);
-                            for (; dx < rsF; dx += F)
+                            for (; dx < rs;)
                             {
-                                __m256i i0 = _mm256_load_si256((__m256i*)(_ix.data + dx));
-                                __m256i i1 = _mm256_add_epi32(i0, _cn);
-                                __m256 s0 = _mm256_i32gather_ps(ps, i0, 4);
-                                __m256 s1 = _mm256_i32gather_ps(ps, i1, 4);
-                                __m256 fx1 = _mm256_load_ps(_ax.data + dx);
+                                const float* ps0 = ps + _ix[dx];
+                                __m256 fx1 = _mm256_set1_ps(_ax[dx]);
                                 __m256 fx0 = _mm256_sub_ps(_1, fx1);
-                                _mm256_store_ps(pb + dx, _mm256_fmadd_ps(s0, fx0, _mm256_mul_ps(s1, fx1)));
+                                for (size_t eF = dx + cnF; dx < eF; dx += F, ps0 += F)
+                                    _mm256_storeu_ps(pb + dx, _mm256_fmadd_ps(fx0, _mm256_loadu_ps(ps0), _mm256_mul_ps(fx1, _mm256_loadu_ps(ps0 + cn))));
+                                if (cnTF)
+                                {
+                                    _mm256_storeu_ps(pb + dx + cnLF, _mm256_fmadd_ps(fx0, _mm256_loadu_ps(ps0 + cnLF), _mm256_mul_ps(fx1, _mm256_loadu_ps(ps0 + cn + cnLF))));
+                                    dx += cnTF;
+                                }
                             }
                         }
                         for (; dx < rs; dx++)
@@ -1182,7 +1184,20 @@ namespace Simd
                                 _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, Sse41::BFloat16ToFloat32<0>(_src)), _mm_mul_ps(fx1, Sse41::BFloat16ToFloat32<1>(_src))));
                             }
                         }
-                        if (cn >= 8)
+                        else if (cn < 8)
+                        {
+                            for (; dx < rs;)
+                            {
+                                const uint16_t* ps0 = ps + _ix[dx];
+                                __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                                for (size_t end = dx + cnH; dx < end; dx += Sse41::F, ps0 += Sse41::F)
+                                    _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
+                                if (cnTH)
+                                    _mm_storeu_ps(pb + dx + cnLH, BilinearRowSumBf16(ps0 + cnLH, cn, fx0, fx1)), dx += cnTH;
+                            }
+                        }                          
+                        else
                         {
                             for (; dx < rs;)
                             {
@@ -1195,19 +1210,7 @@ namespace Simd
                                     _mm256_storeu_ps(pb + dx + cnLF, BilinearRowSumBf16(ps0 + cnLF, cn, fx0, fx1)), dx += cnTF;
                             }
                         }
-                        else if (cn > 4)
-                        {
-                            for (; dx < rs;)
-                            {
-                                const uint16_t* ps0 = ps + _ix[dx];
-                                __m128 fx1 = _mm_set1_ps(_ax[dx]);
-                                __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
-                                for (size_t end = dx + cnH; dx < end; dx += Sse41::F, ps0 += Sse41::F)
-                                    _mm_storeu_ps(pb + dx, BilinearRowSumBf16(ps0, cn, fx0, fx1));
-                                if (cnTH)
-                                    _mm_storeu_ps(pb + dx + cnLH, BilinearRowSumBf16(ps0 + cnLH, cn, fx0, fx1)), dx += cnTH;
-                            }
-                        }                        
+                      
                         for (; dx < rs; dx++)
                         {
                             int32_t sx = _ix[dx];
