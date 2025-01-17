@@ -732,9 +732,9 @@ namespace Simd
 
         void ResizerFloatBilinear::Run(const float* src, size_t srcStride, float* dst, size_t dstStride)
         {
+            size_t cn = _param.channels;
             if (_rowBuf)
             {
-                size_t cn = _param.channels;
                 size_t rs = _param.dstW * cn;
                 float* pbx[2] = { _bx[0].data, _bx[1].data };
                 int32_t prev = -2;
@@ -861,7 +861,11 @@ namespace Simd
             }
             else
             {
-                Avx2::ResizerFloatBilinear::Run(src, srcStride, dst, dstStride);
+                if (cn > 0)
+                {
+                    Avx2::ResizerFloatBilinear::Run(src, srcStride, dst, dstStride);
+                    return;
+                }
             }
         }
 

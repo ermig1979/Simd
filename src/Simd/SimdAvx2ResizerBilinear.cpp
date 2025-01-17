@@ -1009,11 +1009,6 @@ namespace Simd
             }
             else
             {
-                if (cn > 7)
-                {
-                    Sse41::ResizerFloatBilinear::Run(src, srcStride, dst, dstStride);
-                    return;
-                }
                 for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
                 {
                     __m256 fy1 = _mm256_set1_ps(_ay[dy]);
@@ -1209,6 +1204,29 @@ namespace Simd
                                 __m128 r0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src0 + os + cn), fx1));
                                 __m128 r1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src1 + os + cn), fx1));
                                 _mm_storeu_ps(dst + od, _mm_add_ps(_mm_mul_ps(r0, _mm256_castps256_ps128(fy0)), _mm_mul_ps(r1, _mm256_castps256_ps128(fy1))));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (size_t dx = 0; dx < dw; dx++)
+                        {
+                            size_t os = _ix[dx], eF = os + cnF, od = dx * cn;
+                            __m256 fx1 = _mm256_set1_ps(_ax[dx]);
+                            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                            for (; os < eF; os += F, od += F)
+                            {
+                                __m256 r0 = _mm256_fmadd_ps(_mm256_loadu_ps(src0 + os), fx0, _mm256_mul_ps(_mm256_loadu_ps(src0 + os + cn), fx1));
+                                __m256 r1 = _mm256_fmadd_ps(_mm256_loadu_ps(src1 + os), fx0, _mm256_mul_ps(_mm256_loadu_ps(src1 + os + cn), fx1));
+                                _mm256_storeu_ps(dst + od, _mm256_fmadd_ps(r0, fy0, _mm256_mul_ps(r1, fy1)));
+                            }
+                            if (cnTF)
+                            {
+                                os += cnLF;
+                                od += cnLF;
+                                __m256 r0 = _mm256_fmadd_ps(_mm256_loadu_ps(src0 + os), fx0, _mm256_mul_ps(_mm256_loadu_ps(src0 + os + cn), fx1));
+                                __m256 r1 = _mm256_fmadd_ps(_mm256_loadu_ps(src1 + os), fx0, _mm256_mul_ps(_mm256_loadu_ps(src1 + os + cn), fx1));
+                                _mm256_storeu_ps(dst + od, _mm256_fmadd_ps(r0, fy0, _mm256_mul_ps(r1, fy1)));
                             }
                         }
                     }
