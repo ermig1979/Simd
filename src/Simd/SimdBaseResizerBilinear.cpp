@@ -334,7 +334,7 @@ namespace Simd
         ResizerFloatBilinear::ResizerFloatBilinear(const ResParam & param)
             : Resizer(param)
         {
-            _rowBuf = _param.align < 16 || (_param.channels < 4 && _param.align > 32) || _param.dstH >= _param.srcH;
+            _rowBuf = _param.align < 16 || _param.dstH >= _param.srcH;
 #if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
             _rowBuf = true;
 #endif
