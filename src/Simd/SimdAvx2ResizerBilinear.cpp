@@ -1009,7 +1009,7 @@ namespace Simd
             }
             else
             {
-                if (cn > 4)
+                if (cn > 7)
                 {
                     Sse41::ResizerFloatBilinear::Run(src, srcStride, dst, dstStride);
                     return;
@@ -1177,6 +1177,39 @@ namespace Simd
                             __m128 r0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src0 + os + 4), fx1));
                             __m128 r1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src1 + os + 4), fx1));
                             _mm_storeu_ps(dst + od, _mm_add_ps(_mm_mul_ps(r0, _mm256_castps256_ps128(fy0)), _mm_mul_ps(r1, _mm256_castps256_ps128(fy1))));
+                        }
+                    }
+                    else if (cn < 8)
+                    {
+                        size_t dx = 0;
+                        for (; dx < dw1; dx++)
+                        {
+                            size_t os = _ix[dx], od = dx * cn;
+                            __m256 fx1 = _mm256_set1_ps(_ax[dx]);
+                            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                            __m256 r0 = _mm256_fmadd_ps(fx0, _mm256_loadu_ps(src0 + os), _mm256_mul_ps(fx1, _mm256_loadu_ps(src0 + os + cn)));
+                            __m256 r1 = _mm256_fmadd_ps(fx0, _mm256_loadu_ps(src1 + os), _mm256_mul_ps(fx1, _mm256_loadu_ps(src1 + os + cn)));
+                            _mm256_storeu_ps(dst + od, _mm256_fmadd_ps(r0, fy0, _mm256_mul_ps(r1, fy1)));
+                        }
+                        for (; dx < dw; dx++)
+                        {
+                            size_t os = _ix[dx], eH = os + cnH, od = dx * cn;
+                            __m128 fx1 = _mm_set1_ps(_ax[dx]);
+                            __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                            for (; os < eH; os += HF, od += HF)
+                            {
+                                __m128 r0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src0 + os + cn), fx1));
+                                __m128 r1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src1 + os + cn), fx1));
+                                _mm_storeu_ps(dst + od, _mm_add_ps(_mm_mul_ps(r0, _mm256_castps256_ps128(fy0)), _mm_mul_ps(r1, _mm256_castps256_ps128(fy1))));
+                            }
+                            if (cnTH)
+                            {
+                                os += cnLH;
+                                od += cnLH;
+                                __m128 r0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src0 + os + cn), fx1));
+                                __m128 r1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + os), fx0), _mm_mul_ps(_mm_loadu_ps(src1 + os + cn), fx1));
+                                _mm_storeu_ps(dst + od, _mm_add_ps(_mm_mul_ps(r0, _mm256_castps256_ps128(fy0)), _mm_mul_ps(r1, _mm256_castps256_ps128(fy1))));
+                            }
                         }
                     }
                 }
