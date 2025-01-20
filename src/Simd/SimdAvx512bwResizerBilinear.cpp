@@ -728,15 +728,14 @@ namespace Simd
         ResizerFloatBilinear::ResizerFloatBilinear(const ResParam& param)
             : Avx2::ResizerFloatBilinear(param)
         {
-            size_t cn = _param.channels, rs = _param.dstW * cn, rsF = AlignLo(rs, F);
-            _fastLoad = _rowBuf && cn < 5 && cn != 3;
+            size_t cn = _param.channels, rs = _param.dstW * cn, fs = AlignLoAny(F, cn);
+            _fastLoad = _rowBuf && cn < 6;
             if (_fastLoad)
             {
-                for (size_t dx = 0; dx < rsF && _fastLoad; dx += F)
+                for (size_t dx = 0; dx < rs && _fastLoad; dx += fs)
                 {
-                    size_t sx0 = _ix[dx];
-                    for(size_t i = 0; i < F; ++i)
-                        if (_ix[dx + i] + cn - sx0 >= F)
+                    for(size_t i = dx, n = Simd::Min(dx + fs, rs); i < n; ++i)
+                        if (_ix[i] + cn - _ix[dx] >= F)
                             _fastLoad = false;
                 }
             }
@@ -755,6 +754,8 @@ namespace Simd
                 int32_t prev = -2;
                 size_t rsF = AlignLo(rs, F);
                 __mmask16 rsMF = TailMask16(rs - rsF);
+                size_t fs = AlignLoAny(F, cn), rsFS = _fastLoad ? AlignLoAny(rs, fs) : rs;
+                __mmask16 rsMSM = TailMask16(fs), rsMST = TailMask16(rs - rsFS), rsMSTS = TailMask16(_param.srcW*cn - _ix[rsFS]);
                 for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
                 {
                     float fy1 = _ay[dy];
@@ -779,27 +780,27 @@ namespace Simd
                         size_t dx = 0;
                         if (_fastLoad)
                         {
-                            for (; dx < rsF; dx += F)
+                            for (; dx < rsFS; dx += fs)
                             {
                                 size_t sx0 = _ix[dx];
                                 __m512i idx = _mm512_sub_epi32(_mm512_loadu_si512(_ix.data + dx), _mm512_set1_epi32(sx0));
-                                __m512 _src = _mm512_loadu_ps(ps + sx0);
+                               __m512 _src = _mm512_loadu_ps(ps + sx0);
                                 __m512 s0 = _mm512_permutexvar_ps(idx, _src);
                                 __m512 s1 = _mm512_permutexvar_ps(_mm512_add_epi32(idx, _cn), _src);
                                 __m512 fx1 = _mm512_loadu_ps(_ax.data + dx);
                                 __m512 fx0 = _mm512_sub_ps(_1, fx1);
-                                _mm512_storeu_ps(pb + dx, _mm512_fmadd_ps(s0, fx0, _mm512_mul_ps(s1, fx1)));
+                                _mm512_mask_storeu_ps(pb + dx, rsMSM, _mm512_fmadd_ps(s0, fx0, _mm512_mul_ps(s1, fx1)));
                             }
                             if (dx < rs)
                             {
                                 size_t sx0 = _ix[dx];
-                                __m512i idx = _mm512_sub_epi32(_mm512_maskz_loadu_epi32(rsMF, _ix.data + dx), _mm512_set1_epi32(sx0));
-                                __m512 _src = _mm512_maskz_loadu_ps(rsMF, ps + sx0);
+                                __m512i idx = _mm512_sub_epi32(_mm512_maskz_loadu_epi32(rsMST, _ix.data + dx), _mm512_set1_epi32(sx0));
+                                __m512 _src = _mm512_maskz_loadu_ps(rsMSTS, ps + sx0);
                                 __m512 s0 = _mm512_permutexvar_ps(idx, _src);
                                 __m512 s1 = _mm512_permutexvar_ps(_mm512_add_epi32(idx, _cn), _src);
                                 __m512 fx1 = _mm512_loadu_ps(_ax.data + dx);
                                 __m512 fx0 = _mm512_sub_ps(_1, fx1);
-                                _mm512_mask_storeu_ps(pb + dx, rsMF, _mm512_fmadd_ps(s0, fx0, _mm512_mul_ps(s1, fx1)));
+                                _mm512_mask_storeu_ps(pb + dx, rsMST, _mm512_fmadd_ps(s0, fx0, _mm512_mul_ps(s1, fx1)));
                             }
                         }
                         else if (cn == 1)
