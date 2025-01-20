@@ -743,7 +743,7 @@ namespace Simd
 
         void ResizerFloatBilinear::Run(const float* src, size_t srcStride, float* dst, size_t dstStride)
         {
-            size_t cn = _param.channels, cnF = AlignLo(cn, F);
+            size_t cn = _param.channels, cnF = AlignLo(cn, F), cnT = cn - cnF;
             __mmask16 cnMF = TailMask16(cn - cnF);
             __m512 _1 = _mm512_set1_ps(1.0f);
             __m512i _cn = _mm512_set1_epi32((int)cn);
@@ -852,6 +852,22 @@ namespace Simd
                                 int32_t sx = _ix[dx];
                                 float fx = _ax[dx];
                                 pb[dx] = ps[sx] * (1.0f - fx) + ps[sx + cn] * fx;
+                            }
+                        }
+                        else if(cn > 8)
+                        {
+                            for (; dx < rs;)
+                            {
+                                const float* ps0 = ps + _ix[dx];
+                                __m512 fx1 = _mm512_set1_ps(_ax[dx]);
+                                __m512 fx0 = _mm512_sub_ps(_1, fx1);
+                                for (size_t eF = dx + cnF; dx < eF; dx += F, ps0 += F)
+                                    _mm512_storeu_ps(pb + dx, _mm512_fmadd_ps(fx0, _mm512_loadu_ps(ps0), _mm512_mul_ps(fx1, _mm512_loadu_ps(ps0 + cn))));
+                                if (cnMF)
+                                {
+                                    _mm512_mask_storeu_ps(pb + dx, cnMF, _mm512_fmadd_ps(fx0, _mm512_maskz_loadu_ps(cnMF, ps0), _mm512_mul_ps(fx1, _mm512_maskz_loadu_ps(cnMF, ps0 + cn))));
+                                    dx += cnT;
+                                }
                             }
                         }
                         else
