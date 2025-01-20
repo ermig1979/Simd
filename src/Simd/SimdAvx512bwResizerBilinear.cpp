@@ -744,6 +744,7 @@ namespace Simd
         void ResizerFloatBilinear::Run(const float* src, size_t srcStride, float* dst, size_t dstStride)
         {
             size_t cn = _param.channels, cnF = AlignLo(cn, F), cnT = cn - cnF;
+            size_t dw = _param.dstW, dw2 = AlignLo(dw, 2), dw4 = AlignLo(dw, 4), dw8 = AlignLo(dw, 8), dw1 = dw - 1;
             __mmask16 cnMF = TailMask16(cn - cnF);
             __m512 _1 = _mm512_set1_ps(1.0f);
             __m512i _cn = _mm512_set1_epi32((int)cn);
@@ -885,10 +886,36 @@ namespace Simd
             }
             else
             {
-                if (cn > 0)
+                if (cn <= 8)
                 {
                     Avx2::ResizerFloatBilinear::Run(src, srcStride, dst, dstStride);
                     return;
+                }
+                for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+                {
+                    __m512 fy1 = _mm512_set1_ps(_ay[dy]);
+                    __m512 fy0 = _mm512_sub_ps(_1, fy1);
+                    const float* src0 = src + _iy[dy] * srcStride, * src1 = src0 + srcStride;
+                    {
+                        for (size_t dx = 0; dx < dw; dx++)
+                        {
+                            size_t os = _ix[dx], eF = os + cnF, od = dx * cn;
+                            __m512 fx1 = _mm512_set1_ps(_ax[dx]);
+                            __m512 fx0 = _mm512_sub_ps(_1, fx1);
+                            for (; os < eF; os += F, od += F)
+                            {
+                                __m512 r0 = _mm512_fmadd_ps(_mm512_loadu_ps(src0 + os), fx0, _mm512_mul_ps(_mm512_loadu_ps(src0 + os + cn), fx1));
+                                __m512 r1 = _mm512_fmadd_ps(_mm512_loadu_ps(src1 + os), fx0, _mm512_mul_ps(_mm512_loadu_ps(src1 + os + cn), fx1));
+                                _mm512_storeu_ps(dst + od, _mm512_fmadd_ps(r0, fy0, _mm512_mul_ps(r1, fy1)));
+                            }
+                            if (cnT)
+                            {
+                                __m512 r0 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(cnMF, src0 + os), fx0, _mm512_mul_ps(_mm512_maskz_loadu_ps(cnMF, src0 + os + cn), fx1));
+                                __m512 r1 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(cnMF, src1 + os), fx0, _mm512_mul_ps(_mm512_maskz_loadu_ps(cnMF, src1 + os + cn), fx1));
+                                _mm512_mask_storeu_ps(dst + od, cnMF, _mm512_fmadd_ps(r0, fy0, _mm512_mul_ps(r1, fy1)));
+                            }
+                        }
+                    }
                 }
             }
         }
