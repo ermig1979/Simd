@@ -584,7 +584,7 @@ namespace Simd
 
         class ResizerFloatBilinear : public Avx2::ResizerFloatBilinear
         {
-            bool _fastLoad;
+            bool _fastLoad1, _fastLoad2;
         protected:
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
         public:
