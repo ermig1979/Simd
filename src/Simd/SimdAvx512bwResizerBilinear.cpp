@@ -729,7 +729,7 @@ namespace Simd
             : Avx2::ResizerFloatBilinear(param)
         {
             size_t cn = _param.channels, rs = _param.dstW * cn, fs = AlignLoAny(F, cn);
-            _fastLoad1 = _rowBuf && cn <= 8, _fastLoad2 = _fastLoad1;
+            _fastLoad1 = (_rowBuf && cn <= 8), _fastLoad2 = (_rowBuf && cn <= 8 && _param.dstW <= _param.srcW);
             if (_fastLoad1)
             {
                 for (size_t dx = 0; dx < rs && _fastLoad1; dx += fs)

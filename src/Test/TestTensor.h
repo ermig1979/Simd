@@ -448,6 +448,8 @@ namespace Test
         std::stringstream message;
         message << std::fixed << std::setprecision(6);
         int errorCount = 0;
+        if (memcmp(a.Data(), b.Data(), a.Size() * sizeof(float)) == 0)
+            return true;
         Index index(a.Count(), 0);
         Compare(a, b, differenceMax, printError, errorCountMax, differenceType, description, index, 0, errorCount, message);
         if (printError && errorCount > 0)

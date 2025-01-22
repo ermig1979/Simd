@@ -28,6 +28,8 @@
 #include "Simd/SimdSynet.h"
 #include "Test/TestRandom.h"
 
+#include <random>
+
 namespace Test
 {
     void FillSequence(View & view)

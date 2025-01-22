@@ -115,6 +115,7 @@ namespace Test
     extern String REAL_IMAGE;
 
     extern int LITTER_CPU_CACHE;
+    extern int TEST_THREADS;
 
     enum DifferenceType
     {

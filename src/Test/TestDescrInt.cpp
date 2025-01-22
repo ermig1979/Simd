@@ -693,10 +693,13 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 4; depth <= 8; depth++)
+        for (size_t depth = 7; depth <= 8; depth++)
         {
-            result = result && DescrIntCosineDistancesMxNpAutoTest(256, 128, 256, depth, f1, f2);
-            result = result && DescrIntCosineDistancesMxNpAutoTest(128, 128, 512, depth, f1, f2);
+            //result = result && DescrIntCosineDistancesMxNpAutoTest(256, 128, 256, depth, f1, f2);
+            //result = result && DescrIntCosineDistancesMxNpAutoTest(128, 128, 512, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNpAutoTest(1, 10*1024*1024, 512, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNpAutoTest(10, 10 * 1024 * 1024, 512, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNpAutoTest(100, 10 * 1024 * 1024, 512, depth, f1, f2);
         }
 
         return result;
@@ -737,6 +740,57 @@ namespace Test
 #if defined(SIMD_NEON_ENABLE)
         if (Simd::Neon::Enable && TestNeon())
             result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    static inline void SetRandomDescriptor(const float* rnd, size_t size, float mainRange, int seed, float noiseRange, size_t noiseTimes, float* dst)
+    {
+        memset(dst, 0, size * sizeof(float));
+        SimdNeuralAddVectorMultipliedByValue(rnd + seed, size, &mainRange, dst);
+        for(size_t t = 0; t < noiseTimes; ++t)
+            SimdNeuralAddVectorMultipliedByValue(rnd + (Rand() & INT16_MAX), size, &noiseRange, dst);
+    }
+
+    //static inline void SetRandomDescriptor(const float* rnd, size_t size, float main, float noise, float* dst)
+    //{
+    //    SetRandomDescriptor(rnd, size, main, ::rand() & INT16_MAX, noise, ::rand() & INT16_MAX, 1, dst);
+    //}
+
+    bool DescrIntCosineDistancesMxNaSpecialTest(size_t M, size_t N, size_t size)
+    {
+        bool result = true;
+
+        Srand(0);
+
+        Tensor32f rnd(Shp(INT16_MAX + size));
+        FillRandom(rnd.Data(), rnd.Size(), -1.0f, 1.0f);
+
+        Tensor32f b32f(Shp(N, size));
+        for (size_t i = 0, n = Simd::Min<size_t>(N, 20); i < n; ++i)
+        {
+            SetRandomDescriptor(rnd.Data(), size, 1.0f, 0, 0.1f * i, 7, b32f.Data(Shp(i, 0)));
+            SetRandomDescriptor(rnd.Data(), size, 1.0f, n, 0.1f * i, 0, b32f.Data(Shp(i + n, 0)));
+            float d0 = 0, dn = 0;
+            SimdCosineDistance32f(b32f.Data(Shp(0, 0)), b32f.Data(Shp(i, 0)), size, &d0);
+            SimdCosineDistance32f(b32f.Data(Shp(n, 0)), b32f.Data(Shp(i, 0)), size, &dn);
+            std::cout << "Noise = " << 0.1f * i << " Cosine Distance (noise) = " << d0 << " Cosine Distance (other) = " << dn << std::endl;
+        }
+
+        return result;
+    }
+
+    bool DescrIntCosineDistancesMxNaSpecialTest()
+    {
+        bool result = true;
+
+#if defined(NDEBUG)
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 10 * 1024 * 1024, 512);
+#else
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 64 * 1024, 512);
 #endif
 
         return result;

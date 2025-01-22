@@ -26,8 +26,25 @@
 
 #include "Test/TestLog.h"
 
+#define TEST_RAND_VERSION 0
+
 namespace Test
 {
+    SIMD_INLINE int Rand()
+    {
+        return ::rand();
+    }
+
+    SIMD_INLINE void Srand(unsigned int seed)
+    {
+        ::srand(seed);
+    }
+
+    SIMD_INLINE int RandMax()
+    {
+        return INT16_MAX;
+    }
+
     void FillSequence(View& view);
 
     void FillPicture(View& view, uint64_t flag = 0x000000000000000F);
