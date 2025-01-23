@@ -27,6 +27,7 @@
 #include "Test/TestTensor.h"
 
 #include "Simd/SimdDescrInt.h"
+#include "Simd/SimdParallel.hpp"
 
 namespace Test
 {
@@ -695,11 +696,11 @@ namespace Test
 
         for (size_t depth = 7; depth <= 8; depth++)
         {
-            //result = result && DescrIntCosineDistancesMxNpAutoTest(256, 128, 256, depth, f1, f2);
-            //result = result && DescrIntCosineDistancesMxNpAutoTest(128, 128, 512, depth, f1, f2);
-            result = result && DescrIntCosineDistancesMxNpAutoTest(1, 10*1024*1024, 512, depth, f1, f2);
-            result = result && DescrIntCosineDistancesMxNpAutoTest(10, 10 * 1024 * 1024, 512, depth, f1, f2);
-            result = result && DescrIntCosineDistancesMxNpAutoTest(100, 10 * 1024 * 1024, 512, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNpAutoTest(256, 128, 256, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNpAutoTest(128, 128, 512, depth, f1, f2);
+            //result = result && DescrIntCosineDistancesMxNpAutoTest(1, 10*1024*1024, 512, depth, f1, f2);
+            //result = result && DescrIntCosineDistancesMxNpAutoTest(10, 10 * 1024 * 1024, 512, depth, f1, f2);
+            //result = result && DescrIntCosineDistancesMxNpAutoTest(100, 10 * 1024 * 1024, 512, depth, f1, f2);
         }
 
         return result;
@@ -755,32 +756,84 @@ namespace Test
             SimdNeuralAddVectorMultipliedByValue(rnd + (Rand() & INT16_MAX), size, &noiseRange, dst);
     }
 
-    //static inline void SetRandomDescriptor(const float* rnd, size_t size, float main, float noise, float* dst)
-    //{
-    //    SetRandomDescriptor(rnd, size, main, ::rand() & INT16_MAX, noise, ::rand() & INT16_MAX, 1, dst);
-    //}
+    typedef std::pair<size_t, float> Pair;
+    typedef std::vector<Pair> Pairs;
+    typedef std::vector<Pairs> Pairss;
+
+    inline String FuncDescr(size_t M, size_t N, size_t size)
+    {
+        std::stringstream ss;
+        ss << "[" << M << "x" << N << "x" << size << "]";
+        return ss.str();
+    }
+
+    static void CompareDescriptors32f(size_t M, size_t beg, size_t end, size_t size, const float* const* a, const float* const* b, float threshold, Pairss &result)
+    {
+        result.resize(M);
+        for (size_t i = beg; i < end; ++i)
+        {
+            for (size_t j = 0; j < M; ++j)
+            {
+                float distance;
+                SimdCosineDistance32f(a[j], b[i], size, &distance);
+                if (distance < threshold)
+                    result[j].push_back(Pair(i, distance));
+            }
+        }
+    }
+
+    static void CompareDescriptors32f(size_t M, size_t N, size_t size, const float* const* a, const float* const* b, float threshold)
+    {
+        TEST_PERFORMANCE_TEST(String(__FUNCTION__) + FuncDescr(M, N, size));
+        Pairss result(M);
+        if (TEST_THREADS)
+        {
+            std::vector<Pairss> buffer(TEST_THREADS);
+            Simd::Parallel(0, N, [&](size_t thread, size_t begin, size_t end)
+                {
+                    CompareDescriptors32f(M, begin, end, size, a, b, threshold, buffer[thread]);
+                }, TEST_THREADS, 1);
+            for (size_t t = 0; t < TEST_THREADS; ++t)
+                for (size_t j = 0; j < M; ++j)
+                    for (size_t i = 0; i < buffer[t][j].size(); ++i)
+                        result[j].push_back(buffer[t][j][i]);            
+        }
+        else
+        {
+            CompareDescriptors32f(M, 0, N, size, a, b, threshold, result);
+        }
+    }
 
     bool DescrIntCosineDistancesMxNaSpecialTest(size_t M, size_t N, size_t size)
     {
         bool result = true;
 
+        TEST_LOG_SS(Info, "DescrIntCosineDistancesMxNa " << std::max(TEST_THREADS, 1) << " threads special test [" << M << "x" << N << "x" << size << "]:");
+
+        const float threshold = 0.5f;
+
         Srand(0);
 
-        Tensor32f rnd(Shp(INT16_MAX + size));
+        Tensor32f rnd(Shp(std::max(N, size_t(INT16_MAX)) + size));
         FillRandom(rnd.Data(), rnd.Size(), -1.0f, 1.0f);
 
-        Tensor32f b32f(Shp(N, size));
-        for (size_t i = 0, n = Simd::Min<size_t>(N, 20); i < n; ++i)
+        Tensor32f a32f(Shp(M, size)), b32f(Shp(N, size));
+        //Tensor16u a16b(Shp(M, size)), b16b(Shp(N, size));
+        FloatPtrs a32fp(M), b32fp(N);
+        for (size_t i = 0; i < M; ++i)
         {
-            SetRandomDescriptor(rnd.Data(), size, 1.0f, 0, 0.1f * i, 7, b32f.Data(Shp(i, 0)));
-            SetRandomDescriptor(rnd.Data(), size, 1.0f, n, 0.1f * i, 0, b32f.Data(Shp(i + n, 0)));
-            float d0 = 0, dn = 0;
-            SimdCosineDistance32f(b32f.Data(Shp(0, 0)), b32f.Data(Shp(i, 0)), size, &d0);
-            SimdCosineDistance32f(b32f.Data(Shp(n, 0)), b32f.Data(Shp(i, 0)), size, &dn);
-            std::cout << "Noise = " << 0.1f * i << " Cosine Distance (noise) = " << d0 << " Cosine Distance (other) = " << dn << std::endl;
+            a32fp[i] = a32f.Data(Shp(i, 0));
+            SetRandomDescriptor(rnd.Data(), size, 1.0f, Random(int(N)), 0.3f, 3, a32fp[i]);
+        }
+        for (size_t i = 0; i < N; ++i)
+        {
+            b32fp[i] = b32f.Data(Shp(i, 0));
+            SetRandomDescriptor(rnd.Data(), size, 1.0f, int(i), 0.3f, 3, b32fp[i]);
         }
 
-        return result;
+        CompareDescriptors32f(M, N, size, a32fp.data(), b32fp.data(), threshold);
+
+        return true;
     }
 
     bool DescrIntCosineDistancesMxNaSpecialTest()
@@ -788,9 +841,21 @@ namespace Test
         bool result = true;
 
 #if defined(NDEBUG)
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 10 * 1024 * 1024, 512);
+#if defined(SIMD_AMXBF16_ENABLE)
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 10000000, 512);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(10, 10000000, 512);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(100, 10000000, 512);
 #else
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 64 * 1024, 512);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 1000000, 512);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(8, 1000000, 512);
+#endif
+#else
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(10, 1024, 512);
+#endif
+
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.ConsoleReport(false, true));
+        PerformanceMeasurerStorage::s_storage.Clear();
 #endif
 
         return result;
