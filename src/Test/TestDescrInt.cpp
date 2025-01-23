@@ -981,10 +981,18 @@ namespace Test
 
 #if defined(NDEBUG)
 #if defined(SIMD_AMXBF16_ENABLE)
+#if 0
         result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 10000000, 512, 7);
         result = result && DescrIntCosineDistancesMxNaSpecialTest(10, 10000000, 512, 7);
         result = result && DescrIntCosineDistancesMxNaSpecialTest(100, 10000000, 512, 7);
         result = result && DescrIntCosineDistancesMxNaSpecialTest(1000, 10000000, 512, 7);
+#endif
+#if 1
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 10000000, 256, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(10, 10000000, 256, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(100, 10000000, 256, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(1000, 10000000, 256, 7);
+#endif
 #else
         result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 1000000, 512, 7);
         result = result && DescrIntCosineDistancesMxNaSpecialTest(8, 1000000, 512, 7);
