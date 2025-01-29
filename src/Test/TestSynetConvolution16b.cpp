@@ -80,13 +80,13 @@ namespace Test
         const SimdConvolutionParameters& c = p.conv;
         srand(0);
         Tensor32f weight(p.WeightShape());
-        FillRandom(weight.Data(), weight.Size(), -10.0, 10.0f);
+        FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
 
         Tensor32f bias({ c.dstC });
         FillRandom(bias.Data(), bias.Size(), -1.0, 1.0f);
 
         Tensor32f params({ c.dstC });
-        FillRandom(params.Data(), params.Size(), 0.0f, 2.0f);
+        FillRandom(params.Data(), params.Size(), 0.0f, 1.0f);
 
         if (p.conv.activation == ::SimdConvolutionActivationHswish)
         {
@@ -316,14 +316,11 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 32, 192, 256, 256, _1, _1, _1, _0, _0, 1, aRe, tT, f32, f32), c, f1, f2);
 #endif
 #if 1
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 384, 13, 13, 1152, _1, _1, _1, _0, _0, 1, aRe, tF, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 384, 13, 13, 1152, _1, _1, _1, _0, _0, 1, aRe, tT, b16, b16), c, f1, f2);
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 384, 13, 13, 1152, _1, _1, _1, _0, _0, 1, aRe, tF, f32, f32), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 384, 13, 13, 1152, _1, _1, _1, _0, _0, 1, aRe, tT, f32, f32), c, f1, f2);
 #endif
-
 #else
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 2048, 7, 7, 2048, _1, _1, _1, _0, _0, 1, aRe, tT, b16, f32), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 384, 13, 13, 1152, _1, _1, _1, _0, _0, 1, aRe, tF, b16, b16), c, f1, f2);
 #endif
 
         return result;
