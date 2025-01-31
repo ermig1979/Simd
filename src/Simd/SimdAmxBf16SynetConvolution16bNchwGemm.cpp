@@ -48,29 +48,8 @@ namespace Simd
             int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : (int)K * 2;
             const uint16_t* weight1 = weight0 + K * F;
             const uint16_t* src1 = src0 + K * F;
-
             if (cfg)
-            {
-                TileConf conf;
-                conf.rows[0] = 16;
-                conf.rows[1] = 16;
-                conf.rows[2] = uint8_t(dstC - 16);
-                conf.rows[3] = uint8_t(dstC - 16);
-                conf.rows[4] = 16;
-                conf.rows[5] = uint8_t(dstC - 16);
-                conf.rows[6] = 16;
-                conf.rows[7] = 16;
-                conf.colsb[0] = 64;
-                conf.colsb[1] = uint16_t((dstS - 16) * 4);
-                conf.colsb[2] = 64;
-                conf.colsb[3] = uint16_t((dstS - 16) * 4);
-                conf.colsb[4] = 64;
-                conf.colsb[5] = 64;
-                conf.colsb[6] = 64;
-                conf.colsb[7] = uint16_t((dstS - 16) * 4);
-                _tile_loadconfig(&conf);
-            }
-
+                SetTileConf2x2(dstC, dstS);
             if (zero)
             {
                 _tile_zero(0);
@@ -85,17 +64,30 @@ namespace Simd
                 _tile_stream_loadd(2, buf + 16 * dB + 0, strideB);
                 _tile_stream_loadd(3, buf + 16 * dB + F, strideB);
             }
-            for (size_t k = 0; k < K; k += 32, weight0 += stepW, weight1 += stepW)
+
+            size_t K32 = K - 32, k = 0;
+            _tile_stream_loadd(4, weight0, strideW);
+            _tile_loadd(6, src0 + k * 16, strideS);
+            for (; k < K32; weight1 += stepW)
             {
-                _tile_loadd(4, weight0, strideW);
-                _tile_stream_loadd(6, src0 + k * 16, strideS);
+                _tile_loadd(7, src1 + k * 16, strideS);
+                _tile_stream_loadd(5, weight1, strideW);
                 _tile_dpbf16ps(0, 4, 6);
-                _tile_stream_loadd(7, src1 + k * 16, strideS);
                 _tile_dpbf16ps(1, 4, 7);
-                _tile_loadd(5, weight1, strideW);
+                weight0 += stepW;
+                _tile_stream_loadd(4, weight0, strideW);
                 _tile_dpbf16ps(2, 5, 6);
+                k += 32;
+                _tile_loadd(6, src0 + k * 16, strideS);
                 _tile_dpbf16ps(3, 5, 7);
             }
+            _tile_loadd(7, src1 + k * 16, strideS);
+            _tile_stream_loadd(5, weight1, strideW);
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_dpbf16ps(1, 4, 7);
+            _tile_dpbf16ps(2, 5, 6);
+            _tile_dpbf16ps(3, 5, 7);
+
             _tile_stored(0, buf + 0, strideB);
             _tile_stored(1, buf + F, strideB);
             _tile_stored(2, buf + 16 * dB + 0, strideB);
@@ -289,7 +281,8 @@ namespace Simd
             Convolution16bNchwGemmPtr body_1 = Convolution16bNchwGemm_32x16<term, type>;
             Convolution16bNchwGemmPtr tail_1 = m > 16 ? Convolution16bNchwGemm_32x16<term, type> : Convolution16bNchwGemm_16x16<term, type>;
 
-            _tile_loadconfig(&FullConf);
+            if(dstS >= DF)
+                SetTileConfFull();
             for (size_t ds = 0; ds < dstS; ds += DF)
             {
                 size_t dS = Simd::Min(DF, dstS - ds);
@@ -300,7 +293,7 @@ namespace Simd
                 if (dS > F)
                 {
                     if(m)
-                        _tile_loadconfig(&FullConf);
+                        SetTileConfFull();
                     for (; i < nn; i += n, w += n * dW, b += n * dB, d += n * dD)
                         body_2(w, p, a, K, n, dS, zero, src, bias + i, params + i * dp, b, d);
                     if (m)

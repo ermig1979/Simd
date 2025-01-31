@@ -62,9 +62,6 @@ namespace Simd
             }
         }
     };
-
-    const static TileConf ZeroConf = TileConf(true);
-    const static TileConf FullConf = TileConf(false);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -133,6 +130,30 @@ namespace Simd
 #ifdef SIMD_AMXBF16_ENABLE
     namespace AmxBf16
     {
+        const static TileConf ZeroConf = TileConf(true);
+        const static TileConf FullConf = TileConf(false);
+
+        SIMD_INLINE void SetTileConfFull()
+        {
+            _tile_loadconfig(&FullConf);
+        }
+
+        SIMD_INLINE void SetTileConf2x2(size_t rows, size_t cols)
+        {
+            TileConf conf = FullConf;
+            uint8_t tailR = uint8_t(rows - 16);
+            conf.rows[2] = tailR;
+            conf.rows[3] = tailR;
+            conf.rows[5] = tailR;
+            uint16_t tailC = uint16_t((cols - 16) * 4);
+            conf.colsb[1] = tailC;
+            conf.colsb[3] = tailC;
+            conf.colsb[7] = tailC;
+            _tile_loadconfig(&conf);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template<class T> SIMD_INLINE void TileMoveToMemory(const T* ptr, size_t stride, size_t count = 16)
         {
             for (const T* end = ptr + stride * count; ptr < end; ptr += 4 * stride)
