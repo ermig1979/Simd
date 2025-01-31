@@ -53,8 +53,8 @@ namespace Simd
             else
             {
                 dst[1] = 0x0000000000000000;
-                dst[2] = 0x0080008000800080;
-                dst[3] = 0x0080008000800080;
+                dst[2] = 0x0040004000400040;
+                dst[3] = 0x0040004000400040;
                 dst[4] = 0x0000000000000000;
                 dst[5] = 0x0000000000000000;
                 dst[6] = 0x1010101010101010;
@@ -62,6 +62,9 @@ namespace Simd
             }
         }
     };
+
+    const static TileConf ZeroConf = TileConf(true);
+    const static TileConf FullConf = TileConf(false);
 }
 
 //-------------------------------------------------------------------------------------------------

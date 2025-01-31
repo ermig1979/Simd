@@ -41,7 +41,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type> void Convolution16bNchwGemm_32x32(const uint16_t* weight0, const ConvParam& p, const AlgParam& a,
+        template<Term16bType term, SimdConvolutionActivationType type, int cfg> void Convolution16bNchwGemm_32x32(const uint16_t* weight0, const ConvParam& p, const AlgParam& a,
             size_t K, size_t dstC, size_t dstS, int zero, const uint16_t* src0, const float* bias, const float* params, float* buf, uint8_t* dst)
         {
             int dB = (int)a.N, dD = int(a.N * a.elem), strideB = dB * 4, strideS = 64;
@@ -49,24 +49,27 @@ namespace Simd
             const uint16_t* weight1 = weight0 + K * F;
             const uint16_t* src1 = src0 + K * F;
 
-            TileConf conf;
-            conf.rows[0] = 16;
-            conf.rows[1] = 16;
-            conf.rows[2] = uint8_t(dstC - 16);
-            conf.rows[3] = uint8_t(dstC - 16);
-            conf.rows[4] = 16;
-            conf.rows[5] = uint8_t(dstC - 16);
-            conf.rows[6] = 16;
-            conf.rows[7] = 16;
-            conf.colsb[0] = 64;
-            conf.colsb[1] = uint16_t((dstS - 16) * 4);
-            conf.colsb[2] = 64;
-            conf.colsb[3] = uint16_t((dstS - 16) * 4);
-            conf.colsb[4] = 64;
-            conf.colsb[5] = 64;
-            conf.colsb[6] = 64;
-            conf.colsb[7] = uint16_t((dstS - 16) * 4);
-            _tile_loadconfig(&conf);
+            if (cfg)
+            {
+                TileConf conf;
+                conf.rows[0] = 16;
+                conf.rows[1] = 16;
+                conf.rows[2] = uint8_t(dstC - 16);
+                conf.rows[3] = uint8_t(dstC - 16);
+                conf.rows[4] = 16;
+                conf.rows[5] = uint8_t(dstC - 16);
+                conf.rows[6] = 16;
+                conf.rows[7] = 16;
+                conf.colsb[0] = 64;
+                conf.colsb[1] = uint16_t((dstS - 16) * 4);
+                conf.colsb[2] = 64;
+                conf.colsb[3] = uint16_t((dstS - 16) * 4);
+                conf.colsb[4] = 64;
+                conf.colsb[5] = 64;
+                conf.colsb[6] = 64;
+                conf.colsb[7] = uint16_t((dstS - 16) * 4);
+                _tile_loadconfig(&conf);
+            }
 
             if (zero)
             {
@@ -281,11 +284,12 @@ namespace Simd
             size_t dstS = dstH * p.dstW, n1 = dstC, n = 32;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn;
             size_t dB = a.N, dD = a.N * a.elem, dW = K, dp = type == ::SimdConvolutionActivationPrelu ? 1 : 0;
-            Convolution16bNchwGemmPtr body_2 = Convolution16bNchwGemm_32x32<term, type>;
-            Convolution16bNchwGemmPtr tail_2 = m > 16 ? Convolution16bNchwGemm_32x32<term, type> : Convolution16bNchwGemm_16x32<term, type>;
+            Convolution16bNchwGemmPtr body_2 = Convolution16bNchwGemm_32x32<term, type, 0>;
+            Convolution16bNchwGemmPtr tail_2 = m > 16 ? Convolution16bNchwGemm_32x32<term, type, 1> : Convolution16bNchwGemm_16x32<term, type>;
             Convolution16bNchwGemmPtr body_1 = Convolution16bNchwGemm_32x16<term, type>;
             Convolution16bNchwGemmPtr tail_1 = m > 16 ? Convolution16bNchwGemm_32x16<term, type> : Convolution16bNchwGemm_16x16<term, type>;
 
+            _tile_loadconfig(&FullConf);
             for (size_t ds = 0; ds < dstS; ds += DF)
             {
                 size_t dS = Simd::Min(DF, dstS - ds);
@@ -295,6 +299,8 @@ namespace Simd
                 size_t i = 0;
                 if (dS > F)
                 {
+                    if(m)
+                        _tile_loadconfig(&FullConf);
                     for (; i < nn; i += n, w += n * dW, b += n * dB, d += n * dD)
                         body_2(w, p, a, K, n, dS, zero, src, bias + i, params + i * dp, b, d);
                     if (m)
