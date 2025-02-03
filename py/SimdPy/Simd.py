@@ -570,7 +570,7 @@ class Lib():
 		Lib.__lib.SimdResizerRun.restype = None
 
 		
-		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.c_bool ]
 		Lib.__lib.SimdSynetSetInput.restype = None
 
 		
@@ -1027,24 +1027,15 @@ class Lib():
 	# @param dst - a pointer to the output 32-bit float image tensor.
 	# @param channels - a number of channels in the output image tensor. It can be 1 or 3.
 	# @param dstFormat - a format of output image tensor. There are supported following tensor formats: Simd.TensorFormat.Nchw, Simd.TensorFormat.Nhwc.
-	# @param isRgb - is channel order of output tensor is RGB or BGR. Its default value is false.
-	def SynetSetInput(src : ctypes.c_void_p, width: int, height: int, stride: int, srcFormat : Simd.PixelFormat, lower : array.array('f'), upper : array.array('f'), dst : ctypes.c_void_p, channels : int, dstFormat : Simd.TensorFormat, isRgb = False) :
+	# @param swapChannels - a flag indicating whether to swap channels in the output tensor. Its default value is false.
+	def SynetSetInput(src : ctypes.c_void_p, width: int, height: int, stride: int, srcFormat : Simd.PixelFormat, lower : array.array('f'), upper : array.array('f'), dst : ctypes.c_void_p, channels : int, dstFormat : Simd.TensorFormat, swapChannels = False) :
 		if srcFormat != PixelFormat.Gray8 and srcFormat != PixelFormat.Bgr24 and srcFormat != PixelFormat.Bgra32 and srcFormat != PixelFormat.Rgb24 and srcFormat != PixelFormat.Rgba32 :
 			raise Exception("Incompatible image pixel format: {0}!".format(srcFormat))
 		if channels != 1 and channels != 3 :
 			raise Exception("Incompatible channel value: {0} !".format(channels))
 		lo = (ctypes.c_float * len(lower))(*lower)
 		up = (ctypes.c_float * len(upper))(*upper)
-		sF = srcFormat;
-		if srcFormat == PixelFormat.Bgr24 and isRgb : 
-			sF = PixelFormat.Rgb24
-		elif srcFormat == PixelFormat.Rgb24 and isRgb : 
-			sF = PixelFormat.Bgr24
-		elif srcFormat == PixelFormat.Bgra32 and isRgb : 
-			sF = PixelFormat.Rgba32
-		elif srcFormat == PixelFormat.Rgba32 and isRgb : 
-			sF = PixelFormat.Bgra32
-		Lib.__lib.SimdSynetSetInput(src, width, height, stride, sF.value, lo, up, dst, channels, dstFormat.value)
+		Lib.__lib.SimdSynetSetInput(src, width, height, stride, srcFormat.value, lo, up, dst, channels, dstFormat.value, swapChannels)
 		
     ## Creates wrap affine context.
     # @param srcW - a width of input image.
@@ -1779,9 +1770,9 @@ def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bil
 # @param dst - a pointer to the output 32-bit float image tensor.
 # @param channels - a number of channels in the output image tensor. It can be 1 or 3.
 # @param format - a format of output image tensor. There are supported following tensor formats: Simd.TensorFormat.Nchw, Simd.TensorFormat.Nhwc.
-# @param isRgb - is channel order of output tensor is RGB or BGR. Its default value is false.
-def SynetSetInput(src : Image, lower : array.array('f'), upper : array.array('f'), dst : ctypes.c_void_p, channels : int, format : Simd.TensorFormat, isRgb = False) :
-	Lib.SynetSetInput(src.Data(), src.Width(), src.Height(), src.Stride(), src.Format(), lower, upper, dst, channels, format, isRgb)
+# @param swapChannels - a flag indicating whether to swap channels in the output tensor. Its default value is false.
+def SynetSetInput(src : Image, lower : array.array('f'), upper : array.array('f'), dst : ctypes.c_void_p, channels : int, format : Simd.TensorFormat, swapChannels = False) :
+	Lib.SynetSetInput(src.Data(), src.Width(), src.Height(), src.Stride(), src.Format(), lower, upper, dst, channels, format, swapChannels)
 	
 ##  @ingroup python
 # Performs warp affine for current image.

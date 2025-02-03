@@ -383,7 +383,6 @@ namespace Test
     {
         bool result = true;
 
-
         if (TestBase())
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Base::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 
