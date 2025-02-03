@@ -2732,7 +2732,7 @@ namespace Simd
 
         All images must have the same width, height and pixel format.
 
-        \note This function is a C++ wrapper for functionû ::SimdRecursiveBilateralFilterInit and ::SimdRecursiveBilateralFilterRun.
+        \note This function is a C++ wrapper for functionï¿½ ::SimdRecursiveBilateralFilterInit and ::SimdRecursiveBilateralFilterRun.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
@@ -3928,19 +3928,22 @@ namespace Simd
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
         \param [in] format - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [in] isRgb - is channel order of output tensor is RGB or BGR. Its default value is false.
+        \param [in] swapChannels - when 'true' swaps channels (red and blue). If false (default), it passes pixels as is.
     */
-    template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false)
+    template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool swapChannels = false)
     {
         assert(format == SimdTensorFormatNchw || format == SimdTensorFormatNhwc);
         SimdPixelFormatType srcFormat;
         switch (src.format)
         {
-        case View<A>::Gray8: srcFormat = SimdPixelFormatGray8; break;
-        case View<A>::Bgr24: srcFormat = isRgb ? SimdPixelFormatRgb24 : SimdPixelFormatBgr24; break;
-        case View<A>::Bgra32: srcFormat = isRgb ? SimdPixelFormatRgba32 : SimdPixelFormatBgra32; break;
-        case View<A>::Rgb24: srcFormat = isRgb ? SimdPixelFormatBgr24 : SimdPixelFormatRgb24; break;
-        case View<A>::Rgba32: srcFormat = isRgb ? SimdPixelFormatBgra32 : SimdPixelFormatRgba32; break;
+        case View<A>::Gray8:
+          srcFormat = SimdPixelFormatGray8; break;
+        case View<A>::Bgr24:
+        case View<A>::Rgb24:
+          srcFormat = !swapChannels ? SimdPixelFormatBgr24 : SimdPixelFormatRgb24; break;
+        case View<A>::Bgra32:
+        case View<A>::Rgba32:
+          srcFormat = !swapChannels ? SimdPixelFormatBgra32 : SimdPixelFormatRgba32; break;
         deafult :
             assert(0);
         }
