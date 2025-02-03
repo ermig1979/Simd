@@ -1228,7 +1228,9 @@ namespace Simd
         case Gray8:     return CV_8UC1;
         case Uv16:      return CV_8UC2;
         case Bgr24:     return CV_8UC3;
+        case Rgb24:     return CV_8UC3;
         case Bgra32:    return CV_8UC4;
+        case Rgba32:    return CV_8UC4;
         case Int16:     return CV_16SC1;
         case Int32:     return CV_32SC1;
         case Float:     return CV_32FC1;
