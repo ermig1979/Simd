@@ -29,6 +29,7 @@
 #define __SimdLib_h__
 
 #include <stddef.h>
+#include <stdbool.h>
 
 #if defined(_MSC_VER) || defined(__CODEGEARC__)
 
@@ -7628,7 +7629,7 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
         \param [in] dstTensorFormat - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [in] swapChannels - a flag indicating whether to swap channels in the output tensor. Default value is false.
+        \param [in] swapChannels - a flag indicating whether to swap channels in the output tensor.
       */
       SIMD_API void SimdSynetSetInput(
           const uint8_t* src,
@@ -7641,7 +7642,7 @@ extern "C"
           float* dst,
           size_t channels,
           SimdTensorFormatType dstTensorFormat,
-          bool swapChannels = false
+          bool swapChannels
       );
 
       /*! @ingroup synet_other

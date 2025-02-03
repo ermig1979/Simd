@@ -226,15 +226,52 @@ namespace Test
 
     namespace
     {
+        template<class>
+        constexpr bool ALWAYS_FALSE = false;
+
+        using BaseFunc = decltype(Simd::Base::SynetSetInput);
+        using APIFunc = decltype(SimdSynetSetInput);
+        using VoidFuncPtr = void (*)(void);
+
+        struct FuncWrapper {
+            enum class Type {
+                BASE,
+                API
+            };
+
+            template< class FuncType>
+            FuncWrapper(FuncType*) { static_assert(ALWAYS_FALSE<FuncType>, "There is no such specialization"); }
+
+            template<class FuncType>
+            FuncType* Get() const { static_assert(ALWAYS_FALSE<FuncType>, "There is no such specialization"); }
+
+        private:
+            VoidFuncPtr funcPtr;
+            Type funcType;
+        };
+
+        template<> FuncWrapper::FuncWrapper< BaseFunc>(BaseFunc* f) : funcPtr((VoidFuncPtr)f), funcType(Type::BASE) {}
+        template<> FuncWrapper::FuncWrapper< APIFunc>(APIFunc* f) : funcPtr((VoidFuncPtr)f), funcType(Type::API) {}
+
+        template<>
+        BaseFunc* FuncWrapper::Get< BaseFunc>() const {
+            assert(funcType == Type::BASE);
+            return (BaseFunc*)funcPtr;
+        }
+
+        template<>
+        APIFunc* FuncWrapper::Get< APIFunc>() const {
+            assert(funcType == Type::API);
+            return (APIFunc*)funcPtr;
+        }
+
         struct FuncSI
         {
-            typedef void(*FuncPtr)(const uint8_t* src, size_t width, size_t height, size_t stride, SimdPixelFormatType pixelFormat,
-                const float* lower, const float* upper, float* dst, size_t channels, SimdTensorFormatType dstFormat);
-
-            FuncPtr func;
+            FuncWrapper funcPtr;
             String desc;
 
-            FuncSI(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+            template< class FuncType>
+            FuncSI(FuncType* f, const String& d) : funcPtr(f), desc(d) {}
 
             void Update(size_t c, size_t h, size_t w, View::Format src, SimdTensorFormatType dst)
             {
@@ -244,7 +281,42 @@ namespace Test
             void Call(const View& src, const float* lower, const float* upper, size_t channels, Tensor32f& dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func(src.data, src.width, src.height, src.stride, (SimdPixelFormatType)src.format, lower, upper, dst.Data(), channels, dst.Format());
+                funcPtr.Get< BaseFunc >()(
+                    src.data,
+                    src.width,
+                    src.height,
+                    src.stride,
+                    (SimdPixelFormatType) src.format,
+                    lower,
+                    upper,
+                    dst.Data(),
+                    channels,
+                    dst.Format()
+                );
+            }
+
+            void Call(
+                const View& src,
+                const float* lower,
+                const float* upper,
+                size_t channels,
+                Tensor32f& dst,
+                bool swapChannels
+            ) const {
+                TEST_PERFORMANCE_TEST(desc);
+                funcPtr.Get< APIFunc >()(
+                    src.data,
+                    src.width,
+                    src.height,
+                    src.stride,
+                    (SimdPixelFormatType) src.format,
+                    lower,
+                    upper,
+                    dst.Data(),
+                    channels,
+                    dst.Format(),
+                    swapChannels
+                );
             }
         };
     }
@@ -274,7 +346,9 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, lower, upper, c, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, lower, upper, c, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(
+            f2.Call(src, lower, upper, c, dst2,srcFormat == View::Format::Rgb24 || srcFormat == View::Format::Rgba32)
+        );
 
         result = result && Compare(dst1, dst2, EPS*EPS, true, 64, DifferenceBoth);
 
@@ -308,6 +382,7 @@ namespace Test
     bool SynetSetInputAutoTest()
     {
         bool result = true;
+
 
         if (TestBase())
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Base::SynetSetInput), FUNC_SI(SimdSynetSetInput));
