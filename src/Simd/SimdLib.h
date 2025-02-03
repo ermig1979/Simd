@@ -7607,13 +7607,13 @@ extern "C"
                     dst[(c*height + y)*width + x] = src[stride*y + width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
         \endverbatim
 
-        Note that there are following relationships: 
+        Note that there are following relationships:
         \verbatim
         upper[c] = (1 - mean[c]) / std[c];
         lower[c] = - mean[c] / std[c];
         \endverbatim
-        Also this algorithm assumes that channel order of output tensor is BGR. 
-        In case of RGB channel order you need to change parameter srcFormat: ::SimdPixelFormatBgr24 <-> ::SimdPixelFormatRgb24, ::SimdPixelFormatBgra32 <-> ::SimdPixelFormatRgba32. 
+        By default, this algorithm assumes that the channel order (RGB or BGR) should be preserved.
+        If you want to swap between Red and Blue (in the output tensor), use the 'swapChannels' parameter
         Note that real format of pixel data of input image is not need to change.
         
         \note This function has a C++ wrappers: Simd::SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false).
@@ -7622,17 +7622,29 @@ extern "C"
         \param [in] width - a width of input image and output image tensor.
         \param [in] height - a height of input image and output image tensor.
         \param [in] stride - a row size of input image.
-        \param [in] srcFormat - a pixel format of input image. There are supported following pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
+        \param [in] srcPixelFormat - a pixel format of input image. There are supported following pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
         \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
-        \param [in] dstFormat - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-    */
-    SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat, 
-        const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
+        \param [in] dstTensorFormat - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
+        \param [in] swapChannels - a flag indicating whether to swap channels in the output tensor. Default value is false.
+      */
+      SIMD_API void SimdSynetSetInput(
+          const uint8_t* src,
+          size_t width,
+          size_t height,
+          size_t stride,
+          SimdPixelFormatType srcPixelFormat,
+          const float* lower,
+          const float* upper,
+          float* dst,
+          size_t channels,
+          SimdTensorFormatType dstTensorFormat,
+          bool swapChannels = false
+      );
 
-    /*! @ingroup synet_other
+      /*! @ingroup synet_other
 
         \fn void SimdSynetShuffleLayerForward(const float * src0, const float * src1, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format, int type);
 

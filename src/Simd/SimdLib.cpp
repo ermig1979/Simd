@@ -5940,32 +5940,59 @@ SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t
 #endif
 }
 
-SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
-    const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat)
-{
+SIMD_API void SimdSynetSetInput(
+    const uint8_t* src,
+    size_t width,
+    size_t height,
+    size_t stride,
+    SimdPixelFormatType srcPixelFormat,
+    const float* lower,
+    const float* upper,
+    float* dst,
+    size_t channels,
+    SimdTensorFormatType dstTensorFormat,
+    bool swapChannels
+) {
     SIMD_EMPTY();
+
+    switch (srcPixelFormat)
+    {
+        case SimdPixelFormatGray8:
+            break;
+        case SimdPixelFormatBgr24:
+        case SimdPixelFormatRgb24:
+            srcPixelFormat = !swapChannels ? SimdPixelFormatBgr24 : SimdPixelFormatRgb24;
+            break;
+        case SimdPixelFormatBgra32:
+        case SimdPixelFormatRgba32:
+            srcPixelFormat = !swapChannels ? SimdPixelFormatBgra32 : SimdPixelFormatRgba32;
+            break;
+        default:
+            assert(0);
+    }
+
 #if defined(SIMD_SYNET_ENABLE)
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable && width >= Avx512bw::A)
-        Avx512bw::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+        Avx512bw::SynetSetInput(src, width, height, stride, srcPixelFormat, lower, upper, dst, channels, dstTensorFormat);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
-        Avx2::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+        Avx2::SynetSetInput(src, width, height, stride, srcPixelFormat, lower, upper, dst, channels, dstTensorFormat);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
-        Sse41::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+        Sse41::SynetSetInput(src, width, height, stride, srcPixelFormat, lower, upper, dst, channels, dstTensorFormat);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
-        Neon::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+        Neon::SynetSetInput(src, width, height, stride, srcPixelFormat, lower, upper, dst, channels, dstTensorFormat);
     else
 #endif
-        Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+        Base::SynetSetInput(src, width, height, stride, srcPixelFormat, lower, upper, dst, channels, dstTensorFormat);
 #else
     assert(0);
 #endif

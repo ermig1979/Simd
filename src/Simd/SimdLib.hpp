@@ -3927,27 +3927,33 @@ namespace Simd
         \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
-        \param [in] format - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [in] swapChannels - when 'true' swaps channels (red and blue). If false (default), it passes pixels as is.
+        \param [in] tensorFormat - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
+        \param [in] swapChannels - when 'true' swaps channels (red and blue in the output tensor).
+          If false (default), no swapping takes place.
     */
-    template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool swapChannels = false)
-    {
-        assert(format == SimdTensorFormatNchw || format == SimdTensorFormatNhwc);
-        SimdPixelFormatType srcFormat;
-        switch (src.format)
-        {
-        case View<A>::Gray8:
-          srcFormat = SimdPixelFormatGray8; break;
-        case View<A>::Bgr24:
-        case View<A>::Rgb24:
-          srcFormat = !swapChannels ? SimdPixelFormatBgr24 : SimdPixelFormatRgb24; break;
-        case View<A>::Bgra32:
-        case View<A>::Rgba32:
-          srcFormat = !swapChannels ? SimdPixelFormatBgra32 : SimdPixelFormatRgba32; break;
-        deafult :
-            assert(0);
-        }
-        SimdSynetSetInput(src.data, src.width, src.height, src.stride, srcFormat, lower, upper, dst, channels, format);
+    template<template<class> class A> SIMD_INLINE void SynetSetInput(
+        const View<A>& src,
+        const float* lower,
+        const float* upper,
+        float* dst,
+        size_t channels,
+        SimdTensorFormatType tensorFormat,
+        bool swapChannels = false
+    ) {
+        assert(tensorFormat == SimdTensorFormatNchw || tensorFormat == SimdTensorFormatNhwc);
+        SimdSynetSetInput(
+            src.data,
+            src.width,
+            src.height,
+            src.stride,
+            static_cast< SimdPixelFormatType>(src.format),
+            lower,
+            upper,
+            dst,
+            channels,
+            tensorFormat,
+            swapChannels
+        );
     }
 
     /*! @ingroup texture_estimation
