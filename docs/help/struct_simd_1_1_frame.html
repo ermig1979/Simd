@@ -83,6 +83,8 @@ Public Types</h2></td></tr>
 <tr class="separator:ab4e88c89b3b7ea1735996cc4def22d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba15453bb6c2b5fdc57a7031597d7972"><td class="memItemLeft" align="right" valign="top">typedef A&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#aba15453bb6c2b5fdc57a7031597d7972">Allocator</a></td></tr>
 <tr class="separator:aba15453bb6c2b5fdc57a7031597d7972"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e884da8f244afd5c7d149a9803a6a2b"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a8e884da8f244afd5c7d149a9803a6a2b">DeleterPtr</a>) (void *context)</td></tr>
+<tr class="separator:a8e884da8f244afd5c7d149a9803a6a2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -100,8 +102,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a9c5fd643aea78e0c50cb8cce707a3dd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42c982cfc30755842933a51cfaa1f607"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a42c982cfc30755842933a51cfaa1f607">Frame</a> (const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;size, <a class="el" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> format_, bool flipped_=false, double timestamp_=0, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType_=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>)</td></tr>
 <tr class="separator:a42c982cfc30755842933a51cfaa1f607"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab78bc4dc73b3805421feeb4b74093824"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#ab78bc4dc73b3805421feeb4b74093824">Frame</a> (size_t width_, size_t height_, <a class="el" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> format_, uint8_t *data0, size_t stride0, uint8_t *data1, size_t stride1, uint8_t *data2, size_t stride2, bool flipped_=false, double timestamp_=0, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType_=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>)</td></tr>
-<tr class="separator:ab78bc4dc73b3805421feeb4b74093824"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfa39c9df97b2a0f0e6c2cd00367ca01"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#abfa39c9df97b2a0f0e6c2cd00367ca01">Frame</a> (size_t width_, size_t height_, <a class="el" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> format_, uint8_t *data0, size_t stride0, uint8_t *data1, size_t stride1, uint8_t *data2, size_t stride2, bool flipped_=false, double timestamp_=0, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType_=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>, <a class="el" href="struct_simd_1_1_frame.html#a8e884da8f244afd5c7d149a9803a6a2b">DeleterPtr</a> deleter=NULL, void *context=NULL)</td></tr>
+<tr class="separator:abfa39c9df97b2a0f0e6c2cd00367ca01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4707759c7424c6cb4369bf2a8155f6e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#ae4707759c7424c6cb4369bf2a8155f6e">~Frame</a> ()</td></tr>
 <tr class="separator:ae4707759c7424c6cb4369bf2a8155f6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46f4f23b9bb60566c3146b1be00e1dc2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a46f4f23b9bb60566c3146b1be00e1dc2">Clone</a> () const</td></tr>
@@ -209,6 +211,21 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator.">Allocator</a> type definition. </p>
+
+</div>
+</div>
+<a id="a8e884da8f244afd5c7d149a9803a6a2b" name="a8e884da8f244afd5c7d149a9803a6a2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e884da8f244afd5c7d149a9803a6a2b">&#9670;&#160;</a></span>DeleterPtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* DeleterPtr) (void *context)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Deleter callback definition. </p>
 
 </div>
 </div>
@@ -531,8 +548,8 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
 
 </div>
 </div>
-<a id="ab78bc4dc73b3805421feeb4b74093824" name="ab78bc4dc73b3805421feeb4b74093824"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab78bc4dc73b3805421feeb4b74093824">&#9670;&#160;</a></span>Frame() <span class="overload">[8/8]</span></h2>
+<a id="abfa39c9df97b2a0f0e6c2cd00367ca01" name="abfa39c9df97b2a0f0e6c2cd00367ca01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abfa39c9df97b2a0f0e6c2cd00367ca01">&#9670;&#160;</a></span>Frame() <span class="overload">[8/8]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -607,7 +624,19 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td>
-          <td class="paramname"><em>yuvType_</em> = <code><a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a></code>&#160;</td>
+          <td class="paramname"><em>yuvType_</em> = <code><a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_frame.html#a8e884da8f244afd5c7d149a9803a6a2b">DeleterPtr</a>&#160;</td>
+          <td class="paramname"><em>deleter</em> = <code>NULL</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>context</em> = <code>NULL</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -631,6 +660,8 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
     <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of vertically flipped image of created frame. It is equal to false by default. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of created frame. It is equal to 0 by default. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">yuvType_</td><td>- a YUV format type of created frame. It is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a> by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deleter</td><td>- an optional callback to delete external buffer after using. It is equal to NULL by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a context of callback to delete external buffer after using. It is equal to NULL by default. </td></tr>
   </table>
   </dd>
 </dl>

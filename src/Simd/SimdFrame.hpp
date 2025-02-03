@@ -71,6 +71,8 @@ namespace Simd
             Yuv444p,
         };
 
+        typedef void (*DeleterPtr)(void* context); /*!< Deleter callback definition. */
+
         const size_t width; /*!< \brief A width of the frame. */
         const size_t height; /*!< \brief A height of the frame. */
         const Format format; /*!< \brief A pixel format types of the frame. */
@@ -162,9 +164,11 @@ namespace Simd
             \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
             \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
             \param [in] yuvType_ - a YUV format type of created frame. It is equal to ::SimdYuvUnknown by default.
+            \param [in] deleter - an optional callback to delete external buffer after using. It is equal to NULL by default.
+            \param [in] context - a context of callback to delete external buffer after using. It is equal to NULL by default.
         */
-        Frame(size_t width_, size_t height_, Format format_, uint8_t * data0, size_t stride0,
-            uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, bool flipped_ = false, double timestamp_ = 0, SimdYuvType yuvType_ = SimdYuvUnknown);
+        Frame(size_t width_, size_t height_, Format format_, uint8_t * data0, size_t stride0, uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, 
+            bool flipped_ = false, double timestamp_ = 0, SimdYuvType yuvType_ = SimdYuvUnknown, DeleterPtr deleter = NULL, void *context = NULL);
 
         /*!
             A Frame destructor.
@@ -363,6 +367,10 @@ namespace Simd
             Captures image planes (copies to internal buffers) if this Frame is not owner of current image planes.
         */
         void Capture();
+
+        private:
+            DeleterPtr _deleter;
+            void* _context;
     };
 
     /*! @ingroup cpp_frame_functions
@@ -426,6 +434,8 @@ namespace Simd
         , flipped(false)
         , timestamp(0)
         , yuvType(SimdYuvUnknown)
+        , _deleter(NULL)
+        , _context(NULL)
     {
     }
 
@@ -436,6 +446,8 @@ namespace Simd
         , flipped(frame.flipped)
         , timestamp(frame.timestamp)
         , yuvType(frame.yuvType)
+        , _deleter(NULL)
+        , _context(NULL)
     {
         for (size_t i = 0, n = PlaneCount(); i < n; ++i)
             planes[i] = frame.planes[i];
@@ -449,6 +461,8 @@ namespace Simd
         , flipped(false)
         , timestamp(0)
         , yuvType(SimdYuvUnknown)
+        , _deleter(NULL)
+        , _context(NULL)
     {
         Swap(frame);
     }
@@ -461,6 +475,8 @@ namespace Simd
         , flipped(flipped_)
         , timestamp(timestamp_)
         , yuvType(SimdYuvUnknown)
+        , _deleter(NULL)
+        , _context(NULL)
     {
         switch (view.format)
         {
@@ -483,6 +499,8 @@ namespace Simd
         , flipped(flipped_)
         , timestamp(timestamp_)
         , yuvType(SimdYuvUnknown)
+        , _deleter(NULL)
+        , _context(NULL)
     {
         switch (view.format)
         {
@@ -505,6 +523,8 @@ namespace Simd
         , flipped(flipped_)
         , timestamp(timestamp_)
         , yuvType(SimdYuvUnknown)
+        , _deleter(NULL)
+        , _context(NULL)
     {
         Recreate(width_, height_, format_, yuvType_);
     }
@@ -516,18 +536,22 @@ namespace Simd
         , flipped(flipped_)
         , timestamp(timestamp_)
         , yuvType(SimdYuvUnknown)
+        , _deleter(NULL)
+        , _context(NULL)
     {
         Recreate(size, format_, yuvType_);
     }
 
     template <template<class> class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, uint8_t * data0, size_t stride0,
-        uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, bool flipped_, double timestamp_, SimdYuvType yuvType_)
+        uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, bool flipped_, double timestamp_, SimdYuvType yuvType_, DeleterPtr deleter, void* context)
         : width(width_)
         , height(height_)
         , format(format_)
         , flipped(flipped_)
         , timestamp(timestamp_)
         , yuvType(yuvType_)
+        , _deleter(deleter)
+        , _context(context)
     {
         switch (format)
         {
@@ -587,6 +611,8 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE Frame<A>::~Frame()
     {
+        if (_deleter)
+            _deleter(_context);
     }
 
     template <template<class> class A> SIMD_INLINE Frame<A> * Frame<A>::Clone() const
@@ -870,6 +896,8 @@ namespace Simd
         std::swap(flipped, other.flipped);
         std::swap(timestamp, other.timestamp);
         std::swap((SimdYuvType&)yuvType, (SimdYuvType&)other.yuvType);
+        std::swap(_deleter, other._deleter);
+        std::swap(_context, other._context);
     }
 
     template <template<class> class A> SIMD_INLINE bool Frame<A>::Owner() const
