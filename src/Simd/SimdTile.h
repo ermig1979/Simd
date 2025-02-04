@@ -130,17 +130,15 @@ namespace Simd
 #ifdef SIMD_AMXBF16_ENABLE
     namespace AmxBf16
     {
-        const static TileConf ZeroConf = TileConf(true);
-        const static TileConf FullConf = TileConf(false);
-
         SIMD_INLINE void SetTileConfFull()
         {
-            _tile_loadconfig(&FullConf);
+            TileConf conf = TileConf(false);
+            _tile_loadconfig(&conf);
         }
 
         SIMD_INLINE void SetTileConf2x2(size_t rows, size_t cols)
         {
-            TileConf conf = FullConf;
+            TileConf conf = TileConf(false);
             uint8_t tailR = uint8_t(rows - 16);
             conf.rows[2] = tailR;
             conf.rows[3] = tailR;
@@ -154,7 +152,7 @@ namespace Simd
 
         SIMD_INLINE void SetTileConf2x1(size_t rows, size_t cols)
         {
-            TileConf conf = FullConf;
+            TileConf conf = TileConf(false);
             uint8_t tailR = uint8_t(rows - 16);
             conf.rows[2] = tailR;
             conf.rows[5] = tailR;
@@ -167,7 +165,7 @@ namespace Simd
 
         SIMD_INLINE void SetTileConf1x2(size_t rows, size_t cols)
         {
-            TileConf conf = FullConf;
+            TileConf conf = TileConf(false);
             uint8_t tailR = uint8_t(rows);
             conf.rows[0] = tailR;
             conf.rows[1] = tailR;
@@ -180,7 +178,7 @@ namespace Simd
 
         SIMD_INLINE void SetTileConf1x1(size_t rows, size_t cols)
         {
-            TileConf conf = FullConf;
+            TileConf conf = TileConf(false);
             uint8_t tailR = uint8_t(rows);
             conf.rows[0] = tailR;
             conf.rows[4] = tailR;
