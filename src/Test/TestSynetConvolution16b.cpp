@@ -332,7 +332,7 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 383, 13, 13, 1155, _1, _1, _1, _0, _0, 1, aRe, tF, b16, b16), c, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 384, 13, 13, 1152, _1, _1, _1, _0, _0, 1, aRe, tF, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 384, 13, 13, 1152, _1, _1, _1, _0, _0, 1, aPr, tF, b16, b16), c, f1, f2);
 #endif
 
         return result;

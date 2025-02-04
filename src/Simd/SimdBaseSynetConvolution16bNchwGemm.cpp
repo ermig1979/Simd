@@ -313,7 +313,6 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            const float* bias = _bias.data, * params = _params.data;
             for (size_t yBeg = 0; yBeg < p.dstH;)
             {
                 size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
@@ -325,6 +324,7 @@ namespace Simd
                     if (_is1x1)
                         _convert(src, p, a, yBeg, yEnd, mak, mak + macroK, buf);
                     size_t bufOffs = _is1x1 ? 0 : mak * a.F;
+                    const float* bias = _bias.data, * params = _params.data;
                     for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
                     {
                         size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
@@ -337,6 +337,9 @@ namespace Simd
                         else
                             _convolutions[0](weight, p, a, macroD, yEnd - yBeg, macroK, mak == 0 ? 1 : 0,
                                 buf + bufOffs, bias, params, sum + sumOffs, dst + dstOffs);
+                        bias += macroD;
+                        if (p.activation == ::SimdConvolutionActivationPrelu)
+                            params += macroD;
                     }
                 }
                 yBeg = yEnd;

@@ -254,12 +254,12 @@ namespace Simd
             _tile_zero(3);
             for (size_t k = 0; k < K; k += 64)
             {
-                _tile_stream_loadd(4, ad00 + k, adStride);
+                _tile_stream_loadd(4, ad00 + k, (int)adStride);
                 _tile_loadd(6, bd00 + k * 32, 128);
                 _tile_dpbuud(0, 4, 6);
                 _tile_loadd(7, bd64 + k * 32, 128);
                 _tile_dpbuud(1, 4, 7);
-                _tile_stream_loadd(5, ad16 + k, adStride);
+                _tile_stream_loadd(5, ad16 + k, (int)adStride);
                 _tile_dpbuud(2, 5, 6);
                 _tile_dpbuud(3, 5, 7);
             }
@@ -299,10 +299,10 @@ namespace Simd
             _tile_zero(2);
             for (size_t k = 0; k < K; k += 64)
             {
-                _tile_stream_loadd(4, ad00 + k, adStride);
+                _tile_stream_loadd(4, ad00 + k, (int)adStride);
                 _tile_loadd(6, bd00 + k * 32, 128);
                 _tile_dpbuud(0, 4, 6);
-                _tile_stream_loadd(5, ad16 + k, adStride);
+                _tile_stream_loadd(5, ad16 + k, (int)adStride);
                 _tile_dpbuud(2, 5, 6);
             }
             SIMD_ALIGNED(64) int32_t buf[32][16];
@@ -338,7 +338,7 @@ namespace Simd
             _tile_zero(1);
             for (size_t k = 0; k < K; k += 64)
             {
-                _tile_stream_loadd(4, ad00 + k, adStride);
+                _tile_stream_loadd(4, ad00 + k, (int)adStride);
                 _tile_loadd(6, bd00 + k * 32, 128);
                 _tile_dpbuud(0, 4, 6);
                 _tile_loadd(7, bd64 + k * 32, 128);
@@ -371,7 +371,7 @@ namespace Simd
             _tile_zero(0);
             for (size_t k = 0; k < K; k += 64)
             {
-                _tile_stream_loadd(4, ad00 + k, adStride);
+                _tile_stream_loadd(4, ad00 + k, (int)adStride);
                 _tile_loadd(6, bd00 + k * 32, 128);
                 _tile_dpbuud(0, 4, 6);
             }
