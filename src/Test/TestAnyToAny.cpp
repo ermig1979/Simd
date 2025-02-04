@@ -27,6 +27,11 @@
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 
+#ifdef SIMD_OPENCV_ENABLE
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#endif
+
 namespace Test
 {
     namespace
@@ -531,4 +536,35 @@ namespace Test
 
         return result;
     }
+
+    //-----------------------------------------------------------------------------------------------------
+
+    bool BgrToLabSpecialTest()
+    {
+        bool result = true;
+#ifdef SIMD_OPENCV_ENABLE
+        TEST_LOG_SS(Info, "Test OpenCV and Simd image conversion from BGR to LAB pixel format.");
+
+        View src(W, H, View::Bgr24, NULL, TEST_ALIGN(W));
+        FillRandom(src);
+
+        View dst1(W, H, View::Bgr24, NULL, TEST_ALIGN(W));
+        View dst2(W, H, View::Bgr24, NULL, TEST_ALIGN(W));
+
+        Simd::Fill(dst1, 1);
+        Simd::Fill(dst2, 2);
+
+        src.data[0] = 89;
+        src.data[1] = 162;
+        src.data[2] = 252;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(cv::cvtColor((cv::Mat)src, (cv::Mat)(dst1.Ref()), cv::COLOR_BGR2Lab, 3));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(Simd::BgrToLab(src, dst2));
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+#endif
+        return result;
+    }
+
 }

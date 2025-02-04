@@ -95,7 +95,7 @@ namespace Test
     TEST_ADD_GROUP_A0(BgrToGray);
     TEST_ADD_GROUP_A0(BgrToHsl);
     TEST_ADD_GROUP_A0(BgrToHsv);
-    TEST_ADD_GROUP_A0(BgrToLab);
+    TEST_ADD_GROUP_AS(BgrToLab);
     TEST_ADD_GROUP_A0(BgrToRgb);
     TEST_ADD_GROUP_A0(GrayToBgr);
     TEST_ADD_GROUP_A0(GrayToY);
