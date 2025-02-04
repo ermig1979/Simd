@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar,
+* Copyright (c) 2011-2025 Yermalayeu Ihar,
 *               2014-2017 Antonenka Mikhail,
 *               2019-2019 Facundo Galan.
 *
@@ -95,6 +95,7 @@ namespace Test
     TEST_ADD_GROUP_A0(BgrToGray);
     TEST_ADD_GROUP_A0(BgrToHsl);
     TEST_ADD_GROUP_A0(BgrToHsv);
+    TEST_ADD_GROUP_A0(BgrToLab);
     TEST_ADD_GROUP_A0(BgrToRgb);
     TEST_ADD_GROUP_A0(GrayToBgr);
     TEST_ADD_GROUP_A0(GrayToY);

@@ -420,6 +420,8 @@ typedef enum
     SimdPixelFormatUyvy16,
     /*! A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format. */
     SimdPixelFormatArgb32,
+    /*! A 24-bit (3 8-bit channels) LAB (CIELAB) pixel format. */
+    SimdPixelFormatLab24,
 } SimdPixelFormatType;
 
 /*! @ingroup recursive_bilateral_filter
@@ -2036,6 +2038,25 @@ extern "C"
         \param [in] hsvStride - a row size of the hsv image.
     */
     SIMD_API void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsv, size_t hsvStride);
+
+    /*! @ingroup bgr_conversion
+
+        \fn void SimdBgrToLab(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * lab, size_t labStride);
+
+        \short Converts 24-bit BGR image to 24-bit LAB(CIELAB) image.
+
+        All images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::BgrToLab(const View<A>& bgr, View<A>& lab).
+
+        \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
+        \param [in] bgrStride - a row size of the bgr image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] lab - a pointer to pixels data of output 24-bit LAB image.
+        \param [in] labStride - a row size of the lab image.
+    */
+    SIMD_API void SimdBgrToLab(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * lab, size_t labStride);
 
     /*! @ingroup bgr_conversion
 

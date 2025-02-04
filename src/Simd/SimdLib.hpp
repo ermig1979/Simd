@@ -1146,6 +1146,26 @@ namespace Simd
 
     /*! @ingroup bgr_conversion
 
+        \fn void BgrToLab(const View<A> & bgr, View<A> & lab)
+
+        \short Converts 24-bit BGR image to 24-bit LAB image.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdBgrToLab.
+
+        \param [in] bgr - an input 24-bit BGR image.
+        \param [out] lab - an output 24-bit LAB image.
+    */
+    template<template<class> class A> SIMD_INLINE void BgrToLab(const View<A>& bgr, View<A>& lab)
+    {
+        assert(EqualSize(bgr, rgb) && bgr.format == View<A>::Bgr24 && lab.format == View<A>::Lab24);
+
+        SimdBgrToLab(bgr.data, bgr.stride, bgr.width, bgr.height, lab.data, lab.stride);
+    }
+
+    /*! @ingroup bgr_conversion
+
         \fn void BgrToRgb(const View<A> & bgr, View<A> & rgb)
 
         \short Converts 24-bit BGR image to 24-bit RGB image.

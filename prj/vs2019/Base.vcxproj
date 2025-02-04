@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\src\Simd\SimdBase64.h" />
     <ClInclude Include="..\..\src\Simd\SimdBayer.h" />
     <ClInclude Include="..\..\src\Simd\SimdBFloat16.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBgrToLab.h" />
     <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
@@ -130,6 +131,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToHsl.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToHsv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToLab.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBinarization.cpp" />

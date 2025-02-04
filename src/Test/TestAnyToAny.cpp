@@ -79,6 +79,9 @@ namespace Test
         View dst1(width, height, dstType, NULL, TEST_ALIGN(width));
         View dst2(width, height, dstType, NULL, TEST_ALIGN(width));
 
+        Simd::Fill(dst1, 1);
+        Simd::Fill(dst2, 2);
+
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
@@ -264,6 +267,16 @@ namespace Test
 
         if (TestBase())
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsv24, FUNC_O(Simd::Base::BgrToHsv), FUNC_O(SimdBgrToHsv));
+
+        return result;
+    }
+
+    bool BgrToLabAutoTest()
+    {
+        bool result = true;
+
+        if (TestBase())
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Lab24, FUNC_N(Simd::Base::BgrToLab), FUNC_N(SimdBgrToLab));
 
         return result;
     }
@@ -478,7 +491,7 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
 
     bool ConvertImageSpecialTest(size_t width, size_t height, View::Format srcFormat, View::Format dstFormat)
     {

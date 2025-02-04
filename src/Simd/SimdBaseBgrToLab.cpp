@@ -21,34 +21,22 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMemory.h"
-#include "Simd/SimdResizer.h"
+#include "Simd/SimdBgrToLab.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
     namespace Base
     {
-        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
+        void BgrToLab(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* lab, size_t labStride)
         {
-            ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(void*));
-            if (param.IsNearest())
-                return new ResizerNearest(param);
-            else if (param.IsByteBilinear())
-                return new ResizerByteBilinear(param);
-            else if (param.IsShortBilinear())
-                return new ResizerShortBilinear(param);
-            else if (param.IsFloatBilinear())
-                return new ResizerFloatBilinear(param);
-            else if (param.IsBf16Bilinear())
-                return new ResizerBf16Bilinear(param);
-            else if (param.IsByteBicubic())
-                return new ResizerByteBicubic(param);
-            else if (param.IsByteArea2x2())
-                return new ResizerByteArea2x2(param);
-            else if (param.IsByteArea1x1())
-                return new ResizerByteArea1x1(param);
-            else
-                return NULL;
+            for (size_t row = 0; row < height; ++row)
+            {
+                const uint8_t* pBgr = bgr + row * bgrStride;
+                uint8_t* pLab = lab + row * labStride;
+                for (const uint8_t* pBgrEnd = pBgr + width * 3; pBgr < pBgrEnd; pBgr += 3, pLab += 3)
+                    BgrToLab(pBgr[0], pBgr[1], pBgr[2], pLab);
+            }
         }
     }
 }
