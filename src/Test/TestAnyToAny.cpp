@@ -283,6 +283,11 @@ namespace Test
         if (TestBase())
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Lab24, FUNC_N(Simd::Base::BgrToLab), FUNC_N(SimdBgrToLab));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Lab24, FUNC_N(Simd::Sse41::BgrToLab), FUNC_N(SimdBgrToLab));
+#endif 
+
         return result;
     }
 
