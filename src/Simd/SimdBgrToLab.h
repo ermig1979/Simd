@@ -24,67 +24,69 @@
 #ifndef __SimdBgrToLab_h__
 #define __SimdBgrToLab_h__
 
-#include "Simd/SimdDefs.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
     namespace Base
     {
-        namespace LabV0
+        const int LAB_GAMMA_SHIFT = 3;
+
+        const int LabGammaTabSize = 256;
+        extern uint16_t LabGammaTab[LabGammaTabSize];
+
+        const int LabCbrtTabSize = 256 * 3 / 2 * (1 << LAB_GAMMA_SHIFT);
+        extern uint16_t LabCbrtTab[LabCbrtTabSize];
+
+        const int LabCoeffsTabSize = 9;
+        extern uint32_t LabCoeffsTab[LabCoeffsTabSize];
+
+        void LabInitTabs();
+
+        const int LAB_SHIFT = 12;
+        const int LAB_ROUND = 1 << (LAB_SHIFT - 1);
+
+        const int LAB_SHIFT2 = LAB_SHIFT + LAB_GAMMA_SHIFT;
+        const int LAB_ROUND2 = 1 << (LAB_SHIFT2 - 1);
+
+        const int LAB_L_SCALE = (116 * 255 + 50) / 100;
+        const int LAB_L_SHIFT = -((16 * 255 * (1 << LAB_SHIFT2) + 50) / 100);
+
+        const int LAB_A_SCALE = 500;
+        const int LAB_B_SCALE = 200;
+        const int LAB_AB_SHIFT = 128 * (1 << LAB_SHIFT2);
+
+        SIMD_INLINE int LabDescale(int value)
         {
-#define X(xyz) xyz.data[0]
-#define Y(xyz) xyz.data[1]
-#define Z(xyz) xyz.data[2]
-
-            typedef union
-            {
-                double data[3];
-                struct { double r, g, b; };
-                struct { double L, A, B; };
-                struct { double l, c, h; };
-            } DoubleTriplet;
-
-            const double eps = (6 * 6 * 6) / (29.0 * 29.0 * 29.0), kap = (29 * 29 * 29) / (3.0 * 3.0 * 3.0);
-
-            const DoubleTriplet xyzReferenceValues = { {0.95047, 1.0, 1.08883} };
-
-            SIMD_INLINE DoubleTriplet xyzFromRgb(DoubleTriplet rgb)
-            {
-                for (int i = 0; i < 3; ++i)
-                {
-                    double v = rgb.data[i];
-                    rgb.data[i] = (v > 0.04045) ? pow(((v + 0.055) / 1.055), 2.4) : (v / 12.92);
-                }
-                DoubleTriplet temp = { {
-                    rgb.r * 0.4124564 + rgb.g * 0.3575761 + rgb.b * 0.1804375,
-                    rgb.r * 0.2126729 + rgb.g * 0.7151522 + rgb.b * 0.0721750,
-                    rgb.r * 0.0193339 + rgb.g * 0.1191920 + rgb.b * 0.9503041
-                    } };
-                return temp;
-            }
-
-            SIMD_INLINE DoubleTriplet labFromXyz(DoubleTriplet xyz)
-            {
-                for (int i = 0; i < 3; ++i)
-                {
-                    xyz.data[i] /= xyzReferenceValues.data[i];
-                    double v = xyz.data[i];
-                    xyz.data[i] = (v > eps) ? pow(v, (1 / 3.0)) : ((kap * v + 16) / 116.0);
-                }
-                DoubleTriplet temp = { {(116 * Y(xyz)) - 16, 500 * (X(xyz) - Y(xyz)), 200 * (Y(xyz) - Z(xyz))} };
-                return temp;
-            }
-
-            DoubleTriplet labFromRgb(DoubleTriplet rgb) { return labFromXyz(xyzFromRgb(rgb)); }
+            return (value + LAB_ROUND) >> LAB_SHIFT;
         }
 
-        SIMD_INLINE void BgrToLab(int blue, int green, int red, uint8_t* lab)
+        SIMD_INLINE int LabDescale2(int value)
         {
-            LabV0::DoubleTriplet _rgb{red / 255.0 , green / 255.0, blue / 255.0 };
-            LabV0::DoubleTriplet _lab = labFromRgb(_rgb);
-            lab[0] = int(_lab.data[0]);
-            lab[1] = int(_lab.data[1]);
-            lab[2] = int(_lab.data[2]);
+            return (value + LAB_ROUND2) >> LAB_SHIFT2;
+        }
+
+        SIMD_INLINE void RgbToLab(int red, int green, int blue, uint8_t *lab)
+        {
+            int R = LabGammaTab[red];
+            int G = LabGammaTab[green];
+            int B = LabGammaTab[blue];
+
+            int iX = LabDescale(R * LabCoeffsTab[0] + G * LabCoeffsTab[1] + B * LabCoeffsTab[2]);
+            int iY = LabDescale(R * LabCoeffsTab[3] + G * LabCoeffsTab[4] + B * LabCoeffsTab[5]);
+            int iZ = LabDescale(R * LabCoeffsTab[6] + G * LabCoeffsTab[7] + B * LabCoeffsTab[8]);
+
+            int fX = LabCbrtTab[iX];
+            int fY = LabCbrtTab[iY];
+            int fZ = LabCbrtTab[iZ];
+
+            int L = LabDescale2(LAB_L_SCALE * fY + LAB_L_SHIFT);
+            int a = LabDescale2(LAB_A_SCALE * (fX - fY) + LAB_AB_SHIFT);
+            int b = LabDescale2(LAB_B_SCALE * (fY - fZ) + LAB_AB_SHIFT);
+
+            lab[0] = Base::RestrictRange(L);
+            lab[1] = Base::RestrictRange(a);
+            lab[2] = Base::RestrictRange(b);
         }
     }
 }
