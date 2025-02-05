@@ -36,6 +36,10 @@
 #include <windows.h>
 #endif
 
+#ifdef SIMD_OPENCV_ENABLE
+#include <opencv2/core/core.hpp>
+#endif
+
 namespace Test
 {
     typedef bool(*AutoTestPtr)();
@@ -658,7 +662,7 @@ namespace Test
                 }
                 else if (arg.find("-tt=") == 0)
                 {
-                    TEST_THREADS = Simd::Min(FromString<size_t>(arg.substr(4, arg.size() - 4)), (size_t)std::thread::hardware_concurrency());
+                    TEST_THREADS = Simd::Min<int>(FromString<int>(arg.substr(4, arg.size() - 4)), (size_t)std::thread::hardware_concurrency());
                 }
                 else if (arg.find("-tr=") == 0)
                 {
@@ -975,6 +979,9 @@ int main(int argc, char* argv[])
     }
 
     ::SimdSetThreadNumber(options.workThreads);
+#ifdef SIMD_OPENCV_ENABLE
+    cv::setNumThreads(options.workThreads);
+#endif
 
     switch (options.mode)
     {

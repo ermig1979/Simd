@@ -1238,7 +1238,17 @@ namespace Simd
         case Int32:     return CV_32SC1;
         case Float:     return CV_32FC1;
         case Double:    return CV_64FC1;
+        case BayerGrbg: return CV_8UC1;
+        case BayerGbrg: return CV_8UC1;
+        case BayerRggb: return CV_8UC1;
+        case BayerBggr: return CV_8UC1;
         case Hsv24:     return CV_8UC3;
+        case Hsl24:     return CV_8UC3;
+        case Rgb24:     return CV_8UC3;
+        case Rgba32:    return CV_8UC4;
+        case Uyvy16:    return CV_8UC2;
+        case Argb32:    return CV_8UC4;
+        case Lab24:     return CV_8UC3;
         default: assert(0); return 0;
         }
     }

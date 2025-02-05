@@ -1159,7 +1159,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void BgrToLab(const View<A>& bgr, View<A>& lab)
     {
-        assert(EqualSize(bgr, rgb) && bgr.format == View<A>::Bgr24 && lab.format == View<A>::Lab24);
+        assert(EqualSize(bgr, lab) && bgr.format == View<A>::Bgr24 && lab.format == View<A>::Lab24);
 
         SimdBgrToLab(bgr.data, bgr.stride, bgr.width, bgr.height, lab.data, lab.stride);
     }

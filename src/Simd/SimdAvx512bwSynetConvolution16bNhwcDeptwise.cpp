@@ -72,7 +72,7 @@ namespace Simd
             size_t sizeF = AlignLo(size, F), size2F = AlignLo(size, 2 * F), size4F = AlignLo(size, 4 * F), size8F = AlignLo(size, 8 * F);
             size_t dstW = p.dstW, dstW2 = AlignLo(dstW, 2), dstW4 = AlignLo(dstW, 4);
             __mmask16 tail = TailMask16(size - sizeF);
-            __m512 d00, d01, d02, d03, d10, d11, d12, d13, d20, d21, d22, d23, d30, d31, d32, d33, w0, s0, s1;
+            __m512 d00, d01, d02, d03, d10, d11, d12, d13, d20, d21, d22, d23, d30, d31, d32, d33, w0;
 
             for (size_t dy = 0; dy < p.dstH; ++dy)
             {

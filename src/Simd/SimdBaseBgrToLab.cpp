@@ -24,16 +24,24 @@
 #include "Simd/SimdBgrToLab.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
     namespace Base
     {
+#define SIMD_BGR_TO_LAB_OPENCV_COMPATIBILITY
+
         namespace LabV1
         {
             inline double FromRaw(uint64_t raw)
             {
                 return *((double*)&raw);
+            }
+
+            SIMD_INLINE float mullAdd(float a, float b, float c)
+            {
+                return a * b + c;
             }
 
 #define  CV_DESCALE(x,n)     (((x) + (1 << ((n)-1))) >> (n))
@@ -65,7 +73,6 @@ namespace Simd
             };
 
             enum { LAB_CBRT_TAB_SIZE = 1024, GAMMA_TAB_SIZE = 1024 };
-            static const float LabCbrtTabScale = float(LAB_CBRT_TAB_SIZE * 2) / float(3);
 
             static const float GammaTabScale((int)GAMMA_TAB_SIZE);
 
@@ -88,8 +95,6 @@ namespace Simd
             static const float lthresh = float(216) / float(24389); // 0.008856f = (6/29)^3
             static const float lscale = float(841) / float(108); // 7.787f = (29/3)^3/(29*4)
             static const float lbias = float(16) / float(116);
-            //static const softfloat f255(255);
-
 
             static inline float applyGamma(float x)
             {
@@ -119,9 +124,14 @@ namespace Simd
                     for (int i = 0; i < LAB_CBRT_TAB_SIZE_B; i++)
                     {
                         float x = cbTabScale * float(i);
-                        LabCbrtTab_b[i] = (uint16_t)(Round(lshift2 * (x < lthresh ? (x * lscale +  lbias) : cbrt(x))));
+                        LabCbrtTab_b[i] = (uint16_t)(Round(lshift2 * (x < lthresh ? mullAdd(x,  lscale,  lbias) : cbrt(x))));
                     }
-
+#if defined(SIMD_BGR_TO_LAB_OPENCV_COMPATIBILITY)
+                    if(LabCbrtTab_b[324] == 17746)
+                        LabCbrtTab_b[324] = 17745;
+                    if (LabCbrtTab_b[49] == 9455)
+                        LabCbrtTab_b[49] = 9454;
+#endif
                     initialized = true;
                 }
             }
@@ -175,6 +185,27 @@ namespace Simd
                         int a = CV_DESCALE(500 * (fX - fY) + 128 * (1 << lab_shift2), lab_shift2);
                         int b = CV_DESCALE(200 * (fY - fZ) + 128 * (1 << lab_shift2), lab_shift2);
 
+#if defined(_WIN32) && 0
+                        if (L == 45 && a == 165)
+                        {
+                            std::cout << i << " old Lab = {" << L << ", " << a << ", " << b << "}";
+
+                            int R = tab[src[0]], G = tab[src[1]], B = tab[src[2]];
+                            int fX = LabCbrtTab_b[CV_DESCALE(R * C0 + G * C1 + B * C2, lab_shift)];
+                            int fY = LabCbrtTab_b[CV_DESCALE(R * C3 + G * C4 + B * C5, lab_shift)] - 1;
+                            int fZ = LabCbrtTab_b[CV_DESCALE(R * C6 + G * C7 + B * C8, lab_shift)];
+
+                            int L = CV_DESCALE(Lscale * fY + Lshift, lab_shift2);
+                            int a = CV_DESCALE(500 * (fX - fY) + 128 * (1 << lab_shift2), lab_shift2);
+                            int b = CV_DESCALE(200 * (fY - fZ) + 128 * (1 << lab_shift2), lab_shift2);
+
+                            std::cout << " new Lab = {" << L << ", " << a << ", " << b << "}";
+                            std::cout << " index " << CV_DESCALE(R * C3 + G * C4 + B * C5, lab_shift);
+                            std::cout << " value " << LabCbrtTab_b[CV_DESCALE(R * C3 + G * C4 + B * C5, lab_shift)];
+                            std::cout << std::endl;
+                            exit(0);
+                        }
+#endif
                         dst[0] = Base::RestrictRange(L);
                         dst[1] = Base::RestrictRange(a);
                         dst[2] = Base::RestrictRange(b);

@@ -548,21 +548,23 @@ namespace Test
         View src(W, H, View::Bgr24, NULL, TEST_ALIGN(W));
         FillRandom(src);
 
-        View dst1(W, H, View::Bgr24, NULL, TEST_ALIGN(W));
-        View dst2(W, H, View::Bgr24, NULL, TEST_ALIGN(W));
+        View dst1(W, H, View::Lab24, NULL, TEST_ALIGN(W));
+        View dst2(W, H, View::Lab24, NULL, TEST_ALIGN(W));
 
         Simd::Fill(dst1, 1);
         Simd::Fill(dst2, 2);
 
-        src.data[0] = 89;
-        src.data[1] = 162;
-        src.data[2] = 252;
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(TEST_PERFORMANCE_TEST("OpenCV"); cv::cvtColor((cv::Mat)src, (cv::Mat)(dst1.Ref()), cv::COLOR_BGR2Lab, 3));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(cv::cvtColor((cv::Mat)src, (cv::Mat)(dst1.Ref()), cv::COLOR_BGR2Lab, 3));
-
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(Simd::BgrToLab(src, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(TEST_PERFORMANCE_TEST("Simd"); Simd::BgrToLab(src, dst2));
 
         result = result && Compare(dst1, dst2, 0, true, 64);
+
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.ConsoleReport(false, true));
+        PerformanceMeasurerStorage::s_storage.Clear();
+#endif
+
 #endif
         return result;
     }
