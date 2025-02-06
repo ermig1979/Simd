@@ -27,6 +27,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToLab.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBinarization.cpp" />

@@ -294,6 +294,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Lab24, FUNC_N(Simd::Avx2::BgrToLab), FUNC_N(SimdBgrToLab));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Lab24, FUNC_N(Simd::Avx512bw::BgrToLab), FUNC_N(SimdBgrToLab));
+#endif 
+
         return result;
     }
 
