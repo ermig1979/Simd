@@ -289,6 +289,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Lab24, FUNC_N(Simd::Sse41::BgrToLab), FUNC_N(SimdBgrToLab));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Lab24, FUNC_N(Simd::Avx2::BgrToLab), FUNC_N(SimdBgrToLab));
+#endif 
+
         return result;
     }
 
@@ -548,21 +553,6 @@ namespace Test
     bool BgrToLabSpecialTest()
     {
         bool result = true;
-#if 0
-        size_t sl, sw;
-        uint8_t* dw, * dl;
-        Test::FileLoad("dw.bin", &dw, &sw);
-        Test::FileLoad("dl.bin", &dl, &sl);
-        float* pw = (float*)dw;
-        float* pl = (float*)dl;
-        for (size_t i = 0, n = sl / 4; i < n; ++i)
-        {
-            std::cout << i << "\t " << pw[i] << " \t " << pl[i] << " \t " << std::abs(pw[i] - pl[i]) << std::endl;
-        }
-        return result;
-#endif
-
-
 #ifdef SIMD_OPENCV_ENABLE
         TEST_LOG_SS(Info, "Test OpenCV and Simd image conversion from BGR to LAB pixel format.");
 
