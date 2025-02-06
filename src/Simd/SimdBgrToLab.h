@@ -33,10 +33,10 @@ namespace Simd
         const int LAB_GAMMA_SHIFT = 3;
 
         const int LabGammaTabSize = 256;
-        extern uint16_t LabGammaTab[LabGammaTabSize];
+        extern uint32_t LabGammaTab[LabGammaTabSize];
 
         const int LabCbrtTabSize = 256 * 3 / 2 * (1 << LAB_GAMMA_SHIFT);
-        extern uint16_t LabCbrtTab[LabCbrtTabSize];
+        extern uint32_t LabCbrtTab[LabCbrtTabSize];
 
         const int LabCoeffsTabSize = 9;
         extern uint32_t LabCoeffsTab[LabCoeffsTabSize];
@@ -47,23 +47,17 @@ namespace Simd
         const int LAB_ROUND = 1 << (LAB_SHIFT - 1);
 
         const int LAB_SHIFT2 = LAB_SHIFT + LAB_GAMMA_SHIFT;
-        const int LAB_ROUND2 = 1 << (LAB_SHIFT2 - 1);
 
         const int LAB_L_SCALE = (116 * 255 + 50) / 100;
-        const int LAB_L_SHIFT = -((16 * 255 * (1 << LAB_SHIFT2) + 50) / 100);
+        const int LAB_L_SHIFT = -((16 * 255 * (1 << LAB_SHIFT2) + 50) / 100) + (1 << (LAB_SHIFT2 - 1));
 
         const int LAB_A_SCALE = 500;
         const int LAB_B_SCALE = 200;
-        const int LAB_AB_SHIFT = 128 * (1 << LAB_SHIFT2);
+        const int LAB_AB_SHIFT = 128 * (1 << LAB_SHIFT2) + (1 << (LAB_SHIFT2 - 1));
 
         SIMD_INLINE int LabDescale(int value)
         {
             return (value + LAB_ROUND) >> LAB_SHIFT;
-        }
-
-        SIMD_INLINE int LabDescale2(int value)
-        {
-            return (value + LAB_ROUND2) >> LAB_SHIFT2;
         }
 
         SIMD_INLINE void RgbToLab(int red, int green, int blue, uint8_t *lab)
@@ -80,9 +74,9 @@ namespace Simd
             int fY = LabCbrtTab[iY];
             int fZ = LabCbrtTab[iZ];
 
-            int L = LabDescale2(LAB_L_SCALE * fY + LAB_L_SHIFT);
-            int a = LabDescale2(LAB_A_SCALE * (fX - fY) + LAB_AB_SHIFT);
-            int b = LabDescale2(LAB_B_SCALE * (fY - fZ) + LAB_AB_SHIFT);
+            int L = (LAB_L_SCALE * fY + LAB_L_SHIFT) >> LAB_SHIFT2;
+            int a = (LAB_A_SCALE * (fX - fY) + LAB_AB_SHIFT) >> LAB_SHIFT2;
+            int b = (LAB_B_SCALE * (fY - fZ) + LAB_AB_SHIFT) >> LAB_SHIFT2;
 
             lab[0] = Base::RestrictRange(L);
             lab[1] = Base::RestrictRange(a);

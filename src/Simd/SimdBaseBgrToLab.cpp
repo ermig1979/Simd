@@ -32,8 +32,8 @@ namespace Simd
 {
     namespace Base
     {
-        uint16_t LabGammaTab[LabGammaTabSize];
-        uint16_t LabCbrtTab[LabCbrtTabSize];
+        uint32_t LabGammaTab[LabGammaTabSize];
+        uint32_t LabCbrtTab[LabCbrtTabSize];
         uint32_t LabCoeffsTab[9];
 
         SIMD_INLINE float ApplyGamma(float x)
@@ -58,14 +58,14 @@ namespace Simd
             for (int i = 0; i < LabGammaTabSize; i++)
             {
                 float x = float(i) / 255.0f;
-                LabGammaTab[i] = (uint16_t)(Round(intScale * ApplyGamma(x)));
+                LabGammaTab[i] = Round(intScale * ApplyGamma(x));
             }
             const float tabScale(1.0 / (255.0 * (1 << LAB_GAMMA_SHIFT)));
             const float shift2(1 << LAB_SHIFT2);
             for (int i = 0; i < LabCbrtTabSize; i++)
             {
                 float x = tabScale * float(i);
-                LabCbrtTab[i] = (uint16_t)Round(shift2 * ApplyCbrt(x));
+                LabCbrtTab[i] = Round(shift2 * ApplyCbrt(x));
             }
 #if defined(SIMD_BGR_TO_LAB_OPENCV_COMPATIBILITY)
             if (LabCbrtTab[324] == 17746)
