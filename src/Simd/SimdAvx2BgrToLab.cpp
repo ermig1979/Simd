@@ -24,7 +24,7 @@
 #include "Simd/SimdBgrToLab.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
+#include "Simd/SimdEnable.h"
 
 namespace Simd
 {
