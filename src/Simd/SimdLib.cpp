@@ -24,7 +24,6 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdConfig.h"
 
 #ifndef SIMD_LIB_CPP
 #define SIMD_LIB_CPP
@@ -59,7 +58,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdAlignment.h"
 #include "Simd/SimdConst.h"
-#include "Simd/SimdLog.h"
 #include "Simd/SimdPerformance.h"
 #include "Simd/SimdEmpty.h"
 
@@ -89,7 +87,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512bw.h"
-#include "Simd/SimdAvx512vnni.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdNeon.h"
 
