@@ -69,6 +69,8 @@ namespace Simd
             Rgba32,
             /*! Three planes (8-bit full size Y, U, V planes) YUV444P pixel format. */
             Yuv444p,
+            /*! One plane 24-bit (3 8-bit channels) Lab (CIELAB) pixel format. */
+            Lab24,
         };
 
         typedef void (*DeleterPtr)(void* context); /*!< Deleter callback definition. */
@@ -485,6 +487,7 @@ namespace Simd
         case View<A>::Bgra32: (Format&)format = Bgra32; break;
         case View<A>::Rgb24: (Format&)format = Rgb24; break;
         case View<A>::Rgba32: (Format&)format = Rgba32; break;
+        case View<A>::Lab24: (Format&)format = Lab24; break;
         default:
             assert(0);
         }
@@ -509,6 +512,7 @@ namespace Simd
         case View<A>::Bgra32: (Format&)format = Bgra32; break;
         case View<A>::Rgb24: (Format&)format = Rgb24; break;
         case View<A>::Rgba32: (Format&)format = Rgba32; break;
+        case View<A>::Lab24: (Format&)format = Lab24; break;
         default:
             assert(0);
         }
@@ -603,6 +607,11 @@ namespace Simd
             planes[2] = View<A>(width, height, stride2, View<A>::Gray8, data2);
             if (yuvType == SimdYuvUnknown)
                 *(SimdYuvType*)&yuvType = SimdYuvBt601;
+            break;
+        case Lab24:
+            planes[0] = View<A>(width, height, stride0, View<A>::Lab24, data0);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
             break;
         default:
             assert(0);
@@ -739,6 +748,11 @@ namespace Simd
             if (yuvType == SimdYuvUnknown)
                 *(SimdYuvType*)&yuvType = SimdYuvBt601;
             break;
+        case Lab24:
+            planes[0].Recreate(width, height, View<A>::Lab24);
+            if (yuvType != SimdYuvUnknown)
+                *(SimdYuvType*)&yuvType = SimdYuvUnknown;
+            break;
         default:
             assert(0);
         }
@@ -865,6 +879,7 @@ namespace Simd
         case Rgb24:   return 1;
         case Rgba32:  return 1;
         case Yuv444p: return 3;
+        case Lab24:   return 1;
         default: assert(0); return 0;
         }
     }
@@ -1008,6 +1023,15 @@ namespace Simd
                 Simd::StretchGray2x2(v, dst.planes[2]);
                 break;
             }
+            case Frame<A>::Lab24:
+            {
+                View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
+                DeinterleaveUv(src.planes[1], u, v);
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                Yuv420pToBgr(src.planes[0], u, v, bgr, src.yuvType);
+                BgrToLab(bgr, dst.planes[0]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -1051,6 +1075,13 @@ namespace Simd
                 Simd::StretchGray2x2(src.planes[1], dst.planes[2]);
                 break;
             }
+            case Frame<A>::Lab24:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                Yuv420pToBgr(src.planes[0], src.planes[1], src.planes[2], bgr, src.yuvType);
+                BgrToLab(bgr, dst.planes[0]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -1084,6 +1115,13 @@ namespace Simd
             case Frame<A>::Yuv444p:
                 BgraToYuv444p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
                 break;
+            case Frame<A>::Lab24:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                BgraToBgr(src.planes[0], bgr);
+                BgrToLab(bgr, dst.planes[0]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -1116,6 +1154,9 @@ namespace Simd
                 break;
             case Frame<A>::Yuv444p:
                 BgrToYuv444p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
+                break;
+            case Frame<A>::Lab24:
+                BgrToLab(src.planes[0], dst.planes[0]);
                 break;
             default:
                 assert(0);
@@ -1153,6 +1194,13 @@ namespace Simd
             case Frame<A>::Rgba32:
                 GrayToRgba(src.planes[0], dst.planes[0]);
                 break;
+            case Frame<A>::Lab24:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                GrayToBgr(src.planes[0], bgr);
+                BgrToLab(bgr, dst.planes[0]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -1196,6 +1244,13 @@ namespace Simd
                 BgrToYuv444p(bgr, dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
                 break;
             }
+            case Frame<A>::Lab24:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                RgbToBgr(src.planes[0], bgr);
+                BgrToLab(bgr, dst.planes[0]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -1237,6 +1292,13 @@ namespace Simd
                 View<A> bgr(src.Size(), View<A>::Bgr24);
                 RgbaToBgr(src.planes[0], bgr);
                 BgrToYuv444p(bgr, dst.planes[0], dst.planes[1], dst.planes[2], dst.yuvType);
+                break;
+            }
+            case Frame<A>::Lab24:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                RgbaToBgr(src.planes[0], bgr);
+                BgrToLab(bgr, dst.planes[0]);
                 break;
             }
             default:
@@ -1285,6 +1347,13 @@ namespace Simd
                 View<A> bgr(src.Size(), View<A>::Bgr24);
                 Yuv444pToBgr(src.planes[0], src.planes[1], src.planes[2], bgr, src.yuvType);
                 BgrToRgba(bgr, dst.planes[0]);
+                break;
+            }
+            case Frame<A>::Lab24:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                Yuv444pToBgr(src.planes[0], src.planes[1], src.planes[2], bgr, src.yuvType);
+                BgrToLab(bgr, dst.planes[0]);
                 break;
             }
             default:
