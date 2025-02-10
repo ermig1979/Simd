@@ -35,7 +35,7 @@ namespace Simd
     {
         template<::SimdConvolutionActivationType type> void Convolution32fNhwcDepthwiseDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
         {
-            size_t srcW = p.srcW, strideX = p.strideX, dilationX = p.dilationX, kernelX = p.kernelY, sX = strideX * p.dstC;
+            size_t srcW = p.srcW, strideX = p.strideX, dilationX = p.dilationX, kernelX = p.kernelX, sX = strideX * p.dstC;
             size_t dstC = p.dstC, dstCF = AlignLo(p.dstC, F), dstC2F = AlignLo(p.dstC, 2 * F), dstC4F = AlignLo(p.dstC, 4 * F);
             size_t dstW2 = AlignLo(p.dstW, 2), dstW4 = AlignLo(p.dstW, 4);
             __m512 d00, d01, d02, d03, d10, d11, d12, d13, d20, d21, d22, d23, d30, d31, d32, d33, w0;

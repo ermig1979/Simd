@@ -261,7 +261,7 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 20, 75, 75, 20, Size(11, 1), _1, _1, Size(5, 0), Size(5, 0), 20, aId, t), f1, f2);
 #endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 256, 44, 44, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 20, 75, 75, 20, Size(1, 11), _1, _1, Size(0, 5), Size(0, 5), 20, aId, t), f1, f2);
 #endif
         return result;
     }
