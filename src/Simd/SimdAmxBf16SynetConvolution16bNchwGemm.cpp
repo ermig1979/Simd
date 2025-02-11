@@ -264,20 +264,12 @@ namespace Simd
             size_t dstS = dstH * p.dstW, n1 = dstC, n = 32;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn;
             size_t dB = a.sumBuf ? a.bufN : a.N, dD = a.N * a.elem, dW = K, dp = type == ::SimdConvolutionActivationPrelu ? 1 : 0;
-#if 1
             Convolution16bNchwGemmPtr body_2 = Convolution16bNchwGemm_32x32<term, type, 0>;
             Convolution16bNchwGemmPtr tail_2 = m > 16 ? Convolution16bNchwGemm_32x32<term, type, 0> : Convolution16bNchwGemm_16x32<term, type, 0>;
             Convolution16bNchwGemmPtr body_1 = Convolution16bNchwGemm_32x16<term, type, 0>;
             Convolution16bNchwGemmPtr tail_1 = m > 16 ? Convolution16bNchwGemm_32x16<term, type, 0> : Convolution16bNchwGemm_16x16<term, type, 0>;
 
             SetTileConfFull();
-#else
-            Convolution16bNchwGemmPtr body_2 = Convolution16bNchwGemm_32x32<term, type, 1>;
-            Convolution16bNchwGemmPtr tail_2 = m > 16 ? Convolution16bNchwGemm_32x32<term, type, 1> : Convolution16bNchwGemm_16x32<term, type, 1>;
-            Convolution16bNchwGemmPtr body_1 = Convolution16bNchwGemm_32x16<term, type, 1>;
-            Convolution16bNchwGemmPtr tail_1 = m > 16 ? Convolution16bNchwGemm_32x16<term, type, 1> : Convolution16bNchwGemm_16x16<term, type, 1>;
-#endif
-
             for (size_t ds = 0; ds < dstS; ds += DF)
             {
                 size_t dS = Simd::Min(DF, dstS - ds);
