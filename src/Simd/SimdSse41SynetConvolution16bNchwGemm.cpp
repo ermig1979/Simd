@@ -254,7 +254,7 @@ namespace Simd
             size_t K, size_t dstS, int zero, const uint16_t* src0, const float* bias, const float* params, float* buf, uint8_t* dst)
         {
             __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, w0, s00, s01, s10, s11, m = _mm_castsi128_ps(Bf16::MASK);
-            size_t dB = a.N, dD = a.N * a.elem;
+            size_t dB = a.sumBuf ? a.bufN : a.N, dD = a.N * a.elem;
             const uint16_t* src1 = src0 + K * F;
             const uint16_t* weight1 = weight0 + 1 * K;
             const uint16_t* weight2 = weight0 + 2 * K;
@@ -454,7 +454,7 @@ namespace Simd
         {
             size_t dstS = dstH * p.dstW, n1 = dstC, n = 5;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn;
-            size_t dB = a.N, dD = a.N * a.elem, dW = K, dp = type == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            size_t dB = a.sumBuf ? a.bufN : a.N, dD = a.N * a.elem, dW = K, dp = type == ::SimdConvolutionActivationPrelu ? 1 : 0;
             Convolution16bNchwGemm_2xM_Ptr convolution_2xN = GetConvolution16bNchwGemm_2xM<term, type>(n);
             Convolution16bNchwGemm_2xM_Ptr convolution_2xM = GetConvolution16bNchwGemm_2xM<term, type>(m);
 

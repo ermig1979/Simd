@@ -258,7 +258,7 @@ namespace Simd
             const AlgParam& a = _alg;
             size_t size = a.bufN * a.bufK * sizeof(uint16_t);
             if (a.sumBuf)
-                size += a.macroD * a.bufN * sizeof(float);
+                size += a.bufD * a.bufN * sizeof(float);
             return size;
         }
 
@@ -328,7 +328,7 @@ namespace Simd
                     for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
                     {
                         size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-                        size_t sumOffs = a.macroK < a.bufK ? (dc * p.dstH + yBeg) * p.dstW : 0;
+                        size_t sumOffs = a.macroK < a.bufK ? (dc * p.dstH + yBeg) * AlignHi(p.dstW, a.F) : 0;
                         size_t dstOffs = (dc * p.dstH + yBeg) * p.dstW * _elemD;
                         const uint16_t* weight = _weight.data + a.bufD * mak + dc * macroK;
                         if (mak + macroK == a.bufK)
