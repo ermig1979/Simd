@@ -461,7 +461,9 @@ namespace Simd
 
             if (nn)
             {
-                size_t ma = a.reorderType ? m : AlignHi(m, 16), nt = a.reorderType ? nn : n1 - ma;
+                bool avoidSrcOverflow = a.reorderType == 0 && p.Is1x1();
+                if (avoidSrcOverflow)
+                    m = AlignHi(m, 16), nn = n1 - m;
                 Convolution16bNhwcGemmPtr body_2 = Convolution16bNhwcGemm_32x32<term, type, 0>;
                 Convolution16bNhwcGemmPtr tail_2 = m > 16 ? Convolution16bNhwcGemm_32x32<term, type, 0> : Convolution16bNhwcGemm_16x32<term, type, 0>;
                 Convolution16bNhwcGemmPtr body_1 = Convolution16bNhwcGemm_32x16<term, type, 0>;
@@ -486,14 +488,14 @@ namespace Simd
                         for (; i < nn; i += n)
                             body_2(s + i * dS, p, a, srcC, n, dC, zero, weight, _bias, _params, b + i * dB, d + i * dD);
                         if (m)
-                            tail_2(s + nt * dS, p, a, srcC, ma, dC, zero, weight, _bias, _params, b + i * dB, d + nt * dD);
+                            tail_2(s + nn * dS, p, a, srcC, m, dC, zero, weight, _bias, _params, b + i * dB, d + nn * dD);
                     }
                     else
                     {
                         for (; i < nn; i += n)
                             body_1(s + i * dS, p, a, srcC, n, dC, zero, weight, _bias, _params, b + i * dB, d + i * dD);
                         if (m)
-                            tail_1(s + nt * dS, p, a, srcC, ma, dC, zero, weight, _bias, _params, b + i * dB, d + nt * dD);
+                            tail_1(s + nn * dS, p, a, srcC, m, dC, zero, weight, _bias, _params, b + i * dB, d + nn * dD);
                     }
                     weight += dW;
                 }
