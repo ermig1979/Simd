@@ -169,7 +169,7 @@ namespace Simd
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
                         size_t bufOffs = (a.macroK < a.bufK || _convert == NULL) ? 
                             yBeg * (_convert ? AlignHi(p.dstW, a.F) : p.dstW) * a.bufK + (a.reorderType ? mak * a.F : mak) : 0;
-                        size_t sumOffs = a.macroK < a.bufK ? yBeg * AlignHi(p.dstW, a.F) * a.dB : 0;
+                        size_t sumOffs = a.macroK < a.bufK ? yBeg * (a.microK > 2 ? AlignHi(p.dstW, a.F) : p.dstW)* a.dB : 0;
                         size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
                         if (dc == 0 && mak == 0 && _convert)
                         {
