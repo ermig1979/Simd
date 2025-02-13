@@ -461,7 +461,7 @@ namespace Simd
 
             if (nn)
             {
-                bool avoidSrcOverflow = a.reorderType == 0 && p.Is1x1();
+                bool avoidSrcOverflow = !(a.reorderType == 1 && p.Is1x1());
                 if (avoidSrcOverflow)
                     m = AlignHi(m, 16), nn = n1 - m;
                 Convolution16bNhwcGemmPtr body_2 = Convolution16bNhwcGemm_32x32<term, type, 0>;
@@ -571,7 +571,7 @@ namespace Simd
                 }
                 else
                 {
-                    if (p.srcC == AlignLo(p.srcC, 32) && a.batch == 1)
+                    if (p.srcC == AlignLo(p.srcC, 32) && a.batch == 1 && Aligned(p.dstW, a.F))
                     {
                         _convert = Convert16bNhwcGemmR;
                         a.reorderType = 1;
