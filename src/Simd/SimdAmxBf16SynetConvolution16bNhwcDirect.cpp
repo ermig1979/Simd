@@ -181,7 +181,7 @@ namespace Simd
                 _tile_stream_loadd(2, dst1 + 0, strideD);
                 _tile_stream_loadd(3, dst1 + F, strideD);
             }
-#if 0
+#if 1
             for (size_t c = 0, offsS = 0; c < srcC; c += dX, offsS += dC)
             {
                 for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
@@ -202,7 +202,7 @@ namespace Simd
                 }
             }
 #elif 0
-            for (size_t i = 0, n = a.offs.size; i < n; ++i)
+            for (size_t i = 0, n = (srcC + 31) / 32; i < n; ++i)
             {
                 int offs = a.offs[i];
                 _tile_loadd(6, weight0, strideW);
@@ -217,7 +217,7 @@ namespace Simd
                 weight1 += dW;                
             }
 #else
-            int n1 = (int)a.offs.size - 1, *offs = a.offs.data;
+            int n1 = (int)(srcC + 31) / 32 - 1, *offs = a.offs.data;
             _tile_stream_loadd(4, src0, strideS);
             _tile_loadd(6, weight0, strideW);
             for (int i = 0; i < n1; ++i)
@@ -368,13 +368,6 @@ namespace Simd
             Convolution16bNhwcDirectPtr body_1 = Convolution16bNhwcDirect_32x16;
             Convolution16bNhwcDirectPtr tail_1 = m > 16 ? Convolution16bNhwcDirect_32x16 : Convolution16bNhwcDirect_16x16;
 
-            //int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            //Array32i offs(DivHi(srcC, a.microC) * p.kernelY * p.kernelX);
-            //for (size_t c = 0, offsS = 0, i = 0; c < srcC; c += dX, offsS += dC)
-            //    for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)
-            //        for (size_t offsX = offsY, endX = offsY + p.kernelX * dX; offsX < endX; offsX += dX, i++)
-            //            offs[i] = (int)offsX;
-
             SetTileConfFull();
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
@@ -460,11 +453,12 @@ namespace Simd
             default: assert(0);
             }
             AlgParam& a = _alg;
+            int kX = (int)p.kernelX, kY = (int)p.kernelX, mC = (int)a.macroC;
             int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            a.offs.Resize(DivHi(a.macroC, a.microC) * p.kernelY * p.kernelX);
-            for (size_t c = 0, offsS = 0, i = 0; c < a.macroC; c += dX, offsS += dC)
-                for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)
-                    for (size_t offsX = offsY, endX = offsY + p.kernelX * dX; offsX < endX; offsX += dX, i++)
+            a.offs.Resize(DivHi(mC, a.microC) * kY * kX);
+            for (size_t c = 0, offsS = 0, i = 0; c < mC; c += dX, offsS += dC)
+                for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
+                    for (size_t offsX = offsY, endX = offsY + kX * dX; offsX < endX; offsX += dX, i++)
                         a.offs[i] = (int)offsX;
         }
     }
