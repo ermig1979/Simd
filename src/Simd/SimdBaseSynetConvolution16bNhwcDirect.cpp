@@ -77,9 +77,10 @@ namespace Simd
             }
             a.macroH = Simd::RestrictRange(L2 / a.macroC / a.srcW / 2, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.K / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
+            a.numH = DivHi(p.dstH * a.batch, a.macroH);
             a.elem = _elemD;
-            a.bufS = a.batch * a.srcC * a.srcH * a.srcW;
-            a.bufD = a.batch * a.macroD * a.srcH * a.srcW;
+            a.bufS = a.batch * a.srcH * a.srcW * a.srcC + a.F * a.F;
+            a.bufD = (a.batch * a.srcH * a.srcW + a.numH * a.F) * a.macroD;
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
@@ -163,7 +164,7 @@ namespace Simd
                 for (size_t mac = 0; mac < a.srcC; mac += a.macroC)
                 {
                     size_t macroC = Simd::Min(a.srcC, mac + a.macroC) - mac;
-                    for (size_t dyBeg = 0; dyBeg < dstH;)
+                    for (size_t dyBeg = 0, dyTime = 0; dyBeg < dstH; dyTime++)
                     {
                         size_t dyEnd = Simd::Min(dyBeg + a.macroH, dstH);
                         if (mad == 0 && mac == 0)
@@ -185,7 +186,7 @@ namespace Simd
                         else
                         {
                             _convolution(buf + mac * a.srcH * a.srcW + dyBeg * a.srcW * a.microC, p, a, macroD, dyEnd - dyBeg,
-                                macroC, mac == 0 ? 1 : 0, weight, sum + dyBeg * a.srcW * a.macroD);
+                                macroC, mac == 0 ? 1 : 0, weight, sum + (dyBeg * a.srcW + dyTime * a.F) * a.macroD);
                         }
                         if (mac + macroC == a.srcC)
                         {
@@ -197,7 +198,7 @@ namespace Simd
                                     _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, params, dst + b * dD);
                             }
                             else
-                                _postprocess(sum, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
+                                _postprocess(sum + dyTime * a.F * a.macroD, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
                         }
                         dyBeg = dyEnd;
                     }

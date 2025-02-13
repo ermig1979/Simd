@@ -167,25 +167,6 @@ namespace Simd
             const uint16_t* src1 = src0 + 16 * dX;
             float* dst1 = dst0 + 16 * dD;
 
-            TileConf conf;
-            conf.rows[0] = 16;
-            conf.rows[1] = 16;
-            conf.rows[2] = uint8_t(dstS - 16);
-            conf.rows[3] = uint8_t(dstS - 16);
-            conf.rows[4] = 16;
-            conf.rows[5] = uint8_t(dstS - 16);
-            conf.rows[6] = 16;
-            conf.rows[7] = 16;
-            conf.colsb[0] = 64;
-            conf.colsb[1] = 64;
-            conf.colsb[2] = 64;
-            conf.colsb[3] = 64;
-            conf.colsb[4] = 64;
-            conf.colsb[5] = 64;
-            conf.colsb[6] = 64;
-            conf.colsb[7] = 64;
-            _tile_loadconfig(&conf);
-
             if (zero)
             {
                 _tile_zero(0);
@@ -200,14 +181,15 @@ namespace Simd
                 _tile_stream_loadd(2, dst1 + 0, strideD);
                 _tile_stream_loadd(3, dst1 + F, strideD);
             }
+#if 0
             for (size_t c = 0, offsS = 0; c < srcC; c += dX, offsS += dC)
             {
                 for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
                 {
                     for (size_t offsX = offsY, endX = offsY + kX * dX; offsX < endX; offsX += dX)
                     {
-                        _tile_stream_loadd(4, src0 + offsX, strideS);
                         _tile_loadd(6, weight0, strideW);
+                        _tile_stream_loadd(4, src0 + offsX, strideS);
                         _tile_dpbf16ps(0, 4, 6);
                         _tile_loadd(7, weight1, strideW);
                         _tile_dpbf16ps(1, 4, 7);
@@ -219,6 +201,45 @@ namespace Simd
                     }
                 }
             }
+#elif 0
+            for (size_t i = 0, n = a.offs.size; i < n; ++i)
+            {
+                int offs = a.offs[i];
+                _tile_loadd(6, weight0, strideW);
+                _tile_stream_loadd(4, src0 + offs, strideS);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(7, weight1, strideW);
+                _tile_dpbf16ps(1, 4, 7);
+                _tile_stream_loadd(5, src1 + offs, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+                _tile_dpbf16ps(3, 5, 7);
+                weight0 += dW;
+                weight1 += dW;                
+            }
+#else
+            int n1 = (int)a.offs.size - 1, *offs = a.offs.data;
+            _tile_stream_loadd(4, src0, strideS);
+            _tile_loadd(6, weight0, strideW);
+            for (int i = 0; i < n1; ++i)
+            {
+                _tile_stream_loadd(5, src1 + offs[i], strideS);
+                _tile_loadd(7, weight1, strideW);                        
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_dpbf16ps(1, 4, 7);
+                _tile_stream_loadd(4, src0 + offs[i + 1], strideS);
+                _tile_dpbf16ps(2, 5, 6);
+                weight0 += dW;
+                _tile_loadd(6, weight0, strideW);
+                _tile_dpbf16ps(3, 5, 7);
+                weight1 += dW;
+            }
+            _tile_loadd(7, weight1, strideW);
+            _tile_stream_loadd(5, src1 + offs[n1], strideS);
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_dpbf16ps(1, 4, 7);
+            _tile_dpbf16ps(2, 5, 6);
+            _tile_dpbf16ps(3, 5, 7);
+#endif
             _tile_stored(0, dst0 + 0, strideD);
             _tile_stored(1, dst0 + F, strideD);
             _tile_stored(2, dst1 + 0, strideD);
@@ -235,19 +256,6 @@ namespace Simd
             int kX = (int)p.kernelX, kY = (int)p.kernelY, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* src1 = src0 + 16 * dX;
             float* dst1 = dst0 + 16 * dD;
-
-            TileConf conf;
-            conf.rows[0] = 16;
-            conf.rows[2] = uint8_t(dstS - 16);
-            conf.rows[4] = 16;
-            conf.rows[5] = uint8_t(dstS - 16);
-            conf.rows[6] = 16;
-            conf.colsb[0] = 64;
-            conf.colsb[2] = 64;
-            conf.colsb[4] = 64;
-            conf.colsb[5] = 64;
-            conf.colsb[6] = 64;
-            _tile_loadconfig(&conf);
 
             if (zero)
             {
@@ -286,19 +294,6 @@ namespace Simd
             int kX = (int)p.kernelX, kY = (int)p.kernelY, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
 
-            TileConf conf;
-            conf.rows[0] = uint8_t(dstS);
-            conf.rows[1] = uint8_t(dstS);
-            conf.rows[4] = uint8_t(dstS);
-            conf.rows[6] = 16;
-            conf.rows[7] = 16;
-            conf.colsb[0] = 64;
-            conf.colsb[1] = 64;
-            conf.colsb[4] = 64;
-            conf.colsb[6] = 64;
-            conf.colsb[7] = 64;
-            _tile_loadconfig(&conf);
-
             if (zero)
             {
                 _tile_zero(0);
@@ -335,15 +330,6 @@ namespace Simd
         {
             int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
             int kX = (int)p.kernelX, kY = (int)p.kernelY, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
-
-            TileConf conf;
-            conf.rows[0] = uint8_t(dstS);
-            conf.rows[4] = uint8_t(dstS);
-            conf.rows[6] = 16;
-            conf.colsb[0] = 64;
-            conf.colsb[4] = 64;
-            conf.colsb[6] = 64;
-            _tile_loadconfig(&conf);
 
             if (zero)
             {
@@ -382,6 +368,14 @@ namespace Simd
             Convolution16bNhwcDirectPtr body_1 = Convolution16bNhwcDirect_32x16;
             Convolution16bNhwcDirectPtr tail_1 = m > 16 ? Convolution16bNhwcDirect_32x16 : Convolution16bNhwcDirect_16x16;
 
+            //int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
+            //Array32i offs(DivHi(srcC, a.microC) * p.kernelY * p.kernelX);
+            //for (size_t c = 0, offsS = 0, i = 0; c < srcC; c += dX, offsS += dC)
+            //    for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)
+            //        for (size_t offsX = offsY, endX = offsY + p.kernelX * dX; offsX < endX; offsX += dX, i++)
+            //            offs[i] = (int)offsX;
+
+            SetTileConfFull();
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
@@ -465,6 +459,13 @@ namespace Simd
             case SimdConvolutionActivationGelu: SetPostprocess<SimdConvolutionActivationGelu>(p, _alg, _postprocess); break;
             default: assert(0);
             }
+            AlgParam& a = _alg;
+            int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
+            a.offs.Resize(DivHi(a.macroC, a.microC) * p.kernelY * p.kernelX);
+            for (size_t c = 0, offsS = 0, i = 0; c < a.macroC; c += dX, offsS += dC)
+                for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)
+                    for (size_t offsX = offsY, endX = offsY + p.kernelX * dX; offsX < endX; offsX += dX, i++)
+                        a.offs[i] = (int)offsX;
         }
     }
 #endif
