@@ -26,92 +26,25 @@
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
 
-#include <cstdarg>
-
-#ifndef STBIW_ASSERT
-#include <assert.h>
-#define STBIW_ASSERT(x) assert(x)
-#endif
-
 namespace Simd
 { 
     namespace Base
     {
-#define STBIW_UCHAR(x) (unsigned char) ((x) & 0xff)
-
-        typedef void stbi_write_func(void* context, void* data, int size);
-
-        static void MemoryStreamWrite(void* context, void* data, int size)
-        {
-            ((OutputMemoryStream*)context)->Write(data, size);
-        }
-
         typedef struct
         {
-            stbi_write_func* func;
-            void* context;
             unsigned char buffer[64];
             int buf_used;
             OutputMemoryStream *stream;
         } stbi__write_context;
 
         typedef unsigned int stbiw_uint32;
-        typedef int stb_image_write_test[sizeof(stbiw_uint32) == 4 ? 1 : -1];
-
-        static void stbiw__writefv(stbi__write_context* s, const char* fmt, va_list v)
-        {
-            while (*fmt) {
-                switch (*fmt++) {
-                case ' ': break;
-                case '1': {
-                    unsigned char x = STBIW_UCHAR(va_arg(v, int));
-                    s->func(s->context, &x, 1);
-                    break;
-                }
-                case '2': {
-                    int x = va_arg(v, int);
-                    unsigned char b[2];
-                    b[0] = STBIW_UCHAR(x);
-                    b[1] = STBIW_UCHAR(x >> 8);
-                    s->func(s->context, b, 2);
-                    break;
-                }
-                case '4': {
-                    stbiw_uint32 x = va_arg(v, int);
-                    unsigned char b[4];
-                    b[0] = STBIW_UCHAR(x);
-                    b[1] = STBIW_UCHAR(x >> 8);
-                    b[2] = STBIW_UCHAR(x >> 16);
-                    b[3] = STBIW_UCHAR(x >> 24);
-                    s->func(s->context, b, 4);
-                    break;
-                }
-                default:
-                    STBIW_ASSERT(0);
-                    return;
-                }
-            }
-        }
-
-        static void stbiw__writef(stbi__write_context* s, const char* fmt, ...)
-        {
-            va_list v;
-            va_start(v, fmt);
-            stbiw__writefv(s, fmt, v);
-            va_end(v);
-        }
 
         static void stbiw__write_flush(stbi__write_context* s)
         {
             if (s->buf_used) {
-                s->func(s->context, &s->buffer, s->buf_used);
+                s->stream->Write(&s->buffer, s->buf_used);
                 s->buf_used = 0;
             }
-        }
-
-        static void stbiw__putc(stbi__write_context* s, unsigned char c)
-        {
-            s->func(s->context, &c, 1);
         }
 
         static void stbiw__write1(stbi__write_context* s, unsigned char a)
@@ -189,11 +122,11 @@ namespace Simd
                     stbiw__write_pixel(s, rgb_dir, comp, write_alpha, expand_mono, d);
                 }
                 stbiw__write_flush(s);
-                s->func(s->context, &zero, scanline_pad);
+                s->stream->Write(&zero, scanline_pad);
             }
         }
 
-        static int stbiw__outfile(stbi__write_context* s, int rgb_dir, int vdir, int x, int y, int stride, int comp, int expand_mono, void* data, int alpha, int pad, const char* fmt, ...)
+        static int stbiw__outfile(stbi__write_context* s, int rgb_dir, int vdir, int x, int y, int stride, int comp, int expand_mono, void* data, int alpha, int pad)
         {
             if (y < 0 || x < 0) 
             {
@@ -201,10 +134,6 @@ namespace Simd
             }
             else 
             {
-                va_list v;
-                va_start(v, fmt);
-                stbiw__writefv(s, fmt, v);
-                va_end(v);
                 stbiw__write_pixels(s, rgb_dir, vdir, x, y, stride, comp, data, alpha, pad, expand_mono);
                 return 1;
             }
@@ -215,17 +144,11 @@ namespace Simd
             if (comp != 4) 
             {
                 int pad = (-x * 3) & 3;
-                return stbiw__outfile(s, -1, -1, x, y, stride, comp, 1, (void*)data, 0, pad,
-                    "11 4 22 4" "4 44 22 444444",
-                    'B', 'M', 14 + 40 + (x * 3 + pad) * y, 0, 0, 14 + 40,  // file header
-                    40, x, y, 1, 24, 0, 0, 0, 0, 0, 0);             // bitmap header
+                return stbiw__outfile(s, -1, -1, x, y, stride, comp, 1, (void*)data, 0, pad);
             }
             else 
             {
-                return stbiw__outfile(s, -1, -1, x, y, stride, comp, 1, (void*)data, 1, 0,
-                    "11 4 22 4" "4 44 22 444444 4444 4 444 444 444 444",
-                    'B', 'M', 14 + 108 + x * y * 4, 0, 0, 14 + 108, // file header
-                    108, x, y, 1, 32, 3, 0, 0, 0, 0, 0, 0xff0000, 0xff00, 0xff, 0xff000000u, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // bitmap V4 header
+                return stbiw__outfile(s, -1, -1, x, y, stride, comp, 1, (void*)data, 1, 0);
             }
         }
 
@@ -257,10 +180,8 @@ namespace Simd
 
             stbi__write_context s = { 0 };
             s.stream = &_stream;
-            s.context = s.stream;
-            s.func = MemoryStreamWrite;
-            //stbi__start_write_callbacks(&s, func, context);
-            //return stbi_write_bmp_core(&s, x, y, comp, data);
+
+            WriteHeader();
 
             for (size_t row = 0; row < _param.height;)
             {
@@ -275,24 +196,35 @@ namespace Simd
                 if (!stbi_write_bmp_core(&s, _param.width, _param.height, bufStride, _pixel, buf))
                     return false;
 
-                //for (size_t b = 0; b < block; ++b)
-                //{
-                //    uint8_t string[70];
-                //    for (size_t col = 0, offset = 0; col < _param.width; ++col)
-                //    {
-                //        *(uint32_t*)(string + offset) = *(uint32_t*)g_pxmPrint[gray[col]];
-                //        offset += 4;
-                //        if (offset >= 68 || col == _param.width - 1)
-                //        {
-                //            string[offset++] = '\n';
-                //            _stream.Write(string, offset);
-                //            offset = 0;
-                //        }
-                //    }
-                //    gray += grayStride;
-                //}
                 src += stride * block;
                 row += block;
+            }
+            return true;
+        }
+
+        bool ImageBmpSaver::WriteHeader()
+        {
+            _stream.Write8u('B');
+            _stream.Write8u('M');
+            if (_param.format == SimdPixelFormatBgra32 || _param.format == SimdPixelFormatRgba32)
+            {
+                uint32_t data[] = {
+                    uint32_t(14 + 108 + AlignHi(_size, 4) * _param.height),
+                    0, 14 + 108, 108,
+                    uint32_t(_param.width), uint32_t(_param.height),
+                    0x00200001, 3, 0, 0, 0, 0, 0,
+                    0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                _stream.Write(data, sizeof(data));
+            }
+            else
+            {
+                uint32_t data[] = { 
+                    uint32_t(14 + 40 + AlignHi(_size, 4) * _param.height), 
+                    0, 14 + 40, 40,
+                    uint32_t(_param.width), uint32_t(_param.height), 
+                    0x00180001, 0, 0, 0, 0, 0, 0 };
+                _stream.Write(data, sizeof(data));
             }
             return true;
         }

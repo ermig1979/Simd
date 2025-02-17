@@ -240,6 +240,8 @@ namespace Simd
             virtual bool ToStream(const uint8_t* src, size_t stride);
 
         protected:
+            bool WriteHeader();
+
             typedef void (*ConvertPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
             ConvertPtr _convert;
             Array8u _buffer;

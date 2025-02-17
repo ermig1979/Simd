@@ -463,6 +463,15 @@ namespace Simd
             _size = Max(_size, _pos);
         }
 
+        SIMD_INLINE void WriteBe16u(const uint16_t& value)
+        {
+#if defined(SIMD_BIG_ENDIAN)
+            Write<uint16_t>(value);
+#else
+            Write<uint16_t>((value & 0x00FF) << 8 | (value & 0xFF00) >> 8);
+#endif
+        }
+
         SIMD_INLINE void WriteBe32u(const uint32_t & value)
         {
 #if defined(SIMD_BIG_ENDIAN)
