@@ -337,6 +337,8 @@ typedef enum
     SimdImageFilePng,
     /*! A JPEG (Joint Photographic Experts Group) image file format. */
     SimdImageFileJpeg,
+    /*! A BMP (BitMap Picture) image file format. */
+    SimdImageFileBmp,
 } SimdImageFileType;
 
 /*! @ingroup c_types

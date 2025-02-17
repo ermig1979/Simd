@@ -35,7 +35,7 @@
 
 namespace Test
 {
-    const int DebugImageSave = 0;
+    const int DebugImageSave = 1;
 
     SIMD_INLINE int GetMaxJpegError(int quality)
     {
@@ -63,7 +63,7 @@ namespace Test
         {
             TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
             image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
-#if 1
+#if 0
             ::srand(0);
             View buffer(image.Size(), image.format);
             FillRandom(buffer);
@@ -106,6 +106,8 @@ namespace Test
             ss << suffix << ".ppm";
         else if (file == SimdImageFilePng)
             ss << suffix << ".png";
+        else if (file == SimdImageFileBmp)
+            ss << suffix << ".bmp";
         if (file == SimdImageFileJpeg)
             ss << "_" << ToString(quality) << suffix << ".jpg";
         const String dir = "_out";
@@ -113,7 +115,7 @@ namespace Test
         return CreatePathIfNotExist(dir, false) && image.Save(path, file, quality);
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -213,7 +215,7 @@ namespace Test
         std::vector<View::Format> formats({ View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32});
         for (int format = 0; format < (int)formats.size(); format++)
         {
-            for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
+            for (int file = (int)SimdImageFileBmp; file <= (int)SimdImageFileBmp; file++)
             {
                 if (file == SimdImageFileJpeg)
                 {
@@ -259,7 +261,7 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {

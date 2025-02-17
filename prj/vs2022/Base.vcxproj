@@ -156,8 +156,10 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoadJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoadPng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageSave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseImageSaveBmp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageSavePng.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseImageSavePpm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseInt16ToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseIntegral.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseInterleave.cpp" />

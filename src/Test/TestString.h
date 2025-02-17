@@ -103,6 +103,7 @@ namespace Test
         case SimdImageFilePpmBin:       return "PpmB";
         case SimdImageFilePng:          return "Png";
         case SimdImageFileJpeg:         return "Jpeg";
+        case SimdImageFileBmp:          return "Bmp";
         default: assert(0);  return "";
         }
     }

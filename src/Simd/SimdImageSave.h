@@ -34,7 +34,7 @@ namespace Simd
 
     SimdBool ImageSaveToFile(const ImageSaveToMemoryPtr saver, const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path);
 
-    //---------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     struct ImageSaverParam
     {
@@ -87,7 +87,7 @@ namespace Simd
                 if (width % 2 != 0 || height % 2 != 0)
                     return false;
             }
-            if (file <= SimdImageFileUndefined || file > SimdImageFileJpeg)
+            if (file <= SimdImageFileUndefined || file > SimdImageFileBmp)
                 return false;
             return true;
         }
@@ -164,6 +164,8 @@ namespace Simd
             virtual bool ToStream(const uint8_t* src, size_t stride);
         };
 
+        //-------------------------------------------------------------------------------------------------
+
         class ImagePngSaver : public ImageSaver
         {
         public:
@@ -186,6 +188,8 @@ namespace Simd
 
             void WriteToStream(const uint8_t* zlib, size_t zlen);
         };
+
+        //-------------------------------------------------------------------------------------------------
 
         class ImageJpegSaver : public ImageSaver
         {
@@ -226,7 +230,23 @@ namespace Simd
             void WriteHeader();
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        class ImageBmpSaver : public ImageSaver
+        {
+        public:
+            ImageBmpSaver(const ImageSaverParam& param);
+
+            virtual bool ToStream(const uint8_t* src, size_t stride);
+
+        protected:
+            typedef void (*ConvertPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+            ConvertPtr _convert;
+            Array8u _buffer;
+            size_t _block, _size, _pixel;
+        };
+
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
 
@@ -277,7 +297,7 @@ namespace Simd
             virtual void Init();
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
 
@@ -285,7 +305,7 @@ namespace Simd
 
         uint8_t* Yuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
@@ -329,7 +349,7 @@ namespace Simd
             virtual void Init();
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
 
@@ -337,7 +357,7 @@ namespace Simd
 
         uint8_t* Yuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
@@ -381,7 +401,7 @@ namespace Simd
             virtual void Init();
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
 
@@ -389,7 +409,7 @@ namespace Simd
 
         uint8_t* Yuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
@@ -433,7 +453,7 @@ namespace Simd
             virtual void Init();
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
 
@@ -441,7 +461,7 @@ namespace Simd
 
         uint8_t* Yuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }
 
-#endif//__SimdImageSave_h__
+#endif
