@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar,
+* Copyright (c) 2011-2025 Yermalayeu Ihar,
 *               2014-2018 Antonenka Mikhail,
 *               2018-2018 Radchenko Andrey,
 *               2019-2019 Facundo Galan.

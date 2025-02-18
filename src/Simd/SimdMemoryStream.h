@@ -210,7 +210,7 @@ namespace Simd
 
         SIMD_INLINE bool Skip(size_t size)
         {
-            if (_pos + size < _size)
+            if (_pos + size <= _size)
             {
                 _pos += size;
                 return true;

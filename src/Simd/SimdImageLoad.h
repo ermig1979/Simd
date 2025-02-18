@@ -52,6 +52,8 @@ namespace Simd
         bool Validate();
     };
 
+    //-------------------------------------------------------------------------------------------------
+
     class ImageLoader
     {
     protected:
@@ -83,6 +85,8 @@ namespace Simd
             return _image.Release();
         }
     };
+
+    //-------------------------------------------------------------------------------------------------
 
     namespace Base
     {
@@ -147,6 +151,8 @@ namespace Simd
             virtual void SetConverters();
         };
 
+        //-------------------------------------------------------------------------------------------------
+
         class ImagePngLoader : public ImageLoader
         {
         public:
@@ -195,6 +201,8 @@ namespace Simd
             void ConvertImage();
         };
 
+        //-------------------------------------------------------------------------------------------------
+
         class ImageJpegLoader : public ImageLoader
         {
         public:
@@ -208,7 +216,29 @@ namespace Simd
             struct JpegContext* _context;
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        class ImageBmpLoader : public ImageLoader
+        {
+        public:
+            ImageBmpLoader(const ImageLoaderParam& param);
+
+            virtual ~ImageBmpLoader();
+
+            virtual bool FromStream();
+
+        protected:
+            bool ParseHeader();
+            virtual void SetConverters();
+
+            typedef void (*ToAnyPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+            typedef void (*ToBgraPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
+            ToAnyPtr _toAny;
+            ToBgraPtr _toBgra;
+            uint32_t _width, _height, _bpp, _size, _pad, _mr, _mg, _mb, _ma;
+        };
+
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
@@ -266,11 +296,11 @@ namespace Simd
             ImageJpegLoader(const ImageLoaderParam& param);
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
@@ -319,11 +349,11 @@ namespace Simd
             virtual bool FromStream();
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
@@ -364,11 +394,11 @@ namespace Simd
             virtual void SetConverters();
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
@@ -409,11 +439,11 @@ namespace Simd
             virtual void SetConverters();
         };
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }
 
-#endif//__SimdImageLoad_h__
+#endif

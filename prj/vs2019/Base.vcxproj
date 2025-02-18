@@ -153,8 +153,10 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoad.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseImageLoadBmp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoadJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoadPng.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseImageLoadPpm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageSaveBmp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageSaveJpeg.cpp" />

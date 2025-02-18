@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2025 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -414,7 +414,7 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -560,7 +560,7 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -597,6 +597,8 @@ namespace Test
             return format == View::Gray8;
         if (file == SimdImageFilePpmTxt || file == SimdImageFilePpmBin)
             return format != View::Bgra32 && format != View::Rgba32;
+        if (file == SimdImageFileBmp)
+            return true;
         return false;
     }
 
@@ -670,7 +672,7 @@ namespace Test
         std::vector<View::Format> formats = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
         for (size_t format = 0; format < formats.size(); format++)
         {
-            for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
+            for (int file = (int)SimdImageFileBmp; file <= (int)SimdImageFileBmp; file++)
             {
                 if (file == SimdImageFileJpeg)
                 {
@@ -715,7 +717,7 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     bool ImageLoadFromMemorySpecialTest(const String & name, View::Format format, const FuncLM& f1, const FuncLM& f2)
     {
