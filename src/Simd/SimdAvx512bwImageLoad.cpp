@@ -52,7 +52,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImagePgmBinLoader::ImagePgmBinLoader(const ImageLoaderParam& param)
             : Avx2::ImagePgmBinLoader(param)
@@ -74,7 +74,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImagePpmTxtLoader::ImagePpmTxtLoader(const ImageLoaderParam& param)
             : Avx2::ImagePpmTxtLoader(param)
@@ -96,7 +96,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImagePpmBinLoader::ImagePpmBinLoader(const ImageLoaderParam& param)
             : Avx2::ImagePpmBinLoader(param)
@@ -118,7 +118,32 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        ImageBmpLoader::ImageBmpLoader(const ImageLoaderParam& param)
+            : Avx2::ImageBmpLoader(param)
+        {
+        }
+
+        void ImageBmpLoader::SetConverters()
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8: _toAny = (_bpp == 32 ? Avx512bw::BgraToGray : Avx512bw::BgrToGray); break;
+            case SimdPixelFormatBgr24: _toAny = (_bpp == 32 ? (ToAnyPtr)Avx512bw::BgraToBgr : NULL); break;
+            case SimdPixelFormatRgb24: _toAny = (_bpp == 32 ? Avx512bw::BgraToRgb : Avx512bw::BgrToRgb); break;
+            case SimdPixelFormatBgra32: _toBgra = (_bpp == 32 ? NULL : (ToBgraPtr)Avx512bw::BgrToBgra); break;
+            case SimdPixelFormatRgba32:
+                if (_bpp == 32)
+                    _toAny = Avx512bw::BgraToRgba;
+                else
+                    _toBgra = (ToBgraPtr)Avx512bw::RgbToBgra;
+                break;
+            default: break;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         ImageLoader* CreateImageLoader(const ImageLoaderParam& param)
         {
@@ -130,7 +155,7 @@ namespace Simd
             case SimdImageFilePpmBin: return new ImagePpmBinLoader(param);
             case SimdImageFilePng: return new Sse41::ImagePngLoader(param);
             case SimdImageFileJpeg: return new Avx2::ImageJpegLoader(param);
-            case SimdImageFileBmp: return new Base::ImageBmpLoader(param);
+            case SimdImageFileBmp: return new ImageBmpLoader(param);
             default:
                 return NULL;
             }
@@ -151,5 +176,5 @@ namespace Simd
             return NULL;
         }
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 }

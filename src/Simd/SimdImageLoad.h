@@ -296,6 +296,15 @@ namespace Simd
             ImageJpegLoader(const ImageLoaderParam& param);
         };
 
+        class ImageBmpLoader : public Base::ImageBmpLoader
+        {
+        public:
+            ImageBmpLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
         //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
@@ -349,6 +358,15 @@ namespace Simd
             virtual bool FromStream();
         };
 
+        class ImageBmpLoader : public Sse41::ImageBmpLoader
+        {
+        public:
+            ImageBmpLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
         //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
@@ -394,6 +412,15 @@ namespace Simd
             virtual void SetConverters();
         };
 
+        class ImageBmpLoader : public Avx2::ImageBmpLoader
+        {
+        public:
+            ImageBmpLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
         //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
@@ -434,6 +461,15 @@ namespace Simd
         {
         public:
             ImagePpmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImageBmpLoader : public Base::ImageBmpLoader
+        {
+        public:
+            ImageBmpLoader(const ImageLoaderParam& param);
 
         protected:
             virtual void SetConverters();
