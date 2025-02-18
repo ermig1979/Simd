@@ -289,7 +289,7 @@ namespace Test
 #endif
 #else
         {
-            Param p(Shp(1, 68, 56, 56), Cnv(aHs, 1, 1, 84), Cnv(aId, 5, 2), Cnv(aHs, 1, 1, 100), f, f32, f32);
+            Param p(Shp(1, 68, 56, 56), Cnv(aHs, 1, 1, 84), Cnv(aId, 5, 2), Cnv(aHs, 1, 1, 100), f, f32, b16);
             p.conv[1].padX = 2; p.conv[1].padY = 2;
             Param::SetDst(p.conv + 1); Param::SetDst(p.conv + 2);
             result = result && SynetMergedConvolution16bForwardAutoTest(eps, p, f1, f2);

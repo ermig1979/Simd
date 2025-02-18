@@ -356,6 +356,12 @@ namespace Simd
             virtual void Init();
         };
 
+        class ImageBmpSaver : public Sse41::ImageBmpSaver
+        {
+        public:
+            ImageBmpSaver(const ImageSaverParam& param);
+        };
+
         //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
@@ -408,6 +414,12 @@ namespace Simd
             virtual void Init();
         };
 
+        class ImageBmpSaver : public Avx2::ImageBmpSaver
+        {
+        public:
+            ImageBmpSaver(const ImageSaverParam& param);
+        };
+
         //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
@@ -458,6 +470,12 @@ namespace Simd
 
         protected:
             virtual void Init();
+        };
+
+        class ImageBmpSaver : public Base::ImageBmpSaver
+        {
+        public:
+            ImageBmpSaver(const ImageSaverParam& param);
         };
 
         //-------------------------------------------------------------------------------------------------

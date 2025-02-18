@@ -45,7 +45,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImagePgmBinSaver::ImagePgmBinSaver(const ImageSaverParam& param)
             : Avx2::ImagePgmBinSaver(param)
@@ -60,7 +60,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImagePpmTxtSaver::ImagePpmTxtSaver(const ImageSaverParam& param)
             : Avx2::ImagePpmTxtSaver(param)
@@ -75,7 +75,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImagePpmBinSaver::ImagePpmBinSaver(const ImageSaverParam& param)
             : Avx2::ImagePpmBinSaver(param)
@@ -90,7 +90,21 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        ImageBmpSaver::ImageBmpSaver(const ImageSaverParam& param)
+            : Avx2::ImageBmpSaver(param)
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8: _convert = Avx512bw::GrayToBgr; break;
+            case SimdPixelFormatRgb24: _convert = Avx512bw::BgrToRgb; break;
+            case SimdPixelFormatRgba32: _convert = Avx512bw::BgraToRgba; break;
+            default: break;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         ImageSaver* CreateImageSaver(const ImageSaverParam& param)
         {
@@ -102,7 +116,7 @@ namespace Simd
             case SimdImageFilePpmBin: return new ImagePpmBinSaver(param);
             case SimdImageFilePng: return new ImagePngSaver(param);
             case SimdImageFileJpeg: return new ImageJpegSaver(param);
-            case SimdImageFileBmp: return new Sse41::ImageBmpSaver(param);
+            case SimdImageFileBmp: return new ImageBmpSaver(param);
             default:
                 return NULL;
             }
@@ -123,5 +137,5 @@ namespace Simd
             return NULL;
         }
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 }
