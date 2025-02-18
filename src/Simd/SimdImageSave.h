@@ -240,12 +240,11 @@ namespace Simd
             virtual bool ToStream(const uint8_t* src, size_t stride);
 
         protected:
-            bool WriteHeader();
+            void WriteHeader();
 
             typedef void (*ConvertPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
             ConvertPtr _convert;
-            Array8u _buffer;
-            size_t _block, _size, _pixel;
+            size_t _pixel, _size, _pad;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -297,6 +296,12 @@ namespace Simd
 
         protected:
             virtual void Init();
+        };
+
+        class ImageBmpSaver : public Base::ImageBmpSaver
+        {
+        public:
+            ImageBmpSaver(const ImageSaverParam& param);
         };
 
         //-------------------------------------------------------------------------------------------------

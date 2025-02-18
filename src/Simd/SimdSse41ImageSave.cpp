@@ -49,7 +49,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImagePgmBinSaver::ImagePgmBinSaver(const ImageSaverParam& param)
             : Base::ImagePgmBinSaver(param)
@@ -67,7 +67,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImagePpmTxtSaver::ImagePpmTxtSaver(const ImageSaverParam& param)
             : Base::ImagePpmTxtSaver(param)
@@ -85,7 +85,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         ImagePpmBinSaver::ImagePpmBinSaver(const ImageSaverParam& param)
             : Base::ImagePpmBinSaver(param)
@@ -103,7 +103,21 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        ImageBmpSaver::ImageBmpSaver(const ImageSaverParam& param)
+            : Base::ImageBmpSaver(param)
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8: _convert = Sse41::GrayToBgr; break;
+            case SimdPixelFormatRgb24: _convert = Sse41::BgrToRgb; break;
+            case SimdPixelFormatRgba32: _convert = Sse41::BgraToRgba; break;
+            default: break;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         ImageSaver* CreateImageSaver(const ImageSaverParam& param)
         {
@@ -115,7 +129,7 @@ namespace Simd
             case SimdImageFilePpmBin: return new ImagePpmBinSaver(param);
             case SimdImageFilePng: return new ImagePngSaver(param);
             case SimdImageFileJpeg: return new ImageJpegSaver(param);
-            case SimdImageFileBmp: return new Base::ImageBmpSaver(param);
+            case SimdImageFileBmp: return new ImageBmpSaver(param);
             default:
                 return NULL;
             }
