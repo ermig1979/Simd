@@ -132,6 +132,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a620e822b9a8df1f60730f4f952802ae9"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a620e822b9a8df1f60730f4f952802ae9">BgrToGray</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:a620e822b9a8df1f60730f4f952802ae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to 8-bit gray image.  <a href="class_simd_1_1_lib.html#a620e822b9a8df1f60730f4f952802ae9">More...</a><br /></td></tr>
 <tr class="separator:a620e822b9a8df1f60730f4f952802ae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1db5fe21ecce4bf22e4775f22cd82f9f"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a1db5fe21ecce4bf22e4775f22cd82f9f">BgrToLab</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:a1db5fe21ecce4bf22e4775f22cd82f9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to 24-bit LAB image.  <a href="class_simd_1_1_lib.html#a1db5fe21ecce4bf22e4775f22cd82f9f">More...</a><br /></td></tr>
+<tr class="separator:a1db5fe21ecce4bf22e4775f22cd82f9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f9eb68205e3674ac703574ade0c7baf"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a9f9eb68205e3674ac703574ade0c7baf">BgrToRgb</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:a9f9eb68205e3674ac703574ade0c7baf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to 24-bit RGB image and back.  <a href="class_simd_1_1_lib.html#a9f9eb68205e3674ac703574ade0c7baf">More...</a><br /></td></tr>
 <tr class="separator:a9f9eb68205e3674ac703574ade0c7baf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1244,6 +1247,71 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
     <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1db5fe21ecce4bf22e4775f22cd82f9f" name="a1db5fe21ecce4bf22e4775f22cd82f9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1db5fe21ecce4bf22e4775f22cd82f9f">&#9670;&#160;</a></span>BgrToLab()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def BgrToLab </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 24-bit BGR image to 24-bit LAB image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 24-bit BGR image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 24-bit LAB (CIELAB) image. </td></tr>
     <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
   </table>
   </dd>

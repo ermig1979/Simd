@@ -89,6 +89,8 @@ class FrameFormat(enum.Enum) :
 	Rgb24 = 6
 	## One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.
 	Rgba32 = 7
+	## One plane 24-bit (3 8-bit channels) LAB (CIELAB) pixel format.
+	Lab24 = 8
 	
 	## Gets number of planes for current frame format.
 	# @return number of planes.	
@@ -101,6 +103,7 @@ class FrameFormat(enum.Enum) :
 		elif self == Simd.FrameFormat.Gray8: return 1
 		elif self == Simd.FrameFormat.Rgb24: return 1
 		elif self == Simd.FrameFormat.Rgba32: return 1
+		elif self == Simd.FrameFormat.Lab24: return 1
 		else : return 0
 
 	
@@ -121,6 +124,8 @@ class ImageFile(enum.Enum) :
     Png = 5
     ## A JPEG (Joint Photographic Experts Group) image file format.
     Jpeg = 6
+    ## A BMP (BitMap Picture) image file format.
+    Bmp = 7
 
 ## @ingroup python
 # Describes pixel format type. It is used in Simd.Image.
@@ -165,6 +170,8 @@ class PixelFormat(enum.Enum) :
 	Uyvy16 = 18
     ## A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format.
 	Argb32 = 19
+	## A 24-bit (3 8-bit channels) LAB (CIELAB) pixel format.
+	Lab24 = 20
 	
 	## Gets pixel size in bytes.
 	# @return pixel size in bytes.	
@@ -189,6 +196,7 @@ class PixelFormat(enum.Enum) :
 		elif self == Simd.PixelFormat.Rgba32 : return 4
 		elif self == Simd.PixelFormat.Uyvy16 : return 2
 		elif self == Simd.PixelFormat.Argb32 : return 4
+		elif self == Simd.PixelFormat.Lab24 : return 3
 		else : return 0
 		
 	## Gets channel size in bytes.
@@ -214,6 +222,7 @@ class PixelFormat(enum.Enum) :
 		elif self == Simd.PixelFormat.Rgba32 : return 1
 		elif self == Simd.PixelFormat.Uyvy16 : return 1
 		elif self == Simd.PixelFormat.Argb32 : return 1
+		elif self == Simd.PixelFormat.Lab24 : return 1
 		else : return 0
 		
 	## Gets channels count.
@@ -239,6 +248,7 @@ class PixelFormat(enum.Enum) :
 		elif self == Simd.PixelFormat.Rgba32 : return 4
 		elif self == Simd.PixelFormat.Uyvy16 : return 2
 		elif self == Simd.PixelFormat.Argb32 : return 4
+		elif self == Simd.PixelFormat.Lab24 : return 3
 		else : return 0
 
 ## @ingroup python
@@ -505,6 +515,10 @@ class Lib():
 		
 		Lib.__lib.SimdBgrToGray.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdBgrToGray.restype = None
+		
+		
+		Lib.__lib.SimdBgrToLab.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdBgrToLab.restype = None
 		
 		
 		Lib.__lib.SimdBgrToRgb.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
@@ -828,6 +842,16 @@ class Lib():
     # @param dstStride - a row size of output image in bytes.
 	def BgrToGray(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
 		Lib.__lib.SimdBgrToGray(src, width, height, srcStride, dst, dstStride)
+		
+    ## Converts 24-bit BGR image to 24-bit LAB image. 
+    # @param src - a pointer to pixels data of input 24-bit BGR image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param dst - a pointer to pixels data of output 24-bit LAB (CIELAB) image.
+    # @param dstStride - a row size of output image in bytes.
+	def BgrToLab(src : ctypes.c_void_p, srcStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdBgrToLab(src, srcStride, width, height, dst, dstStride)
 		
     ## Converts 24-bit BGR image to 24-bit RGB image and back. 
     # @param src - a pointer to pixels data of input 24-bit BGR (or 24-bit RGB) image.
@@ -1505,6 +1529,10 @@ class ImageFrame():
 			self.__planes[0].Recreate(Simd.PixelFormat.Rgba32, width, height)
 			if self.__yuvType != YuvType.Unknown :
 				self.__yuvType = YuvType.Unknown
+		elif format == Simd.FrameFormat.Lab24 :
+			self.__planes[0].Recreate(Simd.PixelFormat.Lab24, width, height)
+			if self.__yuvType != YuvType.Unknown :
+				self.__yuvType = YuvType.Unknown
 		else :
 			raise Exception("Unsupported {0} frame format!".format(format))
 	
@@ -1582,7 +1610,7 @@ class ImageFrame():
 			if df == FrameFormat.Yuv420p :
 				sp[0].Copy(dp[0])
 				Lib.DeinterleaveUv(sp[1].Data(), sp[1].Stride(), sp[1].Width(), sp[1].Height(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride())
-			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Rgb24  or df == FrameFormat.Rgba32 :
+			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Rgb24 or df == FrameFormat.Rgba32 or df == FrameFormat.Lab24 :
 				u = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
 				v = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
 				Lib.DeinterleaveUv(sp[1].Data(), sp[1].Stride(), sp[1].Width(), sp[1].Height(), u.Data(), u.Stride(), v.Data(), v.Stride())
@@ -1596,6 +1624,10 @@ class ImageFrame():
 					bgra = Image(PixelFormat.Bgra32, self.Width(), self.Height())
 					Lib.Yuv420pToBgra(sp[0].Data(), sp[0].Stride(), u.Data(), u.Stride(), v.Data(), v.Stride(), self.Width(), self.Height(), bgra.Data(), bgra.Stride(), alpha, sy)
 					bgra.Convert(dp[0])
+				elif df == FrameFormat.Lab24 :
+					bgr = Image(PixelFormat.Bgr24, self.Width(), self.Height())
+					Lib.Yuv420pToBgr(sp[0].Data(), sp[0].Stride(), u.Data(), u.Stride(), v.Data(), v.Stride(), self.Width(), self.Height(), bgr.Data(), bgr.Stride(), sy)
+					Lib.BgrToLab(bgr.Data(), bgr.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 				else :
 					raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 			elif df == FrameFormat.Gray8 :
@@ -1609,7 +1641,7 @@ class ImageFrame():
 			if df == FrameFormat.Nv12 :
 				sp[0].Copy(dp[0])
 				Lib.InterleaveUv(sp[1].Data(), sp[1].Stride(), sp[2].Data(), sp[2].Stride(), sp[1].Width(), sp[1].Height(), dp[1].Data(), dp[1].Stride())
-			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Rgb24  or df == FrameFormat.Rgba32 :
+			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Rgb24  or df == FrameFormat.Rgba32 or df == FrameFormat.Lab24 :
 				if df == FrameFormat.Bgra32 :
 					Lib.Yuv420pToBgra(sp[0].Data(), sp[0].Stride(), sp[1].Data(), sp[1].Stride(), sp[2].Data(), sp[2].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), alpha, sy)
 				elif df == FrameFormat.Bgr24 :
@@ -1620,6 +1652,10 @@ class ImageFrame():
 					bgra = Image(PixelFormat.Bgra32, self.Width(), self.Height())
 					Lib.Yuv420pToBgra(sp[0].Data(), sp[0].Stride(), sp[1].Data(), sp[1].Stride(), sp[2].Data(), sp[2].Stride(), self.Width(), self.Height(), bgra.Data(), bgra.Stride(), alpha, sy)
 					bgra.Convert(dp[0])
+				elif df == FrameFormat.Lab24 :
+					bgr = Image(PixelFormat.Bgr24, self.Width(), self.Height())
+					Lib.Yuv420pToBgr(sp[0].Data(), sp[0].Stride(), sp[1].Data(), sp[1].Stride(), sp[2].Data(), sp[2].Stride(), self.Width(), self.Height(), bgr.Data(), bgr.Stride(), sy)
+					Lib.BgrToLab(bgr.Data(), bgr.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 				else :
 					raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 			elif df == FrameFormat.Gray8 :
@@ -1639,6 +1675,9 @@ class ImageFrame():
 				Lib.BgraToYuv420p(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride(), dy)
 			elif df == FrameFormat.Bgr24 or df == FrameFormat.Gray8 or df == FrameFormat.Rgb24 or df == FrameFormat.Rgba32:
 				sp[0].Convert(dp[0], alpha)
+			elif df == FrameFormat.Lab24 :
+				bgr = sp[0].Converted(PixelFormat.Bgr24);
+				Lib.BgrToLab(bgr.Data(), bgr.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		elif sf == FrameFormat.Bgr24 :
@@ -1651,6 +1690,8 @@ class ImageFrame():
 				Lib.BgrToYuv420p(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride(), dy)
 			elif df == FrameFormat.Bgra32 or df == FrameFormat.Gray8 or df == FrameFormat.Rgb24 or df == FrameFormat.Rgba32:
 				sp[0].Convert(dp[0], alpha)
+			elif df == FrameFormat.Lab24 :
+				Lib.BgrToLab(sp[0].Data(), sp[0].Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		elif sf == FrameFormat.Gray8 :
@@ -1669,6 +1710,9 @@ class ImageFrame():
 				dp[2].Fill([128])
 			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Rgb24 or df == FrameFormat.Rgba32:
 				sp[0].Convert(dp[0], alpha)
+			elif df == FrameFormat.Lab24 :
+				bgr = sp[0].Converted(PixelFormat.Bgr24);
+				Lib.BgrToLab(bgr.Data(), bgr.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		elif sf == FrameFormat.Rgb24 :
@@ -1683,6 +1727,9 @@ class ImageFrame():
 				Lib.BgrToYuv420p(bgr.Data(), bgr.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride(), dy)
 			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Gray8 or df == FrameFormat.Rgba32:
 				sp[0].Convert(dp[0], alpha)
+			elif df == FrameFormat.Lab24 :
+				bgr = sp[0].Converted(PixelFormat.Bgr24);
+				Lib.BgrToLab(bgr.Data(), bgr.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		elif sf == FrameFormat.Rgba32 :
@@ -1697,6 +1744,9 @@ class ImageFrame():
 				Lib.BgraToYuv420p(bgra.Data(), bgra.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride(), dy)
 			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Gray8 or df == FrameFormat.Rgb24:
 				sp[0].Convert(dp[0], alpha)
+			elif df == FrameFormat.Lab24 :
+				bgr = sp[0].Converted(PixelFormat.Bgr24);
+				Lib.BgrToLab(bgr.Data(), bgr.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride())
 			else :
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		else :
@@ -1726,6 +1776,7 @@ def PixelFormatToResizeChannel(src) -> ResizeChannel :
 	elif src == Simd.PixelFormat.Rgb24 : return ResizeChannel.Byte
 	elif src == Simd.PixelFormat.Rgba32 : return ResizeChannel.Byte
 	elif src == Simd.PixelFormat.Argb32 : return ResizeChannel.Byte
+	elif src == Simd.PixelFormat.Lab24 : return ResizeChannel.Byte
 	else : raise Exception("Can't {0} convert to Simd.ResizeChannel !".format(src))
 
 ###################################################################################################
