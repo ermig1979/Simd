@@ -382,49 +382,63 @@ namespace Simd
             __m512 s[3][H + 2], d[H];
             __mmask16 mask0 = yB == 0 ? 0 : tailS;
             __mmask16 mask2 = yB + H == dstH ? 0 : tailS;
-            ZeroSrc<H, 0>(s);
-            LoadSrc<T, H, 1>(src0, src1, src2, src3, src4, src5, 0, mask0, tailS, mask2, s);
-            for (size_t dx = 0, offs = sX; dx < dstW; dx += 1, offs += sX)
+            if (tailS)
             {
-                if (H > 0) d[0] = _mm512_setzero_ps();
-                if (H > 1) d[1] = _mm512_setzero_ps();
-                if (H > 2) d[2] = _mm512_setzero_ps();
-                if (H > 3) d[3] = _mm512_setzero_ps();
-                switch (dx % 3)
+                ZeroSrc<H, 0>(s);
+                LoadSrc<T, H, 1>(src0, src1, src2, src3, src4, src5, 0, mask0, tailS, mask2, s);
+                for (size_t dx = 0, offs = sX; dx < dstW; dx += 1, offs += sX)
                 {
-                case 0:
-                {
-                    if (dx == endW)
-                        ZeroSrc<H, 2>(s);
-                    else
-                        LoadSrc<T, H, 2>(src0, src1, src2, src3, src4, src5, offs, mask0, tailS, mask2, s);
-                    Convolution3x3<H, 0, 1, 2>(s, weight, d);
+                    if (H > 0) d[0] = _mm512_setzero_ps();
+                    if (H > 1) d[1] = _mm512_setzero_ps();
+                    if (H > 2) d[2] = _mm512_setzero_ps();
+                    if (H > 3) d[3] = _mm512_setzero_ps();
+                    switch (dx % 3)
+                    {
+                    case 0:
+                    {
+                        if (dx == endW)
+                            ZeroSrc<H, 2>(s);
+                        else
+                            LoadSrc<T, H, 2>(src0, src1, src2, src3, src4, src5, offs, mask0, tailS, mask2, s);
+                        Convolution3x3<H, 0, 1, 2>(s, weight, d);
+                        break;
+                    }
+                    case 1:
+                    {
+                        if (dx == endW)
+                            ZeroSrc<H, 0>(s);
+                        else
+                            LoadSrc<T, H, 0>(src0, src1, src2, src3, src4, src5, offs, mask0, tailS, mask2, s);
+                        Convolution3x3<H, 1, 2, 0>(s, weight, d);
+                        break;
+                    }
+                    case 2:
+                    {
+                        if (dx == endW)
+                            ZeroSrc<H, 1>(s);
+                        else
+                            LoadSrc<T, H, 1>(src0, src1, src2, src3, src4, src5, offs, mask0, tailS, mask2, s);
+                        Convolution3x3<H, 2, 0, 1>(s, weight, d);
+                    }
                     break;
+                    }
+                    if (H > 0) Save1<term, type>(dst + 0 * dY, 0, d[0], bias, params, tailD);
+                    if (H > 1) Save1<term, type>(dst + 1 * dY, 0, d[1], bias, params, tailD);
+                    if (H > 2) Save1<term, type>(dst + 2 * dY, 0, d[2], bias, params, tailD);
+                    if (H > 3) Save1<term, type>(dst + 3 * dY, 0, d[3], bias, params, tailD);
+                    dst += dX;
                 }
-                case 1:
+            }
+            else
+            {
+                for (size_t dx = 0, offs = sX; dx < dstW; dx += 1, offs += sX)
                 {
-                    if (dx == endW)
-                        ZeroSrc<H, 0>(s);
-                    else
-                        LoadSrc<T, H, 0>(src0, src1, src2, src3, src4, src5, offs, mask0, tailS, mask2, s);
-                    Convolution3x3<H, 1, 2, 0>(s, weight, d);
-                    break;
+                    if (H > 0) Save1<term, type>(dst + 0 * dY, 0, _mm512_setzero_ps(), bias, params, tailD);
+                    if (H > 1) Save1<term, type>(dst + 1 * dY, 0, _mm512_setzero_ps(), bias, params, tailD);
+                    if (H > 2) Save1<term, type>(dst + 2 * dY, 0, _mm512_setzero_ps(), bias, params, tailD);
+                    if (H > 3) Save1<term, type>(dst + 3 * dY, 0, _mm512_setzero_ps(), bias, params, tailD);
+                    dst += dX;
                 }
-                case 2:
-                {
-                    if (dx == endW)
-                        ZeroSrc<H, 1>(s);
-                    else
-                        LoadSrc<T, H, 1>(src0, src1, src2, src3, src4, src5, offs, mask0, tailS, mask2, s);
-                    Convolution3x3<H, 2, 0, 1>(s, weight, d);
-                }
-                    break;
-                }
-                if (H > 0) Save1<term, type>(dst + 0 * dY, 0, d[0], bias, params, tailD);
-                if (H > 1) Save1<term, type>(dst + 1 * dY, 0, d[1], bias, params, tailD);
-                if (H > 2) Save1<term, type>(dst + 2 * dY, 0, d[2], bias, params, tailD);
-                if (H > 3) Save1<term, type>(dst + 3 * dY, 0, d[3], bias, params, tailD);
-                dst += dX;
             }
         }
 
@@ -736,6 +750,7 @@ namespace Simd
                 depthwise = DepthwiseConvolution3x3<T, term, type>;
                 return true;
             }
+           
             else
                 return false;
         }
