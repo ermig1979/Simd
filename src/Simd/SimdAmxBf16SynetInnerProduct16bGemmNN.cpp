@@ -69,34 +69,16 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term16bType term, bool loadConf> void InnerProduct16bGemmNN_2x2(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
+        template<Term16bType term, int cfg> void InnerProduct16bGemmNN_2x2(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a,
             size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0, int post, __m512* bias, uint8_t* dst)
         {
             int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
             int strideA = dA * 2, strideB = 64, strideC = dC * 4;
             const uint16_t *A1 = A0 + dA * 16, *B1 = B0 + a.bK * 16;
             float* C1 = C0 + 16 * dC;
-            if (loadConf)
-            {
-                TileConf conf;
-                conf.rows[0] = 16;
-                conf.rows[1] = 16;
-                conf.rows[2] = uint8_t(M - 16);
-                conf.rows[3] = uint8_t(M - 16);
-                conf.rows[4] = 16;
-                conf.rows[5] = uint8_t(M - 16);
-                conf.rows[6] = 16;
-                conf.rows[7] = 16;
-                conf.colsb[0] = 64;
-                conf.colsb[1] = uint16_t(N - 16) * 4;
-                conf.colsb[2] = 64;
-                conf.colsb[3] = uint16_t(N - 16) * 4;
-                conf.colsb[4] = 64;
-                conf.colsb[5] = 64;
-                conf.colsb[6] = 64;
-                conf.colsb[7] = uint16_t(N - 16) * 4;
-                _tile_loadconfig(&conf);
-            }
+
+            if (cfg)
+                SetTileConf2x2(M, N);
             if (update)
             {
                 _tile_stream_loadd(0, C0 + 0, strideC);
@@ -111,17 +93,29 @@ namespace Simd
                 _tile_zero(2);
                 _tile_zero(3);
             }
-            for (size_t k = 0; k < K; k += 32)
+
+            size_t K32 = K - 32, k = 0;
+            _tile_stream_loadd(4, A0, strideA);
+            _tile_loadd(6, B0, strideB);
+            for (; k < K32;)
             {
-                _tile_stream_loadd(4, A0 + k, strideA);
-                _tile_loadd(6, B0 + k * 16, strideB);
-                _tile_dpbf16ps(0, 4, 6);
                 _tile_loadd(7, B1 + k * 16, strideB);
-                _tile_dpbf16ps(1, 4, 7);
                 _tile_stream_loadd(5, A1 + k, strideA);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_dpbf16ps(1, 4, 7);
+                k += 32;
+                _tile_stream_loadd(4, A0 + k, strideA);
                 _tile_dpbf16ps(2, 5, 6);
+                _tile_loadd(6, B0 + k * 16, strideB);
                 _tile_dpbf16ps(3, 5, 7);
             }
+            _tile_loadd(7, B1 + k * 16, strideB);
+            _tile_stream_loadd(5, A1 + k, strideA);
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_dpbf16ps(1, 4, 7);
+            _tile_dpbf16ps(2, 5, 6);
+            _tile_dpbf16ps(3, 5, 7);
+
             _tile_stored(0, C0 + 0, strideC);
             _tile_stored(1, C0 + F, strideC);
             _tile_stored(2, C1 + 0, strideC);
@@ -144,7 +138,7 @@ namespace Simd
             }
         }
 
-        template<Term16bType term> void InnerProduct16bGemmNN_2x1(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
+        template<Term16bType term, int cfg> void InnerProduct16bGemmNN_2x1(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a,
             size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0, int post, __m512* bias, uint8_t* dst)
         {
             int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
@@ -152,19 +146,8 @@ namespace Simd
             const uint16_t* A1 = A0 + dA * 16;
             float* C1 = C0 + 16 * dC;
 
-            TileConf conf;
-            conf.rows[0] = 16;
-            conf.rows[2] = uint8_t(M - 16);
-            conf.rows[4] = 16;
-            conf.rows[5] = uint8_t(M - 16);
-            conf.rows[6] = 16;
-            conf.colsb[0] = uint16_t(N * 4);
-            conf.colsb[2] = uint16_t(N * 4);
-            conf.colsb[4] = 64;
-            conf.colsb[5] = 64;
-            conf.colsb[6] = uint16_t(N * 4);
-            _tile_loadconfig(&conf);
-
+            if (cfg)
+                SetTileConf2x1(M, N);
             if (update)
             {
                 _tile_stream_loadd(0, C0 + 0, strideC);
@@ -201,26 +184,15 @@ namespace Simd
             }
         }
 
-        template<Term16bType term> void InnerProduct16bGemmNN_1x2(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
+        template<Term16bType term, int cfg> void InnerProduct16bGemmNN_1x2(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a,
             size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0, int post, __m512* bias, uint8_t* dst)
         {
             int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
             int strideA = dA * 2, strideB = 64, strideC = dC * 4;
             const uint16_t* B1 = B0 + a.bK * 16;
 
-            TileConf conf;
-            conf.rows[0] = uint8_t(M);
-            conf.rows[1] = uint8_t(M);
-            conf.rows[4] = uint8_t(M);
-            conf.rows[6] = 16;
-            conf.rows[7] = 16;
-            conf.colsb[0] = 64;
-            conf.colsb[1] = uint16_t(N - 16) * 4;
-            conf.colsb[4] = 64;
-            conf.colsb[6] = 64;
-            conf.colsb[7] = uint16_t(N - 16) * 4;
-            _tile_loadconfig(&conf);
-
+            if (cfg)
+                SetTileConf1x2(M, N);
             if (update)
             {
                 _tile_stream_loadd(0, C0 + 0, strideC);
@@ -257,21 +229,14 @@ namespace Simd
             }
         }
 
-        template<Term16bType term> void InnerProduct16bGemmNN_1x1(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, 
+        template<Term16bType term, int cfg> void InnerProduct16bGemmNN_1x1(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a,
             size_t M, size_t N, size_t K, int update, const uint16_t* B0, float* C0, int post, __m512* bias, uint8_t* dst)
         {
             int dC = (int)a.cN, dA = (int)a.aK, dD = int(p.N * a.eC);
             int strideA = dA * 2, strideB = 64, strideC = dC * 4;
 
-            TileConf conf;
-            conf.rows[0] = uint8_t(M);
-            conf.rows[4] = uint8_t(M);
-            conf.rows[6] = 16;
-            conf.colsb[0] = uint16_t(N * 4);
-            conf.colsb[4] = 64;
-            conf.colsb[6] = uint16_t(N * 4);
-            _tile_loadconfig(&conf);
-
+            if (cfg)
+                SetTileConf1x1(M, N);
             if (update)
             {
                 _tile_stream_loadd(0, C0 + 0, strideC);
@@ -309,26 +274,36 @@ namespace Simd
         {
             size_t m = 32, m1 = M, mm = AlignLo(m1, m), t = m1 - mm;
             size_t dA = a.aK, dB = a.bK * DF, dC = a.cN, dD = p.N * a.eC;
-            GemmNN_Ptr tail_2 = t > 16 ? InnerProduct16bGemmNN_2x2<term, true> : InnerProduct16bGemmNN_1x2<term>;
-            GemmNN_Ptr tail_1 = t > 16 ? InnerProduct16bGemmNN_2x1<term> : InnerProduct16bGemmNN_1x1<term>;
+            GemmNN_Ptr tail_2 = t > 16 ? InnerProduct16bGemmNN_2x2<term, 1> : InnerProduct16bGemmNN_1x2<term, 1>;
+            GemmNN_Ptr tail_1 = t > 16 ? InnerProduct16bGemmNN_2x1<term, 1> : InnerProduct16bGemmNN_1x1<term, 1>;
             __m512 _bias[2];
+            SetTileConfFull();
             for (size_t j = 0; j < N; j += DF)
             {
                 _bias[0] = _mm512_loadu_ps(bias + j + 0);
                 _bias[1] = _mm512_loadu_ps(bias + j + F);
                 size_t dN = Simd::Min(DF, N - j);
                 size_t i = 0;
-                if (dN > F)
+                if (dN == DF)
+                {
+                    if (t)
+                        SetTileConfFull();
+                    for (; i < mm; i += m)
+                        InnerProduct16bGemmNN_2x2<term, 0>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
+                    if (t)
+                        tail_2(A + i * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
+                }
+                else if (dN > F)
                 {
                     for (; i < mm; i += m)
-                        InnerProduct16bGemmNN_2x2<term, true>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
+                        InnerProduct16bGemmNN_2x2<term, 1>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                     if (t)
                         tail_2(A + i * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                 }
                 else
                 {
                     for (; i < mm; i += m)
-                        InnerProduct16bGemmNN_2x1<term>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
+                        InnerProduct16bGemmNN_2x1<term, 1>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                     if (t)
                         tail_1(A + i * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                 }
