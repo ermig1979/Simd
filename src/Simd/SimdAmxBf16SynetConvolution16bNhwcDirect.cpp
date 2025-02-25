@@ -159,10 +159,10 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convolution16bNhwcDirect_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcDirect_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            int kX = (int)p.kernelX, kY = (int)p.kernelY, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
+            int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
             const uint16_t* src1 = src0 + 16 * dX;
             float* dst1 = dst0 + 16 * dD;
@@ -181,52 +181,18 @@ namespace Simd
                 _tile_stream_loadd(2, dst1 + 0, strideD);
                 _tile_stream_loadd(3, dst1 + F, strideD);
             }
-#if 0
-            for (size_t c = 0, offsS = 0; c < srcC; c += dX, offsS += dC)
-            {
-                for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
-                {
-                    for (size_t offsX = offsY, endX = offsY + kX * dX; offsX < endX; offsX += dX)
-                    {
-                        _tile_loadd(6, weight0, strideW);
-                        _tile_stream_loadd(4, src0 + offsX, strideS);
-                        _tile_dpbf16ps(0, 4, 6);
-                        _tile_loadd(7, weight1, strideW);
-                        _tile_dpbf16ps(1, 4, 7);
-                        _tile_stream_loadd(5, src1 + offsX, strideS);
-                        _tile_dpbf16ps(2, 5, 6);
-                        _tile_dpbf16ps(3, 5, 7);
-                        weight0 += dW;
-                        weight1 += dW;
-                    }
-                }
-            }
-#elif 0
-            for (size_t i = 0, n = (srcC + 31) / 32 * kX * kY; i < n; ++i)
-            {
-                int offs = a.offs[i];
-                _tile_loadd(6, weight0, strideW);
-                _tile_stream_loadd(4, src0 + offs, strideS);
-                _tile_dpbf16ps(0, 4, 6);
-                _tile_loadd(7, weight1, strideW);
-                _tile_dpbf16ps(1, 4, 7);
-                _tile_stream_loadd(5, src1 + offs, strideS);
-                _tile_dpbf16ps(2, 5, 6);
-                _tile_dpbf16ps(3, 5, 7);
-                weight0 += dW;
-                weight1 += dW;                
-            }
-#else
-            int n1 = (int)(srcC + 31) / 32 * kX * kY - 1, *offs = a.offs.data;
+
+            int n1 = (int)srcCn - 1, *offs = a.offs.data;
             _tile_stream_loadd(4, src0, strideS);
             _tile_loadd(6, weight0, strideW);
-            for (int i = 0; i < n1; ++i)
+            for (int i = 0, o = 0; i < n1; ++i)
             {
-                _tile_stream_loadd(5, src1 + offs[i], strideS);
+                _tile_stream_loadd(5, src1 + o, strideS);
                 _tile_loadd(7, weight1, strideW);                        
                 _tile_dpbf16ps(0, 4, 6);
                 _tile_dpbf16ps(1, 4, 7);
-                _tile_stream_loadd(4, src0 + offs[i + 1], strideS);
+                o = offs[i + 1];
+                _tile_stream_loadd(4, src0 + o, strideS);
                 _tile_dpbf16ps(2, 5, 6);
                 weight0 += dW;
                 _tile_loadd(6, weight0, strideW);
@@ -239,7 +205,7 @@ namespace Simd
             _tile_dpbf16ps(1, 4, 7);
             _tile_dpbf16ps(2, 5, 6);
             _tile_dpbf16ps(3, 5, 7);
-#endif
+
             _tile_stored(0, dst0 + 0, strideD);
             _tile_stored(1, dst0 + F, strideD);
             _tile_stored(2, dst1 + 0, strideD);
@@ -250,10 +216,10 @@ namespace Simd
             TileMoveToMemory(dst1 + F, dD);
         }
 
-        static void Convolution16bNhwcDirect_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcDirect_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            int kX = (int)p.kernelX, kY = (int)p.kernelY, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
+            int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* src1 = src0 + 16 * dX;
             float* dst1 = dst0 + 16 * dD;
 
@@ -267,31 +233,34 @@ namespace Simd
                 _tile_stream_loadd(0, dst0 + 0, strideD);
                 _tile_stream_loadd(2, dst1 + 0, strideD);
             }
-            for (size_t c = 0, offsS = 0; c < srcC; c += dX, offsS += dC)
+
+            int n1 = (int)srcCn - 1, * offs = a.offs.data;
+            _tile_stream_loadd(4, src0, strideS);
+            for (int i = 0, o = 0; i < n1; ++i)
             {
-                for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
-                {
-                    for (size_t x = 0, offsX = offsY; x < kX; x += 1, offsX += dX)
-                    {
-                        _tile_stream_loadd(4, src0 + offsX, strideS);
-                        _tile_loadd(6, weight0, strideW);
-                        _tile_dpbf16ps(0, 4, 6);
-                        _tile_stream_loadd(5, src1 + offsX, strideS);
-                        _tile_dpbf16ps(2, 5, 6);
-                        weight0 += dW;
-                    }
-                }
+                _tile_loadd(6, weight0, strideW);
+                _tile_stream_loadd(5, src1 + o, strideS);
+                _tile_dpbf16ps(0, 4, 6);
+                o = offs[i + 1];
+                _tile_stream_loadd(4, src0 + o, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+                weight0 += dW;
             }
+            _tile_loadd(6, weight0, strideW);
+            _tile_stream_loadd(5, src1 + offs[n1], strideS);
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_dpbf16ps(2, 5, 6);
+
             _tile_stored(0, dst0 + 0, strideD);
             _tile_stored(2, dst1 + 0, strideD);
             TileMoveToMemory(dst0 + 0, dD);
             TileMoveToMemory(dst1 + 0, dD);
         }
 
-        static void Convolution16bNhwcDirect_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcDirect_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            int kX = (int)p.kernelX, kY = (int)p.kernelY, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
+            int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
 
             if (zero)
@@ -304,32 +273,34 @@ namespace Simd
                 _tile_stream_loadd(0, dst0 + 0, strideD);
                 _tile_stream_loadd(1, dst0 + F, strideD);
             }
-            for (size_t c = 0, offsS = 0; c < srcC; c += dX, offsS += dC)
+
+            int n1 = (int)srcCn - 1, * offs = a.offs.data;
+            _tile_loadd(6, weight0, strideW);
+            for (int i = 0, o = 0; i < n1; ++i)
             {
-                for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
-                {
-                    for (size_t x = 0, offsX = offsY; x < kX; x += 1, offsX += dX)
-                    {
-                        _tile_stream_loadd(4, src0 + offsX, strideS);
-                        _tile_loadd(6, weight0, strideW);
-                        _tile_dpbf16ps(0, 4, 6);
-                        _tile_loadd(7, weight1, strideW);
-                        _tile_dpbf16ps(1, 4, 7);
-                        weight0 += dW;
-                        weight1 += dW;
-                    }
-                }
+                _tile_stream_loadd(4, src0 + offs[i], strideS);
+                _tile_loadd(7, weight1, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                weight0 += dW;
+                _tile_loadd(6, weight0, strideW);
+                _tile_dpbf16ps(1, 4, 7);
+                weight1 += dW;
             }
+            _tile_stream_loadd(4, src0 + offs[n1], strideS);
+            _tile_loadd(7, weight1, strideW);
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_dpbf16ps(1, 4, 7);
+
             _tile_stored(0, dst0 + 0, strideD);
             _tile_stored(1, dst0 + F, strideD);
             TileMoveToMemory(dst0 + 0, dD);
             TileMoveToMemory(dst0 + F, dD);
         }
 
-        static void Convolution16bNhwcDirect_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcDirect_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            int kX = (int)p.kernelX, kY = (int)p.kernelY, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
+            int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
 
             if (zero)
             {
@@ -339,19 +310,16 @@ namespace Simd
             {
                 _tile_stream_loadd(0, dst0 + 0, strideD);
             }
-            for (size_t c = 0, offsS = 0; c < srcC; c += dX, offsS += dC)
+
+            int n = (int)srcCn, * offs = a.offs.data;
+            for (int i = 0, o = 0; i < n; ++i)
             {
-                for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
-                {
-                    for (size_t x = 0, offsX = offsY; x < kX; x += 1, offsX += dX)
-                    {
-                        _tile_stream_loadd(4, src0 + offsX, strideS);
-                        _tile_loadd(6, weight0, strideW);
-                        _tile_dpbf16ps(0, 4, 6);
-                        weight0 += dW;
-                    }
-                }
+                _tile_stream_loadd(4, src0 + offs[i], strideS);
+                _tile_loadd(6, weight0, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                weight0 += dW;
             }
+
             _tile_stored(0, dst0 + 0, strideD);
             TileMoveToMemory(dst0 + 0, dD);
         }
@@ -362,7 +330,7 @@ namespace Simd
         {
             size_t n1 = dstH * a.srcW + 1 - p.kernelX, n = 32;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
-            size_t dD = a.macroD, dS = a.microC;
+            size_t dD = a.macroD, dS = a.microC, srcCn = DivHi(srcC, 32) * p.kernelX * p.kernelY;
             Convolution16bNhwcDirectPtr body_2 = Convolution16bNhwcDirect_32x32;
             Convolution16bNhwcDirectPtr tail_2 = m > 16 ? Convolution16bNhwcDirect_32x32 : Convolution16bNhwcDirect_16x32;
             Convolution16bNhwcDirectPtr body_1 = Convolution16bNhwcDirect_32x16;
@@ -376,16 +344,16 @@ namespace Simd
                 if (dC > F)
                 {
                     for (; i < nn; i += n)
-                        body_2(src + i * dS, p, a, srcC, n, zero, weight, dst + i * dD);
+                        body_2(src + i * dS, p, a, srcCn, n, zero, weight, dst + i * dD);
                     if (m)
-                        tail_2(src + i * dS, p, a, srcC, m, zero, weight, dst + i * dD);
+                        tail_2(src + i * dS, p, a, srcCn, m, zero, weight, dst + i * dD);
                 }
                 else
                 {
                     for (; i < nn; i += n)
-                        body_1(src + i * dS, p, a, srcC, n, zero, weight, dst + i * dD);
+                        body_1(src + i * dS, p, a, srcCn, n, zero, weight, dst + i * dD);
                     if (m)
-                        tail_1(src + i * dS, p, a, srcC, m, zero, weight, dst + i * dD);
+                        tail_1(src + i * dS, p, a, srcCn, m, zero, weight, dst + i * dD);
                 }
                 weight += dW;
                 dst += DF;
