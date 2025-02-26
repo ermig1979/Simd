@@ -94,7 +94,7 @@ namespace Simd
                 _tile_zero(3);
             }
 
-            size_t K32 = K - 32, k = 0;
+            int K32 = (int)K - 32, k = 0;
             _tile_stream_loadd(4, A0, strideA);
             _tile_loadd(6, B0, strideB);
             for (; k < K32;)
