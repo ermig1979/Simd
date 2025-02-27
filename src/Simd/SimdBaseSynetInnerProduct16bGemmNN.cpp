@@ -133,12 +133,16 @@ namespace Simd
             a.eA = p.typeA == SimdTensorData32f ? 4 : 2;
             a.eB = p.typeB == SimdTensorData32f ? 4 : 2;
             a.eC = p.typeC == SimdTensorData32f ? 4 : 2;
-            a.bK = p.constB ? a.aK : a.macroK;
-            a.cN = p.typeC == SimdTensorData32f || a.macroK < a.aK ? p.N : a.macroN;
 
-            _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? (a.macroN == a.aN ? a.macroM : a.aM) * a.aK : 0;
+            _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? a.aM * a.aK : 0;
             _sizeB = p.constB ? 0 : a.macroK * a.macroN;
-            _sizeC = p.typeC == SimdTensorData16b ? a.macroM * a.cN : 0;
+            if (a.microK > 2)
+                _sizeC = (p.typeC == SimdTensorData16b || a.aM != p.M) ? a.macroN * a.aM : 0;
+            else
+                _sizeC = ((p.typeC == SimdTensorData16b || a.aM != p.M) && a.macroK < a.aK) ? a.macroN * a.aM : 0;
+
+            a.bK = p.constB ? a.aK : a.macroK;
+            a.cN = _sizeC ? a.macroN : p.N;
 
             _bias.Resize(a.aN, true);
         }
@@ -176,7 +180,7 @@ namespace Simd
                         size_t macroM = Simd::Min(p.M, i + a.macroM) - i;
                         size_t offsA = (a.macroN == a.aN && _prepA) ? 0 : i * a.aK;
                         size_t offsB = p.constB ? j * a.bK + k * a.F : 0;
-                        size_t offsC = _sizeC ? 0 : i * a.cN + j;
+                        size_t offsC = _sizeC ? (a.macroK < a.aK ? i * a.cN : 0) : i * a.cN + j;
                         if (j == 0 && k == 0 && _prepA)
                             _prepA(A + i * p.K * a.eA, p, a, macroM, p.K, bufA + offsA);
                         if (i == 0 && _prepB && !p.constB)
