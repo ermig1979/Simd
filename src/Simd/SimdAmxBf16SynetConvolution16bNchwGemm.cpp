@@ -65,7 +65,7 @@ namespace Simd
                 _tile_stream_loadd(3, buf + 16 * dB + F, strideB);
             }
 
-            size_t K32 = K - 32, k = 0;
+            int K32 = (int)K - 32, k = 0;
             _tile_stream_loadd(4, weight0, strideW);
             _tile_loadd(6, src0 + k * 16, strideS);
             for (; k < K32; weight1 += stepW)
@@ -129,7 +129,7 @@ namespace Simd
                 _tile_stream_loadd(2, buf + 16 * dB + 0, strideB);
             }
 
-            size_t K32 = K - 32, k = 0;
+            int K32 = (int)K - 32, k = 0;
             _tile_stream_loadd(4, weight0, strideW);
             for (; k < K32; k += 32, weight1 += stepW)
             {
@@ -183,7 +183,7 @@ namespace Simd
                 _tile_stream_loadd(1, buf + F, strideB);
             }
 
-            size_t K32 = K - 32, k = 0;
+            int K32 = (int)K - 32, k = 0;
             _tile_loadd(6, src0 + k * 16, strideS);
             for (; k < K32; weight0 += stepW)
             {
