@@ -291,12 +291,15 @@ namespace Simd
             size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C, int post, const float* bias, uint8_t* dst)
         {
             size_t m = 32, m1 = M, mm = AlignLo(m1, m), t = m1 - mm;
-            size_t dA = a.aK, dB = a.bK * DF, dC = a.cN, dD = p.N * a.eC;
+            size_t dA = a.aK, dB = a.bK * DF, dC = a.macroK < a.aK ? a.cN : 0, dD = p.N * a.eC;
             __m512 _bias[2];
             if (mm)
             {
-                GemmNN_Ptr tail_2 = t > 16 ? InnerProduct16bGemmNN_2x2<term, 1> : InnerProduct16bGemmNN_1x2<term, 1>;
-                GemmNN_Ptr tail_1 = t > 16 ? InnerProduct16bGemmNN_2x1<term, 1> : InnerProduct16bGemmNN_1x1<term, 1>;
+                t = AlignHi(t, 16), mm = m1 - t;
+                GemmNN_Ptr body_2 = InnerProduct16bGemmNN_2x2<term, 0>;
+                GemmNN_Ptr tail_2 = t > 16 ? InnerProduct16bGemmNN_2x2<term, 0> : InnerProduct16bGemmNN_1x2<term, 0>;
+                GemmNN_Ptr body_1 = InnerProduct16bGemmNN_2x1<term, 0>;
+                GemmNN_Ptr tail_1 = t > 16 ? InnerProduct16bGemmNN_2x1<term, 0> : InnerProduct16bGemmNN_1x1<term, 0>;
                 SetTileConfFull();
                 for (size_t j = 0; j < N; j += DF)
                 {
@@ -304,28 +307,19 @@ namespace Simd
                     _bias[1] = _mm512_loadu_ps(bias + j + F);
                     size_t dN = Simd::Min(DF, N - j);
                     size_t i = 0;
-                    if (dN == DF)
-                    {
-                        if (t)
-                            SetTileConfFull();
-                        for (; i < mm; i += m)
-                            InnerProduct16bGemmNN_2x2<term, 0>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
-                        if (t)
-                            tail_2(A + i * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
-                    }
-                    else if (dN > F)
+                    if (dN > F)
                     {
                         for (; i < mm; i += m)
-                            InnerProduct16bGemmNN_2x2<term, 1>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
+                            body_2(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                         if (t)
-                            tail_2(A + i * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
+                            tail_2(A + mm * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + mm * dD);
                     }
                     else
                     {
                         for (; i < mm; i += m)
-                            InnerProduct16bGemmNN_2x1<term, 1>(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
+                            body_1(A + i * dA, p, a, m, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
                         if (t)
-                            tail_1(A + i * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + i * dD);
+                            tail_1(A + mm * dA, p, a, t, dN, K, update, B, C + i * dC, post, _bias, dst + mm * dD);
                     }
                     B += dB;
                     C += dN;
