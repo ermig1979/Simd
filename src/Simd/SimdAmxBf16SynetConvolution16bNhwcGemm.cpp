@@ -253,7 +253,7 @@ namespace Simd
                 _tile_stream_loadd(3, buf + 16 * dB + F, strideB);
             }
 
-            size_t srcC32 = srcC - 32, sc = 0;
+            int srcC32 = (int)srcC - 32, sc = 0;
             _tile_stream_loadd(4, src0, strideS);
             _tile_loadd(6, weight0 + sc * 16, strideW);
             for (; sc < srcC32; src1 += stepS)
@@ -317,7 +317,8 @@ namespace Simd
                 _tile_stream_loadd(0, buf + 0, strideB);
                 _tile_stream_loadd(2, buf + 16 * dB + 0, strideB);
             }
-            size_t srcC32 = srcC - 32, sc = 0;
+
+            int srcC32 = (int)srcC - 32, sc = 0;
             _tile_stream_loadd(4, src0, strideS);
             for (; sc < srcC32; sc += 32, src1 += stepS)
             {
@@ -370,7 +371,8 @@ namespace Simd
                 _tile_stream_loadd(0, buf + 0, strideB);
                 _tile_stream_loadd(1, buf + F, strideB);
             }
-            size_t srcC32 = srcC - 32, sc = 0;
+
+            int srcC32 = (int)srcC - 32, sc = 0;
             _tile_loadd(6, weight0 + sc * 16, strideW);
             for (; sc < srcC32; src0 += stepS)
             {
@@ -420,14 +422,15 @@ namespace Simd
             {
                 _tile_stream_loadd(0, buf + 0, strideB);
             }
+
             for (size_t sc = 0; sc < srcC; sc += 32, src0 += stepS)
             {
                 _tile_stream_loadd(4, src0, strideS);
                 _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
             }
-            _tile_stored(0, buf + 0, strideB);
 
+            _tile_stored(0, buf + 0, strideB);
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC);
