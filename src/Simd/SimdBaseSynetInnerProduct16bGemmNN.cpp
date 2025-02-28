@@ -136,10 +136,7 @@ namespace Simd
 
             _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? a.aM * a.aK : 0;
             _sizeB = p.constB ? 0 : a.macroK * a.macroN;
-            if (a.microK > 2)
-                _sizeC = (p.typeC == SimdTensorData16b || a.aM != p.M || a.aN != p.N) ? a.macroN * a.aM : 0;
-            else
-                _sizeC = ((p.typeC == SimdTensorData16b || a.aM != p.M) && a.macroK < a.aK) ? a.macroN * a.aM : 0;
+            _sizeC = (p.typeC == SimdTensorData16b || a.aM != p.M || a.aN != p.N) ? a.macroN * a.aM : 0;
 
             a.bK = p.constB ? a.aK : a.macroK;
             a.cN = _sizeC ? a.macroN : p.N;
