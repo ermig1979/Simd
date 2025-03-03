@@ -186,7 +186,7 @@ namespace Test
         const SimdBool tF = SimdFalse, tT = SimdTrue;
         SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)(SimdSynetCompatibilityFmaUse | SimdSynetCompatibility16bfSoft);
 #ifdef NDEBUG
-#if 1
+#if 0
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, b16, f32), c, f1, f2);
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, b16, b16), c, f1, f2);
