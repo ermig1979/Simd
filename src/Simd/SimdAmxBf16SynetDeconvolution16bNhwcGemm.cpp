@@ -259,30 +259,55 @@ namespace Simd
         {
             size_t m = 32, mm = AlignLoAny(M, m), t = M - mm;
             size_t dS = a.bufK, dW = a.bufK * DF, dD = a.bufN;
-            Deconvolution16bNhwcGemmPtr body_2 = Deconvolution16bNhwcGemm_32x32<1>;
-            Deconvolution16bNhwcGemmPtr tail_2 = t > 16 ? Deconvolution16bNhwcGemm_32x32<1> : Deconvolution16bNhwcGemm_16x32<1>;
-            Deconvolution16bNhwcGemmPtr body_1 = Deconvolution16bNhwcGemm_32x16<1>;
-            Deconvolution16bNhwcGemmPtr tail_1 = t > 16 ? Deconvolution16bNhwcGemm_32x16<1> : Deconvolution16bNhwcGemm_16x16<1>;
 
-            for (size_t j = 0; j < N; j += DF)
+            if (mm)
             {
-                size_t dN = Simd::Min(DF, N - j), i = 0;
-                if (dN > F)
+                Deconvolution16bNhwcGemmPtr body_2 = Deconvolution16bNhwcGemm_32x32<0>;
+                Deconvolution16bNhwcGemmPtr tail_2 = t > 16 ? Deconvolution16bNhwcGemm_32x32<1> : Deconvolution16bNhwcGemm_16x32<1>;
+                Deconvolution16bNhwcGemmPtr body_1 = Deconvolution16bNhwcGemm_32x16<1>;
+                Deconvolution16bNhwcGemmPtr tail_1 = t > 16 ? Deconvolution16bNhwcGemm_32x16<1> : Deconvolution16bNhwcGemm_16x16<1>;
+                SetTileConfFull();
+                for (size_t j = 0; j < N; j += DF)
                 {
-                    for (; i < mm; i += m)
-                        body_2(src + i * dS, p, a, m, dN, K, zero, wgt, dst + i * dD);
-                    if (t)
-                        tail_2(src + i * dS, p, a, t, dN, K, zero, wgt, dst + i * dD);
+                    size_t dN = Simd::Min(DF, N - j), i = 0;
+                    if (dN > F)
+                    {
+                        if(t)
+                            SetTileConfFull();
+                        for (; i < mm; i += m)
+                            body_2(src + i * dS, p, a, m, dN, K, zero, wgt, dst + i * dD);
+                        if (t)
+                            tail_2(src + i * dS, p, a, t, dN, K, zero, wgt, dst + i * dD);
+                    }
+                    else
+                    {
+                        for (; i < mm; i += m)
+                            body_1(src + i * dS, p, a, m, dN, K, zero, wgt, dst + i * dD);
+                        if (t)
+                            tail_1(src + i * dS, p, a, t, dN, K, zero, wgt, dst + i * dD);
+                    }
+                    wgt += dW;
+                    dst += DF;
                 }
+            }
+            else
+            {
+                Deconvolution16bNhwcGemmPtr tail_2 = t > 16 ? Deconvolution16bNhwcGemm_32x32<0> : Deconvolution16bNhwcGemm_16x32<0>;
+                Deconvolution16bNhwcGemmPtr tail_1 = t > 16 ? Deconvolution16bNhwcGemm_32x16<0> : Deconvolution16bNhwcGemm_16x16<0>;
+                if (t > 16)
+                    SetTileConf2x2(t, 32);
                 else
+                    SetTileConf1x2(t, 32);
+                for (size_t j = 0; j < N; j += DF)
                 {
-                    for (; i < mm; i += m)
-                        body_1(src + i * dS, p, a, m, dN, K, zero, wgt, dst + i * dD);
-                    if (t)
+                    size_t dN = Simd::Min(DF, N - j), i = 0;
+                    if (dN > F)
+                        tail_2(src + i * dS, p, a, t, dN, K, zero, wgt, dst + i * dD);
+                    else
                         tail_1(src + i * dS, p, a, t, dN, K, zero, wgt, dst + i * dD);
+                    wgt += dW;
+                    dst += DF;
                 }
-                wgt += dW;
-                dst += DF;
             }
         }
 
