@@ -187,17 +187,22 @@ namespace Test
         SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)(SimdSynetCompatibilityFmaUse | SimdSynetCompatibility16bfSoft);
 #ifdef NDEBUG
 #if 1
-        //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 32, 16, 16, 32, _2, _1, _1, _0, _0, 1, aId, tT, f32, f32), c, f1, f2);
-        //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 24, 12, 16, 32, _2, _1, _1, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, b16, b16), c, f1, f2);
-        //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tF, f32, f32), c, f1, f2);
+#endif
+#if 1
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 3, 5, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 6, 5, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 18, 15, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 17, 15, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 16, 16, 15, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 16, 16, 31, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
 #endif
 #else
 #if 1
-        //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 72, 24, 32, 64, _4, _1, _2, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
-        //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 24, 12, 16, 32, _2, _1, _1, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 16, 16, 15, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 16, 16, 31, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
+        //result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 72, 24, 32, 64, _4, _1, _2, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
 #endif
 #endif
 

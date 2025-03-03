@@ -340,6 +340,7 @@ namespace Simd
             for (size_t dy = 0; dy < p.dstH; ++dy)
                 for (size_t dx = 0; dx < p.dstW; ++dx)
                     memset(dst + (dy * p.dstW + dx) * p.dstC, 0, p.dstC * sizeof(float));
+            size_t gap = a.bufN - a.N;
             for (size_t sy = 0; sy < p.srcH; ++sy)
             {
                 for (size_t sx = 0; sx < p.srcW; ++sx)
@@ -367,6 +368,7 @@ namespace Simd
                         else
                             src += p.kernelX * p.dstC;
                     }
+                    src += gap;
                 }
             }
         }

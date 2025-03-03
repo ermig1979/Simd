@@ -78,6 +78,8 @@ namespace Simd
             a.elem = _elemD;
             _stepS = p.srcH * p.srcW * p.srcC * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * _elemD;
+            if (a.bufN != a.N)
+                _is1x1 = false;
         }
 
         void SynetDeconvolution16bNhwcGemm::SetParams(const float* weight, const float* bias, const float* params)
