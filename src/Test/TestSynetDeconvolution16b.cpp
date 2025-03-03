@@ -188,7 +188,9 @@ namespace Test
 #ifdef NDEBUG
 #if 1
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, f32, f32), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, b16, f32), c, f1, f2);
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, aId, tT, b16, b16), c, f1, f2);
+        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 1024, 32, 256, 128, _4, _1, _2, _1, _1, 1, aId, tT, b16, b16), c, f1, f2);
 #endif
 #if 1
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 3, 5, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);

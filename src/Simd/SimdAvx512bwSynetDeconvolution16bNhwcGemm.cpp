@@ -451,11 +451,12 @@ namespace Simd
         {
             size_t dstCF = AlignLo(p.dstC, F);
             __mmask16 tail = TailMask16(p.dstC - dstCF);
-            for (size_t dy = 0; dy < p.dstH; ++dy)
-                for (size_t dx = 0; dx < p.dstW; ++dx)
-                    memset(dst + (dy * p.dstW + dx) * p.dstC, 0, p.dstC * sizeof(float));
-            size_t gap = a.bufN - a.N;
-            for (size_t sy = 0; sy < p.srcH; ++sy)
+            size_t rowSize = p.dstW * p.dstC, gap = a.bufN - a.N;
+            size_t dyBeg = yBeg ? yBeg * p.strideY + a.preH : 0;
+            size_t dyEnd = Simd::Min(yEnd * p.strideY + a.preH, p.dstH);
+            for (size_t dy = dyBeg; dy < dyEnd; ++dy)
+                memset(dst + dy * rowSize, 0, rowSize * sizeof(float));
+            for (size_t sy = yBeg; sy < yEnd; ++sy)
             {
                 for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
@@ -493,6 +494,8 @@ namespace Simd
         {
             size_t body = AlignLo(p.dstC, F);
             __mmask16 tail = TailMask16(p.dstC - body);
+            src += yBeg * p.dstW * p.dstC;
+            dst += yBeg * p.dstW * p.dstC * a.elem;
             for (size_t dy = yBeg; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx)

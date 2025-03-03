@@ -136,7 +136,7 @@ namespace Simd
                 size_t M, N, K;
                 size_t F, microM, microN, microK;
                 size_t macroH, macroM, macroN, macroK;
-                size_t bufM, bufN, bufK, elem;
+                size_t bufM, bufN, bufK, elem, preH;
             };
 
             static bool Preferable(const DeconvParam& p);
@@ -150,6 +150,7 @@ namespace Simd
             void SetAlgParam(size_t F, size_t microN, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
             void ForwardCommon(const uint8_t* src, uint16_t* bufS, float* bufB, float* bufD, uint8_t* dst);
             void GemmCommon(const uint16_t* src, float* dst);
+            void ForwardSmallNK(const uint8_t* src, uint16_t* bufS, float* bufB, float* bufD, uint8_t* dst);
 
             AlgParam _alg;
             ConvertPtr _convert;
