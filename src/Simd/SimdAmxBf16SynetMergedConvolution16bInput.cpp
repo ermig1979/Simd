@@ -40,59 +40,46 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_2x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_2x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float *dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
             int strideS = (int)sC * 2, strideW = 64, strideD = 64;
             const uint16_t* src1 = src0 + sC * 16, * weight1 = weight0 + sC * 16;
 
-            TileConf conf;
-            conf.rows[0] = 16;
-            conf.rows[1] = 16;
-            conf.rows[2] = uint8_t(dstS - 16);
-            conf.rows[3] = uint8_t(dstS - 16);
-            conf.rows[4] = 16;
-            conf.rows[5] = uint8_t(dstS - 16);
-            conf.rows[6] = 16;
-            conf.rows[7] = 16;
-            conf.colsb[0] = 64;
-            conf.colsb[1] = uint16_t(dstC - 16) * 4;
-            conf.colsb[2] = 64;
-            conf.colsb[3] = uint16_t(dstC - 16) * 4;
-            conf.colsb[4] = 64;
-            conf.colsb[5] = 64;
-            conf.colsb[6] = 64;
-            conf.colsb[7] = uint16_t(dstC - 16) * 4;
-            _tile_loadconfig(&conf);
-
+            if (cfg)
+                SetTileConf2x2(dstS, dstC);
             _tile_zero(0);
             _tile_zero(1);
             _tile_zero(2);
             _tile_zero(3);
-            size_t sc = 0;
-            for (; sc < sC; sc += 32)
+
+            int sC32 = (int)sC - 32, sc = 0;
+            _tile_stream_loadd(4, src0, strideS);
+            _tile_loadd(6, weight0, strideW);
+            for (; sc < sC32;)
             {
-                if(srcStream)
-                    _tile_stream_loadd(4, src0 + sc, strideS);
-                else
-                    _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 16, strideW);
-                _tile_dpbf16ps(0, 4, 6);
                 _tile_loadd(7, weight1 + sc * 16, strideW);
+                _tile_stream_loadd(5, src1 + sc, strideS);
+                _tile_dpbf16ps(0, 4, 6);
                 _tile_dpbf16ps(1, 4, 7);
-                if (srcStream)
-                    _tile_stream_loadd(5, src1 + sc, strideS);
-                else
-                    _tile_loadd(5, src1 + sc, strideS);
+                sc += 32;
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(3, 5, 7);
             }
+            _tile_loadd(7, weight1 + sc * 16, strideW);
+            _tile_stream_loadd(5, src1 + sc, strideS);
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_dpbf16ps(1, 4, 7);
+            _tile_dpbf16ps(2, 5, 6);
+            _tile_dpbf16ps(3, 5, 7);
+
             _tile_stored(0, dst0, strideD);
             _tile_stored(2, dst0 + 256, strideD);
             _tile_stored(1, dst1, strideD);
             _tile_stored(3, dst1 + 256, strideD);
-
             if (type)
             {
                 for (size_t s = 0; s < dstS; ++s, dst0 += F)
@@ -102,46 +89,36 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_2x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_2x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
             int strideS = (int)sC * 2, strideW = 64, strideD = 64;
             const uint16_t* src1 = src0 + sC * 16;
 
-            TileConf conf;
-            conf.rows[0] = 16;
-            conf.rows[2] = uint8_t(dstS - 16);
-            conf.rows[4] = 16;
-            conf.rows[5] = uint8_t(dstS - 16);
-            conf.rows[6] = 16;
-            conf.colsb[0] = uint16_t(dstC * 4);
-            conf.colsb[2] = uint16_t(dstC * 4);
-            conf.colsb[4] = 64;
-            conf.colsb[5] = 64;
-            conf.colsb[6] = uint16_t(dstC * 4);
-            _tile_loadconfig(&conf);
-
+            if (cfg)
+                SetTileConf2x1(dstS, dstC);
             _tile_zero(0);
             _tile_zero(2);
-            size_t sc = 0;
-            for (; sc < sC; sc += 32)
+
+            int sC32 = (int)sC - 32, sc = 0;
+            _tile_stream_loadd(4, src0, strideS);
+            for (; sc < sC32;)
             {
-                if (srcStream)
-                    _tile_stream_loadd(4, src0 + sc, strideS);
-                else
-                    _tile_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 16, strideW);
+                _tile_stream_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(0, 4, 6);
-                if (srcStream)
-                    _tile_stream_loadd(5, src1 + sc, strideS);
-                else
-                    _tile_loadd(5, src1 + sc, strideS);
+                sc += 32;
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
             }
+            _tile_loadd(6, weight0 + sc * 16, strideW);
+            _tile_stream_loadd(5, src1 + sc, strideS);
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_dpbf16ps(2, 5, 6);
+
             _tile_stored(0, dst0, strideD);
             _tile_stored(2, dst0 + 256, strideD);
-
             if (type)
             {
                 for (size_t s = 0; s < dstS; ++s, dst0 += F)
@@ -149,43 +126,36 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_1x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_1x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
             int strideS = (int)sC * 2, strideW = 64, strideD = 64;
             const uint16_t* weight1 = weight0 + sC * 16;
 
-            TileConf conf;
-            conf.rows[0] = uint8_t(dstS);
-            conf.rows[1] = uint8_t(dstS);
-            conf.rows[4] = uint8_t(dstS);
-            conf.rows[6] = 16;
-            conf.rows[7] = 16;
-            conf.colsb[0] = 64;
-            conf.colsb[1] = uint16_t(dstC - 16) * 4;
-            conf.colsb[4] = 64;
-            conf.colsb[6] = 64;
-            conf.colsb[7] = uint16_t(dstC - 16) * 4;
-            _tile_loadconfig(&conf);
-
+            if (cfg)
+                SetTileConf1x2(dstS, dstC);
             _tile_zero(0);
             _tile_zero(1);
-            size_t sc = 0;
-            for (; sc < sC; sc += 32)
+
+            int sC32 = (int)sC - 32, sc = 0;
+            _tile_loadd(6, weight0, strideW);
+            for (; sc < sC32;)
             {
-                if (srcStream)
-                    _tile_stream_loadd(4, src0 + sc, strideS);
-                else
-                    _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 16, strideW);
-                _tile_dpbf16ps(0, 4, 6);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(7, weight1 + sc * 16, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                sc += 32;
+                _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(1, 4, 7);
             }
+            _tile_stream_loadd(4, src0 + sc, strideS);
+            _tile_loadd(7, weight1 + sc * 16, strideW);
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_dpbf16ps(1, 4, 7);
+
             _tile_stored(0, dst0, strideD);
             _tile_stored(1, dst1, strideD);
-
             if (type)
             {
                 for (size_t s = 0; s < dstS; ++s, dst0 += F)
@@ -195,34 +165,24 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_1x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_1x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
             int strideS = (int)sC * 2, strideW = 64, strideD = 64;
 
-            TileConf conf;
-            conf.rows[0] = uint8_t(dstS);
-            conf.rows[4] = uint8_t(dstS);
-            conf.rows[6] = 16;
-            conf.colsb[0] = uint16_t(dstC * 4);
-            conf.colsb[4] = 64;
-            conf.colsb[6] = uint16_t(dstC * 4);
-            _tile_loadconfig(&conf);
-
+            if (cfg)
+                SetTileConf1x1(dstS, dstC);
             _tile_zero(0);
-            size_t sc = 0;
-            for (; sc < sC; sc += 32)
+
+            for (size_t sc = 0; sc < sC; sc += 32)
             {
-                if (srcStream)
-                    _tile_stream_loadd(4, src0 + sc, strideS);
-                else
-                    _tile_loadd(4, src0 + sc, strideS);
+                _tile_stream_loadd(4, src0 + sc, strideS);
                 _tile_loadd(6, weight0 + sc * 16, strideW);
                 _tile_dpbf16ps(0, 4, 6);
             }
-            _tile_stored(0, dst0, strideD);
 
+            _tile_stored(0, dst0, strideD);
             if (type)
             {
                 for (size_t s = 0; s < dstS; ++s, dst0 += F)
@@ -233,7 +193,7 @@ namespace Simd
         typedef void (*InputConvolution1x1Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1);
 
-        template<SimdConvolutionActivationType type, bool srcStream> void InputConvolution1x1_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, 
+        template<SimdConvolutionActivationType type> void InputConvolution1x1_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, 
             size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             size_t dstM = a.bufH[1] - 1, dstS = a.bufH[1] * p.dstW * F, srcC = AlignHi(p.srcC, a.miK), y0 = a.bufH[0] ? yBeg : 0;
@@ -243,12 +203,12 @@ namespace Simd
             size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, a.bufH[1])), n = 32;
             size_t i1 = (yInt - yBeg) * p.dstW, in = AlignLoAny(i1, n), i = i1 - in;
             size_t e1 = (yEnd - yInt) * p.dstW, en = AlignLoAny(e1, n), e = e1 - en;
-            InputConvolution1x1Ptr conv_2x2 = InputConvolution1x1_2x2<type, srcStream>;
-            InputConvolution1x1Ptr conv_2x1 = InputConvolution1x1_2x1<type, srcStream>;
-            InputConvolution1x1Ptr conv_Ix2 = i > 16 ? InputConvolution1x1_2x2<type, srcStream> : InputConvolution1x1_1x2<type, srcStream>;
-            InputConvolution1x1Ptr conv_Ix1 = i > 16 ? InputConvolution1x1_2x1<type, srcStream> : InputConvolution1x1_1x1<type, srcStream>;
-            InputConvolution1x1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2<type, srcStream> : InputConvolution1x1_1x2<type, srcStream>;
-            InputConvolution1x1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1<type, srcStream> : InputConvolution1x1_1x1<type, srcStream>;
+            InputConvolution1x1Ptr conv_2x2 = InputConvolution1x1_2x2<type, 0>;
+            InputConvolution1x1Ptr conv_2x1 = InputConvolution1x1_2x1<type, 0>;
+            InputConvolution1x1Ptr conv_Ix2 = i > 16 ? InputConvolution1x1_2x2<type, 1> : InputConvolution1x1_1x2<type, 1>;
+            InputConvolution1x1Ptr conv_Ix1 = i > 16 ? InputConvolution1x1_2x1<type, 1> : InputConvolution1x1_1x1<type, 1>;
+            InputConvolution1x1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2<type, 1> : InputConvolution1x1_1x2<type, 1>;
+            InputConvolution1x1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1<type, 1> : InputConvolution1x1_1x1<type, 1>;
             for (size_t dc = 0; dc < maC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, maC - dc);
@@ -263,6 +223,7 @@ namespace Simd
                 {
                     if (yInt > yBeg)
                     {
+                        SetTileConfFull();
                         const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                         float* dst0 = dst + (yBeg & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
                         for (size_t j = 0; j < in; j += n, src0 += srcC * n, dst0 += F * n, dst1 += F * n)
@@ -272,6 +233,7 @@ namespace Simd
                     }
                     if (yEnd > yInt)
                     {
+                        SetTileConfFull();
                         const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                         float* dst0 = dst + (yInt & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
                         for (size_t j = 0; j < en; j += n, src0 += srcC * n, dst0 += F * n, dst1 += F * n)
@@ -284,6 +246,7 @@ namespace Simd
                 {
                     if (yInt > yBeg)
                     {
+                        SetTileConfFull();
                         const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                         float* dst0 = dst + (yBeg & dstM) * p.dstW * F;
                         for (size_t j = 0; j < in; j += n, src0 += srcC * n, dst0 += F * n)
@@ -293,6 +256,7 @@ namespace Simd
                     }
                     if (yEnd > yInt)
                     {
+                        SetTileConfFull();
                         const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                         float* dst0 = dst + (yInt & dstM) * p.dstW * F;
                         for (size_t j = 0; j < en; j += n, src0 += srcC * n, dst0 += F * n)
@@ -311,7 +275,7 @@ namespace Simd
         template<SimdConvolutionActivationType type> static void SetInput(const ConvParam& p, InputPtr& input)
         {
             if (Is1x1(p))
-                input = InputConvolution1x1_2<type, true>;
+                input = InputConvolution1x1_2<type>;
             else
                 assert(0);
         }
