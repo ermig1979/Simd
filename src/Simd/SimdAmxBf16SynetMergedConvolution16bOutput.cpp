@@ -252,10 +252,11 @@ namespace Simd
             _params[1] = _mm512_set1_ps(params[1]);
             if (nn)
             {
-                OutputConvolutionPtr body_2 = OutputConvolution_2x2<term, type, 1>;
-                OutputConvolutionPtr tail_2 = m > 16 ? OutputConvolution_2x2<term, type, 1> : OutputConvolution_1x2<term, type, 1>;
-                OutputConvolutionPtr body_1 = OutputConvolution_2x1<term, type, 1>;
-                OutputConvolutionPtr tail_1 = m > 16 ? OutputConvolution_2x1<term, type, 1> : OutputConvolution_1x1<term, type, 1>;
+                OutputConvolutionPtr body_2 = OutputConvolution_2x2<term, type, 0>;
+                OutputConvolutionPtr tail_2 = m > 16 ? OutputConvolution_2x2<term, type, 0> : OutputConvolution_1x2<term, type, 0>;
+                OutputConvolutionPtr body_1 = OutputConvolution_2x1<term, type, 0>;
+                OutputConvolutionPtr tail_1 = m > 16 ? OutputConvolution_2x1<term, type, 0> : OutputConvolution_1x1<term, type, 0>;
+                SetTileConfFull();
                 for (size_t dc = 0; dc < p.dstC; dc += DF)
                 {
                     size_t dC = Simd::Min(DF, p.dstC - dc);
