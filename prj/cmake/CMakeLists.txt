@@ -135,7 +135,7 @@ else()
     message(FATAL_ERROR "Unknown value of CMAKE_BUILD_TYPE!")
 endif()
 
-if((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+if((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang")  OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
   set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -ferror-limit=${MAX_ERRORS}")
 else()
   set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fmax-errors=${MAX_ERRORS}")
