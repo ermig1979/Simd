@@ -253,9 +253,9 @@ namespace Simd
             if (nn)
             {
                 OutputConvolutionPtr body_2 = OutputConvolution_2x2<term, type, 0>;
-                OutputConvolutionPtr tail_2 = m > 16 ? OutputConvolution_2x2<term, type, 0> : OutputConvolution_1x2<term, type, 0>;
-                OutputConvolutionPtr body_1 = OutputConvolution_2x1<term, type, 0>;
-                OutputConvolutionPtr tail_1 = m > 16 ? OutputConvolution_2x1<term, type, 0> : OutputConvolution_1x1<term, type, 0>;
+                OutputConvolutionPtr tail_2 = m > 16 ? OutputConvolution_2x2<term, type, 1> : OutputConvolution_1x2<term, type, 1>;
+                OutputConvolutionPtr body_1 = OutputConvolution_2x1<term, type, 1>;
+                OutputConvolutionPtr tail_1 = m > 16 ? OutputConvolution_2x1<term, type, 1> : OutputConvolution_1x1<term, type, 11>;
                 SetTileConfFull();
                 for (size_t dc = 0; dc < p.dstC; dc += DF)
                 {
@@ -273,6 +273,8 @@ namespace Simd
                     size_t i = 0;
                     if (dC > F)
                     {
+                        if(m)
+                            SetTileConfFull();
                         for (; i < nn; i += n)
                             body_2(s + i * dS, p, a, maC, n, dC, zero, weight, _bias, _params, b + i * dB, d + i * dD);
                         if (m)

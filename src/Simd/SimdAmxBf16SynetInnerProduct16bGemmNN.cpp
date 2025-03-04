@@ -291,7 +291,7 @@ namespace Simd
             size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C, int post, const float* bias, uint8_t* dst)
         {
             size_t m = 32, m1 = M, mm = AlignLo(m1, m), t = m1 - mm;
-            size_t dA = a.aK, dB = a.bK * DF, dC = a.macroK < a.aK ? a.cN : 0, dD = p.N * a.eC;
+            size_t dA = a.aK, dB = a.bK * DF, dC = (a.macroK < a.aK || a.macroN != a.aN || a.macroM != a.aM) ? a.cN : 0, dD = p.N * a.eC;
             __m512 _bias[2];
             if (mm)
             {
