@@ -29,6 +29,7 @@
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdCopy.h"
+#include "Simd/SimdSet.h"
 
 namespace Simd
 {
@@ -102,6 +103,68 @@ namespace Simd
             }
         }
 
+        static void ConvertBf16ToFp32(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, float* dst)
+        {
+            const uint16_t* src = (uint16_t*)src8;
+            size_t srcC = p.srcC, dstC = AlignHi(srcC, F), srcW = p.srcW, srcCF = AlignLo(srcC, F);
+            __mmask16 tail = TailMask16(srcC - srcCF);
+            if (tail)
+            {
+                src += yBeg * srcW * srcC;
+                dst += yBeg * srcW * dstC;
+                for (size_t y = yBeg; y < yEnd; ++y)
+                {
+                    for (size_t x = 0; x < srcW; ++x)
+                    {
+                        size_t c = 0;
+                        for (; c < srcCF; c += F)
+                            _mm512_storeu_ps(dst + c, BFloat16ToFloat32(_mm256_loadu_epi16(src + c)));
+                        if (tail)
+                            _mm512_storeu_ps(dst + c, BFloat16ToFloat32(_mm256_maskz_loadu_epi16(tail, src + c)));
+                        src += srcC;
+                        dst += dstC;
+                    }
+                }
+            }
+            else
+            {
+                size_t rowSize = p.srcW * p.srcC;
+                for (size_t y = yBeg; y < yEnd; ++y)
+                    Avx512bw::BFloat16ToFloat32(src + y * rowSize, rowSize, dst + y * rowSize);
+            }
+        }
+
+        void CopyFp32ToFp32(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, float* dst)
+        {
+            const float* src = (float*)src8;
+            size_t srcC = p.srcC, dstC = AlignHi(srcC, F), srcW = p.srcW, srcCF = AlignLo(srcC, F);
+            __mmask16 tail = TailMask16(srcC - srcCF);
+            if (tail)
+            {
+                src += yBeg * srcW * srcC;
+                dst += yBeg * srcW * dstC;
+                for (size_t y = yBeg; y < yEnd; ++y)
+                {
+                    for (size_t x = 0; x < srcW; ++x)
+                    {
+                        size_t c = 0;
+                        for (; c < srcCF; c += F)
+                            _mm512_storeu_ps(dst + c, _mm512_loadu_ps(src + c));
+                        if (tail)
+                            _mm512_storeu_ps(dst + c, _mm512_maskz_loadu_ps(tail, src + c));
+                        src += srcC;
+                        dst += dstC;
+                    }
+                }
+            }
+            else
+            {
+                size_t rowSize = p.srcW * p.srcC;
+                for (size_t y = yBeg; y < yEnd; ++y)
+                    memcpy(dst + y * rowSize, src + y * rowSize, rowSize * sizeof(float));
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         SynetMergedConvolution16bCdc::SynetMergedConvolution16bCdc(const MergConvParam& p)
@@ -120,6 +183,10 @@ namespace Simd
                     SetInput(_param.conv[0], _input);
                 else
                     Avx512bw::SetInput(_param.conv[0], _input);
+                if (_src16b)
+                    _toFp32 = ConvertBf16ToFp32;
+                else
+                    _toFp32 = CopyFp32ToFp32;
                 SetDepthwise(_param.conv[1], _depthwise);
                 SetOutput(_param.conv[2], _output);
             }
