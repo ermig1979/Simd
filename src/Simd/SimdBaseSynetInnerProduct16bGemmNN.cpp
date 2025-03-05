@@ -129,7 +129,7 @@ namespace Simd
             a.aM = AlignHi(p.M, a.microM);
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN / 2, a.microK), a.microK, a.aK);
             a.macroN = Simd::RestrictRange(AlignLo(L3 / a.macroK / 2, a.microN), a.microN, a.aN);
-            a.macroM = Simd::RestrictRange(L2 / a.macroK / 2, a.microM, a.aM);
+            a.macroM = Simd::RestrictRange(AlignLo(L2 / a.macroK / 2, a.microM), a.microM, a.aM);
             a.eA = p.typeA == SimdTensorData32f ? 4 : 2;
             a.eB = p.typeB == SimdTensorData32f ? 4 : 2;
             a.eC = p.typeC == SimdTensorData32f ? 4 : 2;
