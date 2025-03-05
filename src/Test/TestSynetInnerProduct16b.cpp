@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2025 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -205,9 +205,8 @@ namespace Test
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(3333, 3333, 3333, b16, b16, f32, f, f, t), f1, f2);
 #endif
 #else
-        //result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(3333, 3333, 3333, b16, b16, f32, f, f, t), f1, f2);
-        //result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 4096, b16, b16, b16, t, f, t), f1, f2);
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 1000, 1280, f32, f32, f32, f, t, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1824, 64, 608, f32, f32, f32, f, t, t), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(64, 1824, 608, f32, f32, f32, f, t, t), f1, f2);
 #endif
 
         return result;

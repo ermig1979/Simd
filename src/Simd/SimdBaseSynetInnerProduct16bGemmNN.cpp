@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2025 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -175,7 +175,7 @@ namespace Simd
                     for (size_t i = 0; i < p.M; i += a.macroM)
                     {
                         size_t macroM = Simd::Min(p.M, i + a.macroM) - i;
-                        size_t offsA = (a.macroN == a.aN && _prepA) ? 0 : i * a.aK;
+                        size_t offsA = (a.macroN == a.aN && a.macroK == a.aK && _prepA) ? 0 : i * a.aK;
                         size_t offsB = p.constB ? j * a.bK + k * a.F : 0;
                         size_t offsC = _sizeC ? (a.macroK < a.aK ? i * a.cN : 0) : i * a.cN + j;
                         if (j == 0 && k == 0 && _prepA)
