@@ -100,6 +100,7 @@ namespace Test
         result = result && SynetChannelSum16bAutoTest(555, 333, nhwc, f1, f2);
         result = result && SynetChannelSum16bAutoTest(512, 512, nhwc, f1, f2);
         result = result && SynetChannelSum16bAutoTest(512, 512, nchw, f1, f2);
+        result = result && SynetChannelSum16bAutoTest(256, 256, nhwc, f1, f2);
 
         return result;
     }
@@ -116,11 +117,11 @@ namespace Test
             result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Sse41::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2())
-//            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx2::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
-//#endif
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx2::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+#endif
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw())
 //            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx512bw::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));

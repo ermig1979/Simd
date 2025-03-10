@@ -4866,7 +4866,7 @@ SIMD_API void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetChannelSum16bPtr) (const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
-    const static SimdSynetChannelSum16bPtr simdSynetChannelSum16b = SIMD_FUNC1(SynetChannelSum16b, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC);
+    const static SimdSynetChannelSum16bPtr simdSynetChannelSum16b = SIMD_FUNC2(SynetChannelSum16b, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC);
 
     simdSynetChannelSum16b(src, channels, spatial, format, sum);
 #else

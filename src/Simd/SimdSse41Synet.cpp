@@ -42,10 +42,10 @@ namespace Simd
         {
             if (format == SimdTensorFormatNhwc)
             {
-                size_t channelsF = AlignLo(spatial, F), channelsF2 = AlignLo(spatial, F * 2);
+                size_t channels4 = AlignLo(spatial, 4), channels8 = AlignLo(spatial, 8);
                 size_t spatial4 = AlignLo(spatial, 4);
                 size_t c = 0;
-                for (; c < channelsF; ++c)
+                for (; c < channels4; c += 4)
                     _mm_storeu_ps(sum + c, _mm_setzero_ps());
                 for (; c < channels; ++c)
                     sum[c] = 0.0f;
@@ -58,10 +58,10 @@ namespace Simd
                     const uint16_t* src2 = src + 2 * channels;
                     const uint16_t* src3 = src + 3 * channels;
                     size_t c = 0;
-                    for (; c < channelsF2; c += F * 2)
+                    for (; c < channels8; c += 8)
                     {
                         __m128 sum0 = _mm_loadu_ps(sum + c + 0);
-                        __m128 sum1 = _mm_loadu_ps(sum + c + F);
+                        __m128 sum1 = _mm_loadu_ps(sum + c + 4);
                         __m128i _src = _mm_loadu_si128((__m128i*)(src0 + c));
                         sum0 = _mm_add_ps(sum0, BFloat16ToFloat32<0>(_src));
                         sum1 = _mm_add_ps(sum1, BFloat16ToFloat32<1>(_src));
@@ -75,9 +75,9 @@ namespace Simd
                         sum0 = _mm_add_ps(sum0, BFloat16ToFloat32<0>(_src));
                         sum1 = _mm_add_ps(sum1, BFloat16ToFloat32<1>(_src));
                         _mm_storeu_ps(sum + c + 0, sum0);
-                        _mm_storeu_ps(sum + c + F, sum1);
+                        _mm_storeu_ps(sum + c + 4, sum1);
                     }
-                    for (; c < channelsF; c += F)
+                    for (; c < channels4; c += 4)
                     {
                         __m128 sum0 = _mm_loadu_ps(sum + c + 0);
                         __m128i _src = _mm_loadl_epi64((__m128i*)(src0 + c));
@@ -102,15 +102,15 @@ namespace Simd
                 for (; s < spatial; ++s)
                 {
                     c = 0;
-                    for (; c < channelsF2; c += F * 2)
+                    for (; c < channels8; c += 8)
                     {
                         __m128i _src = _mm_loadu_si128((__m128i*)(src + c));
                         __m128 sum0 = _mm_loadu_ps(sum + c + 0);
-                        __m128 sum1 = _mm_loadu_ps(sum + c + F);
+                        __m128 sum1 = _mm_loadu_ps(sum + c + 4);
                         _mm_storeu_ps(sum + c + 0, _mm_add_ps(sum0, BFloat16ToFloat32<0>(_src)));
-                        _mm_storeu_ps(sum + c + F, _mm_add_ps(sum1, BFloat16ToFloat32<1>(_src)));
+                        _mm_storeu_ps(sum + c + 4, _mm_add_ps(sum1, BFloat16ToFloat32<1>(_src)));
                     }
-                    for (; c < channelsF; c += F)
+                    for (; c < channels4; c += 4)
                     {
                         __m128 _sum = _mm_loadu_ps(sum + c);
                         __m128i _src = _mm_loadl_epi64((__m128i*)(src + c));
@@ -123,12 +123,12 @@ namespace Simd
             }
             else if (format == SimdTensorFormatNchw)
             {
-                size_t spatialDF = AlignLo(spatial, DF);
+                size_t spatial8 = AlignLo(spatial, 8);
                 for (size_t c = 0; c < channels; ++c)
                 {
                     __m128 sum0 = _mm_setzero_ps(), sum1 = _mm_setzero_ps();
                     size_t s = 0;
-                    for (; s < spatialDF; s += DF)
+                    for (; s < spatial8; s += 8)
                     {
                         __m128i _src = _mm_loadu_si128((__m128i*)(src + s));
                         sum0 = _mm_add_ps(sum0, BFloat16ToFloat32Even(_src));
