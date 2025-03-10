@@ -56,7 +56,7 @@ jobs:
 
     strategy:
       matrix:
-        clang_version: [18]
+        clang_version: [18, 19]
         build_type: [Debug, Release]
 
     steps:

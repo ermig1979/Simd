@@ -1738,7 +1738,7 @@ namespace Simd
             NodeIterator operator++(int)
             {
                 NodeIterator tmp = *this;
-                ++this;
+                ++(*this);
                 return tmp;
             }
 
@@ -1752,7 +1752,7 @@ namespace Simd
             NodeIterator operator--(int)
             {
                 NodeIterator tmp = *this;
-                ++this;
+                --(*this);
                 return tmp;
             }
 
@@ -1813,7 +1813,7 @@ namespace Simd
             AttributeIterator operator++(int)
             {
                 AttributeIterator tmp = *this;
-                ++this;
+                ++(*this);
                 return tmp;
             }
 
@@ -1827,7 +1827,7 @@ namespace Simd
             AttributeIterator operator--(int)
             {
                 AttributeIterator tmp = *this;
-                ++this;
+                --(*this);
                 return tmp;
             }
 
