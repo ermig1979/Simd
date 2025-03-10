@@ -4861,6 +4861,19 @@ SIMD_API void SimdSynetAdd8i(const uint8_t* aData, const float* aScale, const fl
 #endif
 }
 
+SIMD_API void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetChannelSum16bPtr) (const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
+    const static SimdSynetChannelSum16bPtr simdSynetChannelSum16b = SIMD_FUNC0(SynetChannelSum16b);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+
+    simdSynetChannelSum16b(src, channels, spatial, format, sum);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
 {
     SIMD_EMPTY();

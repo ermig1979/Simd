@@ -50,6 +50,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ga88f0b789a90dd29211eb9a9841afef09"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga88f0b789a90dd29211eb9a9841afef09">SimdSynetChannelSum16b</a> (const uint16_t *src, size_t channels, size_t spatial, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, float *sum)</td></tr>
+<tr class="memdesc:ga88f0b789a90dd29211eb9a9841afef09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates channels sums in FP32 format for input tensor in BF16 format.  <a href="group__synet__other.html#ga88f0b789a90dd29211eb9a9841afef09">More...</a><br /></td></tr>
+<tr class="separator:ga88f0b789a90dd29211eb9a9841afef09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4834136a19efbacb48575f1c9d894092"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga4834136a19efbacb48575f1c9d894092">SimdSynetEltwiseLayerForward</a> (float const *const *src, const float *weight, size_t count, size_t size, <a class="el" href="group__synet__types.html#ga89b4d9922d69654a2a675ccba0a9452d">SimdSynetEltwiseOperationType</a> type, float *dst)</td></tr>
 <tr class="memdesc:ga4834136a19efbacb48575f1c9d894092"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of EltwiseLayer.  <a href="group__synet__other.html#ga4834136a19efbacb48575f1c9d894092">More...</a><br /></td></tr>
 <tr class="separator:ga4834136a19efbacb48575f1c9d894092"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -72,6 +75,69 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Other accelerated functions used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ga88f0b789a90dd29211eb9a9841afef09" name="ga88f0b789a90dd29211eb9a9841afef09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga88f0b789a90dd29211eb9a9841afef09">&#9670;&#160;</a></span>SimdSynetChannelSum16b()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetChannelSum16b </td>
+          <td>(</td>
+          <td class="paramtype">const uint16_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>spatial</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>sum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates channels sums in FP32 format for input tensor in BF16 format. </p>
+<p >Algorithm's details (example for NCHW tensor format) : </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+    sum[c] = 0;
+    for(s = 0; s &lt; spatial; ++s)
+        sum[c] += src[c, s];
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 16-bit brain-float tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial (width * height) size of input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input tensor. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a pointer to output 32-bit float array with channels sums. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ga4834136a19efbacb48575f1c9d894092" name="ga4834136a19efbacb48575f1c9d894092"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga4834136a19efbacb48575f1c9d894092">&#9670;&#160;</a></span>SimdSynetEltwiseLayerForward()</h2>
 

@@ -33,6 +33,104 @@
 namespace Test
 {
 #if defined(SIMD_SYNET_ENABLE)
+    namespace
+    {
+        struct FuncScs16b
+        {
+            typedef void(*FuncPtr)(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
+
+            FuncPtr func;
+            String desc;
+
+            FuncScs16b(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(size_t c, size_t s, SimdTensorFormatType f)
+            {
+                desc = desc + "[" + ToString(c) + "-" + ToString(s) + (f == SimdTensorFormatNhwc ? "-1" : "-0") + "]";
+            }
+
+            void Call(const Tensor16u& src, size_t channels, size_t spatial, SimdTensorFormatType format, Tensor32f& sum) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), channels, spatial, format, sum.Data());
+            }
+        };
+    }
+
+#define FUNC_SCS16B(function) FuncScs16b(function, #function)
+
+    bool SynetChannelSum16bAutoTest(size_t channels, size_t spatial, SimdTensorFormatType format, FuncScs16b f1, FuncScs16b f2)
+    {
+        bool result = true;
+
+        f1.Update(channels, spatial, format);
+        f2.Update(channels, spatial, format);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << "-" << spatial << (format == SimdTensorFormatNhwc ? "-1" : "-0") << "].");
+
+        Tensor32f src32f(ToShape(channels, spatial, format));
+        Tensor16u src16b(ToShape(channels, spatial, format));
+
+        Tensor32f sum1(ToShape(channels, format));
+        Tensor32f sum2(ToShape(channels, format));
+
+        FillRandom(src32f.Data(), src32f.Size(), -1.0, 1.0);
+        SimdFloat32ToBFloat16(src32f.Data(), src32f.Size(), src16b.Data());
+        Fill(sum1, 1.0f);
+        Fill(sum2, 2.0f);
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src16b, channels, spatial, format, sum1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src16b, channels, spatial, format, sum2));
+
+        result = result && Compare(sum1, sum2, EPS, true, 64, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetChannelSum16bAutoTest(const FuncScs16b& f1, const FuncScs16b& f2)
+    {
+        bool result = true;
+
+        SimdTensorFormatType nchw = SimdTensorFormatNchw, nhwc = SimdTensorFormatNhwc;
+
+        result = result && SynetChannelSum16bAutoTest(555, 333, nchw, f1, f2);
+        result = result && SynetChannelSum16bAutoTest(555, 333, nhwc, f1, f2);
+        result = result && SynetChannelSum16bAutoTest(512, 512, nhwc, f1, f2);
+        result = result && SynetChannelSum16bAutoTest(512, 512, nchw, f1, f2);
+
+        return result;
+    }
+
+    bool SynetChannelSum16bAutoTest()
+    {
+        bool result = true;
+
+        if (TestBase())
+            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Base::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable && TestSse41())
+//            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Sse41::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable && TestAvx2())
+//            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx2::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+//#endif
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable && TestAvx512bw())
+//            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx512bw::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+//#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     SIMD_INLINE String ToString(SimdSynetEltwiseOperationType type)
     {
         switch (type)

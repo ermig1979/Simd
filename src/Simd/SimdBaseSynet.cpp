@@ -26,12 +26,42 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAlignment.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
+        void SynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum)
+        {
+            if (format == SimdTensorFormatNhwc)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                    sum[c] = 0.0f;
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                        sum[c] += BFloat16ToFloat32(src[c]);
+                    src += channels;
+                }
+            }
+            else if (format == SimdTensorFormatNchw)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    sum[c] = 0.0f;
+                    for (size_t s = 0; s < spatial; ++s)
+                        sum[c] += BFloat16ToFloat32(src[s]);
+                    src += spatial;
+                }
+            }
+            else
+                assert(0);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <SimdSynetEltwiseOperationType type> void SynetEltwiseLayerForward(float const * const * src, size_t count, size_t size, float * dst)
         {
             size_t aligned = Simd::AlignLo(size, 4);

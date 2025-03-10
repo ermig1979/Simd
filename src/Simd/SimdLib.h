@@ -6069,6 +6069,30 @@ extern "C"
     SIMD_API void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
         uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
+    /*! @ingroup synet_other
+
+        \fn void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
+
+        \short Calculates channels sums in FP32 format for input tensor in BF16 format.
+
+        Algorithm's details (example for NCHW tensor format) :
+        \verbatim
+        for(c = 0; c < channels; ++c)
+            sum[c] = 0;
+            for(s = 0; s < spatial; ++s)
+                sum[c] += src[c, s];
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 16-bit brain-float tensor.
+        \param [in] channels - a number of channels in input and output arrays.
+        \param [in] spatial - a spatial (width * height) size of input tensor.
+        \param [in] format - a format of input tensor.
+        \param [out] sum - a pointer to output 32-bit float array with channels sums.
+    */
+    SIMD_API void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
+
     /*! @ingroup synet_conversion
 
         \fn void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t * dst, SimdSynetCompatibilityType compatibility);
