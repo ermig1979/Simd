@@ -69,7 +69,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get -y install clang-${{matrix.clang_version}}
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="clang-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native"
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="clang-${{matrix.clang_version}}" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native"
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
