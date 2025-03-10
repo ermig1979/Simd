@@ -111,11 +111,11 @@ namespace Test
         if (TestBase())
             result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Base::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Sse41::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Sse41::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx2::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
