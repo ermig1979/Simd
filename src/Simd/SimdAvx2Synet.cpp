@@ -42,7 +42,7 @@ namespace Simd
         {
             if (format == SimdTensorFormatNhwc)
             {
-                size_t channels4 = AlignLo(spatial, 4), channels8 = AlignLo(spatial, 8), channels16 = AlignLo(spatial, 16);
+                size_t channels4 = AlignLo(channels, 4), channels8 = AlignLo(channels, 8), channels16 = AlignLo(channels, 16);
                 size_t spatial4 = AlignLo(spatial, 4);
                 size_t c = 0;
                 for (; c < channels8; c += 8)

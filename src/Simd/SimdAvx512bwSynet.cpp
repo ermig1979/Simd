@@ -33,12 +33,180 @@
 #include "Simd/SimdPow.h"
 #include "Simd/SimdInterleave.h"
 #include "Simd/SimdDeinterleave.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)     
     namespace Avx512bw
     {
+        void SynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum)
+        {
+            if (format == SimdTensorFormatNhwc)
+            {
+                size_t channels32 = AlignLo(channels, 32), spatial4 = AlignLo(spatial, 4);
+                __mmask32 tail = TailMask32(channels - channels32);
+                __mmask16 tail0 = TailMask16(channels - channels32), tail1 = TailMask16(channels - channels32 - 16);
+                size_t c = 0;
+                for (; c < channels32; c += 32)
+                {
+                    _mm512_storeu_ps(sum + c + 0x00, _mm512_setzero_ps());
+                    _mm512_storeu_ps(sum + c + 0x10, _mm512_setzero_ps());
+                }
+                if (c < channels)
+                {
+                    _mm512_mask_storeu_ps(sum + c + 0x00, tail0, _mm512_setzero_ps());
+                    _mm512_mask_storeu_ps(sum + c + 0x10, tail1, _mm512_setzero_ps());
+                }
+                size_t s = 0;
+                for (; s < spatial4; s += 4)
+                {
+                    const uint16_t* src0 = src + 0 * channels;
+                    const uint16_t* src1 = src + 1 * channels;
+                    const uint16_t* src2 = src + 2 * channels;
+                    const uint16_t* src3 = src + 3 * channels;
+                    size_t c = 0;
+                    for (; c < channels32; c += 32)
+                    {
+                        __m512 sum0 = _mm512_loadu_ps(sum + c + 0x00);
+                        __m512 sum1 = _mm512_loadu_ps(sum + c + 0x10);
+                        __m512i _src = _mm512_loadu_si512((__m512i*)(src0 + c));
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src));
+                        _src = _mm512_loadu_si512((__m512i*)(src1 + c));
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src));
+                        _src = _mm512_loadu_si512((__m512i*)(src2 + c));
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src));
+                        _src = _mm512_loadu_si512((__m512i*)(src3 + c));
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src));
+                        _mm512_storeu_ps(sum + c + 0x00, sum0);
+                        _mm512_storeu_ps(sum + c + 0x10, sum1);
+                    }
+                    if (c < channels)
+                    {
+                        __m512 sum0 = _mm512_maskz_loadu_ps(tail0, sum + c + 0x00);
+                        __m512 sum1 = _mm512_maskz_loadu_ps(tail1, sum + c + 0x10);
+                        __m512i _src = _mm512_maskz_loadu_epi16(tail, src0 + c);
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src));
+                        _src = _mm512_maskz_loadu_epi16(tail, src1 + c);
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src));
+                        _src = _mm512_maskz_loadu_epi16(tail, src2 + c);
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src));
+                        _src = _mm512_maskz_loadu_epi16(tail, src3 + c);
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src));
+                        _mm512_mask_storeu_ps(sum + c + 0x00, tail0, sum0);
+                        _mm512_mask_storeu_ps(sum + c + 0x10, tail1, sum1);
+                    }
+                    src += channels * 4;
+                }
+                for (; s < spatial; ++s)
+                {
+                    c = 0;
+                    for (; c < channels32; c += 32)
+                    {
+                        __m512 sum0 = _mm512_loadu_ps(sum + c + 0x00);
+                        __m512 sum1 = _mm512_loadu_ps(sum + c + 0x10);
+                        __m512i _src = _mm512_loadu_si512((__m512i*)(src + c));
+                        _mm512_storeu_ps(sum + c + 0x00, _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src)));
+                        _mm512_storeu_ps(sum + c + 0x10, _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src)));
+                    }
+                    if (c < channels)
+                    {
+                        __m512 sum0 = _mm512_maskz_loadu_ps(tail0, sum + c + 0x00);
+                        __m512 sum1 = _mm512_maskz_loadu_ps(tail1, sum + c + 0x10);
+                        __m512i _src = _mm512_maskz_loadu_epi16(tail, src + c);
+                        _mm512_mask_storeu_ps(sum + c + 0x00, tail0, _mm512_add_ps(sum0, BFloat16ToFloat32<0>(_src)));
+                        _mm512_mask_storeu_ps(sum + c + 0x10, tail1, _mm512_add_ps(sum1, BFloat16ToFloat32<1>(_src)));
+                    }
+                    src += channels;
+                }
+            }
+            else if (format == SimdTensorFormatNchw)
+            {
+                size_t channels4 = AlignLo(spatial, 4), spatial32 = AlignLo(spatial, 32);
+                __mmask32 tail = TailMask32(spatial - spatial32);
+                size_t c = 0;
+                for (; c < channels4; c += 4)
+                {
+                    const uint16_t* src0 = src + 0 * spatial;
+                    const uint16_t* src1 = src + 1 * spatial;
+                    const uint16_t* src2 = src + 2 * spatial;
+                    const uint16_t* src3 = src + 3 * spatial;
+                    __m512 sum00 = _mm512_setzero_ps(), sum01 = _mm512_setzero_ps();
+                    __m512 sum10 = _mm512_setzero_ps(), sum11 = _mm512_setzero_ps();
+                    __m512 sum20 = _mm512_setzero_ps(), sum21 = _mm512_setzero_ps();
+                    __m512 sum30 = _mm512_setzero_ps(), sum31 = _mm512_setzero_ps();
+                    size_t s = 0;
+                    for (; s < spatial32; s += 32)
+                    {
+                        __m512i _src = _mm512_loadu_si512((__m512i*)(src0 + s));
+                        sum00 = _mm512_add_ps(sum00, BFloat16ToFloat32Even(_src));
+                        sum01 = _mm512_add_ps(sum01, BFloat16ToFloat32Odd(_src));
+                        _src = _mm512_loadu_si512((__m512i*)(src1 + s));
+                        sum10 = _mm512_add_ps(sum10, BFloat16ToFloat32Even(_src));
+                        sum11 = _mm512_add_ps(sum11, BFloat16ToFloat32Odd(_src));
+                        _src = _mm512_loadu_si512((__m512i*)(src2 + s));
+                        sum20 = _mm512_add_ps(sum20, BFloat16ToFloat32Even(_src));
+                        sum21 = _mm512_add_ps(sum21, BFloat16ToFloat32Odd(_src));
+                        _src = _mm512_loadu_si512((__m512i*)(src3 + s));
+                        sum30 = _mm512_add_ps(sum30, BFloat16ToFloat32Even(_src));
+                        sum31 = _mm512_add_ps(sum31, BFloat16ToFloat32Odd(_src));
+                    }
+                    if (s < spatial)
+                    {
+                        __m512i _src = _mm512_maskz_loadu_epi16(tail, src0 + s);
+                        sum00 = _mm512_add_ps(sum00, BFloat16ToFloat32Even(_src));
+                        sum01 = _mm512_add_ps(sum01, BFloat16ToFloat32Odd(_src));
+                        _src = _mm512_maskz_loadu_epi16(tail, src1 + s);
+                        sum10 = _mm512_add_ps(sum10, BFloat16ToFloat32Even(_src));
+                        sum11 = _mm512_add_ps(sum11, BFloat16ToFloat32Odd(_src));
+                        _src = _mm512_maskz_loadu_epi16(tail, src2 + s);
+                        sum20 = _mm512_add_ps(sum20, BFloat16ToFloat32Even(_src));
+                        sum21 = _mm512_add_ps(sum21, BFloat16ToFloat32Odd(_src));
+                        _src = _mm512_maskz_loadu_epi16(tail, src3 + s);
+                        sum30 = _mm512_add_ps(sum30, BFloat16ToFloat32Even(_src));
+                        sum31 = _mm512_add_ps(sum31, BFloat16ToFloat32Odd(_src));
+                    }
+                    sum00 = _mm512_add_ps(sum00, sum01);
+                    sum10 = _mm512_add_ps(sum10, sum11);
+                    sum20 = _mm512_add_ps(sum20, sum21);
+                    sum30 = _mm512_add_ps(sum30, sum31);
+                    _mm_storeu_ps(sum + c, Extract4Sums(sum00, sum10, sum20, sum30));
+                    src += 4 * spatial;
+                }
+                for (; c < channels; ++c)
+                {
+                    __m512 sum0 = _mm512_setzero_ps(), sum1 = _mm512_setzero_ps();
+                    size_t s = 0;
+                    for (; s < spatial32; s += 32)
+                    {
+                        __m512i _src = _mm512_loadu_si512((__m512i*)(src + s));
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32Even(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32Odd(_src));
+                    }
+                    if(s < spatial)
+                    {
+                        __m512i _src = _mm512_maskz_loadu_epi16(tail, src + s);
+                        sum0 = _mm512_add_ps(sum0, BFloat16ToFloat32Even(_src));
+                        sum1 = _mm512_add_ps(sum1, BFloat16ToFloat32Odd(_src));
+                    }
+                    sum[c] = ExtractSum(_mm512_add_ps(sum0, sum1));
+                    src += spatial;
+                }
+            }
+            else
+                assert(0);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <SimdSynetEltwiseOperationType type> __m512 SynetEltwiseLayerForward(__m512 src0, __m512 src1);
 
         template <> SIMD_INLINE __m512 SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(__m512 src0, __m512 src1)

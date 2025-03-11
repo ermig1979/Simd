@@ -463,7 +463,9 @@ namespace Simd
 
         void SynetAddBias(const float* bias, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
 
-        void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, 
+        void SynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
+
+        void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format,
             const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
         void SynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format,

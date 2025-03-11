@@ -122,10 +122,10 @@ namespace Test
             result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx2::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
 #endif
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw())
-//            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx512bw::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
+            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx512bw::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+#endif
 
         return result;
     }
