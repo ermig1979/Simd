@@ -29,6 +29,7 @@
 #include "Test/TestRandom.h"
 
 #include "Simd/SimdSynetScale8i.h"
+#include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdSynet.h"
 
 namespace Test
@@ -329,6 +330,138 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw())
             result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Avx512bw::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 #endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncS16b
+        {
+            typedef void* (*FuncPtr)(size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias);
+
+            FuncPtr func;
+            String desc;
+
+            FuncS16b(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(size_t c, size_t s, SimdTensorDataType st, SimdTensorDataType dt, SimdTensorFormatType f, SimdBool n, SimdBool b)
+            {
+                desc = desc + "[" + ToString(c) + "x" + ToString(s) + "-" + ToChar(st) + ToChar(dt) + 
+                    (f == SimdTensorFormatNhwc ? "1-" : "0-") + (n ? "1" : "0") + (b ? "1" : "0") + "]";
+            }
+
+            void Call(void* context, const uint8_t* src, const float * norm, const float* bias, uint8_t* dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                ::SimdSynetScale16bForward(context, src, norm, bias, dst);
+            }
+        };
+    }
+
+#define FUNC_S16B(function) FuncS16b(function, #function)
+
+    bool SynetScale16bAutoTest(size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias, FuncS16b f1, FuncS16b f2)
+    {
+        bool result = true;
+
+        f1.Update(channels, spatial, srcType, dstType, format, norm, bias);
+        f2.Update(channels, spatial, srcType, dstType, format, norm, bias);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        Shape shape = ToShape(channels, spatial, format);
+        Tensor32f src32f(shape), dst32f1(shape), dst32f2(shape), norm32f(Shp(channels)), bias32f(Shp(channels));
+        Tensor16u src16b(shape), dst16b1(shape), dst16b2(shape);
+
+        FillRandom(src32f.Data(), src32f.Size(), -1.0, 1.0f);
+        FillRandom(norm32f.Data(), norm32f.Size(), -1.0, 1.0f);
+        FillRandom(bias32f.Data(), bias32f.Size(), -1.0, 1.0f);
+
+        SimdFloat32ToBFloat16(src32f.Data(), src32f.Size(), src16b.Data());
+
+        Fill(dst32f1, 1.0f);
+        Fill(dst32f2, 2.0f);
+
+        Fill(dst16b1.Data(), dst16b1.Size(), uint16_t(1));
+        Fill(dst16b2.Data(), dst16b2.Size(), uint16_t(2));
+
+        const uint8_t* src = srcType == SimdTensorData32f ? (uint8_t*)src32f.Data() : (uint8_t*)src16b.Data();
+        const float* pn = norm ? norm32f.Data() : NULL;
+        const float* pb = bias ? bias32f.Data() : NULL;
+        uint8_t* dst1 = dstType == SimdTensorData32f ? (uint8_t*)dst32f1.Data() : (uint8_t*)dst16b1.Data();
+        uint8_t* dst2 = dstType == SimdTensorData32f ? (uint8_t*)dst32f2.Data() : (uint8_t*)dst16b2.Data();
+
+        void* context1 = f1.func(channels, spatial, srcType, dstType, format, norm, bias);
+        void* context2 = f2.func(channels, spatial, srcType, dstType, format, norm, bias);
+
+        if (context1 == NULL)
+            return true;
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, pn, pb, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, pn, pb, dst2));
+
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
+
+        float eps = EPS;
+        if (dstType == SimdTensorData16b)
+        {
+            //eps = eps * 7.1f;
+            SimdBFloat16ToFloat32(dst16b1.Data(), dst16b1.Size(), dst32f1.Data());
+            SimdBFloat16ToFloat32(dst16b2.Data(), dst16b2.Size(), dst32f2.Data());
+        }
+        result = result && Compare(dst32f1, dst32f2, eps, true, 64, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetScale16bAutoTest(const FuncS16b& f1, const FuncS16b& f2)
+    {
+        bool result = true;
+
+        const SimdTensorFormatType nchw = SimdTensorFormatNchw, nhwc = SimdTensorFormatNhwc;
+        const SimdTensorDataType f32 = SimdTensorData32f, b16 = SimdTensorData16b;
+        const SimdBool t = SimdTrue, f = SimdFalse;
+
+#if 1
+        result = result && SynetScale16bAutoTest(224, 144, b16, b16, nhwc, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(333, 555, b16, b16, nhwc, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(333, 443, f32, b16, nchw, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(333, 443, f32, b16, nhwc, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(333, 225, b16, f32, nhwc, t, f, f1, f2);
+        result = result && SynetScale16bAutoTest(333, 225, b16, f32, nhwc, f, t, f1, f2);
+#endif
+
+        return result;
+    }
+
+    bool SynetScale16bAutoTest()
+    {
+        bool result = true;
+
+        if (TestBase())
+            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Base::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable && TestSse41())
+//            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Sse41::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable && TestAvx2())
+//            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx2::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+//#endif 
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable && TestAvx512bw())
+//            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx512bw::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+//#endif
 
         return result;
     }

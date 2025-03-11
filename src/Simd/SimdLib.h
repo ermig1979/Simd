@@ -7560,6 +7560,38 @@ extern "C"
 
     /*! @ingroup synet_scale
 
+        \fn void* SimdSynetScale16bInit(size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias);
+
+        \short Initilizes BF16 scale algorithm.
+
+        \param [in] channels - a number of channels in the (input/output) image tensor.
+        \param [in] spatial - a spaial size (height*width) of (input/output) image tensor.
+        \param [in] srcType - a type of input tensor. Can be FP32 of BF16.
+        \param [in] dstType - a type of output tensor. Can be FP32 of BF16.
+        \param [in] format - a format of input/output tensors.
+        \param [in] norm - a flag of presence scale operation.
+        \param [in] bias - a flag of presence shift operation.
+        \return a pointer to scale context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in function ::SimdSynetScale16bForward.
+    */
+    SIMD_API void* SimdSynetScale16bInit(size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias);
+
+    /*! @ingroup synet_scale
+
+        \fn void SimdSynetScale16bForward(void* context, const uint8_t* src, const float *norm, const float * bias, uint8_t* dst);
+
+        \short Performs forward propagation of BF16 scale algorithm.
+
+        \param [in] context - a pointer to scale context. It must be created by function ::SimdSynetScale16bInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor.
+        \param [in] norm - a pointer to FP32 array with scale coefficients. Can be NULL.
+        \param [in] bias - a pointer to FP32 array with shift coefficients. Can be NULL.
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetScale16bForward(void* context, const uint8_t* src, const float *norm, const float * bias, uint8_t* dst);
+
+    /*! @ingroup synet_scale
+
         \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
         \short This function is used for forward propagation of ScaleLayer.

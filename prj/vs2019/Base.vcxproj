@@ -98,6 +98,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTransform.h" />

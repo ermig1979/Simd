@@ -83,6 +83,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetMergedConvolution8i.h"
 #include "Simd/SimdSynetPermute.h"
 #include "Simd/SimdSynetScale8i.h"
+#include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdWarpAffine.h"
 
 #include "Simd/SimdBase.h"
@@ -5969,6 +5970,31 @@ SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     ((Base::SynetScale8i*)context)->Forward(src, dst);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void* SimdSynetScale16bInit(size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void* (*SimdSynetScale16bInitPtr) (size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias);
+    const static SimdSynetScale16bInitPtr simdSynetScale16bInit = SIMD_FUNC0(SynetScale16bInit);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+
+    return simdSynetScale16bInit(channels, spatial, srcType, dstType, format, norm, bias);
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetScale16bForward(void* context, const uint8_t* src, const float* norm, const float* bias, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    SynetScale16b* c = (SynetScale16b*)context;
+    c->Forward(src, norm, bias, dst);
 #else
     assert(0);
 #endif
