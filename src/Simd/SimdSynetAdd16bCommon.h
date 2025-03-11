@@ -53,6 +53,24 @@ namespace Simd
             float _b = Convert16b<B, float>(b);
             dst = Convert16b<float, D>(_a + _b);
         }
+
+        template <typename S, typename D> void NormBias16b(const S& src, float norm, float bias, D& dst)
+        {
+            float _src = Convert16b<S, float>(src);
+            dst = Convert16b<float, D>(_src * norm + bias);
+        }
+
+        template <typename S, typename D> void Norm16b(const S& src, float norm, D& dst)
+        {
+            float _src = Convert16b<S, float>(src);
+            dst = Convert16b<float, D>(_src * norm);
+        }
+
+        template <typename S, typename D> void Bias16b(const S& src, float bias, D& dst)
+        {
+            float _src = Convert16b<S, float>(src);
+            dst = Convert16b<float, D>(_src + bias);
+        }
     }
 }
 

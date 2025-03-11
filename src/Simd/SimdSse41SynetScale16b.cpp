@@ -26,40 +26,99 @@
 
 namespace Simd
 {
-#if defined(SIMD_SYNET_ENABLE)
-
-    SynetScale16b::SynetScale16b(const Scale16bParam& p)
-        : _param(p)
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+    namespace Sse41
     {
+        template <typename S, typename D> void NormBias16bDF(const S* src, const float * norm,  const float * bias, D* dst);
 
-    }
+        template <> SIMD_INLINE void NormBias16bDF(const float* src, const float* norm, const float* bias, float* dst)
+        {
+            _mm_storeu_ps(dst + 0, _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src + 0), _mm_loadu_ps(norm + 0)), _mm_loadu_ps(bias + 0)));
+            _mm_storeu_ps(dst + F, _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src + F), _mm_loadu_ps(norm + F)), _mm_loadu_ps(bias + F)));
+        }
 
-    //-------------------------------------------------------------------------------------------------
+        template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, const float* norm, const float* bias, float* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            _mm_storeu_ps(dst + 0, _mm_add_ps(_mm_mul_ps(BFloat16ToFloat32<0>(_src), _mm_loadu_ps(norm + 0)), _mm_loadu_ps(bias + 0)));
+            _mm_storeu_ps(dst + F, _mm_add_ps(_mm_mul_ps(BFloat16ToFloat32<1>(_src), _mm_loadu_ps(norm + F)), _mm_loadu_ps(bias + F)));
+        }
 
-    namespace Base
-    {
+        template <> SIMD_INLINE void NormBias16bDF(const float* src, const float* norm, const float* bias, uint16_t* dst)
+        {
+            __m128 dst0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src + 0), _mm_loadu_ps(norm + 0)), _mm_loadu_ps(bias + 0));
+            __m128 dst1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src + F), _mm_loadu_ps(norm + F)), _mm_loadu_ps(bias + F));
+            _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16(dst0, dst1));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, const float* norm, const float* bias, uint16_t* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128 dst0 = _mm_add_ps(_mm_mul_ps(BFloat16ToFloat32<0>(_src), _mm_loadu_ps(norm + 0)), _mm_loadu_ps(bias + 0));
+            __m128 dst1 = _mm_add_ps(_mm_mul_ps(BFloat16ToFloat32<1>(_src), _mm_loadu_ps(norm + F)), _mm_loadu_ps(bias + F));
+            _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16(dst0, dst1));
+        }
+
+        template <typename S, typename D> void NormBias16bDF(const S* src, __m128 norm, __m128 bias, D* dst);
+
+        template <> SIMD_INLINE void NormBias16bDF(const float* src, __m128 norm, __m128 bias, float* dst)
+        {
+            _mm_storeu_ps(dst + 0, _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src + 0), norm), bias));
+            _mm_storeu_ps(dst + F, _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src + F), norm), bias));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, __m128 norm, __m128 bias, float* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            _mm_storeu_ps(dst + 0, _mm_add_ps(_mm_mul_ps(BFloat16ToFloat32<0>(_src), norm), bias));
+            _mm_storeu_ps(dst + F, _mm_add_ps(_mm_mul_ps(BFloat16ToFloat32<1>(_src), norm), bias));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const float* src, __m128 norm, __m128 bias, uint16_t* dst)
+        {
+            __m128 dst0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src + 0), norm), bias);
+            __m128 dst1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src + F), norm), bias);
+            _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16(dst0, dst1));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, __m128 norm, __m128 bias, uint16_t* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128 dstE = _mm_add_ps(_mm_mul_ps(BFloat16ToFloat32Even(_src), norm), bias);
+            __m128 dstO = _mm_add_ps(_mm_mul_ps(BFloat16ToFloat32Odd(_src), norm), bias);
+            _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16Interlived(dstE, dstO));
+        }
+
         template<class S, class D> void SynetNormBias16b(const uint8_t* src8, size_t channels, size_t spatial, SimdTensorFormatType format, const float* norm, const float* bias, uint8_t* dst8)
         {
             const S* src = (const S*)src8;
             D* dst = (D*)dst8;
             if (format == SimdTensorFormatNchw)
             {
+                size_t spatialDF = AlignLo(spatial, DF);
                 for (size_t c = 0; c < channels; ++c)
                 {
-                    float _norm = norm[c];
-                    float _bias = bias[c];
-                    for (size_t s = 0; s < spatial; ++s)
-                        NormBias16b<S, D>(src[s], _norm, _bias, dst[s]);
+                    __m128 _norm = _mm_set1_ps(norm[c]);
+                    __m128 _bias = _mm_set1_ps(bias[c]);
+                    size_t s = 0;
+                    for (; s < spatialDF; s += DF)
+                        NormBias16bDF<S, D>(src + s, _norm, _bias, dst + s);
+                    for (; s < spatial; ++s)
+                        Base::NormBias16b<S, D>(src[s], norm[c], bias[c], dst[s]);
                     src += spatial;
                     dst += spatial;
                 }
             }
             else if (format == SimdTensorFormatNhwc)
             {
+                size_t channelsDF = AlignLo(channels, DF);
                 for (size_t s = 0; s < spatial; ++s)
                 {
-                    for (size_t c = 0; c < channels; ++c)
-                        NormBias16b<S, D>(src[c], norm[c], bias[c], dst[c]);
+                    size_t c = 0;
+                    for (; c < channelsDF; c += DF)
+                        NormBias16bDF<S, D>(src + c, norm + c, bias + c, dst + c);
+                    for (; c < channels; ++c)
+                        Base::NormBias16b<S, D>(src[c], norm[c], bias[c], dst[c]);
                     src += channels;
                     dst += channels;
                 }
@@ -67,6 +126,8 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         template<class S, class D> void SynetNorm16b(const uint8_t* src8, size_t channels, size_t spatial, SimdTensorFormatType format, const float* norm, const float* bias, uint8_t* dst8)
         {
@@ -78,7 +139,7 @@ namespace Simd
                 {
                     float _norm = norm[c];
                     for (size_t s = 0; s < spatial; ++s)
-                        Norm16b<S, D>(src[s], _norm, dst[s]);
+                        Base::Norm16b<S, D>(src[s], _norm, dst[s]);
                     src += spatial;
                     dst += spatial;
                 }
@@ -88,7 +149,7 @@ namespace Simd
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     for (size_t c = 0; c < channels; ++c)
-                        Norm16b<S, D>(src[c], norm[c], dst[c]);
+                        Base::Norm16b<S, D>(src[c], norm[c], dst[c]);
                     src += channels;
                     dst += channels;
                 }
@@ -96,6 +157,8 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         template<class S, class D> void SynetBias16b(const uint8_t* src8, size_t channels, size_t spatial, SimdTensorFormatType format, const float* norm, const float* bias, uint8_t* dst8)
         {
@@ -107,7 +170,7 @@ namespace Simd
                 {
                     float _bias = bias[c];
                     for (size_t s = 0; s < spatial; ++s)
-                        Bias16b<S, D>(src[s], _bias, dst[s]);
+                        Base::Bias16b<S, D>(src[s], _bias, dst[s]);
                     src += spatial;
                     dst += spatial;
                 }
@@ -117,7 +180,7 @@ namespace Simd
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     for (size_t c = 0; c < channels; ++c)
-                        Bias16b<S, D>(src[c], bias[c], dst[c]);
+                        Base::Bias16b<S, D>(src[c], bias[c], dst[c]);
                     src += channels;
                     dst += channels;
                 }
@@ -161,20 +224,9 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         SynetScale16b::SynetScale16b(const Scale16bParam& p)
-            : Simd::SynetScale16b(p)
-            , _worker(NULL)
+            : Base::SynetScale16b(p)
         {
-            _worker = GetScale16bWorker(p.sType, p.dType, p.norm, p.bias);
-        }
-
-        bool SynetScale16b::Preferable(const Scale16bParam& p)
-        {
-            return true;
-        }
-
-        void SynetScale16b::Forward(const uint8_t* src, const float* norm, const float* bias, uint8_t* dst)
-        {
-            _worker(src, _param.channels, _param.spatial, _param.format, norm, bias, dst);
+            //_worker = GetScale16bWorker(p.sType, p.dType, p.norm, p.bias);
         }
 
         //-------------------------------------------------------------------------------------------------

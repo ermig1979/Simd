@@ -96,6 +96,15 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        class SynetScale16b : public Base::SynetScale16b
+        {
+        public:
+            SynetScale16b(const Scale16bParam& p);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetScale16bInit(size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias);
     }
 #endif
 

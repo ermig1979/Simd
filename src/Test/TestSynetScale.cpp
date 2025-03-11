@@ -433,6 +433,7 @@ namespace Test
         result = result && SynetScale16bAutoTest(224, 144, b16, b16, nhwc, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(333, 555, b16, b16, nhwc, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(333, 443, f32, b16, nchw, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(333, 443, b16, b16, nchw, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(333, 443, f32, b16, nhwc, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(333, 225, b16, f32, nhwc, t, f, f1, f2);
         result = result && SynetScale16bAutoTest(333, 225, b16, f32, nhwc, f, t, f1, f2);
@@ -448,11 +449,11 @@ namespace Test
         if (TestBase())
             result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Base::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Sse41::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Sse41::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx2::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
