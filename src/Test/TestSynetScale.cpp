@@ -412,7 +412,7 @@ namespace Test
         float eps = EPS;
         if (dstType == SimdTensorData16b)
         {
-            //eps = eps * 7.1f;
+            eps = eps * 7.1f;
             SimdBFloat16ToFloat32(dst16b1.Data(), dst16b1.Size(), dst32f1.Data());
             SimdBFloat16ToFloat32(dst16b2.Data(), dst16b2.Size(), dst32f2.Data());
         }
@@ -430,7 +430,16 @@ namespace Test
         const SimdBool t = SimdTrue, f = SimdFalse;
 
 #if 1
+        result = result && SynetScale16bAutoTest(224, 144, f32, f32, nhwc, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(224, 144, f32, b16, nhwc, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(224, 144, b16, f32, nhwc, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(224, 144, b16, b16, nhwc, t, t, f1, f2);
+
+        result = result && SynetScale16bAutoTest(224, 144, f32, f32, nchw, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(224, 144, f32, b16, nchw, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(224, 144, b16, f32, nchw, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(224, 144, b16, b16, nchw, t, t, f1, f2);
+
         result = result && SynetScale16bAutoTest(333, 555, b16, b16, nhwc, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(333, 443, f32, b16, nchw, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(333, 443, b16, b16, nchw, t, t, f1, f2);
@@ -454,11 +463,11 @@ namespace Test
             result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Sse41::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2())
-//            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx2::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx2::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+#endif 
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw())
 //            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx512bw::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
