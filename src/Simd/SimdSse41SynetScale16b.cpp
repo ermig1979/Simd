@@ -228,26 +228,94 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template <typename S, typename D> void Bias16bDF(const S* src, const float* bias, D* dst);
+
+        template <> SIMD_INLINE void Bias16bDF(const float* src, const float* bias, float* dst)
+        {
+            _mm_storeu_ps(dst + 0, _mm_add_ps(_mm_loadu_ps(src + 0), _mm_loadu_ps(bias + 0)));
+            _mm_storeu_ps(dst + F, _mm_add_ps(_mm_loadu_ps(src + F), _mm_loadu_ps(bias + F)));
+        }
+
+        template <> SIMD_INLINE void Bias16bDF(const uint16_t* src, const float* bias, float* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            _mm_storeu_ps(dst + 0, _mm_add_ps(BFloat16ToFloat32<0>(_src), _mm_loadu_ps(bias + 0)));
+            _mm_storeu_ps(dst + F, _mm_add_ps(BFloat16ToFloat32<1>(_src), _mm_loadu_ps(bias + F)));
+        }
+
+        template <> SIMD_INLINE void Bias16bDF(const float* src, const float* bias, uint16_t* dst)
+        {
+            __m128 dst0 = _mm_add_ps(_mm_loadu_ps(src + 0), _mm_loadu_ps(bias + 0));
+            __m128 dst1 = _mm_add_ps(_mm_loadu_ps(src + F), _mm_loadu_ps(bias + F));
+            _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16(dst0, dst1));
+        }
+
+        template <> SIMD_INLINE void Bias16bDF(const uint16_t* src, const float* bias, uint16_t* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128 dst0 = _mm_add_ps(BFloat16ToFloat32<0>(_src), _mm_loadu_ps(bias + 0));
+            __m128 dst1 = _mm_add_ps(BFloat16ToFloat32<1>(_src),  _mm_loadu_ps(bias + F));
+            _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16(dst0, dst1));
+        }
+
+        template <typename S, typename D> void Bias16bDF(const S* src, __m128 bias, D* dst);
+
+        template <> SIMD_INLINE void Bias16bDF(const float* src, __m128 bias, float* dst)
+        {
+            _mm_storeu_ps(dst + 0, _mm_add_ps(_mm_loadu_ps(src + 0), bias));
+            _mm_storeu_ps(dst + F, _mm_add_ps(_mm_loadu_ps(src + F), bias));
+        }
+
+        template <> SIMD_INLINE void Bias16bDF(const uint16_t* src, __m128 bias, float* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            _mm_storeu_ps(dst + 0, _mm_add_ps(BFloat16ToFloat32<0>(_src), bias));
+            _mm_storeu_ps(dst + F, _mm_add_ps(BFloat16ToFloat32<1>(_src), bias));
+        }
+
+        template <> SIMD_INLINE void Bias16bDF(const float* src, __m128 bias, uint16_t* dst)
+        {
+            __m128 dst0 = _mm_add_ps(_mm_loadu_ps(src + 0), bias);
+            __m128 dst1 = _mm_add_ps(_mm_loadu_ps(src + F), bias);
+            _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16(dst0, dst1));
+        }
+
+        template <> SIMD_INLINE void Bias16bDF(const uint16_t* src, __m128 bias, uint16_t* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128 dstE = _mm_add_ps(BFloat16ToFloat32Even(_src), bias);
+            __m128 dstO = _mm_add_ps(BFloat16ToFloat32Odd(_src), bias);
+            _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16Interlived(dstE, dstO));
+        }
+
         template<class S, class D> void SynetBias16b(const uint8_t* src8, size_t channels, size_t spatial, SimdTensorFormatType format, const float* norm, const float* bias, uint8_t* dst8)
         {
             const S* src = (const S*)src8;
             D* dst = (D*)dst8;
             if (format == SimdTensorFormatNchw)
             {
+                size_t spatialDF = AlignLo(spatial, DF);
                 for (size_t c = 0; c < channels; ++c)
                 {
-                    float _bias = bias[c];
-                    for (size_t s = 0; s < spatial; ++s)
-                        Base::Bias16b<S, D>(src[s], _bias, dst[s]);
+                    __m128 _bias = _mm_set1_ps(bias[c]);
+                    size_t s = 0;
+                    for (; s < spatialDF; s += DF)
+                        Bias16bDF<S, D>(src + s, _bias, dst + s);
+                    for (; s < spatial; ++s)
+                        Base::Bias16b<S, D>(src[s], bias[c], dst[s]);
                     src += spatial;
                     dst += spatial;
                 }
             }
             else if (format == SimdTensorFormatNhwc)
             {
+                size_t channelsDF = AlignLo(channels, DF);
                 for (size_t s = 0; s < spatial; ++s)
                 {
-                    for (size_t c = 0; c < channels; ++c)
+                    size_t c = 0;
+                    for (; c < channelsDF; c += DF)
+                        Bias16bDF<S, D>(src + c, bias + c, dst + c);
+                    for (; c < channels; ++c)
                         Base::Bias16b<S, D>(src[c], bias[c], dst[c]);
                     src += channels;
                     dst += channels;
