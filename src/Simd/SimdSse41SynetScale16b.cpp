@@ -362,7 +362,7 @@ namespace Simd
         SynetScale16b::SynetScale16b(const Scale16bParam& p)
             : Base::SynetScale16b(p)
         {
-            //_worker = GetScale16bWorker(p.sType, p.dType, p.norm, p.bias);
+            _worker = GetScale16bWorker(p.sType, p.dType, p.norm, p.bias);
         }
 
         //-------------------------------------------------------------------------------------------------

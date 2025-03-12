@@ -248,15 +248,18 @@ namespace Simd
             __m512i d0 = Float32ToBFloat16(s0);
             __m512i d1 = Float32ToBFloat16(s1);
             _mm512_storeu_si512(dst, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, d1)));
-        }        
+        }
+
+        SIMD_INLINE __m512i Float32ToBFloat16(__m512 lo, __m512 hi)
+        {
+            return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(Float32ToBFloat16(lo), Float32ToBFloat16(hi)));
+        }
         
         SIMD_INLINE void Float32ToBFloat16(const float* src, uint16_t* dst, __mmask32 loadMask, __mmask32 saveMask = __mmask32(-1))
         {
             __m512 s0 = _mm512_maskz_loadu_ps(__mmask16(loadMask >> 0 * 16), src + 0 * F);
             __m512 s1 = _mm512_maskz_loadu_ps(__mmask16(loadMask >> 1 * 16), src + 1 * F);
-            __m512i d0 = Float32ToBFloat16(s0);
-            __m512i d1 = Float32ToBFloat16(s1);
-            _mm512_mask_storeu_epi16(dst, saveMask, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, d1)));
+            _mm512_mask_storeu_epi16(dst, saveMask, Float32ToBFloat16(s0));
         }
 
         SIMD_INLINE __m512 BFloat16ToFloat32Even(__m512i value)

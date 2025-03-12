@@ -468,10 +468,10 @@ namespace Test
             result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx2::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw())
-//            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx512bw::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
+            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx512bw::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+#endif
 
         return result;
     }

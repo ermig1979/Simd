@@ -129,6 +129,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetSoftmax.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetUnaryOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwTexture.cpp" />

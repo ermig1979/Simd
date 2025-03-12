@@ -33,29 +33,29 @@ namespace Simd
 
         template <> SIMD_INLINE void NormBias16bDF(const float* src, const float* norm, const float* bias, float* dst)
         {
-            _mm256_storeu_ps(dst + 0, _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + 0), _mm256_loadu_ps(norm + 0)), _mm256_loadu_ps(bias + 0)));
-            _mm256_storeu_ps(dst + F, _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + F), _mm256_loadu_ps(norm + F)), _mm256_loadu_ps(bias + F)));
+            _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(_mm256_loadu_ps(src + 0), _mm256_loadu_ps(norm + 0), _mm256_loadu_ps(bias + 0)));
+            _mm256_storeu_ps(dst + F, _mm256_fmadd_ps(_mm256_loadu_ps(src + F), _mm256_loadu_ps(norm + F), _mm256_loadu_ps(bias + F)));
         }
 
         template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, const float* norm, const float* bias, float* dst)
         {
             __m256i _src = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)src), 0xD8);
-            _mm256_storeu_ps(dst + 0, _mm256_add_ps(_mm256_mul_ps(BFloat16ToFloat32<0>(_src), _mm256_loadu_ps(norm + 0)), _mm256_loadu_ps(bias + 0)));
-            _mm256_storeu_ps(dst + F, _mm256_add_ps(_mm256_mul_ps(BFloat16ToFloat32<1>(_src), _mm256_loadu_ps(norm + F)), _mm256_loadu_ps(bias + F)));
+            _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(BFloat16ToFloat32<0>(_src), _mm256_loadu_ps(norm + 0), _mm256_loadu_ps(bias + 0)));
+            _mm256_storeu_ps(dst + F, _mm256_fmadd_ps(BFloat16ToFloat32<1>(_src), _mm256_loadu_ps(norm + F), _mm256_loadu_ps(bias + F)));
         }
 
         template <> SIMD_INLINE void NormBias16bDF(const float* src, const float* norm, const float* bias, uint16_t* dst)
         {
-            __m256 dst0 = _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + 0), _mm256_loadu_ps(norm + 0)), _mm256_loadu_ps(bias + 0));
-            __m256 dst1 = _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + F), _mm256_loadu_ps(norm + F)), _mm256_loadu_ps(bias + F));
+            __m256 dst0 = _mm256_fmadd_ps(_mm256_loadu_ps(src + 0), _mm256_loadu_ps(norm + 0), _mm256_loadu_ps(bias + 0));
+            __m256 dst1 = _mm256_fmadd_ps(_mm256_loadu_ps(src + F), _mm256_loadu_ps(norm + F), _mm256_loadu_ps(bias + F));
             _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16(dst0, dst1));
         }
 
         template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, const float* norm, const float* bias, uint16_t* dst)
         {
             __m256i _src = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)src), 0xD8);
-            __m256 dst0 = _mm256_add_ps(_mm256_mul_ps(BFloat16ToFloat32<0>(_src), _mm256_loadu_ps(norm + 0)), _mm256_loadu_ps(bias + 0));
-            __m256 dst1 = _mm256_add_ps(_mm256_mul_ps(BFloat16ToFloat32<1>(_src), _mm256_loadu_ps(norm + F)), _mm256_loadu_ps(bias + F));
+            __m256 dst0 = _mm256_fmadd_ps(BFloat16ToFloat32<0>(_src), _mm256_loadu_ps(norm + 0), _mm256_loadu_ps(bias + 0));
+            __m256 dst1 = _mm256_fmadd_ps(BFloat16ToFloat32<1>(_src), _mm256_loadu_ps(norm + F), _mm256_loadu_ps(bias + F));
             _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16(dst0, dst1));
         }
 
@@ -63,29 +63,29 @@ namespace Simd
 
         template <> SIMD_INLINE void NormBias16bDF(const float* src, __m256 norm, __m256 bias, float* dst)
         {
-            _mm256_storeu_ps(dst + 0, _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + 0), norm), bias));
-            _mm256_storeu_ps(dst + F, _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + F), norm), bias));
+            _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(_mm256_loadu_ps(src + 0), norm, bias));
+            _mm256_storeu_ps(dst + F, _mm256_fmadd_ps(_mm256_loadu_ps(src + F), norm, bias));
         }
 
         template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, __m256 norm, __m256 bias, float* dst)
         {
             __m256i _src = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)src), 0xD8);
-            _mm256_storeu_ps(dst + 0, _mm256_add_ps(_mm256_mul_ps(BFloat16ToFloat32<0>(_src), norm), bias));
-            _mm256_storeu_ps(dst + F, _mm256_add_ps(_mm256_mul_ps(BFloat16ToFloat32<1>(_src), norm), bias));
+            _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(BFloat16ToFloat32<0>(_src), norm, bias));
+            _mm256_storeu_ps(dst + F, _mm256_fmadd_ps(BFloat16ToFloat32<1>(_src), norm, bias));
         }
 
         template <> SIMD_INLINE void NormBias16bDF(const float* src, __m256 norm, __m256 bias, uint16_t* dst)
         {
-            __m256 dst0 = _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + 0), norm), bias);
-            __m256 dst1 = _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + F), norm), bias);
+            __m256 dst0 = _mm256_fmadd_ps(_mm256_loadu_ps(src + 0), norm, bias);
+            __m256 dst1 = _mm256_fmadd_ps(_mm256_loadu_ps(src + F), norm, bias);
             _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16(dst0, dst1));
         }
 
         template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, __m256 norm, __m256 bias, uint16_t* dst)
         {
             __m256i _src = _mm256_loadu_si256((__m256i*)src);
-            __m256 dstE = _mm256_add_ps(_mm256_mul_ps(BFloat16ToFloat32Even(_src), norm), bias);
-            __m256 dstO = _mm256_add_ps(_mm256_mul_ps(BFloat16ToFloat32Odd(_src), norm), bias);
+            __m256 dstE = _mm256_fmadd_ps(BFloat16ToFloat32Even(_src), norm, bias);
+            __m256 dstO = _mm256_fmadd_ps(BFloat16ToFloat32Odd(_src), norm, bias);
             _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16Interlived(dstE, dstO));
         }
 
