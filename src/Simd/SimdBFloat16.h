@@ -259,7 +259,7 @@ namespace Simd
         {
             __m512 s0 = _mm512_maskz_loadu_ps(__mmask16(loadMask >> 0 * 16), src + 0 * F);
             __m512 s1 = _mm512_maskz_loadu_ps(__mmask16(loadMask >> 1 * 16), src + 1 * F);
-            _mm512_mask_storeu_epi16(dst, saveMask, Float32ToBFloat16(s0));
+            _mm512_mask_storeu_epi16(dst, saveMask, Float32ToBFloat16(s0, s1));
         }
 
         SIMD_INLINE __m512 BFloat16ToFloat32Even(__m512i value)
