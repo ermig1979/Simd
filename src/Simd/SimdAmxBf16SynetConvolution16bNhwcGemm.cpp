@@ -474,7 +474,6 @@ namespace Simd
                 SetTileConfFull();
                 for (size_t dc = 0; dc < dstC; dc += DF)
                 {
-                    SIMD_PERF_BEG("row");
                     size_t dC = Simd::Min(DF, dstC - dc);
                     _bias[0] = _mm512_loadu_ps(bias + dc + 0);
                     _bias[1] = _mm512_loadu_ps(bias + dc + F);
@@ -549,7 +548,25 @@ namespace Simd
             __m512 f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + 0 * F), bias[0]), params, 0);
             __m512 f1 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + 1 * F), bias[1]), params, 1);
             _mm512_mask_storeu_epi16((uint16_t*)ptr, tail, (__m512i)_mm512_cvtne2ps_pbh(f1, f0));
-            _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
+            //_mm_prefetch((const char*)ptr, _MM_HINT_NTA);
+        }
+
+        template<SimdConvolutionActivationType type> static SIMD_INLINE void Apply16b2x2(uint8_t* ptr, int dP, float* buf, int dB, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
+        {
+            Apply16b2<type>(ptr + 0 * dP, buf + 0 * dB, bias, params, tail);
+            Apply16b2<type>(ptr + 1 * dP, buf + 1 * dB, bias, params, tail);
+        }
+
+        template<SimdConvolutionActivationType type> static SIMD_INLINE void Apply16b2x4(uint8_t* ptr, int dP, float* buf, int dB, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
+        {
+            Apply16b2x2<type>(ptr + 0 * dP, dP, buf + 0 * dB, dB, bias, params, tail);
+            Apply16b2x2<type>(ptr + 2 * dP, dP, buf + 2 * dB, dB, bias, params, tail);
+        }
+
+        template<SimdConvolutionActivationType type> static SIMD_INLINE void Apply16b2x8(uint8_t* ptr, int dP, float* buf, int dB, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
+        {
+            Apply16b2x4<type>(ptr + 0 * dP, dP, buf + 0 * dB, dB, bias, params, tail);
+            Apply16b2x4<type>(ptr + 4 * dP, dP, buf + 4 * dB, dB, bias, params, tail);
         }
 
         template<SimdConvolutionActivationType type> static SIMD_INLINE void Apply32f1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
@@ -601,18 +618,20 @@ namespace Simd
             _tile_loadd(7, weight1 + sc * 16, strideW);
             _tile_stream_loadd(5, src1, strideS);
             _tile_dpbf16ps(0, 4, 6);
-            _tile_dpbf16ps(1, 4, 7);
-            _tile_dpbf16ps(2, 5, 6);
-            _tile_dpbf16ps(3, 5, 7);
-
             _tile_stored(0, buf + 0, strideB);
+            _tile_dpbf16ps(1, 4, 7);
             _tile_stored(1, buf + F, strideB);
+            _tile_dpbf16ps(2, 5, 6);
             _tile_stored(2, buf + 16 * dB + 0, strideB);
+            _tile_dpbf16ps(3, 5, 7);
             _tile_stored(3, buf + 16 * dB + F, strideB);
+
             if (term == Term16bLast16b)
             {
                 __mmask32 tailD = TailMask32(dstC);
-                size_t ds = 0;
+                size_t ds = 0, dstS8 = dstS&(~7);
+                for (; ds < dstS8; ds += 8)
+                    Apply16b2x8<type>(dst + ds * dD, dD, buf + ds * dB, dB, bias, params, tailD);
                 for (; ds < dstS; ++ds)
                     Apply16b2<type>(dst + ds * dD, buf + ds * dB, bias, params, tailD);
             }
@@ -773,7 +792,6 @@ namespace Simd
                 SetTileConfFull();
                 for (size_t dc = 0; dc < dstC; dc += DF)
                 {
-                    SIMD_PERF_BEG("row");
                     size_t dC = Simd::Min(DF, dstC - dc);
                     _bias[0] = _mm512_loadu_ps(bias + dc + 0);
                     _bias[1] = _mm512_loadu_ps(bias + dc + F);
