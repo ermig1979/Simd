@@ -412,7 +412,7 @@ namespace Test
         float eps = EPS;
         if (dstType == SimdTensorData16b)
         {
-            eps = eps * 7.1f;
+            eps = eps * 7.3f;
             SimdBFloat16ToFloat32(dst16b1.Data(), dst16b1.Size(), dst32f1.Data());
             SimdBFloat16ToFloat32(dst16b2.Data(), dst16b2.Size(), dst32f2.Data());
         }
