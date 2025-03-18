@@ -837,7 +837,7 @@ namespace Simd
         {
             size_t n = 32, n1 = dstH * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * DF;
             size_t dD = p.dstC * a.elem, dS = a.bufK;
-            bool dstAligned = Aligned(dst, A) && Aligned(dD, A);
+            bool bigAlignedDst = Aligned(dst, A) && Aligned(dD, A) && dD * p.dstW * p.dstH > 4 * Base::AlgCacheL1();
 
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -858,7 +858,7 @@ namespace Simd
                 SetTileConfFull();
                 for (size_t dc = 0; dc < dstC; dc += DF)
                 {
-                    if(dstAligned)
+                    if(bigAlignedDst)
                         body_2 = dc == 0 ? Convolution16bNhwcGemm_TinyC_32x32<term, type, 0, 2> : Convolution16bNhwcGemm_TinyC_32x32<term, type, 1, 2>;
                     else
                         body_2 = dc == 0 ? Convolution16bNhwcGemm_TinyC_32x32<term, type, 0, 1> : Convolution16bNhwcGemm_TinyC_32x32<term, type, 1, 1>;
