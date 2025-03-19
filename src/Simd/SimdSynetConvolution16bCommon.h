@@ -1188,6 +1188,30 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply16b2(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
+        {
+            __m512 f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + 0), bias[0]), params, 0);
+            __m512 f1 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + F), bias[1]), params, 1);
+            _mm512_mask_storeu_epi16((uint16_t*)ptr, tail, (__m512i)_mm512_cvtne2ps_pbh(f1, f0));
+            _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
+            _mm_prefetch((const char*)(buf + 0), _MM_HINT_NTA);
+            _mm_prefetch((const char*)(buf + F), _MM_HINT_NTA);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply16b2x8(uint8_t* ptr, int dP, float* buf, int dB, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
+        {
+            Apply16b2<type>(ptr + 0 * dP, buf + 0 * dB, bias, params, tail);
+            Apply16b2<type>(ptr + 1 * dP, buf + 1 * dB, bias, params, tail);
+            Apply16b2<type>(ptr + 2 * dP, buf + 2 * dB, bias, params, tail);
+            Apply16b2<type>(ptr + 3 * dP, buf + 3 * dB, bias, params, tail);
+            Apply16b2<type>(ptr + 4 * dP, buf + 4 * dB, bias, params, tail);
+            Apply16b2<type>(ptr + 5 * dP, buf + 5 * dB, bias, params, tail);
+            Apply16b2<type>(ptr + 6 * dP, buf + 6 * dB, bias, params, tail);
+            Apply16b2<type>(ptr + 7 * dP, buf + 7 * dB, bias, params, tail);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Postprocess(const float* sum, const float* bias, const float* params, size_t offset, uint8_t* dst, __mmask16 tail = __mmask16(-1))
         {
             Term16b<term>::template Postprocess<type>(sum, bias, params, offset, dst, tail);

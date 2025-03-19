@@ -280,7 +280,16 @@ namespace Simd
             _tile_stored(1, buf + F, strideB);
             _tile_stored(2, buf + 16 * dB + 0, strideB);
             _tile_stored(3, buf + 16 * dB + F, strideB);
-            if (type)
+            if (term == Term16bLast16b)
+            {
+                __mmask32 tailD = TailMask32(dstC);
+                size_t dstS8 = AlignLo(dstS, 8), ds = 0;
+                for (; ds < dstS8; ds += 8)
+                    Apply16b2x8<type>(dst + ds * dD, dD, buf + ds * dB, dB, bias, params, tailD);
+                for (; ds < dstS; ++ds)
+                    Apply16b2<type>(dst + ds * dD, buf + ds * dB, bias, params, tailD);
+            }
+            else if (Term16bLast32f)
             {
                 __mmask16 tailD = TailMask16(dstC - F);
                 size_t dstS8 = AlignLo(dstS, 8), ds = 0;
@@ -336,7 +345,7 @@ namespace Simd
 
             _tile_stored(0, buf + 0, strideB);
             _tile_stored(2, buf + 16 * dB + 0, strideB);
-            if (type)
+            if (term == Term16bLast16b || term == Term16bLast32f)
             {
                 __mmask16 tailD = TailMask16(dstC);
                 size_t dstS8 = AlignLo(dstS, 8), ds = 0;
@@ -390,7 +399,7 @@ namespace Simd
 
             _tile_stored(0, buf + 0, strideB);
             _tile_stored(1, buf + F, strideB);
-            if (type)
+            if (term == Term16bLast16b || term == Term16bLast32f)
             {
                 __mmask16 tailD = TailMask16(dstC - F);
                 size_t dstS8 = AlignLo(dstS, 8), ds = 0;
@@ -431,7 +440,7 @@ namespace Simd
             }
 
             _tile_stored(0, buf + 0, strideB);
-            if (type)
+            if (term == Term16bLast16b || term == Term16bLast32f)
             {
                 __mmask16 tailD = TailMask16(dstC);
                 size_t dstS8 = AlignLo(dstS, 8), ds = 0;
@@ -985,9 +994,9 @@ namespace Simd
             }
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationPrelu>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRelu>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, _alg, _convolutions); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, _alg, _convolutions); break;
             case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, _alg, _convolutions); break;
