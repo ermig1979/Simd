@@ -144,6 +144,7 @@
     <ClInclude Include="..\..\src\Test\TestFile.h" />
     <ClInclude Include="..\..\src\Test\TestHtml.h" />
     <ClInclude Include="..\..\src\Test\TestLog.h" />
+    <ClInclude Include="..\..\src\Test\TestOptions.h" />
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />
     <ClInclude Include="..\..\src\Test\TestRandom.h" />
     <ClInclude Include="..\..\src\Test\TestString.h" />

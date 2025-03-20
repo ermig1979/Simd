@@ -28,6 +28,7 @@
 #include "Test/TestLog.h"
 #include "Test/TestString.h"
 #include "Test/TestTensor.h"
+#include "Test/TestOptions.h"
 
 #if defined(_MSC_VER)
 #ifndef NOMINMAX
@@ -634,169 +635,21 @@ namespace Test
         std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds));
     }
 
-    struct Options
+    bool Required(const Options & options, const Group& group)
     {
-        enum Mode
-        {
-            Auto,
-            Special,
-        } mode;
-
-        bool help;
-
-        Strings include, exclude;
-
-        String text, html;
-
-        size_t workThreads, testRepeats, testStatistics;
-
-        bool printAlign, printInternal, checkCpp;
-
-        Options(int argc, char* argv[])
-            : mode(Auto)
-            , help(false)
-            , testRepeats(1)
-            , workThreads(1)
-            , testStatistics(0)
-            , printAlign(false)
-            , printInternal(true)
-            , checkCpp(false)
-        {
-            for (int i = 1; i < argc; ++i)
-            {
-                String arg = argv[i];
-                if (arg.substr(0, 5) == "-help" || arg.substr(0, 2) == "-?")
-                {
-                    help = true;
-                    break;
-                }
-                else if (arg.find("-m=") == 0)
-                {
-                    switch (arg[3])
-                    {
-                    case 'a': mode = Auto; break;
-                    case 's': mode = Special; break;
-                    default:
-                        TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
-                        exit(1);
-                    }
-                }
-                else if (arg.find("-tt=") == 0)
-                {
-                    TEST_THREADS = Simd::Min<int>(FromString<int>(arg.substr(4, arg.size() - 4)), (size_t)std::thread::hardware_concurrency());
-                }
-                else if (arg.find("-tr=") == 0)
-                {
-                    testRepeats = FromString<size_t>(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-ts=") == 0)
-                {
-                    testStatistics = FromString<int>(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-fi=") == 0)
-                {
-                    include.push_back(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-fe=") == 0)
-                {
-                    exclude.push_back(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-ot=") == 0)
-                {
-                    text = arg.substr(4, arg.size() - 4);
-                }
-                else if (arg.find("-oh=") == 0)
-                {
-                    html = arg.substr(4, arg.size() - 4);
-                }
-                else if (arg.find("-r=") == 0)
-                {
-                    ROOT_PATH = arg.substr(3, arg.size() - 3);
-                }
-                else if (arg.find("-s=") == 0)
-                {
-                    SOURCE = arg.substr(3, arg.size() - 3);
-                }
-                else if (arg.find("-o=") == 0)
-                {
-                    OUTPUT = arg.substr(3, arg.size() - 3);
-                }
-                else if (arg.find("-c=") == 0)
-                {
-                    C = FromString<int>(arg.substr(3, arg.size() - 3));
-                }
-                else if (arg.find("-h=") == 0)
-                {
-                    H = FromString<int>(arg.substr(3, arg.size() - 3));
-                }                
-                else if (arg.find("-w=") == 0)
-                {
-                    W = FromString<int>(arg.substr(3, arg.size() - 3));
-                }
-                else if (arg.find("-pa=") == 0)
-                {
-                    printAlign = FromString<bool>(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-pi=") == 0)
-                {
-                    printInternal = FromString<bool>(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-wt=") == 0)
-                {
-                    workThreads = FromString<size_t>(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-mt=") == 0)
-                {
-                    MINIMAL_TEST_EXECUTION_TIME = FromString<int>(arg.substr(4, arg.size() - 4))*0.001;
-                }
-                else if (arg.find("-lc=") == 0)
-                {
-                    LITTER_CPU_CACHE = FromString<int>(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-ri=") == 0)
-                {
-                    REAL_IMAGE = arg.substr(4, arg.size() - 4);
-                }
-                else if (arg.find("-cc=") == 0)
-                {
-                    checkCpp = FromString<bool>(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-de=") == 0)
-                {
-                    DISABLED_EXTENSIONS = FromString<uint32_t>(arg.substr(4, arg.size() - 4));
-                }
-                else if (arg.find("-wu=") == 0)
-                {
-                    WARM_UP_TIME = FromString<int>(arg.substr(4, arg.size() - 4)) * 0.001;
-                }
-                else if (arg.find("-pt=") == 0)
-                {
-                    PIN_THREAD = FromString<bool>(arg.substr(4, arg.size() - 4));
-                }
-                else
-                {
-                    TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
-                    exit(1);
-                }
-            }
-        }
-
-        bool Required(const Group & group) const
-        {
-            if (mode == Auto && group.autoTest == NULL)
-                return false;
-            if (mode == Special && group.specialTest == NULL)
-                return false;
-            bool required = include.empty();
-            for (size_t i = 0; i < include.size() && !required; ++i)
-                if (group.name.find(include[i]) != std::string::npos)
-                    required = true;
-            for (size_t i = 0; i < exclude.size() && required; ++i)
-                if (group.name.find(exclude[i]) != std::string::npos)
-                    required = false;
-            return required;
-        }
-    };
+        if (options.mode == Options::Auto && group.autoTest == NULL)
+            return false;
+        if (options.mode == Options::Special && group.specialTest == NULL)
+            return false;
+        bool required = options.include.empty();
+        for (size_t i = 0; i < options.include.size() && !required; ++i)
+            if (group.name.find(options.include[i]) != std::string::npos)
+                required = true;
+        for (size_t i = 0; i < options.exclude.size() && required; ++i)
+            if (group.name.find(options.exclude[i]) != std::string::npos)
+                required = false;
+        return required;
+    }
 
     int MakeAutoTests(Groups & groups, const Options & options)
     {
@@ -917,7 +770,7 @@ namespace Test
         std::cout << "-ot=log.txt  - a file name with test report (in TEXT format)." << std::endl;
         std::cout << "               The test's report also will be output to console." << std::endl << std::endl;
         std::cout << "Also you can use parameters: " << std::endl << std::endl;
-        std::cout << "    -help or -?   to print this help message." << std::endl << std::endl;
+        std::cout << "    --help or -?   to print this help message." << std::endl << std::endl;
         std::cout << "    -r=../..      to set project root directory." << std::endl << std::endl;
         std::cout << "    -pa=1         to print alignment statistics." << std::endl << std::endl;
         std::cout << "    -pi=1         to print internal statistics (Cmake parameter SIMD_PERF must be ON)." << std::endl << std::endl;
@@ -986,7 +839,7 @@ int main(int argc, char* argv[])
     Test::Groups groups;
     for (const Test::Group& group : Test::g_groups)
     {
-        if (options.Required(group))
+        if (Test::Required(options, group))
         {
             for(size_t r = 0; r < options.testRepeats; ++r)
                 groups.push_back(group);
