@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 #define SIMD_CHECK_PERFORMANCE() TEST_PERFORMANCE_TEST_(SIMD_FUNCTION)
@@ -1283,7 +1284,7 @@ namespace Test
         return true;
     }
 
-    bool NeuralPredictSpecialTest()
+    bool NeuralPredictSpecialTest(const Options & options)
     {
         Network net;
         if (!CreateNetwork(net, false, false))
@@ -1348,7 +1349,7 @@ namespace Test
         TEST_LOG_SS(Info, "Simd::Neural::Network uses " << dst.train.src.size() << " samples for train and " << dst.check.src.size() << " samples for check.");
     }
 
-    bool NeuralTrainSpecialTest()
+    bool NeuralTrainSpecialTest(const Options & options)
     {
         Network net;
         if (!CreateNetwork(net, false, false))
@@ -1364,15 +1365,15 @@ namespace Test
         TrainData data;
         Prepare(sample, 8, data);
 
-        TrainOptions options;
-        options.epochFinish = 101;
+        TrainOptions trainOptions;
+        trainOptions.epochFinish = 101;
 #ifdef _DEBUG
-        options.threadNumber = 1;
+        trainOptions.threadNumber = 1;
 #endif
 
-        Logger logger(&net, &data, &options);
+        Logger logger(&net, &data, &trainOptions);
 
-        net.Train(data.train.src, data.train.dst, options, logger);
+        net.Train(data.train.src, data.train.dst, trainOptions, logger);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
         TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.ConsoleReport(false, true));

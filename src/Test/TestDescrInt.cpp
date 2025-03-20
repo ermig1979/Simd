@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
 #include "Test/TestTensor.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdDescrInt.h"
 #include "Simd/SimdParallel.hpp"
@@ -785,18 +786,18 @@ namespace Test
         }
     }
 
-    static Pairss CompareDescriptors32f(size_t M, size_t N, size_t size, const float* const* a, const float* const* b, float threshold)
+    static Pairss CompareDescriptors32f(const Options& options, size_t M, size_t N, size_t size, const float* const* a, const float* const* b, float threshold)
     {
         TEST_PERFORMANCE_TEST(String(__FUNCTION__) + FuncDescr(M, N, size));
         Pairss result(M);
-        if (TEST_THREADS)
+        if (options.testThreads)
         {
-            std::vector<Pairss> buffer(TEST_THREADS);
+            std::vector<Pairss> buffer(options.testThreads);
             Simd::Parallel(0, N, [&](size_t thread, size_t begin, size_t end)
                 {
                     CompareDescriptors32f(M, begin, end, size, a, b, threshold, buffer[thread]);
-                }, TEST_THREADS, 1);
-            for (size_t t = 0; t < TEST_THREADS; ++t)
+                }, options.testThreads, 1);
+            for (size_t t = 0; t < options.testThreads; ++t)
                 for (size_t j = 0; j < M; ++j)
                     for (size_t i = 0; i < buffer[t][j].size(); ++i)
                         result[j].push_back(buffer[t][j][i]);            
@@ -827,18 +828,18 @@ namespace Test
         }
     }
 
-    static Pairss CompareDescriptors16b(size_t M, size_t N, size_t size, const uint16_t* const* a, const uint16_t* const* b, float threshold)
+    static Pairss CompareDescriptors16b(const Options& options, size_t M, size_t N, size_t size, const uint16_t* const* a, const uint16_t* const* b, float threshold)
     {
         TEST_PERFORMANCE_TEST(String(__FUNCTION__) + FuncDescr(M, N, size));
         Pairss result(M);
-        if (TEST_THREADS)
+        if (options.testThreads)
         {
-            std::vector<Pairss> buffer(TEST_THREADS);
+            std::vector<Pairss> buffer(options.testThreads);
             Simd::Parallel(0, N, [&](size_t thread, size_t begin, size_t end)
                 {
                     CompareDescriptors16b(M, begin, end, size, a, b, threshold, buffer[thread]);
-                }, TEST_THREADS, 256);
-            for (size_t t = 0; t < TEST_THREADS; ++t)
+                }, options.testThreads, 256);
+            for (size_t t = 0; t < options.testThreads; ++t)
                 for (size_t j = 0; j < M; ++j)
                     for (size_t i = 0; i < buffer[t][j].size(); ++i)
                         result[j].push_back(buffer[t][j][i]);
@@ -869,18 +870,18 @@ namespace Test
         }
     }
 
-    static Pairss CompareDescriptors8u(size_t depth, const void *context, size_t M, size_t N, size_t size, const uint8_t* const* a, const uint8_t* const* b, float threshold)
+    static Pairss CompareDescriptors8u(const Options& options, size_t depth, const void *context, size_t M, size_t N, size_t size, const uint8_t* const* a, const uint8_t* const* b, float threshold)
     {
         TEST_PERFORMANCE_TEST(String(__FUNCTION__) + FuncDescr(M, N, size, depth));
         Pairss result(M);
-        if (TEST_THREADS)
+        if (options.testThreads)
         {
-            std::vector<Pairss> buffer(TEST_THREADS);
+            std::vector<Pairss> buffer(options.testThreads);
             Simd::Parallel(0, N, [&](size_t thread, size_t begin, size_t end)
                 {
                     CompareDescriptors8u(context, M, begin, end, size, a, b, threshold, buffer[thread]);
-                }, TEST_THREADS, 1024);
-            for (size_t t = 0; t < TEST_THREADS; ++t)
+                }, options.testThreads, 1024);
+            for (size_t t = 0; t < options.testThreads; ++t)
                 for (size_t j = 0; j < M; ++j)
                     for (size_t i = 0; i < buffer[t][j].size(); ++i)
                         result[j].push_back(buffer[t][j][i]);
@@ -913,11 +914,11 @@ namespace Test
         return true;
     }
 
-    bool DescrIntCosineDistancesMxNaSpecialTest(size_t M, size_t N, size_t size, size_t depth)
+    bool DescrIntCosineDistancesMxNaSpecialTest(const Options& options, size_t M, size_t N, size_t size, size_t depth)
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "DescrIntCosineDistancesMxNa " << std::max(TEST_THREADS, 1) << " threads special test [" << M << "x" << N << "x" << size << "]:");
+        TEST_LOG_SS(Info, "DescrIntCosineDistancesMxNa " << std::max<int>(options.testThreads, 1) << " threads special test [" << M << "x" << N << "x" << size << "]:");
 
         const float threshold = 0.5f;
 
@@ -958,11 +959,11 @@ namespace Test
 
         Pairss res32f, res16b, res8u;
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(res32f = CompareDescriptors32f(M, N, size, a32fp.data(), b32fp.data(), threshold));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(res32f = CompareDescriptors32f(options, M, N, size, a32fp.data(), b32fp.data(), threshold));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(res16b = CompareDescriptors16b(M, N, size, a16bp.data(), b16bp.data(), threshold));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(res16b = CompareDescriptors16b(options, M, N, size, a16bp.data(), b16bp.data(), threshold));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(res8u = CompareDescriptors8u(depth, context, M, N, size, a8up.data(), b8up.data(), threshold));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(res8u = CompareDescriptors8u(options, depth, context, M, N, size, a8up.data(), b8up.data(), threshold));
 
         SimdRelease(context);
 
@@ -975,30 +976,30 @@ namespace Test
         return true;
     }
 
-    bool DescrIntCosineDistancesMxNaSpecialTest()
+    bool DescrIntCosineDistancesMxNaSpecialTest(const Options & options)
     {
         bool result = true;
 
 #if defined(NDEBUG)
 #if defined(SIMD_AMXBF16_ENABLE)
 #if 0
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 10000000, 512, 7);
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(10, 10000000, 512, 7);
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(100, 10000000, 512, 7);
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(1000, 10000000, 512, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 1, 10000000, 512, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 10, 10000000, 512, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 100, 10000000, 512, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 1000, 10000000, 512, 7);
 #endif
 #if 1
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 10000000, 256, 7);
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(10, 10000000, 256, 7);
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(100, 10000000, 256, 7);
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(1000, 10000000, 256, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 1, 10000000, 256, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 10, 10000000, 256, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 100, 10000000, 256, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 1000, 10000000, 256, 7);
 #endif
 #else
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(1, 1000000, 512, 7);
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(8, 1000000, 512, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 1, 1000000, 512, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 8, 1000000, 512, 7);
 #endif
 #else
-        result = result && DescrIntCosineDistancesMxNaSpecialTest(10, 1024, 512, 7);
+        result = result && DescrIntCosineDistancesMxNaSpecialTest(options, 10, 1024, 512, 7);
 #endif
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE

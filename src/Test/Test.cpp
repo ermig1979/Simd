@@ -44,7 +44,7 @@
 namespace Test
 {
     typedef bool(*AutoTestPtr)();
-    typedef bool(*SpecialTestPtr)();
+    typedef bool(*SpecialTestPtr)(const Options& options);
 
     struct Group
     {
@@ -64,7 +64,7 @@ namespace Test
     Groups g_groups;
 
 #define TEST_ADD_GROUP_0S(name) \
-    bool name##SpecialTest(); \
+    bool name##SpecialTest(const Options & options); \
     bool name##AddToList(){ g_groups.push_back(Group(#name, NULL, name##SpecialTest)); return true; } \
     bool name##AtList = name##AddToList();
 
@@ -75,7 +75,7 @@ namespace Test
 
 #define TEST_ADD_GROUP_AS(name) \
     bool name##AutoTest(); \
-    bool name##SpecialTest(); \
+    bool name##SpecialTest(const Options & options); \
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##SpecialTest)); return true; } \
     bool name##AtList = name##AddToList();
 
@@ -653,14 +653,14 @@ namespace Test
 
     int MakeAutoTests(Groups & groups, const Options & options)
     {
-        if (TEST_THREADS > 0)
+        if (options.testThreads > 0)
         {
             if (PIN_THREAD)
                 PinThread(SimdCpuInfo(SimdCpuInfoThreads) - 1);
 
             Test::Log::s_log.SetLevel(Test::Log::Error);
 
-            size_t testThreads = Simd::Min<size_t>(TEST_THREADS, groups.size());
+            size_t testThreads = Simd::Min<size_t>(options.testThreads, groups.size());
             size_t total = groups.size();
             size_t block = Simd::DivHi(total, testThreads);
             testThreads = Simd::Min(testThreads, Simd::DivHi(total, block));
@@ -733,7 +733,7 @@ namespace Test
         {
             TEST_LOG_SS(Info, group.name << "SpecialTest is started :");
             group.time = GetTime();
-            bool result = group.specialTest();
+            bool result = group.specialTest(options);
             group.time = GetTime() - group.time;
             TEST_LOG_SS(Info, group.name << "SpecialTest is finished " << (result ? "successfully." : "with errors!") << std::endl);
             if (!result)
@@ -817,7 +817,6 @@ namespace Test
     double MINIMAL_TEST_EXECUTION_TIME = 0.1;
     double WARM_UP_TIME = 0.0;
     int LITTER_CPU_CACHE = 0;
-    int TEST_THREADS = 0;
     uint32_t DISABLED_EXTENSIONS = 0;
     bool PIN_THREAD = true;
 

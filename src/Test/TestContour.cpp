@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -210,7 +211,7 @@ namespace Test
 {
     typedef Simd::ContourDetector<Simd::Allocator> ContourDetector;
 
-    bool ContourDetectorSpecialTest()
+    bool ContourDetectorSpecialTest(const Options & options)
     {
         ContourDetector::View image;
 

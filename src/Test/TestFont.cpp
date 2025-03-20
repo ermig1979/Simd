@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdFont.hpp"
 
@@ -199,7 +200,7 @@ namespace Test
 
 namespace Test
 {
-    bool FontDrawSpecialTest()
+    bool FontDrawSpecialTest(const Options & options)
     {
         typedef Simd::Pixel::Bgra32 Color;
 

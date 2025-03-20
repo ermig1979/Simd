@@ -26,6 +26,7 @@
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 #include "Test/TestFile.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdWarpAffine.h"
 
@@ -355,7 +356,7 @@ namespace Test
         return result;
     }
 
-    bool WarpAffineOpenCvSpecialTest()
+    bool WarpAffineOpenCvSpecialTest(const Options & options)
     {
         bool result = true;
 

@@ -26,6 +26,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdImageLoad.h"
 #include "Simd/SimdImageSave.h"
@@ -898,7 +899,7 @@ namespace Test
         return result;
     }
 
-    bool ImageLoadFromMemorySpecialTest()
+    bool ImageLoadFromMemorySpecialTest(const Options & options)
     {
         bool result = true;
 

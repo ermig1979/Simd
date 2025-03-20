@@ -26,6 +26,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 //-----------------------------------------------------------------------------
 
@@ -123,7 +124,7 @@ namespace Test
         TEST_LOG_SS(Info, "Filtration performance for " << g_names[type] << " : " << std::setprecision(3) << std::fixed << (GetTime() - time) << " s. ");
     }
 
-    bool ImageMatcherSpecialTest()
+    bool ImageMatcherSpecialTest(const Options & options)
     {
         bool result = true;
 

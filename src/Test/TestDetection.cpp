@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdDrawing.hpp"
 
@@ -482,7 +483,7 @@ namespace Test
 #endif
     }
 
-    bool DetectionSpecialTest()
+    bool DetectionSpecialTest(const Options & options)
     {
         Detection detection;
 

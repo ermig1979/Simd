@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -181,7 +182,7 @@ namespace Test
         return true;
     }
 
-    bool ShiftDetectorRandSpecialTest()
+    bool ShiftDetectorRandSpecialTest(const Options & options)
     {
         typedef Simd::ShiftDetector<Simd::Allocator> ShiftDetector;
 
@@ -228,7 +229,7 @@ namespace Test
         return true;
     }
 
-    bool ShiftDetectorFileSpecialTest()
+    bool ShiftDetectorFileSpecialTest(const Options & options)
     {
         typedef Simd::ShiftDetector<Simd::Allocator> ShiftDetector;
 

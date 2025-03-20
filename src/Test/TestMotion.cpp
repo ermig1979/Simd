@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestVideo.h"
+#include "Test/TestOptions.h"
 
 //-----------------------------------------------------------------------------
 
@@ -127,7 +128,7 @@ namespace Test
         }
     };
 
-    bool MotionSpecialTest()
+    bool MotionSpecialTest(const Options & options)
     {
         Video video(true);
 

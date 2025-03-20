@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdFrame.hpp"
 
@@ -453,7 +454,7 @@ namespace Test
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Yuv420pToRgbV2SpecialTest()
+    bool Yuv420pToRgbV2SpecialTest(const Options & options)
     {
         bool result = true;
 

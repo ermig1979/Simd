@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -633,7 +634,7 @@ namespace Test
 
 namespace Test
 {
-    bool DrawLineSpecialTest()
+    bool DrawLineSpecialTest(const Options & options)
     {
         View image(W, H, View::Gray8);
 
@@ -655,7 +656,7 @@ namespace Test
         return true;
     }
 
-    bool DrawRectangleSpecialTest()
+    bool DrawRectangleSpecialTest(const Options & options)
     {
         View image(W, H, View::Gray8);
 
@@ -681,7 +682,7 @@ namespace Test
         return true;
     }
 
-    bool DrawFilledRectangleSpecialTest()
+    bool DrawFilledRectangleSpecialTest(const Options & options)
     {
         View image(W, H, View::Gray8);
 
@@ -704,7 +705,7 @@ namespace Test
         return true;
     }
 
-    bool DrawPolygonSpecialTest()
+    bool DrawPolygonSpecialTest(const Options & options)
     {
         View image(W, H, View::Gray8);
 
@@ -731,7 +732,7 @@ namespace Test
         return true;
     }
 
-    bool DrawFilledPolygonSpecialTest()
+    bool DrawFilledPolygonSpecialTest(const Options & options)
     {
         View image(W, H, View::Gray8);
 
@@ -758,7 +759,7 @@ namespace Test
         return true;
     }
 
-    bool DrawEllipseSpecialTest()
+    bool DrawEllipseSpecialTest(const Options & options)
     {
         View image(W, H, View::Gray8);
 
@@ -781,7 +782,7 @@ namespace Test
         return true;
     }
 
-    bool DrawCircleSpecialTest()
+    bool DrawCircleSpecialTest(const Options & options)
     {
         View image(W, H, View::Gray8);
 

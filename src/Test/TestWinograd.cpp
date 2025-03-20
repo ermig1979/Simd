@@ -26,6 +26,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -1211,7 +1212,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel1x3Block1x4SpecialTest()
+    bool WinogradKernel1x3Block1x4SpecialTest(const Options & options)
     {
         return WinogradKernel1x3SpecialTest(4, FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter), FUNC_WI(SimdWinogradKernel1x3Block1x4SetInput), FUNC_WO(SimdWinogradKernel1x3Block1x4SetOutput));
     }
@@ -1240,7 +1241,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel1x5Block1x4SpecialTest()
+    bool WinogradKernel1x5Block1x4SpecialTest(const Options & options)
     {
         return WinogradKernel1x5SpecialTest(4, FUNC_WF(SimdWinogradKernel1x5Block1x4SetFilter), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput), FUNC_WO(SimdWinogradKernel1x5Block1x4SetOutput));
     }
@@ -1271,12 +1272,12 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel2x2Block2x2SpecialTest()
+    bool WinogradKernel2x2Block2x2SpecialTest(const Options & options)
     {
         return WinogradKernel2x2SpecialTest(2, FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter), FUNC_WI(SimdWinogradKernel2x2Block2x2SetInput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
     }
 
-    bool WinogradKernel2x2Block4x4SpecialTest()
+    bool WinogradKernel2x2Block4x4SpecialTest(const Options & options)
     {
         return WinogradKernel2x2SpecialTest(4, FUNC_WF(SimdWinogradKernel2x2Block4x4SetFilter), FUNC_WI(SimdWinogradKernel2x2Block4x4SetInput), FUNC_WO(SimdWinogradKernel2x2Block4x4SetOutput));
     }
@@ -1306,17 +1307,17 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block2x2SpecialTest()
+    bool WinogradKernel3x3Block2x2SpecialTest(const Options & options)
     {
         return WinogradKernel3x3SpecialTest(2, FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter), FUNC_WI(SimdWinogradKernel3x3Block2x2SetInput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
     }
 
-    bool WinogradKernel3x3Block3x3SpecialTest()
+    bool WinogradKernel3x3Block3x3SpecialTest(const Options & options)
     {
         return WinogradKernel3x3SpecialTest(3, FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter), FUNC_WI(SimdWinogradKernel3x3Block3x3SetInput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
     }
 
-    bool WinogradKernel3x3Block4x4SpecialTest()
+    bool WinogradKernel3x3Block4x4SpecialTest(const Options & options)
     {
         return WinogradKernel3x3SpecialTest(4, FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter), FUNC_WI(SimdWinogradKernel3x3Block4x4SetInput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
     }

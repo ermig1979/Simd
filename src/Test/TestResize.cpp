@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdResizer.h"
 
@@ -414,7 +415,7 @@ namespace Test
         return result;
     }
 
-    bool ResizeYuv420pSpecialTest()
+    bool ResizeYuv420pSpecialTest(const Options & options)
     {
         bool result = true;
 

@@ -26,6 +26,7 @@
 
 #include "Test/TestConfig.h"
 #include "Test/TestLog.h"
+#include "Test/TestString.h"
 
 namespace Test
 {
@@ -191,7 +192,7 @@ namespace Test
             , checkCpp(false)
         {
             help = HasArg("--help", "-?");
-            testThreads = Simd::RestrictRange<int>(FromString<int>(GetArg("-tt", "0", false)), 0, std::thread::hardware_concurrency());
+            testThreads = std::min<int>(std::max<int>(FromString<int>(GetArg("-tt", "0", false)), 0), std::thread::hardware_concurrency());
 
             for (int i = 1; i < argc; ++i)
             {
@@ -214,7 +215,7 @@ namespace Test
                 }
                 else if (arg.find("-tt=") == 0)
                 {
-                    TEST_THREADS = Simd::Min<int>(FromString<int>(arg.substr(4, arg.size() - 4)), (size_t)std::thread::hardware_concurrency());
+                    //TEST_THREADS = std::min<int>(FromString<int>(arg.substr(4, arg.size() - 4)), (size_t)std::thread::hardware_concurrency());
                 }
                 else if (arg.find("-tr=") == 0)
                 {

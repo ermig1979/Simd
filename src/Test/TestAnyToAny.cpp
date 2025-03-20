@@ -27,6 +27,7 @@
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
 #include "Test/TestFile.h"
+#include "Test/TestOptions.h"
 
 #ifdef SIMD_OPENCV_ENABLE
 #include <opencv2/core/core.hpp>
@@ -541,7 +542,7 @@ namespace Test
         return result;
     }
 
-    bool ConvertImageSpecialTest()
+    bool ConvertImageSpecialTest(const Options & options)
     {
         bool result = true;
 
@@ -555,7 +556,7 @@ namespace Test
 
     //-----------------------------------------------------------------------------------------------------
 
-    bool BgrToLabSpecialTest()
+    bool BgrToLabSpecialTest(const Options & options)
     {
         bool result = true;
 #ifdef SIMD_OPENCV_ENABLE
