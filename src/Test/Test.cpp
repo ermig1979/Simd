@@ -488,7 +488,7 @@ namespace Test
 
     //-------------------------------------------------------------------------------------------------
 
-    void WarmUpCpu()
+    void WarmUpCpu(double warmUpTime)
     {
 #if defined(__linux__)
         TEST_LOG_SS(Info, "CPU warm upping is started. Initial frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000 / 1000 << " MHz.");
@@ -496,7 +496,7 @@ namespace Test
         TEST_LOG_SS(Info, "CPU warm upping is started.");
 #endif
         double time = 0;
-        while (time < WARM_UP_TIME)
+        while (time < warmUpTime)
         {
             double start = GetTime();
             const size_t n = 1024;
@@ -530,6 +530,7 @@ namespace Test
 
     class Task
     {
+        const Options& _options;
         Group * _groups;
         size_t _id, _size;
         std::thread _thread;
@@ -537,8 +538,9 @@ namespace Test
     public:
         static volatile bool s_stopped;
 
-        Task(size_t id, Group * groups, size_t size, bool start)
-            : _id(id)
+        Task(const Options& options, size_t id, Group * groups, size_t size, bool start)
+            : _options(options)
+            , _id(id)
             , _groups(groups)
             , _size(size)
             , _progress(0)
@@ -562,10 +564,10 @@ namespace Test
 
         void Run()
         {
-            if (PIN_THREAD)
+            if (_options.pinThreads)
                 PinThread(_id);
-            if (WARM_UP_TIME > 0)
-                WarmUpCpu();
+            if (_options.warmUpTime > 0)
+                WarmUpCpu(_options.warmUpTime);
             for (size_t i = 0; i < _size && !s_stopped; ++i)
             {
                 _progress = double(i) / double(_size);
@@ -655,7 +657,7 @@ namespace Test
     {
         if (options.testThreads > 0)
         {
-            if (PIN_THREAD)
+            if (options.pinThreads)
                 PinThread(SimdCpuInfo(SimdCpuInfoThreads) - 1);
 
             Test::Log::s_log.SetLevel(Test::Log::Error);
@@ -671,7 +673,7 @@ namespace Test
             {
                 size_t beg = i * block;
                 size_t end = std::min(total, beg + block);
-                tasks.push_back(Test::TaskPtr(new Test::Task(i, groups.data() + beg, end - beg, true)));
+                tasks.push_back(Test::TaskPtr(new Test::Task(options, i, groups.data() + beg, end - beg, true)));
             }
 
             std::cout << std::endl;
@@ -696,7 +698,7 @@ namespace Test
         }
         else
         {
-            Test::Task task(0, groups.data(), groups.size(), false);
+            Test::Task task(options, 0, groups.data(), groups.size(), false);
             task.Run();
         }
 
@@ -801,8 +803,6 @@ namespace Test
 #else
     String ROOT_PATH = "..";
 #endif
-    String SOURCE = "";
-    String OUTPUT = "";
     String REAL_IMAGE = "";
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
@@ -815,10 +815,9 @@ namespace Test
     int W = 128;
 #endif
     double MINIMAL_TEST_EXECUTION_TIME = 0.1;
-    double WARM_UP_TIME = 0.0;
+    //double WARM_UP_TIME = 0.0;
     int LITTER_CPU_CACHE = 0;
     uint32_t DISABLED_EXTENSIONS = 0;
-    bool PIN_THREAD = true;
 
     void CheckCpp();
 }

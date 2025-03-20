@@ -184,7 +184,7 @@ You can use several filters - function name has to satisfy at least one of them.
     
 Also you can use parameters:
 
-* `-help` or `-?` in order to print help message.
+* `--help` or `-?` in order to print help message.
 * `-r=../..` to set project root directory.
 * `-pa=1` to print alignment statistics.
 * `-pi=1` to print internal statistics (Cmake parameter SIMD_PERF must be ON).

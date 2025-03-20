@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2025 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -174,32 +174,41 @@ namespace Test
 
         Strings include, exclude;
 
-        String text, html;
+        String text, html, source, output;
 
         size_t workThreads, testRepeats, testStatistics, testThreads;
 
-        bool printAlign, printInternal, checkCpp;
+        bool printAlign, printInternal, checkCpp, pinThreads;
+
+        double warmUpTime;
 
         Options(int argc, char* argv[])
             : ArgsParser(argc, argv, true)
             , mode(Auto)
-            , help(false)
-            , testRepeats(1)
-            , workThreads(1)
-            , testStatistics(0)
-            , printAlign(false)
-            , printInternal(true)
-            , checkCpp(false)
         {
             help = HasArg("--help", "-?");
+            include = GetArgs("-fi", Strings(), false);
+            exclude = GetArgs("-fe", Strings(), false);
             testThreads = std::min<int>(std::max<int>(FromString<int>(GetArg("-tt", "0", false)), 0), std::thread::hardware_concurrency());
+            workThreads = std::min<int>(std::max<int>(FromString<int>(GetArg("-wt", "1", false)), 1), std::thread::hardware_concurrency());
+            testRepeats = std::min<int>(FromString<int>(GetArg("-tr", "1", false)), 1);
+            testStatistics = std::min<int>(FromString<int>(GetArg("-ts", "0", false)), 0);
+            checkCpp = FromString<bool>(GetArg("-cc", "0", false));
+            printAlign = FromString<bool>(GetArg("-pa", "0", false));
+            printInternal = FromString<bool>(GetArg("-pi", "1", false));
+            pinThreads = FromString<bool>(GetArg("-pt", "1", false));
+            text = GetArg("-ot", "", false);
+            html = GetArg("-oh", "", false);
+            source = GetArg("-s", "", false);
+            output = GetArg("-o", "", false);
+            warmUpTime = FromString<int>(GetArg("-wu", "0", false)) * 0.001;
 
             for (int i = 1; i < argc; ++i)
             {
                 String arg = argv[i];
                 if (arg.substr(0, 5) == "-help" || arg.substr(0, 2) == "-?")
                 {
-                    help = true;
+                    //help = true;
                     break;
                 }
                 else if (arg.find("-m=") == 0)
@@ -219,27 +228,27 @@ namespace Test
                 }
                 else if (arg.find("-tr=") == 0)
                 {
-                    testRepeats = FromString<size_t>(arg.substr(4, arg.size() - 4));
+                    //testRepeats = FromString<size_t>(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-ts=") == 0)
                 {
-                    testStatistics = FromString<int>(arg.substr(4, arg.size() - 4));
+                    //testStatistics = FromString<int>(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-fi=") == 0)
                 {
-                    include.push_back(arg.substr(4, arg.size() - 4));
+                    //include.push_back(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-fe=") == 0)
                 {
-                    exclude.push_back(arg.substr(4, arg.size() - 4));
+                    //exclude.push_back(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-ot=") == 0)
                 {
-                    text = arg.substr(4, arg.size() - 4);
+                    //text = arg.substr(4, arg.size() - 4);
                 }
                 else if (arg.find("-oh=") == 0)
                 {
-                    html = arg.substr(4, arg.size() - 4);
+                    //html = arg.substr(4, arg.size() - 4);
                 }
                 else if (arg.find("-r=") == 0)
                 {
@@ -247,11 +256,11 @@ namespace Test
                 }
                 else if (arg.find("-s=") == 0)
                 {
-                    SOURCE = arg.substr(3, arg.size() - 3);
+                    //SOURCE = arg.substr(3, arg.size() - 3);
                 }
                 else if (arg.find("-o=") == 0)
                 {
-                    OUTPUT = arg.substr(3, arg.size() - 3);
+                    //OUTPUT = arg.substr(3, arg.size() - 3);
                 }
                 else if (arg.find("-c=") == 0)
                 {
@@ -267,15 +276,15 @@ namespace Test
                 }
                 else if (arg.find("-pa=") == 0)
                 {
-                    printAlign = FromString<bool>(arg.substr(4, arg.size() - 4));
+                    //printAlign = FromString<bool>(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-pi=") == 0)
                 {
-                    printInternal = FromString<bool>(arg.substr(4, arg.size() - 4));
+                    //printInternal = FromString<bool>(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-wt=") == 0)
                 {
-                    workThreads = FromString<size_t>(arg.substr(4, arg.size() - 4));
+                    //workThreads = FromString<size_t>(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-mt=") == 0)
                 {
@@ -291,7 +300,7 @@ namespace Test
                 }
                 else if (arg.find("-cc=") == 0)
                 {
-                    checkCpp = FromString<bool>(arg.substr(4, arg.size() - 4));
+                    //checkCpp = FromString<bool>(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-de=") == 0)
                 {
@@ -299,11 +308,11 @@ namespace Test
                 }
                 else if (arg.find("-wu=") == 0)
                 {
-                    WARM_UP_TIME = FromString<int>(arg.substr(4, arg.size() - 4)) * 0.001;
+                    //WARM_UP_TIME = FromString<int>(arg.substr(4, arg.size() - 4)) * 0.001;
                 }
                 else if (arg.find("-pt=") == 0)
                 {
-                    PIN_THREAD = FromString<bool>(arg.substr(4, arg.size() - 4));
+                    //PIN_THREAD = FromString<bool>(arg.substr(4, arg.size() - 4));
                 }
                 else
                 {

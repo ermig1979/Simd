@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2025 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -132,20 +132,20 @@ namespace Test
     {
         Video video(true);
 
-        if (SOURCE.length() == 0)
+        if (options.source.length() == 0)
         {
             TEST_LOG_SS(Error, "Video source is undefined (-s parameter)!");
             return false;
         }
-        if (!video.SetSource(SOURCE))
+        if (!video.SetSource(options.source))
         {
-            TEST_LOG_SS(Error, "Can't open source video file '" << SOURCE << "'!");
+            TEST_LOG_SS(Error, "Can't open source video file '" << options.source << "'!");
             return false;
         }
 
-        if (OUTPUT.length() != 0 && !video.SetOutput(OUTPUT))
+        if (options.output.length() != 0 && !video.SetOutput(options.output))
         {
-            TEST_LOG_SS(Error, "Can't open output video file '" << OUTPUT << "'!");
+            TEST_LOG_SS(Error, "Can't open output video file '" << options.output << "'!");
             return false;
         }
 

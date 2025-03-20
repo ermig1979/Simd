@@ -161,7 +161,7 @@
      - `-ot=log.txt` - a file name with test report (in TEXT file format). The test's report also will be output to console.
     
     Also you can use parameters:
-     - `-help` or `-?` in order to print help message.
+     - `--help` or `-?` in order to print help message.
      - `-r=../..` to set project root directory.
      - `-pa=1` to print alignment statistics.
      - `-pi=1` to print internal statistics (Cmake parameter SIMD_PERF must be ON).
