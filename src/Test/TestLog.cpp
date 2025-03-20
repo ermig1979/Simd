@@ -80,6 +80,7 @@ namespace Test
             switch (level)
             {
             case Log::Error: ss << Console::Stylized("Error: ", Console::FormatDefault, Console::ForegroundLightRed); break;
+            case Log::Warning: ss << Console::Stylized("Warning: ", Console::FormatDefault, Console::ForegroundYellow); break;
             case Log::Info: ss << Console::Stylized("Info: ", Console::FormatDefault, Console::ForegroundGreen); break;
             default:
                 assert(0);

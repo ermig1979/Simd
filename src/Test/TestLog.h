@@ -34,6 +34,7 @@ namespace Test
         enum Level
         {
             Error = 0,
+            Warning,
             Info,
         };
 

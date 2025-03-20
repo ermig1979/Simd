@@ -204,4 +204,5 @@ Also you can use parameters:
 * `-cc=1` to check c++ API.
 * `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16.
 * `-wu=100` a time to warm up CPU before testing (in milliseconds).
+* `-pt=1` a boolean flag to pin threads to cpu cores.
 

@@ -511,17 +511,34 @@ namespace Test
 #endif
     }
 
+    static bool PinThread(size_t core)
+    {
+#if defined(__linux__)
+        pthread_t this_thread = pthread_self();
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_SET(core, &cpuset);
+        if (pthread_setaffinity_np(this_thread, sizeof(cpu_set_t), &cpuset))
+        {
+            TEST_LOG_SS(Warning, "Can't set affinity " << core << " to " << this_thread << " thread : " << std::strerror(errno) << " !");
+            return false;
+        }
+#endif
+        return true;
+    }
+
     class Task
     {
         Group * _groups;
-        size_t _size;
+        size_t _id, _size;
         std::thread _thread;
         volatile double _progress;
     public:
         static volatile bool s_stopped;
 
-        Task(Group * groups, size_t size, bool start)
-            : _groups(groups)
+        Task(size_t id, Group * groups, size_t size, bool start)
+            : _id(id)
+            , _groups(groups)
             , _size(size)
             , _progress(0)
         {
@@ -544,6 +561,8 @@ namespace Test
 
         void Run()
         {
+            if (PIN_THREAD)
+                PinThread(_id);
             if (WARM_UP_TIME > 0)
                 WarmUpCpu();
             for (size_t i = 0; i < _size && !s_stopped; ++i)
@@ -750,6 +769,10 @@ namespace Test
                 {
                     WARM_UP_TIME = FromString<int>(arg.substr(4, arg.size() - 4)) * 0.001;
                 }
+                else if (arg.find("-pt=") == 0)
+                {
+                    PIN_THREAD = FromString<bool>(arg.substr(4, arg.size() - 4));
+                }
                 else
                 {
                     TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
@@ -779,6 +802,9 @@ namespace Test
     {
         if (TEST_THREADS > 0)
         {
+            if (PIN_THREAD)
+                PinThread(SimdCpuInfo(SimdCpuInfoThreads) - 1);
+
             Test::Log::s_log.SetLevel(Test::Log::Error);
 
             size_t testThreads = Simd::Min<size_t>(TEST_THREADS, groups.size());
@@ -792,7 +818,7 @@ namespace Test
             {
                 size_t beg = i * block;
                 size_t end = std::min(total, beg + block);
-                tasks.push_back(Test::TaskPtr(new Test::Task(groups.data() + beg, end - beg, true)));
+                tasks.push_back(Test::TaskPtr(new Test::Task(i, groups.data() + beg, end - beg, true)));
             }
 
             std::cout << std::endl;
@@ -817,7 +843,7 @@ namespace Test
         }
         else
         {
-            Test::Task task(groups.data(), groups.size(), false);
+            Test::Task task(0, groups.data(), groups.size(), false);
             task.Run();
         }
 
@@ -913,6 +939,7 @@ namespace Test
         std::cout << "    -de=2         a flags of SIMD extensions which testing are disabled." << std::endl;
         std::cout << "                  Base - 1, 2 - SSE4.1/NEON, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16." << std::endl << std::endl;
         std::cout << "    -wu=100       a time to warm up CPU before testing (in milliseconds)." << std::endl << std::endl;
+        std::cout << "    -pt=1         a boolean flag to pin threads to cpu cores." << std::endl << std::endl;
         return 0;
     }
 
@@ -939,6 +966,7 @@ namespace Test
     int LITTER_CPU_CACHE = 0;
     int TEST_THREADS = 0;
     uint32_t DISABLED_EXTENSIONS = 0;
+    bool PIN_THREAD = true;
 
     void CheckCpp();
 }

@@ -49,6 +49,7 @@
 #include <stdexcept>
 #include <thread>
 #include <mutex>
+#include <cstring>
 
 #define SIMD_STATIC
 #include "Simd/SimdConfig.h"
@@ -118,6 +119,7 @@ namespace Test
 
     extern int LITTER_CPU_CACHE;
     extern int TEST_THREADS;
+    extern bool PIN_THREAD;
 
     enum DifferenceType
     {
