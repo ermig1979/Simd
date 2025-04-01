@@ -352,9 +352,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16b.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcDirect.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16bDepthwise.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
@@ -410,6 +407,9 @@
       <Filter>Avx512bw</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale16b.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcSpecV0.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
   </ItemGroup>

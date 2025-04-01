@@ -36,12 +36,12 @@ namespace Simd
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
     namespace AmxBf16
     {
-        typedef Base::SynetConvolution16bNhwcDirect::AlgParam AlgParam;
-        typedef Base::SynetConvolution16bNhwcDirect::PostprocessPtr PostprocessPtr;
+        typedef Base::SynetConvolution16bNhwcSpecV0::AlgParam AlgParam;
+        typedef Base::SynetConvolution16bNhwcSpecV0::PostprocessPtr PostprocessPtr;
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convert16bNhwcDirect(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
+        static void Convert16bNhwcSpecV0(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
         {
             assert(a.microC == DF);
             const float* src = (float*)src8;
@@ -99,7 +99,7 @@ namespace Simd
             }
         }
 
-        static void Reorder16bNhwcDirect(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
+        static void Reorder16bNhwcSpecV0(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
         {
             assert(a.microC == DF);
             const uint16_t* src = (uint16_t*)src8;
@@ -159,7 +159,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convolution16bNhwcDirect_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
             int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
@@ -216,7 +216,7 @@ namespace Simd
             TileMoveToMemory(dst1 + F, dD);
         }
 
-        static void Convolution16bNhwcDirect_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
             int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
@@ -257,7 +257,7 @@ namespace Simd
             TileMoveToMemory(dst1 + 0, dD);
         }
 
-        static void Convolution16bNhwcDirect_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
             int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
@@ -297,7 +297,7 @@ namespace Simd
             TileMoveToMemory(dst0 + F, dD);
         }
 
-        static void Convolution16bNhwcDirect_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
             int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
@@ -324,17 +324,17 @@ namespace Simd
             TileMoveToMemory(dst0 + 0, dD);
         }
 
-        typedef void (*Convolution16bNhwcDirectPtr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0);
+        typedef void (*Convolution16bNhwcSpecV0Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0);
 
-        static void Convolution16bNhwcDirect_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
+        static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
         {
             size_t n1 = dstH * a.srcW + 1 - p.kernelX, n = 32;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
             size_t dD = a.macroD, dS = a.microC, srcCn = DivHi(srcC, 32) * p.kernelX * p.kernelY;
-            Convolution16bNhwcDirectPtr body_2 = Convolution16bNhwcDirect_32x32;
-            Convolution16bNhwcDirectPtr tail_2 = m > 16 ? Convolution16bNhwcDirect_32x32 : Convolution16bNhwcDirect_16x32;
-            Convolution16bNhwcDirectPtr body_1 = Convolution16bNhwcDirect_32x16;
-            Convolution16bNhwcDirectPtr tail_1 = m > 16 ? Convolution16bNhwcDirect_32x16 : Convolution16bNhwcDirect_16x16;
+            Convolution16bNhwcSpecV0Ptr body_2 = Convolution16bNhwcSpecV0_32x32;
+            Convolution16bNhwcSpecV0Ptr tail_2 = m > 16 ? Convolution16bNhwcSpecV0_32x32 : Convolution16bNhwcSpecV0_16x32;
+            Convolution16bNhwcSpecV0Ptr body_1 = Convolution16bNhwcSpecV0_32x16;
+            Convolution16bNhwcSpecV0Ptr tail_1 = m > 16 ? Convolution16bNhwcSpecV0_32x16 : Convolution16bNhwcSpecV0_16x16;
 
             SetTileConfFull();
             for (size_t dc = 0; dc < dstC; dc += DF)
@@ -362,7 +362,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type>  void Postprocess16bNhwcDirect(const float* src, const ConvParam& p,
+        template<Term16bType term, SimdConvolutionActivationType type>  void Postprocess16bNhwcSpecV0(const float* src, const ConvParam& p,
             const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst)
         {
             size_t dstCF = AlignLo(dstC, F);
@@ -389,22 +389,22 @@ namespace Simd
         template<SimdConvolutionActivationType type> void SetPostprocess(const ConvParam& p, const AlgParam& a, PostprocessPtr & postprocess)
         {
             if (p.dstT == SimdTensorData16b)
-                postprocess = Postprocess16bNhwcDirect<Term16bLast16b, type>;
+                postprocess = Postprocess16bNhwcSpecV0<Term16bLast16b, type>;
             else
-                postprocess = Postprocess16bNhwcDirect<Term16bLast32f, type>;
+                postprocess = Postprocess16bNhwcSpecV0<Term16bLast32f, type>;
         }
 
         //-----------------------------------------------------------------------------------------
 
-        SynetConvolution16bNhwcDirect::SynetConvolution16bNhwcDirect(const ConvParam & p)
-            : Avx512bw::SynetConvolution16bNhwcDirect(p)
+        SynetConvolution16bNhwcSpecV0::SynetConvolution16bNhwcSpecV0(const ConvParam & p)
+            : Avx512bw::SynetConvolution16bNhwcSpecV0(p)
         {
             SetAlgParam(F, F * 2, 32, F * 2, int(Base::AlgCacheL1() * 1.05), int(Base::AlgCacheL2() * 0.5), Base::AlgCacheL3());
             if (_src16b)
-                _preprocess = Reorder16bNhwcDirect;
+                _preprocess = Reorder16bNhwcSpecV0;
             else
-                _preprocess = Convert16bNhwcDirect;
-            _convolution = Convolution16bNhwcDirect_2;
+                _preprocess = Convert16bNhwcSpecV0;
+            _convolution = Convolution16bNhwcSpecV0_2;
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;

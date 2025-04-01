@@ -161,10 +161,10 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        class SynetConvolution16bNhwcDirect : public SynetConvolution16b
+        class SynetConvolution16bNhwcSpecV0 : public SynetConvolution16b
         {
         public:
-            SynetConvolution16bNhwcDirect(const ConvParam& p);
+            SynetConvolution16bNhwcSpecV0(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
@@ -276,10 +276,10 @@ namespace Simd
             virtual String Ext() const { return "Sse41"; }
         };
 
-        class SynetConvolution16bNhwcDirect : public Base::SynetConvolution16bNhwcDirect
+        class SynetConvolution16bNhwcSpecV0 : public Base::SynetConvolution16bNhwcSpecV0
         {
         public:
-            SynetConvolution16bNhwcDirect(const ConvParam& p);
+            SynetConvolution16bNhwcSpecV0(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -317,10 +317,10 @@ namespace Simd
             virtual String Ext() const { return "Avx2"; }
         };
 
-        class SynetConvolution16bNhwcDirect : public Sse41::SynetConvolution16bNhwcDirect
+        class SynetConvolution16bNhwcSpecV0 : public Sse41::SynetConvolution16bNhwcSpecV0
         {
         public:
-            SynetConvolution16bNhwcDirect(const ConvParam& p);
+            SynetConvolution16bNhwcSpecV0(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -358,10 +358,10 @@ namespace Simd
             virtual String Ext() const { return "Avx512bw"; }
         };
 
-        class SynetConvolution16bNhwcDirect : public Avx2::SynetConvolution16bNhwcDirect
+        class SynetConvolution16bNhwcSpecV0 : public Avx2::SynetConvolution16bNhwcSpecV0
         {
         public:
-            SynetConvolution16bNhwcDirect(const ConvParam& p);
+            SynetConvolution16bNhwcSpecV0(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
@@ -400,10 +400,10 @@ namespace Simd
             virtual String Ext() const { return "AmxBf16"; }
         };
 
-        class SynetConvolution16bNhwcDirect : public Avx512bw::SynetConvolution16bNhwcDirect
+        class SynetConvolution16bNhwcSpecV0 : public Avx512bw::SynetConvolution16bNhwcSpecV0
         {
         public:
-            SynetConvolution16bNhwcDirect(const ConvParam& p);
+            SynetConvolution16bNhwcSpecV0(const ConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };

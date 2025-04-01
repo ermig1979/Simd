@@ -35,8 +35,8 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE) 
     namespace Avx2
     {
-        typedef Base::SynetConvolution16bNhwcDirect::AlgParam AlgParam;
-        typedef Base::SynetConvolution16bNhwcDirect::PostprocessPtr PostprocessPtr;
+        typedef Base::SynetConvolution16bNhwcSpecV0::AlgParam AlgParam;
+        typedef Base::SynetConvolution16bNhwcSpecV0::PostprocessPtr PostprocessPtr;
 
         SIMD_INLINE void Float32ToBFloat16Tail(const float* src, size_t size, uint16_t* dst)
         {
@@ -58,7 +58,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convert16bNhwcDirect(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
+        static void Convert16bNhwcSpecV0(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
         {
             assert(a.microC == DF);
             const float* src = (float*)src8;
@@ -115,7 +115,7 @@ namespace Simd
             }
         }
 
-        static void Reorder16bNhwcDirect(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
+        static void Reorder16bNhwcSpecV0(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
         {
             assert(a.microC == DF);
             const uint16_t* src = (uint16_t*)src8;
@@ -300,7 +300,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<int M> void Convolution16bNhwcDirect_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int zero, const uint16_t* weight0, float* dst)
+        template<int M> void Convolution16bNhwcSpecV0_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int zero, const uint16_t* weight0, float* dst)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm256_castsi256_ps(Bf16::MASK);
             size_t dD = a.macroD, dX = a.microC, dY = a.srcW * dX, dC = dY * a.srcH * a.batch, kX = p.kernelX, kY = p.kernelY;
@@ -475,31 +475,31 @@ namespace Simd
             }
         }
 
-        typedef void(*Convolution16bNhwcDirect_2xM_Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int zero, const uint16_t* weight0, float* dst);
+        typedef void(*Convolution16bNhwcSpecV0_2xM_Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int zero, const uint16_t* weight0, float* dst);
 
-        static Convolution16bNhwcDirect_2xM_Ptr GetConvolution16bNhwcDirect_2xM(size_t M)
+        static Convolution16bNhwcSpecV0_2xM_Ptr GetConvolution16bNhwcSpecV0_2xM(size_t M)
         {
             switch (M)
             {
             case 0: return NULL;
-            case 1: return Convolution16bNhwcDirect_2xM<1>;
-            case 2: return Convolution16bNhwcDirect_2xM<2>;
-            case 3: return Convolution16bNhwcDirect_2xM<3>;
-            case 4: return Convolution16bNhwcDirect_2xM<4>;
-            case 5: return Convolution16bNhwcDirect_2xM<5>;
+            case 1: return Convolution16bNhwcSpecV0_2xM<1>;
+            case 2: return Convolution16bNhwcSpecV0_2xM<2>;
+            case 3: return Convolution16bNhwcSpecV0_2xM<3>;
+            case 4: return Convolution16bNhwcSpecV0_2xM<4>;
+            case 5: return Convolution16bNhwcSpecV0_2xM<5>;
             }
             assert(0);
             return NULL;
         }
 
-        static void Convolution16bNhwcDirect_2(const uint16_t* src, const ConvParam& p,
+        static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p,
             const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
         {
             size_t n1 = dstH * a.srcW + 1 - p.kernelX, n = 5;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
             size_t dD = a.macroD, dS = a.microC;
-            Convolution16bNhwcDirect_2xM_Ptr convolution_2xN = GetConvolution16bNhwcDirect_2xM(n);
-            Convolution16bNhwcDirect_2xM_Ptr convolution_2xM = GetConvolution16bNhwcDirect_2xM(m);
+            Convolution16bNhwcSpecV0_2xM_Ptr convolution_2xN = GetConvolution16bNhwcSpecV0_2xM(n);
+            Convolution16bNhwcSpecV0_2xM_Ptr convolution_2xM = GetConvolution16bNhwcSpecV0_2xM(m);
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
@@ -515,7 +515,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type>  void Postprocess16bNhwcDirect(const float* src, const ConvParam& p,
+        template<Term16bType term, SimdConvolutionActivationType type>  void Postprocess16bNhwcSpecV0(const float* src, const ConvParam& p,
             const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst)
         {
             size_t dstCF = AlignLo(dstC, F), tailD = dstC - dstCF;
@@ -541,17 +541,17 @@ namespace Simd
         template<SimdConvolutionActivationType type> void SetPostprocess(const ConvParam& p, const AlgParam& a, PostprocessPtr & postprocess)
         {
             if (p.dstT == SimdTensorData16b)
-                postprocess = Postprocess16bNhwcDirect<Term16bLast16b, type>;
+                postprocess = Postprocess16bNhwcSpecV0<Term16bLast16b, type>;
             else
-                postprocess = Postprocess16bNhwcDirect<Term16bLast32f, type>;
+                postprocess = Postprocess16bNhwcSpecV0<Term16bLast32f, type>;
         }
 
         //-----------------------------------------------------------------------------------------
 
 //#define SIMD_CONV16B_COMPATIBLE_WITH_AMX
 
-        SynetConvolution16bNhwcDirect::SynetConvolution16bNhwcDirect(const ConvParam & p)
-            : Sse41::SynetConvolution16bNhwcDirect(p)
+        SynetConvolution16bNhwcSpecV0::SynetConvolution16bNhwcSpecV0(const ConvParam & p)
+            : Sse41::SynetConvolution16bNhwcSpecV0(p)
         {
 #ifdef SIMD_CONV16B_COMPATIBLE_WITH_AMX
             SetAlgParam(F, F * 2, 5, F * 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
@@ -562,11 +562,11 @@ namespace Simd
 #else
             SetAlgParam(F, F * 2, 5, F * 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_src16b)
-                _preprocess = Reorder16bNhwcDirect;
+                _preprocess = Reorder16bNhwcSpecV0;
             else
-                _preprocess = Convert16bNhwcDirect;
+                _preprocess = Convert16bNhwcSpecV0;
 #endif
-            _convolution = Convolution16bNhwcDirect_2;
+            _convolution = Convolution16bNhwcSpecV0_2;
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
