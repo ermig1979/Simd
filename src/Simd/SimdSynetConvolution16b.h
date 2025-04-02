@@ -215,21 +215,21 @@ namespace Simd
 
             struct AlgParam
             {
-                size_t batch, srcC, srcH, srcW, dstC, K;
+                size_t batch, srcH, srcW, dstC, kX, K;
                 size_t padV, padH, padE;
-                size_t F, microD, microS, microC;
+                size_t F, microD, microS, microK;
                 size_t macroD, macroH, macroK, numH;
                 size_t bufS, bufD, elem;
             };
 
-            typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst);
+            typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst);
 
             typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t K, int zero, const uint16_t* weight, float* dst);
 
             typedef void(*PostprocessPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst);
 
         protected:
-            void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
+            void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microK, size_t L1, size_t L2, size_t L3);
             virtual void SetWeight(const float* weight);
             void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 

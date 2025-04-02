@@ -51,7 +51,7 @@ namespace Simd
             return desc.str();
         }
 
-        void SynetConvolution16bNhwcSpecV1::SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3)
+        void SynetConvolution16bNhwcSpecV1::SetAlgParam(size_t F, size_t microD, size_t microS, size_t microK, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam& p = _param;
             AlgParam& a = _alg;
@@ -59,41 +59,40 @@ namespace Simd
             a.F = F;
             a.microD = microD;
             a.microS = microS;
-            a.microC = microC;
-            a.srcC = AlignHi(p.srcC, a.microC);
+            a.microK = microK;
             a.padV = Simd::Max(p.padY, p.padH);
             a.padH = Simd::Max(p.padX, p.padW);
             a.srcH = p.srcH + a.padV;
             a.srcW = p.srcW + a.padH;
             a.padE = (a.srcW + a.padH) * a.padV;
             a.dstC = AlignHi(p.dstC, a.F);
-            a.K = p.kernelX * p.kernelY * a.srcC;
+            a.kX = AlignHi(p.kernelX * p.srcC, a.microK);
+            a.K = a.kX * p.kernelY;
 
-            a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD / 2, a.microC), a.microC, a.K);
+            a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD / 2, a.microK), a.microK, a.K);
             a.batch = 1;
-            size_t bufSize = a.srcC * a.srcH * a.srcW * 2;
+            size_t bufSize = (p.srcC * a.srcH * a.srcW + a.microK) * 2;
             if (bufSize * 2 <= L2 && p.batch > 1)
             {
                 for (size_t batch = 1; batch <= p.batch; ++batch)
                     if (p.batch % batch == 0 && batch * bufSize <= L2)
                         a.batch = batch;
             }
-            a.macroH = Simd::RestrictRange(L2 / a.macroK / a.srcW / 2, size_t(1), p.dstH * a.batch);
+            a.macroH = Simd::RestrictRange(L2 / (a.macroK / p.kernelX * 2), size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
             a.numH = DivHi(p.dstH * a.batch, a.macroH);
             a.elem = _elemD;
-            a.bufS = (a.batch * a.srcH * a.srcW + a.padE + a.F) * a.srcC;
+            a.bufS = (a.batch * a.srcH * a.srcW + a.padE + a.F) * p.srcC + a.microK;
             a.bufD = (a.batch * a.srcH * a.srcW + a.numH * a.F) * a.macroD;
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
 
-            int kX = (int)p.kernelX, kY = (int)p.kernelY, C = (int)a.srcC, dX = a.srcW;
+            int kX = (int)a.kX, kY = (int)p.kernelY, dY = (int)(p.srcC * a.srcW), dX = (int)a.microK;
             _offset.Resize(a.K);
-            for (size_t y = 0, i = 0; y < kY; y++)
-                for (size_t x = 0; x < kX; x++)
-                    for (size_t c = 0; c < C; c++, i++)
-                        _offset[i] = (int)((y * dX + x) * C + c);
+            for (int y = 0, i = 0; y < kY; y++)
+                for (int x = 0; x < kX; x += dX, i++)
+                    _offset[i] = y * dY + x;
         }
 
         size_t SynetConvolution16bNhwcSpecV1::ExternalBufferSize() const
@@ -118,20 +117,21 @@ namespace Simd
             const AlgParam& a = _alg;
             _weight.Resize(a.K * a.dstC, true);
             uint16_t* dst = _weight.data;
+            size_t kX = p.kernelX * p.srcC;
             for (size_t mad = 0; mad < p.dstC; mad += _alg.F)
             {
-                for (size_t k = 0, K = p.kernelY * p.kernelX; k < K; k++)
+                for (size_t ky = 0; ky < p.kernelY; ky++)
                 {
-                    for (size_t mac = 0; mac < p.srcC; mac += a.microC)
+                    for (size_t mak = 0; mak < kX; mak += a.microK)
                     {
-                        for (size_t c = 0; c < a.microC; c += 2)
+                        for (size_t k = 0; k < a.microK; k += 2)
                         {
-                            const float* src = weight + (k * p.srcC + mac + c) * p.dstC + mad;
+                            const float* src = weight + (ky * kX + mak + k) * p.dstC + mad;
                             for (size_t d = 0; d < a.F; ++d)
                             {
                                 for (size_t i = 0; i < 2; ++i)
                                 {
-                                    if (mad + d < p.dstC && mac + c + i < p.srcC)
+                                    if (mad + d < p.dstC && mak + k + i < kX)
                                         *(dst++) = Float32ToBFloat16(src[i * p.dstC]);
                                     else
                                         *(dst++) = 0;
@@ -183,12 +183,12 @@ namespace Simd
                             if (a.batch > 1)
                             {
                                 size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
-                                size_t dB = a.srcH * a.srcW * a.microC;
+                                size_t dB = a.srcH * a.srcW * p.srcC;
                                 for (size_t b = 0; b < a.batch; ++b)
-                                    _preprocess(src + b * dS, p, a, 0, p.dstH, buf + b * dB);
+                                    _preprocess(src + b * dS, p, a, 0, p.dstH, b == a.batch - 1 ? 1 : 0, buf + b * dB);
                             }
                             else
-                                _preprocess(src, p, a, dyBeg, dyEnd, buf);
+                                _preprocess(src, p, a, dyBeg, dyEnd, dyEnd == dstH ? 1 : 0, buf);
                         }
                         if (a.batch > 1)
                         {
@@ -196,7 +196,7 @@ namespace Simd
                         }
                         else
                         {
-                            _convolution(buf + mak + dyBeg * a.srcW * a.srcC, p, a, offs + mak, macroD, dyEnd - dyBeg,
+                            _convolution(buf + mak + dyBeg * a.srcW * p.srcC, p, a, offs + mak, macroD, dyEnd - dyBeg,
                                 macroK, mak == 0 ? 1 : 0, weight, sum + (dyBeg * a.srcW + dyN * a.F) * a.macroD);
                         }
                         if (mak + macroK == a.K)
