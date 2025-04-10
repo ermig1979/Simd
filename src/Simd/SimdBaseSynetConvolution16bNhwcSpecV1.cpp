@@ -167,12 +167,12 @@ namespace Simd
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
             const int* offs = _offset.data;
-            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch + 1 - p.kernelY;
+            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch - a.padV, macroO = a.macroK / a.microK;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
                 const uint16_t* weight = _weight.data + mad * a.K;
-                for (size_t mak = 0; mak < a.K; mak += a.macroK)
+                for (size_t mak = 0, mao = 0; mak < a.K; mak += a.macroK, mao += macroO)
                 {
                     size_t macroK = Simd::Min(a.K, mak + a.macroK) - mak;
                     for (size_t dyBeg = 0, dyN = 0; dyBeg < dstH; dyN++)
@@ -192,11 +192,11 @@ namespace Simd
                         }
                         if (a.batch > 1)
                         {
-                            _convolution(buf + mak, p, a, offs + mak, macroD, dstHb, macroK, mak == 0 ? 1 : 0, weight, sum);
+                            _convolution(buf, p, a, offs + mao, macroD, dstHb, macroK, mak == 0 ? 1 : 0, weight, sum);
                         }
                         else
                         {
-                            _convolution(buf + mak + dyBeg * a.srcW * p.srcC, p, a, offs + mak, macroD, dyEnd - dyBeg,
+                            _convolution(buf + dyBeg * a.srcW * p.srcC, p, a, offs + mao, macroD, dyEnd - dyBeg,
                                 macroK, mak == 0 ? 1 : 0, weight, sum + (dyBeg * a.srcW + dyN * a.F) * a.macroD);
                         }
                         if (mak + macroK == a.K)

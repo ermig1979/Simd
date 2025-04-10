@@ -38,7 +38,7 @@ namespace Simd
         typedef Base::SynetConvolution16bNhwcSpecV1::AlgParam AlgParam;
         typedef Base::SynetConvolution16bNhwcSpecV1::PostprocessPtr PostprocessPtr;
 
-        //-----------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------
 
         static void Convert16bNhwcSpecV1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst)
         {
@@ -128,7 +128,7 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------
 
         template<int M> void Convolution16bNhwcSpecV1_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offset, size_t K, size_t dstC, int zero, const uint16_t* weight0, float* dst)
         {
@@ -308,7 +308,7 @@ namespace Simd
 
         static void Convolution16bNhwcSpecV1_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t K, int zero, const uint16_t* weight, float* dst)
         {
-            size_t n1 = dstH * a.srcW + 1 - p.kernelX, n = 5;
+            size_t n1 = dstH * a.srcW - a.padH, n = 5;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.K * DF;
             size_t dD = a.macroD, dS = p.srcC;
             Convolution16bNhwcSpecV1_2xM_Ptr convolution_2xN = GetConvolution16bNhwcSpecV1_2xM(n);
@@ -326,9 +326,40 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------
 
-        //-----------------------------------------------------------------------------------------
+        template<Term16bType term, SimdConvolutionActivationType type>  void Postprocess16bNhwcSpecV1(const float* src, const ConvParam& p,
+            const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst)
+        {
+            size_t dstCF = AlignLo(dstC, F), tailD = dstC - dstCF;
+            size_t rowGap = a.padH * a.macroD;
+            src += dyBeg * a.srcW * a.macroD;
+            dst += dyBeg * p.dstW * p.dstC * a.elem;
+            for (size_t dy = dyBeg; dy < dyEnd; ++dy)
+            {
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                {
+                    size_t dc = 0;
+                    for (; dc < dstCF; dc += F)
+                        Sse41::Postprocess<term, type>(src, bias, params, dc, dst);
+                    if (tailD)
+                        Sse41::Postprocess<term, type>(src, bias, params, dc, dst, tailD);
+                    src += a.macroD;
+                    dst += p.dstC * a.elem;
+                }
+                src += rowGap;
+            }
+        }
+
+        template<SimdConvolutionActivationType type> void SetPostprocess(const ConvParam& p, const AlgParam& a, PostprocessPtr& postprocess)
+        {
+            if (p.dstT == SimdTensorData16b)
+                postprocess = Postprocess16bNhwcSpecV1<Term16bLast16b, type>;
+            else
+                postprocess = Postprocess16bNhwcSpecV1<Term16bLast32f, type>;
+        }
+
+        //------------------------------------------------------------------------------------------------
 
         SynetConvolution16bNhwcSpecV1::SynetConvolution16bNhwcSpecV1(const ConvParam & p)
             : Base::SynetConvolution16bNhwcSpecV1(p)
@@ -339,21 +370,21 @@ namespace Simd
             else
                 _preprocess = Convert16bNhwcSpecV1;
             _convolution = Convolution16bNhwcSpecV1_2;
-            //switch (p.activation)
-            //{
-            //case SimdConvolutionActivationIdentity: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationRelu: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationLeakyRelu: SetPostprocess<SimdConvolutionActivationPrelu>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationRestrictRange: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationPrelu: SetPostprocess<SimdConvolutionActivationPrelu>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationElu: SetPostprocess<SimdConvolutionActivationElu>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationHswish: SetPostprocess<SimdConvolutionActivationHswish>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationMish: SetPostprocess<SimdConvolutionActivationMish>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationHardSigmoid: SetPostprocess<SimdConvolutionActivationHardSigmoid>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationSwish: SetPostprocess<SimdConvolutionActivationSwish>(p, _alg, _postprocess); break;
-            //case SimdConvolutionActivationGelu: SetPostprocess<SimdConvolutionActivationGelu>(p, _alg, _postprocess); break;
-            //default: assert(0);
-            //}
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationRelu: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationLeakyRelu: SetPostprocess<SimdConvolutionActivationPrelu>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationRestrictRange: SetPostprocess<SimdConvolutionActivationRestrictRange>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationPrelu: SetPostprocess<SimdConvolutionActivationPrelu>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationElu: SetPostprocess<SimdConvolutionActivationElu>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationHswish: SetPostprocess<SimdConvolutionActivationHswish>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationMish: SetPostprocess<SimdConvolutionActivationMish>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationHardSigmoid: SetPostprocess<SimdConvolutionActivationHardSigmoid>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationSwish: SetPostprocess<SimdConvolutionActivationSwish>(p, _alg, _postprocess); break;
+            case SimdConvolutionActivationGelu: SetPostprocess<SimdConvolutionActivationGelu>(p, _alg, _postprocess); break;
+            default: assert(0);
+            }
         }
     }
 #endif

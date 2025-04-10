@@ -213,7 +213,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcSpecV0::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1);
+            return p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) && p.dstC >= 4;
         }
     }
 #endif
