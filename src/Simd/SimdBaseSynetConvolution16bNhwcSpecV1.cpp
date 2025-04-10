@@ -70,6 +70,7 @@ namespace Simd
             a.K = a.kX * p.kernelY;
 
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD / 2, a.microK), a.microK, a.K);
+            a.macroO = a.macroK / a.microK;
             a.batch = 1;
             size_t bufSize = (p.srcC * a.srcH * a.srcW + a.microK) * 2;
             if (bufSize * 2 <= L2 && p.batch > 1)
@@ -88,8 +89,8 @@ namespace Simd
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
 
-            int kX = (int)a.kX, kY = (int)p.kernelY, dY = (int)(p.srcC * a.srcW), dX = (int)a.microK;
-            _offset.Resize(a.K);
+            int kX = (int)a.kX, kY = (int)p.kernelY, dY = (int)(p.srcC * a.srcW), dX = (int)a.microK, nK = a.K / a.microK;
+            _offset.Resize(nK);
             for (int y = 0, i = 0; y < kY; y++)
                 for (int x = 0; x < kX; x += dX, i++)
                     _offset[i] = y * dY + x;
@@ -167,12 +168,12 @@ namespace Simd
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
             const int* offs = _offset.data;
-            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch - a.padV, macroO = a.macroK / a.microK;
+            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch - a.padV;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
                 const uint16_t* weight = _weight.data + mad * a.K;
-                for (size_t mak = 0, mao = 0; mak < a.K; mak += a.macroK, mao += macroO)
+                for (size_t mak = 0, mao = 0; mak < a.K; mak += a.macroK, mao += a.macroO)
                 {
                     size_t macroK = Simd::Min(a.K, mak + a.macroK) - mak;
                     for (size_t dyBeg = 0, dyN = 0; dyBeg < dstH; dyN++)

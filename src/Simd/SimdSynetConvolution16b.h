@@ -218,7 +218,7 @@ namespace Simd
                 size_t batch, srcH, srcW, dstC, kX, K;
                 size_t padV, padH, padE;
                 size_t F, microD, microS, microK;
-                size_t macroD, macroH, macroK, numH;
+                size_t macroD, macroH, macroK, numH, macroO;
                 size_t bufS, bufD, elem;
             };
 
@@ -468,6 +468,14 @@ namespace Simd
         {
         public:
             SynetConvolution16bNhwcSpecV0(const ConvParam& p);
+
+            virtual String Ext() const { return "AmxBf16"; }
+        };
+
+        class SynetConvolution16bNhwcSpecV1 : public Avx512bw::SynetConvolution16bNhwcSpecV1
+        {
+        public:
+            SynetConvolution16bNhwcSpecV1(const ConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };
