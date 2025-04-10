@@ -64,7 +64,7 @@ namespace Simd
             a.padH = Simd::Max(p.padX, p.padW);
             a.srcH = p.srcH + a.padV;
             a.srcW = p.srcW + a.padH;
-            a.padE = (a.srcW + a.padH) * a.padV;
+            a.padE = (a.srcW + a.padH) * a.padV + a.F;
             a.dstC = AlignHi(p.dstC, a.F);
             a.kX = AlignHi(p.kernelX * p.srcC, a.microK);
             a.K = a.kX * p.kernelY;
@@ -82,7 +82,7 @@ namespace Simd
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
             a.numH = DivHi(p.dstH * a.batch, a.macroH);
             a.elem = _elemD;
-            a.bufS = (a.batch * a.srcH * a.srcW + a.padE + a.F) * p.srcC + a.microK;
+            a.bufS = (a.batch * a.srcH * a.srcW + a.padE) * p.srcC + a.microK;
             a.bufD = (a.batch * a.srcH * a.srcW + a.numH * a.F) * a.macroD;
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;

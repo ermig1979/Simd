@@ -38,39 +38,19 @@ namespace Simd
         typedef Base::SynetConvolution16bNhwcSpecV1::AlgParam AlgParam;
         typedef Base::SynetConvolution16bNhwcSpecV1::PostprocessPtr PostprocessPtr;
 
-        SIMD_INLINE void Float32ToBFloat16Tail(const float* src, size_t size, uint16_t* dst)
-        {
-            size_t i = 0;
-            for (; i < size; ++i)
-                dst[i] = Base::Float32ToBFloat16(src[i]);
-            for (; i < DF; ++i)
-                dst[i] = 0;
-        }
-
-        SIMD_INLINE void Copy(const uint16_t* src, size_t size, uint16_t* dst)
-        {
-            size_t i = 0;
-            for (; i < size; ++i)
-                dst[i] = src[i];
-            for (; i < DF; ++i)
-                dst[i] = 0;
-        }
-
         //-----------------------------------------------------------------------------------------
 
         static void Convert16bNhwcSpecV1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst)
         {
             const float* src = (float*)src8;
             size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
+            size_t padH = a.padH * p.srcC, padHDF = AlignLo(padH, DF);
+            size_t sizeH = p.srcW * p.srcC, sizeHDF = AlignLo(sizeH, DF);
             if (dyBeg == 0)
             {
-                size_t size = a.padV * a.srcW * p.srcC, sizeDF = AlignLo(size, DF), i = 0;
-                for (; i < sizeDF; i += DF)
-                    Sse41::SetZero(dst + i);
-                for (; i < size; i += 1)
-                    dst[i] = 0;
-                //memset(dst, 0, size * sizeof(uint16_t));
-                dst += size;
+                size_t padV = a.padV * a.srcW * p.srcC;
+                memset(dst, 0, padV * sizeof(uint16_t));
+                dst += padV;
                 syBeg = 0;
             }
             else
@@ -79,97 +59,73 @@ namespace Simd
                 src += syBeg * p.srcW * p.srcC;
                 dst += (dyBeg + p.kernelY - 1) * a.srcW * p.srcC;
             }
-            //for (size_t sy = syBeg; sy < syEnd; ++sy)
-            //{
-            //    if (p.padX)
-            //    {
-            //        for (size_t s = 0; s < p.padX; ++s)
-            //            for (size_t c = 0; c < a.srcC; c += a.microC)
-            //                Sse41::SetZero(dst + c * cD + s * sD);
-            //        dst += p.padX * sD;
-            //    }
-            //    for (size_t sx = 0; sx < p.srcW; ++sx)
-            //    {
-            //        size_t sc = 0;
-            //        for (; sc < srcCDF; sc += DF)
-            //            Sse41::Float32ToBFloat16(src + sc, dst + sc * cD);
-            //        if (tailC)
-            //            Sse41::Float32ToBFloat16Tail(src + sc, tailC, dst + sc * cD);
-            //        src += p.srcC;
-            //        dst += sD;
-            //    }
-            //    if (p.padW)
-            //    {
-            //        for (size_t s = 0; s < p.padW; ++s)
-            //            for (size_t c = 0; c < a.srcC; c += a.microC)
-            //                Sse41::SetZero(dst + c * cD + s * sD);
-            //        dst += p.padW * sD;
-            //    }
-            //}
-            //if (dyEnd == p.dstH)
-            //{
-            //    for (size_t s = 0, n = p.padH * a.srcW; s < n; ++s)
-            //        for (size_t c = 0; c < a.srcC; c += a.microC)
-            //            Sse41::SetZero(dst + c * cD + s * sD);
-            //    dst += p.padH * a.srcW * sD;
-            //}
+            for (size_t sy = syBeg; sy < syEnd; ++sy)
+            {
+                if (padH)
+                {
+                    size_t i = 0;
+                    for (; i < padHDF; i += DF)
+                        Sse41::SetZero(dst + i);
+                    for (; i < padH; i += 1)
+                        dst[i] = 0;
+                    dst += padH;
+                }
+                size_t x = 0;
+                for (; x < sizeH; x += DF)
+                    Sse41::Float32ToBFloat16(src + x, dst + x); 
+                for (; x < sizeH; ++x)
+                    dst[x] = Base::Float32ToBFloat16(src[x]);
+                src += sizeH;
+                dst += sizeH;
+            }
+            if (end)
+            {
+                size_t padE = a.padE * p.srcC;
+                memset(dst, 0, padE * sizeof(uint16_t));
+                dst += padE;
+            }
         }
 
         static void Reorder16bNhwcSpecV1(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst)
         {
-            //assert(a.microC == DF);
-            //const uint16_t* src = (uint16_t*)src8;
-            //size_t srcCDF = Simd::AlignLo(p.srcC, DF), tailC = p.srcC - srcCDF;
-            //size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
-            //size_t cD = a.batch * a.srcH * a.srcW, sD = a.microC;
-            //if (dyBeg == 0)
-            //{
-            //    for (size_t s = 0, n = p.padY * a.srcW; s < n; ++s)
-            //        for (size_t c = 0; c < a.srcC; c += a.microC)
-            //            Sse41::SetZero(dst + c * cD + s * sD);
-            //    dst += p.padY * a.srcW * sD;
-            //    syBeg = 0;
-            //}
-            //else
-            //{
-            //    syBeg = dyBeg + syPad;
-            //    src += syBeg * p.srcW * p.srcC;
-            //    dst += (dyBeg + p.kernelY - 1) * a.srcW * sD;
-            //}
-            //for (size_t sy = syBeg; sy < syEnd; ++sy)
-            //{
-            //    if (p.padX)
-            //    {
-            //        for (size_t s = 0; s < p.padX; ++s)
-            //            for (size_t c = 0; c < a.srcC; c += a.microC)
-            //                Sse41::SetZero(dst + c * cD + s * sD);
-            //        dst += p.padX * sD;
-            //    }
-            //    for (size_t sx = 0; sx < p.srcW; ++sx)
-            //    {
-            //        size_t sc = 0;
-            //        for (; sc < srcCDF; sc += DF)
-            //            Sse41::Copy(src + sc, dst + sc * cD);
-            //        if (tailC)
-            //            Sse41::Copy(src + sc, tailC, dst + sc * cD);
-            //        src += p.srcC;
-            //        dst += sD;
-            //    }
-            //    if (p.padW)
-            //    {
-            //        for (size_t s = 0; s < p.padW; ++s)
-            //            for (size_t c = 0; c < a.srcC; c += a.microC)
-            //                Sse41::SetZero(dst + c * cD + s * sD);
-            //        dst += p.padW * sD;
-            //    }
-            //}
-            //if (dyEnd == p.dstH)
-            //{
-            //    for (size_t s = 0, n = p.padH * a.srcW; s < n; ++s)
-            //        for (size_t c = 0; c < a.srcC; c += a.microC)
-            //            Sse41::SetZero(dst + c * cD + s * sD);
-            //    dst += p.padH * a.srcW * sD;
-            //}
+            const uint16_t* src = (uint16_t*)src8;
+            size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
+            size_t padH = a.padH * p.srcC, padHDF = AlignLo(padH, DF);
+            size_t sizeH = p.srcW * p.srcC, sizeHDF = AlignLo(sizeH, DF);
+            if (dyBeg == 0)
+            {
+                size_t padV = a.padV * a.srcW * p.srcC;
+                memset(dst, 0, padV * sizeof(uint16_t));
+                dst += padV;
+                syBeg = 0;
+            }
+            else
+            {
+                syBeg = dyBeg + syPad;
+                src += syBeg * p.srcW * p.srcC;
+                dst += (dyBeg + p.kernelY - 1) * a.srcW * p.srcC;
+            }
+            for (size_t sy = syBeg; sy < syEnd; ++sy)
+            {
+                if (padH)
+                {
+                    size_t i = 0;
+                    for (; i < padHDF; i += DF)
+                        Sse41::SetZero(dst + i);
+                    for (; i < padH; i += 1)
+                        dst[i] = 0;
+                    dst += padH;
+                }
+                memcpy(dst, src, sizeH * sizeof(uint16_t));
+                src += sizeH;
+                dst += sizeH;
+            }
+            if (end)
+            {
+                size_t padE = a.padE * p.srcC;
+                memset(dst, 0, padE * sizeof(uint16_t));
+                dst += padE;
+            }
         }
 
         //-----------------------------------------------------------------------------------------
