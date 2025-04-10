@@ -423,6 +423,13 @@ namespace Simd
             virtual String Ext() const { return "Avx512bw"; }
         };
 
+        class SynetConvolution16bNhwcSpecV1 : public Avx2::SynetConvolution16bNhwcSpecV1
+        {
+        public:
+            SynetConvolution16bNhwcSpecV1(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
+        };
 
         class SynetConvolution16bNhwcDepthwise : public Avx2::SynetConvolution16bNhwcDepthwise
         {
