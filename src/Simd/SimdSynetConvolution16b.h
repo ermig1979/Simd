@@ -177,7 +177,7 @@ namespace Simd
             {
                 size_t batch, srcC, srcH, srcW, dstC, K;
                 size_t F, microD, microS, microC;
-                size_t macroD, macroH, macroC, numH;
+                size_t macroD, macroH, macroC, numH, macroO;
                 size_t bufS, bufD, elem;
                 Array32i offs;
             };
@@ -194,6 +194,7 @@ namespace Simd
             void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 
             AlgParam _alg;
+            Array32i _offset;
             PreprocessPtr _preprocess;
             ConvolutionPtr _convolution;
             PostprocessPtr _postprocess;

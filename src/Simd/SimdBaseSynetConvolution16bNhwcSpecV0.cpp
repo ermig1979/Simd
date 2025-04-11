@@ -67,6 +67,7 @@ namespace Simd
             a.K = p.kernelX * p.kernelY;
 
             a.macroC = Simd::RestrictRange(AlignLo(L1 / a.microD / a.K / 2, a.microC), a.microC, a.srcC);
+            a.macroO = a.macroC * a.K / a.microC;
             a.batch = 1;
             size_t bufSize = a.srcC * a.srcH * a.srcW * 2;
             if (bufSize * 2 <= L2 && p.batch > 1)
@@ -84,6 +85,13 @@ namespace Simd
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
+
+            int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
+            _offset.Resize(DivHi(a.srcC, a.microC) * a.K);
+            for (size_t c = 0, offsS = 0, i = 0; c < a.srcC; c += dX, offsS += dC)
+                for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)
+                    for (size_t offsX = offsY, endX = offsY + p.kernelX * dX; offsX < endX; offsX += dX, i++)
+                        _offset[i] = (int)offsX;
         }
 
         size_t SynetConvolution16bNhwcSpecV0::ExternalBufferSize() const
