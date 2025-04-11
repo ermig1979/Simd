@@ -176,6 +176,7 @@ namespace Simd
             struct AlgParam
             {
                 size_t batch, srcC, srcH, srcW, dstC, K;
+                size_t padV, padH, padE;
                 size_t F, microD, microS, microC;
                 size_t macroD, macroH, macroC, numH, macroO;
                 size_t bufS, bufD, elem;
