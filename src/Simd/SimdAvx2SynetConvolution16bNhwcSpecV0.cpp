@@ -58,7 +58,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convert16bNhwcSpecV0(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
+        static void Convert16bNhwcSpecV0(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst)
         {
             assert(a.microC == DF);
             const float* src = (float*)src8;
@@ -115,7 +115,7 @@ namespace Simd
             }
         }
 
-        static void Reorder16bNhwcSpecV0(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
+        static void Reorder16bNhwcSpecV0(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst)
         {
             assert(a.microC == DF);
             const uint16_t* src = (uint16_t*)src8;
@@ -174,7 +174,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convert16bNhwcDirect2(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, uint16_t* dst)
+        static void Convert16bNhwcDirect2(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst)
         {
             assert(a.microC == DF * 2);
             const float* src = (float*)src8;
