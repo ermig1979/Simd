@@ -326,7 +326,7 @@ namespace Simd
 
         typedef void (*Convolution16bNhwcSpecV0Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0);
 
-        static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
+        static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
         {
             size_t n1 = dstH * a.srcW + 1 - p.kernelX, n = 32;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
