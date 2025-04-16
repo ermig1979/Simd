@@ -193,11 +193,11 @@ namespace Simd
                         }
                         if (a.batch > 1)
                         {
-                            _convolution(buf + mac * a.srcH * a.srcW * a.batch, p, a, offs + mao, macroD, dstHb, macroC, mac == 0 ? 1 : 0, weight, sum);
+                            _convolution(buf + mac * a.srcH * a.srcW * a.batch * (a.F == 4 ? 0 : 1), p, a, offs + mao, macroD, dstHb, macroC, mac == 0 ? 1 : 0, weight, sum);
                         }
                         else
                         {
-                            _convolution(buf + mac * a.srcH * a.srcW + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
+                            _convolution(buf + mac * a.srcH * a.srcW * (a.F == 4 ? 0 : 1) + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
                                 macroC, mac == 0 ? 1 : 0, weight, sum + (dyBeg * a.srcW + dyTime * a.F) * a.macroD);
                         }
                         if (mac + macroC == a.srcC)
