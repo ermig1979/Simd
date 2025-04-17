@@ -109,7 +109,7 @@ namespace Simd
             {
                 for (size_t s = 0, n = a.padH; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
-                        Sse41::SetZero(dst + c * cD + s * sD);
+                        Avx2::SetZero(dst + c * cD + s * sD);
             }
         }
 

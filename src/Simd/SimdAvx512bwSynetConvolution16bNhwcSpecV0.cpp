@@ -47,13 +47,13 @@ namespace Simd
             size_t srcCDF = Simd::AlignLo(p.srcC, DF);
             __mmask32 tailC = TailMask32(p.srcC - srcCDF);
             size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
-            size_t cD = a.batch * a.srcH * a.srcW, sD = a.microC;
+            size_t cD = a.batch * a.srcH * a.srcW + a.padE, sD = a.microC;
             if (dyBeg == 0)
             {
-                for (size_t s = 0, n = p.padY * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padV * a.srcW; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Avx512bw::SetZero(dst + c * cD + s * sD);
-                dst += p.padY * a.srcW * sD;
+                dst += a.padV * a.srcW * sD;
                 syBeg = 0;
             }
             else
@@ -64,12 +64,12 @@ namespace Simd
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
             {
-                if (p.padX)
+                if (a.padH)
                 {
-                    for (size_t s = 0; s < p.padX; ++s)
+                    for (size_t s = 0; s < a.padH; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
                             Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padX * sD;
+                    dst += p.padH * sD;
                 }
                 for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
@@ -81,20 +81,18 @@ namespace Simd
                     src += p.srcC;
                     dst += sD;
                 }
-                if (p.padW)
-                {
-                    for (size_t s = 0; s < p.padW; ++s)
-                        for (size_t c = 0; c < a.srcC; c += a.microC)
-                            Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padW * sD;
-                }
             }
-            if (dyEnd == p.dstH)
+            if (end)
             {
-                for (size_t s = 0, n = p.padH * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padE; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Avx512bw::SetZero(dst + c * cD + s * sD);
-                dst += p.padH * a.srcW * sD;
+            }
+            else if (dyEnd != p.dstH)
+            {
+                for (size_t s = 0, n = a.padH; s < n; ++s)
+                    for (size_t c = 0; c < a.srcC; c += a.microC)
+                        Avx512bw::SetZero(dst + c * cD + s * sD);
             }
         }
 
@@ -105,13 +103,13 @@ namespace Simd
             size_t srcCDF = Simd::AlignLo(p.srcC, DF);
             __mmask32 tailC = TailMask32(p.srcC - srcCDF);
             size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
-            size_t cD = a.batch * a.srcH * a.srcW, sD = a.microC;
+            size_t cD = a.batch * a.srcH * a.srcW + a.padE, sD = a.microC;
             if (dyBeg == 0)
             {
-                for (size_t s = 0, n = p.padY * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padV * a.srcW; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Avx512bw::SetZero(dst + c * cD + s * sD);
-                dst += p.padY * a.srcW * sD;
+                dst += a.padV * a.srcW * sD;
                 syBeg = 0;
             }
             else
@@ -122,12 +120,12 @@ namespace Simd
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
             {
-                if (p.padX)
+                if (a.padH)
                 {
-                    for (size_t s = 0; s < p.padX; ++s)
+                    for (size_t s = 0; s < a.padH; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
                             Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padX * sD;
+                    dst += p.padH * sD;
                 }
                 for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
@@ -139,31 +137,29 @@ namespace Simd
                     src += p.srcC;
                     dst += sD;
                 }
-                if (p.padW)
-                {
-                    for (size_t s = 0; s < p.padW; ++s)
-                        for (size_t c = 0; c < a.srcC; c += a.microC)
-                            Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padW * sD;
-                }
             }
-            if (dyEnd == p.dstH)
+            if (end)
             {
-                for (size_t s = 0, n = p.padH * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padE; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Avx512bw::SetZero(dst + c * cD + s * sD);
-                dst += p.padH * a.srcW * sD;
+            }
+            else if (dyEnd != p.dstH)
+            {
+                for (size_t s = 0, n = a.padH; s < n; ++s)
+                    for (size_t c = 0; c < a.srcC; c += a.microC)
+                        Avx512bw::SetZero(dst + c * cD + s * sD);
             }
         }
 
         //-----------------------------------------------------------------------------------------
 
-        template<int M> void Convolution16bNhwcSpecV0_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int zero, const uint16_t* weight0, float* dst)
+        template<int M> void Convolution16bNhwcSpecV0_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offset, size_t nK, size_t dstC, int zero, const uint16_t* weight0, float* dst)
         {
             __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51,
                 d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1,
                 s0, w00, w01, w10, w11, m = _mm512_castsi512_ps(Bf16::MASK);
-            size_t dD = a.macroD, dX = a.microC, dY = a.srcW * dX, dC = dY * a.srcH * a.batch, kX = p.kernelX, kY = p.kernelY;
+            size_t dD = a.macroD, dX = a.microC;
             const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
             const uint16_t* src1 = src0 + 1 * dX;
             const uint16_t* src2 = src0 + 2 * dX;
@@ -202,108 +198,102 @@ namespace Simd
                     if (M > 0xa) da0 = _mm512_loadu_ps(dst + 0xa * dD + 0), da1 = _mm512_loadu_ps(dst + 0xa * dD + F);
                     if (M > 0xb) db0 = _mm512_loadu_ps(dst + 0xb * dD + 0), db1 = _mm512_loadu_ps(dst + 0xb * dD + F);
                 }
-                for (size_t c = 0, offsS = 0; c < srcC; c += dX, offsS += dC)
+                for (size_t k = 0; k < nK; k += 1)
                 {
-                    for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
+                    for (size_t offs0 = offset[k], end = offs0 + dX, offs6 = offs0 + 6 * dX; offs0 < end; offs0 += 2, offs6 += 2)
                     {
-                        for (size_t x = 0, offsX = offsY; x < kX; x += 1, offsX += dX)
+                        w01 = _mm512_loadu_ps((float*)weight0);
+                        w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
+                        w01 = _mm512_and_ps(w01, m);
+                        w11 = _mm512_loadu_ps((float*)weight1);
+                        w10 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w11), Base::Bf16::SHIFT));
+                        w11 = _mm512_and_ps(w11, m);
+                        if (M > 0x0)
                         {
-                            for (size_t offs0 = offsX, end0 = offs0 + dX, offs6 = offs0 + 6 * dX; offs0 < end0; offs0 += 2, offs6 += 2)
-                            {
-                                w01 = _mm512_loadu_ps((float*)weight0);
-                                w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
-                                w01 = _mm512_and_ps(w01, m);
-                                w11 = _mm512_loadu_ps((float*)weight1);
-                                w10 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w11), Base::Bf16::SHIFT));
-                                w11 = _mm512_and_ps(w11, m);
-                                if (M > 0x0)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs0]));
-                                    d00 = _mm512_fmadd_ps(s0, w00, d00); d01 = _mm512_fmadd_ps(s0, w10, d01);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs0)), m);
-                                    d00 = _mm512_fmadd_ps(s0, w01, d00); d01 = _mm512_fmadd_ps(s0, w11, d01);
-                                }
-                                if (M > 0x1)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs0]));
-                                    d10 = _mm512_fmadd_ps(s0, w00, d10); d11 = _mm512_fmadd_ps(s0, w10, d11);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs0)), m);
-                                    d10 = _mm512_fmadd_ps(s0, w01, d10); d11 = _mm512_fmadd_ps(s0, w11, d11);
-                                }
-                                if (M > 0x2)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs0]));
-                                    d20 = _mm512_fmadd_ps(s0, w00, d20); d21 = _mm512_fmadd_ps(s0, w10, d21);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs0)), m);
-                                    d20 = _mm512_fmadd_ps(s0, w01, d20); d21 = _mm512_fmadd_ps(s0, w11, d21);
-                                }
-                                if (M > 0x3)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs0]));
-                                    d30 = _mm512_fmadd_ps(s0, w00, d30); d31 = _mm512_fmadd_ps(s0, w10, d31);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs0)), m);
-                                    d30 = _mm512_fmadd_ps(s0, w01, d30); d31 = _mm512_fmadd_ps(s0, w11, d31);
-                                }
-                                if (M > 0x4)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs0]));
-                                    d40 = _mm512_fmadd_ps(s0, w00, d40); d41 = _mm512_fmadd_ps(s0, w10, d41);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs0)), m);
-                                    d40 = _mm512_fmadd_ps(s0, w01, d40); d41 = _mm512_fmadd_ps(s0, w11, d41);
-                                }
-                                if (M > 0x5)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs0]));
-                                    d50 = _mm512_fmadd_ps(s0, w00, d50); d51 = _mm512_fmadd_ps(s0, w10, d51);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs0)), m);
-                                    d50 = _mm512_fmadd_ps(s0, w01, d50); d51 = _mm512_fmadd_ps(s0, w11, d51);
-                                }
-                                if (M > 0x6)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs6]));
-                                    d60 = _mm512_fmadd_ps(s0, w00, d60); d61 = _mm512_fmadd_ps(s0, w10, d61);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs6)), m);
-                                    d60 = _mm512_fmadd_ps(s0, w01, d60); d61 = _mm512_fmadd_ps(s0, w11, d61);
-                                }
-                                if (M > 0x7)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs6]));
-                                    d70 = _mm512_fmadd_ps(s0, w00, d70); d71 = _mm512_fmadd_ps(s0, w10, d71);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs6)), m);
-                                    d70 = _mm512_fmadd_ps(s0, w01, d70); d71 = _mm512_fmadd_ps(s0, w11, d71);
-                                }
-                                if (M > 0x8)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs6]));
-                                    d80 = _mm512_fmadd_ps(s0, w00, d80); d81 = _mm512_fmadd_ps(s0, w10, d81);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs6)), m);
-                                    d80 = _mm512_fmadd_ps(s0, w01, d80); d81 = _mm512_fmadd_ps(s0, w11, d81);
-                                }
-                                if (M > 0x9)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs6]));
-                                    d90 = _mm512_fmadd_ps(s0, w00, d90); d91 = _mm512_fmadd_ps(s0, w10, d91);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs6)), m);
-                                    d90 = _mm512_fmadd_ps(s0, w01, d90); d91 = _mm512_fmadd_ps(s0, w11, d91);
-                                }
-                                if (M > 0xa)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs6]));
-                                    da0 = _mm512_fmadd_ps(s0, w00, da0); da1 = _mm512_fmadd_ps(s0, w10, da1);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs6)), m);
-                                    da0 = _mm512_fmadd_ps(s0, w01, da0); da1 = _mm512_fmadd_ps(s0, w11, da1);
-                                }
-                                if (M > 0xb)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs6]));
-                                    db0 = _mm512_fmadd_ps(s0, w00, db0); db1 = _mm512_fmadd_ps(s0, w10, db1);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs6)), m);
-                                    db0 = _mm512_fmadd_ps(s0, w01, db0); db1 = _mm512_fmadd_ps(s0, w11, db1);
-                                }
-                                weight0 += DF;
-                                weight1 += DF;
-                            }
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs0]));
+                            d00 = _mm512_fmadd_ps(s0, w00, d00); d01 = _mm512_fmadd_ps(s0, w10, d01);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs0)), m);
+                            d00 = _mm512_fmadd_ps(s0, w01, d00); d01 = _mm512_fmadd_ps(s0, w11, d01);
                         }
+                        if (M > 0x1)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs0]));
+                            d10 = _mm512_fmadd_ps(s0, w00, d10); d11 = _mm512_fmadd_ps(s0, w10, d11);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs0)), m);
+                            d10 = _mm512_fmadd_ps(s0, w01, d10); d11 = _mm512_fmadd_ps(s0, w11, d11);
+                        }
+                        if (M > 0x2)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs0]));
+                            d20 = _mm512_fmadd_ps(s0, w00, d20); d21 = _mm512_fmadd_ps(s0, w10, d21);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs0)), m);
+                            d20 = _mm512_fmadd_ps(s0, w01, d20); d21 = _mm512_fmadd_ps(s0, w11, d21);
+                        }
+                        if (M > 0x3)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs0]));
+                            d30 = _mm512_fmadd_ps(s0, w00, d30); d31 = _mm512_fmadd_ps(s0, w10, d31);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs0)), m);
+                            d30 = _mm512_fmadd_ps(s0, w01, d30); d31 = _mm512_fmadd_ps(s0, w11, d31);
+                        }
+                        if (M > 0x4)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs0]));
+                            d40 = _mm512_fmadd_ps(s0, w00, d40); d41 = _mm512_fmadd_ps(s0, w10, d41);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs0)), m);
+                            d40 = _mm512_fmadd_ps(s0, w01, d40); d41 = _mm512_fmadd_ps(s0, w11, d41);
+                        }
+                        if (M > 0x5)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs0]));
+                            d50 = _mm512_fmadd_ps(s0, w00, d50); d51 = _mm512_fmadd_ps(s0, w10, d51);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs0)), m);
+                            d50 = _mm512_fmadd_ps(s0, w01, d50); d51 = _mm512_fmadd_ps(s0, w11, d51);
+                        }
+                        if (M > 0x6)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs6]));
+                            d60 = _mm512_fmadd_ps(s0, w00, d60); d61 = _mm512_fmadd_ps(s0, w10, d61);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs6)), m);
+                            d60 = _mm512_fmadd_ps(s0, w01, d60); d61 = _mm512_fmadd_ps(s0, w11, d61);
+                        }
+                        if (M > 0x7)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs6]));
+                            d70 = _mm512_fmadd_ps(s0, w00, d70); d71 = _mm512_fmadd_ps(s0, w10, d71);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs6)), m);
+                            d70 = _mm512_fmadd_ps(s0, w01, d70); d71 = _mm512_fmadd_ps(s0, w11, d71);
+                        }
+                        if (M > 0x8)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs6]));
+                            d80 = _mm512_fmadd_ps(s0, w00, d80); d81 = _mm512_fmadd_ps(s0, w10, d81);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs6)), m);
+                            d80 = _mm512_fmadd_ps(s0, w01, d80); d81 = _mm512_fmadd_ps(s0, w11, d81);
+                        }
+                        if (M > 0x9)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs6]));
+                            d90 = _mm512_fmadd_ps(s0, w00, d90); d91 = _mm512_fmadd_ps(s0, w10, d91);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs6)), m);
+                            d90 = _mm512_fmadd_ps(s0, w01, d90); d91 = _mm512_fmadd_ps(s0, w11, d91);
+                        }
+                        if (M > 0xa)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs6]));
+                            da0 = _mm512_fmadd_ps(s0, w00, da0); da1 = _mm512_fmadd_ps(s0, w10, da1);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs6)), m);
+                            da0 = _mm512_fmadd_ps(s0, w01, da0); da1 = _mm512_fmadd_ps(s0, w11, da1);
+                        }
+                        if (M > 0xb)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs6]));
+                            db0 = _mm512_fmadd_ps(s0, w00, db0); db1 = _mm512_fmadd_ps(s0, w10, db1);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs6)), m);
+                            db0 = _mm512_fmadd_ps(s0, w01, db0); db1 = _mm512_fmadd_ps(s0, w11, db1);
+                        }
+                        weight0 += DF;
+                        weight1 += DF;
                     }
                 }
                 if (M > 0x0) _mm512_storeu_ps(dst + 0x0 * dD + 0, d00), _mm512_storeu_ps(dst + 0x0 * dD + F, d01);
@@ -351,104 +341,98 @@ namespace Simd
                     if (M > 0xa) da0 = _mm512_loadu_ps(dst + 0xa * dD + 0);
                     if (M > 0xb) db0 = _mm512_loadu_ps(dst + 0xb * dD + 0);
                 }
-                for (size_t c = 0, offsS = 0; c < srcC; c += dX, offsS += dC)
+                for (size_t k = 0; k < nK; k += 1)
                 {
-                    for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
+                    for (size_t offs0 = offset[k], end = offs0 + dX, offs6 = offs0 + 6 * dX; offs0 < end; offs0 += 2, offs6 += 2)
                     {
-                        for (size_t x = 0, offsX = offsY; x < kX; x += 1, offsX += dX)
+                        w01 = _mm512_loadu_ps((float*)weight0);
+                        w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
+                        w01 = _mm512_and_ps(w01, m);
+                        if (M > 0x0)
                         {
-                            for (size_t offs0 = offsX, end0 = offs0 + dX, offs6 = offs0 + 6 * dX; offs0 < end0; offs0 += 2, offs6 += 2)
-                            {
-                                w01 = _mm512_loadu_ps((float*)weight0);
-                                w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
-                                w01 = _mm512_and_ps(w01, m);
-                                if (M > 0x0)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs0]));
-                                    d00 = _mm512_fmadd_ps(s0, w00, d00);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs0)), m);
-                                    d00 = _mm512_fmadd_ps(s0, w01, d00);
-                                }
-                                if (M > 0x1)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs0]));
-                                    d10 = _mm512_fmadd_ps(s0, w00, d10);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs0)), m);
-                                    d10 = _mm512_fmadd_ps(s0, w01, d10);
-                                }
-                                if (M > 0x2)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs0]));
-                                    d20 = _mm512_fmadd_ps(s0, w00, d20);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs0)), m);
-                                    d20 = _mm512_fmadd_ps(s0, w01, d20);
-                                }
-                                if (M > 0x3)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs0]));
-                                    d30 = _mm512_fmadd_ps(s0, w00, d30);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs0)), m);
-                                    d30 = _mm512_fmadd_ps(s0, w01, d30);
-                                }
-                                if (M > 0x4)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs0]));
-                                    d40 = _mm512_fmadd_ps(s0, w00, d40);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs0)), m);
-                                    d40 = _mm512_fmadd_ps(s0, w01, d40);
-                                }
-                                if (M > 0x5)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs0]));
-                                    d50 = _mm512_fmadd_ps(s0, w00, d50);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs0)), m);
-                                    d50 = _mm512_fmadd_ps(s0, w01, d50);
-                                }
-                                if (M > 0x6)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs6]));
-                                    d60 = _mm512_fmadd_ps(s0, w00, d60);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs6)), m);
-                                    d60 = _mm512_fmadd_ps(s0, w01, d60);
-                                }
-                                if (M > 0x7)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs6]));
-                                    d70 = _mm512_fmadd_ps(s0, w00, d70);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs6)), m);
-                                    d70 = _mm512_fmadd_ps(s0, w01, d70);
-                                }
-                                if (M > 0x8)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs6]));
-                                    d80 = _mm512_fmadd_ps(s0, w00, d80);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs6)), m);
-                                    d80 = _mm512_fmadd_ps(s0, w01, d80);
-                                }
-                                if (M > 0x9)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs6]));
-                                    d90 = _mm512_fmadd_ps(s0, w00, d90);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs6)), m);
-                                    d90 = _mm512_fmadd_ps(s0, w01, d90);
-                                }
-                                if (M > 0xa)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs6]));
-                                    da0 = _mm512_fmadd_ps(s0, w00, da0);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs6)), m);
-                                    da0 = _mm512_fmadd_ps(s0, w01, da0);
-                                }
-                                if (M > 0xb)
-                                {
-                                    s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs6]));
-                                    db0 = _mm512_fmadd_ps(s0, w00, db0);
-                                    s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs6)), m);
-                                    db0 = _mm512_fmadd_ps(s0, w01, db0);
-                                }
-                                weight0 += DF;
-                            }
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs0]));
+                            d00 = _mm512_fmadd_ps(s0, w00, d00);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs0)), m);
+                            d00 = _mm512_fmadd_ps(s0, w01, d00);
                         }
+                        if (M > 0x1)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs0]));
+                            d10 = _mm512_fmadd_ps(s0, w00, d10);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs0)), m);
+                            d10 = _mm512_fmadd_ps(s0, w01, d10);
+                        }
+                        if (M > 0x2)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs0]));
+                            d20 = _mm512_fmadd_ps(s0, w00, d20);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs0)), m);
+                            d20 = _mm512_fmadd_ps(s0, w01, d20);
+                        }
+                        if (M > 0x3)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs0]));
+                            d30 = _mm512_fmadd_ps(s0, w00, d30);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs0)), m);
+                            d30 = _mm512_fmadd_ps(s0, w01, d30);
+                        }
+                        if (M > 0x4)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs0]));
+                            d40 = _mm512_fmadd_ps(s0, w00, d40);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs0)), m);
+                            d40 = _mm512_fmadd_ps(s0, w01, d40);
+                        }
+                        if (M > 0x5)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs0]));
+                            d50 = _mm512_fmadd_ps(s0, w00, d50);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs0)), m);
+                            d50 = _mm512_fmadd_ps(s0, w01, d50);
+                        }
+                        if (M > 0x6)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs6]));
+                            d60 = _mm512_fmadd_ps(s0, w00, d60);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs6)), m);
+                            d60 = _mm512_fmadd_ps(s0, w01, d60);
+                        }
+                        if (M > 0x7)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs6]));
+                            d70 = _mm512_fmadd_ps(s0, w00, d70);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs6)), m);
+                            d70 = _mm512_fmadd_ps(s0, w01, d70);
+                        }
+                        if (M > 0x8)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs6]));
+                            d80 = _mm512_fmadd_ps(s0, w00, d80);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs6)), m);
+                            d80 = _mm512_fmadd_ps(s0, w01, d80);
+                        }
+                        if (M > 0x9)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs6]));
+                            d90 = _mm512_fmadd_ps(s0, w00, d90);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs6)), m);
+                            d90 = _mm512_fmadd_ps(s0, w01, d90);
+                        }
+                        if (M > 0xa)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs6]));
+                            da0 = _mm512_fmadd_ps(s0, w00, da0);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs6)), m);
+                            da0 = _mm512_fmadd_ps(s0, w01, da0);
+                        }
+                        if (M > 0xb)
+                        {
+                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs6]));
+                            db0 = _mm512_fmadd_ps(s0, w00, db0);
+                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs6)), m);
+                            db0 = _mm512_fmadd_ps(s0, w01, db0);
+                        }
+                        weight0 += DF;
                     }
                 }
                 if (M > 0x0) _mm512_storeu_ps(dst + 0x0 * dD + 0, d00);
@@ -466,7 +450,7 @@ namespace Simd
             }
         }
 
-        typedef void(*Convolution16bNhwcSpecV0_2xM_Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int zero, const uint16_t* weight0, float* dst);
+        typedef void(*Convolution16bNhwcSpecV0_2xM_Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offset, size_t nK, size_t dstC, int zero, const uint16_t* weight0, float* dst);
 
         static Convolution16bNhwcSpecV0_2xM_Ptr GetConvolution16bNhwcSpecV0_2xM(size_t M)
         {
@@ -493,7 +477,8 @@ namespace Simd
         static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p,
             const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
         {
-            size_t n1 = dstH * a.srcW + 1 - p.kernelX, n = 12;
+            size_t nK = srcC * a.K / a.microC;
+            size_t n1 = dstH * a.srcW - a.padH, n = 12;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
             size_t dD = a.macroD, dS = a.microC;
             Convolution16bNhwcSpecV0_2xM_Ptr convolution_2xN = GetConvolution16bNhwcSpecV0_2xM(n);
@@ -503,9 +488,9 @@ namespace Simd
                 size_t dC = Simd::Min(DF, dstC - dc);
                 size_t i = 0;
                 for (; i < nn; i += n)
-                    convolution_2xN(src + i * dS, p, a, srcC, dC, zero, weight, dst + i * dD);
+                    convolution_2xN(src + i * dS, p, a, offs, nK, dC, zero, weight, dst + i * dD);
                 for (; i < n1; i += m)
-                    convolution_2xM(src + i * dS, p, a, srcC, dC, zero, weight, dst + i * dD);
+                    convolution_2xM(src + i * dS, p, a, offs, nK, dC, zero, weight, dst + i * dD);
                 weight += dW;
                 dst += DF;
             }
@@ -518,7 +503,7 @@ namespace Simd
         {
             size_t dstCF = AlignLo(dstC, F);
             __mmask16 tailD = TailMask16(dstC - dstCF);
-            size_t rowGap = (p.kernelX - 1) * a.macroD;
+            size_t rowGap = a.padH * a.macroD;
             src += dyBeg * a.srcW * a.macroD;
             dst += dyBeg * p.dstW * p.dstC * a.elem;
             for (size_t dy = dyBeg; dy < dyEnd; ++dy)
