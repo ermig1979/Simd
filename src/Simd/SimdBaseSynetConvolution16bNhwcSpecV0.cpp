@@ -61,13 +61,13 @@ namespace Simd
             a.microS = microS;
             a.microC = microC;
             a.srcC = AlignHi(p.srcC, a.microC);
-            a.srcH = p.srcH + p.padY + p.padH;
-            a.srcW = p.srcW + p.padX + p.padW;
-            a.dstC = AlignHi(p.dstC, a.F);
             a.padV = Simd::Max(p.padY, p.padH);
             a.padH = Simd::Max(p.padX, p.padW);
+            a.srcH = p.srcH + a.padV;
+            a.srcW = p.srcW + a.padH;
+            a.dstC = AlignHi(p.dstC, a.F);
             a.K = p.kernelX * p.kernelY;
-            a.padE = (a.srcW + a.padH) * a.padV + a.microC * a.F;
+            a.padE = (a.srcW + a.padH) * a.padV + a.microC;
 
             a.macroC = Simd::RestrictRange(AlignLo(L1 / a.microD / a.K / 2, a.microC), a.microC, a.srcC);
             a.macroO = a.macroC * a.K / a.microC;
@@ -83,13 +83,13 @@ namespace Simd
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.K / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
             a.numH = DivHi(p.dstH * a.batch, a.macroH);
             a.elem = _elemD;
-            a.bufS = a.batch * a.srcH * a.srcW * a.srcC + a.F * a.F;
+            a.bufS = (a.batch * a.srcH * a.srcW + a.padE) * a.srcC + a.microC * a.F;
             a.bufD = (a.batch * a.srcH * a.srcW + a.numH * a.F) * a.macroD;
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
 
-            int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
+            int dX = (int)a.microC, dY = (int)a.srcW * dX, dC =int(a.batch * a.srcH * a.srcW + a.padE) * dX;
             _offset.Resize(DivHi(a.srcC, a.microC) * a.K);
             for (size_t c = 0, offsS = 0, i = 0; c < a.srcC; c += dX, offsS += dC)
                 for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)
@@ -168,7 +168,7 @@ namespace Simd
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
             const int* offs = _offset.data;
-            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch + 1 - p.kernelY;
+            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch - a.padV;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
@@ -176,7 +176,7 @@ namespace Simd
                 for (size_t mac = 0, mao = 0; mac < a.srcC; mac += a.macroC, mao += a.macroO)
                 {
                     size_t macroC = Simd::Min(a.srcC, mac + a.macroC) - mac;
-                    for (size_t dyBeg = 0, dyTime = 0; dyBeg < dstH; dyTime++)
+                    for (size_t dyBeg = 0, dyN = 0; dyBeg < dstH; dyN++)
                     {
                         size_t dyEnd = Simd::Min(dyBeg + a.macroH, dstH);
                         if (mad == 0 && mac == 0)
@@ -193,12 +193,12 @@ namespace Simd
                         }
                         if (a.batch > 1)
                         {
-                            _convolution(buf + mac * a.srcH * a.srcW * a.batch * (a.F == 4 ? 0 : 1), p, a, offs + mao, macroD, dstHb, macroC, mac == 0 ? 1 : 0, weight, sum);
+                            _convolution(buf, p, a, offs + mao, macroD, dstHb, macroC, mac == 0 ? 1 : 0, weight, sum);
                         }
                         else
                         {
-                            _convolution(buf + mac * a.srcH * a.srcW * (a.F == 4 ? 0 : 1) + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
-                                macroC, mac == 0 ? 1 : 0, weight, sum + (dyBeg * a.srcW + dyTime * a.F) * a.macroD);
+                            _convolution(buf + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
+                                macroC, mac == 0 ? 1 : 0, weight, sum + (dyBeg * a.srcW + dyN * a.F) * a.macroD);
                         }
                         if (mac + macroC == a.srcC)
                         {
@@ -210,7 +210,7 @@ namespace Simd
                                     _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, params, dst + b * dD);
                             }
                             else
-                                _postprocess(sum + dyTime * a.F * a.macroD, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
+                                _postprocess(sum + dyN * a.F * a.macroD, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
                         }
                         dyBeg = dyEnd;
                     }

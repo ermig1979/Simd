@@ -64,13 +64,13 @@ namespace Simd
             const float* src = (float*)src8;
             size_t srcCDF = Simd::AlignLo(p.srcC, DF), tailC = p.srcC - srcCDF;
             size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
-            size_t cD = a.batch * a.srcH * a.srcW, sD = a.microC;
+            size_t cD = a.batch * a.srcH * a.srcW + a.padE, sD = a.microC;
             if (dyBeg == 0)
             {
-                for (size_t s = 0, n = p.padY * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padV * a.srcW; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Sse41::SetZero(dst + c * cD + s * sD);
-                dst += p.padY * a.srcW * sD;
+                dst += a.padV * a.srcW * sD;
                 syBeg = 0;
             }
             else
@@ -81,12 +81,12 @@ namespace Simd
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
             {
-                if (p.padX)
+                if (a.padH)
                 {
-                    for (size_t s = 0; s < p.padX; ++s)
+                    for (size_t s = 0; s < a.padH; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
                             Sse41::SetZero(dst + c * cD + s * sD);
-                    dst += p.padX * sD;
+                    dst += p.padH * sD;
                 }
                 for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
@@ -98,20 +98,18 @@ namespace Simd
                     src += p.srcC;
                     dst += sD;
                 }
-                if (p.padW)
-                {
-                    for (size_t s = 0; s < p.padW; ++s)
-                        for (size_t c = 0; c < a.srcC; c += a.microC)
-                            Sse41::SetZero(dst + c * cD + s * sD);
-                    dst += p.padW * sD;
-                }
             }
-            if (dyEnd == p.dstH)
+            if (end)
             {
-                for (size_t s = 0, n = p.padH * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padE; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Sse41::SetZero(dst + c * cD + s * sD);
-                dst += p.padH * a.srcW * sD;
+            }
+            else if(dyEnd != p.dstH)
+            {
+                for (size_t s = 0, n = a.padH; s < n; ++s)
+                    for (size_t c = 0; c < a.srcC; c += a.microC)
+                        Sse41::SetZero(dst + c * cD + s * sD);
             }
         }
 
@@ -121,13 +119,13 @@ namespace Simd
             const uint16_t* src = (uint16_t*)src8;
             size_t srcCDF = Simd::AlignLo(p.srcC, DF), tailC = p.srcC - srcCDF;
             size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
-            size_t cD = a.batch * a.srcH * a.srcW, sD = a.microC;
+            size_t cD = a.batch * a.srcH * a.srcW + a.padE, sD = a.microC;
             if (dyBeg == 0)
             {
-                for (size_t s = 0, n = p.padY * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padV * a.srcW; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Sse41::SetZero(dst + c * cD + s * sD);
-                dst += p.padY * a.srcW * sD;
+                dst += a.padV * a.srcW * sD;
                 syBeg = 0;
             }
             else
@@ -138,12 +136,12 @@ namespace Simd
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
             {
-                if (p.padX)
+                if (a.padH)
                 {
-                    for (size_t s = 0; s < p.padX; ++s)
+                    for (size_t s = 0; s < a.padH; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
                             Sse41::SetZero(dst + c * cD + s * sD);
-                    dst += p.padX * sD;
+                    dst += p.padH * sD;
                 }
                 for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
@@ -155,20 +153,18 @@ namespace Simd
                     src += p.srcC;
                     dst += sD;
                 }
-                if (p.padW)
-                {
-                    for (size_t s = 0; s < p.padW; ++s)
-                        for (size_t c = 0; c < a.srcC; c += a.microC)
-                            Sse41::SetZero(dst + c * cD + s * sD);
-                    dst += p.padW * sD;
-                }
             }
-            if (dyEnd == p.dstH)
+            if (end)
             {
-                for (size_t s = 0, n = p.padH * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padE; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Sse41::SetZero(dst + c * cD + s * sD);
-                dst += p.padH * a.srcW * sD;
+            }
+            else if (dyEnd != p.dstH)
+            {
+                for (size_t s = 0, n = a.padH; s < n; ++s)
+                    for (size_t c = 0; c < a.srcC; c += a.microC)
+                        Sse41::SetZero(dst + c * cD + s * sD);
             }
         }
 
@@ -358,7 +354,7 @@ namespace Simd
             const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
         {
             size_t nK = srcC * a.K / a.microC;
-            size_t n1 = dstH * a.srcW + 1 - p.kernelX, n = 5;
+            size_t n1 = dstH * a.srcW - a.padH, n = 5;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
             size_t dD = a.macroD, dS = a.microC;
             Convolution16bNhwcSpecV0_2xM_Ptr convolution_2xN = GetConvolution16bNhwcSpecV0_2xM(n);
@@ -382,7 +378,7 @@ namespace Simd
             const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst)
         {
             size_t dstCF = AlignLo(dstC, F), tailD = dstC - dstCF;
-            size_t rowGap = (p.kernelX - 1) * a.macroD;
+            size_t rowGap = a.padH * a.macroD;
             src += dyBeg * a.srcW * a.macroD;
             dst += dyBeg * p.dstW * p.dstC * a.elem;
             for (size_t dy = dyBeg; dy < dyEnd; ++dy)
