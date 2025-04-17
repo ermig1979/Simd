@@ -48,13 +48,13 @@ namespace Simd
             size_t srcCDF = Simd::AlignLo(p.srcC, DF);
             __mmask32 tailC = TailMask32(p.srcC - srcCDF);
             size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
-            size_t cD = a.batch * a.srcH * a.srcW, sD = a.microC;
+            size_t cD = a.batch * a.srcH * a.srcW + a.padE, sD = a.microC;
             if (dyBeg == 0)
             {
-                for (size_t s = 0, n = p.padY * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padV * a.srcW; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Avx512bw::SetZero(dst + c * cD + s * sD);
-                dst += p.padY * a.srcW * sD;
+                dst += a.padV * a.srcW * sD;
                 syBeg = 0;
             }
             else
@@ -65,12 +65,12 @@ namespace Simd
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
             {
-                if (p.padX)
+                if (a.padH)
                 {
-                    for (size_t s = 0; s < p.padX; ++s)
+                    for (size_t s = 0; s < a.padH; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
                             Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padX * sD;
+                    dst += p.padH * sD;
                 }
                 for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
@@ -82,20 +82,18 @@ namespace Simd
                     src += p.srcC;
                     dst += sD;
                 }
-                if (p.padW)
-                {
-                    for (size_t s = 0; s < p.padW; ++s)
-                        for (size_t c = 0; c < a.srcC; c += a.microC)
-                            Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padW * sD;
-                }
             }
-            if (dyEnd == p.dstH)
+            if (end)
             {
-                for (size_t s = 0, n = p.padH * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padE; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Avx512bw::SetZero(dst + c * cD + s * sD);
-                dst += p.padH * a.srcW * sD;
+            }
+            else if (dyEnd != p.dstH)
+            {
+                for (size_t s = 0, n = a.padH; s < n; ++s)
+                    for (size_t c = 0; c < a.srcC; c += a.microC)
+                        Avx512bw::SetZero(dst + c * cD + s * sD);
             }
         }
 
@@ -106,13 +104,13 @@ namespace Simd
             size_t srcCDF = Simd::AlignLo(p.srcC, DF);
             __mmask32 tailC = TailMask32(p.srcC - srcCDF);
             size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
-            size_t cD = a.batch * a.srcH * a.srcW, sD = a.microC;
+            size_t cD = a.batch * a.srcH * a.srcW + a.padE, sD = a.microC;
             if (dyBeg == 0)
             {
-                for (size_t s = 0, n = p.padY * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padV * a.srcW; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Avx512bw::SetZero(dst + c * cD + s * sD);
-                dst += p.padY * a.srcW * sD;
+                dst += a.padV * a.srcW * sD;
                 syBeg = 0;
             }
             else
@@ -123,12 +121,12 @@ namespace Simd
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
             {
-                if (p.padX)
+                if (a.padH)
                 {
-                    for (size_t s = 0; s < p.padX; ++s)
+                    for (size_t s = 0; s < a.padH; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
                             Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padX * sD;
+                    dst += p.padH * sD;
                 }
                 for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
@@ -140,29 +138,26 @@ namespace Simd
                     src += p.srcC;
                     dst += sD;
                 }
-                if (p.padW)
-                {
-                    for (size_t s = 0; s < p.padW; ++s)
-                        for (size_t c = 0; c < a.srcC; c += a.microC)
-                            Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padW * sD;
-                }
             }
-            if (dyEnd == p.dstH)
+            if (end)
             {
-                for (size_t s = 0, n = p.padH * a.srcW; s < n; ++s)
+                for (size_t s = 0, n = a.padE; s < n; ++s)
                     for (size_t c = 0; c < a.srcC; c += a.microC)
                         Avx512bw::SetZero(dst + c * cD + s * sD);
-                dst += p.padH * a.srcW * sD;
+            }
+            else if (dyEnd != p.dstH)
+            {
+                for (size_t s = 0, n = a.padH; s < n; ++s)
+                    for (size_t c = 0; c < a.srcC; c += a.microC)
+                        Avx512bw::SetZero(dst + c * cD + s * sD);
             }
         }
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convolution16bNhwcSpecV0_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
-            int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
+            int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
             const uint16_t* src1 = src0 + 16 * dX;
             float* dst1 = dst0 + 16 * dD;
@@ -182,7 +177,7 @@ namespace Simd
                 _tile_stream_loadd(3, dst1 + F, strideD);
             }
 
-            int n1 = (int)srcCn - 1, *offs = a.offs.data;
+            int n1 = (int)nK - 1;
             _tile_stream_loadd(4, src0, strideS);
             _tile_loadd(6, weight0, strideW);
             for (int i = 0, o = 0; i < n1; ++i)
@@ -216,10 +211,9 @@ namespace Simd
             TileMoveToMemory(dst1 + F, dD);
         }
 
-        static void Convolution16bNhwcSpecV0_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
-            int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
+            int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* src1 = src0 + 16 * dX;
             float* dst1 = dst0 + 16 * dD;
 
@@ -234,7 +228,7 @@ namespace Simd
                 _tile_stream_loadd(2, dst1 + 0, strideD);
             }
 
-            int n1 = (int)srcCn - 1, * offs = a.offs.data;
+            int n1 = (int)nK - 1;
             _tile_stream_loadd(4, src0, strideS);
             for (int i = 0, o = 0; i < n1; ++i)
             {
@@ -257,10 +251,9 @@ namespace Simd
             TileMoveToMemory(dst1 + 0, dD);
         }
 
-        static void Convolution16bNhwcSpecV0_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
-            int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
+            int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
 
             if (zero)
@@ -274,7 +267,7 @@ namespace Simd
                 _tile_stream_loadd(1, dst0 + F, strideD);
             }
 
-            int n1 = (int)srcCn - 1, * offs = a.offs.data;
+            int n1 = (int)nK - 1;
             _tile_loadd(6, weight0, strideW);
             for (int i = 0, o = 0; i < n1; ++i)
             {
@@ -297,10 +290,9 @@ namespace Simd
             TileMoveToMemory(dst0 + F, dD);
         }
 
-        static void Convolution16bNhwcSpecV0_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcCn, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
         {
-            int dD = (int)a.macroD, dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            int strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
+            int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
 
             if (zero)
             {
@@ -311,7 +303,7 @@ namespace Simd
                 _tile_stream_loadd(0, dst0 + 0, strideD);
             }
 
-            int n = (int)srcCn, * offs = a.offs.data;
+            int n = (int)nK;
             for (int i = 0, o = 0; i < n; ++i)
             {
                 _tile_stream_loadd(4, src0 + offs[i], strideS);
@@ -324,13 +316,14 @@ namespace Simd
             TileMoveToMemory(dst0 + 0, dD);
         }
 
-        typedef void (*Convolution16bNhwcSpecV0Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, int zero, const uint16_t* weight0, float* dst0);
+        typedef void (*Convolution16bNhwcSpecV0Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offset, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0);
 
         static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
         {
-            size_t n1 = dstH * a.srcW + 1 - p.kernelX, n = 32;
+            size_t nK = srcC * a.K / a.microC;
+            size_t n1 = dstH * a.srcW - a.padH, n = 32;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
-            size_t dD = a.macroD, dS = a.microC, srcCn = DivHi(srcC, 32) * p.kernelX * p.kernelY;
+            size_t dD = a.macroD, dS = a.microC;
             Convolution16bNhwcSpecV0Ptr body_2 = Convolution16bNhwcSpecV0_32x32;
             Convolution16bNhwcSpecV0Ptr tail_2 = m > 16 ? Convolution16bNhwcSpecV0_32x32 : Convolution16bNhwcSpecV0_16x32;
             Convolution16bNhwcSpecV0Ptr body_1 = Convolution16bNhwcSpecV0_32x16;
@@ -344,16 +337,16 @@ namespace Simd
                 if (dC > F)
                 {
                     for (; i < nn; i += n)
-                        body_2(src + i * dS, p, a, srcCn, n, zero, weight, dst + i * dD);
+                        body_2(src + i * dS, p, a, offs, nK, n, zero, weight, dst + i * dD);
                     if (m)
-                        tail_2(src + i * dS, p, a, srcCn, m, zero, weight, dst + i * dD);
+                        tail_2(src + i * dS, p, a, offs, nK, m, zero, weight, dst + i * dD);
                 }
                 else
                 {
                     for (; i < nn; i += n)
-                        body_1(src + i * dS, p, a, srcCn, n, zero, weight, dst + i * dD);
+                        body_1(src + i * dS, p, a, offs, nK, n, zero, weight, dst + i * dD);
                     if (m)
-                        tail_1(src + i * dS, p, a, srcCn, m, zero, weight, dst + i * dD);
+                        tail_1(src + i * dS, p, a, offs, nK, m, zero, weight, dst + i * dD);
                 }
                 weight += dW;
                 dst += DF;
@@ -367,7 +360,7 @@ namespace Simd
         {
             size_t dstCF = AlignLo(dstC, F);
             __mmask16 tailD = TailMask16(dstC - dstCF);
-            size_t rowGap = (p.kernelX - 1) * a.macroD;
+            size_t rowGap = a.padH * a.macroD;
             src += dyBeg * a.srcW * a.macroD;
             dst += dyBeg * p.dstW * p.dstC * a.elem;
             for (size_t dy = dyBeg; dy < dyEnd; ++dy)
@@ -376,9 +369,9 @@ namespace Simd
                 {
                     size_t dc = 0;
                     for (; dc < dstCF; dc += F)
-                        Avx512bw::Postprocess<term, type>(src, bias, params, dc, dst);
+                        AmxBf16::Postprocess<term, type>(src, bias, params, dc, dst);
                     if (tailD)
-                        Avx512bw::Postprocess<term, type>(src, bias, params, dc, dst, tailD);
+                        AmxBf16::Postprocess<term, type>(src, bias, params, dc, dst, tailD);
                     src += a.macroD;
                     dst += p.dstC * a.elem;
                 }
@@ -420,14 +413,6 @@ namespace Simd
             case SimdConvolutionActivationGelu: SetPostprocess<SimdConvolutionActivationGelu>(p, _alg, _postprocess); break;
             default: assert(0);
             }
-            AlgParam& a = _alg;
-            int kX = (int)p.kernelX, kY = (int)p.kernelY, mC = (int)a.macroC;
-            int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = dY * int(a.srcH * a.batch);
-            a.offs.Resize(DivHi(mC, a.microC) * kY * kX);
-            for (size_t c = 0, offsS = 0, i = 0; c < mC; c += dX, offsS += dC)
-                for (size_t y = 0, offsY = offsS; y < kY; y += 1, offsY += dY)
-                    for (size_t offsX = offsY, endX = offsY + kX * dX; offsX < endX; offsX += dX, i++)
-                        a.offs[i] = (int)offsX;
         }
     }
 #endif
