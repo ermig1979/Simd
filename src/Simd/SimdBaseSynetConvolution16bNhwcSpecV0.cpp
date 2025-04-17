@@ -70,7 +70,7 @@ namespace Simd
             a.padE = (a.srcW + a.padH) * a.padV + a.microC;
 
             a.macroC = Simd::RestrictRange(AlignLo(L1 / a.microD / a.K / 2, a.microC), a.microC, a.srcC);
-            a.macroO = a.macroC * a.K / a.microC;
+            a.macroO = DivHi(a.macroC, a.microC) * a.K;
             a.batch = 1;
             size_t bufSize = a.srcC * a.srcH * a.srcW * 2;
             if (bufSize * 2 <= L2 && p.batch > 1)

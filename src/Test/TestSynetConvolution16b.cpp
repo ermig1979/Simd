@@ -80,7 +80,7 @@ namespace Test
         const SimdConvolutionParameters& c = p.conv;
         srand(0);
         Tensor32f weight(p.WeightShape());
-        FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
+        FillRandom(weight.Data(), weight.Size(), -10.0, 10.0f);
 
         Tensor32f bias({ c.dstC });
         FillRandom(bias.Data(), bias.Size(), -1.0, 1.0f);
@@ -138,8 +138,10 @@ namespace Test
         Tensor8u buf8u1, buf8u2;
         buf8u1.Extend({ ::SimdSynetConvolution16bExternalBufferSize(context1) });
         buf8u2.Extend({ ::SimdSynetConvolution16bExternalBufferSize(context2) });
-        Fill(buf8u1, uint8_t(1));
-        Fill(buf8u2, uint8_t(-1));
+        //Fill(buf8u1, uint8_t(1));
+        //Fill(buf8u2, uint8_t(-1));
+        FillRandom(buf8u1);
+        FillRandom(buf8u2);
 
         ::SimdSynetConvolution16bSetParams(context1, weight.Data(), bias.Data(), params.Data());
         ::SimdSynetConvolution16bSetParams(context2, weight.Data(), bias.Data(), params.Data());
@@ -361,14 +363,22 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 999, 6, 6, 999, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 125, 116, 116, 125, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
 #endif
-#if 1
+#if 0
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 112, 24, 24, 112, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 56, 96, 96, 56, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 56, 48, 48, 56, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 56, 48, 48, 112, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 48, 48, 56, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 112, 24, 24, 112, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 112, 24, 24, 224, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 128, 24, 24, 112, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 224, 12, 12, 224, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 224, 12, 12, 448, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 448, 6, 6, 448, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(10, 448, 6, 6, 448, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+#endif
+#if 1
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 112, 24, 24, 112, _3, _1, _1, _1, _1, 1, aId, tT, b16, f32), c, f1, f2);
 #endif
 #else
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(2, 8, 8, 8, 8, _3, _1, _1, _1, _1, 1, aId, tT, b16, f32), c, f1, f2);

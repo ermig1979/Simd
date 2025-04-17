@@ -479,7 +479,7 @@ namespace Simd
         static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p,
             const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
         {
-            size_t nK = srcC * a.K / a.microC;
+            size_t nK = DivHi(srcC, a.microC) * a.K;
             size_t n1 = dstH * a.srcW - a.padH, n = 5;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
             size_t dD = a.macroD, dS = a.microC;
