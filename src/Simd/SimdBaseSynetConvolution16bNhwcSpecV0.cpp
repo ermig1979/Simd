@@ -89,7 +89,7 @@ namespace Simd
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
 
-            int dX = (int)a.microC, dY = (int)a.srcW * dX, dC =int(a.batch * a.srcH * a.srcW + a.padE) * dX;
+            int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = int(a.batch * a.srcH * a.srcW + a.padE) * dX;
             _offset.Resize(DivHi(a.srcC, a.microC) * a.K);
             for (size_t c = 0, offsS = 0, i = 0; c < a.srcC; c += dX, offsS += dC)
                 for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)

@@ -155,7 +155,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void Convolution16bNhwcSpecV0_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
@@ -177,10 +177,10 @@ namespace Simd
                 _tile_stream_loadd(3, dst1 + F, strideD);
             }
 
-            int n1 = (int)nK - 1;
-            _tile_stream_loadd(4, src0, strideS);
+            int n1 = (int)nK - 1, o = offs[0];
+            _tile_stream_loadd(4, src0 + o, strideS);
             _tile_loadd(6, weight0, strideW);
-            for (int i = 0, o = 0; i < n1; ++i)
+            for (int i = 0; i < n1; ++i)
             {
                 _tile_stream_loadd(5, src1 + o, strideS);
                 _tile_loadd(7, weight1, strideW);                        
@@ -211,7 +211,7 @@ namespace Simd
             TileMoveToMemory(dst1 + F, dD);
         }
 
-        static void Convolution16bNhwcSpecV0_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* src1 = src0 + 16 * dX;
@@ -228,9 +228,9 @@ namespace Simd
                 _tile_stream_loadd(2, dst1 + 0, strideD);
             }
 
-            int n1 = (int)nK - 1;
-            _tile_stream_loadd(4, src0, strideS);
-            for (int i = 0, o = 0; i < n1; ++i)
+            int n1 = (int)nK - 1, o = offs[0];
+            _tile_stream_loadd(4, src0 + o, strideS);
+            for (int i = 0; i < n1; ++i)
             {
                 _tile_loadd(6, weight0, strideW);
                 _tile_stream_loadd(5, src1 + o, strideS);
@@ -251,7 +251,7 @@ namespace Simd
             TileMoveToMemory(dst1 + 0, dD);
         }
 
-        static void Convolution16bNhwcSpecV0_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
             const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
@@ -269,7 +269,7 @@ namespace Simd
 
             int n1 = (int)nK - 1;
             _tile_loadd(6, weight0, strideW);
-            for (int i = 0, o = 0; i < n1; ++i)
+            for (int i = 0; i < n1; ++i)
             {
                 _tile_stream_loadd(4, src0 + offs[i], strideS);
                 _tile_loadd(7, weight1, strideW);
@@ -290,7 +290,7 @@ namespace Simd
             TileMoveToMemory(dst0 + F, dD);
         }
 
-        static void Convolution16bNhwcSpecV0_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0)
+        static void Convolution16bNhwcSpecV0_16x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
 
@@ -304,7 +304,7 @@ namespace Simd
             }
 
             int n = (int)nK;
-            for (int i = 0, o = 0; i < n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 _tile_stream_loadd(4, src0 + offs[i], strideS);
                 _tile_loadd(6, weight0, strideW);
@@ -316,7 +316,7 @@ namespace Simd
             TileMoveToMemory(dst0 + 0, dD);
         }
 
-        typedef void (*Convolution16bNhwcSpecV0Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offset, size_t nK, size_t dstS, int zero, const uint16_t* weight0, float* dst0);
+        typedef void (*Convolution16bNhwcSpecV0Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offset, size_t nK, int zero, const uint16_t* weight0, float* dst0);
 
         static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
         {
@@ -337,16 +337,16 @@ namespace Simd
                 if (dC > F)
                 {
                     for (; i < nn; i += n)
-                        body_2(src + i * dS, p, a, offs, nK, n, zero, weight, dst + i * dD);
+                        body_2(src + i * dS, p, a, offs, nK, zero, weight, dst + i * dD);
                     if (m)
-                        tail_2(src + i * dS, p, a, offs, nK, m, zero, weight, dst + i * dD);
+                        tail_2(src + i * dS, p, a, offs, nK, zero, weight, dst + i * dD);
                 }
                 else
                 {
                     for (; i < nn; i += n)
-                        body_1(src + i * dS, p, a, offs, nK, n, zero, weight, dst + i * dD);
+                        body_1(src + i * dS, p, a, offs, nK, zero, weight, dst + i * dD);
                     if (m)
-                        tail_1(src + i * dS, p, a, offs, nK, m, zero, weight, dst + i * dD);
+                        tail_1(src + i * dS, p, a, offs, nK, zero, weight, dst + i * dD);
                 }
                 weight += dW;
                 dst += DF;
