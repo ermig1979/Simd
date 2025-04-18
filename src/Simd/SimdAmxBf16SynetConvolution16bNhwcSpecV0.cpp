@@ -70,7 +70,7 @@ namespace Simd
                     for (size_t s = 0; s < a.padH; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
                             Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padH * sD;
+                    dst += a.padH * sD;
                 }
                 for (size_t sx = 0; sx < p.srcW; ++sx)
                 {
@@ -126,7 +126,7 @@ namespace Simd
                     for (size_t s = 0; s < a.padH; ++s)
                         for (size_t c = 0; c < a.srcC; c += a.microC)
                             Avx512bw::SetZero(dst + c * cD + s * sD);
-                    dst += p.padH * sD;
+                    dst += a.padH * sD;
                 }
                 for (size_t sx = 0; sx < p.srcW; ++sx)
                 {

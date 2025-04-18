@@ -69,7 +69,7 @@ namespace Simd
             a.gapH = a.srcW - p.dstW;
             a.dstC = AlignHi(p.dstC, a.F);
             a.K = p.kernelX * p.kernelY;
-            a.padE = (a.srcW + a.padH) * a.padV + a.microC;
+            a.padE = a.srcW * a.padV + a.padH * Simd::Max<size_t>(1, a.padV) + a.microC;
 
             a.macroC = Simd::RestrictRange(AlignLo(L1 / a.microD / a.K / 2, a.microC), a.microC, a.srcC);
             a.macroO = DivHi(a.macroC, a.microC) * a.K;
