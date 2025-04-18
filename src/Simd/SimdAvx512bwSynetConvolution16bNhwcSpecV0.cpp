@@ -160,7 +160,7 @@ namespace Simd
                 d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1,
                 s0, w00, w01, w10, w11, m = _mm512_castsi512_ps(Bf16::MASK);
             size_t dD = a.macroD, dX = a.microC;
-            const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
+            const uint16_t* weight1 = weight0 + a.K * F;
             const uint16_t* src1 = src0 + 1 * dX;
             const uint16_t* src2 = src0 + 2 * dX;
             const uint16_t* src3 = src0 + 3 * dX;
@@ -475,11 +475,10 @@ namespace Simd
         }
 
         static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p,
-            const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
+            const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t nK, int zero, const uint16_t* weight, float* dst)
         {
-            size_t nK = DivHi(srcC, a.microC) * a.K;
             size_t n1 = dstH * a.srcW - a.gapH, n = 12;
-            size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
+            size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.K * DF;
             size_t dD = a.macroD, dS = a.microC;
             Convolution16bNhwcSpecV0_2xM_Ptr convolution_2xN = GetConvolution16bNhwcSpecV0_2xM(n);
             Convolution16bNhwcSpecV0_2xM_Ptr convolution_2xM = GetConvolution16bNhwcSpecV0_2xM(m);

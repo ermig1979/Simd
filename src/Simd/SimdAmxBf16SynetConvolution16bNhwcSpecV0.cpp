@@ -158,7 +158,7 @@ namespace Simd
         static void Convolution16bNhwcSpecV0_32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
-            const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
+            const uint16_t* weight1 = weight0 + a.K * F;
             const uint16_t* src1 = src0 + 16 * dX;
             float* dst1 = dst0 + 16 * dD;
 
@@ -254,7 +254,7 @@ namespace Simd
         static void Convolution16bNhwcSpecV0_16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* dst0)
         {
             int dD = (int)a.macroD, dX = (int)a.microC, strideS = dX * 2, dW = 512, strideW = 64, strideD = dD * 4;
-            const uint16_t* weight1 = weight0 + a.srcC * a.K * F;
+            const uint16_t* weight1 = weight0 + a.K * F;
 
             if (zero)
             {
@@ -318,11 +318,10 @@ namespace Simd
 
         typedef void (*Convolution16bNhwcSpecV0Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offset, size_t nK, int zero, const uint16_t* weight0, float* dst0);
 
-        static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
+        static void Convolution16bNhwcSpecV0_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t nK, int zero, const uint16_t* weight, float* dst)
         {
-            size_t nK = DivHi(srcC, a.microC) * a.K;
             size_t n1 = dstH * a.srcW - a.gapH, n = 32;
-            size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
+            size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.K * DF;
             size_t dD = a.macroD, dS = a.microC;
             Convolution16bNhwcSpecV0Ptr body_2 = Convolution16bNhwcSpecV0_32x32;
             Convolution16bNhwcSpecV0Ptr tail_2 = m > 16 ? Convolution16bNhwcSpecV0_32x32 : Convolution16bNhwcSpecV0_16x32;

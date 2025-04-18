@@ -175,16 +175,16 @@ namespace Simd
 
             struct AlgParam
             {
-                size_t batch, srcC, srcH, srcW, dstC, K;
-                size_t padV, padH, padE, gapV, gapH;
                 size_t F, microD, microS, microC;
+                size_t batch, srcC, srcH, srcW, dstC, K;
+                size_t padV, padH, padE, gapV, gapH, kA;
                 size_t macroD, macroH, macroC, numH, macroO;
                 size_t bufS, bufD, elem;
             };
 
             typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst);
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t nK, int zero, const uint16_t* weight, float* dst);
 
             typedef void(*PostprocessPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst);
 
