@@ -65,6 +65,8 @@ namespace Simd
             a.padH = Simd::Max(p.padX, p.padW);
             a.srcH = p.srcH + a.padV;
             a.srcW = p.srcW + a.padH;
+            a.gapV = a.srcH - p.dstH;
+            a.gapH = a.srcW - p.dstW;
             a.dstC = AlignHi(p.dstC, a.F);
             a.K = p.kernelX * p.kernelY;
             a.padE = (a.srcW + a.padH) * a.padV + a.microC;
@@ -168,7 +170,7 @@ namespace Simd
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
             const int* offs = _offset.data;
-            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch - a.padV;
+            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch - a.gapV;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;

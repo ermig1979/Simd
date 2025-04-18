@@ -480,7 +480,7 @@ namespace Simd
             const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, float* dst)
         {
             size_t nK = DivHi(srcC, a.microC) * a.K;
-            size_t n1 = dstH * a.srcW - a.padH, n = 5;
+            size_t n1 = dstH * a.srcW - a.gapH, n = 5;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.srcC * a.K * DF;
             size_t dD = a.macroD, dS = a.microC;
             Convolution16bNhwcSpecV0_2xM_Ptr convolution_2xN = GetConvolution16bNhwcSpecV0_2xM(n);
@@ -504,7 +504,7 @@ namespace Simd
             const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst)
         {
             size_t dstCF = AlignLo(dstC, F), tailD = dstC - dstCF;
-            size_t rowGap = a.padH * a.macroD;
+            size_t rowGap = a.gapH * a.macroD;
             src += dyBeg * a.srcW * a.macroD;
             dst += dyBeg * p.dstW * p.dstC * a.elem;
             for (size_t dy = dyBeg; dy < dyEnd; ++dy)

@@ -176,11 +176,10 @@ namespace Simd
             struct AlgParam
             {
                 size_t batch, srcC, srcH, srcW, dstC, K;
-                size_t padV, padH, padE;
+                size_t padV, padH, padE, gapV, gapH;
                 size_t F, microD, microS, microC;
                 size_t macroD, macroH, macroC, numH, macroO;
                 size_t bufS, bufD, elem;
-                Array32i offs;
             };
 
             typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst);
