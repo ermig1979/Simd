@@ -170,7 +170,8 @@ namespace Simd
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
             const int* offs = _offset.data;
-            size_t dstH = p.dstH * a.batch, padY = (p.kernelY - 1) / 2, dstHb = a.srcH * a.batch - a.gapV;
+            size_t dstH = p.dstH * a.batch, dstHb = a.srcH * a.batch - a.gapV;
+            size_t bufOffs = ((a.padV - p.padY) * a.srcW + (a.padH - p.padX)) * a.microC;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
@@ -195,11 +196,11 @@ namespace Simd
                         }
                         if (a.batch > 1)
                         {
-                            _convolution(buf, p, a, offs + mao, macroD, dstHb, macroC, mac == 0 ? 1 : 0, weight, sum);
+                            _convolution(buf + bufOffs, p, a, offs + mao, macroD, dstHb, macroC, mac == 0 ? 1 : 0, weight, sum);
                         }
                         else
                         {
-                            _convolution(buf + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
+                            _convolution(buf + bufOffs + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
                                 macroC, mac == 0 ? 1 : 0, weight, sum + (dyBeg * a.srcW + dyN * a.F) * a.macroD);
                         }
                         if (mac + macroC == a.srcC)

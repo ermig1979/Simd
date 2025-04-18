@@ -60,7 +60,7 @@ namespace Simd
             {
                 syBeg = dyBeg + syPad;
                 src += syBeg * p.srcW * p.srcC;
-                dst += (dyBeg + p.kernelY - 1) * a.srcW * sD;
+                dst += (dyBeg + p.kernelY - 1 + a.padV - p.padY) * a.srcW * sD;
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
             {
@@ -116,7 +116,7 @@ namespace Simd
             {
                 syBeg = dyBeg + syPad;
                 src += syBeg * p.srcW * p.srcC;
-                dst += (dyBeg + p.kernelY - 1) * a.srcW * sD;
+                dst += (dyBeg + p.kernelY - 1 + a.padV - p.padY) * a.srcW * sD;
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
             {
