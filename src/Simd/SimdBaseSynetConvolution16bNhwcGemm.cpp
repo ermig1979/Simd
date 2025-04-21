@@ -50,6 +50,8 @@ namespace Simd
                 desc << "-" << _alg.batch;
             if (_alg.reorderType)
                 desc << "-r";
+            if (_alg.invOrder)
+                desc << "-i";
             return desc.str();
         }
 
@@ -66,6 +68,7 @@ namespace Simd
             a.microK = microK;
             a.bufD = AlignHiAny(p.dstC, a.microD);
             a.bufK = AlignHi(a.K, a.microK);
+
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD / 2, a.microK), a.microK, a.bufK);
             a.batch = 1;
             size_t bufSize = a.M * a.bufK * 2;
@@ -81,6 +84,7 @@ namespace Simd
             a.elem = _elemD;
             a.reorderType = 0;
             a.sumBuf = (_dst16b && a.macroK < a.K) || a.microK > 2 ? 1 : 0;
+            a.invOrder = (a.macroH == p.dstH * a.batch) && (p.dstC >= p.dstW * p.dstH * 4) && 0 ? 1 : 0;
             if (a.sumBuf == 0 && a.macroD > p.dstC)
                 a.macroD = p.dstC;
             a.dB = (a.sumBuf ? a.macroD : p.dstC);
