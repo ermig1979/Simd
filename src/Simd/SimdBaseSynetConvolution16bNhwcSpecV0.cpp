@@ -48,6 +48,8 @@ namespace Simd
             desc << Ext() << "::NhwcSpecV0";
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
+            if (_alg.inv)
+                desc << "-i";
             return desc.str();
         }
 
@@ -72,7 +74,14 @@ namespace Simd
             a.K = a.srcC * a.kA;
             a.padE = a.srcW * a.padV + a.padH * Simd::Max<size_t>(1, a.padV) + a.microC;
 
-            a.macroC = Simd::RestrictRange(AlignLo(L1 / a.microD / a.kA / 2, a.microC), a.microC, a.srcC);
+            a.inv = 0;
+            if (a.microS == 32 && p.IsKernel(3) && p.srcC >= 128 && p.dstC >= 128 && p.dstW * p.dstH >= 128 && 0)
+            {
+                a.inv = 1;
+                a.macroC = Simd::RestrictRange<size_t>(AlignLo(L1 / a.microS / p.kernelY / 2, a.microC), a.microC, a.srcC);
+            }
+            else
+                a.macroC = Simd::RestrictRange(AlignLo(L1 / a.microD / a.kA / 2, a.microC), a.microC, a.srcC);
             a.macroO = DivHi(a.macroC, a.microC) * a.kA;
             a.batch = 1;
             size_t bufSize = a.srcC * a.srcH * a.srcW * 2;
