@@ -190,8 +190,10 @@ namespace Simd
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
+            bool InvertedOrder() const;
             virtual void SetWeight(const float* weight);
-            void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
+            void ForwardDirect(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
+            void ForwardInverse(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 
             AlgParam _alg;
             Array32i _offset;
