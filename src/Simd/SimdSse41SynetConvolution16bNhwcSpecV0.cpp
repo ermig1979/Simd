@@ -174,7 +174,7 @@ namespace Simd
         {
             __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
             size_t dD = a.macroD, dX = a.microC;
-            const uint16_t* weight1 = weight0 + a.srcC * a.K;
+            const uint16_t* weight1 = weight0 + a.K * F;
             const uint16_t* src1 = src0 + 1 * dX;
             const uint16_t* src2 = src0 + 2 * dX;
             const uint16_t* src3 = src0 + 3 * dX;
