@@ -134,9 +134,9 @@ namespace Simd
                 return false;
             if (!p.IsKernel(3))
                 return false;
-            //if (p.srcC <= 64 || p.dstC < 128 && p.dstW * p.dstH < 128)
+            //if (p.srcC <= 64 || p.dstC <= 64)
             //    return false; 
-            return (choise++) &0;
+            return false;// (choise++) & 1;
         }
 
         size_t SynetConvolution16bNhwcSpecV0::ExternalBufferSize() const
