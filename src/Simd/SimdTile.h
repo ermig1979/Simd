@@ -130,62 +130,89 @@ namespace Simd
 #ifdef SIMD_AMXBF16_ENABLE
     namespace AmxBf16
     {
+        SIMD_INLINE bool TileConfChanged(size_t rows, size_t cols)
+        {
+            static thread_local size_t _size = 0;
+            size_t size = (rows << 16) | cols;
+            if (size != _size)
+            {
+                _size = size;
+                return true;
+            }
+            return false;
+        }
+
         SIMD_INLINE void SetTileConfFull()
         {
-            TileConf conf = TileConf(false);
-            _tile_loadconfig(&conf);
+            if (TileConfChanged(32, 32))
+            {
+                TileConf conf = TileConf(false);
+                _tile_loadconfig(&conf);
+            }
         }
 
         SIMD_INLINE void SetTileConf2x2(size_t rows, size_t cols)
         {
-            TileConf conf = TileConf(false);
-            uint8_t tailR = uint8_t(rows - 16);
-            conf.rows[2] = tailR;
-            conf.rows[3] = tailR;
-            conf.rows[5] = tailR;
-            uint16_t tailC = uint16_t((cols - 16) * 4);
-            conf.colsb[1] = tailC;
-            conf.colsb[3] = tailC;
-            conf.colsb[7] = tailC;
-            _tile_loadconfig(&conf);
+            if (TileConfChanged(rows, cols))
+            {
+                TileConf conf = TileConf(false);
+                uint8_t tailR = uint8_t(rows - 16);
+                conf.rows[2] = tailR;
+                conf.rows[3] = tailR;
+                conf.rows[5] = tailR;
+                uint16_t tailC = uint16_t((cols - 16) * 4);
+                conf.colsb[1] = tailC;
+                conf.colsb[3] = tailC;
+                conf.colsb[7] = tailC;
+                _tile_loadconfig(&conf);
+            }
         }
 
         SIMD_INLINE void SetTileConf2x1(size_t rows, size_t cols)
         {
-            TileConf conf = TileConf(false);
-            uint8_t tailR = uint8_t(rows - 16);
-            conf.rows[2] = tailR;
-            conf.rows[5] = tailR;
-            uint16_t tailC = uint16_t(cols * 4);
-            conf.colsb[0] = tailC;
-            conf.colsb[2] = tailC;
-            conf.colsb[6] = tailC;
-            _tile_loadconfig(&conf);
+            if (TileConfChanged(rows, cols))
+            {
+                TileConf conf = TileConf(false);
+                uint8_t tailR = uint8_t(rows - 16);
+                conf.rows[2] = tailR;
+                conf.rows[5] = tailR;
+                uint16_t tailC = uint16_t(cols * 4);
+                conf.colsb[0] = tailC;
+                conf.colsb[2] = tailC;
+                conf.colsb[6] = tailC;
+                _tile_loadconfig(&conf);
+            }
         }
 
         SIMD_INLINE void SetTileConf1x2(size_t rows, size_t cols)
         {
-            TileConf conf = TileConf(false);
-            uint8_t tailR = uint8_t(rows);
-            conf.rows[0] = tailR;
-            conf.rows[1] = tailR;
-            conf.rows[4] = tailR;
-            uint16_t tailC = uint16_t((cols - 16) * 4);
-            conf.colsb[1] = tailC;
-            conf.colsb[7] = tailC;
-            _tile_loadconfig(&conf);
+            if (TileConfChanged(rows, cols))
+            {
+                TileConf conf = TileConf(false);
+                uint8_t tailR = uint8_t(rows);
+                conf.rows[0] = tailR;
+                conf.rows[1] = tailR;
+                conf.rows[4] = tailR;
+                uint16_t tailC = uint16_t((cols - 16) * 4);
+                conf.colsb[1] = tailC;
+                conf.colsb[7] = tailC;
+                _tile_loadconfig(&conf);
+            }
         }
 
         SIMD_INLINE void SetTileConf1x1(size_t rows, size_t cols)
         {
-            TileConf conf = TileConf(false);
-            uint8_t tailR = uint8_t(rows);
-            conf.rows[0] = tailR;
-            conf.rows[4] = tailR;
-            uint16_t tailC = uint16_t(cols * 4);
-            conf.colsb[0] = tailC;
-            conf.colsb[6] = tailC;
-            _tile_loadconfig(&conf);
+            if (TileConfChanged(rows, cols))
+            {
+                TileConf conf = TileConf(false);
+                uint8_t tailR = uint8_t(rows);
+                conf.rows[0] = tailR;
+                conf.rows[4] = tailR;
+                uint16_t tailC = uint16_t(cols * 4);
+                conf.colsb[0] = tailC;
+                conf.colsb[6] = tailC;
+                _tile_loadconfig(&conf);
+            }
         }
 
         //-------------------------------------------------------------------------------------------------
