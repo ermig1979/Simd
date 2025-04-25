@@ -142,9 +142,9 @@ namespace Simd
             return false;
         }
 
-        SIMD_INLINE void SetTileConfFull()
+        SIMD_INLINE void SetTileConfFull(bool force = false)
         {
-            if (TileConfChanged(32, 32))
+            if (TileConfChanged(32, 32) || force)
             {
                 TileConf conf = TileConf(false);
                 _tile_loadconfig(&conf);

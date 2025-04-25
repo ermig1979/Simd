@@ -62,6 +62,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdLog.h"
 #include "Simd/SimdPerformance.h"
 #include "Simd/SimdEmpty.h"
+#include "Simd/SimdTile.h"
 
 #include "Simd/SimdDescrInt.h"
 #include "Simd/SimdGaussianBlur.h"
@@ -233,6 +234,14 @@ SIMD_API void SimdEmpty()
         Sse41::Empty();
 #endif
 }
+SIMD_API void SimdSetAmxFull()
+{
+#ifdef SIMD_AMXBF16_ENABLE
+    if (AmxBf16::Enable)
+        AmxBf16::SetTileConfFull(true);
+#endif
+}
+
 
 SIMD_API uint32_t SimdCrc32(const void* src, size_t size)
 {

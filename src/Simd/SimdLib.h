@@ -941,6 +941,14 @@ extern "C"
     */
     SIMD_API void SimdSetFastMode(SimdBool value);
 
+    /*! @ingroup cpu_flags
+
+        \fn void SimdSetAmxFull();
+
+        \short Set configuration of AMX registers to maximat size. It is x86 specific functionality. Affect only on CPU with AMX support.
+    */
+    SIMD_API void SimdSetAmxFull();
+
     /*! @ingroup hash
 
         \fn uint32_t SimdCrc32(const void * src, size_t size);
