@@ -139,9 +139,9 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
 #ifdef NDEBUG
-        result = result && SynetPoolingAverageAutoTest(ParamP(5184, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(5184, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(5184, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(128, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(128, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(128, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
         //result = result && SynetPoolingAverageAutoTest(ParamP(32, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
         //result = result && SynetPoolingAverageAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
 #else

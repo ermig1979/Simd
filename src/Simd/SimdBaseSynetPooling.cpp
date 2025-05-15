@@ -70,7 +70,7 @@ namespace Simd
             {
                 if (kernelY == 2 && kernelX == 2 && strideY == 2 && strideX == 2 && padY == 0 && padX == 0)
                 {
-                    size_t dstH2 = Simd::Min(srcH / 2, dstH), dstW2 = Simd::Min(srcW / 2, dstW);
+                    size_t dstH2 = srcH / 2, dstW2 = srcW / 2;
                     float mainA = 0.25f, edgeA = excludePad ? 0.5f : 0.25f, cornA = excludePad ? 1.0f : 0.25f;
                     for (size_t c = 0; c < srcC; ++c)
                     {
