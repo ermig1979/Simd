@@ -224,13 +224,9 @@ namespace Simd
                             const float* src1 = src0 + srcW;
                             for (; dx < dstWF; dx += F, sx += DF)
                             {
-                                __m128 src00 = _mm_loadu_ps(src0 + sx + 0);
-                                __m128 src01 = _mm_loadu_ps(src0 + sx + F);
-                                __m128 src10 = _mm_loadu_ps(src1 + sx + 0);
-                                __m128 src11 = _mm_loadu_ps(src1 + sx + F);
-                                __m128 rs0 = _mm_add_ps(_mm_shuffle_ps(src00, src01, 0x88), _mm_shuffle_ps(src00, src01, 0xDD));
-                                __m128 rs1 = _mm_add_ps(_mm_shuffle_ps(src10, src11, 0x88), _mm_shuffle_ps(src10, src11, 0xDD));
-                                _mm_storeu_ps(dst + dx, _mm_mul_ps(_mm_add_ps(rs0, rs1), _mainA));
+                                __m128 rs0 = _mm_add_ps(_mm_loadu_ps(src0 + sx + 0), _mm_loadu_ps(src1 + sx + 0));
+                                __m128 rs1 = _mm_add_ps(_mm_loadu_ps(src0 + sx + F), _mm_loadu_ps(src1 + sx + F));
+                                _mm_storeu_ps(dst + dx, _mm_mul_ps(_mm_add_ps(_mm_shuffle_ps(rs0, rs1, 0x88), _mm_shuffle_ps(rs0, rs1, 0xDD)), _mainA));
                             }
                             for (; dx < dstW2; ++dx, sx += 2)
                                 dst[dx] = (src0[sx] + src0[sx + 1] + src1[sx] + src1[sx + 1]) * mainA;

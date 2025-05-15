@@ -204,6 +204,56 @@ namespace Simd
                     return;
                 }
             }
+            else if (format == SimdTensorFormatNchw)
+            {
+                if (kernelY == 2 && kernelX == 2 && strideY == 2 && strideX == 2 && padY == 0 && padX == 0 && dstW >= F)
+                {
+                    size_t dstH2 = srcH / 2, dstW2 = srcW / 2, dstWHF = AlignLo(dstW2, HF), dstWF = AlignLo(dstW2, F);
+                    float mainA = 0.25f, edgeA = excludePad ? 0.5f : 0.25f, cornA = excludePad ? 1.0f : 0.25f;
+                    __m256 _mainA = _mm256_set1_ps(mainA);
+                    for (size_t c = 0; c < srcC; ++c)
+                    {
+                        size_t dy = 0;
+                        const float* src0 = src;
+                        for (; dy < dstH2; ++dy)
+                        {
+                            size_t dx = 0, sx = 0;
+                            const float* src1 = src0 + srcW;
+                            for (; dx < dstWF; dx += F, sx += DF)
+                            {
+                                __m256 rs0 = _mm256_add_ps(_mm256_loadu_ps(src0 + sx + 0), _mm256_loadu_ps(src1 + sx + 0));
+                                __m256 rs1 = _mm256_add_ps(_mm256_loadu_ps(src0 + sx + F), _mm256_loadu_ps(src1 + sx + F));
+                                __m256 avg = _mm256_mul_ps(_mm256_add_ps(_mm256_shuffle_ps(rs0, rs1, 0x88), _mm256_shuffle_ps(rs0, rs1, 0xDD)), _mainA);
+                                _mm256_storeu_si256((__m256i*)(dst + dx), _mm256_permute4x64_epi64(_mm256_castps_si256(avg), 0xD8));
+                            }
+                            for (; dx < dstWHF; dx += HF, sx += F)
+                            {
+                                __m128 rs0 = _mm_add_ps(_mm_loadu_ps(src0 + sx + 0), _mm_loadu_ps(src1 + sx + 0));
+                                __m128 rs1 = _mm_add_ps(_mm_loadu_ps(src0 + sx + HF), _mm_loadu_ps(src1 + sx + HF));
+                                _mm_storeu_ps(dst + dx, _mm_mul_ps(_mm_add_ps(_mm_shuffle_ps(rs0, rs1, 0x88), _mm_shuffle_ps(rs0, rs1, 0xDD)), _mm256_castps256_ps128(_mainA)));
+                            }
+                            for (; dx < dstW2; ++dx, sx += 2)
+                                dst[dx] = (src0[sx] + src0[sx + 1] + src1[sx] + src1[sx + 1]) * mainA;
+                            if (dx < dstW)
+                                dst[dx] = (src0[sx] + src1[sx]) * edgeA;
+                            src0 += srcW * 2;
+                            dst += dstW;
+                        }
+                        for (; dy < dstH; ++dy)
+                        {
+                            size_t dx = 0, sx = 0;
+                            for (; dx < dstW2; ++dx, sx += 2)
+                                dst[dx] = (src0[sx] + src0[sx + 1]) * edgeA;
+                            if (dx < dstW)
+                                dst[dx] = src0[sx] * cornA;
+                            src0 += srcW;
+                            dst += dstW;
+                        }
+                        src += srcW * srcH;
+                    }
+                    return;
+                }
+            }
             Sse41::SynetPoolingAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
         }
 
