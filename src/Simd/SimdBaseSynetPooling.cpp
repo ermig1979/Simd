@@ -68,30 +68,65 @@ namespace Simd
             }
             else if (format == SimdTensorFormatNchw)
             {
-                for (size_t c = 0; c < srcC; ++c)
+                if (kernelY == 2 && kernelX == 2 && strideY == 2 && strideX == 2 && padY == 0 && padX == 0)
                 {
-                    for (size_t ph = 0; ph < dstH; ++ph)
+                    size_t dstH2 = Simd::Min(srcH / 2, dstH), dstW2 = Simd::Min(srcW / 2, dstW);
+                    float mainA = 0.25f, edgeA = excludePad ? 0.5f : 0.25f, cornA = excludePad ? 1.0f : 0.25f;
+                    for (size_t c = 0; c < srcC; ++c)
                     {
-                        size_t hStart = ph * strideY - padY;
-                        size_t hEnd = Simd::Min(hStart + kernelY, srcH);
-                        hStart = Simd::Max<ptrdiff_t>(0, hStart);
-                        for (size_t pw = 0; pw < dstW; ++pw)
+                        size_t dy = 0;
+                        const float* src0 = src;
+                        for (; dy < dstH2; ++dy)
                         {
-                            size_t wStart = pw * strideX - padX;
-                            size_t wEnd = Simd::Min(wStart + kernelX, srcW);
-                            wStart = Simd::Max<ptrdiff_t>(0, wStart);
-                            float sum = 0.0f;
-                            for (size_t h = hStart; h < hEnd; ++h)
-                                for (size_t w = wStart; w < wEnd; ++w)
-                                    sum += src[h * srcW + w];
-                            if (excludePad)
-                                dst[ph * dstW + pw] = sum / float((hEnd - hStart) * (wEnd - wStart));
-                            else
-                                dst[ph * dstW + pw] = sum / float(kernelY * kernelX);
+                            size_t dx = 0, sx = 0;
+                            const float* src1 = src0 + srcW;
+                            for (; dx < dstW2; ++dx, sx += 2)
+                                dst[dx] = (src0[sx] + src0[sx + 1] + src1[sx] + src1[sx + 1]) * mainA;
+                            if (dx < dstW)
+                                dst[dx] = (src0[sx] + src1[sx]) * edgeA;
+                            src0 += srcW * 2;
+                            dst += dstW;
                         }
+                        for (; dy < dstH; ++dy)
+                        {
+                            size_t dx = 0, sx = 0;
+                            for (; dx < dstW2; ++dx, sx += 2)
+                                dst[dx] = (src0[sx] + src0[sx + 1]) * edgeA;
+                            if (dx < dstW)
+                                dst[dx] = src0[sx] * cornA;
+                            src0 += srcW;
+                            dst += dstW;
+                        }
+                        src += srcW * srcH;
                     }
-                    src += srcW * srcH;
-                    dst += dstW * dstH;
+                }
+                else
+                {
+                    for (size_t c = 0; c < srcC; ++c)
+                    {
+                        for (size_t ph = 0; ph < dstH; ++ph)
+                        {
+                            size_t hStart = ph * strideY - padY;
+                            size_t hEnd = Simd::Min(hStart + kernelY, srcH);
+                            hStart = Simd::Max<ptrdiff_t>(0, hStart);
+                            for (size_t pw = 0; pw < dstW; ++pw)
+                            {
+                                size_t wStart = pw * strideX - padX;
+                                size_t wEnd = Simd::Min(wStart + kernelX, srcW);
+                                wStart = Simd::Max<ptrdiff_t>(0, wStart);
+                                float sum = 0.0f;
+                                for (size_t h = hStart; h < hEnd; ++h)
+                                    for (size_t w = wStart; w < wEnd; ++w)
+                                        sum += src[h * srcW + w];
+                                if (excludePad)
+                                    dst[ph * dstW + pw] = sum / float((hEnd - hStart) * (wEnd - wStart));
+                                else
+                                    dst[ph * dstW + pw] = sum / float(kernelY * kernelX);
+                            }
+                        }
+                        src += srcW * srcH;
+                        dst += dstW * dstH;
+                    }
                 }
             }
             else
