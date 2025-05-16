@@ -111,13 +111,13 @@ namespace Simd
 
             virtual void Forward(const uint8_t* src, const uint8_t* grd, uint8_t* dst);
 
-            typedef void (*IndexCoeffsPtr)(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float * dy, float *dx);
+            typedef void (*IndexCoeffsPtr)(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float * dy, float *dx, int& yMin, int& yMax);
             typedef void (*BilinearInterpPtr)(const float* pad, size_t dstS, int padW, uint32_t* idx, float * dy, float* dx, float * dst);
 
         protected:
             Array32f _padded, _coeffs;
             Array32u _index;
-            size_t _padH, _padW, _srcS, _dstS;
+            size_t _padH, _padW, _srcS, _dstS, _sparse;
             IndexCoeffsPtr _indexCoeffs;
             BilinearInterpPtr _bilinearInterp;
         };

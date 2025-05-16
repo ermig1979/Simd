@@ -28,7 +28,7 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        template <SimdBool align> SIMD_INLINE float Denormalize32f(float pos, int dim)
+        template <int align> SIMD_INLINE float Denormalize32f(float pos, int dim)
         {
             if (align)
                 return float((pos + 1) / 2.0f * (dim - 1));
@@ -36,7 +36,7 @@ namespace Simd
                 return float(((pos + 1) * dim - 1) / 2.0f);
         }
 
-        template<SimdBool align>  void IndexCoeffs32fBlZ(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float* dy, float* dx)
+        template<int align, int range>  void IndexCoeffs32fBlZ(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float* dy, float* dx, int& yMin, int& yMax)
         {
             for (size_t d = 0; d < dstS; ++d)
             {
@@ -49,6 +49,11 @@ namespace Simd
                 x0 = Simd::RestrictRange(x0, -2, srcW) + 2;
                 y0 = Simd::RestrictRange(y0, -2, srcH) + 2;
                 idx[d] = padW * y0 + x0;
+                if (range)
+                {
+                    yMin = Min(yMin, y0);
+                    yMax = Max(yMax, y0);
+                }
                 grd += 2;
             }
         }
@@ -85,7 +90,11 @@ namespace Simd
             _padded.Resize(_padH * _padW, true);
             _index.Resize(_dstS);
             _coeffs.Resize(_dstS * 2);
-            _indexCoeffs = _param.align ? IndexCoeffs32fBlZ<SimdTrue> : IndexCoeffs32fBlZ<SimdFalse>;
+            _sparse = _param.dstH * 3 < _param.srcH;
+            if(_sparse)
+                _indexCoeffs = _param.align ? IndexCoeffs32fBlZ<1, 1> : IndexCoeffs32fBlZ<0, 1>;
+            else
+                _indexCoeffs = _param.align ? IndexCoeffs32fBlZ<1, 0> : IndexCoeffs32fBlZ<0, 0>;
             _bilinearInterp = BilinearInterp32fBlZ;
         }
 
@@ -105,10 +114,13 @@ namespace Simd
             float* dx = _coeffs.data + _dstS;
             for (size_t b = 0; b < _param.batch; ++b)
             {
-                _indexCoeffs(grd, _dstS, (int)_param.srcH, (int)_param.srcW, (int)_padW, idx, dy, dx);
+                int yMin = (int)_padH - 2, yMax = 0;
+                _indexCoeffs(grd, _dstS, (int)_param.srcH, (int)_param.srcW, (int)_padW, idx, dy, dx, yMin, yMax);
+                yMin = _sparse ? Max(0, yMin - 2) : 0;
+                yMax = _sparse ? Min((int)_param.srcH, yMax) : (int)_param.srcH;
                 for (size_t c = 0; c < _param.channels; ++c)
                 {
-                    for (size_t h = 0; h < _param.srcH; ++h)
+                    for (int h = yMin; h < yMax; ++h)
                         memcpy(pad + h * _padW, src + h * _param.srcW, _param.srcW * sizeof(float));
                     _bilinearInterp(_padded.data, _dstS, (int)_padW, idx, dy, dx, dst);
                     src += _srcS;

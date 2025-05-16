@@ -32,7 +32,7 @@ namespace Simd
 #if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Sse41
     {
-        template <SimdBool align> SIMD_INLINE float Denormalize32f(float pos, int dim)
+        template <int align> SIMD_INLINE float Denormalize32f(float pos, int dim)
         {
             if (align)
                 return float((pos + 1) / 2.0f * (dim - 1));
@@ -40,7 +40,7 @@ namespace Simd
                 return float(((pos + 1) * dim - 1) / 2.0f);
         }
 
-        template<SimdBool align>  void IndexCoeffs32fBlZ(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float* dy, float* dx)
+        template<int align, int range>  void IndexCoeffs32fBlZ(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float* dy, float* dx, int& yMin, int& yMax)
         {
             size_t dstSF = AlignLo(dstS, F), d = 0;
             const __m128 a = SetFloat((srcW - align) / 2.0f, (srcH - align) / 2.0f);
@@ -50,6 +50,12 @@ namespace Simd
             const __m128i _srcH = _mm_set1_epi32(srcH + 2);
             const __m128i _srcW = _mm_set1_epi32(srcW + 2);
             const __m128i _padW = _mm_set1_epi32(padW);
+            __m128i _yMin, _yMax;
+            if (range)
+            {
+                _yMin = _mm_set1_epi32(yMin);
+                _yMax = _mm_set1_epi32(yMax);
+            }
             for (; d < dstSF; d += F)
             {
                 __m128 xy0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(grd + 0), a), b);
@@ -63,7 +69,17 @@ namespace Simd
                 __m128i xi = _mm_min_epi32(_mm_max_epi32(_mm_add_epi32(_mm_cvtps_epi32(xf), _2), _0), _srcW);
                 __m128i yi = _mm_min_epi32(_mm_max_epi32(_mm_add_epi32(_mm_cvtps_epi32(yf), _2), _0), _srcH);
                 _mm_storeu_si128((__m128i*)(idx + d), _mm_add_epi32(_mm_mullo_epi32(_padW, yi), xi));
+                if (range)
+                {
+                    _yMin = _mm_min_epi32(_yMin, yi);
+                    _yMax = _mm_max_epi32(_yMax, yi);
+                }
                 grd += 2 * F;
+            }
+            if (range)
+            {
+                yMin = MinVal32i(_yMin);
+                yMax = MaxVal32i(_yMax);
             }
             for (; d < dstS; ++d)
             {
@@ -76,6 +92,11 @@ namespace Simd
                 x0 = Simd::RestrictRange(x0, -2, srcW) + 2;
                 y0 = Simd::RestrictRange(y0, -2, srcH) + 2;
                 idx[d] = padW * y0 + x0;
+                if (range)
+                {
+                    yMin = Min(yMin, y0);
+                    yMax = Max(yMax, y0);
+                }
                 grd += 2;
             }
         }
@@ -126,7 +147,10 @@ namespace Simd
         SynetGridSample2d32fBlZ::SynetGridSample2d32fBlZ(const GridSample2dParam& param)
             : Base::SynetGridSample2d32fBlZ(param)
         {
-            _indexCoeffs = _param.align ? IndexCoeffs32fBlZ<SimdTrue> : IndexCoeffs32fBlZ<SimdFalse>;
+            if (_sparse)
+                _indexCoeffs = _param.align ? IndexCoeffs32fBlZ<1, 1> : IndexCoeffs32fBlZ<0, 1>;
+            else
+                _indexCoeffs = _param.align ? IndexCoeffs32fBlZ<1, 0> : IndexCoeffs32fBlZ<0, 0>;
             _bilinearInterp = BilinearInterp32fBlZ;
         }
     }

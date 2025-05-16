@@ -32,7 +32,7 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx2
     {
-        template <SimdBool align> SIMD_INLINE float Denormalize32f(float pos, int dim)
+        template <int align> SIMD_INLINE float Denormalize32f(float pos, int dim)
         {
             if (align)
                 return float((pos + 1) / 2.0f * (dim - 1));
@@ -40,7 +40,7 @@ namespace Simd
                 return float(((pos + 1) * dim - 1) / 2.0f);
         }
 
-        template<SimdBool align>  void IndexCoeffs32fBlZ(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float* dy, float* dx)
+        template<int align, int range>  void IndexCoeffs32fBlZ(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float* dy, float* dx, int& yMin, int& yMax)
         {
             size_t dstS4 = AlignLo(dstS, 4), dstS8 = AlignLo(dstS, 8), d = 0;
             const __m256 a = SetFloat((srcW - align) / 2.0f, (srcH - align) / 2.0f);
@@ -50,6 +50,12 @@ namespace Simd
             const __m256i _srcH = _mm256_set1_epi32(srcH + 2);
             const __m256i _srcW = _mm256_set1_epi32(srcW + 2);
             const __m256i _padW = _mm256_set1_epi32(padW);
+            __m256i _yMin, _yMax;
+            if (range)
+            {
+                _yMin = _mm256_set1_epi32(yMin);
+                _yMax = _mm256_set1_epi32(yMax);
+            }
             for (; d < dstS8; d += 8)
             {
                 __m256 xy0 = _mm256_fmadd_ps(Load<false>(grd + 0, grd + 8), a, b);
@@ -63,6 +69,11 @@ namespace Simd
                 __m256i xi = _mm256_min_epi32(_mm256_max_epi32(_mm256_add_epi32(_mm256_cvtps_epi32(xf), _2), _0), _srcW);
                 __m256i yi = _mm256_min_epi32(_mm256_max_epi32(_mm256_add_epi32(_mm256_cvtps_epi32(yf), _2), _0), _srcH);
                 _mm256_storeu_si256((__m256i*)(idx + d), _mm256_add_epi32(_mm256_mullo_epi32(_padW, yi), xi));
+                if (range)
+                {
+                    _yMin = _mm256_min_epi32(_yMin, yi);
+                    _yMax = _mm256_max_epi32(_yMax, yi);
+                }
                 grd += 2 * 8;
             }
             for (; d < dstS4; d += 4)
@@ -78,7 +89,17 @@ namespace Simd
                 __m128i xi = _mm_min_epi32(_mm_max_epi32(_mm_add_epi32(_mm_cvtps_epi32(xf), _mm256_castsi256_si128(_2)), _mm256_castsi256_si128(_0)), _mm256_castsi256_si128(_srcW));
                 __m128i yi = _mm_min_epi32(_mm_max_epi32(_mm_add_epi32(_mm_cvtps_epi32(yf), _mm256_castsi256_si128(_2)), _mm256_castsi256_si128(_0)), _mm256_castsi256_si128(_srcH));
                 _mm_storeu_si128((__m128i*)(idx + d), _mm_add_epi32(_mm_mullo_epi32(_mm256_castsi256_si128(_padW), yi), xi));
+                if (range)
+                {
+                    _yMin = _mm256_min_epi32(_yMin, _mm256_castsi128_si256(yi));
+                    _yMax = _mm256_max_epi32(_yMax, _mm256_castsi128_si256(yi));
+                }
                 grd += 2 * 4;
+            }
+            if (range)
+            {
+                yMin = MinVal32i(_yMin);
+                yMax = MaxVal32i(_yMax);
             }
             for (; d < dstS; ++d)
             {
@@ -91,6 +112,11 @@ namespace Simd
                 x0 = Simd::RestrictRange(x0, -2, srcW) + 2;
                 y0 = Simd::RestrictRange(y0, -2, srcH) + 2;
                 idx[d] = padW * y0 + x0;
+                if (range)
+                {
+                    yMin = Min(yMin, y0);
+                    yMax = Max(yMax, y0);
+                }
                 grd += 2;
             }
         }
@@ -161,7 +187,10 @@ namespace Simd
         SynetGridSample2d32fBlZ::SynetGridSample2d32fBlZ(const GridSample2dParam& param)
             : Sse41::SynetGridSample2d32fBlZ(param)
         {
-            _indexCoeffs = _param.align ? IndexCoeffs32fBlZ<SimdTrue> : IndexCoeffs32fBlZ<SimdFalse>;
+            if (_sparse)
+                _indexCoeffs = _param.align ? IndexCoeffs32fBlZ<1, 1> : IndexCoeffs32fBlZ<0, 1>;
+            else
+                _indexCoeffs = _param.align ? IndexCoeffs32fBlZ<1, 0> : IndexCoeffs32fBlZ<0, 0>;
             _bilinearInterp = BilinearInterp32fBlZ;
         }
     }

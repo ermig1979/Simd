@@ -487,6 +487,20 @@ namespace Simd
             src = _mm_min_ss(src, Shuffle32f<0x01>(src));
             _mm_store_ss(&dst, src);
         }
+
+        SIMD_INLINE int MaxVal32i(__m128i src)
+        {
+            src = _mm_max_epi32(src, _mm_shuffle_epi32(src, 0x0E));
+            src = _mm_max_epi32(src, _mm_shuffle_epi32(src, 0x01));
+            return _mm_extract_epi32(src, 0);
+        }
+
+        SIMD_INLINE int MinVal32i(__m128i src)
+        {
+            src = _mm_min_epi32(src, _mm_shuffle_epi32(src, 0x0E));
+            src = _mm_min_epi32(src, _mm_shuffle_epi32(src, 0x01));
+            return _mm_extract_epi32(src, 0);
+        }
     }
 #endif// SIMD_SSE41_ENABLE
 
@@ -496,7 +510,7 @@ namespace Simd
         SIMD_INLINE __m256 Square(__m256 value)
         {
             return _mm256_mul_ps(value, value);
-    }
+        }
 
         template<bool fast> __m256 Rcp(__m256 value);
 
@@ -578,6 +592,16 @@ namespace Simd
         SIMD_INLINE void MinVal32f(__m256 src, float& dst)
         {
             Sse41::MinVal32f(_mm_min_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
+        }
+
+        SIMD_INLINE int MaxVal32i(__m256i src)
+        {
+            return Sse41::MaxVal32i(_mm_max_epi32(_mm256_castsi256_si128(src), _mm256_extracti128_si256(src, 1)));
+        }
+
+        SIMD_INLINE int MinVal32i(__m256i src)
+        {
+            return Sse41::MinVal32i(_mm_min_epi32(_mm256_castsi256_si128(src), _mm256_extracti128_si256(src, 1)));
         }
 
         SIMD_INLINE __m256 Not(__m256 value)
