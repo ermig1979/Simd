@@ -81,6 +81,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetAdd16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
@@ -97,7 +98,10 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTile.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h" />
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />

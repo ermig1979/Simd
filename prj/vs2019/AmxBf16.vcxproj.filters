@@ -148,6 +148,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution16b.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="AmxBf16">

@@ -163,6 +163,7 @@
     <ClInclude Include="..\..\src\Simd\SimdBase64.h" />
     <ClInclude Include="..\..\src\Simd\SimdBayer.h" />
     <ClInclude Include="..\..\src\Simd\SimdBFloat16.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBgrToLab.h" />
     <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
@@ -235,6 +236,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTransform.h" />

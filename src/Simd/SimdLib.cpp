@@ -83,6 +83,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetMergedConvolution16b.h"
 #include "Simd/SimdSynetMergedConvolution8i.h"
 #include "Simd/SimdSynetPermute.h"
+#include "Simd/SimdSynetQuantizedConvolution.h"
 #include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdWarpAffine.h"

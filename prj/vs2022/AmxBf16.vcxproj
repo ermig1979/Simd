@@ -17,6 +17,7 @@
     <ClInclude Include="..\..\src\Simd\SimdBFloat16.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
     <ClInclude Include="..\..\src\Simd\SimdCopy.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
