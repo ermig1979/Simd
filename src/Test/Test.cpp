@@ -319,6 +319,7 @@ namespace Test
 
     TEST_ADD_GROUP_A0(Resizer);
     TEST_ADD_GROUP_0S(ResizeYuv420p);
+    TEST_ADD_GROUP_0S(ResizeOpenCv);
 
     TEST_ADD_GROUP_A0(SegmentationShrinkRegion);
     TEST_ADD_GROUP_A0(SegmentationFillSingleHoles);

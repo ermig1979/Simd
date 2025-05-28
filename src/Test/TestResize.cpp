@@ -63,12 +63,12 @@ namespace Test
     {
         struct FuncRS
         {
-            typedef void*(*FuncPtr)(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+            typedef void* (*FuncPtr)(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
 
             FuncPtr func;
             String description;
 
-            FuncRS(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncRS(const FuncPtr& f, const String& d) : func(f), description(d) {}
 
             void Update(SimdResizeMethodType method, SimdResizeChannelType type, size_t channels, size_t srcW, size_t srcH, size_t dstW, size_t dstH)
             {
@@ -78,9 +78,9 @@ namespace Test
                 description = ss.str();
             }
 
-            void Call(const View & src, View & dst, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method) const
+            void Call(const View& src, View& dst, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method) const
             {
-                void * resizer = NULL;
+                void* resizer = NULL;
                 if (src.format == View::Float || src.format == View::Int16)
                     resizer = func(src.width / channels, src.height, dst.width / channels, dst.height, channels, type, method);
                 else
@@ -100,7 +100,7 @@ namespace Test
 #define FUNC_RS(function) \
     FuncRS(function, std::string(#function))
 
-//#define TEST_RESIZE_REAL_IMAGE
+    //#define TEST_RESIZE_REAL_IMAGE
 
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, size_t channels, size_t srcW, size_t srcH, size_t dstW, size_t dstH, FuncRS f1, FuncRS f2)
     {
@@ -190,9 +190,9 @@ namespace Test
                 SimdBFloat16ToFloat32(dst1.Row<uint16_t>(row), dstW, dst32f1.Row<float>(row));
                 SimdBFloat16ToFloat32(dst2.Row<uint16_t>(row), dstW, dst32f2.Row<float>(row));
             }
-            result = result && Compare(dst32f1, dst32f2, EPS*8.0f, true, 64, DifferenceBoth);
+            result = result && Compare(dst32f1, dst32f2, EPS * 8.0f, true, 64, DifferenceBoth);
         }
-        else if(type == SimdResizeChannelShort)
+        else if (type == SimdResizeChannelShort)
             result = result && Compare(dst1, dst2, 1, true, 64);
         else
             result = result && Compare(dst1, dst2, 0, true, 64);
@@ -216,10 +216,10 @@ namespace Test
 
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, int width, int height, double k, FuncRS f1, FuncRS f2)
     {
-        return ResizerAutoTest(method, type, channels, int(width*k), int(height*k), width, height, f1, f2);
+        return ResizerAutoTest(method, type, channels, int(width * k), int(height * k), width, height, f1, f2);
     }
 
-    bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, const FuncRS & f1, const FuncRS & f2)
+    bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, const FuncRS& f1, const FuncRS& f2)
     {
         bool result = true;
 
@@ -243,7 +243,7 @@ namespace Test
         return result;
     }
 
-    bool ResizerAutoTest(const FuncRS & f1, const FuncRS & f2)
+    bool ResizerAutoTest(const FuncRS& f1, const FuncRS& f2)
     {
         //return ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 10, f1, f2);
         bool result = true;
@@ -369,7 +369,7 @@ namespace Test
         Rect yDstRect(0, 0, W / 2, H / 2), uvDstRect = yDstRect / 2;
 
 #if 0
-        void* yResizer = SimdResizerInit(ySrcRect.Width(), ySrcRect.Height(), 
+        void* yResizer = SimdResizerInit(ySrcRect.Width(), ySrcRect.Height(),
             yDstRect.Width(), yDstRect.Height(), 1, SimdResizeChannelByte, method);
         void* uvResizer = SimdResizerInit(uvSrcRect.Width(), uvSrcRect.Height(),
             uvDstRect.Width(), uvDstRect.Height(), 1, SimdResizeChannelByte, method);
@@ -387,7 +387,7 @@ namespace Test
 
         void* rcy, * rcu, * rcv;
         rcy = SimdResizerInit(sr.Width(), sr.Height(), tr.Width(), tr.Height(), 1, SimdResizeChannelByte, method);
-        if (rcy) 
+        if (rcy)
         {
             SimdResizerRun(rcy, syuv + sr.Left() + sr.Top() * sw, sw, tyuv + tr.Left() + tr.Top() * tw, tw);
             SimdRelease(rcy);
@@ -399,7 +399,7 @@ namespace Test
             SimdRelease(rcu);
         }
         rcv = SimdResizerInit(sr.Width() / 2, sr.Height() / 2, tr.Width() / 2, tr.Height() / 2, 1, SimdResizeChannelByte, method);
-        if (rcv) 
+        if (rcv)
         {
             SimdResizerRun(rcv, syuv + sw * sh * 5 / 4 + sr.Left() / 2 + sr.Top() * sw / 2, sw / 2, tyuv + tw * th * 5 / 4 + tr.Left() / 2 + tr.Top() / 2 * tw / 2, tw / 2);
             SimdRelease(rcv);
@@ -415,7 +415,7 @@ namespace Test
         return result;
     }
 
-    bool ResizeYuv420pSpecialTest(const Options & options)
+    bool ResizeYuv420pSpecialTest(const Options& options)
     {
         bool result = true;
 
@@ -432,3 +432,85 @@ namespace Test
         return result;
     }
 }
+
+//---------------------------------------------------------------------------------------------
+
+#ifdef SIMD_OPENCV_ENABLE
+#include <opencv2/core/core.hpp>
+#include <opencv2/core/utils/logger.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+namespace Test
+{
+    void ResizeSimd(const View& src, View& dst, SimdResizeMethodType method)
+    {
+        TEST_PERFORMANCE_TEST("ResizeSimd");
+        Simd::Resize(src, dst, method);
+    }
+
+    void ResizeOpenCv(const View& src, View& dst, SimdResizeMethodType method)
+    {
+        cv::Mat cSrc = src, cDst = dst;
+        TEST_PERFORMANCE_TEST("ResizeOpenCV");
+        cv::resize(cSrc, cDst, dst.Size());
+    }
+
+    bool ResizeOpenCvSpecialTest(View::Format format, const Size& srcSize, const Size& dstSize, SimdResizeMethodType method)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "ResizeOpenCvSpecialTest: resize " << ToString(format) << " " << 
+            srcSize.x << "x" << srcSize.y << "->" << dstSize.x << "x" << dstSize.y << " with " << ToString(method) << ".");
+
+        View src(srcSize, format);
+#ifdef TEST_RESIZE_REAL_IMAGE
+        ::srand(0);
+        FillPicture(src);
+#else
+        FillRandom(src);
+#endif
+        View dst1(dstSize, format), dst2(dstSize, format);
+
+        cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_WARNING);
+        cv::setNumThreads((int)SimdGetThreadNumber());
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(ResizeSimd(src, dst1, method));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(ResizeOpenCv(src, dst2, method));
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
+#if defined(TEST_RESIZE_REAL_IMAGE)
+        if (!result)
+        {
+            SaveImage(src, String("_src"));
+            SaveImage(dst1, String("dst_simd"));
+            SaveImage(dst2, String("dst_ocv"));
+        }
+#endif
+
+        return result;
+    }
+
+    bool ResizeOpenCvSpecialTest(SimdResizeMethodType method)
+    {
+        bool result = true;
+
+        result = result && ResizeOpenCvSpecialTest(View::Bgr24, Size(480, 640), Size(333, 444), SimdResizeMethodBilinear);
+
+        return result;
+    }
+
+    bool ResizeOpenCvSpecialTest(const Options& options)
+    {
+        bool result = true;
+
+        result = result && ResizeOpenCvSpecialTest(SimdResizeMethodBilinear);
+
+        return result;
+    }
+}
+
+#endif
