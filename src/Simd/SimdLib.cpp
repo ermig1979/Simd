@@ -5887,6 +5887,68 @@ SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope,
 #endif
 }
 
+SIMD_API void* SimdSynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// simdSynetConvolution8iInit(batch, conv, compatibility);
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetQuantizedConvolutionExternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetQuantizedConvolutionInternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API const char* SimdSynetQuantizedConvolutionInfo(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetQuantizedConvolutionSetParams(void* context, const int8_t* weight, const int32_t* bias, const float* norm, const uint8_t* srcZero, const uint8_t* dstZero)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
 {
     SIMD_EMPTY();
