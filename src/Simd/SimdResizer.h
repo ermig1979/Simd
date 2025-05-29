@@ -60,6 +60,11 @@ namespace Simd
                 (method == SimdResizeMethodBicubic && (srcW == 2 || srcH == 2)));
         }
 
+        bool IsByteBilinearOpenCv() const
+        {
+            return type == SimdResizeChannelByte && (method == SimdResizeMethodBilinearOpenCv);
+        }
+
         bool IsShortBilinear() const
         {
             return type == SimdResizeChannelShort && method == SimdResizeMethodBilinear;
@@ -155,6 +160,29 @@ namespace Simd
             ResizerByteBilinear(const ResParam & param);
 
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        const int LINEAR_OCV_SHIFT = 11;
+        const int LINEAR_OCV_RANGE = 1 << LINEAR_OCV_SHIFT;
+        const int LINEAR_OCV_ROUND = 1 << (LINEAR_OCV_SHIFT - 1);
+
+        const int BILINEAR_OCV_SHIFT = LINEAR_OCV_SHIFT * 2;
+        const int BILINEAR_OCV_RANGE = 1 << BILINEAR_OCV_SHIFT;
+        const int BILINEAR_OCV_ROUND = 1 << (BILINEAR_OCV_SHIFT - 1);
+
+        class ResizerByteBilinearOpenCv : public Resizer
+        {
+        protected:
+            Array16i _ax, _ay;
+            Array32i _ix, _iy, _bx[2];
+
+            void EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, int16_t* alphas);
+        public:
+            ResizerByteBilinearOpenCv(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         };
 
         //-------------------------------------------------------------------------------------------------

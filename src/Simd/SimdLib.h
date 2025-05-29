@@ -482,6 +482,8 @@ typedef enum
     SimdResizeMethodBilinearCaffe,
     /*! Bilinear Pytorch compatible method. It is relevant only for ::SimdResizeChannelFloat (32-bit float channel type).*/
     SimdResizeMethodBilinearPytorch,
+    /*! Bilinear OpenCV compatible method. It is relevant only for ::SimdResizeChannelByte (8-bit integer channel type).*/
+    SimdResizeMethodBilinearOpenCv,
     /*! Bicubic method. */
     SimdResizeMethodBicubic,
     /*! Area method. */

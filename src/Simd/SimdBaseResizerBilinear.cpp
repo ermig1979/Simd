@@ -131,6 +131,108 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        ResizerByteBilinearOpenCv::ResizerByteBilinearOpenCv(const ResParam& param)
+            : Resizer(param)
+        {
+            _iy.Resize(_param.dstH);
+            _ay.Resize(_param.dstH * 2);
+            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy.data, _ay.data);
+        }
+
+        void ResizerByteBilinearOpenCv::EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, int16_t* alphas)
+        {
+            double invScale = (double)dstSize / srcSize;
+            double scale = 1.0 / invScale;
+            //double scale = (double)srcSize / dstSize;
+
+            for (int i = 0; i < (int)dstSize; ++i)
+            {
+                float alpha = (float)((i + 0.5) * scale - 0.5);
+                int32_t index = (int32_t)::floor(alpha);
+                alpha -= index;
+
+                if (index < 0)
+                {
+                    index = 0;
+                    alpha = 0;
+                }
+
+                if (index > (int32_t)srcSize - 2)
+                {
+                    index = srcSize - 2;
+                    alpha = 1;
+                }
+
+                for (size_t c = 0; c < channels; c++)
+                {
+                    size_t offset = i * channels + c;
+                    indices[offset] = (int32_t)(channels * index + c);
+                    alphas[offset * 2 + 0] = (int16_t)(alpha * LINEAR_OCV_RANGE);
+                    alphas[offset * 2 + 1] = (int16_t)((1.0f - alpha) * LINEAR_OCV_RANGE);
+                }
+            }
+        }
+
+        void ResizerByteBilinearOpenCv::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t cn = _param.channels;
+            size_t rs = _param.dstW * cn;
+            if (_ax.data == 0)
+            {
+                _ix.Resize(rs);
+                _ax.Resize(rs * 2);
+                EstimateIndexAlpha(_param.srcW, _param.dstW, cn, _ix.data, _ax.data);
+                _bx[0].Resize(rs);
+                _bx[1].Resize(rs);
+            }
+            int32_t* pbx[2] = { _bx[0].data, _bx[1].data };
+            int32_t prev = -2;
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                int32_t fy1 = _ay[dy * 2 + 0], fy0 = _ay[dy * 2 + 1];
+                int32_t sy = _iy[dy];
+                int32_t k = 0;
+
+                if (sy == prev)
+                    k = 2;
+                else if (sy == prev + 1)
+                {
+                    Swap(pbx[0], pbx[1]);
+                    k = 1;
+                }
+
+                prev = sy;
+
+                for (; k < 2; k++)
+                {
+                    int32_t* pb = pbx[k];
+                    const uint8_t* ps = src + (sy + k) * srcStride;
+                    for (size_t dx = 0; dx < rs; dx++)
+                    {
+                        int32_t sx = _ix[dx];
+                        int32_t fx1 = _ax[dx * 2 + 0], fx0 = _ax[dx * 2 + 1];
+                        pb[dx] = ps[sx] * fx0 + ps[sx + cn] * fx1;
+                    }
+                }
+
+                //if (fy == 0)
+                //    for (size_t dx = 0; dx < rs; dx++)
+                //        dst[dx] = ((pbx[0][dx] << LINEAR_OCV_SHIFT) + BILINEAR_OCV_ROUND) >> BILINEAR_OCV_SHIFT;
+                //else if (fy == LINEAR_OCV_RANGE)
+                //    for (size_t dx = 0; dx < rs; dx++)
+                //        dst[dx] = ((pbx[1][dx] << LINEAR_OCV_SHIFT) + BILINEAR_OCV_ROUND) >> BILINEAR_OCV_SHIFT;
+                //else
+                {
+                    for (size_t dx = 0; dx < rs; dx++)
+                    {
+                        dst[dx] = (pbx[0][dx] * fy0 + pbx[1][dx] * fy1 + BILINEAR_OCV_ROUND) >> BILINEAR_OCV_SHIFT;
+                    }
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         ResizerShortBilinear::ResizerShortBilinear(const ResParam& param)
             : Resizer(param)
         {

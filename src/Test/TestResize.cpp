@@ -35,13 +35,14 @@ namespace Test
     {
         switch (method)
         {
-        case SimdResizeMethodNearest: return "NrO";
+        case SimdResizeMethodNearest: return "NrS";
         case SimdResizeMethodNearestPytorch: return "NrP";
-        case SimdResizeMethodBilinear: return "BlO";
+        case SimdResizeMethodBilinear: return "BlS";
         case SimdResizeMethodBilinearCaffe: return "BlC";
         case SimdResizeMethodBilinearPytorch: return "BlP";
-        case SimdResizeMethodBicubic: return "BcO";
-        case SimdResizeMethodArea: return "ArO";
+        case SimdResizeMethodBilinearOpenCv: return "BlO";
+        case SimdResizeMethodBicubic: return "BcS";
+        case SimdResizeMethodArea: return "ArS";
         case SimdResizeMethodAreaFast: return "ArF";
         default: assert(0); return "";
         }
@@ -287,14 +288,15 @@ namespace Test
         //result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 4, 100, 2, 200, 10, f1, f2);
 
 #if !defined(__aarch64__) || 1  
-        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBicubic, SimdResizeMethodArea, SimdResizeMethodAreaFast };
+        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBilinearOpenCv, SimdResizeMethodBicubic, SimdResizeMethodArea, SimdResizeMethodAreaFast };
         for (size_t m = 0; m < methods.size(); ++m)
         {
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 1, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 2, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 3, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 4, f1, f2);
-            if (methods[m] == SimdResizeMethodBicubic || methods[m] == SimdResizeMethodArea || methods[m] == SimdResizeMethodAreaFast)
+            if (methods[m] == SimdResizeMethodBicubic || methods[m] == SimdResizeMethodArea || 
+                methods[m] == SimdResizeMethodAreaFast || methods[m] == SimdResizeMethodBilinearOpenCv)
                 continue;
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelShort, 1, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelShort, 2, f1, f2);
@@ -476,9 +478,9 @@ namespace Test
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(ResizeSimd(src, dst1, method));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(ResizeOpenCv(src, dst1, method));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(ResizeOpenCv(src, dst2, method));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(ResizeSimd(src, dst2, method));
 
         result = result && Compare(dst1, dst2, 0, true, 64);
 
@@ -486,8 +488,8 @@ namespace Test
         if (!result)
         {
             SaveImage(src, String("_src"));
-            SaveImage(dst1, String("dst_simd"));
-            SaveImage(dst2, String("dst_ocv"));
+            SaveImage(dst1, String("dst_ocv"));
+            SaveImage(dst2, String("dst_simd"));
         }
 #endif
 
@@ -498,7 +500,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizeOpenCvSpecialTest(View::Bgr24, Size(480, 640), Size(333, 444), SimdResizeMethodBilinear);
+        result = result && ResizeOpenCvSpecialTest(View::Bgr24, Size(480, 640), Size(333, 444), method);
 
         return result;
     }
@@ -507,7 +509,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizeOpenCvSpecialTest(SimdResizeMethodBilinear);
+        result = result && ResizeOpenCvSpecialTest(SimdResizeMethodBilinearOpenCv);
+
+        //result = result && ResizeOpenCvSpecialTest(SimdResizeMethodBilinear);
 
         return result;
     }

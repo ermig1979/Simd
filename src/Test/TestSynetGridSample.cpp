@@ -103,8 +103,8 @@ namespace Test
                 {
                     for (size_t x = 0; x < shape[2]; ++x)
                     {
-                        tensor.Data(Shp(b, y, x, 0))[0] = float(y) / shape[1] + 0.1 * (float)Random();
-                        tensor.Data(Shp(b, y, x, 1))[0] = float(x) / shape[2] + 0.1 * (float)Random();
+                        tensor.Data(Shp(b, y, x, 0))[0] = float(y) / shape[1] + 0.1f * (float)Random();
+                        tensor.Data(Shp(b, y, x, 1))[0] = float(x) / shape[2] + 0.1f * (float)Random();
                     }
                 }
             }
