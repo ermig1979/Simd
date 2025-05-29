@@ -86,8 +86,8 @@ namespace Simd
                         dst = 0;
                         src = srcIndex - _ixg[block].src;
                     }
-                    _ixg[block].shuffle[dst] = src;
-                    _ixg[block].shuffle[dst + 1] = src + 1;
+                    _ixg[block].shuffle[dst] = (uint8_t)src;
+                    _ixg[block].shuffle[dst + 1] = (uint8_t)src + 1;
 
                     alphas[1] = (uint8_t)(alpha * Base::FRACTION_RANGE + 0.5);
                     alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
@@ -350,8 +350,8 @@ namespace Simd
         {
             if (_ax.data)
                 return;
-            //if (_param.channels == 1 && _param.srcW < 4 * _param.dstW)
-            //    _blocks = BlockCountMax(A);
+            if (_param.channels == 1 && _param.srcW < 4 * _param.dstW)
+                _blocks = BlockCountMax(A);
             float scale = (float)_param.srcW / _param.dstW;
             _ax.Resize(AlignHi(_param.dstW, A) * _param.channels * 2, false, _param.align);
             int16_t* alphas = _ax.data;
@@ -389,11 +389,15 @@ namespace Simd
                         dst = 0;
                         src = srcIndex - _ixg[block].src;
                     }
-                    _ixg[block].shuffle[dst] = src;
-                    _ixg[block].shuffle[dst + 1] = src + 1;
+                    int offs = dst * 2;
+                    _ixg[block].shuffle[offs + 0] = (uint8_t)src;
+                    _ixg[block].shuffle[offs + 1] = (uint8_t)-1;
+                    _ixg[block].shuffle[offs + 2] = (uint8_t)src + 1;
+                    _ixg[block].shuffle[offs + 3] = (uint8_t)-1;
 
-                    alphas[1] = (uint8_t)(alpha * Base::FRACTION_RANGE + 0.5);
-                    alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
+                    int16_t ialpha = (int16_t)Round(alpha * Base::LINEAR_X_RANGE);
+                    alphas[0] = int16_t(Base::LINEAR_X_RANGE) - ialpha;
+                    alphas[1] = ialpha;
                     alphas += 2;
                 }
                 _blocks = block + 1;
@@ -566,57 +570,60 @@ namespace Simd
             }
         }
 
-        template <class Idx> SIMD_INLINE void ResizerByteBilinearOpenCvLoadGrayInterpolated(const uint8_t* src, const Idx& index, const uint8_t* alpha, uint8_t* dst)
+        template <class Idx> SIMD_INLINE void ResizerByteBilinearOpenCvLoadGrayInterpolated(const uint8_t* src, const Idx& index, const int16_t* alpha, int16_t* dst)
         {
-            __m128i _src = _mm_loadu_si128((__m128i*)(src + index.src));
-            __m128i _shuffle = _mm_loadu_si128((__m128i*) & index.shuffle);
-            __m128i _alpha = _mm_loadu_si128((__m128i*)(alpha + index.dst));
-            _mm_storeu_si128((__m128i*)(dst + index.dst), _mm_maddubs_epi16(_mm_shuffle_epi8(_src, _shuffle), _alpha));
+            __m128i src0 = _mm_loadu_si128((__m128i*)(src + index.src));
+            __m128i shuffle0 = _mm_loadu_si128((__m128i*) & index.shuffle + 0);
+            __m128i shuffle1 = _mm_loadu_si128((__m128i*) & index.shuffle + 1);
+            __m128i alpha0 = _mm_loadu_si128((__m128i*)(alpha + index.dst) + 0);
+            __m128i alpha1 = _mm_loadu_si128((__m128i*)(alpha + index.dst) + 1);
+            __m128i d0 = _mm_srli_epi32(_mm_madd_epi16(_mm_shuffle_epi8(src0, shuffle0), alpha0), Base::LINEAR_X_RSHIFT);
+            __m128i d1 = _mm_srli_epi32(_mm_madd_epi16(_mm_shuffle_epi8(src0, shuffle1), alpha1), Base::LINEAR_X_RSHIFT);
+            _mm_storeu_si128((__m128i*)((uint8_t*)dst + index.dst), _mm_packs_epi32(d0, d1));
         }
 
         void ResizerByteBilinearOpenCv::RunG(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            //size_t bufW = AlignHi(_param.dstW, A) * 2;
-            //size_t size = 2 * _param.dstW;
-            //size_t aligned = AlignHi(size, DA) - DA;
-            //size_t blocks = _blocks;
-            //ptrdiff_t previous = -2;
-            //__m128i a[2];
-            //int16_t* bx[2] = { _bx[0].data, _bx[1].data };
-            //const int16_t* ax = _ax.data;
-            //const Idx* ixg = _ixg.data;
+            size_t rs = _param.dstW, size = 2 * rs;
+            size_t aligned = AlignHi(rs, A) - A;
+            size_t blocks = _blocks;
+            ptrdiff_t previous = -2;
+            __m128i a[2];
+            int16_t* bx[2] = { _bx[0].data, _bx[1].data };
+            const int16_t* ax = _ax.data;
+            const Idx* ixg = _ixg.data;
 
-            //for (size_t yDst = 0; yDst < _param.dstH; yDst++, dst += dstStride)
-            //{
-            //    a[0] = _mm_set1_epi16(int16_t(Base::FRACTION_RANGE - _ay[yDst]));
-            //    a[1] = _mm_set1_epi16(int16_t(_ay[yDst]));
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                a[0] = _mm_set1_epi16(_ay[dy * 2 + 0]);
+                a[1] = _mm_set1_epi16(_ay[dy * 2 + 1]);
 
-            //    ptrdiff_t sy = _iy[yDst];
-            //    int k = 0;
+                ptrdiff_t sy = _iy[dy];
+                int k = 0;
 
-            //    if (sy == previous)
-            //        k = 2;
-            //    else if (sy == previous + 1)
-            //    {
-            //        Swap(bx[0], bx[1]);
-            //        k = 1;
-            //    }
+                if (sy == previous)
+                    k = 2;
+                else if (sy == previous + 1)
+                {
+                    Swap(bx[0], bx[1]);
+                    k = 1;
+                }
 
-            //    previous = sy;
+                previous = sy;
 
-            //    for (; k < 2; k++)
-            //    {
-            //        const uint8_t* psrc = src + (sy + k) * srcStride;
-            //        int16_t* pdst = bx[k];
-            //        for (size_t i = 0; i < blocks; ++i)
-            //            ResizerByteBilinearOpenCvLoadGrayInterpolated(psrc, ixg[i], ax, pdst);
-            //    }
+                for (; k < 2; k++)
+                {
+                    const uint8_t* psrc = src + (sy + k) * srcStride;
+                    int16_t* pdst = bx[k];
+                    for (size_t i = 0; i < blocks; ++i)
+                        ResizerByteBilinearOpenCvLoadGrayInterpolated(psrc, ixg[i], ax, pdst);
+                }
 
-            //    for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
-            //        ResizerByteBilinearOpenCvInterpolateY<true>(bx[0] + ib, bx[1] + ib, a, dst + id);
-            //    size_t i = size - DA;
-            //    ResizerByteBilinearOpenCvInterpolateY<false>(bx[0] + i, bx[1] + i, a, dst + i / 2);
-            //}
+                for (size_t i = 0; i < aligned; i += A)
+                    ResizerByteBilinearOpenCvInterpolateY(bx[0] + i, bx[1] + i, a, dst + i);
+                size_t i = rs - A;
+                ResizerByteBilinearOpenCvInterpolateY(bx[0] + i, bx[1] + i, a, dst + i);
+            }
         }
 
         void ResizerByteBilinearOpenCv::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
@@ -627,9 +634,9 @@ namespace Simd
             switch (_param.channels)
             {
             case 1:
-                //if (_blocks)
-                //    RunG(src, srcStride, dst, dstStride);
-                //else
+                if (_blocks)
+                    RunG(src, srcStride, dst, dstStride);
+                else
                     Run<1>(src, srcStride, dst, dstStride);
                 break;
             case 2: Run<2>(src, srcStride, dst, dstStride); break;
