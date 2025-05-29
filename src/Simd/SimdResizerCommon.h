@@ -26,6 +26,7 @@
 
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdResizer.h"
 
 namespace Simd
 {
@@ -178,7 +179,7 @@ namespace Simd
             ResizerByteAreaResult34<3>(src, count, curr, zero, next, dst);
         }
     }
-#endif //SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
@@ -190,7 +191,31 @@ namespace Simd
             __m256i _alpha = _mm256_loadu_si256((__m256i*)(alpha + index.dst));
             _mm256_storeu_si256((__m256i*)(dst + index.dst), _mm256_maddubs_epi16(Avx2::Shuffle(_src, _shuffle), _alpha));
         }
+
+        template <class Idx, int fast> SIMD_INLINE void ResizerByteBilinearOpenCvLoadGrayInterpolated(const uint8_t* src, const Idx& index, const int16_t* alpha, int16_t* dst)
+        {
+            __m256i shuffle0 = _mm256_loadu_si256((__m256i*) & index.shuffle + 0);
+            __m256i shuffle1 = _mm256_loadu_si256((__m256i*) & index.shuffle + 1);
+            __m256i src0, src1;
+            if (fast)
+            {
+                __m256i _src = Load<false>((__m128i*)(src + index.src), (__m128i*)(src + index.src));
+                src0 = _mm256_shuffle_epi8(_src, shuffle0);
+                src1 = _mm256_shuffle_epi8(_src, shuffle1);
+            }
+            else
+            {
+                __m256i _src = _mm256_loadu_si256((__m256i*)(src + index.src));
+                src0 = _mm256_and_si256(Avx2::Shuffle(_src, shuffle0), K16_00FF);
+                src1 = _mm256_and_si256(Avx2::Shuffle(_src, shuffle1), K16_00FF);
+            }
+            __m256i alpha0 = _mm256_loadu_si256((__m256i*)(alpha + index.dst) + 0);
+            __m256i alpha1 = _mm256_loadu_si256((__m256i*)(alpha + index.dst) + 1);
+            __m256i d0 = _mm256_srli_epi32(_mm256_madd_epi16(src0, alpha0), Base::LINEAR_X_RSHIFT);
+            __m256i d1 = _mm256_srli_epi32(_mm256_madd_epi16(src1, alpha1), Base::LINEAR_X_RSHIFT);
+            _mm256_storeu_si256((__m256i*)((uint8_t*)dst + index.dst), PackI32ToI16(d0, d1));
+        }
     }
-#endif //SIMD_AVX2_ENABLE 
+#endif
 }
-#endif//__SimdResizerCommon_h__
+#endif

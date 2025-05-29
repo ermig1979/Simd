@@ -507,6 +507,28 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class ResizerByteBilinearOpenCv : public Sse41::ResizerByteBilinearOpenCv
+        {
+        protected:
+            struct Idx
+            {
+                int32_t src, dst;
+                uint8_t shuffle[DA];
+            };
+            Array<Idx> _ixg;
+            int _fast;
+
+            void EstimateParams();
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            template<int fast> void RunG(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteBilinearOpenCv(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class ResizerShortBilinear : public Sse41::ResizerShortBilinear
         {
         protected:

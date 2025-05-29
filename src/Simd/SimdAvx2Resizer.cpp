@@ -40,6 +40,8 @@ namespace Simd
                 return new ResizerNearest(param);
             else if (param.IsByteBilinear() && dstX >= A)
                 return new ResizerByteBilinear(param);
+            else if (param.IsByteBilinearOpenCv() && dstX >= A && channels < 2)
+                return new ResizerByteBilinearOpenCv(param);
             else if (param.IsShortBilinear() && dstX >= F)
                 return new ResizerShortBilinear(param);
             else if (param.IsFloatBilinear())
