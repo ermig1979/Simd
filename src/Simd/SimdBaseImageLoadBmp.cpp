@@ -160,7 +160,7 @@ namespace Simd
             if (_bpp == 24)
             {
                 _size = _width * 3;
-                _pad = AlignHi(_size, 4) - _size;
+                _pad = (int32_t)AlignHi(_size, 4) - _size;
             }
             else
             {

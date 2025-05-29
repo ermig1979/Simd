@@ -136,18 +136,15 @@ namespace Simd
         {
             _iy.Resize(_param.dstH);
             _ay.Resize(_param.dstH * 2);
-            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy.data, _ay.data);
+            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy.data, _ay.data, LINEAR_Y_RANGE);
         }
-
-        void ResizerByteBilinearOpenCv::EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, int16_t* alphas)
+        void ResizerByteBilinearOpenCv::EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, int16_t* alphas, int range)
         {
-            double invScale = (double)dstSize / srcSize;
-            double scale = 1.0 / invScale;
-            //double scale = (double)srcSize / dstSize;
+            float scale = float(srcSize) / float(dstSize);
 
             for (int i = 0; i < (int)dstSize; ++i)
             {
-                float alpha = (float)((i + 0.5) * scale - 0.5);
+                float alpha = (float)((i + 0.5f) * scale - 0.5f);
                 int32_t index = (int32_t)::floor(alpha);
                 alpha -= index;
 
@@ -159,7 +156,7 @@ namespace Simd
 
                 if (index > (int32_t)srcSize - 2)
                 {
-                    index = srcSize - 2;
+                    index = (int32_t)srcSize - 2;
                     alpha = 1;
                 }
 
@@ -167,8 +164,9 @@ namespace Simd
                 {
                     size_t offset = i * channels + c;
                     indices[offset] = (int32_t)(channels * index + c);
-                    alphas[offset * 2 + 0] = (int16_t)(alpha * LINEAR_OCV_RANGE);
-                    alphas[offset * 2 + 1] = (int16_t)((1.0f - alpha) * LINEAR_OCV_RANGE);
+                    int16_t ialpha = (int16_t)Round(alpha * range);
+                    alphas[offset * 2 + 0] = range - ialpha;
+                    alphas[offset * 2 + 1] = ialpha;
                 }
             }
         }
@@ -181,16 +179,16 @@ namespace Simd
             {
                 _ix.Resize(rs);
                 _ax.Resize(rs * 2);
-                EstimateIndexAlpha(_param.srcW, _param.dstW, cn, _ix.data, _ax.data);
+                EstimateIndexAlpha(_param.srcW, _param.dstW, cn, _ix.data, _ax.data, LINEAR_X_RANGE);
                 _bx[0].Resize(rs);
                 _bx[1].Resize(rs);
             }
-            int32_t* pbx[2] = { _bx[0].data, _bx[1].data };
+            int16_t* pbx[2] = { _bx[0].data, _bx[1].data };
             int32_t prev = -2;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
-                int32_t fy1 = _ay[dy * 2 + 0], fy0 = _ay[dy * 2 + 1];
                 int32_t sy = _iy[dy];
+                int32_t fy0 = _ay[dy * 2 + 0], fy1 = _ay[dy * 2 + 1];
                 int32_t k = 0;
 
                 if (sy == prev)
@@ -205,27 +203,27 @@ namespace Simd
 
                 for (; k < 2; k++)
                 {
-                    int32_t* pb = pbx[k];
+                    int16_t* pb = pbx[k];
                     const uint8_t* ps = src + (sy + k) * srcStride;
                     for (size_t dx = 0; dx < rs; dx++)
                     {
                         int32_t sx = _ix[dx];
-                        int32_t fx1 = _ax[dx * 2 + 0], fx0 = _ax[dx * 2 + 1];
-                        pb[dx] = ps[sx] * fx0 + ps[sx + cn] * fx1;
+                        int32_t fx0 = _ax[dx * 2 + 0], fx1 = _ax[dx * 2 + 1];
+                        pb[dx] = (ps[sx] * fx0 + ps[sx + cn] * fx1) >> LINEAR_X_RSHIFT;
                     }
                 }
 
-                //if (fy == 0)
-                //    for (size_t dx = 0; dx < rs; dx++)
-                //        dst[dx] = ((pbx[0][dx] << LINEAR_OCV_SHIFT) + BILINEAR_OCV_ROUND) >> BILINEAR_OCV_SHIFT;
-                //else if (fy == LINEAR_OCV_RANGE)
-                //    for (size_t dx = 0; dx < rs; dx++)
-                //        dst[dx] = ((pbx[1][dx] << LINEAR_OCV_SHIFT) + BILINEAR_OCV_ROUND) >> BILINEAR_OCV_SHIFT;
-                //else
+                if (fy0 == 0)
+                    for (size_t dx = 0; dx < rs; dx++)
+                        dst[dx] = dst[dx] = (((pbx[1][dx] * fy1) >> 16) + LINEAR_Y_ROUND) >> LINEAR_Y_RSHIFT;
+                else if (fy1 == 0)
+                    for (size_t dx = 0; dx < rs; dx++)
+                        dst[dx] = dst[dx] = (((pbx[0][dx] * fy0) >> 16) + LINEAR_Y_ROUND) >> LINEAR_Y_RSHIFT;
+                else
                 {
                     for (size_t dx = 0; dx < rs; dx++)
                     {
-                        dst[dx] = (pbx[0][dx] * fy0 + pbx[1][dx] * fy1 + BILINEAR_OCV_ROUND) >> BILINEAR_OCV_SHIFT;
+                        dst[dx] = (((pbx[0][dx] * fy0) >> 16) + ((pbx[1][dx] * fy1) >> 16) + LINEAR_Y_ROUND) >> LINEAR_Y_RSHIFT;
                     }
                 }
             }

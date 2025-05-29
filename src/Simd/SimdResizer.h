@@ -164,21 +164,22 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        const int LINEAR_OCV_SHIFT = 11;
-        const int LINEAR_OCV_RANGE = 1 << LINEAR_OCV_SHIFT;
-        const int LINEAR_OCV_ROUND = 1 << (LINEAR_OCV_SHIFT - 1);
+        const int LINEAR_X_LSHIFT = 15;
+        const int LINEAR_X_RANGE = 1 << LINEAR_X_LSHIFT;
+        const int LINEAR_X_RSHIFT = LINEAR_X_LSHIFT - 7;
 
-        const int BILINEAR_OCV_SHIFT = LINEAR_OCV_SHIFT * 2;
-        const int BILINEAR_OCV_RANGE = 1 << BILINEAR_OCV_SHIFT;
-        const int BILINEAR_OCV_ROUND = 1 << (BILINEAR_OCV_SHIFT - 1);
+        const int LINEAR_Y_LSHIFT = 15;
+        const int LINEAR_Y_RANGE = 1 << LINEAR_Y_LSHIFT;
+        const int LINEAR_Y_RSHIFT = LINEAR_X_LSHIFT - LINEAR_X_RSHIFT + LINEAR_Y_LSHIFT - 16;
+        const int LINEAR_Y_ROUND = 1 << (LINEAR_Y_RSHIFT - 1);
 
         class ResizerByteBilinearOpenCv : public Resizer
         {
         protected:
-            Array16i _ax, _ay;
-            Array32i _ix, _iy, _bx[2];
+            Array16i _ax, _ay, _bx[2];
+            Array32i _ix, _iy;
 
-            void EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, int16_t* alphas);
+            void EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, int16_t* alphas, int range);
         public:
             ResizerByteBilinearOpenCv(const ResParam& param);
 

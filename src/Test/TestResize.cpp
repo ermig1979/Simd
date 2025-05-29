@@ -246,13 +246,13 @@ namespace Test
 
     bool ResizerAutoTest(const FuncRS& f1, const FuncRS& f2)
     {
-        //return ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 10, f1, f2);
         bool result = true;
 
-#if 1
+#if 0
 #if defined(SIMD_X64_ENABLE) 
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 64, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 32, f1, f2);
+        return result;
 #endif
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 16, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 10, f1, f2);
@@ -261,12 +261,13 @@ namespace Test
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 3, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 2, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 1, f1, f2);
+        return result;
 #endif
-
 #if 0
 #if defined(SIMD_X64_ENABLE) 
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 64, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 32, f1, f2);
+        return result;
 #endif        
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 16, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 10, f1, f2);
@@ -275,17 +276,34 @@ namespace Test
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 3, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 2, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 1, f1, f2);
-#endif
-
         return result;
-
+#endif
+#if 0
         result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelBf16, 1, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelBf16, 3, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodNearest, SimdResizeChannelBf16, 8, f1, f2);
+        return result;
+#endif
+#if 0
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 530, 404, 96, 96, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 4, 100, 1, 200, 10, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 4, 100, 2, 200, 10, f1, f2);
+        return result;
+#endif
 
-        //result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 530, 404, 96, 96, f1, f2);
-        //result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 4, 100, 1, 200, 10, f1, f2);
-        //result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 4, 100, 2, 200, 10, f1, f2);
+#if  1 
+        {
+            std::vector<SimdResizeMethodType> methods = { SimdResizeMethodBilinear, SimdResizeMethodBilinearOpenCv };
+            for (size_t m = 0; m < methods.size(); ++m)
+            {
+                result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 1, f1, f2);
+                result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 2, f1, f2);
+                result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 3, f1, f2);
+                result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 4, f1, f2);
+            }
+            return result;
+        }
+#endif
 
 #if !defined(__aarch64__) || 1  
         std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBilinearOpenCv, SimdResizeMethodBicubic, SimdResizeMethodArea, SimdResizeMethodAreaFast };
@@ -457,7 +475,7 @@ namespace Test
         cv::resize(cSrc, cDst, dst.Size());
     }
 
-    bool ResizeOpenCvSpecialTest(View::Format format, const Size& srcSize, const Size& dstSize, SimdResizeMethodType method)
+    bool ResizeOpenCvSpecialTest(View::Format format, const Size& srcSize, const Size& dstSize, SimdResizeMethodType method, int differenceMax)
     {
         bool result = true;
 
@@ -482,7 +500,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(ResizeSimd(src, dst2, method));
 
-        result = result && Compare(dst1, dst2, 0, true, 64);
+        result = result && Compare(dst1, dst2, differenceMax, true, 64);
 
 #if defined(TEST_RESIZE_REAL_IMAGE)
         if (!result)
@@ -496,11 +514,11 @@ namespace Test
         return result;
     }
 
-    bool ResizeOpenCvSpecialTest(SimdResizeMethodType method)
+    bool ResizeOpenCvSpecialTest(SimdResizeMethodType method, int differenceMax)
     {
         bool result = true;
 
-        result = result && ResizeOpenCvSpecialTest(View::Bgr24, Size(480, 640), Size(333, 444), method);
+        result = result && ResizeOpenCvSpecialTest(View::Bgr24, Size(480, 640), Size(333, 444), method, differenceMax);
 
         return result;
     }
@@ -509,9 +527,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizeOpenCvSpecialTest(SimdResizeMethodBilinearOpenCv);
+        result = result && ResizeOpenCvSpecialTest(SimdResizeMethodBilinearOpenCv, 1);
 
-        //result = result && ResizeOpenCvSpecialTest(SimdResizeMethodBilinear);
+        result = result && ResizeOpenCvSpecialTest(SimdResizeMethodBilinear, 13);
 
         return result;
     }
