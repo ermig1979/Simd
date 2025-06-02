@@ -486,21 +486,6 @@ namespace Simd
             ResizerByteBilinearOpenCvInterpolateX2(src + 1, alpha + 2, dst + 1);
         }
 
-        //const __m256i K8_SHUFFLE_X2 = SIMD_MM256_SETR_EPI8(0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF,
-        //    0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF);
-
-        //SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX2(const __m256i* alpha, __m256i* buffer)
-        //{
-        //    __m256i src = _mm256_shuffle_epi8(_mm256_loadu_si256(buffer), K8_SHUFFLE_X2);
-        //    _mm256_storeu_si256(buffer, _mm256_maddubs_epi16(src, _mm256_loadu_si256(alpha)));
-        //}
-
-        //template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<2>(const __m256i* alpha, __m256i* buffer)
-        //{
-        //    ResizerByteBilinearOpenCvInterpolateX2(alpha + 0, buffer + 0);
-        //    ResizerByteBilinearOpenCvInterpolateX2(alpha + 1, buffer + 1);
-        //}
-
         //const __m256i K8_SHUFFLE_X3_00 = SIMD_MM256_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         //    0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
         //const __m256i K8_SHUFFLE_X3_01 = SIMD_MM256_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1,
@@ -545,22 +530,28 @@ namespace Simd
         //    _mm256_storeu_si256(buffer + 2, _mm256_maddubs_epi16(shuffled, _mm256_loadu_si256(alpha + 2)));
         //}
 
-        //const __m256i K8_SHUFFLE_X4 = SIMD_MM256_SETR_EPI8(0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
-        //    0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
+        const __m256i K8_SFL_X4_0 = SIMD_MM256_SETR_EPI8(
+            0x0, -1, 0x4, -1, 0x1, -1, 0x5, -1, 0x2, -1, 0x6, -1, 0x3, -1, 0x7, -1,
+            0x0, -1, 0x4, -1, 0x1, -1, 0x5, -1, 0x2, -1, 0x6, -1, 0x3, -1, 0x7, -1);
+        const __m256i K8_SFL_X4_1 = SIMD_MM256_SETR_EPI8(
+            0x8, -1, 0xC, -1, 0x9, -1, 0xD, -1, 0xA, -1, 0xE, -1, 0xB, -1, 0xF, -1,
+            0x8, -1, 0xC, -1, 0x9, -1, 0xD, -1, 0xA, -1, 0xE, -1, 0xB, -1, 0xF, -1);
 
-        //SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX4(const __m256i* alpha, __m256i* buffer)
-        //{
-        //    __m256i src = _mm256_shuffle_epi8(_mm256_loadu_si256(buffer), K8_SHUFFLE_X4);
-        //    _mm256_storeu_si256(buffer, _mm256_maddubs_epi16(src, _mm256_loadu_si256(alpha)));
-        //}
+        SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX4(const __m256i* src, const __m256i* alpha, __m256i* dst)
+        {
+            __m256i _s = LoadPermuted<false>(src);
+            __m256i d0 = _mm256_srli_epi32(_mm256_madd_epi16(_mm256_shuffle_epi8(_s, K8_SFL_X4_0), _mm256_loadu_si256(alpha + 0)), Base::LINEAR_X_RSHIFT);
+            __m256i d1 = _mm256_srli_epi32(_mm256_madd_epi16(_mm256_shuffle_epi8(_s, K8_SFL_X4_1), _mm256_loadu_si256(alpha + 1)), Base::LINEAR_X_RSHIFT);
+            _mm256_storeu_si256(dst + 0, PackI32ToI16(d0, d1));
+        }
 
-        //template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<4>(const __m256i* alpha, __m256i* buffer)
-        //{
-        //    ResizerByteBilinearOpenCvInterpolateX4(alpha + 0, buffer + 0);
-        //    ResizerByteBilinearOpenCvInterpolateX4(alpha + 1, buffer + 1);
-        //    ResizerByteBilinearOpenCvInterpolateX4(alpha + 2, buffer + 2);
-        //    ResizerByteBilinearOpenCvInterpolateX4(alpha + 3, buffer + 3);
-        //}
+        template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<4>(const __m256i* src, const __m256i* alpha, __m256i* dst)
+        {
+            ResizerByteBilinearOpenCvInterpolateX4(src + 0, alpha + 0, dst + 0);
+            ResizerByteBilinearOpenCvInterpolateX4(src + 1, alpha + 2, dst + 1);
+            ResizerByteBilinearOpenCvInterpolateX4(src + 2, alpha + 4, dst + 2);
+            ResizerByteBilinearOpenCvInterpolateX4(src + 3, alpha + 6, dst + 3);
+        }
 
         const __m256i K16_LINEAR_Y_ROUND = SIMD_MM256_SET1_EPI16(Base::LINEAR_Y_ROUND);
 
@@ -693,7 +684,7 @@ namespace Simd
                 break;
             case 2: Run<2>(src, srcStride, dst, dstStride); break;
             //case 3: Run<3>(src, srcStride, dst, dstStride); break;
-            //case 4: Run<4>(src, srcStride, dst, dstStride); break;
+            case 4: Run<4>(src, srcStride, dst, dstStride); break;
             default:
                 assert(0);
             }
