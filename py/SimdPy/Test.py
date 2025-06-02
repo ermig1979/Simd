@@ -109,7 +109,7 @@ def ConvertImageTest(args) :
 
 def ImageResizeTest(args) :
 	image = LoadTestImage(args)
-	resized = Simd.Resized(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.Area)
+	resized = Simd.Resized(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.BilinearOpenCv)
 	resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
 	
 ###################################################################################################

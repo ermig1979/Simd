@@ -297,12 +297,14 @@ class ResizeMethod(enum.Enum) :
 	BilinearCaffe = 3
     ## Bilinear Pytorch compatible method. It is relevant only for Simd.ResizeChannel.Float (32-bit float channel type).
 	BilinearPytorch = 4
+    ## Bilinear OpenCV compatible method. It is relevant only for Simd.ResizeChannel.Byte (8-bit integer channel type).
+	BilinearOpenCv = 5
     ## Bicubic method.
-	Bicubic = 5
+	Bicubic = 6
     ## Area method.
-	Area = 6
+	Area = 7
     ## Area method for previously reduced in 2 times image.
-	AreaFast = 7
+	AreaFast = 8
 	
 ## @ingroup python
 # 4D-tensor format type.
