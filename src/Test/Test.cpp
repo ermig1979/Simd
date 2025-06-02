@@ -319,7 +319,9 @@ namespace Test
 
     TEST_ADD_GROUP_A0(Resizer);
     TEST_ADD_GROUP_0S(ResizeYuv420p);
+#ifdef SIMD_OPENCV_ENABLE
     TEST_ADD_GROUP_0S(ResizeOpenCv);
+#endif
 
     TEST_ADD_GROUP_A0(SegmentationShrinkRegion);
     TEST_ADD_GROUP_A0(SegmentationFillSingleHoles);
