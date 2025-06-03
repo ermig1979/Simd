@@ -466,9 +466,9 @@ namespace Simd
             for (size_t i = 0; i < size; i += 16)
             {
 #if defined(__GNUC__) &&  __GNUC__ < 6
-                _mm512_storeu_si512(dst + 4 * i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), (const int*)src, 2));
+                _mm512_storeu_si512(dst + 4 * i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), (const int*)src, 1));
 #else
-                _mm512_storeu_si512(dst + 4 * i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), src, 2));
+                _mm512_storeu_si512(dst + 4 * i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), src, 1));
 #endif
             }
         }
@@ -494,10 +494,31 @@ namespace Simd
             for (size_t i = 0; i < size; i += 8)
             {
 #if defined(__GNUC__) &&  __GNUC__ < 6
-                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), (const long long int*)src, 4));
+                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), (const long long int*)src, 1));
 #else
-                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), src, 4));
+                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), src, 1));
 #endif
+            }
+        }
+
+        template <size_t N> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX(const uint8_t* src, const int* index, const int16_t* alpha, size_t size, int16_t* dst)
+        {
+        }
+
+        template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<4>(const uint8_t* src, const int* index, const int16_t* alpha, size_t size, int16_t* dst)
+        {
+            for (size_t i = 0; i < size; i += 8, alpha += 64)
+            {
+                __m256i _index = _mm256_loadu_si256((__m256i*)(index + i));
+#if defined(__GNUC__) &&  __GNUC__ < 6
+                __m512i _src = _mm512_i32gather_epi64(_index, (const long long int*)src, 1);
+#else
+                __m512i _src = _mm512_i32gather_epi64(_index, src, 1);
+#endif
+                _src = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _src);
+                __m512i d0 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_shuffle_epi8(_src, K8_SFL_X4_0), _mm512_loadu_si512((__m512i*)alpha + 0)), Base::LINEAR_X_RSHIFT);
+                __m512i d1 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_shuffle_epi8(_src, K8_SFL_X4_1), _mm512_loadu_si512((__m512i*)alpha + 1)), Base::LINEAR_X_RSHIFT);
+                _mm512_storeu_si512((__m512i*)(dst + i * 4), PackI32ToI16(d0, d1));
             }
         }
 
@@ -536,11 +557,18 @@ namespace Simd
 
                 for (; k < 2; k++)
                 {
-                    ResizerByteBilinearOpenCvGather<N>(src + (sy + k) * srcStride, ix, dstW, _sx.data);
+                    if (N == 4 && 0)
+                    {
+                        ResizerByteBilinearOpenCvInterpolateX<N>(src + (sy + k) * srcStride, ix, ax, dstW, bx[k]);
+                    }
+                    else
+                    {
+                        ResizerByteBilinearOpenCvGather<N>(src + (sy + k) * srcStride, ix, dstW, _sx.data);
 
-                    uint8_t* pb = (uint8_t*)bx[k];
-                    for (size_t i = 0; i < size; i += step)
-                        ResizerByteBilinearOpenCvInterpolateX<N>((__m512i*)(_sx.data + i), (__m512i*)(ax + i), (__m512i*)(pb + i));
+                        uint8_t* pb = (uint8_t*)bx[k];
+                        for (size_t i = 0; i < size; i += step)
+                            ResizerByteBilinearOpenCvInterpolateX<N>((__m512i*)(_sx.data + i), (__m512i*)(ax + i), (__m512i*)(pb + i));
+                    }
                 }
 
                 for (size_t i = 0; i < aligned; i += A)
@@ -600,10 +628,10 @@ namespace Simd
 
             bool empty = _ax.Empty();
             EstimateParams();
-            if (empty && _param.channels == 3)
+            if (empty)
             {
                 for (size_t i = 0; i < _ix.size; ++i)
-                    _ix[i] *= 3;
+                    _ix[i] *= _param.channels;
             }
             switch (_param.channels)
             {
