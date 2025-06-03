@@ -320,7 +320,312 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        ResizerByteBilinearOpenCv::ResizerByteBilinearOpenCv(const ResParam& param)
+            : Avx2::ResizerByteBilinearOpenCv(param)
+        {
+        }
+
+        template <size_t N> void ResizerByteBilinearOpenCvInterpolateX(const __m512i* src, const __m512i* alpha, __m512i* dst);
+
+        template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<1>(const __m512i* src, const __m512i* alpha, __m512i* dst)
+        {
+            __m512i _s = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _mm512_loadu_si512(src));
+            __m512i d0 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_unpacklo_epi8(_s, _mm512_setzero_si512()), _mm512_loadu_si512(alpha + 0)), Base::LINEAR_X_RSHIFT);
+            __m512i d1 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_unpackhi_epi8(_s, _mm512_setzero_si512()), _mm512_loadu_si512(alpha + 1)), Base::LINEAR_X_RSHIFT);
+            _mm512_storeu_si512(dst + 0, PackI32ToI16(d0, d1));
+        }
+
+        //template <size_t N> void ResizerByteBilinearOpenCvInterpolateX(const uint8_t* alpha, uint8_t* buffer);
+
+        //template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<1>(const uint8_t* alpha, uint8_t* buffer)
+        //{
+        //    __m512i _buffer = Load<true>(buffer);
+        //    Store<true>(buffer, _mm512_maddubs_epi16(_buffer, Load<true>(alpha)));
+        //}
+
+        //const __m512i K8_SHUFFLE_X2 = SIMD_MM512_SETR_EPI8(
+        //    0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF,
+        //    0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF,
+        //    0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF,
+        //    0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF);
+
+        //SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX2(const uint8_t* alpha, uint8_t* buffer)
+        //{
+        //    __m512i _buffer = _mm512_shuffle_epi8(Load<true>(buffer), K8_SHUFFLE_X2);
+        //    Store<true>(buffer, _mm512_maddubs_epi16(_buffer, Load<true>(alpha)));
+        //}
+
+        //template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<2>(const uint8_t* alpha, uint8_t* buffer)
+        //{
+        //    ResizerByteBilinearOpenCvInterpolateX2(alpha + 0, buffer + 0);
+        //    ResizerByteBilinearOpenCvInterpolateX2(alpha + A, buffer + A);
+        //}
+
+        //const __m512i K8_SHUFFLE_X3_00 = SIMD_MM512_SETR_EPI8(
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        //const __m512i K8_SHUFFLE_X3_01 = SIMD_MM512_SETR_EPI8(
+        //    0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1,
+        //    -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1,
+        //    -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF,
+        //    0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1);
+        //const __m512i K8_SHUFFLE_X3_02 = SIMD_MM512_SETR_EPI8(
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0);
+
+        //const __m512i K8_SHUFFLE_X3_10 = SIMD_MM512_SETR_EPI8(
+        //    0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        //const __m512i K8_SHUFFLE_X3_11 = SIMD_MM512_SETR_EPI8(
+        //    -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1,
+        //    -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF,
+        //    0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1,
+        //    -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1);
+        //const __m512i K8_SHUFFLE_X3_12 = SIMD_MM512_SETR_EPI8(
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1);
+
+        //const __m512i K8_SHUFFLE_X3_20 = SIMD_MM512_SETR_EPI8(
+        //    0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        //const __m512i K8_SHUFFLE_X3_21 = SIMD_MM512_SETR_EPI8(
+        //    -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF,
+        //    0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1,
+        //    -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1,
+        //    -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF);
+        //const __m512i K8_SHUFFLE_X3_22 = SIMD_MM512_SETR_EPI8(
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1,
+        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+
+        //template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<3>(const uint8_t* alpha, uint8_t* buffer)
+        //{
+        //    __m512i src[3], shuffled;
+        //    src[0] = Load<true>(buffer + 0 * A);
+        //    src[1] = Load<true>(buffer + 1 * A);
+        //    src[2] = Load<true>(buffer + 2 * A);
+
+        //    shuffled = _mm512_shuffle_epi8(_mm512_alignr_epi32(src[0], src[0], 12), K8_SHUFFLE_X3_00);
+        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(src[0], K8_SHUFFLE_X3_01));
+        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(_mm512_alignr_epi32(src[1], src[0], 4), K8_SHUFFLE_X3_02));
+        //    Store<true>(buffer + 0 * A, _mm512_maddubs_epi16(shuffled, Load<true>(alpha + 0 * A)));
+
+        //    shuffled = _mm512_shuffle_epi8(_mm512_alignr_epi32(src[1], src[0], 12), K8_SHUFFLE_X3_10);
+        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(src[1], K8_SHUFFLE_X3_11));
+        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(_mm512_alignr_epi32(src[2], src[1], 4), K8_SHUFFLE_X3_12));
+        //    Store<true>(buffer + 1 * A, _mm512_maddubs_epi16(shuffled, Load<true>(alpha + 1 * A)));
+
+        //    shuffled = _mm512_shuffle_epi8(_mm512_alignr_epi32(src[2], src[1], 12), K8_SHUFFLE_X3_20);
+        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(src[2], K8_SHUFFLE_X3_21));
+        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(_mm512_alignr_epi32(src[2], src[2], 4), K8_SHUFFLE_X3_22));
+        //    Store<true>(buffer + 2 * A, _mm512_maddubs_epi16(shuffled, Load<true>(alpha + 2 * A)));
+        //}
+
+        //const __m512i K8_SHUFFLE_X4 = SIMD_MM512_SETR_EPI8(
+        //    0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+        //    0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+        //    0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+        //    0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
+
+        //SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX4(const uint8_t* alpha, uint8_t* buffer)
+        //{
+        //    __m512i _buffer = _mm512_shuffle_epi8(Load<true>(buffer), K8_SHUFFLE_X4);
+        //    Store<true>(buffer, _mm512_maddubs_epi16(_buffer, Load<true>(alpha)));
+        //}
+
+        //template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<4>(const uint8_t* alpha, uint8_t* buffer)
+        //{
+        //    ResizerByteBilinearOpenCvInterpolateX4(alpha + 0 * A, buffer + 0 * A);
+        //    ResizerByteBilinearOpenCvInterpolateX4(alpha + 1 * A, buffer + 1 * A);
+        //    ResizerByteBilinearOpenCvInterpolateX4(alpha + 2 * A, buffer + 2 * A);
+        //    ResizerByteBilinearOpenCvInterpolateX4(alpha + 3 * A, buffer + 3 * A);
+        //}
+
+        const __m512i K16_LINEAR_Y_ROUND = SIMD_MM512_SET1_EPI16(Base::LINEAR_Y_ROUND);
+
+        SIMD_INLINE __m512i ResizerByteBilinearOpenCvInterpolateY(const __m512i* pbx0, const __m512i* pbx1, __m512i alpha[2])
+        {
+            __m512i sum = _mm512_add_epi16(_mm512_mulhi_epi16(_mm512_loadu_si512(pbx0), alpha[0]), _mm512_mulhi_epi16(_mm512_loadu_si512(pbx1), alpha[1]));
+            return _mm512_srli_epi16(_mm512_add_epi16(sum, K16_LINEAR_Y_ROUND), Base::LINEAR_Y_RSHIFT);
+        }
+
+        SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateY(const int16_t* bx0, const int16_t* bx1, __m512i alpha[2], uint8_t* dst)
+        {
+            __m512i lo = ResizerByteBilinearOpenCvInterpolateY((__m512i*)bx0 + 0, (__m512i*)bx1 + 0, alpha);
+            __m512i hi = ResizerByteBilinearOpenCvInterpolateY((__m512i*)bx0 + 1, (__m512i*)bx1 + 1, alpha);
+            _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(lo, hi));
+        }
+        
+        template <size_t N> SIMD_INLINE void ResizerByteBilinearOpenCvGather(const uint8_t* src, const int* idx, size_t size, uint8_t* dst)
+        {
+            struct Src { uint8_t channels[N * 1]; };
+            struct Dst { uint8_t channels[N * 2]; };
+            const Src* s = (const Src*)src;
+            Dst* d = (Dst*)dst;
+            for (size_t i = 0; i < size; i++)
+                d[i] = *(Dst*)(s + idx[i]);
+        }
+
+//        template <> SIMD_INLINE void ResizerByteBilinearOpenCvGather<2>(const uint8_t* src, const int* idx, size_t size, uint8_t* dst)
+//        {
+//            for (size_t i = 0; i < size; i += 16)
+//            {
+//#if defined(__GNUC__) &&  __GNUC__ < 6
+//                _mm512_storeu_si512(dst + 4 * i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), (const int*)src, 2));
+//#else
+//                _mm512_storeu_si512(dst + 4 * i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), src, 2));
+//#endif
+//            }
+//        }
+//
+//        template <> SIMD_INLINE void ResizerByteBilinearOpenCvGather<4>(const uint8_t* src, const int* idx, size_t size, uint8_t* dst)
+//        {
+//            for (size_t i = 0; i < size; i += 8)
+//            {
+//#if defined(__GNUC__) &&  __GNUC__ < 6
+//                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), (const long long int*)src, 4));
+//#else
+//                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), src, 4));
+//#endif
+//            }
+//        }
+
+        template<size_t N> void ResizerByteBilinearOpenCv::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            struct One { uint8_t val[N * 1]; };
+            struct Two { uint8_t val[N * 2]; };
+
+            size_t rs = _param.dstW * N, size = 2 * rs;
+            size_t aligned = AlignHi(rs, A) - A;
+            const size_t step = A * N;
+            ptrdiff_t previous = -2;
+            __m512i a[2];
+            int16_t* bx[2] = { _bx[0].data, _bx[1].data };
+            const int16_t* ax = _ax.data;
+            const int32_t* ix = _ix.data;
+            size_t dstW = _param.dstW;
+
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                a[0] = _mm512_set1_epi16(_ay[dy * 2 + 0]);
+                a[1] = _mm512_set1_epi16(_ay[dy * 2 + 1]);
+
+                ptrdiff_t sy = _iy[dy];
+                int k = 0;
+
+                if (sy == previous)
+                    k = 2;
+                else if (sy == previous + 1)
+                {
+                    Swap(bx[0], bx[1]);
+                    k = 1;
+                }
+
+                previous = sy;
+
+                for (; k < 2; k++)
+                {
+                    Two* ps = (Two*)_sx.data;
+                    const One* psrc = (const One*)(src + (sy + k) * srcStride);
+                    for (size_t x = 0; x < dstW; x++)
+                        ps[x] = *(Two*)(psrc + ix[x]);
+
+                    uint8_t* pb = (uint8_t*)bx[k];
+                    for (size_t i = 0; i < size; i += step)
+                        ResizerByteBilinearOpenCvInterpolateX<N>((__m512i*)(_sx.data + i), (__m512i*)(ax + i), (__m512i*)(pb + i));
+                }
+
+                for (size_t i = 0; i < aligned; i += A)
+                    ResizerByteBilinearOpenCvInterpolateY(bx[0] + i, bx[1] + i, a, dst + i);
+                size_t i = rs - A;
+                ResizerByteBilinearOpenCvInterpolateY(bx[0] + i, bx[1] + i, a, dst + i);
+            }
+        }
+
+        template<int fast> void ResizerByteBilinearOpenCv::RunG(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t rs = _param.dstW, size = 2 * rs;
+            size_t aligned = AlignHi(rs, A) - A;
+            size_t blocks = _blocks;
+            ptrdiff_t previous = -2;
+            __m512i a[2];
+            int16_t* bx[2] = { _bx[0].data, _bx[1].data };
+            const int16_t* ax = _ax.data;
+            const Idx* ixg = _ixg.data;
+
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                a[0] = _mm512_set1_epi16(_ay[dy * 2 + 0]);
+                a[1] = _mm512_set1_epi16(_ay[dy * 2 + 1]);
+
+                ptrdiff_t sy = _iy[dy];
+                int k = 0;
+
+                if (sy == previous)
+                    k = 2;
+                else if (sy == previous + 1)
+                {
+                    Swap(bx[0], bx[1]);
+                    k = 1;
+                }
+
+                previous = sy;
+
+                for (; k < 2; k++)
+                {
+                    const uint8_t* psrc = src + (sy + k) * srcStride;
+                    int16_t* pdst = bx[k];
+                    for (size_t i = 0; i < blocks; ++i)
+                        Avx2::ResizerByteBilinearOpenCvLoadGrayInterpolated<Idx, fast>(psrc, ixg[i], ax, pdst);
+                }
+
+                for (size_t i = 0; i < aligned; i += A)
+                    ResizerByteBilinearOpenCvInterpolateY(bx[0] + i, bx[1] + i, a, dst + i);
+                size_t i = rs - A;
+                ResizerByteBilinearOpenCvInterpolateY(bx[0] + i, bx[1] + i, a, dst + i);
+            }
+        }
+
+        void ResizerByteBilinearOpenCv::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            assert(_param.dstW >= A);
+
+            EstimateParams();
+            switch (_param.channels)
+            {
+            case 1:
+                if (_blocks)
+                {
+                    if (_fast)
+                        RunG<1>(src, srcStride, dst, dstStride);
+                    else
+                        RunG<0>(src, srcStride, dst, dstStride);
+                }
+                else
+                    Run<1>(src, srcStride, dst, dstStride);
+                break;
+            //case 2: Run<2>(src, srcStride, dst, dstStride); break;
+            //case 3: Run<3>(src, srcStride, dst, dstStride); break;
+            //case 4: Run<4>(src, srcStride, dst, dstStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         ResizerShortBilinear::ResizerShortBilinear(const ResParam& param)
             : Avx2::ResizerShortBilinear(param)

@@ -644,6 +644,19 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class ResizerByteBilinearOpenCv : public Avx2::ResizerByteBilinearOpenCv
+        {
+        protected:
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            template<int fast> void RunG(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteBilinearOpenCv(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class ResizerShortBilinear : public Avx2::ResizerShortBilinear
         {
         protected:
