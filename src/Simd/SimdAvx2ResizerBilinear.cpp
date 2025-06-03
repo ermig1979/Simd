@@ -360,9 +360,9 @@ namespace Simd
             if (_ax.data)
                 return;
             if (_param.channels == 1 && _param.srcW < 4 * _param.dstW)
-                _blocks = BlockCountMax(A) * 4;
+                _blocks = BlockCountMax(A);
             float scale = (float)_param.srcW / _param.dstW;
-            _ax.Resize(AlignHi(_param.dstW, A) * _param.channels * 2, false, _param.align);
+            _ax.Resize(AlignHi(_param.dstW, A) * _param.channels * 2, true, _param.align);
             int16_t* alphas = _ax.data;
             if (_blocks)
             {
@@ -420,7 +420,7 @@ namespace Simd
             }
             else
             {
-                _ix.Resize(_param.dstW);
+                _ix.Resize(_param.dstW + SIMD_ALIGN, true);
                 for (size_t i = 0; i < _param.dstW; ++i)
                 {
                     float alpha = (float)((i + 0.5) * scale - 0.5);

@@ -457,6 +457,22 @@ namespace Simd
             }
         }
 
+//        const __m512i K16_GATHER_3 = SIMD_MM512_SETR_EPI16(
+//            0x00, 0x01, 0x02, 0x04, 0x05, 0x06, 0x08, 0x09, 0x0A, 0x0C, 0x0D, 0x0E, 0x10, 0x11, 0x12, 0x14,
+//            0x15, 0x16, 0x18, 0x19, 0x1A, 0x1C, 0x1D, 0x1E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+//
+//        template <> SIMD_INLINE void ResizerByteBilinearOpenCvGather<3>(const uint8_t* src, const int* idx, size_t size, uint8_t* dst)
+//        {
+//            for (size_t i = 0; i < size; i += 8)
+//            {
+//#if defined(__GNUC__) &&  __GNUC__ < 6
+//                _mm512_mask_storeu_epi8(dst + 6 * i, 0x0000FFFFFFFFFFFF, _mm512_permutexvar_epi16(K16_GATHER_3,_mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), (const long long int*)src, 3)));
+//#else
+//                _mm512_mask_storeu_epi8(dst + 6 * i, 0x0000FFFFFFFFFFFF, _mm512_permutexvar_epi16(K16_GATHER_3,_mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), src, 3)));
+//#endif
+//            }
+//        }
+
         template <> SIMD_INLINE void ResizerByteBilinearOpenCvGather<4>(const uint8_t* src, const int* idx, size_t size, uint8_t* dst)
         {
             for (size_t i = 0; i < size; i += 8)
@@ -504,10 +520,12 @@ namespace Simd
 
                 for (; k < 2; k++)
                 {
-                    Two* ps = (Two*)_sx.data;
-                    const One* psrc = (const One*)(src + (sy + k) * srcStride);
-                    for (size_t x = 0; x < dstW; x++)
-                        ps[x] = *(Two*)(psrc + ix[x]);
+                    ResizerByteBilinearOpenCvGather<N>(src + (sy + k) * srcStride, ix, dstW, _sx.data);
+
+                    //Two* ps = (Two*)_sx.data;
+                    //const One* psrc = (const One*)(src + (sy + k) * srcStride);
+                    //for (size_t x = 0; x < dstW; x++)
+                    //    ps[x] = *(Two*)(psrc + ix[x]);
 
                     uint8_t* pb = (uint8_t*)bx[k];
                     for (size_t i = 0; i < size; i += step)
