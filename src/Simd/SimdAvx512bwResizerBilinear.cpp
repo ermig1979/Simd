@@ -362,76 +362,36 @@ namespace Simd
             ResizerByteBilinearOpenCvInterpolateX2(src + 1, alpha + 2, dst + 1);
         }
 
-        //const __m512i K8_SHUFFLE_X3_00 = SIMD_MM512_SETR_EPI8(
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-        //const __m512i K8_SHUFFLE_X3_01 = SIMD_MM512_SETR_EPI8(
-        //    0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1,
-        //    -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1,
-        //    -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF,
-        //    0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1);
-        //const __m512i K8_SHUFFLE_X3_02 = SIMD_MM512_SETR_EPI8(
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0);
+        const __m512i K8_SFL_X3_0 = SIMD_MM512_SETR_EPI8(
+            0x0, -1, 0x3, -1, 0x1, -1, 0x4, -1, 0x2, -1, 0x5, -1, 0x6, -1, 0x9, -1,
+            0x3, -1, 0x6, -1, 0x4, -1, 0x7, -1, 0x8, -1, 0xB, -1, 0x9, -1, 0xC, -1,
+            0x6, -1, 0x9, -1, 0xA, -1, 0xD, -1, 0xB, -1, 0xE, -1, 0xC, -1, 0xF, -1,
+            0x0, -1, 0x3, -1, 0x1, -1, 0x4, -1, 0x2, -1, 0x5, -1, 0x6, -1, 0x9, -1);
+        const __m512i K8_SFL_X3_1 = SIMD_MM512_SETR_EPI8(
+            0x3, -1, 0x6, -1, 0x4, -1, 0x7, -1, 0x8, -1, 0xB, -1, 0x9, -1, 0xC, -1,
+            0x6, -1, 0x9, -1, 0xA, -1, 0xD, -1, 0xB, -1, 0xE, -1, 0xC, -1, 0xF, -1,
+            0x0, -1, 0x3, -1, 0x1, -1, 0x4, -1, 0x2, -1, 0x5, -1, 0x6, -1, 0x9, -1,
+            0x3, -1, 0x6, -1, 0x4, -1, 0x7, -1, 0x8, -1, 0xB, -1, 0x9, -1, 0xC, -1);
+        const __m512i K8_SFL_X3_2 = SIMD_MM512_SETR_EPI8(
+            0x6, -1, 0x9, -1, 0xA, -1, 0xD, -1, 0xB, -1, 0xE, -1, 0xC, -1, 0xF, -1,
+            0x0, -1, 0x3, -1, 0x1, -1, 0x4, -1, 0x2, -1, 0x5, -1, 0x6, -1, 0x9, -1,
+            0x3, -1, 0x6, -1, 0x4, -1, 0x7, -1, 0x8, -1, 0xB, -1, 0x9, -1, 0xC, -1,
+            0x6, -1, 0x9, -1, 0xA, -1, 0xD, -1, 0xB, -1, 0xE, -1, 0xC, -1, 0xF, -1);
 
-        //const __m512i K8_SHUFFLE_X3_10 = SIMD_MM512_SETR_EPI8(
-        //    0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-        //const __m512i K8_SHUFFLE_X3_11 = SIMD_MM512_SETR_EPI8(
-        //    -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1,
-        //    -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF,
-        //    0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1,
-        //    -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1);
-        //const __m512i K8_SHUFFLE_X3_12 = SIMD_MM512_SETR_EPI8(
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1);
+        SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX3(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, __m512i shf0,
+            const uint8_t* src4, const uint8_t* src5, const uint8_t* src6, const uint8_t* src7, __m512i shf1, const __m512i* alpha, __m512i* dst)
+        {
+            __m512i d0 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_shuffle_epi8(Load<false>((__m128i*)src0, (__m128i*)src1, (__m128i*)src2, (__m128i*)src3), shf0), _mm512_loadu_si512(alpha + 0)), Base::LINEAR_X_RSHIFT);
+            __m512i d1 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_shuffle_epi8(Load<false>((__m128i*)src4, (__m128i*)src5, (__m128i*)src6, (__m128i*)src7), shf1), _mm512_loadu_si512(alpha + 1)), Base::LINEAR_X_RSHIFT);
+            _mm512_storeu_si512(dst + 0, PackI32ToI16(d0, d1));
+        }
 
-        //const __m512i K8_SHUFFLE_X3_20 = SIMD_MM512_SETR_EPI8(
-        //    0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-        //const __m512i K8_SHUFFLE_X3_21 = SIMD_MM512_SETR_EPI8(
-        //    -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF,
-        //    0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1,
-        //    -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1,
-        //    -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF);
-        //const __m512i K8_SHUFFLE_X3_22 = SIMD_MM512_SETR_EPI8(
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1,
-        //    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-
-        //template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<3>(const uint8_t* alpha, uint8_t* buffer)
-        //{
-        //    __m512i src[3], shuffled;
-        //    src[0] = Load<true>(buffer + 0 * A);
-        //    src[1] = Load<true>(buffer + 1 * A);
-        //    src[2] = Load<true>(buffer + 2 * A);
-
-        //    shuffled = _mm512_shuffle_epi8(_mm512_alignr_epi32(src[0], src[0], 12), K8_SHUFFLE_X3_00);
-        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(src[0], K8_SHUFFLE_X3_01));
-        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(_mm512_alignr_epi32(src[1], src[0], 4), K8_SHUFFLE_X3_02));
-        //    Store<true>(buffer + 0 * A, _mm512_maddubs_epi16(shuffled, Load<true>(alpha + 0 * A)));
-
-        //    shuffled = _mm512_shuffle_epi8(_mm512_alignr_epi32(src[1], src[0], 12), K8_SHUFFLE_X3_10);
-        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(src[1], K8_SHUFFLE_X3_11));
-        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(_mm512_alignr_epi32(src[2], src[1], 4), K8_SHUFFLE_X3_12));
-        //    Store<true>(buffer + 1 * A, _mm512_maddubs_epi16(shuffled, Load<true>(alpha + 1 * A)));
-
-        //    shuffled = _mm512_shuffle_epi8(_mm512_alignr_epi32(src[2], src[1], 12), K8_SHUFFLE_X3_20);
-        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(src[2], K8_SHUFFLE_X3_21));
-        //    shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(_mm512_alignr_epi32(src[2], src[2], 4), K8_SHUFFLE_X3_22));
-        //    Store<true>(buffer + 2 * A, _mm512_maddubs_epi16(shuffled, Load<true>(alpha + 2 * A)));
-        //}
+        template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<3>(const __m512i* src, const __m512i* alpha, __m512i* dst)
+        {
+            ResizerByteBilinearOpenCvInterpolateX3((uint8_t*)src + 0, (uint8_t*)src + 4, (uint8_t*)src + 8, (uint8_t*)src + 24, K8_SFL_X3_0, (uint8_t*)src + 28, (uint8_t*)src + 32, (uint8_t*)src + 48, (uint8_t*)src + 52, K8_SFL_X3_1, alpha + 0, dst + 0);
+            ResizerByteBilinearOpenCvInterpolateX3((uint8_t*)src + 56, (uint8_t*)src + 72, (uint8_t*)src + 76, (uint8_t*)src + 80, K8_SFL_X3_2, (uint8_t*)src + 96, (uint8_t*)src + 100, (uint8_t*)src + 104, (uint8_t*)src + 120, K8_SFL_X3_0, alpha + 2, dst + 1);
+            ResizerByteBilinearOpenCvInterpolateX3((uint8_t*)src + 124, (uint8_t*)src + 128, (uint8_t*)src + 144, (uint8_t*)src + 148, K8_SFL_X3_1, (uint8_t*)src + 152, (uint8_t*)src + 168, (uint8_t*)src + 172, (uint8_t*)src + 176, K8_SFL_X3_2, alpha + 4, dst + 2);
+        }
 
         const __m512i K8_SFL_X4_0 = SIMD_MM512_SETR_EPI8(
             0x0, -1, 0x4, -1, 0x1, -1, 0x5, -1, 0x2, -1, 0x6, -1, 0x3, -1, 0x7, -1,
@@ -624,7 +584,7 @@ namespace Simd
                     Run<1>(src, srcStride, dst, dstStride);
                 break;
             case 2: Run<2>(src, srcStride, dst, dstStride); break;
-            //case 3: Run<3>(src, srcStride, dst, dstStride); break;
+            case 3: Run<3>(src, srcStride, dst, dstStride); break;
             case 4: Run<4>(src, srcStride, dst, dstStride); break;
             default:
                 assert(0);

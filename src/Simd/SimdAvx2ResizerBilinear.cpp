@@ -488,12 +488,12 @@ namespace Simd
 
         const __m256i K8_SFL_X3_0 = SIMD_MM256_SETR_EPI8(
             0x0, -1, 0x3, -1, 0x1, -1, 0x4, -1, 0x2, -1, 0x5, -1, 0x6, -1, 0x9, -1,
-            0x1, -1, 0x4, -1, 0x2, -1, 0x5, -1, 0x6, -1, 0x9, -1, 0x7, -1, 0xA, -1);
+            0x3, -1, 0x6, -1, 0x4, -1, 0x7, -1, 0x8, -1, 0xB, -1, 0x9, -1, 0xC, -1);
         const __m256i K8_SFL_X3_1 = SIMD_MM256_SETR_EPI8(
             0x6, -1, 0x9, -1, 0xA, -1, 0xD, -1, 0xB, -1, 0xE, -1, 0xC, -1, 0xF, -1,
             0x0, -1, 0x3, -1, 0x1, -1, 0x4, -1, 0x2, -1, 0x5, -1, 0x6, -1, 0x9, -1);
         const __m256i K8_SFL_X3_2 = SIMD_MM256_SETR_EPI8(
-            0x1, -1, 0x4, -1, 0x2, -1, 0x5, -1, 0x6, -1, 0x9, -1, 0x7, -1, 0xA, -1,
+            0x3, -1, 0x6, -1, 0x4, -1, 0x7, -1, 0x8, -1, 0xB, -1, 0x9, -1, 0xC, -1,
             0x6, -1, 0x9, -1, 0xA, -1, 0xD, -1, 0xB, -1, 0xE, -1, 0xC, -1, 0xF, -1);
 
         SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX3(const uint8_t* src0, const uint8_t* src1, __m256i shf0, 
@@ -506,9 +506,9 @@ namespace Simd
 
         template <> SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX<3>(const __m256i* src, const __m256i* alpha, __m256i* dst)
         {
-            ResizerByteBilinearOpenCvInterpolateX3((uint8_t*)src + 0, (uint8_t*)src + 6, K8_SFL_X3_0, (uint8_t*)src + 8, (uint8_t*)src + 24, K8_SFL_X3_1, alpha + 0, dst + 0);
-            ResizerByteBilinearOpenCvInterpolateX3((uint8_t*)src + 30, (uint8_t*)src + 32, K8_SFL_X3_2, (uint8_t*)src + 48, (uint8_t*)src + 54, K8_SFL_X3_0, alpha + 2, dst + 1);
-            ResizerByteBilinearOpenCvInterpolateX3((uint8_t*)src + 56, (uint8_t*)src + 72, K8_SFL_X3_1, (uint8_t*)src + 78, (uint8_t*)src + 80, K8_SFL_X3_2, alpha + 4, dst + 2);
+            ResizerByteBilinearOpenCvInterpolateX3((uint8_t*)src + 0, (uint8_t*)src + 4, K8_SFL_X3_0, (uint8_t*)src + 8, (uint8_t*)src + 24, K8_SFL_X3_1, alpha + 0, dst + 0);
+            ResizerByteBilinearOpenCvInterpolateX3((uint8_t*)src + 28, (uint8_t*)src + 32, K8_SFL_X3_2, (uint8_t*)src + 48, (uint8_t*)src + 52, K8_SFL_X3_0, alpha + 2, dst + 1);
+            ResizerByteBilinearOpenCvInterpolateX3((uint8_t*)src + 56, (uint8_t*)src + 72, K8_SFL_X3_1, (uint8_t*)src + 76, (uint8_t*)src + 80, K8_SFL_X3_2, alpha + 4, dst + 2);
         }
 
         const __m256i K8_SFL_X4_0 = SIMD_MM256_SETR_EPI8(
