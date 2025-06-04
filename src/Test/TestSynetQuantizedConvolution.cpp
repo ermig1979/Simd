@@ -68,57 +68,124 @@ namespace Test
 #define FUNC_QC(function) \
     FuncQC(function, std::string(#function))
 
-    bool SynetQuantizedConvolutionInit32f(Param p, Tensor32f& src, Tensor32f & weight, Tensor32f& bias, Tensor32f& params, Tensor32f& dst)
+    struct QcParams32f
     {
-        p.conv.srcT = SimdTensorData32f;
-        p.conv.dstT = SimdTensorData32f;
+        Tensor32f src, weight, bias, params, dst0, dst1;
 
-        src.Reshape(p.SrcShape());
-        FillRandom(src, -1.0, 1.0f);
-
-        weight.Reshape(p.WeightShape());
-        FillRandom(weight, -1.0, 1.0f);
-
-        bias.Reshape(Shp(p.conv.dstC));
-        FillRandom(bias, -1.0, 1.0f);
-
-        params.Reshape(Shp(p.conv.dstC));
-        FillRandom(params, 0.0f, 2.0f);
-        if (p.conv.activation == ::SimdConvolutionActivationHswish)
+        bool Init(Param p)
         {
-            params.Data()[0] = 3.0f;
-            params.Data()[1] = 1.0f / 6.0f;
+            p.conv.srcT = SimdTensorData32f;
+            p.conv.dstT = SimdTensorData32f;
+
+            src.Reshape(p.SrcShape());
+            FillRandom(src, -0.9, 1.1f);
+
+            weight.Reshape(p.WeightShape());
+            FillRandom(weight, -1.1, 1.0f);
+
+            bias.Reshape(Shp(p.conv.dstC));
+            FillRandom(bias, -1.1, 1.2f);
+
+            params.Reshape(Shp(p.conv.dstC));
+            FillRandom(params, 0.0f, 2.0f);
+            if (p.conv.activation == ::SimdConvolutionActivationHswish)
+            {
+                params.Data()[0] = 3.0f;
+                params.Data()[1] = 1.0f / 6.0f;
+            }
+            else if (p.conv.activation == ::SimdConvolutionActivationMish)
+                params.Data()[0] = 20.0f;
+            else if (p.conv.activation == ::SimdConvolutionActivationHardSigmoid)
+            {
+                params.Data()[0] = 1.0f / 6.0f;
+                params.Data()[1] = 0.5f;
+            }
+            else
+            {
+                params.Data()[0] = 0.1f;
+                params.Data()[1] = 1.1f;
+            }
+
+            dst0.Reshape(p.DstShape());
+
+            void* context = ::SimdSynetConvolution32fInit(p.batch, &p.conv);
+            if (context == NULL)
+                return false;
+
+            Tensor32f buf;
+            buf.Extend({ ::SimdSynetConvolution32fExternalBufferSize(context) });
+
+            ::SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
+
+            ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst0.Data());
+
+            ::SimdRelease(context);
+
+            dst1.Reshape(p.DstShape());
+
+            return true;
         }
-        else if (p.conv.activation == ::SimdConvolutionActivationMish)
-            params.Data()[0] = 20.0f;
-        else if (p.conv.activation == ::SimdConvolutionActivationHardSigmoid)
+    };
+
+    struct QcParams8i
+    {
+        Tensor8u src, dst0, dst1, srcZero, dstZero;
+        Tensor8i weight;
+        Tensor32i bias;
+        Tensor32f norm;
+
+        bool Init(const Param & p, const QcParams32f & f32, bool full, bool uniform)
         {
-            params.Data()[0] = 1.0f / 6.0f;
-            params.Data()[1] = 0.5f;
+            bool trans = p.conv.srcF == SimdTensorFormatNhwc;
+
+            weight.Reshape(p.WeightShape());
+
+            bias.Reshape(Shp(p.conv.dstC));
+            norm.Reshape(Shp(p.conv.dstC));
+
+            Tensor32f srcScale, dstScale;
+            if (!QuantizeSrcDst(f32.src, trans, uniform, src, srcZero, srcScale))
+                return false;
+            if (!QuantizeSrcDst(f32.dst0, trans, uniform, dst0, dstZero, dstScale))
+                return false;
+
+            dst1.Reshape(p.DstShape());
+
+            return true;
         }
-        else
+
+    protected:
+        static bool QuantizeSrcDst(const Tensor32f& src, bool trans, bool uniform, Tensor8u& dst, Tensor8u& zero, Tensor32f& scale)
         {
-            params.Data()[0] = 0.1f;
-            params.Data()[1] = 1.1f;
+            size_t batch = src.Axis(0), size = src.Size();
+            size_t channels = trans ? src.Axis(3) : src.Axis(1);
+            size_t spatial = trans ? src.Size(1, 3) : src.Size(2, 4);
+            dst.Reshape(src.Shape());
+            zero.Reshape(Shp(channels));
+            scale.Reshape(Shp(channels));
+            if (uniform)
+            {
+                float min = FLT_MAX, max = -FLT_MAX;
+                const float* psrc = src.Data();
+                for (size_t i = 0; i < size; ++i)
+                {
+                    min = std::min(min, psrc[i]);
+                    max = std::max(max, psrc[i]);
+                }
+                float range = std::max(0.000001f, max - min);
+                float _scale = 255.0f / range;
+                Fill(scale, _scale);
+                uint8_t _zero = (int)std::nearbyint(min * _scale);
+                Fill(zero, _zero);
+                uint8_t* pdst = dst.Data();
+                for (size_t i = 0; i < size; ++i)
+                    pdst[i] = Simd::RestrictRange((int)std::nearbyint(psrc[i] * _scale) + _zero, 0, 255);
+            }
+            else
+                return false;
+            return true;
         }
-
-        dst.Reshape(p.DstShape());
-
-        void* context = ::SimdSynetConvolution32fInit(p.batch, &p.conv);
-        if (context == NULL)
-            return false;
-
-        Tensor32f buf;
-        buf.Extend({ ::SimdSynetConvolution32fExternalBufferSize(context) });
-
-        ::SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
-
-        ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());
-
-        ::SimdRelease(context);
-
-        return true;
-    }
+    };
 
     bool SynetQuantizedConvolutionForwardAutoTest(float eps, Param p, FuncQC f1, FuncQC f2)
     {
@@ -129,10 +196,15 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test [" << f1.desc << " & " << f2.desc << "].");
 
-        const SimdConvolutionParameters& c = p.conv;
+        QcParams32f p32f;
+        if (!p32f.Init(p))
+            return false;
 
-        Tensor32f src32f, weight32f, bias32f, params32f, dst32f;
-        SynetQuantizedConvolutionInit32f(p, src32f, weight32f, bias32f, params32f, dst32f);
+        QcParams8i p8i;
+        if (!p8i.Init(p, p32f, true, true))
+            return false;
+
+        const SimdConvolutionParameters& c = p.conv;
      
         //
         //Tensor8i weight8i(p.WeightShape());
@@ -197,7 +269,7 @@ namespace Test
 
         const Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3), _4(4, 4), _5(5, 5), _7(7, 7);
         const float e = EPS;
-        const SimdBool t0 = SimdFalse, t1 = SimdTrue;
+        const SimdBool f = SimdFalse, t = SimdTrue;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
         const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu, 
             aLr = SimdConvolutionActivationLeakyRelu, aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu, 
@@ -206,10 +278,10 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 512, 32, 32, 256, _1, _1, _1, _0, _0, 1, aRe, t1, u8, f32), f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 155, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), f1, f2);
 #endif
 #else
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 128, 30, 40, 76, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 155, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), f1, f2);
 #endif
 
         return result;
