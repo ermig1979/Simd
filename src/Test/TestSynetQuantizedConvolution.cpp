@@ -149,6 +149,11 @@ namespace Test
             if (!QuantizeSrcDst(f32.dst0, trans, uniform, dst0, dstZero, dstScale))
                 return false;
 
+            Tensor32f wScale;
+            if (!QuantizeWeight(f32.weight, trans, full, weight, wScale))
+                return false;
+
+
             dst1.Reshape(p.DstShape());
 
             return true;
@@ -183,6 +188,37 @@ namespace Test
             }
             else
                 return false;
+            return true;
+        }
+
+        static bool QuantizeWeight(const Tensor32f& src, bool trans, bool full, Tensor8i& dst, Tensor32f& scale)
+        {
+            size_t size = src.Size(), N = trans ? src.Axis(0) : src.Axis(3), K = size / N;
+            Shape sh = Shp(N);
+            SimdTensorFormatType tf = SimdTensorFormatUnknown;
+            dst.Reshape(src.Shape());
+            scale.Reshape(sh);
+            const float* psrc = src.Data();
+            int8_t* pdst = dst.Data();
+            int lo = full ? -128 : -64, hi = full ? 127 : 63;
+            for (size_t j = 0; j < N; ++j)
+            {
+                float min = FLT_MAX, max = -FLT_MAX;
+                for (size_t k = 0; k < K; ++k)
+                {
+                    size_t offset = trans ? j * K + k : k * N + j;
+                    min = std::min(min, psrc[offset]);
+                    max = std::max(max, psrc[offset]);
+                }
+                float range = std::max(0.000001f, max - min);
+                float _scale = 255.0f / range;
+                scale.Data()[j] = _scale;
+                for (size_t k = 0; k < K; ++k)
+                {
+                    size_t offset = trans ? j * K + k : k * N + j;
+                    pdst[offset] = Simd::RestrictRange((int)std::nearbyint(psrc[offset] * _scale), lo, hi);
+                }
+            }
             return true;
         }
     };
