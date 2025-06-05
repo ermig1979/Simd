@@ -154,7 +154,14 @@ namespace Test
                 return false;
 
             Tensor32f sBias;
-            if (!QuantizeBias(f32.src, srcScale.Data()[0], sWeight, bias, sBias))
+            Tensor32i iBias;
+            if (!QuantizeBias(f32.bias, srcScale.Data()[0], sWeight, iBias, sBias))
+                return false;
+
+            if (!SetNorm(srcScale.Data()[0], sWeight, dstScale.Data()[0], norm))
+                return false;
+
+            if (!SetBias(weight, iBias, srcZero.Data()[0], trans, bias))
                 return false;
 
             dst1.Reshape(p.DstShape());
@@ -196,7 +203,7 @@ namespace Test
 
         static bool QuantizeWeight(const Tensor32f& src, bool trans, bool full, Tensor8i& dst, Tensor32f& scale)
         {
-            size_t size = src.Size(), N = trans ? src.Axis(0) : src.Axis(3), K = size / N;
+            size_t size = src.Size(), N = trans ? src.Axis(3) : src.Axis(0), K = size / N;
             dst.Reshape(src.Shape());
             scale.Reshape(Shp(N));
             const float* psrc = src.Data();
@@ -207,7 +214,7 @@ namespace Test
                 float max = 0;
                 for (size_t k = 0; k < K; ++k)
                 {
-                    size_t offset = trans ? j * K + k : k * N + j;
+                    size_t offset = trans ? k * N + j : j * K + k;
                     max = std::max(max, std::abs(psrc[offset]));
                 }
                 float range = std::max(0.000001f, max);
@@ -235,6 +242,36 @@ namespace Test
                 float _scale = sSrc * psw[i];
                 scale.Data()[i] = _scale;
                 pdst[i] = (int)std::nearbyint(psrc[i] * _scale);
+            }
+            return true;
+        }
+
+        static bool SetNorm(float sSrc, const Tensor32f& sWeight, float sDst, Tensor32f& norm)
+        {
+            size_t size = sWeight.Size();
+            norm.Reshape(sWeight.Shape());
+            const float* psw = sWeight.Data();
+            float* pn = norm.Data();
+            for (size_t i = 0; i < size; ++i)
+                pn[i] = sSrc * psw[i] / sDst;
+            return true;
+        }
+
+        static bool SetBias(const Tensor8i& weight, const Tensor32i& bias, int srcZero, bool trans, Tensor32i& dst)
+        {
+            size_t size = weight.Size(), N = trans ? weight.Axis(3) : weight.Axis(0), K = size / N;
+            dst.Reshape(Shp(N));
+            const int8_t* pw = weight.Data();
+            const int32_t* pb = bias.Data();
+            int32_t* pdst = dst.Data();
+            for (size_t j = 0; j < N; ++j)
+            {
+                pdst[j] = pb[j];
+                for (size_t k = 0; k < K; ++k)
+                {
+                    size_t offset = trans ? k * N + j : j * K + k;
+                    pdst[j] -= pw[offset] * srcZero;
+                }
             }
             return true;
         }
@@ -331,10 +368,10 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 155, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), f1, f2);
 #endif
 #else
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 155, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), f1, f2);
 #endif
 
         return result;
