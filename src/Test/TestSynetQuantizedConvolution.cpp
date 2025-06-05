@@ -149,10 +149,13 @@ namespace Test
             if (!QuantizeSrcDst(f32.dst0, trans, uniform, dst0, dstZero, dstScale))
                 return false;
 
-            Tensor32f wScale;
-            if (!QuantizeWeight(f32.weight, trans, full, weight, wScale))
+            Tensor32f sWeight;
+            if (!QuantizeWeight(f32.weight, trans, full, weight, sWeight))
                 return false;
 
+            Tensor32f sBias;
+            if (!QuantizeBias(f32.src, srcScale.Data()[0], sWeight, bias, sBias))
+                return false;
 
             dst1.Reshape(p.DstShape());
 
@@ -194,30 +197,44 @@ namespace Test
         static bool QuantizeWeight(const Tensor32f& src, bool trans, bool full, Tensor8i& dst, Tensor32f& scale)
         {
             size_t size = src.Size(), N = trans ? src.Axis(0) : src.Axis(3), K = size / N;
-            Shape sh = Shp(N);
-            SimdTensorFormatType tf = SimdTensorFormatUnknown;
             dst.Reshape(src.Shape());
-            scale.Reshape(sh);
+            scale.Reshape(Shp(N));
             const float* psrc = src.Data();
             int8_t* pdst = dst.Data();
             int lo = full ? -128 : -64, hi = full ? 127 : 63;
             for (size_t j = 0; j < N; ++j)
             {
-                float min = FLT_MAX, max = -FLT_MAX;
+                float max = 0;
                 for (size_t k = 0; k < K; ++k)
                 {
                     size_t offset = trans ? j * K + k : k * N + j;
-                    min = std::min(min, psrc[offset]);
-                    max = std::max(max, psrc[offset]);
+                    max = std::max(max, std::abs(psrc[offset]));
                 }
-                float range = std::max(0.000001f, max - min);
-                float _scale = 255.0f / range;
+                float range = std::max(0.000001f, max);
+                float _scale = (full ? 127.0f : 63.0f) / range;
                 scale.Data()[j] = _scale;
                 for (size_t k = 0; k < K; ++k)
                 {
                     size_t offset = trans ? j * K + k : k * N + j;
                     pdst[offset] = Simd::RestrictRange((int)std::nearbyint(psrc[offset] * _scale), lo, hi);
                 }
+            }
+            return true;
+        }
+
+        static bool QuantizeBias(const Tensor32f& src, float sSrc, const Tensor32f& sWeight, Tensor32i& dst, Tensor32f& scale)
+        {
+            size_t size = src.Size();
+            dst.Reshape(src.Shape());
+            scale.Reshape(src.Shape());
+            const float* psw = sWeight.Data();
+            const float* psrc = src.Data();
+            int32_t* pdst = dst.Data();
+            for (size_t i = 0; i < size; ++i)
+            {
+                float _scale = sSrc * psw[i];
+                scale.Data()[i] = _scale;
+                pdst[i] = (int)std::nearbyint(psrc[i] * _scale);
             }
             return true;
         }
