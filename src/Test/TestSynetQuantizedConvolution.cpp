@@ -70,7 +70,7 @@ namespace Test
 
     struct QcParams32f
     {
-        Tensor32f src, weight, bias, params, dst0, dst1;
+        Tensor32f src, weight, bias, params, dst1, dst2;
 
         bool Init(Param p)
         {
@@ -106,7 +106,7 @@ namespace Test
                 params.Data()[1] = 1.1f;
             }
 
-            dst0.Reshape(p.DstShape());
+            dst1.Reshape(p.DstShape());
 
             void* context = ::SimdSynetConvolution32fInit(p.batch, &p.conv);
             if (context == NULL)
@@ -117,11 +117,11 @@ namespace Test
 
             ::SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
 
-            ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst0.Data());
+            ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst1.Data());
 
             ::SimdRelease(context);
 
-            dst1.Reshape(p.DstShape());
+            dst2.Reshape(p.DstShape());
 
             return true;
         }
@@ -129,7 +129,7 @@ namespace Test
 
     struct QcParams8i
     {
-        Tensor8u src, dst0, dst1, srcZero, dstZero;
+        Tensor8u src, dst1, dst2, srcZero, dstZero;
         Tensor8i weight;
         Tensor32i bias;
         Tensor32f norm;
@@ -146,7 +146,7 @@ namespace Test
             Tensor32f srcScale, dstScale;
             if (!QuantizeSrcDst(f32.src, trans, uniform, src, srcZero, srcScale))
                 return false;
-            if (!QuantizeSrcDst(f32.dst0, trans, uniform, dst0, dstZero, dstScale))
+            if (!QuantizeSrcDst(f32.dst1, trans, uniform, dst1, dstZero, dstScale))
                 return false;
 
             Tensor32f sWeight;
@@ -164,7 +164,8 @@ namespace Test
             if (!SetBias(weight, iBias, srcZero.Data()[0], trans, bias))
                 return false;
 
-            dst1.Reshape(p.DstShape());
+            dst2.Reshape(p.DstShape());
+            Copy(dst1, dst2);
 
             return true;
         }
@@ -294,61 +295,35 @@ namespace Test
         if (!p8i.Init(p, p32f, true, true))
             return false;
 
-        const SimdConvolutionParameters& c = p.conv;
-     
-        //
-        //Tensor8i weight8i(p.WeightShape());
-        //FillRandom(weight8i, -128, 127);
+        void * context1 = f1.func(p.batch, &p.conv);
+        void * context2 = f2.func(p.batch, &p.conv);
 
-        //Tensor32i bias32i(Shp(c.dstC));
-        //FillRandom(bias32i, -32*1024, 32*1024 - 1);
+        Tensor8u buf8u;
+        buf8u.Extend({ ::SimdSynetQuantizedConvolutionExternalBufferSize(context1) });
+        buf8u.Extend({ ::SimdSynetQuantizedConvolutionExternalBufferSize(context2) });
 
+        ::SimdSynetQuantizedConvolutionSetParams(context1, p8i.weight.Data(), p8i.bias.Data(), p8i.norm.Data(), p8i.srcZero.Data(), p8i.dstZero.Data());
+        ::SimdSynetQuantizedConvolutionSetParams(context2, p8i.weight.Data(), p8i.bias.Data(), p8i.norm.Data(), p8i.srcZero.Data(), p8i.dstZero.Data());
 
+        const uint8_t * src = p.conv.srcT == SimdTensorData32f ? (uint8_t*)p32f.src.Data() : p8i.src.Data();
+        uint8_t* dst1 = p.conv.dstT == SimdTensorData32f ? (uint8_t*)p32f.dst1.Data() : p8i.dst1.Data();
+        uint8_t* dst2 = p.conv.dstT == SimdTensorData32f ? (uint8_t*)p32f.dst2.Data() : p8i.dst2.Data();
 
-        //Tensor32f srcMin({ c.srcC }), srcMax({ c.srcC }), dstMin({ c.dstC }), dstMax({ c.dstC });
-        //Tensor32f src32f(p.SrcShape(), p.conv.srcF), dst32f1(p.DstShape(), p.conv.dstF), dst32f2(p.DstShape(), p.conv.dstF), buf32f;
-        //Tensor8u src8u(p.SrcShape(), p.conv.srcF), dst8u1(p.DstShape(), p.conv.dstF), dst8u2(p.DstShape(), p.conv.dstF), buf8u;
-        ////dst8u2.Reshape({ 1000000 }); dst8u2.Extend(p.DstShape());
+        TEST_ALIGN(SIMD_ALIGN);
 
-        //FillRandom(src32f, srcMin.Data(), srcMax.Data(), p.conv.srcC, neg);
-        //SetSrc32fTo8u(src32f, srcMin.Data(), srcMax.Data(), c.srcC, neg, comp, NULL, NULL, src8u);
-        //FillDstStat(p, neg, comp, weight, bias, params, src32f, buf32f, dst32f1, dstMin.Data(), dstMax.Data(), NULL, NULL);
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, buf8u.Data(), dst1));
 
-        //const float* stats[4] = { srcMin.Data(), srcMax.Data(), dstMin.Data(), dstMax.Data() };
-        //const uint8_t * src = p.conv.srcT == SimdTensorData32f ? (uint8_t*)src32f.Data() : src8u.Data();
-        //uint8_t* dst1 = p.conv.dstT == SimdTensorData32f ? (uint8_t*)dst32f1.Data() : dst8u1.Data();
-        //uint8_t* dst2 = p.conv.dstT == SimdTensorData32f ? (uint8_t*)dst32f2.Data() : dst8u2.Data();
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, buf8u.Data(), dst2));
 
-        //Fill(dst32f1, 0.1f);
-        //Fill(dst32f2, 1.1f);
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
 
-        //Fill(dst8u1, uint8_t(1));
-        //Fill(dst8u2, uint8_t(2));
+        int differenceMax = 0;
 
-        //void * context1 = f1.func(p.batch, &p.conv);
-        //void * context2 = f2.func(p.batch, &p.conv);
-
-        //buf8u.Extend({ ::SimdSynetQuantizedConvolutionExternalBufferSize(context1) });
-        //buf8u.Extend({ ::SimdSynetQuantizedConvolutionExternalBufferSize(context2) });
-
-        //::SimdSynetConvolution8iSetParams(context1, weight.Data(), bias.Data(), params.Data(), stats);
-        //::SimdSynetConvolution8iSetParams(context2, weight.Data(), bias.Data(), params.Data(), stats);
-
-        //TEST_ALIGN(SIMD_ALIGN);
-
-        //TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, buf8u.Data(), dst1));
-
-        //TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, buf8u.Data(), dst2));
-
-        //::SimdRelease(context1);
-        //::SimdRelease(context2);
-
-        //int differenceMax = 0;
-
-        //if(p.conv.dstT == SimdTensorData32f)
-        //    result = result && Compare(dst32f1, dst32f2, eps, true, 64, DifferenceBoth);
-        //else
-        //    result = result && Compare(dst8u1, dst8u2, differenceMax, true, 64);
+        if(p.conv.dstT == SimdTensorData32f)
+            result = result && Compare(p32f.dst1, p32f.dst2, eps, true, 64, DifferenceBoth);
+        else
+            result = result && Compare(p8i.dst1, p8i.dst2, differenceMax, true, 64);
 
         return result;
     }
