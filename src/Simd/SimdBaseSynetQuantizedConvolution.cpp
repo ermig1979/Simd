@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetQuantizedConvolution.h"
+#include "Simd/SimdSynetConvolution8iCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
@@ -75,11 +76,6 @@ namespace Simd
         }
     }
 
-    void SynetQuantizedConvolution::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
-    {
-        const ConvParam& p = _param;
-    }
-
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
     Base::PerformanceMeasurer * SynetQuantizedConvolution::Perf(const char* func)
     {
@@ -91,6 +87,53 @@ namespace Simd
 
     namespace Base
     {
+        SynetQuantizedConvolutionGemmNN::SynetQuantizedConvolutionGemmNN(const ConvParam& p)
+            : SynetQuantizedConvolution(p)
+        {
+            if (p.IsDilation(1) && p.IsStride(1) && p.IsPad(0))
+            {
+                _skipConv = p.IsKernel(1) || (p.srcH == p.kernelY && p.srcW == p.kernelX);
+            }
+            else
+                _skipConv = false;
+            _sizeB = p.srcC * p.kernelY * p.kernelX * p.dstH * p.dstW;
+            if (p.trans)
+            {
+                _ldS = p.srcC * p.kernelY * p.kernelX / p.group * (_skipConv ? p.group : 1);
+                _ldW = p.dstC;
+                _ldD = p.dstC;
+                _grW = p.dstC / p.group;
+                _grS = p.srcC * p.kernelY * p.kernelX / p.group * (_skipConv ? 1 : p.dstH * p.dstW);
+                _grD = p.dstC / p.group;
+            }
+            else
+            {
+                _ldW = p.srcC * p.kernelY * p.kernelX / p.group;
+                _ldS = p.dstH * p.dstW;
+                _ldD = p.dstH * p.dstW;
+                _grW = p.dstC / p.group * p.srcC * p.kernelY * p.kernelX / p.group;
+                _grS = p.srcC * p.kernelY * p.kernelX / p.group * p.dstH * p.dstW;
+                _grD = p.dstH * p.dstW * p.dstC / p.group;
+            }
+            _siK = p.kernelY * p.kernelX;
+            _siC = p.srcC / p.group;
+            _siD = p.dstC / p.group;
+            _siS = p.dstH * p.dstW;
+        }
+
+        size_t SynetQuantizedConvolutionGemmNN::ExternalBufferSize() const
+        {
+            size_t size = SynetQuantizedConvolution::ExternalBufferSize();
+            if (!_skipConv)
+                size += AlignHi(_sizeB * _merge * sizeof(uint8_t), SIMD_ALIGN);
+            size += AlignHi(_sizeD * _merge * sizeof(int32_t), SIMD_ALIGN);
+            return size;
+        }
+
+        void SynetQuantizedConvolutionGemmNN::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+        {
+            const ConvParam& p = _param;
+        }
 
         //-------------------------------------------------------------------------------------------------
 

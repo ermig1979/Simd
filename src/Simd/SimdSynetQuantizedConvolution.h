@@ -71,7 +71,7 @@ namespace Simd
         }
 
     protected:
-        virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+        virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
 
         ConvParam _param;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
