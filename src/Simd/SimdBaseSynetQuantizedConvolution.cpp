@@ -60,6 +60,11 @@ namespace Simd
     void SynetQuantizedConvolution::SetParams(const int8_t* weight, const int32_t* bias, const float* norm, const uint8_t* srcZero, const uint8_t* dstZero)
     {
         const ConvParam& p = _param;
+        _weight.Assign(weight, _weight.size);
+        _bias.Assign(bias, _bias.size);
+        _norm.Assign(norm, _norm.size);
+        _srcZero.Assign(srcZero, _bias.size);
+        _dstZero.Assign(dstZero, _bias.size);
     }
 
     void SynetQuantizedConvolution::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
@@ -85,8 +90,62 @@ namespace Simd
     }
 #endif
 
+    //------------------------------------------------------------------------------------------------
+
     namespace Base
     {
+        SIMD_INLINE int NearByInt(float value)
+        {
+            return (int)std::nearbyint(value);
+        }
+
+        SIMD_INLINE int QuantizeSumLinear(int sum, int bias, float norm, int zero, int min, int max)
+        {
+            return RestrictRange(NearByInt(float(sum + bias) * norm) + zero, min, max);
+        }
+
+        SIMD_INLINE void QuantizeSumLinear(const int32_t* sum, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const int32_t* bias, const float* norm, const uint8_t* zero, uint8_t* dst)
+        {
+            int min = std::numeric_limits<uint8_t>::min();
+            int max = std::numeric_limits<uint8_t>::max();
+            for (size_t b = 0; b < batch; ++b)
+            {
+                if (format == SimdTensorFormatNchw)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                    {
+                        int32_t _bias = bias[c];
+                        float _norm = norm[c];
+                        int32_t _zero = zero[c];
+                        for (size_t h = 0; h < height; ++h)
+                        {
+                            for (size_t w = 0; w < width; ++w)
+                                dst[w] = (uint8_t)QuantizeSumLinear(sum[w], _bias, _norm, _zero, min, max);
+                            sum += width;
+                            dst += width;
+                        }
+                    }
+                }
+                else if (format == SimdTensorFormatNhwc)
+                {
+                    for (size_t h = 0; h < height; ++h)
+                    {
+                        for (size_t w = 0; w < width; ++w)
+                        {
+                            for (size_t c = 0; c < channels; ++c)
+                                dst[c] = (uint8_t)QuantizeSumLinear(sum[c], bias[c], norm[c], zero[c], min, max);
+                            sum += channels;
+                            dst += channels;
+                        }
+                    }
+                }
+                else
+                    assert(0);
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         SynetQuantizedConvolutionGemmNN::SynetQuantizedConvolutionGemmNN(const ConvParam& p)
             : SynetQuantizedConvolution(p)
         {
@@ -133,13 +192,54 @@ namespace Simd
         void SynetQuantizedConvolutionGemmNN::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const ConvParam& p = _param;
+            const int8_t* weight = _weight.data;
+            int32_t* sum = Allocate<int32_t>(buf, _sizeD * _merge);
+            if (!_skipConv)
+            {
+                const uint8_t* zero = _srcZero.data;
+                if (p.trans)
+                    for (size_t m = 0; m < _merge; ++m)
+                        ImgToRow(src + m * _sizeS, p, zero, buf + m * _sizeB);
+                else
+                    for (size_t m = 0; m < _merge; ++m)
+                        ImgToCol(src + m * _sizeS, p, zero, buf + m * _sizeB);
+                src = buf;
+            }
+            if (_merge > 1)
+            {
+                assert(0);
+            }
+            else
+            {
+                bool overflow = Overflow(p.compatibility);
+                for (size_t g = 0; g < p.group; ++g)
+                {
+                    if (p.trans)
+                        GemmNhwc(_siS, _siD, _siK, _siC, src + _grS * g, _ldS, weight + _grW * g, _ldW, sum + _grD * g, _ldD, overflow);
+                    else
+                        GemmNchw(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD, overflow);
+                }
+            }
+            if (p.activation == SimdConvolutionActivationIdentity || p.activation == SimdConvolutionActivationRelu)
+            {
+                const float* norm = _norm.data;
+                const int32_t* bias = _bias.data;
+                const uint8_t* zero = _dstZero.data;
+                QuantizeSumLinear(sum, 1, p.dstC, p.dstH, p.dstW, p.dstF, bias, norm, zero, dst);
+            }
+            else
+                assert(0);
         }
 
         //-------------------------------------------------------------------------------------------------
 
         void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv)
         {
-            return NULL;
+            ConvParam param(batch, conv);
+            if (!ValidQuantized(param))
+                return NULL;
+            else
+                return new SynetQuantizedConvolutionGemmNN(param);
         }
     }
 #endif

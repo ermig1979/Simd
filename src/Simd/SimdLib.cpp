@@ -5892,7 +5892,10 @@ SIMD_API void* SimdSynetQuantizedConvolutionInit(size_t batch, const SimdConvolu
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return 0;// simdSynetConvolution8iInit(batch, conv, compatibility);
+    typedef void* (*SimdSynetQuantizedConvolutionInitPtr) (size_t batch, const SimdConvolutionParameters* conv);
+    const static SimdSynetQuantizedConvolutionInitPtr simdSynetQuantizedConvolutionInit = SIMD_FUNC0(SynetQuantizedConvolutionInit);// , SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    return simdSynetQuantizedConvolutionInit(batch, conv);
 #else
     assert(0);
     return 0;
@@ -5903,7 +5906,7 @@ SIMD_API size_t SimdSynetQuantizedConvolutionExternalBufferSize(const void* cont
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return 0;
+    return ((SynetQuantizedConvolution*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -5914,7 +5917,7 @@ SIMD_API size_t SimdSynetQuantizedConvolutionInternalBufferSize(const void* cont
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return 0;
+    return ((SynetQuantizedConvolution*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -5925,7 +5928,7 @@ SIMD_API const char* SimdSynetQuantizedConvolutionInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return 0;
+    return ((SynetQuantizedConvolution*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -5936,6 +5939,7 @@ SIMD_API void SimdSynetQuantizedConvolutionSetParams(void* context, const int8_t
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
+    ((SynetQuantizedConvolution*)context)->SetParams(weight, bias, norm, srcZero, dstZero);
 #else
     assert(0);
 #endif
@@ -5945,6 +5949,9 @@ SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t*
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
+    SynetQuantizedConvolution* c = (SynetQuantizedConvolution*)context;
+    SIMD_PERF_EXT(c);
+    c->Forward(src, buf, dst);
 #else
     assert(0);
 #endif
