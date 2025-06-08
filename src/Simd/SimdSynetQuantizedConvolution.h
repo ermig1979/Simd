@@ -106,10 +106,7 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        inline void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv)
-        {
-            return NULL;
-        }
+        void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 
 #ifdef SIMD_SSE41_ENABLE    

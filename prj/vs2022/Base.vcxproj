@@ -226,6 +226,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetSoftmax.cpp" />
