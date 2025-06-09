@@ -132,9 +132,9 @@ namespace Test
         Tensor8u src, dst1, dst2, srcZero, dstZero;
         Tensor8i weight;
         Tensor32i bias;
-        Tensor32f norm;
+        Tensor32f weightScale, srcScale, dstScale, norm;
 
-        bool Init(const Param & p, const QcParams32f & f32, bool full, bool uniform)
+        bool Init(const Param & p, const QcParams32f & f32, SimdBool overflow, SimdBool uniform)
         {
             bool trans = p.conv.srcF == SimdTensorFormatNhwc;
 
@@ -143,22 +143,20 @@ namespace Test
             bias.Reshape(Shp(p.conv.dstC));
             norm.Reshape(Shp(p.conv.dstC));
 
-            Tensor32f srcScale, dstScale;
             if (!QuantizeSrcDst(f32.src, trans, uniform, src, srcZero, srcScale))
                 return false;
             if (!QuantizeSrcDst(f32.dst1, trans, uniform, dst1, dstZero, dstScale))
                 return false;
 
-            Tensor32f sWeight;
-            if (!QuantizeWeight(f32.weight, trans, full, weight, sWeight))
+            if (!QuantizeWeight(f32.weight, trans, overflow, weight, weightScale))
                 return false;
 
-            Tensor32f sBias;
+            Tensor32f scaleBias;
             Tensor32i iBias;
-            if (!QuantizeBias(f32.bias, srcScale.Data()[0], sWeight, iBias, sBias))
+            if (!QuantizeBias(f32.bias, srcScale.Data()[0], weightScale, iBias, scaleBias))
                 return false;
 
-            if (!SetNorm(srcScale.Data()[0], sWeight, dstScale.Data()[0], norm))
+            if (!SetNorm(srcScale.Data()[0], weightScale, dstScale.Data()[0], norm))
                 return false;
 
             if (!SetBias(weight, iBias, srcZero.Data()[0], trans, bias))
@@ -171,7 +169,7 @@ namespace Test
         }
 
     protected:
-        static bool QuantizeSrcDst(const Tensor32f& src, bool trans, bool uniform, Tensor8u& dst, Tensor8u& zero, Tensor32f& scale)
+        static bool QuantizeSrcDst(const Tensor32f& src, bool trans, SimdBool uniform, Tensor8u& dst, Tensor8u& zero, Tensor32f& scale)
         {
             size_t batch = src.Axis(0), size = src.Size();
             size_t channels = trans ? src.Axis(3) : src.Axis(1);
@@ -189,58 +187,58 @@ namespace Test
                     max = std::max(max, psrc[i]);
                 }
                 float range = std::max(0.000001f, max - min);
-                float _scale = 255.0f / range;
+                float _scale = range / 255.0f, invScale = 255.0f / range;
                 Fill(scale, _scale);
-                uint8_t _zero = (int)std::nearbyint(min * _scale);
+                uint8_t _zero = (int)std::nearbyint(min * invScale);
                 Fill(zero, _zero);
                 uint8_t* pdst = dst.Data();
                 for (size_t i = 0; i < size; ++i)
-                    pdst[i] = Simd::RestrictRange((int)std::nearbyint(psrc[i] * _scale) + _zero, 0, 255);
+                    pdst[i] = Simd::RestrictRange((int)std::nearbyint(psrc[i] * invScale) + _zero, 0, 255);
             }
             else
                 return false;
             return true;
         }
 
-        static bool QuantizeWeight(const Tensor32f& src, bool trans, bool full, Tensor8i& dst, Tensor32f& scale)
+        static bool QuantizeWeight(const Tensor32f& src, bool trans, SimdBool overflow, Tensor8i& dst, Tensor32f& scale)
         {
-            size_t size = src.Size(), N = trans ? src.Axis(3) : src.Axis(0), K = size / N;
+            size_t size = src.Size(), D = trans ? src.Axis(3) : src.Axis(0), CK = size / D;
             dst.Reshape(src.Shape());
-            scale.Reshape(Shp(N));
+            scale.Reshape(Shp(D));
             const float* psrc = src.Data();
             int8_t* pdst = dst.Data();
-            int lo = full ? -128 : -64, hi = full ? 127 : 63;
-            for (size_t j = 0; j < N; ++j)
+            int lo = overflow ? -64 : -128, hi = overflow ? 63 : 127;
+            for (size_t d = 0; d < D; ++d)
             {
                 float max = 0;
-                for (size_t k = 0; k < K; ++k)
+                for (size_t ck = 0; ck < CK; ++ck)
                 {
-                    size_t offset = trans ? k * N + j : j * K + k;
+                    size_t offset = trans ? ck * D + d : d * CK + ck;
                     max = std::max(max, std::abs(psrc[offset]));
                 }
                 float range = std::max(0.000001f, max);
-                float _scale = (full ? 127.0f : 63.0f) / range;
-                scale.Data()[j] = _scale;
-                for (size_t k = 0; k < K; ++k)
+                float _scale =  range / (overflow ? 63.0f : 127.0f), invScale = (overflow ? 63.0f : 127.0f) / range;
+                scale.Data()[d] = _scale;
+                for (size_t ck = 0; ck < CK; ++ck)
                 {
-                    size_t offset = trans ? j * K + k : k * N + j;
-                    pdst[offset] = Simd::RestrictRange((int)std::nearbyint(psrc[offset] * _scale), lo, hi);
+                    size_t offset = trans ? d * CK + ck : ck * D + d;
+                    pdst[offset] = Simd::RestrictRange((int)std::nearbyint(psrc[offset] * invScale), lo, hi);
                 }
             }
             return true;
         }
 
-        static bool QuantizeBias(const Tensor32f& src, float sSrc, const Tensor32f& sWeight, Tensor32i& dst, Tensor32f& scale)
+        static bool QuantizeBias(const Tensor32f& src, float sSrc, const Tensor32f& weightScale, Tensor32i& dst, Tensor32f& scale)
         {
             size_t size = src.Size();
             dst.Reshape(src.Shape());
             scale.Reshape(src.Shape());
-            const float* psw = sWeight.Data();
+            const float* pws = weightScale.Data();
             const float* psrc = src.Data();
             int32_t* pdst = dst.Data();
             for (size_t i = 0; i < size; ++i)
             {
-                float _scale = sSrc * psw[i];
+                float _scale = sSrc * pws[i];
                 scale.Data()[i] = _scale;
                 pdst[i] = (int)std::nearbyint(psrc[i] * _scale);
             }
@@ -278,7 +276,7 @@ namespace Test
         }
     };
 
-    bool SynetQuantizedConvolutionForwardAutoTest(float eps, Param p, FuncQC f1, FuncQC f2)
+    bool SynetQuantizedConvolutionForwardAutoTest(float eps, Param p, SimdBool uniform, SimdBool overflow, FuncQC f1, FuncQC f2)
     {
         bool result = true;
 
@@ -292,7 +290,7 @@ namespace Test
             return false;
 
         QcParams8i p8i;
-        if (!p8i.Init(p, p32f, true, true))
+        if (!p8i.Init(p, p32f, overflow, uniform))
             return false;
 
         void * context1 = f1.func(p.batch, &p.conv);
@@ -328,7 +326,7 @@ namespace Test
         return result;
     }
 
-    bool SynetQuantizedConvolutionForwardAutoTest(const FuncQC& f1, const FuncQC& f2)
+    bool SynetQuantizedConvolutionForwardAutoTest(SimdBool o, const FuncQC& f1, const FuncQC& f2)
     {
         bool result = true;
 
@@ -343,10 +341,10 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), t, o, f1, f2);
 #endif
 #else
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), t, o, f1, f2);
 #endif
 
         return result;
@@ -356,8 +354,10 @@ namespace Test
     {
         bool result = true;
 
+        const SimdBool f = SimdFalse, t = SimdTrue;
+
         if (TestBase())
-            result = result && SynetQuantizedConvolutionForwardAutoTest(FUNC_QC(Simd::Base::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
+            result = result && SynetQuantizedConvolutionForwardAutoTest(t, FUNC_QC(Simd::Base::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
 
 //#ifdef SIMD_SSE41_ENABLE
 //        if (Simd::Sse41::Enable && TestSse41())
