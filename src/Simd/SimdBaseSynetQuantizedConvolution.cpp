@@ -63,8 +63,8 @@ namespace Simd
         _weight.Assign(weight, _weight.size);
         _bias.Assign(bias, _bias.size);
         _norm.Assign(norm, _norm.size);
-        _srcZero.Assign(srcZero, _bias.size);
-        _dstZero.Assign(dstZero, _bias.size);
+        _srcZero.Assign(srcZero, p.srcC);
+        _dstZero.Assign(dstZero, p.dstC);
     }
 
     void SynetQuantizedConvolution::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
@@ -211,7 +211,7 @@ namespace Simd
             }
             else
             {
-                bool overflow = Overflow(p.compatibility);
+                bool overflow = true;// Overflow(p.compatibility);
                 for (size_t g = 0; g < p.group; ++g)
                 {
                     if (p.trans)

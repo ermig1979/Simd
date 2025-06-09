@@ -162,8 +162,8 @@ namespace Test
             if (!SetBias(weight, iBias, srcZero.Data()[0], trans, bias))
                 return false;
 
-            dst2.Reshape(p.DstShape());
-            Copy(dst1, dst2);
+            dst2.Reshape(p.DstShape(), p.conv.dstF);
+            //Copy(dst1, dst2);
 
             return true;
         }
@@ -221,7 +221,7 @@ namespace Test
                 scale.Data()[d] = _scale;
                 for (size_t ck = 0; ck < CK; ++ck)
                 {
-                    size_t offset = trans ? d * CK + ck : ck * D + d;
+                    size_t offset = trans ? ck * D + d : d * CK + ck;
                     pdst[offset] = Simd::RestrictRange((int)std::nearbyint(psrc[offset] * invScale), lo, hi);
                 }
             }
@@ -238,9 +238,9 @@ namespace Test
             int32_t* pdst = dst.Data();
             for (size_t i = 0; i < size; ++i)
             {
-                float _scale = sSrc * pws[i];
+                float _scale = sSrc * pws[i], invScale = 1.0f / _scale;
                 scale.Data()[i] = _scale;
-                pdst[i] = (int)std::nearbyint(psrc[i] * _scale);
+                pdst[i] = (int)std::nearbyint(psrc[i] * invScale);
             }
             return true;
         }
@@ -258,18 +258,18 @@ namespace Test
 
         static bool SetBias(const Tensor8i& weight, const Tensor32i& bias, int srcZero, bool trans, Tensor32i& dst)
         {
-            size_t size = weight.Size(), N = trans ? weight.Axis(3) : weight.Axis(0), K = size / N;
-            dst.Reshape(Shp(N));
+            size_t size = weight.Size(), D = trans ? weight.Axis(3) : weight.Axis(0), CK = size / D;
+            dst.Reshape(Shp(D));
             const int8_t* pw = weight.Data();
             const int32_t* pb = bias.Data();
             int32_t* pdst = dst.Data();
-            for (size_t j = 0; j < N; ++j)
+            for (size_t d = 0; d < D; ++d)
             {
-                pdst[j] = pb[j];
-                for (size_t k = 0; k < K; ++k)
+                pdst[d] = pb[d];
+                for (size_t ck = 0; ck < CK; ++ck)
                 {
-                    size_t offset = trans ? k * N + j : j * K + k;
-                    pdst[j] -= pw[offset] * srcZero;
+                    size_t offset = trans ? ck * D + d : d * CK + ck;
+                    pdst[d] -= pw[offset] * srcZero;
                 }
             }
             return true;
@@ -318,10 +318,10 @@ namespace Test
 
         int differenceMax = 0;
 
-        //if(p.conv.dstT == SimdTensorData32f)
-        //    result = result && Compare(p32f.dst1, p32f.dst2, eps, true, 64, DifferenceBoth);
-        //else
-        //    result = result && Compare(p8i.dst1, p8i.dst2, differenceMax, true, 64);
+        if(p.conv.dstT == SimdTensorData32f)
+            result = result && Compare(p32f.dst1, p32f.dst2, eps, true, 64, DifferenceBoth);
+        else
+            result = result && Compare(p8i.dst1, p8i.dst2, differenceMax, true, 64);
 
         return result;
     }
@@ -341,10 +341,10 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), t, o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), t, o, f1, f2);
 #endif
 #else
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aRe, f, u8, u8), t, o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 160, 32, 42, 156, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), t, o, f1, f2);
 #endif
 
         return result;
