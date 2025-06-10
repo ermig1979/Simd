@@ -7553,18 +7553,21 @@ extern "C"
 
     /*! @ingroup synet_quantized_convolution
 
-        \fn void SimdSynetQuantizedConvolutionSetParams(void* context, const int8_t* weight, const int32_t* bias, const float* norm, const uint8_t* srcZero, const uint8_t* dstZero);
+        \fn void SimdSynetQuantizedConvolutionSetParams(void* context, const float * srcScale, const uint8_t* srcZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params, const float* dstScale, const uint8_t* dstZero);
 
-        \short Sets weights, biases, output normalization parameters, input/output tensor zeros required for Quantized convolution algorithm.
+        \short Sets weights, biases, input/output parameters required for Quantized convolution algorithm.
 
         \param [in, out] context - a pointer to Quantized convolution context. It must be created by function ::SimdSynetQuantizedConvolutionInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to 8-bit integer convolution weights.
-        \param [in] bias - a pointer to 32-bit integer bias. 
-        \param [in] norm - a pointer to 32-bit float point normalization parameters.
-        \param [in] srcZero - a pointer to 8-bit unsigned integer input tensor zeros.
-        \param [in] dstZero - a pointer to 8-bit unsigned integer output tensor zeros/
+        \param [in] srcScale - a pointer to 32-bit float point input tensor scale. 
+        \param [in] srcZero - a pointer to 8-bit unsigned integer input tensor zero.
+        \param [in] weight - a pointer to 8-bit integer convolution weight.
+        \param [in] weightScale - a pointer to 32-bit float point weight scale.
+        \param [in] bias - a pointer to 32-bit integer bias. Can be NULL.
+        \param [in] params - a pointer to 32-bit float point parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] dstScale - a pointer to 32-bit float point output tensor scale.
+        \param [in] dstZero - a pointer to 8-bit unsigned integer output tensor zero.
     */
-    SIMD_API void SimdSynetQuantizedConvolutionSetParams(void* context, const int8_t* weight, const int32_t* bias, const float* norm, const uint8_t* srcZero, const uint8_t* dstZero);
+    SIMD_API void SimdSynetQuantizedConvolutionSetParams(void* context, const float * srcScale, const uint8_t* srcZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params, const float* dstScale, const uint8_t* dstZero);
 
     /*! @ingroup synet_quantized_convolution
 

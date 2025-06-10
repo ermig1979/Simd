@@ -395,32 +395,6 @@ namespace Simd
             return flop;
         }
     };
-
-    //-------------------------------------------------------------------------------------------------
-
-    struct QuantConvParam : public ConvParam
-    {
-        SimdBool uniform;
-
-        QuantConvParam()
-            : ConvParam()
-            , uniform(SimdTrue)
-        {
-        }
-
-        QuantConvParam(size_t batch, const SimdConvolutionParameters* conv, SimdBool uniform = SimdTrue)
-            : ConvParam(batch, conv)
-        {
-            this->uniform = uniform;
-        }
-
-        bool Valid() const
-        {
-            if (!ConvParam::Valid(SimdTensorData8u, SimdTensorData8u))
-                return false;
-            return true;
-        }
-    };
 }
 
 #endif

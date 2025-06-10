@@ -5935,11 +5935,11 @@ SIMD_API const char* SimdSynetQuantizedConvolutionInfo(const void* context)
 #endif
 }
 
-SIMD_API void SimdSynetQuantizedConvolutionSetParams(void* context, const int8_t* weight, const int32_t* bias, const float* norm, const uint8_t* srcZero, const uint8_t* dstZero)
+SIMD_API void SimdSynetQuantizedConvolutionSetParams(void* context, const float* srcScale, const uint8_t* srcZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params, const float* dstScale, const uint8_t* dstZero)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetQuantizedConvolution*)context)->SetParams(weight, bias, norm, srcZero, dstZero);
+    ((SynetQuantizedConvolution*)context)->SetParams(srcScale, srcZero, weight, weightScale, bias, params, dstScale, dstZero);
 #else
     assert(0);
 #endif

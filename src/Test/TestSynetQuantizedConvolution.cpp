@@ -70,7 +70,7 @@ namespace Test
 
     struct QcParams32f
     {
-        Tensor32f src, weight, bias, params, dst1, dst2;
+        Tensor32f src, weight, bias, params, dst, dst1, dst2;
 
         bool Init(Param p)
         {
@@ -106,7 +106,7 @@ namespace Test
                 params.Data()[1] = 1.1f;
             }
 
-            dst1.Reshape(p.DstShape());
+            dst.Reshape(p.DstShape());
 
             void* context = ::SimdSynetConvolution32fInit(p.batch, &p.conv);
             if (context == NULL)
@@ -117,11 +117,15 @@ namespace Test
 
             ::SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
 
-            ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst1.Data());
+            ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());
 
             ::SimdRelease(context);
 
-            dst2.Reshape(p.DstShape());
+            if (p.conv.dstT == SimdTensorData32f)
+            {
+                dst1.Reshape(p.DstShape(), p.conv.dstF);
+                dst2.Reshape(p.DstShape(), p.conv.dstF);
+            }
 
             return true;
         }
@@ -129,74 +133,58 @@ namespace Test
 
     struct QcParams8i
     {
-        Tensor8u src, dst1, dst2, srcZero, dstZero;
+        Tensor8u src, dst, dst1, dst2;
         Tensor8i weight;
         Tensor32i bias;
-        Tensor32f weightScale, srcScale, dstScale, norm;
+        uint8_t srcZero, dstZero;
+        float srcScale, dstScale;
+        Tensor32f weightScale;
 
-        bool Init(const Param & p, const QcParams32f & f32, SimdBool overflow, SimdBool uniform)
+        bool Init(const Param & p, const QcParams32f & f32, SimdBool overflow)
         {
             bool trans = p.conv.srcF == SimdTensorFormatNhwc;
 
-            weight.Reshape(p.WeightShape());
-
-            bias.Reshape(Shp(p.conv.dstC));
-            norm.Reshape(Shp(p.conv.dstC));
-
-            if (!QuantizeSrcDst(f32.src, trans, uniform, src, srcZero, srcScale))
+            if (!QuantizeSrcDst(f32.src, trans, src, srcZero, srcScale))
                 return false;
-            if (!QuantizeSrcDst(f32.dst1, trans, uniform, dst1, dstZero, dstScale))
+
+            if (!QuantizeSrcDst(f32.dst, trans, dst, dstZero, dstScale))
                 return false;
 
             if (!QuantizeWeight(f32.weight, trans, overflow, weight, weightScale))
                 return false;
 
-            Tensor32f scaleBias;
-            Tensor32i iBias;
-            if (!QuantizeBias(f32.bias, srcScale.Data()[0], weightScale, iBias, scaleBias))
+            if (!QuantizeBias(f32.bias, srcScale, weightScale, bias))
                 return false;
 
-            if (!SetNorm(srcScale.Data()[0], weightScale, dstScale.Data()[0], norm))
-                return false;
-
-            if (!SetBias(weight, iBias, srcZero.Data()[0], trans, bias))
-                return false;
-
-            dst2.Reshape(p.DstShape(), p.conv.dstF);
-            //Copy(dst1, dst2);
+            if (p.conv.dstT == SimdTensorData8u)
+            {
+                dst1.Reshape(p.DstShape(), p.conv.dstF);
+                dst2.Reshape(p.DstShape(), p.conv.dstF);
+            }
 
             return true;
         }
 
     protected:
-        static bool QuantizeSrcDst(const Tensor32f& src, bool trans, SimdBool uniform, Tensor8u& dst, Tensor8u& zero, Tensor32f& scale)
+        static bool QuantizeSrcDst(const Tensor32f& src, bool trans, Tensor8u& dst, uint8_t& zero, float& scale)
         {
             size_t batch = src.Axis(0), size = src.Size();
             size_t channels = trans ? src.Axis(3) : src.Axis(1);
             size_t spatial = trans ? src.Size(1, 3) : src.Size(2, 4);
             dst.Reshape(src.Shape());
-            zero.Reshape(Shp(channels));
-            scale.Reshape(Shp(channels));
-            if (uniform)
+            float min = FLT_MAX, max = -FLT_MAX;
+            const float* psrc = src.Data();
+            for (size_t i = 0; i < size; ++i)
             {
-                float min = FLT_MAX, max = -FLT_MAX;
-                const float* psrc = src.Data();
-                for (size_t i = 0; i < size; ++i)
-                {
-                    min = std::min(min, psrc[i]);
-                    max = std::max(max, psrc[i]);
-                }
-                float range = std::max(0.000001f, max - min);
-                float _scale = range / 255.0f, invScale = 255.0f / range;
-                Fill(scale, _scale);
-                uint8_t _zero = (int)std::nearbyint(min * invScale);
-                Fill(zero, _zero);
-                uint8_t* pdst = dst.Data();
-                for (size_t i = 0; i < size; ++i)
-                    pdst[i] = Simd::RestrictRange((int)std::nearbyint(psrc[i] * invScale) + _zero, 0, 255);
+                min = std::min(min, psrc[i]);
+                max = std::max(max, psrc[i]);
             }
-            else
-                return false;
+            float range = std::max(0.000001f, max - min), invScale = 255.0f / range;
+            scale = range / 255.0f;
+            zero = (int)std::nearbyint(min * invScale);
+            uint8_t* pdst = dst.Data();
+            for (size_t i = 0; i < size; ++i)
+                pdst[i] = Simd::RestrictRange((int)std::nearbyint(psrc[i] * invScale) + zero, 0, 255);
             return true;
         }
 
@@ -228,55 +216,23 @@ namespace Test
             return true;
         }
 
-        static bool QuantizeBias(const Tensor32f& src, float sSrc, const Tensor32f& weightScale, Tensor32i& dst, Tensor32f& scale)
+        static bool QuantizeBias(const Tensor32f& src, float srcScale, const Tensor32f& weightScale, Tensor32i& dst)
         {
             size_t size = src.Size();
             dst.Reshape(src.Shape());
-            scale.Reshape(src.Shape());
-            const float* pws = weightScale.Data();
             const float* psrc = src.Data();
+            const float* pws = weightScale.Data();
             int32_t* pdst = dst.Data();
             for (size_t i = 0; i < size; ++i)
             {
-                float _scale = sSrc * pws[i], invScale = 1.0f / _scale;
-                scale.Data()[i] = _scale;
+                float invScale = 1.0f / (srcScale * pws[i]);
                 pdst[i] = (int)std::nearbyint(psrc[i] * invScale);
-            }
-            return true;
-        }
-
-        static bool SetNorm(float sSrc, const Tensor32f& sWeight, float sDst, Tensor32f& norm)
-        {
-            size_t size = sWeight.Size();
-            norm.Reshape(sWeight.Shape());
-            const float* psw = sWeight.Data();
-            float* pn = norm.Data();
-            for (size_t i = 0; i < size; ++i)
-                pn[i] = sSrc * psw[i] / sDst;
-            return true;
-        }
-
-        static bool SetBias(const Tensor8i& weight, const Tensor32i& bias, int srcZero, bool trans, Tensor32i& dst)
-        {
-            size_t size = weight.Size(), D = trans ? weight.Axis(3) : weight.Axis(0), CK = size / D;
-            dst.Reshape(Shp(D));
-            const int8_t* pw = weight.Data();
-            const int32_t* pb = bias.Data();
-            int32_t* pdst = dst.Data();
-            for (size_t d = 0; d < D; ++d)
-            {
-                pdst[d] = pb[d];
-                for (size_t ck = 0; ck < CK; ++ck)
-                {
-                    size_t offset = trans ? ck * D + d : d * CK + ck;
-                    pdst[d] -= pw[offset] * srcZero;
-                }
             }
             return true;
         }
     };
 
-    bool SynetQuantizedConvolutionForwardAutoTest(float eps, Param p, SimdBool uniform, SimdBool overflow, FuncQC f1, FuncQC f2)
+    bool SynetQuantizedConvolutionForwardAutoTest(float eps, Param p, SimdBool overflow, FuncQC f1, FuncQC f2)
     {
         bool result = true;
 
@@ -290,7 +246,7 @@ namespace Test
             return false;
 
         QcParams8i p8i;
-        if (!p8i.Init(p, p32f, overflow, uniform))
+        if (!p8i.Init(p, p32f, overflow))
             return false;
 
         void * context1 = f1.func(p.batch, &p.conv);
@@ -300,8 +256,8 @@ namespace Test
         buf8u.Extend({ ::SimdSynetQuantizedConvolutionExternalBufferSize(context1) });
         buf8u.Extend({ ::SimdSynetQuantizedConvolutionExternalBufferSize(context2) });
 
-        ::SimdSynetQuantizedConvolutionSetParams(context1, p8i.weight.Data(), p8i.bias.Data(), p8i.norm.Data(), p8i.srcZero.Data(), p8i.dstZero.Data());
-        ::SimdSynetQuantizedConvolutionSetParams(context2, p8i.weight.Data(), p8i.bias.Data(), p8i.norm.Data(), p8i.srcZero.Data(), p8i.dstZero.Data());
+        ::SimdSynetQuantizedConvolutionSetParams(context1, &p8i.srcScale, &p8i.srcZero, p8i.weight.Data(), p8i.weightScale.Data(), p8i.bias.Data(), p32f.params.Data(), &p8i.dstScale, &p8i.dstZero);
+        ::SimdSynetQuantizedConvolutionSetParams(context2, &p8i.srcScale, &p8i.srcZero, p8i.weight.Data(), p8i.weightScale.Data(), p8i.bias.Data(), p32f.params.Data(), &p8i.dstScale, &p8i.dstZero);
 
         const uint8_t * src = p.conv.srcT == SimdTensorData32f ? (uint8_t*)p32f.src.Data() : p8i.src.Data();
         uint8_t* dst1 = p.conv.dstT == SimdTensorData32f ? (uint8_t*)p32f.dst1.Data() : p8i.dst1.Data();
@@ -316,12 +272,19 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        int differenceMax = 0;
 
-        if(p.conv.dstT == SimdTensorData32f)
+        if (p.conv.dstT == SimdTensorData32f)
+        {
             result = result && Compare(p32f.dst1, p32f.dst2, eps, true, 64, DifferenceBoth);
+        }
         else
-            result = result && Compare(p8i.dst1, p8i.dst2, differenceMax, true, 64);
+        {
+            int diffMax = 0;
+            result = result && Compare(p8i.dst1, p8i.dst2, diffMax, true, 64);
+
+            int controlDiffMax = 4;
+            result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
+        }
 
         return result;
     }
@@ -341,10 +304,10 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), t, o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
 #endif
 #else
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 160, 32, 42, 156, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), t, o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 160, 32, 42, 156, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
 #endif
 
         return result;

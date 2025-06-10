@@ -41,9 +41,6 @@ namespace Simd
         _sizeS = p.srcC * p.srcH * p.srcW;
         _sizeD = p.dstC * p.dstH * p.dstW;
         _merge = 1;
-        _weight.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
-        _norm.Resize(p.dstC);
-        _bias.Resize(p.dstC);
     }
 
     size_t SynetQuantizedConvolution::ExternalBufferSize() const
@@ -54,17 +51,38 @@ namespace Simd
 
     size_t SynetQuantizedConvolution::InternalBufferSize() const
     {
-        return _buffer.RawSize() + _weight.RawSize() + _srcZero.RawSize() + _dstZero.RawSize() + _norm.RawSize() + _bias.RawSize();
+        return _buffer.RawSize() + _weight.RawSize() + _srcZero.RawSize() + _dstZero.RawSize() + _norm.RawSize() + 
+            _bias.RawSize() + _weightScale.RawSize() + _norm.RawSize();
     }
 
-    void SynetQuantizedConvolution::SetParams(const int8_t* weight, const int32_t* bias, const float* norm, const uint8_t* srcZero, const uint8_t* dstZero)
+    void SynetQuantizedConvolution::SetParams(const float* srcScale, const uint8_t* srcZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params, const float* dstScale, const uint8_t* dstZero)
     {
         const ConvParam& p = _param;
-        _weight.Assign(weight, _weight.size);
-        _bias.Assign(bias, _bias.size);
-        _norm.Assign(norm, _norm.size);
-        _srcZero.Assign(srcZero, p.srcC);
-        _dstZero.Assign(dstZero, p.dstC);
+
+        _srcScale = srcScale ? srcScale[0] : 0.0f;
+
+        _srcZero.Resize(p.srcC, true);
+        if(srcZero)
+            memset(_srcZero.data, srcZero[0], p.srcC);
+
+        SetWeight(weight);
+
+        _weightScale.Assign(weightScale, p.dstC);
+
+        SetBias(bias);
+
+        if(params)
+            _params.Assign(params, p.dstC);
+        else
+            _params.Resize(p.dstC, true);
+
+        _dstScale = dstScale ? dstScale[0] : 0.0f;
+
+        _dstZero.Resize(p.dstC, true);
+        if(dstZero)
+            memset(_dstZero.data, dstZero[0], p.dstC);
+
+        SetOther();
     }
 
     void SynetQuantizedConvolution::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
@@ -187,6 +205,49 @@ namespace Simd
                 size += AlignHi(_sizeB * _merge * sizeof(uint8_t), SIMD_ALIGN);
             size += AlignHi(_sizeD * _merge * sizeof(int32_t), SIMD_ALIGN);
             return size;
+        }
+
+        void SynetQuantizedConvolutionGemmNN::SetWeight(const int8_t* weight)
+        {
+            const ConvParam& p = _param;
+            _weight.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
+            _weight.Assign(weight, _weight.size);
+        }
+
+        void SynetQuantizedConvolutionGemmNN::SetBias(const int32_t* bias)
+        {
+            const ConvParam& p = _param;
+            if (bias)
+                _bias.Assign(bias, p.dstC);
+            else
+                _bias.Resize(p.dstC, true);
+            size_t K = _siK * _siC, D = p.dstC;
+            int srcZero = _srcZero[0];
+            const int8_t* pw = _weight.data;
+            int32_t* pb = _bias.data;
+            if (p.trans)
+            {
+                for (size_t d = 0; d < D; ++d)
+                    for (size_t k = 0; k < K; ++k)
+                        pb[d] -= pw[k * D + d] * srcZero;
+            }
+            else
+            {
+                for (size_t d = 0; d < D; ++d)
+                     for (size_t k = 0; k < K; ++k)
+                        pb[d] -= pw[d * K + k] * srcZero;
+            }
+        }
+
+        void SynetQuantizedConvolutionGemmNN::SetOther()
+        {
+            const ConvParam& p = _param;
+            size_t D = p.dstC;
+            _norm.Resize(D);
+            const float* psw = _weightScale.data;
+            float* pn = _norm.data;
+            for (size_t d = 0; d < D; ++d)
+                pn[d] = _srcScale * psw[d] / _dstScale;
         }
 
         void SynetQuantizedConvolutionGemmNN::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)

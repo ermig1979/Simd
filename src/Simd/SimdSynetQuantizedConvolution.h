@@ -56,7 +56,7 @@ namespace Simd
         virtual size_t ExternalBufferSize() const;
         virtual size_t InternalBufferSize() const;
 
-        virtual void SetParams(const int8_t* weight, const int32_t* bias, const float* norm, const uint8_t* srcZero, const uint8_t* dstZero);
+        virtual void SetParams(const float* srcScale, const uint8_t* srcZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params, const float* dstScale, const uint8_t* dstZero);
 
         virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
@@ -71,6 +71,10 @@ namespace Simd
         }
 
     protected:
+        virtual void SetWeight(const int8_t* weight) = 0;
+        virtual void SetBias(const int32_t* bias) = 0;
+        virtual void SetOther() = 0;
+
         virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
 
         ConvParam _param;
@@ -81,7 +85,8 @@ namespace Simd
         Array8u _buffer, _srcZero, _dstZero;
         Array8i _weight;
         Array32i _bias;
-        Array32f _norm; 
+        Array32f _weightScale, _norm, _params; 
+        float _srcScale, _dstScale;
         size_t _merge, _sizeS, _sizeD;
     };
 
@@ -98,6 +103,10 @@ namespace Simd
             virtual size_t ExternalBufferSize() const;
 
         protected:
+            virtual void SetWeight(const int8_t* weight);
+            virtual void SetBias(const int32_t* bias);
+            virtual void SetOther();
+
             virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
             bool _skipConv;
