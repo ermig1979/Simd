@@ -25,6 +25,7 @@
 #define __SimdSynetQuantizeLinear_h__
 
 #include "Simd/SimdMath.h"
+#include "Simd/SimdSynetConvolution8iCommon.h"
 
 namespace Simd
 {
@@ -40,7 +41,7 @@ namespace Simd
             return RestrictRange(NearByInt(float(sum + bias) * norm) + zero, min, max);
         }
 
-        SIMD_INLINE void QuantizeSumLinear(const int32_t * sum, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const int32_t * bias, const float* norm, const uint8_t * zero, uint8_t * dst)
+        SIMD_INLINE void QuantizeSumLinear(const int32_t * sum, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const int32_t * bias, const float* norm, const int32_t * zero, uint8_t * dst)
         {
             int min = std::numeric_limits<uint8_t>::min();
             int max = std::numeric_limits<uint8_t>::max();
@@ -84,6 +85,80 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        template <Term8iType term> struct QuntizedTerm8i
+        {
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i* zero);
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i* zero, size_t tail);
+        };
+
+        template <> struct QuntizedTerm8i<Term8iLast8u>
+        {
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i* zero)
+            {
+                __m128i i32 = _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(sum, bias[index])), norm[index])), zero[index]);
+                ((int32_t*)dst)[index] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
+            }
+
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i* zero, size_t tail)
+            {
+                uint8_t tmp[F];
+                QuntizedTerm8i::Save<index>(tmp - index * F, buf, sum, bias, norm, zero);
+                for (size_t i = 0; i < tail; ++i)
+                    dst[index * F + i] = tmp[i];
+            }
+        };
+
+        template <> struct QuntizedTerm8i<Term8iInterim>
+        {
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i* zero)
+            {
+                _mm_storeu_si128((__m128i*)buf + index, sum);
+            }
+
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i* zero, size_t tail)
+            {
+                int32_t tmp[F];
+                _mm_storeu_si128((__m128i*)tmp, sum);
+                for (size_t i = 0; i < tail; ++i)
+                    buf[index * F + i] = tmp[i];
+            }
+        };
+
+        template<Term8iType term>
+        SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum,
+            const __m128i* bias, const __m128* norm, const __m128i* zero)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, buf, sum, bias, norm, zero);
+        }
+
+        template<Term8iType term>
+        SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum,
+            const __m128i* bias, const __m128* norm, const __m128i* zero, size_t tail)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, buf, sum, bias, norm, zero, tail);
+        }
+
+        template<Term8iType term>
+        SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+            const __m128i* bias, const __m128* norm, const __m128i* zero)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, buf, sum0, bias, norm, zero);
+            QuntizedTerm8i<term>::template Save<1>(dst, buf, sum1, bias, norm, zero);
+        }
+
+        template<Term8iType term>
+        SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+            const __m128i* bias, const __m128* norm, const __m128i* zero, size_t tail)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, buf, sum0, bias, norm, zero);
+            QuntizedTerm8i<term>::template Save<1>(dst, buf, sum1, bias, norm, zero, tail);
+        }
     }
 #endif
 

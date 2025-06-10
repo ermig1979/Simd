@@ -83,7 +83,7 @@ namespace Simd
 
     protected:
         virtual void SetWeight(const int8_t* weight) = 0;
-        virtual void SetBias(const int32_t* bias);
+        virtual void SetBias(const int8_t* weight, const int32_t* bias);
         virtual void SetOther();
 
         ConvParam _param;
@@ -91,9 +91,9 @@ namespace Simd
         Base::PerformanceMeasurer * _perf;
 #endif
         mutable String _info;
-        Array8u _buffer, _srcZero, _dstZero;
+        Array8u _buffer, _srcZero;
         Array8i _weight;
-        Array32i _bias;
+        Array32i _bias, _dstZero;
         Array32f _weightScale, _norm, _params; 
         float _srcScale, _dstScale;
         bool _src8u, _dst8u, _is1x1;
@@ -146,7 +146,7 @@ namespace Simd
             typedef void(*ConvertPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);
 
             typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-                size_t srcC, int update, const int8_t* weight, const int32_t* bias, const float* norm, const uint8_t* zero, int32_t* sum, uint8_t* dst);
+                size_t srcC, int update, const int8_t* weight, const int32_t* bias, const float* norm, const int32_t* zero, int32_t* sum, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);

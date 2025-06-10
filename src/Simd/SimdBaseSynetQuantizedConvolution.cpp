@@ -75,7 +75,7 @@ namespace Simd
 
         _weightScale.Assign(weightScale, p.dstC);
 
-        SetBias(bias);
+        SetBias(weight, bias);
 
         if (params)
             _params.Assign(params, p.activation == SimdConvolutionActivationPrelu ? p.dstC : 2);
@@ -85,13 +85,16 @@ namespace Simd
         _dstScale = dstScale ? dstScale[0] : 0.0f;
 
         _dstZero.Resize(p.dstC, true);
-        if(dstZero)
-            memset(_dstZero.data, dstZero[0], p.dstC);
+        if (dstZero)
+        {
+            for (size_t d = 0; d < p.dstC; ++d)
+                _dstZero[d] = dstZero[0];
+        }
 
         SetOther();
     }
 
-    void SynetQuantizedConvolution::SetBias(const int32_t* bias)
+    void SynetQuantizedConvolution::SetBias(const int8_t* weight, const int32_t* bias)
     {
         const ConvParam& p = _param;
         if (bias)
@@ -100,19 +103,18 @@ namespace Simd
             _bias.Resize(p.dstC, true);
         size_t K = p.kernelY * p.kernelX * p.srcC / p.group, D = p.dstC;
         int srcZero = _srcZero[0];
-        const int8_t* pw = _weight.data;
         int32_t* pb = _bias.data;
         if (p.trans)
         {
             for (size_t d = 0; d < D; ++d)
                 for (size_t k = 0; k < K; ++k)
-                    pb[d] -= pw[k * D + d] * srcZero;
+                    pb[d] -= weight[k * D + d] * srcZero;
         }
         else
         {
             for (size_t d = 0; d < D; ++d)
                 for (size_t k = 0; k < K; ++k)
-                    pb[d] -= pw[d * K + k] * srcZero;
+                    pb[d] -= weight[d * K + k] * srcZero;
         }
     }
 
@@ -235,7 +237,7 @@ namespace Simd
             {
                 const float* norm = _norm.data;
                 const int32_t* bias = _bias.data;
-                const uint8_t* zero = _dstZero.data;
+                const int32_t* zero = _dstZero.data;
                 QuantizeSumLinear(sum, 1, p.dstC, p.dstH, p.dstW, p.dstF, bias, norm, zero, dst);
             }
             else

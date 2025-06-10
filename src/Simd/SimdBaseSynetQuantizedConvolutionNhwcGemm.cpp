@@ -150,7 +150,7 @@ namespace Simd
             const AlgParam& a = _alg;
             const int32_t* bias = _bias.data;
             const float* norm = _norm.data;
-            const uint8_t* zero = _dstZero.data;
+            const int32_t* zero = _dstZero.data;
             size_t dstH = p.dstH * a.batch;
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
