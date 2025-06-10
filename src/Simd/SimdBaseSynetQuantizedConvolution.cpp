@@ -71,8 +71,8 @@ namespace Simd
 
         SetBias(bias);
 
-        if(params)
-            _params.Assign(params, p.dstC);
+        if (params)
+            _params.Assign(params, p.activation == SimdConvolutionActivationPrelu ? p.dstC : 2);
         else
             _params.Resize(p.dstC, true);
 
