@@ -190,7 +190,6 @@ namespace Simd
                 }
                 bias += macroD;
                 norm += macroD;
-                zero += macroD;
                 dst += macroD * _elemD;
                 if (!a.sumBuf)
                     sum += macroD;
