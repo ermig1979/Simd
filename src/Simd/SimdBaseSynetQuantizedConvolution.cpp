@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetQuantizedConvolution.h"
+#include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetConvolution8iCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
@@ -38,6 +39,11 @@ namespace Simd
         , _perf(NULL)
 #endif
     {
+        _src8u = p.srcT == SimdTensorData8u;
+        _dst8u = p.dstT == SimdTensorData8u;
+        _elemS = _src8u ? 1 : 4;
+        _elemD = _dst8u ? 1 : 4;
+        _is1x1 = p.Is1x1();
         _sizeS = p.srcC * p.srcH * p.srcW;
         _sizeD = p.dstC * p.dstH * p.dstW;
         _merge = 1;
@@ -85,18 +91,40 @@ namespace Simd
         SetOther();
     }
 
-    void SynetQuantizedConvolution::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+    void SynetQuantizedConvolution::SetBias(const int32_t* bias)
     {
-        if (buf == NULL)
-        {
-            _buffer.Resize(ExternalBufferSize());
-            buf = _buffer.data;
-        }
         const ConvParam& p = _param;
-        for (size_t b = 0; b < p.batch; b += _merge)
+        if (bias)
+            _bias.Assign(bias, p.dstC);
+        else
+            _bias.Resize(p.dstC, true);
+        size_t K = p.kernelY * p.kernelX * p.srcC / p.group, D = p.dstC;
+        int srcZero = _srcZero[0];
+        const int8_t* pw = _weight.data;
+        int32_t* pb = _bias.data;
+        if (p.trans)
         {
-            Forward8u(src + b * _sizeS, buf, dst + b * _sizeD);
+            for (size_t d = 0; d < D; ++d)
+                for (size_t k = 0; k < K; ++k)
+                    pb[d] -= pw[k * D + d] * srcZero;
         }
+        else
+        {
+            for (size_t d = 0; d < D; ++d)
+                for (size_t k = 0; k < K; ++k)
+                    pb[d] -= pw[d * K + k] * srcZero;
+        }
+    }
+
+    void SynetQuantizedConvolution::SetOther()
+    {
+        const ConvParam& p = _param;
+        size_t D = p.dstC;
+        _norm.Resize(D);
+        const float* psw = _weightScale.data;
+        float* pn = _norm.data;
+        for (size_t d = 0; d < D; ++d)
+            pn[d] = _srcScale * psw[d] / _dstScale;
     }
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
@@ -112,59 +140,7 @@ namespace Simd
 
     namespace Base
     {
-        SIMD_INLINE int NearByInt(float value)
-        {
-            return (int)std::nearbyint(value);
-        }
-
-        SIMD_INLINE int QuantizeSumLinear(int sum, int bias, float norm, int zero, int min, int max)
-        {
-            return RestrictRange(NearByInt(float(sum + bias) * norm) + zero, min, max);
-        }
-
-        SIMD_INLINE void QuantizeSumLinear(const int32_t* sum, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const int32_t* bias, const float* norm, const uint8_t* zero, uint8_t* dst)
-        {
-            int min = std::numeric_limits<uint8_t>::min();
-            int max = std::numeric_limits<uint8_t>::max();
-            for (size_t b = 0; b < batch; ++b)
-            {
-                if (format == SimdTensorFormatNchw)
-                {
-                    for (size_t c = 0; c < channels; ++c)
-                    {
-                        int32_t _bias = bias[c];
-                        float _norm = norm[c];
-                        int32_t _zero = zero[c];
-                        for (size_t h = 0; h < height; ++h)
-                        {
-                            for (size_t w = 0; w < width; ++w)
-                                dst[w] = (uint8_t)QuantizeSumLinear(sum[w], _bias, _norm, _zero, min, max);
-                            sum += width;
-                            dst += width;
-                        }
-                    }
-                }
-                else if (format == SimdTensorFormatNhwc)
-                {
-                    for (size_t h = 0; h < height; ++h)
-                    {
-                        for (size_t w = 0; w < width; ++w)
-                        {
-                            for (size_t c = 0; c < channels; ++c)
-                                dst[c] = (uint8_t)QuantizeSumLinear(sum[c], bias[c], norm[c], zero[c], min, max);
-                            sum += channels;
-                            dst += channels;
-                        }
-                    }
-                }
-                else
-                    assert(0);
-            }
-        }
-
-        //------------------------------------------------------------------------------------------------
-
-        SynetQuantizedConvolutionGemmNN::SynetQuantizedConvolutionGemmNN(const ConvParam& p)
+        SynetQuantizedConvolutionGemm::SynetQuantizedConvolutionGemm(const ConvParam& p)
             : SynetQuantizedConvolution(p)
         {
             if (p.IsDilation(1) && p.IsStride(1) && p.IsPad(0))
@@ -198,7 +174,7 @@ namespace Simd
             _siS = p.dstH * p.dstW;
         }
 
-        size_t SynetQuantizedConvolutionGemmNN::ExternalBufferSize() const
+        size_t SynetQuantizedConvolutionGemm::ExternalBufferSize() const
         {
             size_t size = SynetQuantizedConvolution::ExternalBufferSize();
             if (!_skipConv)
@@ -207,54 +183,28 @@ namespace Simd
             return size;
         }
 
-        void SynetQuantizedConvolutionGemmNN::SetWeight(const int8_t* weight)
+        void SynetQuantizedConvolutionGemm::SetWeight(const int8_t* weight)
         {
             const ConvParam& p = _param;
             _weight.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
             _weight.Assign(weight, _weight.size);
         }
 
-        void SynetQuantizedConvolutionGemmNN::SetBias(const int32_t* bias)
+        void SynetQuantizedConvolutionGemm::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const ConvParam& p = _param;
-            if (bias)
-                _bias.Assign(bias, p.dstC);
-            else
-                _bias.Resize(p.dstC, true);
-            size_t K = _siK * _siC, D = p.dstC;
-            int srcZero = _srcZero[0];
-            const int8_t* pw = _weight.data;
-            int32_t* pb = _bias.data;
-            if (p.trans)
+            buf = Buffer(buf);
+            int32_t* sum =  Allocate<int32_t>(buf, _sizeD * _merge);
+            for (size_t b = 0; b < p.batch; b += _merge)
             {
-                for (size_t d = 0; d < D; ++d)
-                    for (size_t k = 0; k < K; ++k)
-                        pb[d] -= pw[k * D + d] * srcZero;
-            }
-            else
-            {
-                for (size_t d = 0; d < D; ++d)
-                     for (size_t k = 0; k < K; ++k)
-                        pb[d] -= pw[d * K + k] * srcZero;
+                Forward(src + b * _sizeS * _elemS, buf, sum, dst + b * _sizeD * _elemD);
             }
         }
 
-        void SynetQuantizedConvolutionGemmNN::SetOther()
-        {
-            const ConvParam& p = _param;
-            size_t D = p.dstC;
-            _norm.Resize(D);
-            const float* psw = _weightScale.data;
-            float* pn = _norm.data;
-            for (size_t d = 0; d < D; ++d)
-                pn[d] = _srcScale * psw[d] / _dstScale;
-        }
-
-        void SynetQuantizedConvolutionGemmNN::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+        void SynetQuantizedConvolutionGemm::Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst)
         {
             const ConvParam& p = _param;
             const int8_t* weight = _weight.data;
-            int32_t* sum = Allocate<int32_t>(buf, _sizeD * _merge);
             if (!_skipConv)
             {
                 const uint8_t* zero = _srcZero.data;
@@ -281,7 +231,7 @@ namespace Simd
                         GemmNchw(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD, overflow);
                 }
             }
-            if (p.activation == SimdConvolutionActivationIdentity || p.activation == SimdConvolutionActivationRelu)
+            if (p.activation == SimdConvolutionActivationIdentity || p.activation == SimdConvolutionActivationRelu || p.activation == SimdConvolutionActivationRestrictRange)
             {
                 const float* norm = _norm.data;
                 const int32_t* bias = _bias.data;
@@ -300,7 +250,7 @@ namespace Simd
             if (!ValidQuantized(param))
                 return NULL;
             else
-                return new SynetQuantizedConvolutionGemmNN(param);
+                return new SynetQuantizedConvolutionGemm(param);
         }
     }
 #endif

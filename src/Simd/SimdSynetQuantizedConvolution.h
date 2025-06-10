@@ -58,11 +58,22 @@ namespace Simd
 
         virtual void SetParams(const float* srcScale, const uint8_t* srcZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params, const float* dstScale, const uint8_t* dstZero);
 
-        virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst);
+        virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst) = 0;
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer* Perf(const char* func);
 #endif
+
+        uint8_t* Buffer(uint8_t* buffer)
+        {
+            if (buffer)
+                return buffer;
+            else
+            {
+                _buffer.Resize(ExternalBufferSize());
+                return _buffer.data;
+            }
+        }
 
         const char* Info() const
         {
@@ -72,10 +83,8 @@ namespace Simd
 
     protected:
         virtual void SetWeight(const int8_t* weight) = 0;
-        virtual void SetBias(const int32_t* bias) = 0;
-        virtual void SetOther() = 0;
-
-        virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
+        virtual void SetBias(const int32_t* bias);
+        virtual void SetOther();
 
         ConvParam _param;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
@@ -87,30 +96,69 @@ namespace Simd
         Array32i _bias;
         Array32f _weightScale, _norm, _params; 
         float _srcScale, _dstScale;
-        size_t _merge, _sizeS, _sizeD;
+        bool _src8u, _dst8u, _is1x1;
+        size_t _merge, _sizeS, _sizeD, _elemS, _elemD;
     };
 
     //------------------------------------------------------------------------------------------------
 
     namespace Base
     {
-        class SynetQuantizedConvolutionGemmNN : public SynetQuantizedConvolution
+        class SynetQuantizedConvolutionGemm : public SynetQuantizedConvolution
         {
         public:
-            SynetQuantizedConvolutionGemmNN(const ConvParam & p);
+            SynetQuantizedConvolutionGemm(const ConvParam & p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::GemmNN"; }
+            virtual String Desc() const { return Ext() + "::Gemm"; }
             virtual size_t ExternalBufferSize() const;
 
         protected:
             virtual void SetWeight(const int8_t* weight);
-            virtual void SetBias(const int32_t* bias);
-            virtual void SetOther();
 
-            virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+            void Forward(const uint8_t* src, uint8_t* buf, int32_t *sum, uint8_t* dst);
 
             bool _skipConv;
             size_t _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeB;
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcGemm : public SynetQuantizedConvolution
+        {
+        public:
+            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t batch, K, M;
+                size_t F, microD, microM, microK;
+                size_t macroD, macroH, macroK;
+                size_t bufD, bufM, bufK, elem, dB;
+                int reorderType, sumBuf;
+            };
+
+            typedef void(*ConvertPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);
+
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
+                size_t srcC, int update, const int8_t* weight, const int32_t* bias, const float* norm, const uint8_t* zero, int32_t* sum, uint8_t* dst);
+
+        protected:
+            void SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
+
+            virtual void SetWeight(const int8_t* weight);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+            void Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst);
+
+            AlgParam _alg;
+            ConvertPtr _convert;
+            ConvolutionPtr _convolutions[2];
         };
 
         //------------------------------------------------------------------------------------------------
@@ -121,6 +169,17 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        class SynetQuantizedConvolutionNhwcGemm : public Base::SynetQuantizedConvolutionNhwcGemm
+        {
+        public:
+            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 #endif
 

@@ -31,6 +31,8 @@
 #include "Simd/SimdSynetQuantizedConvolution.h"
 #include "Simd/SimdSynet.h"
 
+#include "Simd/SimdMath.h"
+
 namespace Test
 {
 #if defined(SIMD_SYNET_ENABLE)
@@ -305,6 +307,9 @@ namespace Test
 #ifdef NDEBUG
 #if 1
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _1, _1, _1, _0, _0, 1, aId, f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _1, _1, _1, _0, _0, 1, aId, t, u8, u8), o, f1, f2);
 #endif
 #else
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 160, 32, 42, 156, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
@@ -322,11 +327,11 @@ namespace Test
         if (TestBase())
             result = result && SynetQuantizedConvolutionForwardAutoTest(t, FUNC_QC(Simd::Base::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetQuantizedConvolutionForwardAutoTest(FUNC_QC(Simd::Sse41::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetQuantizedConvolutionForwardAutoTest(t, FUNC_QC(Simd::Sse41::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetQuantizedConvolutionForwardAutoTest(FUNC_QC(Simd::Avx2::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
