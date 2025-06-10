@@ -40,7 +40,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void QuantizedConvolutionNhwcGemmReorder(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
+        static void QuantizedConvolutionNhwcGemmReorder(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
             size_t gap = a.bufK - a.K;
             for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
@@ -64,14 +64,14 @@ namespace Simd
                                 }
                                 else
                                 {
-                                    memset(row, zero[0], p.srcC);
+                                    memset(row, zero, p.srcC);
                                     row += p.srcC;
                                 }
                             }
                         }
                         else
                         {
-                            memset(row, zero[0], p.kernelX * p.srcC);
+                            memset(row, zero, p.kernelX * p.srcC);
                             row += p.kernelX * p.srcC;
                         }
                     }
@@ -84,7 +84,7 @@ namespace Simd
         //-----------------------------------------------------------------------------------------
 
         template<Term8iType term, int M> void QuantizedConvolutionNhwcGemm_2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int update, const int8_t* weight0, const __m128i* bias, const __m128* norm, const __m128i* zero, int32_t* buf, uint8_t* dst)
+            size_t srcC, size_t dstC, int update, const int8_t* weight0, const __m128i* bias, const __m128* norm, const __m128i& zero, int32_t* buf, uint8_t* dst)
         {
             __m128i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
             size_t dB = a.dB, dD = p.dstC * a.elem, dS = a.bufK;
@@ -188,7 +188,7 @@ namespace Simd
         }
 
         typedef void(*QuantizedConvolutionNhwcGemm_2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int update, const int8_t* weight, const __m128i* bias, const __m128* norm, const __m128i* zero, int32_t* buf, uint8_t* dst);
+            size_t srcC, size_t dstC, int update, const int8_t* weight, const __m128i* bias, const __m128* norm, const __m128i& zero, int32_t* buf, uint8_t* dst);
 
         template<Term8iType term> QuantizedConvolutionNhwcGemm_2xM_Ptr GetQuantizedConvolutionNhwcGemm_2xM(size_t M)
         {
@@ -206,7 +206,7 @@ namespace Simd
         }
 
         template<Term8iType term> void QuantizedConvolutionNhwcGemm_2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-            size_t srcC, int update, const int8_t* weight, const int32_t* bias, const float* norm, const int32_t* zero, int32_t* buf, uint8_t* dst)
+            size_t srcC, int update, const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t* buf, uint8_t* dst)
         {
             size_t n1 = dstH * p.dstW, n = 5;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * DF;
@@ -215,7 +215,7 @@ namespace Simd
             QuantizedConvolutionNhwcGemm_2xM_Ptr convolution_2xM = GetQuantizedConvolutionNhwcGemm_2xM<term>(m);
 
             __m128 _norm[2];
-            __m128i _bias[2], _zero[2];
+            __m128i _bias[2], _zero = _mm_set1_epi32(zero);
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
@@ -223,8 +223,6 @@ namespace Simd
                 _bias[1] = _mm_loadu_si128((__m128i*)(bias + dc) + 1);
                 _norm[0] = _mm_loadu_ps(norm + dc + 0);
                 _norm[1] = _mm_loadu_ps(norm + dc + F);
-                _zero[0] = _mm_loadu_si128((__m128i*)(zero + dc) + 0);
-                _zero[1] = _mm_loadu_si128((__m128i*)(zero + dc) + 1);
                 const uint8_t* s = src;
                 int32_t* b = buf + dc;
                 uint8_t* d = dst + dc * a.elem;

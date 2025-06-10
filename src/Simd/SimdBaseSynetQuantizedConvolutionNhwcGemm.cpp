@@ -150,7 +150,7 @@ namespace Simd
             const AlgParam& a = _alg;
             const int32_t* bias = _bias.data;
             const float* norm = _norm.data;
-            const int32_t* zero = _dstZero.data;
+            int32_t zero = _dstZero[0];
             size_t dstH = p.dstH * a.batch;
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
@@ -173,10 +173,10 @@ namespace Simd
                                 size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
                                 size_t dB = p.dstH * p.dstW * a.bufK;
                                 for (size_t b = 0; b < a.batch; ++b)
-                                    _convert(src + b * dS, _srcZero.data, p, a, 0, p.dstH, buf + b * dB);
+                                    _convert(src + b * dS, _srcZero[0], p, a, 0, p.dstH, buf + b * dB);
                             }
                             else
-                                _convert(src, _srcZero.data, p, a, yBeg, yEnd, buf + bufOffs);
+                                _convert(src, _srcZero[0], p, a, yBeg, yEnd, buf + bufOffs);
                         }
                         if (mak + macroK == a.bufK)
                             _convolutions[1](buf + bufOffs, p, a, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 0 : 1,
