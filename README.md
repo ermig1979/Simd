@@ -23,7 +23,6 @@ The Simd Library has next folder's structure:
 * `simd/src/Test/` - contains test framework of the library.
 * `simd/src/Use/` - contains the use examples of the library.
 * `simd/py/SimdPy/` - contains Python wrapper of the library.
-* `simd/prj/vs2015/` - contains project files of Microsoft Visual Studio 2015.
 * `simd/prj/vs2017/` - contains project files of Microsoft Visual Studio 2017.
 * `simd/prj/vs2019/` - contains project files of Microsoft Visual Studio 2019.
 * `simd/prj/vs2022/` - contains project files of Microsoft Visual Studio 2022.
@@ -39,7 +38,7 @@ The Simd Library has next folder's structure:
 Building the library for Windows
 ================================
 
-To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2022 (or 2015/2017/2019). 
+To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2022 (or 2017/2019). 
 The project files are in the directory: 
 
 `simd/prj/vs2022/`
