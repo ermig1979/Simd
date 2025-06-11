@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2024 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Sse41
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx2
     {
         typedef Base::SynetQuantizedConvolutionNhwcGemm::AlgParam AlgParam;
         typedef Base::SynetQuantizedConvolutionNhwcGemm::ConvolutionPtr Convolution;
@@ -84,9 +84,9 @@ namespace Simd
         //-----------------------------------------------------------------------------------------
 
         template<Term8iType term, int M> void QuantizedConvolutionNhwcGemm_2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int update, const int8_t* weight0, const __m128i* bias, const __m128* norm, const __m128i& zero, int32_t* buf, uint8_t* dst)
+            size_t srcC, size_t dstC, int update, const int8_t* weight0, const __m256i* bias, const __m256* norm, const __m256i& zero, int32_t* buf, uint8_t* dst)
         {
-            __m128i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
+            __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
             size_t dB = a.dB, dD = p.dstC * a.elem, dS = a.bufK;
             const int8_t* weight1 = weight0 + a.bufK * F;
             const uint8_t* src1 = src0 + 1 * dS;
@@ -97,24 +97,24 @@ namespace Simd
             {
                 if (update)
                 {
-                    if (M > 0) d00 = _mm_loadu_si128((__m128i*)(buf + 0 * dB) + 0), d01 = _mm_loadu_si128((__m128i*)(buf + 0 * dB) + 1);
-                    if (M > 1) d10 = _mm_loadu_si128((__m128i*)(buf + 1 * dB) + 0), d11 = _mm_loadu_si128((__m128i*)(buf + 1 * dB) + 1);
-                    if (M > 2) d20 = _mm_loadu_si128((__m128i*)(buf + 2 * dB) + 0), d21 = _mm_loadu_si128((__m128i*)(buf + 2 * dB) + 1);
-                    if (M > 3) d30 = _mm_loadu_si128((__m128i*)(buf + 3 * dB) + 0), d31 = _mm_loadu_si128((__m128i*)(buf + 3 * dB) + 1);
-                    if (M > 4) d40 = _mm_loadu_si128((__m128i*)(buf + 4 * dB) + 0), d41 = _mm_loadu_si128((__m128i*)(buf + 4 * dB) + 1);
+                    if (M > 0) d00 = _mm256_loadu_si256((__m256i*)(buf + 0 * dB) + 0), d01 = _mm256_loadu_si256((__m256i*)(buf + 0 * dB) + 1);
+                    if (M > 1) d10 = _mm256_loadu_si256((__m256i*)(buf + 1 * dB) + 0), d11 = _mm256_loadu_si256((__m256i*)(buf + 1 * dB) + 1);
+                    if (M > 2) d20 = _mm256_loadu_si256((__m256i*)(buf + 2 * dB) + 0), d21 = _mm256_loadu_si256((__m256i*)(buf + 2 * dB) + 1);
+                    if (M > 3) d30 = _mm256_loadu_si256((__m256i*)(buf + 3 * dB) + 0), d31 = _mm256_loadu_si256((__m256i*)(buf + 3 * dB) + 1);
+                    if (M > 4) d40 = _mm256_loadu_si256((__m256i*)(buf + 4 * dB) + 0), d41 = _mm256_loadu_si256((__m256i*)(buf + 4 * dB) + 1);
                 }
                 else
                 {
-                    if (M > 0) d00 = _mm_setzero_si128(), d01 = _mm_setzero_si128();
-                    if (M > 1) d10 = _mm_setzero_si128(), d11 = _mm_setzero_si128();
-                    if (M > 2) d20 = _mm_setzero_si128(), d21 = _mm_setzero_si128();
-                    if (M > 3) d30 = _mm_setzero_si128(), d31 = _mm_setzero_si128();
-                    if (M > 4) d40 = _mm_setzero_si128(), d41 = _mm_setzero_si128();
+                    if (M > 0) d00 = _mm256_setzero_si256(), d01 = _mm256_setzero_si256();
+                    if (M > 1) d10 = _mm256_setzero_si256(), d11 = _mm256_setzero_si256();
+                    if (M > 2) d20 = _mm256_setzero_si256(), d21 = _mm256_setzero_si256();
+                    if (M > 3) d30 = _mm256_setzero_si256(), d31 = _mm256_setzero_si256();
+                    if (M > 4) d40 = _mm256_setzero_si256(), d41 = _mm256_setzero_si256();
                 }
                 for (size_t offs = 0; offs < srcC; offs += 4)
                 {
-                    w0 = _mm_loadu_si128((__m128i*)weight0);
-                    w1 = _mm_loadu_si128((__m128i*)weight1);
+                    w0 = _mm256_loadu_si256((__m256i*)weight0);
+                    w1 = _mm256_loadu_si256((__m256i*)weight1);
                     if (M > 0) s0 = Set4(src0 + offs), Madd4<true>(d00, s0, w0), Madd4<true>(d01, s0, w1);
                     if (M > 1) s0 = Set4(src1 + offs), Madd4<true>(d10, s0, w0), Madd4<true>(d11, s0, w1);
                     if (M > 2) s0 = Set4(src2 + offs), Madd4<true>(d20, s0, w0), Madd4<true>(d21, s0, w1);
@@ -144,23 +144,23 @@ namespace Simd
             {
                 if (update)
                 {
-                    if (M > 0) d00 = _mm_loadu_si128((__m128i*)(buf + 0 * dB) + 0);
-                    if (M > 1) d10 = _mm_loadu_si128((__m128i*)(buf + 1 * dB) + 0);
-                    if (M > 2) d20 = _mm_loadu_si128((__m128i*)(buf + 2 * dB) + 0);
-                    if (M > 3) d30 = _mm_loadu_si128((__m128i*)(buf + 3 * dB) + 0);
-                    if (M > 4) d40 = _mm_loadu_si128((__m128i*)(buf + 4 * dB) + 0);
+                    if (M > 0) d00 = _mm256_loadu_si256((__m256i*)(buf + 0 * dB) + 0);
+                    if (M > 1) d10 = _mm256_loadu_si256((__m256i*)(buf + 1 * dB) + 0);
+                    if (M > 2) d20 = _mm256_loadu_si256((__m256i*)(buf + 2 * dB) + 0);
+                    if (M > 3) d30 = _mm256_loadu_si256((__m256i*)(buf + 3 * dB) + 0);
+                    if (M > 4) d40 = _mm256_loadu_si256((__m256i*)(buf + 4 * dB) + 0);
                 }
                 else
                 {
-                    if (M > 0) d00 = _mm_setzero_si128();
-                    if (M > 1) d10 = _mm_setzero_si128();
-                    if (M > 2) d20 = _mm_setzero_si128();
-                    if (M > 3) d30 = _mm_setzero_si128();
-                    if (M > 4) d40 = _mm_setzero_si128();
+                    if (M > 0) d00 = _mm256_setzero_si256();
+                    if (M > 1) d10 = _mm256_setzero_si256();
+                    if (M > 2) d20 = _mm256_setzero_si256();
+                    if (M > 3) d30 = _mm256_setzero_si256();
+                    if (M > 4) d40 = _mm256_setzero_si256();
                 }
                 for (size_t offs = 0; offs < srcC; offs += 4)
                 {
-                    w0 = _mm_loadu_si128((__m128i*)weight0);
+                    w0 = _mm256_loadu_si256((__m256i*)weight0);
                     if (M > 0) s0 = Set4(src0 + offs), Madd4<true>(d00, s0, w0);
                     if (M > 1) s0 = Set4(src1 + offs), Madd4<true>(d10, s0, w0);
                     if (M > 2) s0 = Set4(src2 + offs), Madd4<true>(d20, s0, w0);
@@ -188,7 +188,7 @@ namespace Simd
         }
 
         typedef void(*QuantizedConvolutionNhwcGemm_2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int update, const int8_t* weight, const __m128i* bias, const __m128* norm, const __m128i& zero, int32_t* buf, uint8_t* dst);
+            size_t srcC, size_t dstC, int update, const int8_t* weight, const __m256i* bias, const __m256* norm, const __m256i& zero, int32_t* buf, uint8_t* dst);
 
         template<Term8iType term> QuantizedConvolutionNhwcGemm_2xM_Ptr GetQuantizedConvolutionNhwcGemm_2xM(size_t M)
         {
@@ -214,15 +214,15 @@ namespace Simd
             QuantizedConvolutionNhwcGemm_2xM_Ptr convolution_2xN = GetQuantizedConvolutionNhwcGemm_2xM<term>(n);
             QuantizedConvolutionNhwcGemm_2xM_Ptr convolution_2xM = GetQuantizedConvolutionNhwcGemm_2xM<term>(m);
 
-            __m128 _norm[2];
-            __m128i _bias[2], _zero = _mm_set1_epi32(zero);
+            __m256 _norm[2];
+            __m256i _bias[2], _zero = _mm256_set1_epi32(zero);
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
-                _bias[0] = _mm_loadu_si128((__m128i*)(bias + dc) + 0);
-                _bias[1] = _mm_loadu_si128((__m128i*)(bias + dc) + 1);
-                _norm[0] = _mm_loadu_ps(norm + dc + 0);
-                _norm[1] = _mm_loadu_ps(norm + dc + F);
+                _bias[0] = _mm256_loadu_si256((__m256i*)(bias + dc) + 0);
+                _bias[1] = _mm256_loadu_si256((__m256i*)(bias + dc) + 1);
+                _norm[0] = _mm256_loadu_ps(norm + dc + 0);
+                _norm[1] = _mm256_loadu_ps(norm + dc + F);
                 const uint8_t* s = src;
                 int32_t* b = buf + dc;
                 uint8_t* d = dst + dc * a.elem;
@@ -247,7 +247,7 @@ namespace Simd
         }
 
         SynetQuantizedConvolutionNhwcGemm::SynetQuantizedConvolutionNhwcGemm(const ConvParam& p)
-            : Base::SynetQuantizedConvolutionNhwcGemm(p)
+            : Sse41::SynetQuantizedConvolutionNhwcGemm(p)
         {
             SetAlgParam(F, F * 2, 5, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_src8u)

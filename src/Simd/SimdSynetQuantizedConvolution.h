@@ -186,6 +186,17 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        class SynetQuantizedConvolutionNhwcGemm : public Sse41::SynetQuantizedConvolutionNhwcGemm
+        {
+        public:
+            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 #endif
 
