@@ -415,6 +415,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcSpecV1.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcGemm.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolution.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">

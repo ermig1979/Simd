@@ -203,7 +203,17 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        class SynetQuantizedConvolutionNhwcGemm : public Avx2::SynetQuantizedConvolutionNhwcGemm
+        {
+        public:
+            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
 
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 #endif
 
