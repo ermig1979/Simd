@@ -362,7 +362,7 @@ namespace Simd
                 for (; ds < dstS; ++ds)
                     Apply16b2<type>(dst + ds * dD, buf + ds * dB, bias, params, tailD);
             }
-            else if (Term16bLast32f)
+            else if (term == Term16bLast32f)
             {
                 __mmask16 tailD = TailMask16(dstC - F);
                 size_t dstS8 = AlignLo(dstS, 8), ds = 0;

@@ -116,7 +116,29 @@ namespace Simd
         {
             size_t tail = size & 31;
             Copy(src, size & (~31), tail ? __mmask32(-1) >> (32 - tail) : 0, dst);
-        }   
+        } 
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void Copy(const uint8_t* src, uint8_t* dst, __mmask64 srcMask = __mmask64(-1), __mmask64 dstMask = __mmask64(-1))
+        {
+            _mm512_mask_storeu_epi8(dst, dstMask, _mm512_maskz_loadu_epi8(srcMask, src));
+        }
+
+        SIMD_INLINE void Copy(const uint8_t* src, size_t size64, __mmask64 tail, uint8_t* dst)
+        {
+            size_t i = 0;
+            for (; i < size64; i += 64)
+                _mm512_storeu_si512(dst + i, _mm512_loadu_si512(src + i));
+            if (tail)
+                _mm512_mask_storeu_epi8(dst + i, tail, _mm512_maskz_loadu_epi8(tail, src + i));
+        }
+
+        SIMD_INLINE void Copy(const uint8_t* src, size_t size, uint8_t* dst)
+        {
+            size_t tail = size & 63;
+            Copy(src, size & (~63), tail ? __mmask64(-1) >> (64 - tail) : 0, dst);
+        }
     }
 #endif
 }

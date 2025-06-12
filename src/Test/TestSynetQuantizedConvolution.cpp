@@ -306,6 +306,8 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
+        //result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 70, 16, 16, 64, _1, _1, _1, _0, _0, 1, aId, t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 3, 300, 300, 64, _7, _1, _2, _3, _3, 1, aRe, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 512, 10, 10, 512, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 177, 31, 41, 155, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
@@ -350,11 +352,11 @@ namespace Test
             result = result && SynetQuantizedConvolutionForwardAutoTest(f, FUNC_QC(Simd::Avx512vnni::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
 #endif
 
-//#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
-//        if (Simd::AmxBf16::Enable && TestAmxBf16())
-//            result = result && SynetQuantizedConvolutionForwardAutoTest(FUNC_QC(Simd::AmxBf16::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
-//#endif
-//
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+        if (Simd::AmxBf16::Enable && TestAmxBf16())
+            result = result && SynetQuantizedConvolutionForwardAutoTest(f, FUNC_QC(Simd::AmxBf16::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
+#endif
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable && TestNeon())
 //            result = result && SynetQuantizedConvolutionForwardAutoTest(FUNC_QC(Simd::Neon::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));

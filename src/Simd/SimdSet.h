@@ -175,6 +175,8 @@ namespace Simd
             _mm512_mask_storeu_ps(dst, mask, _mm512_setzero_ps());
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void SetZero(uint16_t* dst, __mmask32 mask = __mmask32(-1))
         {
             _mm512_mask_storeu_epi16(dst, mask, _mm512_setzero_si512());
@@ -194,6 +196,28 @@ namespace Simd
         {
             size_t tail = size & 31;
             SetZeros(dst, size & (~31), tail ? __mmask32(-1) >> (32 - tail) : 0);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void SetZero(uint8_t* dst, __m512i zero = _mm512_setzero_si512(), __mmask64 mask = __mmask64(-1))
+        {
+            _mm512_mask_storeu_epi8(dst, mask, zero);
+        }
+
+        SIMD_INLINE void SetZeros(uint8_t* dst, __m512i zero, size_t size64, __mmask64 tail)
+        {
+            size_t i = 0;
+            for (; i < size64; i += 64)
+                _mm512_storeu_si512(dst + i, zero);
+            if (tail)
+                _mm512_mask_storeu_epi8(dst + i, tail, zero);
+        }
+
+        SIMD_INLINE void SetZeros(uint8_t* dst, __m512i zero, size_t size)
+        {
+            size_t tail = size & 63;
+            SetZeros(dst, zero, size & (~63), tail ? __mmask64(-1) >> (64 - tail) : 0);
         }
     }
 #endif

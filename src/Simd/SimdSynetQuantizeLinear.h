@@ -43,8 +43,8 @@ namespace Simd
 
         SIMD_INLINE void QuantizeSumLinear(const int32_t * sum, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const int32_t * bias, const float* norm, const int32_t * zero, uint8_t * dst)
         {
-            int min = std::numeric_limits<uint8_t>::min();
-            int max = std::numeric_limits<uint8_t>::max();
+            constexpr int min = std::numeric_limits<uint8_t>::min();
+            constexpr int max = std::numeric_limits<uint8_t>::max();
             for (size_t b = 0; b < batch; ++b)
             {
                 if (format == SimdTensorFormatNchw)
@@ -330,6 +330,87 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
     namespace AmxBf16
     {
+        template <Term8iType term> struct QuntizedTerm8i
+        {
+            template<int index> static SIMD_INLINE void Apply(uint8_t* dst, int32_t* buf, const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1);
+        };
+
+        template <> struct QuntizedTerm8i<Term8iLast8u>
+        {
+            template<int index> static SIMD_INLINE void Apply(uint8_t* dst, int32_t* buf, const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+            {
+                __m512i i32 = _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(_mm512_loadu_si512(buf + index * F), bias[index])), norm[index])), zero);
+                _mm_mask_storeu_epi8(dst + index * F, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(i32, K_ZERO), K_ZERO)));
+                _mm_prefetch((const char*)(dst + index * A), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(buf + index * F), _MM_HINT_NTA);
+            }
+        };
+
+        template <> struct QuntizedTerm8i<Term8iInterim>
+        {
+            template<int index> static SIMD_INLINE void Apply(uint8_t* dst, int32_t* buf, const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+            {
+            }
+        };
+
+        template<Term8iType term>
+        SIMD_INLINE void Apply1(uint8_t* dst, int32_t* buf, const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+        {
+            QuntizedTerm8i<term>::template Apply<0>(dst, buf, bias, norm, zero, tail);
+        }
+
+        template<Term8iType term> SIMD_INLINE void Apply1x8(uint8_t* ptr, int dP, int32_t* buf, int dB, const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+        {
+            Apply1<term>(ptr + 0 * dP, buf + 0 * dB, bias, norm, zero, tail);
+            Apply1<term>(ptr + 1 * dP, buf + 1 * dB, bias, norm, zero, tail);
+            Apply1<term>(ptr + 2 * dP, buf + 2 * dB, bias, norm, zero, tail);
+            Apply1<term>(ptr + 3 * dP, buf + 3 * dB, bias, norm, zero, tail);
+            Apply1<term>(ptr + 4 * dP, buf + 4 * dB, bias, norm, zero, tail);
+            Apply1<term>(ptr + 5 * dP, buf + 5 * dB, bias, norm, zero, tail);
+            Apply1<term>(ptr + 6 * dP, buf + 6 * dB, bias, norm, zero, tail);
+            Apply1<term>(ptr + 7 * dP, buf + 7 * dB, bias, norm, zero, tail);
+        }
+
+        template<Term8iType term>
+        SIMD_INLINE void Apply2(uint8_t* dst, int32_t* buf, const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+        {
+            QuntizedTerm8i<term>::template Apply<0>(dst, buf, bias, norm, zero);
+            QuntizedTerm8i<term>::template Apply<1>(dst, buf, bias, norm, zero, tail);
+        }
+
+        template<Term8iType term> SIMD_INLINE void Apply2x8(uint8_t* ptr, int dP, int32_t* buf, int dB, const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+        {
+            Apply2<term>(ptr + 0 * dP, buf + 0 * dB, bias, norm, zero, tail);
+            Apply2<term>(ptr + 1 * dP, buf + 1 * dB, bias, norm, zero, tail);
+            Apply2<term>(ptr + 2 * dP, buf + 2 * dB, bias, norm, zero, tail);
+            Apply2<term>(ptr + 3 * dP, buf + 3 * dB, bias, norm, zero, tail);
+            Apply2<term>(ptr + 4 * dP, buf + 4 * dB, bias, norm, zero, tail);
+            Apply2<term>(ptr + 5 * dP, buf + 5 * dB, bias, norm, zero, tail);
+            Apply2<term>(ptr + 6 * dP, buf + 6 * dB, bias, norm, zero, tail);
+            Apply2<term>(ptr + 7 * dP, buf + 7 * dB, bias, norm, zero, tail);
+        }
+
+        SIMD_INLINE void Apply8u2(uint8_t* dst, int32_t* buf, const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask32 tail = -1)
+        {
+            __m512i d0 = _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(_mm512_loadu_si512(buf + 0), bias[0])), norm[0])), zero);
+            __m512i d1 = _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(_mm512_loadu_si512(buf + F), bias[1])), norm[1])), zero);
+            _mm256_mask_storeu_epi8(dst, tail, _mm512_castsi512_si256(PackI16ToU8(PackI32ToI16(d0, d1), K_ZERO)));
+            _mm_prefetch((const char*)(dst), _MM_HINT_NTA);
+            _mm_prefetch((const char*)(buf + 0), _MM_HINT_NTA);
+            _mm_prefetch((const char*)(buf + F), _MM_HINT_NTA);
+        }
+
+        SIMD_INLINE void Apply8u2x8(uint8_t* ptr, int dP, int32_t* buf, int dB, const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask32 tail = -1)
+        {
+            Apply8u2(ptr + 0 * dP, buf + 0 * dB, bias, norm, zero, tail);
+            Apply8u2(ptr + 1 * dP, buf + 1 * dB, bias, norm, zero, tail);
+            Apply8u2(ptr + 2 * dP, buf + 2 * dB, bias, norm, zero, tail);
+            Apply8u2(ptr + 3 * dP, buf + 3 * dB, bias, norm, zero, tail);
+            Apply8u2(ptr + 4 * dP, buf + 4 * dB, bias, norm, zero, tail);
+            Apply8u2(ptr + 5 * dP, buf + 5 * dB, bias, norm, zero, tail);
+            Apply8u2(ptr + 6 * dP, buf + 6 * dB, bias, norm, zero, tail);
+            Apply8u2(ptr + 7 * dP, buf + 7 * dB, bias, norm, zero, tail);
+        }
     }
 #endif
 

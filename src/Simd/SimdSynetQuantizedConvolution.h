@@ -234,9 +234,20 @@ namespace Simd
     }
 #endif
 
-#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
+#if defined(SIMD_AMXBF16_ENABLE)  
     namespace AmxBf16
     {
+        class SynetQuantizedConvolutionNhwcGemm : public Avx512vnni::SynetQuantizedConvolutionNhwcGemm
+        {
+        public:
+            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+
+            virtual String Ext() const { return "AmxBf16"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 #endif
 
