@@ -83,6 +83,42 @@ namespace Simd
             }
         }
 
+        static void QuantizedConvolutionNhwcGemmReorder64d1(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
+        {
+            assert(p.srcC <= 64 && p.IsDilation(1));
+            size_t C = p.srcC, kX = p.kernelX, sX = p.strideX;
+            __mmask64 gap = TailMask64(a.bufK - a.K), tail = TailMask64(C);
+            __m512i _zero = _mm512_set1_epi8(zero);
+            for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
+            {
+                for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
+                {
+                    uint8_t* pd = dst + dr * a.bufK;
+                    for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
+                    {
+                        size_t sy = dy * p.strideY + ky - p.padY;
+                        if (sy < p.srcH)
+                        {
+                            for (size_t kx = 0; kx < kX; kx++, pd += C)
+                            {
+                                size_t sx = dx * p.strideX + kx - p.padX;
+                                if (sx < p.srcW)
+                                    Copy(src + (sy * p.srcW + sx) * C, pd, tail, tail);
+                                else
+                                    SetZero(pd, _zero, tail);
+                            }
+                        }
+                        else
+                        {
+                            for (size_t kx = 0; kx < kX; kx++, pd += C)
+                                SetZero(pd, _zero, tail);
+                        }
+                    }
+                    SetZero(pd, _mm512_setzero_si512(), gap);
+                }
+            }
+        }
+
         //-----------------------------------------------------------------------------------------
 
         template<Term8iType term, int M> void QuantizedConvolutionNhwcGemm_2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
@@ -301,7 +337,12 @@ namespace Simd
                 if (_is1x1 && a.K == a.bufK)
                     _convert = NULL;
                 else
-                    _convert = QuantizedConvolutionNhwcGemmReorder;
+                {
+                    if(p.IsDilation(1) && p.srcC <= 64)
+                        _convert = QuantizedConvolutionNhwcGemmReorder64d1;
+                    else
+                        _convert = QuantizedConvolutionNhwcGemmReorder;
+                }
             }
             else
                 assert(0);
