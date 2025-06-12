@@ -29,6 +29,8 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdSet.h"
+#include "Simd/SimdCopy.h"
 
 namespace Simd
 {
@@ -37,49 +39,6 @@ namespace Simd
     {
         typedef Base::SynetQuantizedConvolutionNhwcGemm::AlgParam AlgParam;
         typedef Base::SynetQuantizedConvolutionNhwcGemm::ConvolutionPtr Convolution;
-
-        //-----------------------------------------------------------------------------------------
-
-        static void QuantizedConvolutionNhwcGemmReorder(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
-        {
-            size_t gap = a.bufK - a.K;
-            for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
-            {
-                for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
-                {
-                    uint8_t* row = dst + dr * a.bufK;
-                    for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
-                    {
-                        size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
-                        if (sy < p.srcH)
-                        {
-                            for (size_t kx = 0; kx < p.kernelX; kx++)
-                            {
-                                size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
-                                if (sx < p.srcW)
-                                {
-                                    const uint8_t* ps = src + (sy * p.srcW + sx) * p.srcC;
-                                    memcpy(row, ps, p.srcC);
-                                    row += p.srcC;
-                                }
-                                else
-                                {
-                                    memset(row, zero, p.srcC);
-                                    row += p.srcC;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            memset(row, zero, p.kernelX * p.srcC);
-                            row += p.kernelX * p.srcC;
-                        }
-                    }
-                    for (size_t g = 0; g < gap; ++g)
-                        *(row++) = 0;
-                }
-            }
-        }
 
         //-----------------------------------------------------------------------------------------
 
@@ -293,16 +252,6 @@ namespace Simd
             : Avx512bw::SynetQuantizedConvolutionNhwcGemm(p)
         {
             SetAlgParam(F, F * 2, 12, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            if (_src8u)
-            {
-                AlgParam& a = _alg;
-                if (_is1x1 && a.K == a.bufK)
-                    _convert = NULL;
-                else
-                    _convert = QuantizedConvolutionNhwcGemmReorder;
-            }
-            else
-                assert(0);
             Set(p, _alg, _convolutions);
         }
     }

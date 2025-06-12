@@ -45,7 +45,7 @@ namespace Simd
 
         static void QuantizedConvolutionNhwcGemmReorderD(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
-            size_t srcC64 = AlignLo(p.srcC, 32);
+            size_t srcC64 = AlignLo(p.srcC, 64);
             __mmask64 gapMask = TailMask64(a.bufK - a.K), tailMask = TailMask64(p.srcC - srcC64);
             __m512i _zero = _mm512_set1_epi8(zero);
             for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)

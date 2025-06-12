@@ -29,6 +29,8 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdSet.h"
+#include "Simd/SimdCopy.h"
 
 namespace Simd
 {
@@ -42,7 +44,9 @@ namespace Simd
 
         static void QuantizedConvolutionNhwcGemmReorder(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
-            size_t gap = a.bufK - a.K;
+            size_t srcC64 = AlignLo(p.srcC, 64);
+            __mmask64 gapMask = TailMask64(a.bufK - a.K), tailMask = TailMask64(p.srcC - srcC64);
+            __m512i _zero = _mm512_set1_epi8(zero);
             for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
@@ -58,25 +62,23 @@ namespace Simd
                                 size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
                                 if (sx < p.srcW)
                                 {
-                                    const uint8_t* ps = src + (sy * p.srcW + sx) * p.srcC;
-                                    memcpy(row, ps, p.srcC);
+                                    Copy(src + (sy * p.srcW + sx) * p.srcC, srcC64, tailMask, row);
                                     row += p.srcC;
                                 }
                                 else
                                 {
-                                    memset(row, zero, p.srcC);
+                                    SetZeros(row, _zero, srcC64, tailMask);
                                     row += p.srcC;
                                 }
                             }
                         }
                         else
                         {
-                            memset(row, zero, p.kernelX * p.srcC);
+                            SetZeros(row, _zero, p.kernelX * p.srcC);
                             row += p.kernelX * p.srcC;
                         }
                     }
-                    for (size_t g = 0; g < gap; ++g)
-                        *(row++) = 0;
+                    SetZero(row, _mm512_setzero_si512(), gapMask);
                 }
             }
         }
