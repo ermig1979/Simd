@@ -845,6 +845,14 @@ namespace Simd
             Gemm32fNNcb::Main kernelMM, kernelMT;
             Gemm32fNNcb::Tail kernelTM, kernelTT;
             size_t microM, microN;
+
+			microM = 4;
+			microN = 8;
+			kernelMM = Avx2::GemmKernel4x8nn;
+			kernelMT = Avx2::GemmKernel4x8nn;
+			kernelTM = Avx2::GetGemmTail(M%microM, microN);
+			kernelTT = Avx2::GetGemmTail(M%microM, microN);
+
 #ifdef SIMD_X64_ENABLE
             if (type == GemmKernelF3 || (type == GemmKernelAny && (M == 4 || M == 8 || M == 16 || N == 24 || N == 48 || N == 96) && N > 16))
             {
@@ -878,13 +886,6 @@ namespace Simd
                 kernelTT = Avx2::GetGemmTail(M%microM, microN);
                 type = GemmKernelF1;
             }
-#else
-            microM = 4;
-            microN = 8;
-            kernelMM = Avx2::GemmKernel4x8nn;
-            kernelMT = Avx2::GemmKernel4x8nn;
-            kernelTM = Avx2::GetGemmTail(M%microM, microN);
-            kernelTT = Avx2::GetGemmTail(M%microM, microN);
 #endif
             return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), 
                 kernelMM, kernelMT, kernelTM, kernelTT, Avx2::GemmPackA, Avx2::GemmPackB, Avx2::GemmScaleC, NULL, compatibility);
