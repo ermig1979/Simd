@@ -322,7 +322,7 @@ namespace Simd
                 PadType rowPad = dstH2 < dstH ? PadTail1 : PadNone;
                 size_t tailRow = dstH2 < dstH ? dstH - 1 : dstH - 2;
                 bool specialRowTail = dstH2 < dstH || (pad && dstH2);
-                bool specialColTail = pad ? dstW32 : (dstW32 < dstW);
+                bool specialColTail = pad ? static_cast<bool>(dstW32) : (dstW32 < dstW);
 
                 __mmask16 tails[5], noses[5];
                 for (size_t c = 0; c < 2; ++c)
