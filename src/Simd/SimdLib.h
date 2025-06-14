@@ -757,7 +757,7 @@ extern "C"
 
         \return string with version of %Simd Library (major version number, minor version number, release number, number of SVN's commits).
     */
-    SIMD_API const char * SimdVersion();
+    SIMD_API const char * SimdVersion(void);
 
     /*! @ingroup info
 
@@ -831,7 +831,7 @@ extern "C"
 
         \return string with internal performance statistics of %Simd Library.
     */
-    SIMD_API const char * SimdPerformanceStatistic();
+    SIMD_API const char * SimdPerformanceStatistic(void);
 
     /*! @ingroup memory
 
@@ -881,7 +881,7 @@ extern "C"
 
         \return a required alignment.
     */
-    SIMD_API size_t SimdAlignment();
+    SIMD_API size_t SimdAlignment(void);
 
     /*! @ingroup memory
 
@@ -903,7 +903,7 @@ extern "C"
 
         \return current thread number.
     */
-    SIMD_API size_t SimdGetThreadNumber();
+    SIMD_API size_t SimdGetThreadNumber(void);
 
     /*! @ingroup thread
 
@@ -921,7 +921,7 @@ extern "C"
 
         \short Clears MMX registers (runs EMMS instruction). It is x86 specific functionality. 
     */
-    SIMD_API void SimdEmpty();
+    SIMD_API void SimdEmpty(void);
 
     /*! @ingroup cpu_flags
 
@@ -931,7 +931,7 @@ extern "C"
 
         \return current 'fast' mode.
     */
-    SIMD_API SimdBool SimdGetFastMode();
+    SIMD_API SimdBool SimdGetFastMode(void);
 
     /*! @ingroup cpu_flags
 
@@ -949,7 +949,7 @@ extern "C"
 
         \short Set configuration of AMX registers to maximat size. It is x86 specific functionality. Affect only on CPU with AMX support.
     */
-    SIMD_API void SimdSetAmxFull();
+    SIMD_API void SimdSetAmxFull(void);
 
     /*! @ingroup hash
 
