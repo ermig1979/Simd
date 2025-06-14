@@ -49,7 +49,7 @@ namespace Test
     bool DirectoryExists(const String & path)
     {
 #if defined(_WIN32)
-        DWORD fileAttribute = GetFileAttributes(path.c_str());
+        DWORD fileAttribute = GetFileAttributesA(path.c_str());
         return ((fileAttribute != INVALID_FILE_ATTRIBUTES) &&
             (fileAttribute & FILE_ATTRIBUTE_DIRECTORY) != 0);
 #elif defined(__linux__)
