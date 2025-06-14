@@ -102,7 +102,7 @@ namespace Simd
                         {
                             for (ptrdiff_t sxc = sxcB; sxc < sxcE; sxc += C, pd += C)
                             {
-                                if ((size_t)sxc < kcX)
+                                if ((size_t)sxc < cW)
                                     Copy(src + sy * cW + sxc, pd, mC, mC);
                                 else
                                     SetZero(pd, _zero, mC);
@@ -141,7 +141,7 @@ namespace Simd
                         {
                             for (ptrdiff_t sxc = sxcB; sxc < sxcE; sxc += C, pd += C)
                             {
-                                if ((size_t)sxc < kcX)
+                                if ((size_t)sxc < cW)
                                     _mm_mask_storeu_epi8(pd, cM, _mm_maskz_loadu_epi8(cM, src + sy * cW + sxc));
                                 else
                                     _mm_mask_storeu_epi8(pd, cM, _mm512_castsi512_si128(_zero));
@@ -195,7 +195,7 @@ namespace Simd
                         {
                             for (ptrdiff_t sxc = sxcB; sxc < sxcE; sxc += C, pd += C)
                             {
-                                if ((size_t)sxc < kcX)
+                                if ((size_t)sxc < cW)
                                     _mm_mask_storeu_epi8(pd, cM, _mm_maskz_loadu_epi8(cM, src + sy * cW + sxc));
                                 else
                                     _mm_mask_storeu_epi8(pd, cM, _mm512_castsi512_si128(_zero));
