@@ -1398,6 +1398,9 @@ namespace Simd
                     _context->yuv420pToBgra(_context->img_comp[0].data, _context->img_comp[0].w2, _context->img_comp[1].data, _context->img_comp[1].w2,
                         _context->img_comp[2].data, _context->img_comp[2].w2, _context->img_x, _context->img_y, _image.data, _image.stride, 0xFF, SimdYuvTrect871);
                     return true;
+				default:
+					assert(false && "Unsupported pixel format for YUV 420 conversion.");
+					return false;
                 }
             }
             if (IsYuv444(*_context))
@@ -1414,18 +1417,29 @@ namespace Simd
                     _context->yuv444pToBgra(_context->img_comp[0].data, _context->img_comp[0].w2, _context->img_comp[1].data, _context->img_comp[1].w2,
                         _context->img_comp[2].data, _context->img_comp[2].w2, _context->img_x, _context->img_y, _image.data, _image.stride, 0xFF, SimdYuvTrect871);
                     return true;
+				default:
+					assert(false && "Unsupported pixel format for YUV 444 conversion.");
+					return false;
                 }
             }
             if (JpegToRgba(_context))
             {
                 size_t stride = 4 * _context->img_x;
-                if (_param.format == SimdPixelFormatRgba32)
+				switch (_param.format)
+				{
+				case SimdPixelFormatRgba32:
                     Base::Copy(_context->out.data, stride, _context->img_x, _context->img_y, 4, _image.data, _image.stride);
-                else if (_param.format == SimdPixelFormatGray8 || _param.format == SimdPixelFormatBgr24 ||
-                    _param.format == SimdPixelFormatBgra32 || _param.format == SimdPixelFormatRgb24)
+					return true;
+				case SimdPixelFormatGray8:
+				case SimdPixelFormatBgr24:
+				case SimdPixelFormatBgra32:
+				case SimdPixelFormatRgb24:
                     _context->rgbaToAny(_context->out.data, _context->img_x, _context->img_y, stride, _image.data, _image.stride);
-                else
-                    return false;
+					return true;
+				default:
+					assert(false && "Unsupported pixel format for JPEG conversion.");
+					return false;
+				}
                 return true;
             }
             return false;

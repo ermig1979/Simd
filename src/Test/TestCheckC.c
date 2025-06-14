@@ -29,6 +29,6 @@
 
 #include "Simd/SimdLib.h"
 
-void test()
+void test(void)
 {
 }

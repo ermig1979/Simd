@@ -60,7 +60,7 @@ namespace Simd
                     sizes[0] = 0;
                     for (i = 1; i < 16; ++i)
                         if (sizes[i] > (1 << i))
-                            return CorruptPngError("bad sizes");
+                            return static_cast<bool>(CorruptPngError("bad sizes"));
                     code = 0;
                     for (i = 1; i < 16; ++i)
                     {
@@ -69,7 +69,7 @@ namespace Simd
                         firstSymbol[i] = (uint16_t)k;
                         code = (code + sizes[i]);
                         if (sizes[i] && code - 1 >= (1 << i))
-                            return CorruptPngError("bad codelengths");
+                            return static_cast<bool>(CorruptPngError("bad codelengths"));
                         maxCode[i] = code << (16 - i);
                         code <<= 1;
                         k += sizes[i];
@@ -1104,13 +1104,13 @@ namespace Simd
 
             _buffer.Resize(width * height * output_bytes);
             if (_buffer.Empty())
-                return PngLoadError("outofmem", "Out of memory");
+                return static_cast<bool>(PngLoadError("outofmem", "Out of memory"));
 
             img_width_bytes = (_channels * width * _depth + 7) >> 3;
             img_len = (img_width_bytes + 1) * height;
 
             if (size < img_len)
-                return CorruptPngError("not enough pixels");
+                return static_cast<bool>(CorruptPngError("not enough pixels"));
 
             for (j = 0; j < height; ++j)
             {
@@ -1119,12 +1119,12 @@ namespace Simd
                 int filter = *data++;
 
                 if (filter > 4)
-                    return CorruptPngError("invalid filter");
+                    return static_cast<bool>(CorruptPngError("invalid filter"));
 
                 if (_depth < 8)
                 {
                     if (img_width_bytes > width)
-                        return CorruptPngError("invalid width");
+                        return static_cast<bool>(CorruptPngError("invalid width"));
                     cur += width * _outN - img_width_bytes; // store output to the rightmost img_len bytes, so we can decode in place
                     filter_bytes = 1;
                     width_ = img_width_bytes;

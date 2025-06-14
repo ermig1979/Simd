@@ -388,10 +388,10 @@ namespace Simd
                 LoadSrc<T, H, 1>(src0, src1, src2, src3, src4, src5, 0, mask0, tailS, mask2, s);
                 for (size_t dx = 0, offs = sX; dx < dstW; dx += 1, offs += sX)
                 {
-                    if (H > 0) d[0] = _mm512_setzero_ps();
-                    if (H > 1) d[1] = _mm512_setzero_ps();
-                    if (H > 2) d[2] = _mm512_setzero_ps();
-                    if (H > 3) d[3] = _mm512_setzero_ps();
+                    if constexpr (H > 0) d[0] = _mm512_setzero_ps();
+                    if constexpr (H > 1) d[1] = _mm512_setzero_ps();
+                    if constexpr (H > 2) d[2] = _mm512_setzero_ps();
+                    if constexpr (H > 3) d[3] = _mm512_setzero_ps();
                     switch (dx % 3)
                     {
                     case 0:

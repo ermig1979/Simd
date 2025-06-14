@@ -36,7 +36,9 @@ namespace Test
 
         struct Filter
         {
-            virtual bool Process(const Frame & input, Frame & output) = 0;
+			virtual ~Filter() = default;
+
+			virtual bool Process(const Frame & input, Frame & output) = 0;
         };
 
         Video(bool window = true);

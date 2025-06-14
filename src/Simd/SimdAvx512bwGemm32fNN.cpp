@@ -1323,6 +1323,15 @@ namespace Simd
             Gemm32fNNcb::Main kernelMM, kernelMT;
             Gemm32fNNcb::Tail kernelTM, kernelTT;
             size_t microM, microN;
+
+			microM = 4;
+			microN = 16;
+			size_t tail = N - AlignLoAny(N, microN);
+			kernelMM = Avx512bw::GemmKernel4x16nn;
+			kernelMT = Avx512bw::GemmKernel4x16nn;
+			kernelTM = Avx512bw::GetGemmTail(M%microM, microN);
+			kernelTT = Avx512bw::GetGemmTail(M%microM, tail);
+
 #if SIMD_ZMM_COUNT == 32
             if (type == GemmKernelF4 || (type == GemmKernelAny && (M == 6 || N == 64)))
             {
@@ -1408,6 +1417,7 @@ namespace Simd
                 kernelTT = Avx512bw::GetGemmTail(M%microM, tail);
                 type = GemmKernelF1;
             }
+
 #elif SIMD_ZMM_COUNT == 16
             if (type == GemmKernelF3 || (type == GemmKernelAny && (M == 4 || M == 8 || M == 16 || N == 48 || N == 96) && N > 32))
             {
@@ -1442,14 +1452,6 @@ namespace Simd
                 kernelTT = Avx512bw::GetGemmTail(M%microM, tail);
                 type = GemmKernelF1;
             }
-#else
-            microM = 4;
-            microN = 16;
-            size_t tail = N - AlignLoAny(N, microN);
-            kernelMM = Avx512bw::GemmKernel4x16nn;
-            kernelMT = Avx512bw::GemmKernel4x16nn;
-            kernelTM = Avx512bw::GetGemmTail(M%microM, microN);
-            kernelTT = Avx512bw::GetGemmTail(M%microM, tail);
 #endif
             return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), 
                 kernelMM, kernelMT, kernelTM, kernelTT, Avx512bw::GemmPackA, Avx512bw::GemmPackB, Avx512bw::GemmScaleC, TailMask16, compatibility);
