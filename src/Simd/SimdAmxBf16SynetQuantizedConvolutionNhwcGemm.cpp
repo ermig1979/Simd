@@ -45,16 +45,16 @@ namespace Simd
 
         static void QuantizedConvolutionNhwcGemmReorderR(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
-            size_t srcC64 = AlignLo(p.srcC, 64);
-            assert(p.srcC == srcC64);
+            assert(Aligned(p.srcC, 64));
+            size_t K = a.bufK, C = p.srcC, kcX = p.kernelX * C;
             __m512i _zero = _mm512_set1_epi8(zero);
             for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
                 {
                     size_t drB = dr & (~15), drO = dr & 15;
-                    uint8_t* row = dst + drB * a.bufK + drO * 64;
-                    for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
+                    uint8_t* row = dst + drB * K + drO * 64;
+                    for (size_t ky = 0; ky < p.kernelY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
                         if (sy < p.srcH)
@@ -65,19 +65,19 @@ namespace Simd
                                 if (sx < p.srcW)
                                 {
                                     const uint8_t* ps = src + (sy * p.srcW + sx) * p.srcC;
-                                    for (size_t sc = 0; sc < srcC64; sc += 64, row += 1024)
+                                    for (size_t sc = 0; sc < C; sc += 64, row += 1024)
                                         Avx512bw::Copy(ps + sc, row);
                                 }
                                 else
                                 {
-                                    for (size_t sc = 0; sc < srcC64; sc += 64, row += 1024)
+                                    for (size_t sc = 0; sc < C; sc += 64, row += 1024)
                                         SetZero(row, _zero);
                                 }
                             }
                         }
                         else
                         {
-                            for (size_t sc = 0, scN = p.kernelX * srcC64; sc < scN; sc += 64, row += 1024)
+                            for (size_t sc = 0; sc < kcX; sc += 64, row += 1024)
                                 SetZero(row, _zero);
                         }
                     }

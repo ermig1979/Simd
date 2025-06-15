@@ -44,14 +44,14 @@ namespace Simd
 
         static void QuantizedConvolutionNhwcGemmReorder(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
-            size_t srcC64 = AlignLo(p.srcC, 64);
-            __mmask64 gapMask = TailMask64(a.bufK - a.K), tailMask = TailMask64(p.srcC - srcC64);
+            size_t C = p.srcC, C64 = AlignLo(C, 64), K = a.bufK, kcX = p.kernelX * C;
+            __mmask64 gM = TailMask64(K - a.K), cM= TailMask64(C - C64);
             __m512i _zero = _mm512_set1_epi8(zero);
-            for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
+            for (size_t dy = yBeg; dy < yEnd; ++dy)
             {
-                for (size_t dx = 0; dx < p.dstW; ++dx, ++dr)
+                for (size_t dx = 0; dx < p.dstW; ++dx, dst += K)
                 {
-                    uint8_t* row = dst + dr * a.bufK;
+                    uint8_t* pd = dst;
                     for (size_t ky = 0, k = 0; ky < p.kernelY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
@@ -61,41 +61,39 @@ namespace Simd
                             {
                                 size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
                                 if (sx < p.srcW)
-                                {
-                                    Copy(src + (sy * p.srcW + sx) * p.srcC, srcC64, tailMask, row);
-                                    row += p.srcC;
-                                }
+                                    Copy(src + (sy * p.srcW + sx) * C, C64, cM, pd);
                                 else
-                                {
-                                    SetZeros(row, _zero, srcC64, tailMask);
-                                    row += p.srcC;
-                                }
+                                    SetZeros(pd, _zero, C64, cM);
+                                pd += C;
                             }
                         }
                         else
                         {
-                            SetZeros(row, _zero, p.kernelX * p.srcC);
-                            row += p.kernelX * p.srcC;
+                            SetZeros(pd, _zero, kcX);
+                            pd += kcX;
                         }
                     }
-                    SetZero(row, _mm512_setzero_si512(), gapMask);
+                    SetZero(pd, _mm512_setzero_si512(), gM);
                 }
             }
         }
 
-        static void QuantizedConvolutionNhwcGemmReorder1d64c(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
+        static void QuantizedConvolutionNhwcGemmReorder1d(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
-            assert(p.IsDilation(1) && p.srcC <= 64);
-            size_t K = a.bufK, C = p.srcC, kcX = p.kernelX * C, sX = p.strideX, cW = p.srcW * C, cwH = cW * p.srcH, kY = p.kernelY;
-            __mmask64 gM = TailMask64(K - a.K), mC = TailMask64(C);
+            //SIMD_PERF_BEG(ToStr(p.srcC));
+            assert(p.IsDilation(1));
+            size_t C = p.srcC, C64 = AlignLo(C, 64), K = a.bufK, kC = p.kernelX * C, kC64 = AlignLo(kC, 64), sX = p.strideX, cW = p.srcW * C, kY = p.kernelY, scX = sX * C;
+            size_t dyB = DivHi(p.padY, p.strideY), dyE = p.dstH - DivHi(p.padH, p.strideY), dxB = DivHi(p.padX, p.strideX), dxE = p.dstW - DivHi(p.padW, p.strideX);
+            __mmask64 gM = TailMask64(K - a.K), cM = TailMask64(C - C64), kcM = TailMask64(kC - kC64);
             __m512i _zero = _mm512_set1_epi8(zero);
             for (size_t dy = yBeg; dy < yEnd; ++dy)
             {
-                for (size_t dx = 0; dx < p.dstW; ++dx, dst += K)
+                size_t dx = 0;
+                for (; dx < dxB; ++dx, dst += K)
                 {
                     uint8_t* pd = dst;
-                    ptrdiff_t sxcB = (dx * sX - p.padX) * C, sxcE = sxcB + kcX;
-                    for (size_t ky = 0; ky < kY; ky++)
+                    ptrdiff_t sxcB = (dx * sX - p.padX) * C, sxcE = sxcB + kC;
+                    for (size_t ky = 0, k = 0; ky < kY; ky++)
                     {
                         size_t sy = dy * p.strideY + ky - p.padY;
                         if (sy < p.srcH)
@@ -103,15 +101,69 @@ namespace Simd
                             for (ptrdiff_t sxc = sxcB; sxc < sxcE; sxc += C, pd += C)
                             {
                                 if ((size_t)sxc < cW)
-                                    Copy(src + sy * cW + sxc, pd, mC, mC);
+                                    Copy(src + sy * cW + sxc, C64, cM, pd);
                                 else
-                                    SetZero(pd, _zero, mC);
+                                    SetZeros(pd, _zero, C64, cM);
                             }
                         }
                         else
                         {
-                            for (size_t kx = 0; kx < kcX; kx += C, pd += C)
-                                SetZero(pd, _zero, mC);
+                            SetZeros(pd, _zero, kC64, kcM);
+                            pd += kC;
+                        }
+                    }
+                    SetZero(pd, _mm512_setzero_si512(), gM);
+                }
+                if (dy >= dyB && dy < dyE)
+                {
+                    const uint8_t* ps = src + (dy * p.strideY - p.padY) * cW + (dx * sX - p.padX) * C;
+                    for (; dx < dxE; ++dx, dst += K, ps += scX)
+                    {
+                        uint8_t* pd = dst;
+                        for (size_t ky = 0; ky < kY; ky++, pd += kC)
+                            Copy(ps + ky * cW, kC64, kcM, pd);
+                        SetZero(pd, _mm512_setzero_si512(), gM);
+                    }
+                }
+                else
+                {
+                    for (; dx < dxE; ++dx, dst += K)
+                    {
+                        uint8_t* pd = dst;
+                        ptrdiff_t sxcB = (dx * sX - p.padX) * C;
+                        for (size_t ky = 0; ky < kY; ky++)
+                        {
+                            size_t sy = dy * p.strideY + ky - p.padY;
+                            if (sy < p.srcH)
+                                Copy(src + sy * cW + sxcB, kC64, kcM, pd);
+                            else
+                                SetZeros(pd, _zero, kC64, kcM);
+                            pd += kC;
+                        }
+                        SetZero(pd, _mm512_setzero_si512(), gM);
+                    }
+                }
+                for (; dx < p.dstW; ++dx, dst += K)
+                {
+                    uint8_t* pd = dst;
+                    ptrdiff_t sxcB = (dx * sX - p.padX) * C, sxcE = sxcB + kC;
+                    for (size_t ky = 0, k = 0; ky < kY; ky++)
+                    {
+                        size_t sy = dy * p.strideY + ky - p.padY;
+                        if (sy < p.srcH)
+                        {
+                            for (ptrdiff_t sxc = sxcB; sxc < sxcE; sxc += C, pd += C)
+                            {
+                                if ((size_t)sxc < cW)
+                                    Copy(src + sy * cW + sxc, C64, cM, pd);
+                                else
+                                    SetZeros(pd, _zero, C64, cM);
+                            }
+                        }
+                        else
+                        {
+                            SetZeros(pd, _zero, kC64, kcM);
+                            pd += kC;
                         }
                     }
                     SetZero(pd, _mm512_setzero_si512(), gM);
@@ -433,8 +485,8 @@ namespace Simd
                 {
                     if (p.IsDilation(1) && p.srcC <= 16 && p.srcC*p.kernelX <= 64)
                         _convert = QuantizedConvolutionNhwcGemmReorder1d16c;
-                    else if(p.IsDilation(1) && p.srcC <= 64)
-                        _convert = QuantizedConvolutionNhwcGemmReorder1d64c;
+                    else if (p.IsDilation(1))
+                        _convert = QuantizedConvolutionNhwcGemmReorder1d;
                     else
                         _convert = QuantizedConvolutionNhwcGemmReorder;
                 }
