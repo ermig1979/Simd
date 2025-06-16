@@ -252,6 +252,13 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE __m256i QuantizeLinear(__m256 value, __m256 scale, __m256i zero)
+        {
+            return _mm256_add_epi32(_mm256_cvtps_epi32(_mm256_mul_ps(value, scale)), zero);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
         template <Term8iType term> struct QuntizedTerm8i
         {
             template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum,

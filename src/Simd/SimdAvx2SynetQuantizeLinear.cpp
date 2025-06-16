@@ -50,6 +50,30 @@ namespace Simd
             for (; i < size; i += 1)
                 Sse41::DequantizeLinear1(src + i, _mm256_castsi256_si128(_bias), _mm256_castps256_ps128(_norm), dst + i);
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void QuantizeLinear16(const float* src, __m256 scale, __m256i zero, uint8_t* dst)
+        {
+            __m256i i0 = QuantizeLinear(_mm256_load_ps(src + 0 * 4), scale, zero);
+            __m256i i1 = QuantizeLinear(_mm256_load_ps(src + 1 * 4), scale, zero);
+            __m256i i2 = QuantizeLinear(_mm256_load_ps(src + 2 * 4), scale, zero);
+            __m256i i3 = QuantizeLinear(_mm256_load_ps(src + 3 * 4), scale, zero);
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(i0, i1), PackI32ToI16(i2, i3)));
+        }
+
+        void SynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst)
+        {
+            __m256 _scale = _mm256_set1_ps(scale[0]);
+            __m256i _zero = _mm256_set1_epi32(zero);
+            size_t i = 0, size4 = AlignLo(size, 4), size32 = AlignLo(size, 32);
+            for (; i < size32; i += 32)
+                QuantizeLinear16(src + i, _scale, _zero, dst + i);
+            for (; i < size4; i += 4)
+                Sse41::QuantizeLinear4(src + i, _mm256_castps256_ps128(_scale), _mm256_castsi256_si128(_zero), dst + i);
+            for (; i < size; i += 1)
+                Sse41::QuantizeLinear1(src + i, _mm256_castps256_ps128(_scale), _mm256_castsi256_si128(_zero), dst + i);
+        }
     }
 #endif
 }
