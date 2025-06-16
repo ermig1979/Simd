@@ -98,11 +98,11 @@ namespace Test
         if (TestBase())
             result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Base::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Sse41::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Sse41::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Avx2::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));

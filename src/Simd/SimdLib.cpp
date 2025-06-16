@@ -5261,7 +5261,7 @@ SIMD_API void SimdSynetDequantizeLinear(const uint8_t* src, size_t size, int32_t
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetDequantizeLinearPtr) (const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
-    const static SimdSynetDequantizeLinearPtr simdSynetDequantizeLinear = SIMD_FUNC0(SynetDequantizeLinear);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetDequantizeLinearPtr simdSynetDequantizeLinear = SIMD_FUNC1(SynetDequantizeLinear, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetDequantizeLinear(src, size, bias, norm, dst);
 #else
