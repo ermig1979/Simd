@@ -182,11 +182,11 @@ namespace Test
         if (TestBase())
             result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Base::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Sse41::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Sse41::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Avx2::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
