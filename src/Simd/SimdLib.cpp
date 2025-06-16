@@ -5970,6 +5970,19 @@ SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t*
 #endif
 }
 
+SIMD_API void SimdSynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetQuantizeLinearPtr) (const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst);
+    const static SimdSynetQuantizeLinearPtr simdSynetQuantizeLinear = SIMD_FUNC0(SynetQuantizeLinear);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+
+    simdSynetQuantizeLinear(src, size, scale, zero, dst);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
 {
     SIMD_EMPTY();

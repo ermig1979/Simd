@@ -37,6 +37,16 @@ namespace Simd
             for (size_t i = 0; i < size; ++i)
                 dst[i] = DequantizeLinear(src[i], bias, _norm);
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        void SynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst)
+        {
+            float _scale = scale[0];
+            int min = 0, max = 255;
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = QuantizeLinear(src[i], _scale, zero, min, max);
+        }
     }
 #endif
 }

@@ -6522,7 +6522,7 @@ extern "C"
 
         \fn void SimdSynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
 
-        \short Performs INT8 linear dequantization.
+        \short Performs UINT8 linear dequantization.
 
         Algorithm's details for ::SimdSynetDequantizeLinear:
         \verbatim
@@ -6530,7 +6530,7 @@ extern "C"
             dst[i] = (src[i] + bias) * norm[0];
         \endverbatim
 
-        \param [in] src - a pointer to INT8 input tensor.
+        \param [in] src - a pointer to UINT8 input tensor.
         \param [in] size - a size of the input and output tensors.
         \param [in] bias - a dequantization bias (-zero).
         \param [in] norm - a dequantization norm (scale).
@@ -7602,6 +7602,26 @@ extern "C"
         \param [out] dst - a pointer to output tensor.
     */
     SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+    /*! @ingroup synet_quantized_other
+
+        \fn void SimdSynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst);
+
+        \short Performs UINT8 linear quantization.
+
+        Algorithm's details for ::SimdSynetQuantizeLinear:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = Min(Max(std::nearbyint(src[i] * scale[0]) - zero), 0), 255);
+        \endverbatim
+
+        \param [in] src - a pointer to FP32 input tensor.
+        \param [in] size - a size of the input and output tensors.
+        \param [in] scale - a quantization scale.
+        \param [in] zero - a quantization zero.
+        \param [out] dst - a pointer to UINT8 output tensor.
+    */
+    SIMD_API void SimdSynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst);
 
     /*! @ingroup synet_activation
 

@@ -417,6 +417,7 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetQuantizedConvolutionForward);
 
     TEST_ADD_GROUP_A0(SynetDequantizeLinear);
+    TEST_ADD_GROUP_A0(SynetQuantizeLinear);
 
     TEST_ADD_GROUP_A0(SynetScaleLayerForward);
     TEST_ADD_GROUP_A0(SynetScale8iForward);
