@@ -1,7 +1,8 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2025 Yermalayeu Ihar,
+*               2025-2025 Ger Hobbelt.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal

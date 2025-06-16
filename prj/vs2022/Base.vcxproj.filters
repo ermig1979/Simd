@@ -403,6 +403,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemm.cpp">
       <Filter>Base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizeLinear.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

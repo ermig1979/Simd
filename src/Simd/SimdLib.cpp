@@ -5256,6 +5256,19 @@ SIMD_API void SimdSynetDeconvolution16bForward(void* context, const uint8_t* src
 #endif
 }
 
+SIMD_API void SimdSynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetDequantizeLinearPtr) (const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
+    const static SimdSynetDequantizeLinearPtr simdSynetDequantizeLinear = SIMD_FUNC0(SynetDequantizeLinear);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetDequantizeLinear(src, size, bias, norm, dst);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst)
 {
     SIMD_EMPTY();

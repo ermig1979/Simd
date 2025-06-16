@@ -21,29 +21,21 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetQuantizedConvolution.h"
-#include "Simd/SimdSynetQuantizeLinear.h"
-#include "Simd/SimdSynetConvolution8iCommon.h"
-#include "Simd/SimdSynet.h"
-#include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdSynetQuantizeLinear.h"
 
 namespace Simd
 {
-#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Avx2
+#if defined(SIMD_SYNET_ENABLE)
+    namespace Base
     {
-        void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv)
+        void SynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst)
         {
-            ConvParam param(batch, conv);
-            if (!ValidQuantized(param))
-                return NULL;
-            else if(SynetQuantizedConvolutionNhwcGemm::Preferable(param))
-                return new SynetQuantizedConvolutionNhwcGemm(param);
-            else
-                return new Base::SynetQuantizedConvolutionGemm(param);
+            float _norm = norm[0];
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = DequantizeLinear(src[i], bias, _norm);
         }
     }
 #endif

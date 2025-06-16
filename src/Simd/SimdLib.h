@@ -4,7 +4,8 @@
 * Copyright (c) 2011-2025 Yermalayeu Ihar,
 *               2014-2019 Antonenka Mikhail,
 *               2019-2019 Facundo Galan,
-*               2024-2024 Sergey Chezhin.
+*               2024-2024 Sergey Chezhin,
+*               2025-2025 Ger Hobbelt.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -6516,6 +6517,26 @@ extern "C"
         \param [out] dst - a pointer to output tensor.
     */
     SIMD_API void SimdSynetDeconvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+    /*! @ingroup synet_quantized_other
+
+        \fn void SimdSynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
+
+        \short Performs INT8 linear dequantization.
+
+        Algorithm's details for ::SimdSynetDequantizeLinear:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = (src[i] + bias) * norm[0];
+        \endverbatim
+
+        \param [in] src - a pointer to INT8 input tensor.
+        \param [in] size - a size of the input and output tensors.
+        \param [in] bias - a dequantization bias (-zero).
+        \param [in] norm - a dequantization norm (scale).
+        \param [out] dst - a pointer to FP32 output tensor.
+    */
+    SIMD_API void SimdSynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
 
     /*! @ingroup synet_other
 

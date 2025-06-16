@@ -80,6 +80,13 @@ namespace Simd
                     assert(0);
             }
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE float DequantizeLinear(int value, int bias, float norm)
+        {
+            return float(value + bias) * norm;
+        }
     }
 
 #ifdef SIMD_SSE41_ENABLE    
