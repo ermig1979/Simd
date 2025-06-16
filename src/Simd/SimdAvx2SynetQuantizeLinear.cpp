@@ -28,29 +28,27 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Sse41
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx2
     {
-        SIMD_INLINE void DequantizeLinear16(const uint8_t* src, __m128i bias, __m128 norm, float* dst)
+        SIMD_INLINE void DequantizeLinear16(const uint8_t* src, __m256i bias, __m256 norm, float* dst)
         {
             __m128i _src = _mm_loadu_si128((__m128i*)src);
-            _mm_storeu_ps(dst + 0 * 4, DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 0 * 4)), bias, norm));
-            _mm_storeu_ps(dst + 1 * 4, DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 1 * 4)), bias, norm));
-            _mm_storeu_ps(dst + 2 * 4, DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 2 * 4)), bias, norm));
-            _mm_storeu_ps(dst + 3 * 4, DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 3 * 4)), bias, norm));
+            _mm256_storeu_ps(dst + 0 * 8, DequantizeLinear(_mm256_cvtepu8_epi32(_mm_srli_si128(_src, 0 * 8)), bias, norm));
+            _mm256_storeu_ps(dst + 1 * 8, DequantizeLinear(_mm256_cvtepu8_epi32(_mm_srli_si128(_src, 1 * 8)), bias, norm));
         }
 
         void SynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst)
         {
-            __m128i _bias = _mm_set1_epi32(bias);
-            __m128 _norm = _mm_set1_ps(norm[0]);
+            __m256i _bias = _mm256_set1_epi32(bias);
+            __m256 _norm = _mm256_set1_ps(norm[0]);
             size_t i = 0, size4 = AlignLo(size, 4), size16 = AlignLo(size, 16);
             for (; i < size16; i += 16)
                 DequantizeLinear16(src + i, _bias, _norm, dst + i);
             for (; i < size4; i += 4)
-                DequantizeLinear4(src + i, _bias, _norm, dst + i);
+                Sse41::DequantizeLinear4(src + i, _mm256_castsi256_si128(_bias), _mm256_castps256_ps128(_norm), dst + i);
             for (; i < size; i += 1)
-                DequantizeLinear1(src + i, _bias, _norm, dst + i);
+                Sse41::DequantizeLinear1(src + i, _mm256_castsi256_si128(_bias), _mm256_castps256_ps128(_norm), dst + i);
         }
     }
 #endif

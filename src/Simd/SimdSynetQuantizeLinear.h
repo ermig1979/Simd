@@ -92,6 +92,27 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        SIMD_INLINE __m128 DequantizeLinear(__m128i value, __m128i bias, __m128 norm)
+        {
+            return _mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(value, bias)), norm);
+        }
+
+        SIMD_INLINE void DequantizeLinear1(const uint8_t* src, __m128i bias, __m128 norm, float* dst)
+        {
+            __m128i _src = _mm_set1_epi32(src[0]);
+            __m128 _dst = DequantizeLinear(_src, bias, norm);
+            _mm_store_ss(dst, _dst);
+        }
+
+        SIMD_INLINE void DequantizeLinear4(const uint8_t* src, __m128i bias, __m128 norm, float* dst)
+        {
+            __m128i _src = _mm_cvtepu8_epi32(_mm_set1_epi32(((int32_t*)src)[0]));
+            __m128 _dst = DequantizeLinear(_src, bias, norm);
+            _mm_storeu_ps(dst, _dst);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
         template <Term8iType term> struct QuntizedTerm8i
         {
             template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
@@ -189,6 +210,13 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        SIMD_INLINE __m256 DequantizeLinear(__m256i value, __m256i bias, __m256 norm)
+        {
+            return _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_add_epi32(value, bias)), norm);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
         template <Term8iType term> struct QuntizedTerm8i
         {
             template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum,
