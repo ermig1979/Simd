@@ -314,6 +314,13 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        SIMD_INLINE __m512 DequantizeLinear(__m512i value, __m512i bias, __m512 norm)
+        {
+            return _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(value, bias)), norm);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
         template <Term8iType term> struct QuntizedTerm8i
         {
             template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,

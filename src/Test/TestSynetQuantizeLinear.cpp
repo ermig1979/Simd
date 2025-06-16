@@ -108,10 +108,10 @@ namespace Test
             result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Avx2::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw())
-//            result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Avx512bw::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
-//#endif 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
+            result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Avx512bw::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
+#endif 
 
         return result;
     }
