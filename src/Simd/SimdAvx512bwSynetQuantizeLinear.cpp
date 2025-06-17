@@ -48,6 +48,37 @@ namespace Simd
             if (i < size)
                 DequantizeLinear16(src + i, _bias, _norm, dst + i, tail16);
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void QuantizeLinear16(const float* src, __m512 scale, __m512i zero, uint8_t* dst, __mmask16 tail = __mmask16(-1))
+        {
+            __m512i i0 = QuantizeLinear(_mm512_loadu_ps(src), scale, zero);
+            _mm_mask_storeu_epi8(dst, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(i0, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void QuantizeLinear64(const float* src, __m512 scale, __m512i zero, uint8_t* dst)
+        {
+            __m512i i0 = QuantizeLinear(_mm512_loadu_ps(src + 0 * 16), scale, zero);
+            __m512i i1 = QuantizeLinear(_mm512_loadu_ps(src + 1 * 16), scale, zero);
+            __m512i i2 = QuantizeLinear(_mm512_loadu_ps(src + 2 * 16), scale, zero);
+            __m512i i3 = QuantizeLinear(_mm512_loadu_ps(src + 3 * 16), scale, zero);
+            _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(i0, i1), PackI32ToI16(i2, i3)));
+        }
+
+        void SynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst)
+        {
+            __m512 _scale = _mm512_set1_ps(scale[0]);
+            __m512i _zero = _mm512_set1_epi32(zero);
+            size_t i = 0, size16 = AlignLo(size, 16), size64 = AlignLo(size, 64);
+            __mmask16 tail16 = TailMask16(size - size16);
+            for (; i < size64; i += 64)
+                QuantizeLinear64(src + i, _scale, _zero, dst + i);
+            for (; i < size16; i += 16)
+                QuantizeLinear16(src + i, _scale, _zero, dst + i);
+            if (i < size)
+                QuantizeLinear16(src + i, _scale, _zero, dst + i, tail16);
+        }
     }
 #endif
 }

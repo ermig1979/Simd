@@ -515,6 +515,8 @@ namespace Simd
         
         void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
 
+        void SynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst);
+
         void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
 
         void SynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst);

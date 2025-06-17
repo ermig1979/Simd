@@ -132,17 +132,17 @@ namespace Simd
 
         SIMD_INLINE void QuantizeLinear4(const float* src, __m128 scale, __m128i zero, uint8_t* dst)
         {
-            __m128 _src = _mm_load_ps(src);
+            __m128 _src = _mm_loadu_ps(src);
             __m128i i32 = QuantizeLinear(_src, scale, zero);
             ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
         }
 
         SIMD_INLINE void QuantizeLinear16(const float* src, __m128 scale, __m128i zero, uint8_t* dst)
         {
-            __m128i i0 = QuantizeLinear(_mm_load_ps(src + 0 * 4), scale, zero);
-            __m128i i1 = QuantizeLinear(_mm_load_ps(src + 1 * 4), scale, zero);
-            __m128i i2 = QuantizeLinear(_mm_load_ps(src + 2 * 4), scale, zero);
-            __m128i i3 = QuantizeLinear(_mm_load_ps(src + 3 * 4), scale, zero);
+            __m128i i0 = QuantizeLinear(_mm_loadu_ps(src + 0 * 4), scale, zero);
+            __m128i i1 = QuantizeLinear(_mm_loadu_ps(src + 1 * 4), scale, zero);
+            __m128i i2 = QuantizeLinear(_mm_loadu_ps(src + 2 * 4), scale, zero);
+            __m128i i3 = QuantizeLinear(_mm_loadu_ps(src + 3 * 4), scale, zero);
             _mm_storeu_si128((__m128i*)dst,  _mm_packus_epi16(_mm_packs_epi32(i0, i1), _mm_packs_epi32(i2, i3)));
         }
 
@@ -359,6 +359,13 @@ namespace Simd
         SIMD_INLINE __m512 DequantizeLinear(__m512i value, __m512i bias, __m512 norm)
         {
             return _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(value, bias)), norm);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE __m512i QuantizeLinear(__m512 value, __m512 scale, __m512i zero)
+        {
+            return _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(value, scale)), zero);
         }
 
         //--------------------------------------------------------------------------------------------------
