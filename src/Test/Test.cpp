@@ -414,6 +414,8 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetPoolingMax32f);
     TEST_ADD_GROUP_A0(SynetPoolingMax8u);
 
+    TEST_ADD_GROUP_A0(SynetQuantizedAddForward);
+
     TEST_ADD_GROUP_A0(SynetQuantizedConvolutionForward);
 
     TEST_ADD_GROUP_A0(SynetDequantizeLinear);

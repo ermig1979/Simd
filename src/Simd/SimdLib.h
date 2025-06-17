@@ -7500,7 +7500,6 @@ extern "C"
     SIMD_API void SimdSynetPoolingMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
-
     /*! @ingroup synet_activation
 
         \fn void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
@@ -7524,6 +7523,48 @@ extern "C"
         \param [in] format - a format of (input/output) image tensor.
     */
     SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+
+    /*! @ingroup synet_quantized_add
+
+        \fn void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm, const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm, SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+
+        \short Initilizes quantized addition algorithm.
+
+        \param [in] aShape - a pointer to shape of input A tensor.
+        \param [in] aCount - a count of dimensions of input A tensor.
+        \param [in] aType - a type of input A tensor. Can be FP32 of UINT8.
+        \param [in] aBias - a dequantization bias parameter of A tensor (-zero).
+        \param [in] aNorm - a dequantization norm parameter of A tensor (scale).
+        \param [in] bShape - a pointer to shape of input B tensor.
+        \param [in] bCount - a count of dimensions of input B tensor.
+        \param [in] bType - a type of input B tensor. Can be FP32 of UINT8.
+        \param [in] bBias - a dequantization bias parameter of B tensor (-zero).
+        \param [in] bNorm - a dequantization norm parameter of B tensor (scale).
+        \param [in] actType - an activation function type (if it merged to quantized addition).
+        \param [in] actParams - a pointer to activation function parameters. Can be NULL.
+        \param [in] dstType - a type of output tensor. Can be FP32 of UINT8.
+        \param [in] dstNorm - an output quantization norm (1/scale). 
+        \param [in] dstZero - an output quantization zero.
+        \return a pointer to quantized addition context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in function ::SimdSynetQuantizedAddForward.
+    */
+    SIMD_API void* SimdSynetQuantizedAddInit(
+        const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
+        const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm, 
+        SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+
+    /*! @ingroup synet_quantized_add
+
+        \fn void SimdSynetQuantizedAddForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
+
+        \short Performs forward propagation of quantized addition algorithm.
+
+        \param [in] context - a pointer to quantized addition context. It must be created by function ::SimdSynetQuantizedAddInit and released by function ::SimdRelease.
+        \param [in] a - a pointer to input A tensor.
+        \param [in] b - a pointer to input B tensor.
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetQuantizedAddForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
     /*! @ingroup synet_quantized_convolution
 
@@ -7605,23 +7646,23 @@ extern "C"
 
     /*! @ingroup synet_quantized_other
 
-        \fn void SimdSynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst);
+        \fn void SimdSynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
 
         \short Performs UINT8 linear quantization.
 
         Algorithm's details for ::SimdSynetQuantizeLinear:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = Min(Max(std::nearbyint(src[i] * scale[0]) - zero), 0), 255);
+            dst[i] = Min(Max(std::nearbyint(src[i] * scale[0]) + zero), 0), 255);
         \endverbatim
 
         \param [in] src - a pointer to FP32 input tensor.
         \param [in] size - a size of the input and output tensors.
-        \param [in] scale - a quantization scale.
+        \param [in] norm - a quantization norm (1/scale).
         \param [in] zero - a quantization zero.
         \param [out] dst - a pointer to UINT8 output tensor.
     */
-    SIMD_API void SimdSynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst);
+    SIMD_API void SimdSynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
 
     /*! @ingroup synet_activation
 

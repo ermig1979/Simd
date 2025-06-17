@@ -53,26 +53,26 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void QuantizeLinear32(const float* src, __m256 scale, __m256i zero, uint8_t* dst)
+        SIMD_INLINE void QuantizeLinear32(const float* src, __m256 norm, __m256i zero, uint8_t* dst)
         {
-            __m256i i0 = QuantizeLinear(_mm256_loadu_ps(src + 0 * 8), scale, zero);
-            __m256i i1 = QuantizeLinear(_mm256_loadu_ps(src + 1 * 8), scale, zero);
-            __m256i i2 = QuantizeLinear(_mm256_loadu_ps(src + 2 * 8), scale, zero);
-            __m256i i3 = QuantizeLinear(_mm256_loadu_ps(src + 3 * 8), scale, zero);
+            __m256i i0 = QuantizeLinear(_mm256_loadu_ps(src + 0 * 8), norm, zero);
+            __m256i i1 = QuantizeLinear(_mm256_loadu_ps(src + 1 * 8), norm, zero);
+            __m256i i2 = QuantizeLinear(_mm256_loadu_ps(src + 2 * 8), norm, zero);
+            __m256i i3 = QuantizeLinear(_mm256_loadu_ps(src + 3 * 8), norm, zero);
             _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(i0, i1), PackI32ToI16(i2, i3)));
         }
 
-        void SynetQuantizeLinear(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst)
+        void SynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst)
         {
-            __m256 _scale = _mm256_set1_ps(scale[0]);
+            __m256 _norm = _mm256_set1_ps(norm[0]);
             __m256i _zero = _mm256_set1_epi32(zero);
             size_t i = 0, size4 = AlignLo(size, 4), size32 = AlignLo(size, 32);
             for (; i < size32; i += 32)
-                QuantizeLinear32(src + i, _scale, _zero, dst + i);
+                QuantizeLinear32(src + i, _norm, _zero, dst + i);
             for (; i < size4; i += 4)
-                Sse41::QuantizeLinear4(src + i, _mm256_castps256_ps128(_scale), _mm256_castsi256_si128(_zero), dst + i);
+                Sse41::QuantizeLinear4(src + i, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + i);
             for (; i < size; i += 1)
-                Sse41::QuantizeLinear1(src + i, _mm256_castps256_ps128(_scale), _mm256_castsi256_si128(_zero), dst + i);
+                Sse41::QuantizeLinear1(src + i, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + i);
         }
     }
 #endif

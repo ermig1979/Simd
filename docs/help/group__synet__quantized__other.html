@@ -53,9 +53,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gad261eff337f22143aa0a6755bd724e7e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#gad261eff337f22143aa0a6755bd724e7e">SimdSynetDequantizeLinear</a> (const uint8_t *src, size_t size, int32_t bias, const float *norm, float *dst)</td></tr>
 <tr class="memdesc:gad261eff337f22143aa0a6755bd724e7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs UINT8 linear dequantization.  <a href="group__synet__quantized__other.html#gad261eff337f22143aa0a6755bd724e7e">More...</a><br /></td></tr>
 <tr class="separator:gad261eff337f22143aa0a6755bd724e7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaad16fb2bddceac965249268f8b3bb5a7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#gaad16fb2bddceac965249268f8b3bb5a7">SimdSynetQuantizeLinear</a> (const float *src, size_t size, const float *scale, int32_t zero, uint8_t *dst)</td></tr>
-<tr class="memdesc:gaad16fb2bddceac965249268f8b3bb5a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs UINT8 linear quantization.  <a href="group__synet__quantized__other.html#gaad16fb2bddceac965249268f8b3bb5a7">More...</a><br /></td></tr>
-<tr class="separator:gaad16fb2bddceac965249268f8b3bb5a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5cbccbcb840d3ead9391d4f7e12d23fd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#ga5cbccbcb840d3ead9391d4f7e12d23fd">SimdSynetQuantizeLinear</a> (const float *src, size_t size, const float *norm, int32_t zero, uint8_t *dst)</td></tr>
+<tr class="memdesc:ga5cbccbcb840d3ead9391d4f7e12d23fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs UINT8 linear quantization.  <a href="group__synet__quantized__other.html#ga5cbccbcb840d3ead9391d4f7e12d23fd">More...</a><br /></td></tr>
+<tr class="separator:ga5cbccbcb840d3ead9391d4f7e12d23fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >These function are used to accelerate quantization algorithms in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
@@ -120,8 +120,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gaad16fb2bddceac965249268f8b3bb5a7" name="gaad16fb2bddceac965249268f8b3bb5a7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaad16fb2bddceac965249268f8b3bb5a7">&#9670;&#160;</a></span>SimdSynetQuantizeLinear()</h2>
+<a id="ga5cbccbcb840d3ead9391d4f7e12d23fd" name="ga5cbccbcb840d3ead9391d4f7e12d23fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5cbccbcb840d3ead9391d4f7e12d23fd">&#9670;&#160;</a></span>SimdSynetQuantizeLinear()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -142,7 +142,7 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>scale</em>, </td>
+          <td class="paramname"><em>norm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -165,13 +165,13 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Performs UINT8 linear quantization. </p>
-<p >Algorithm's details for <a class="el" href="group__synet__quantized__other.html#gaad16fb2bddceac965249268f8b3bb5a7" title="Performs UINT8 linear quantization.">SimdSynetQuantizeLinear</a>: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] = Min(Max(std::nearbyint(src[i] * scale[0]) - zero), 0), 255);
+<p >Algorithm's details for <a class="el" href="group__synet__quantized__other.html#ga5cbccbcb840d3ead9391d4f7e12d23fd" title="Performs UINT8 linear quantization.">SimdSynetQuantizeLinear</a>: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
+    dst[i] = Min(Max(std::nearbyint(src[i] * scale[0]) + zero), 0), 255);
 </pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to FP32 input tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of the input and output tensors. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a quantization scale. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">norm</td><td>- a quantization norm (1/scale). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">zero</td><td>- a quantization zero. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to UINT8 output tensor. </td></tr>
   </table>

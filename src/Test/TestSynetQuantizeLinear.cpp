@@ -122,17 +122,17 @@ namespace Test
     {
         struct FuncQl
         {
-            typedef void(*FuncPtr)(const float* src, size_t size, const float* scale, int32_t zero, uint8_t* dst);
+            typedef void(*FuncPtr)(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
 
             FuncPtr func;
             String desc;
 
             FuncQl(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
-            void Call(const Tensor32f& src, float scale, int32_t zero, Tensor8u& dst) const
+            void Call(const Tensor32f& src, float norm, int32_t zero, Tensor8u& dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func(src.Data(), src.Size(), &scale, zero, dst.Data());
+                func(src.Data(), src.Size(), &norm, zero, dst.Data());
             }
         };
     }
@@ -151,14 +151,14 @@ namespace Test
         Tensor8u dst1(ToShape(size));
         Tensor8u dst2(ToShape(size));
 
-        float scale = 0.01;
+        float norm = 0.01;
         int32_t zero = 47;
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, zero, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, norm, zero, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, zero, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, norm, zero, dst2));
 
         result = result && Compare(dst1, dst2, 0, true, 64);
 

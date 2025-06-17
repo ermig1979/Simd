@@ -350,7 +350,7 @@ namespace Test
     typedef Tensor<uint8_t> Tensor8u;
     typedef Tensor<uint16_t> Tensor16u;
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     inline Shape Shp()
     {
@@ -382,6 +382,8 @@ namespace Test
         return Shape({ axis0, axis1, axis2, axis3, axis4 });
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     template<class T> inline void Copy(const Tensor<T> & src, Tensor<T> & dst)
     {
         assert(src.Size() == dst.Size());
@@ -393,6 +395,8 @@ namespace Test
         for (size_t i = 0; i < tensor.Size(); ++i)
             tensor.Data()[i] = value;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     inline void Compare(const Tensor32f & a, const Tensor32f & b, float differenceMax, bool printError, int errorCountMax, DifferenceType differenceType, const String & description,
         Shape index, size_t order, int & errorCount, std::stringstream & message)
@@ -504,6 +508,8 @@ namespace Test
         return errorCount == 0;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     inline void FillDebug(Tensor32f & dst, Shape index, size_t order)
     {
         if (order == dst.Count())
@@ -525,6 +531,8 @@ namespace Test
         Index index(dst.Count(), 0);
         FillDebug(dst, index, 0);
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     inline String ToString(SimdTensorFormatType format)
     {
@@ -573,6 +581,8 @@ namespace Test
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     inline Shape ToShape(size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format)
     {
         switch (format)
@@ -611,6 +621,32 @@ namespace Test
     inline Shape ToShape(size_t channels, SimdTensorFormatType format)
     {
         return Shp(channels);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    inline bool IsCompatible(const Shape& a, const Shape& b)
+    {
+        for (size_t i = 0, n = std::max(a.size(), b.size()), a0 = n - a.size(), b0 = n - b.size(); i < n; ++i)
+        {
+            size_t ai = i < a0 ? 1 : a[i - a0];
+            size_t bi = i < b0 ? 1 : b[i - b0];
+            if (!(ai == bi || ai == 1 || bi == 1))
+                return false;
+        }
+        return true;
+    }
+
+   inline Shape OutputShape(const Shape& a, const Shape& b)
+    {
+        Shape d(std::max(a.size(), b.size()), 1);
+        for (size_t i = 0, n = d.size(), a0 = n - a.size(), b0 = n - b.size(); i < n; ++i)
+        {
+            size_t ai = i < a0 ? 1 : a[i - a0];
+            size_t bi = i < b0 ? 1 : b[i - b0];
+            d[i] = std::max(ai, bi);
+        }
+        return d;
     }
 }
 
