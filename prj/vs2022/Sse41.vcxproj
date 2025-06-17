@@ -136,6 +136,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizeLinear.cpp" />

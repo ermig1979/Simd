@@ -50,7 +50,7 @@ namespace Test
             {
                 const char* afs[] = { "-id", "-re", "-lr", "-rr", "-pr", "-el", "-hs", "-mi", "-hi", "-sw", "-ge" };
                 desc = desc + "[" + ToString(as) + "+" + ToString(bs) + "-" +
-                    ToChar(at) + ToChar(bt) + ToChar(dt) + "-" + afs[act] + "]";
+                    ToChar(at) + ToChar(bt) + ToChar(dt) + afs[act] + "]";
             }
 
             void Call(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst) const
@@ -131,6 +131,8 @@ namespace Test
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
         result = result && SynetQuantizedAddForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 127, 17, 17), u8, aId, u8, f1, f2);
+        result = result && SynetQuantizedAddForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 127, 17, 17), u8, aRe, u8, f1, f2);
+        result = result && SynetQuantizedAddForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 127, 17, 17), u8, aId, f32, f1, f2);
 
         return result;
     }
@@ -142,11 +144,11 @@ namespace Test
         if (TestBase())
             result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Base::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Sse41::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Sse41::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Avx2::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));

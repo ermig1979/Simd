@@ -112,6 +112,17 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        class SynetQuantizedAddUniform : public Base::SynetQuantizedAddUniform
+        {
+        public:
+            SynetQuantizedAddUniform(const QuantizedAddParam& p);
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
+            const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm,
+            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
     }
 #endif
 
