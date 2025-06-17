@@ -38,12 +38,12 @@ namespace Simd
 
         template <> SIMD_INLINE float Convert8u(const uint8_t& src, float norm, int bias)
         {
-            return QuantizeLinear(src, norm, bias, 0, 255);
+            return DequantizeLinear(src, bias, norm);
         }
 
         template <> SIMD_INLINE uint8_t Convert8u(const float& src, float norm, int bias)
         {
-            return DequantizeLinear(src, bias, norm);
+            return QuantizeLinear(src, norm, bias, 0, 255);
         }
 
         //-------------------------------------------------------------------------------------------------

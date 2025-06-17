@@ -36,9 +36,9 @@ namespace Simd
             return (int)std::nearbyint(value);
         }
 
-        SIMD_INLINE int QuantizeLinear(int value, float norm, int zero, int min, int max)
+        SIMD_INLINE int QuantizeLinear(float value, float norm, int zero, int min, int max)
         {
-            return RestrictRange(NearByInt(float(value) * norm) + zero, min, max);
+            return RestrictRange(NearByInt(value * norm) + zero, min, max);
         }
 
         SIMD_INLINE int QuantizeSumLinear(int sum, int bias, float norm, int zero, int min, int max)
