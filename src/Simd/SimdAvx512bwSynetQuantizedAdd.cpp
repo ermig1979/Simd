@@ -46,7 +46,7 @@ namespace Simd
             __m512i d1 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 1)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 1)), bBias, bNorm, params, dNorm, dZero);
             __m512i d2 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 2)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 2)), bBias, bNorm, params, dNorm, dZero);
             __m512i d3 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 3)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 3)), bBias, bNorm, params, dNorm, dZero);
-            _mm512_storeu_epi8(dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
+            _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
         }
 
         template <SimdConvolutionActivationType type> static void QuantizedAddUniform8u8u8u(const uint8_t* a, int aBias, float aNorm, const uint8_t* b, int bBias, float bNorm, size_t size, const float* params, float dNorm, int dZero, uint8_t* dst)
