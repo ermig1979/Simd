@@ -42,10 +42,10 @@ namespace Simd
 
         template <SimdConvolutionActivationType type> void QuantizedAdd8u8u8u64(const uint8_t* a, const __m512i& aBias, const __m512& aNorm, const uint8_t* b, const __m512i& bBias, const __m512& bNorm, const __m512* params, uint8_t* dst, const __m512& dNorm, const __m512i& dZero)
         {
-            __m512i d0 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_epi8(a + 0 * F)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_epi8(b + 0 * F)), bBias, bNorm, params, dNorm, dZero);
-            __m512i d1 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_epi8(a + 1 * F)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_epi8(b + 1 * F)), bBias, bNorm, params, dNorm, dZero);
-            __m512i d2 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_epi8(a + 2 * F)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_epi8(b + 2 * F)), bBias, bNorm, params, dNorm, dZero);
-            __m512i d3 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_epi8(a + 3 * F)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_epi8(b + 3 * F)), bBias, bNorm, params, dNorm, dZero);
+            __m512i d0 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 0)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 0)), bBias, bNorm, params, dNorm, dZero);
+            __m512i d1 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 1)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 1)), bBias, bNorm, params, dNorm, dZero);
+            __m512i d2 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 2)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 2)), bBias, bNorm, params, dNorm, dZero);
+            __m512i d3 = QuantizedAdd<type>(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 3)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 3)), bBias, bNorm, params, dNorm, dZero);
             _mm512_storeu_epi8(dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
         }
 
