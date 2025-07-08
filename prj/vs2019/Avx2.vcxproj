@@ -129,6 +129,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizeLinear.cpp" />

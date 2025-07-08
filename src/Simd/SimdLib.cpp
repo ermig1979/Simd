@@ -5911,7 +5911,7 @@ SIMD_API void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, Si
     typedef void* (*SimdSynetQuantizedAddInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
         const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm,
         SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
-    const static SimdSynetQuantizedAddInitPtr simdSynetQuantizedAddInit = SIMD_FUNC1(SynetQuantizedAddInit, SIMD_SSE41_FUNC);// SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC);
+    const static SimdSynetQuantizedAddInitPtr simdSynetQuantizedAddInit = SIMD_FUNC2(SynetQuantizedAddInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// SIMD_AVX512BW_FUNC);
 
     return simdSynetQuantizedAddInit(aShape, aCount, aType, aBias, aNorm, bShape, bCount, bType, bBias, bNorm, actType, actParams, dstType, dstNorm, dstZero);
 #else
