@@ -342,9 +342,14 @@ namespace Simd
             const uint32x4_t MASK = SIMD_VEC_SET1_EPI32(Base::Bf16::MASK);
         }
 
+        SIMD_INLINE uint32x4_t BFloat16Round(float32x4_t value)
+        {
+            return vaddq_u32(vandq_u32(vshrq_n_u32(vreinterpretq_u32_f32(value), Base::Bf16::SHIFT), K32_00000001), Bf16::ROUND);
+        }
+
         SIMD_INLINE uint32x4_t Float32ToBFloat16(float32x4_t value)
         {
-            return vshrq_n_u32(vaddq_u32(vreinterpretq_u32_f32(value), Bf16::ROUND), Base::Bf16::SHIFT);
+            return vshrq_n_u32(vaddq_u32(vreinterpretq_u32_f32(value), BFloat16Round(value)), Base::Bf16::SHIFT);
         }
 
         SIMD_INLINE float32x4_t BFloat16ToFloat32(uint32x4_t value)
