@@ -101,6 +101,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
@@ -232,6 +233,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemm.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizeLinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale16b.cpp" />

@@ -113,6 +113,10 @@ namespace Simd
         }
 
     protected:
+        virtual void SetB(const int8_t* b) = 0;
+        virtual void SetBias(const int8_t* b, const int32_t* bias);
+        virtual void SetOther();
+
         QuantizedInnerProductParam _param;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer * _perf;
@@ -131,9 +135,21 @@ namespace Simd
 
     namespace Base
     {
+        class SynetQuantizedInnerProductRef : public SynetQuantizedInnerProduct
+        {
+        public:
+            SynetQuantizedInnerProductRef(const QuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
+
+        protected:
+            virtual void SetB(const int8_t* b);
+        };
+
         //------------------------------------------------------------------------------------------------
 
-        inline void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias) { return 0; };
+        void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
     }
 
 #ifdef SIMD_SSE41_ENABLE    

@@ -177,7 +177,7 @@ namespace Simd
             size_t K = a.bufK, C = p.srcC, kcX = p.kernelX * C, sX = p.strideX, cW = p.srcW * C, cwH = cW * p.srcH, kY = p.kernelY, scX = sX * C;
             size_t dyB = DivHi(p.padY, p.strideY), dyE = p.dstH - DivHi(p.padH, p.strideY), dxB = DivHi(p.padX, p.strideX), dxE = p.dstW - DivHi(p.padW, p.strideX);
             __mmask64 gM = TailMask64(K - a.K), kcM = TailMask64(kcX);
-            __mmask16 cM = TailMask64(C);
+            __mmask16 cM = TailMask16(C);
             __m512i _zero = _mm512_set1_epi8(zero);
             for (size_t dy = yBeg; dy < yEnd; ++dy)
             {

@@ -217,6 +217,8 @@ namespace Test
 
         void * context1 = f1.func(p.M, p.N, p.K, p.typeA, p.typeB, p.typeC, p.transB, p.constB, p.bias);
         void * context2 = f2.func(p.M, p.N, p.K, p.typeA, p.typeB, p.typeC, p.transB, p.constB, p.bias);
+        if (context1 == NULL)
+            return true;
 
         Tensor8u buf8u;
         buf8u.Extend({ ::SimdSynetQuantizedInnerProductExternalBufferSize(context1) });
@@ -238,7 +240,6 @@ namespace Test
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
-
 
         if (p.typeC == SimdTensorData32f)
         {

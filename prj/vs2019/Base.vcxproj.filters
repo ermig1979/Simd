@@ -409,6 +409,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedAdd.cpp">
       <Filter>Base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedInnerProduct.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -691,6 +694,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
