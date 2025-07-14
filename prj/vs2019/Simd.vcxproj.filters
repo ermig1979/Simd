@@ -253,6 +253,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="C++">
