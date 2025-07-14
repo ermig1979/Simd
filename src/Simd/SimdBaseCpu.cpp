@@ -273,7 +273,9 @@ namespace Simd
         size_t CpuSocketNumber()
         {
             uint32_t number = 0;
-#if !defined(__APPLE__)
+#if defined(__APPLE__)
+#elif defined(__ANDROID__)
+#else
             ::FILE * p = ::popen("lscpu -b -p=Socket 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
             if (p)
             {
@@ -289,7 +291,9 @@ namespace Simd
         size_t CpuCoreNumber()
         {
             uint32_t number = 0;
-#if !defined(__APPLE__)
+#if defined(__APPLE__)
+#elif defined(__ANDROID__)
+#else
             ::FILE * p = ::popen("lscpu -b -p=Core 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
             if (p)
             {
@@ -347,7 +351,9 @@ namespace Simd
         uint64_t CpuRamSize()
         {
             uint64_t size = 0;
-#if !defined(__APPLE__)
+#if defined(__APPLE__)
+#elif defined(__ANDROID__)
+#else
             ::FILE* file = ::popen("grep MemTotal /proc/meminfo | awk '{printf \"%d\", $2 }'", "r");
             if (file)
             {
@@ -363,7 +369,9 @@ namespace Simd
         std::string CpuModel()
         {
             std::string model;
-#if !defined(__APPLE__)
+#if defined(__APPLE__)
+#elif defined(__ANDROID__)
+#else
             ::FILE* file = ::popen("lscpu | grep 'Model name:' | sed -r 's/Model name:\\s{1,}//g'", "r");
             if (file)
             {
@@ -379,7 +387,9 @@ namespace Simd
 
         uint64_t CpuCurrentFrequency()
         {
-#if !defined(__APPLE__)
+#if defined(__APPLE__)
+#elif defined(__ANDROID__)
+#else
             int core = sched_getcpu();
             std::string scaling_cur_freq = "/sys/devices/system/cpu/cpu" + std::to_string(core) + "/cpufreq/scaling_cur_freq";
             if (::access(scaling_cur_freq.c_str(), F_OK) != -1)
