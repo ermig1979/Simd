@@ -155,6 +155,7 @@ namespace Simd
             SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
             virtual void SetB(const int8_t* b) = 0;
             virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
@@ -167,9 +168,9 @@ namespace Simd
                 size_t aM, aN, aK, eA, eB, eC, bK, cN;
             };
 
-            typedef void(*PrepAPtr)(const uint8_t* src, float norm, uint8_t zero, const QuantizedInnerProductParam& p, const AlgParam& a, size_t mBeg, size_t mEnd, uint8_t* dst);
+            typedef void(*PrepAPtr)(const uint8_t* src, float norm, uint8_t zero, const QuantizedInnerProductParam& p, const AlgParam& a, size_t size, size_t K, uint8_t* dst);
             typedef void(*PrepBPtr)(const uint8_t* src, float norm, uint8_t zero, const QuantizedInnerProductParam& p, const AlgParam& a, int8_t* dst);
-            typedef void(*GemmPtr)(const uint8_t* A, const QuantizedInnerProductParam& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* C, int post, const float* bias, uint8_t* dst);
+            typedef void(*GemmPtr)(const uint8_t* A, const QuantizedInnerProductParam& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* C, int post, const int32_t * bias, const float* norm, uint32_t zero, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);

@@ -73,6 +73,7 @@ namespace Simd
             _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? a.aM * a.aK : 0;
             _sizeB = p.constB ? 0 : a.macroK * a.macroN;
             _sizeC = (p.typeC == SimdTensorData16b || a.aM != p.M || a.aN != p.N) ? a.macroN * a.aM : 0;
+            _aN = a.aN;
 
             a.bK = p.constB ? a.aK : a.macroK;
             a.cN = _sizeC ? a.macroN : p.N;
@@ -81,14 +82,16 @@ namespace Simd
             _bias.Resize(a.aN, true);
         }
 
-        //size_t SynetQuantizedInnerProductRef::ExternalBufferSize() const
-        //{
-        //    size_t size = SynetQuantizedInnerProduct::ExternalBufferSize();
-        //    if (!_a8u)
-        //        size += _sizeA;
-        //    size += _sizeC * sizeof(int32_t);
-        //    return size;
-        //}
+        size_t SynetQuantizedInnerProductGemmNN::ExternalBufferSize() const
+        {
+            const QuantizedInnerProductParam& p = _param;
+            const AlgParam& a = _alg;
+            size_t size = SynetQuantizedInnerProduct::ExternalBufferSize();
+            if (!_a8u || a.aK != p.K)
+                size += _sizeA;
+            size += _sizeC * sizeof(int32_t);
+            return size;
+        }
 
         void SynetQuantizedInnerProductGemmNN::SetB(const int8_t* b)
         {
@@ -105,22 +108,32 @@ namespace Simd
         void SynetQuantizedInnerProductGemmNN::Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C)
         {
             const QuantizedInnerProductParam& p = _param;
+            const AlgParam& a = _alg;
             buf = Buffer(buf);
-            //uint8_t* bufA = (uint8_t*)A;
-            //if (!_a8u)
-            //{
-            //    bufA = Allocate<uint8_t>(buf, _sizeA);
-            //    SynetQuantizeLinear((float*)A, _sizeA, &_aScale, _aZero[0], bufA);
-            //}
-            //const int8_t* bufB = (int8_t*)B;
-            //if (p.constB)
-            //    bufB = _b.data;
-            //int32_t* bufC = Allocate<int32_t>(buf, _sizeC);
-            //Gemm(bufA, bufB, bufC);
-            //if (_c8u)
-            //    QuantizeSumLinear(bufC, 1, p.N, 1, p.M, SimdTensorFormatNhwc, _bias.data, _norm.data, _cZero.data, C);
-            //else
-            //    assert(0);
+            uint8_t* bufA = _prepA ? Allocate<uint8_t>(buf, _sizeA) : (uint8_t*)A;
+            int8_t* bufB = p.constB ? _b.data : Allocate<int8_t>(buf, _sizeB);
+            int32_t* bufC = Allocate<int32_t>(buf, _sizeC);
+            for (size_t j = 0; j < p.N; j += a.macroN)
+            {
+                size_t macroN = Simd::Min(p.N, j + a.macroN) - j;
+                for (size_t k = 0; k < p.K; k += a.macroK)
+                {
+                    size_t macroK = Simd::Min(p.K, k + a.macroK) - k;
+                    for (size_t i = 0; i < p.M; i += a.macroM)
+                    {
+                        size_t macroM = Simd::Min(p.M, i + a.macroM) - i;
+                        size_t offsA = (a.macroN == a.aN && a.macroK == a.aK && _prepA) ? 0 : i * a.aK;
+                        size_t offsB = p.constB ? j * a.bK + k * a.F : 0;
+                        size_t offsC = _sizeC ? (a.macroK < a.aK ? i * a.cN : 0) : i * a.cN + j;
+                        if (j == 0 && k == 0 && _prepA)
+                            _prepA(A + i * p.K * a.eA, _aScale, _aZero[0], p, a, macroM, p.K, bufA + offsA);
+                        //if (i == 0 && _prepB && !p.constB)
+                        //    _prepB(B + (p.transB ? j * p.K + k : k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
+                        _gemm(bufA + offsA + k, p, a, macroM, macroN, macroK, (int)k, bufB + offsB, bufC + offsC,
+                            k + macroK == p.K && (_sizeC || p.bias), _bias.data + j, _norm.data + j, _cZero[0], C + (i * p.N + j) * a.eC);
+                    }
+                }
+            }
         }
     }
 #endif
