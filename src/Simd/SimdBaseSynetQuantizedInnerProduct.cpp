@@ -42,6 +42,9 @@ namespace Simd
         _elemC = _c8u ? 1 : 4;
         _sizeA = p.M * p.K;
         _sizeC = p.M * p.N;
+        _aM = p.M;
+        _aN = p.N;
+        _aK = p.K;
     }
 
     size_t SynetQuantizedInnerProduct::ExternalBufferSize() const
@@ -74,7 +77,7 @@ namespace Simd
 
         _cScale = cScale ? cScale[0] : 0.0f;
 
-        _cZero.Resize(p.N, true);
+        _cZero.Resize(_aN, true);
         if (cZero)
         {
             for (size_t j = 0; j < p.N; ++j)
@@ -87,10 +90,12 @@ namespace Simd
     void SynetQuantizedInnerProduct::SetBias(const int8_t* b, const int32_t* bias)
     {
         const QuantizedInnerProductParam& p = _param;
+        _bias.Resize(_aN, true);
         if (bias)
-            _bias.Assign(bias, p.N);
-        else
-            _bias.Resize(p.N, true);
+        {
+            for (size_t j = 0; j < p.N; ++j)
+                _bias[j] = bias[j];
+        }
         int aZero = _aZero[0];
         int32_t* pb = _bias.data;
         if (p.transB)
@@ -110,7 +115,7 @@ namespace Simd
     void SynetQuantizedInnerProduct::SetOther()
     {
         const QuantizedInnerProductParam& p = _param;
-        _norm.Resize(p.N);
+        _norm.Resize(_aN, true);
         const float* psb = _bScale.data;
         float* pn = _norm.data;
         for (size_t j = 0; j < p.N; ++j)

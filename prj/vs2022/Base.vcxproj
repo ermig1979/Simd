@@ -234,6 +234,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedInnerProduct.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedInnerProductGemmNN.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizeLinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale16b.cpp" />
