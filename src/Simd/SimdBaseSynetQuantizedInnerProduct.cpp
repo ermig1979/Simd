@@ -97,13 +97,13 @@ namespace Simd
         {
             for (size_t j = 0; j < p.N; ++j)
                 for (size_t k = 0; k < p.K; ++k)
-                    pb[j] -= b[k * p.N + j] * aZero;
+                    pb[j] -= b[j * p.K + k] * aZero;
         }
         else
         {
             for (size_t j = 0; j < p.N; ++j)
                 for (size_t k = 0; k < p.K; ++k)
-                    pb[j] -= b[j * p.K + k] * aZero;
+                    pb[j] -= b[k * p.N + j] * aZero;
         }
     }
 
@@ -142,14 +142,82 @@ namespace Simd
             return desc.str();
         }
 
+        size_t SynetQuantizedInnerProductRef::ExternalBufferSize() const
+        {
+            size_t size = SynetQuantizedInnerProduct::ExternalBufferSize();
+            if (!_a8u)
+                size += _sizeA;
+            size += _sizeC * sizeof(int32_t);
+            return size;
+        }
+
         void SynetQuantizedInnerProductRef::Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C)
         {
+            const QuantizedInnerProductParam& p = _param;
+            buf = Buffer(buf);
+            uint8_t* bufA = (uint8_t*)A;
+            if (!_a8u)
+            {
+                bufA = Allocate<uint8_t>(buf, _sizeA);
+                SynetQuantizeLinear((float*)A, _sizeA, &_aScale, _aZero[0], bufA);
+            }
+            const int8_t* bufB = (int8_t*)B;
+            if (p.constB)
+                bufB = _b.data;
+            int32_t* bufC = Allocate<int32_t>(buf, _sizeC);
+            Gemm(bufA, bufB, bufC);
+            if (_c8u)
+                QuantizeSumLinear(bufC, 1, p.N, 1, p.M, SimdTensorFormatNhwc, _bias.data, _norm.data, _cZero.data, C);
+            else
+                assert(0);
+        }
 
+        void SynetQuantizedInnerProductRef::Gemm(const uint8_t* A, const int8_t* B, int32_t* C)
+        {
+            const QuantizedInnerProductParam& p = _param;
+            const bool overflow = true;
+            size_t K2 = overflow ? p.K / 2 * 2 : 0, k;
+            for (size_t i = 0; i < p.M; ++i)
+            {
+                if (p.transB)
+                {
+                    for (size_t j = 0; j < p.N; ++j)
+                    {
+                        const int8_t* b = B + j * p.K;
+                        C[j] = 0;
+                        for (k = 0; k < K2; k += 2)
+                            C[j] += RestrictRange(int(A[k + 0]) * int(b[k + 0]) + int(A[k + 1]) * int(b[k + 1]), SHRT_MIN, SHRT_MAX);
+                        for (; k < p.K; ++k)
+                            C[j] += int(A[k]) * int(b[k]);
+                    }
+                }
+                else
+                {
+                    for (size_t j = 0; j < p.N; ++j)
+                        C[j] = 0;
+                    for (k = 0; k < K2; k += 2)
+                    {
+                        const int8_t* b = B + k * p.N;
+                        for (size_t j = 0; j < p.N; ++j)
+                            C[j] += RestrictRange(int(A[k + 0]) * int(b[j + 0]) + int(A[k + 1]) * int(b[j + p.N]), SHRT_MIN, SHRT_MAX);
+                    }
+                    for (; k < p.K; ++k)
+                    {
+                        const int8_t* b = B + k * p.N;
+                        for (size_t j = 0; j < p.N; ++j)
+                            C[j] += int(A[k]) * int(b[j]);
+                    }
+                }
+                A += p.K;
+                C += p.N;
+            }
         }
 
         void SynetQuantizedInnerProductRef::SetB(const int8_t* b)
         {
-
+            const QuantizedInnerProductParam& p = _param;
+            _b.Resize(p.N * p.K);
+            _b.Assign(b, _b.size);
         }
         
         //-------------------------------------------------------------------------------------------------
@@ -159,7 +227,7 @@ namespace Simd
             QuantizedInnerProductParam param(M, N, K, typeA, typeB, typeC, transB, constB, bias);
             if (!param.Valid())
                 return NULL;
-            return NULL;// new SynetQuantizedInnerProductRef(param);
+            return new SynetQuantizedInnerProductRef(param);
         }
     }
 #endif

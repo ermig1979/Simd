@@ -7664,9 +7664,9 @@ extern "C"
         \param [in] M - a height of A and height of C matrices.
         \param [in] N - a width of B and width of C matrices.
         \param [in] K - a width of A and height of B matrices.
-        \param [in] typeA - a type of A matrix. It can be FP32 or INT8.
+        \param [in] typeA - a type of A matrix. It can be FP32 or UINT8.
         \param [in] typeB - a type of B matrix. It can be FP32 or INT8.
-        \param [in] typeC - a type of C matrix. It can be FP32 or INT8.
+        \param [in] typeC - a type of C matrix. It can be FP32 or UINT8.
         \param [in] transB - a transpose matrix B before multiplication.
         \param [in] constB - a matrix B is constant.
         \param [in] bias - a flag to add bias to output matrix C.

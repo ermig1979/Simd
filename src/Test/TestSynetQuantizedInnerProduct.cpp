@@ -138,7 +138,7 @@ namespace Test
             size_t batch = src.Axis(0), size = src.Size();
             size_t channels = src.Axis(1);
             dst.Reshape(src.Shape());
-            float min = FLT_MAX, max = -FLT_MAX;
+            float min = 0.0f, max = 0.0f;
             const float* psrc = src.Data();
             for (size_t i = 0; i < size; ++i)
             {
@@ -147,7 +147,7 @@ namespace Test
             }
             float range = std::max(0.000001f, max - min), invScale = 255.0f / range;
             scale = range / 255.0f;
-            zero = (int)std::nearbyint(min * invScale);
+            zero = -(int)std::nearbyint(min * invScale);
             uint8_t* pdst = dst.Data();
             for (size_t i = 0; i < size; ++i)
                 pdst[i] = Simd::RestrictRange((int)std::nearbyint(psrc[i] * invScale) + zero, 0, 255);
@@ -156,26 +156,26 @@ namespace Test
 
         static bool QuantizeB(const Tensor32f& src, bool trans, SimdBool overflow, Tensor8i& dst, Tensor32f& scale)
         {
-            size_t size = src.Size(), M = trans ? src.Axis(1) : src.Axis(0), K = size / M;
+            size_t size = src.Size(), N = trans ? src.Axis(0) : src.Axis(1), K = size / N;
             dst.Reshape(src.Shape());
-            scale.Reshape(Shp(M));
+            scale.Reshape(Shp(N));
             const float* psrc = src.Data();
             int8_t* pdst = dst.Data();
             int lo = overflow ? -64 : -128, hi = overflow ? 63 : 127;
-            for (size_t i = 0; i < M; ++i)
+            for (size_t j = 0; j < N; ++j)
             {
                 float max = 0;
                 for (size_t k = 0; k < K; ++k)
                 {
-                    size_t offset = trans ? k * M + i : i * K + k;
+                    size_t offset = trans ? j * K + k : k * N + j;
                     max = std::max(max, std::abs(psrc[offset]));
                 }
                 float range = std::max(0.000001f, max);
                 float _scale =  range / (overflow ? 63.0f : 127.0f), invScale = (overflow ? 63.0f : 127.0f) / range;
-                scale.Data()[i] = _scale;
+                scale.Data()[j] = _scale;
                 for (size_t k = 0; k < K; ++k)
                 {
-                    size_t offset = trans ? k * M + i : i * K + k;
+                    size_t offset = trans ? j * K + k : k * N + j;
                     pdst[offset] = Simd::RestrictRange((int)std::nearbyint(psrc[offset] * invScale), lo, hi);
                 }
             }
@@ -250,8 +250,8 @@ namespace Test
             int diffMax = 0;
             result = result && Compare(p8i.c1, p8i.c2, diffMax, true, 64);
 
-            //int controlDiffMax = 4;
-            //result = result && Compare(p8i.c1, p8i.c, controlDiffMax, true, 64, "control");
+            int controlDiffMax = 2;
+            result = result && Compare(p8i.c1, p8i.c, controlDiffMax, true, 64, "control");
         }
 
         return result;
@@ -263,15 +263,19 @@ namespace Test
 
         const float e = EPS;
         const SimdBool f = SimdFalse, t = SimdTrue;
-        const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
+        const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u, i8 = SimdTensorData8i;
         typedef Simd::QuantizedInnerProductParam Param;
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 1000, u8, u8, u8, f, t, f), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 1000, u8, i8, u8, f, t, f), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 1000, u8, i8, u8, t, t, f), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 1000, 512, u8, i8, u8, f, t, f), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 1000, 512, u8, i8, u8, t, t, f), o, f1, f2);
 #endif
 #else
-        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 1000, u8, u8, u8, f, t, f), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 4, 2, u8, i8, u8, f, t, f), o, f1, f2);
+        //result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 1000, u8, i8, u8, f, t, f), o, f1, f2);
 #endif
 
         return result;

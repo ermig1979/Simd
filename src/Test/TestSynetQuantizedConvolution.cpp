@@ -174,7 +174,7 @@ namespace Test
             size_t channels = trans ? src.Axis(3) : src.Axis(1);
             size_t spatial = trans ? src.Size(1, 3) : src.Size(2, 4);
             dst.Reshape(src.Shape());
-            float min = FLT_MAX, max = -FLT_MAX;
+            float min = 0.0f, max = 0.0f;
             const float* psrc = src.Data();
             for (size_t i = 0; i < size; ++i)
             {
@@ -183,7 +183,7 @@ namespace Test
             }
             float range = std::max(0.000001f, max - min), invScale = 255.0f / range;
             scale = range / 255.0f;
-            zero = (int)std::nearbyint(min * invScale);
+            zero = -(int)std::nearbyint(min * invScale);
             uint8_t* pdst = dst.Data();
             for (size_t i = 0; i < size; ++i)
                 pdst[i] = Simd::RestrictRange((int)std::nearbyint(psrc[i] * invScale) + zero, 0, 255);

@@ -141,10 +141,12 @@ namespace Simd
             SynetQuantizedInnerProductRef(const QuantizedInnerProductParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
             virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
         protected:
             virtual void SetB(const int8_t* b);
+            void Gemm(const uint8_t* A, const int8_t* B, int32_t* C);
         };
 
         //------------------------------------------------------------------------------------------------
