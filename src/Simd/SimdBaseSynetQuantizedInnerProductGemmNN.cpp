@@ -45,17 +45,35 @@ namespace Simd
             {
                 for (size_t k = 0; k < a.aK; k += 4)
                 {
-                    const uint8_t* ps = src + k * p.N + n * a.F;
-                    for (size_t f = 0; f < a.F; ++f)
+                    if (p.transB)
                     {
-                        for (size_t i = 0; i < 4; ++i)
+                        const uint8_t* ps = src + n * a.F * p.K + k;
+                        for (size_t f = 0; f < a.F; ++f)
                         {
-                            if (n * a.F + f < p.N && k + i < p.K)
-                                *(dst++) = ps[i * p.N];
-                            else
-                                *(dst++) = 0;
+                            for (size_t i = 0; i < 4; ++i)
+                            {
+                                if (n * a.F + f < p.N && k + i < p.K)
+                                    *(dst++) = ps[i];
+                                else
+                                    *(dst++) = 0;
+                            }
+                            ps += p.K;
                         }
-                        ps++;
+                    }
+                    else
+                    {
+                        const uint8_t* ps = src + k * p.N + n * a.F;
+                        for (size_t f = 0; f < a.F; ++f)
+                        {
+                            for (size_t i = 0; i < 4; ++i)
+                            {
+                                if (n * a.F + f < p.N && k + i < p.K)
+                                    *(dst++) = ps[i * p.N];
+                                else
+                                    *(dst++) = 0;
+                            }
+                            ps++;
+                        }
                     }
                 }
             }
@@ -106,11 +124,11 @@ namespace Simd
 
             _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? a.aM * a.aK : 0;
             _sizeB = p.constB ? 0 : a.macroK * a.macroN;
-            _sizeC = (p.typeC == SimdTensorData16b || a.aM != p.M || a.aN != p.N) ? a.macroN * a.aM : 0;
+            _sizeC = a.macroN * a.aM;
             _aN = a.aN;
 
             a.bK = p.constB ? a.aK : a.macroK;
-            a.cN = _sizeC ? a.macroN : p.N;
+            a.cN = a.macroN;
 
             _norm.Resize(a.aN, true);
             _bias.Resize(a.aN, true);

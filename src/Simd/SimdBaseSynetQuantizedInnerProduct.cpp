@@ -42,9 +42,7 @@ namespace Simd
         _elemC = _c8u ? 1 : 4;
         _sizeA = p.M * p.K;
         _sizeC = p.M * p.N;
-        _aM = p.M;
         _aN = p.N;
-        _aK = p.K;
     }
 
     size_t SynetQuantizedInnerProduct::ExternalBufferSize() const
@@ -69,7 +67,9 @@ namespace Simd
         if (aZero)
             memset(_aZero.data, aZero[0], p.K);
 
-        _bScale.Assign(bScale, p.N);
+        _bScale.Resize(_aN, true);
+        for (size_t j = 0; j < p.N; ++j)
+            _bScale[j] = bScale[j];
 
         SetB(b);
 
