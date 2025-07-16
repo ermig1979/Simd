@@ -278,7 +278,7 @@ namespace Test
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, t, t, f), o, f1, f2);
 #endif
 #else
-        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 4, 2, u8, i8, u8, f, t, f), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(64, 96, 128, u8, i8, u8, f, t, f), o, f1, f2);
         //result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 1000, u8, i8, u8, f, t, f), o, f1, f2);
 #endif
 
@@ -294,11 +294,11 @@ namespace Test
         if (TestBase())
             result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Base::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Sse41::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Sse41::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Avx2::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));

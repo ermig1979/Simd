@@ -31,12 +31,46 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
+        typedef Simd::QuantizedInnerProductParam QipParam;
+        typedef Base::SynetQuantizedInnerProductGemmNN::AlgParam AlgParam;
+        typedef Base::SynetQuantizedInnerProductGemmNN::PrepPtr PrepPtr;
+        typedef Base::SynetQuantizedInnerProductGemmNN::GemmPtr GemmPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        static void SynetQuantizedInnerProductGemmNN_PrepB_8i(const uint8_t* src, float norm, uint8_t zero, const QipParam& p, const AlgParam& a, size_t, size_t, uint8_t* dst)
+        {
+            size_t N = DivHi(p.N, a.F);
+            for (size_t n = 0; n < N; n++)
+            {
+                for (size_t k = 0; k < a.aK; k += 4)
+                {
+                    const uint8_t* ps = src + k * p.N + n * a.F;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 4; ++i)
+                        {
+                            if (n * a.F + f < p.N && k + i < p.K)
+                                *(dst++) = ps[i * p.N];
+                            else
+                                *(dst++) = 0;
+                        }
+                        ps++;
+                    }
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+
         SynetQuantizedInnerProductGemmNN::SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p)
             : SynetQuantizedInnerProduct(p)
             , _prepA(0)
             , _prepB(0)
             , _gemm(0)
         {
+            _prepB = SynetQuantizedInnerProductGemmNN_PrepB_8i;
         }
 
         String SynetQuantizedInnerProductGemmNN::Desc() const
@@ -101,7 +135,7 @@ namespace Simd
             {
                 assert(b);
                 _b.Resize(a.aK * a.aN, true);
-                _prepB((uint8_t*)b, _bScale[0], 0, p, a, _b.data);
+                _prepB((uint8_t*)b, _bScale[0], 0, p, a, p.N, p.K, (uint8_t*)_b.data);
             }
         }
 

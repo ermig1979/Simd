@@ -69,9 +69,9 @@ namespace Simd
         if (aZero)
             memset(_aZero.data, aZero[0], p.K);
 
-        SetB(b);
-
         _bScale.Assign(bScale, p.N);
+
+        SetB(b);
 
         SetBias(b, bias);
 

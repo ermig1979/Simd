@@ -149,6 +149,8 @@ namespace Simd
             void Gemm(const uint8_t* A, const int8_t* B, int32_t* C);
         };
 
+        //------------------------------------------------------------------------------------------------
+
         class SynetQuantizedInnerProductGemmNN : public SynetQuantizedInnerProduct
         {
         public:
@@ -156,7 +158,6 @@ namespace Simd
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
-            virtual void SetB(const int8_t* b) = 0;
             virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
             static bool Preferable(const QuantizedInnerProductParam& p);
@@ -168,16 +169,15 @@ namespace Simd
                 size_t aM, aN, aK, eA, eB, eC, bK, cN;
             };
 
-            typedef void(*PrepAPtr)(const uint8_t* src, float norm, uint8_t zero, const QuantizedInnerProductParam& p, const AlgParam& a, size_t size, size_t K, uint8_t* dst);
-            typedef void(*PrepBPtr)(const uint8_t* src, float norm, uint8_t zero, const QuantizedInnerProductParam& p, const AlgParam& a, int8_t* dst);
+            typedef void(*PrepPtr)(const uint8_t* src, float norm, uint8_t zero, const QuantizedInnerProductParam& p, const AlgParam& a, size_t rows, size_t cols, uint8_t* dst);
             typedef void(*GemmPtr)(const uint8_t* A, const QuantizedInnerProductParam& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* C, int post, const int32_t * bias, const float* norm, uint32_t zero, uint8_t* dst);
 
         protected:
+            virtual void SetB(const int8_t* b);
             void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
 
             AlgParam _alg;
-            PrepAPtr _prepA;
-            PrepBPtr _prepB;
+            PrepPtr _prepA, _prepB;
             GemmPtr _gemm;
         };
 
@@ -189,6 +189,16 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        class SynetQuantizedInnerProductGemmNN : public Base::SynetQuantizedInnerProductGemmNN
+        {
+        public:
+            SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
     }
 #endif
 
