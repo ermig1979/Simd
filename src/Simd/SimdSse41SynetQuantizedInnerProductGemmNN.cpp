@@ -25,6 +25,7 @@
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdCopy.h"
 
 namespace Simd
 {
@@ -36,7 +37,26 @@ namespace Simd
         typedef Base::SynetQuantizedInnerProductGemmNN::PrepPtr PrepPtr;
         typedef Base::SynetQuantizedInnerProductGemmNN::GemmPtr GemmPtr;
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
+
+        static void QuantizedInnerProductGemmNN_PrepA_8u(const uint8_t* src, float norm, uint8_t zero, const QipParam& p, const AlgParam& a, size_t M, size_t, uint8_t* dst)
+        {
+            size_t KA = Simd::AlignLo(p.K, A);
+            for (size_t i = 0; i < M; ++i)
+            {
+                size_t k = 0;
+                for (; k < KA; k += A)
+                    Copy(src + k, dst + k);
+                for (; k < p.K; ++k)
+                    dst[k] = src[k];
+                for (; k < a.aK; ++k)
+                    dst[k] = 0;
+                src += p.K;
+                dst += a.aK;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
 
         template<Term8iType term, int M> void QuantizedInnerProductGemm_2xM(const uint8_t* A0, const QipParam& p, const AlgParam& a,
             size_t K, size_t N, int update, const int8_t* B0, const __m128i* bias, const __m128* norm, const __m128i& zero, int32_t* buf, uint8_t* C)
@@ -189,23 +209,24 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------------------------
-
-        SIMD_INLINE void Set(const QipParam& p, const AlgParam& a, GemmPtr & gemm)
-        {
-            if (p.typeC == SimdTensorData8u)
-                gemm = QuantizedInnerProductGemm_2<Term8iLast8u>;
-            else
-                gemm = NULL;// QuantizedInnerProductGemm_2<Term8iLast32f>;
-        }
-
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         SynetQuantizedInnerProductGemmNN::SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p)
             : Base::SynetQuantizedInnerProductGemmNN(p)
         {
             SetAlgParam(F, F * 2, 5, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            Set(p, _alg, _gemm);
+            if (_sizeA)
+            {
+                if (p.typeA == SimdTensorData8u)
+                    _prepA = QuantizedInnerProductGemmNN_PrepA_8u;
+                else
+                    _prepA = NULL;
+            }
+            if (p.typeC == SimdTensorData8u)
+                _gemm = QuantizedInnerProductGemm_2<Term8iLast8u>;
+            else
+                _gemm = NULL;// QuantizedInnerProductGemm_2<Term8iLast32f>;
+
         }
     }
 #endif
