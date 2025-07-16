@@ -303,11 +303,11 @@ namespace Test
             result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Sse41::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2())
-//            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Avx2::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
-//#endif
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Avx2::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
+#endif
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw())
 //            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Avx512bw::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));

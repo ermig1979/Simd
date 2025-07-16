@@ -93,6 +93,11 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
+        SIMD_INLINE void Copy(const uint8_t* src, uint8_t* dst)
+        {
+            _mm256_storeu_si256((__m256i*)dst, _mm256_loadu_si256((__m256i*)src));
+        }
+
         SIMD_INLINE void Copy(const uint16_t* src, uint16_t* dst)
         {
             _mm256_storeu_si256((__m256i*)dst, _mm256_loadu_si256((__m256i*)src));
