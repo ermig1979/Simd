@@ -280,6 +280,7 @@ namespace Test
 #if 1
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, t, t, f), o, f1, f2);
+        //result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, f, f, f), o, f1, f2);
 #endif
 #else
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(64, 96, 128, u8, i8, u8, f, t, f), o, f1, f2);
@@ -308,11 +309,11 @@ namespace Test
             result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Avx2::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
 #endif
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw())
-//            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Avx512bw::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
-//#endif
-//
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
+            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Avx512bw::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
+#endif
+
 //#if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
 //        if (Simd::Avx512vnni::Enable && TestAvx512vnni())
 //            result = result && SynetQuantizedInnerProductForwardAutoTest(f, FUNC_QIP(Simd::Avx512vnni::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));

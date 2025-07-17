@@ -24,12 +24,12 @@
 #include "Simd/SimdSynetQuantizedInnerProduct.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdCpu.h"
-#include "Simd/SimdSse41.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Sse41
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx512bw
     {
         void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias)
         {
@@ -37,7 +37,7 @@ namespace Simd
             if (!param.Valid())
                 return NULL;
             else if (Base::SynetQuantizedInnerProductGemmNN::Preferable(param))
-                return new Sse41::SynetQuantizedInnerProductGemmNN(param);
+                return new Avx512bw::SynetQuantizedInnerProductGemmNN(param);
             else
                 return new Base::SynetQuantizedInnerProductRef(param);
         }

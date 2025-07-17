@@ -52,9 +52,10 @@ namespace Simd
         bool Valid()
         {
             return
-                (typeA == SimdTensorData32f || typeA == SimdTensorData8u) &&
-                (typeB == SimdTensorData32f || typeB == SimdTensorData8i) &&
-                (typeC == SimdTensorData32f || typeC == SimdTensorData8u);
+                constB &&
+                (/*typeA == SimdTensorData32f || */typeA == SimdTensorData8u) &&
+                (/*typeB == SimdTensorData32f || */typeB == SimdTensorData8i) &&
+                (/*typeC == SimdTensorData32f || */typeC == SimdTensorData8u);
         }
 
         String Info() const
@@ -221,6 +222,17 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        class SynetQuantizedInnerProductGemmNN : public Avx2::SynetQuantizedInnerProductGemmNN
+        {
+        public:
+            SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+
     }
 #endif
 
