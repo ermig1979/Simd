@@ -38,9 +38,9 @@ namespace Simd
         SynetQuantizedConvolutionNhwcSpecV0::SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p)
             : SynetQuantizedConvolution(p)
         {
-            _convert = 0;
-            _convolutions[0] = 0;
-            _convolutions[1] = 0;
+            _preprocess = 0;
+            _convolution = 0;
+            _postprocess = 0;
         }
 
         String SynetQuantizedConvolutionNhwcSpecV0::Desc() const
@@ -162,54 +162,65 @@ namespace Simd
 
         void SynetQuantizedConvolutionNhwcSpecV0::Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst)
         {
-            //const ConvParam& p = _param;
-            //const AlgParam& a = _alg;
-            //const int32_t* bias = _bias.data;
-            //const float* norm = _norm.data;
-            //int32_t zero = _dstZero[0];
-            //size_t dstH = p.dstH * a.batch;
-            //for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
-            //{
-            //    size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-            //    const int8_t* weight = _weight.data + dc * a.bufK;
-            //    for (size_t mak = 0; mak < a.K; mak += a.macroK)
-            //    {
-            //        size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-            //        for (size_t yBeg = 0; yBeg < dstH;)
-            //        {
-            //            size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-            //            size_t bufOffs = (a.macroK < a.bufK || _convert == NULL) ?
-            //                yBeg * (_convert ? AlignHi(p.dstW, a.F) : p.dstW) * a.bufK + (a.reorderType ? mak * a.F : mak) : 0;
-            //            size_t sumOffs = a.macroK < a.bufK ? yBeg * (a.microK > 4 ? AlignHi(p.dstW, a.F) : p.dstW) * a.dB : 0;
-            //            size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
-            //            if (dc == 0 && mak == 0 && _convert)
-            //            {
-            //                if (a.batch > 1)
-            //                {
-            //                    size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
-            //                    size_t dB = p.dstH * p.dstW * a.bufK;
-            //                    for (size_t b = 0; b < a.batch; ++b)
-            //                        _convert(src + b * dS, _srcZero[0], p, a, 0, p.dstH, buf + b * dB);
-            //                }
-            //                else
-            //                    _convert(src, _srcZero[0], p, a, yBeg, yEnd, buf + bufOffs);
-            //            }
-            //            if (mak + macroK == a.bufK)
-            //                _convolutions[1](buf + bufOffs, p, a, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 0 : 1,
-            //                    weight, bias, norm, zero, sum + sumOffs, dst + dstOffs);
-            //            else
-            //                _convolutions[0](buf + bufOffs, p, a, macroD, yEnd - yBeg, macroK, mak == 0 ? 0 : 1,
-            //                    weight, bias, norm, zero, sum + sumOffs, dst + dstOffs);
-            //            yBeg = yEnd;
-            //        }
-            //        weight += macroK * a.F;
-            //    }
-            //    bias += macroD;
-            //    norm += macroD;
-            //    dst += macroD * _elemD;
-            //    if (!a.sumBuf)
-            //        sum += macroD;
-            //}
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            const int32_t* bias = _bias.data;
+            const float* norm = _norm.data;
+            int32_t zero = _dstZero[0];
+            const int* offs = _offset.data;
+            size_t dstH = p.dstH * a.batch, dstHb = a.srcH * a.batch - a.gapV;
+            size_t bufOffs = ((a.padV - p.padY) * a.srcW + (a.padH - p.padX)) * a.microC;
+            for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
+            {
+                size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
+                const int8_t* weight = _weight.data + mad * a.K;
+                for (size_t mac = 0, mao = 0; mac < a.srcC; mac += a.macroC, mao += a.macroO)
+                {
+                    size_t macroC = Simd::Min(a.srcC, mac + a.macroC) - mac;
+                    size_t nK = DivHi(macroC, a.microC) * a.kA;
+                    for (size_t dyBeg = 0, dyN = 0; dyBeg < dstH; dyN++)
+                    {
+                        size_t dyEnd = Simd::Min(dyBeg + a.macroH, dstH);
+                        if (mad == 0 && mac == 0)
+                        {
+                            if (a.batch > 1)
+                            {
+                                size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
+                                size_t dB = a.srcH * a.srcW * a.microC;
+                                for (size_t b = 0; b < a.batch; ++b)
+                                    _preprocess(src + b * dS, _srcZero[0], p, a, 0, p.dstH, b == a.batch - 1 ? 1 : 0, buf + b * dB);
+                            }
+                            else
+                                _preprocess(src, _srcZero[0], p, a, dyBeg, dyEnd, dyEnd == dstH ? 1 : 0, buf);
+                        }
+                        if (a.batch > 1)
+                        {
+                            _convolution(buf + bufOffs, p, a, offs + mao, macroD, dstHb, nK, mac == 0 ? 1 : 0, weight, sum);
+                        }
+                        else
+                        {
+                            _convolution(buf + bufOffs + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
+                                nK, mac == 0 ? 1 : 0, weight, sum + (dyBeg * a.srcW + dyN * a.F) * a.macroD);
+                        }
+                        if (mac + macroC == a.srcC)
+                        {
+                            if (a.batch > 1)
+                            {
+                                size_t dS = a.srcH * a.srcW * a.macroD;
+                                size_t dD = p.dstH * p.dstW * p.dstC * a.elem;
+                                for (size_t b = 0; b < a.batch; ++b)
+                                    _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, norm, zero, dst + b * dD);
+                            }
+                            else
+                                _postprocess(sum + dyN * a.F * a.macroD, p, a, macroD, dyBeg, dyEnd, bias, norm, zero, dst);
+                        }
+                        dyBeg = dyEnd;
+                    }
+                    weight += macroC * a.kA * a.F;
+                }
+                bias += macroD;
+                dst += macroD * _elemD;
+            }
         }
 
         bool SynetQuantizedConvolutionNhwcSpecV0::Preferable(const ConvParam& p)
