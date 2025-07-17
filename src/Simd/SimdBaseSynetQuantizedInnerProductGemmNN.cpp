@@ -129,6 +129,7 @@ namespace Simd
 
             a.bK = p.constB ? a.aK : a.macroK;
             a.cN = a.macroN;
+            a.reorderType = 0;
         }
 
         size_t SynetQuantizedInnerProductGemmNN::ExternalBufferSize() const

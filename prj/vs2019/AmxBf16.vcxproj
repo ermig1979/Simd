@@ -93,6 +93,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution8iOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolutionNhwcGemm.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedInnerProduct.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedInnerProductGemmNN.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemDefinitionGroup>
