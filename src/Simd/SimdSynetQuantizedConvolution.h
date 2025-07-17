@@ -161,6 +161,44 @@ namespace Simd
             ConvolutionPtr _convolutions[2];
         };
 
+        //-------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcSpecV0 : public SynetQuantizedConvolution
+        {
+        public:
+            SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t F, microD, microS, microC;
+                size_t batch, srcC, srcH, srcW, dstC, K;
+                size_t padV, padH, padE, gapV, gapH, kA;
+                size_t macroD, macroH, macroC, numH, macroO;
+                size_t bufS, bufD, elem;
+            };
+
+            typedef void(*ConvertPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, int end, uint8_t* dst); 
+
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH,
+                size_t srcC, size_t nK, int update, const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t* sum, uint8_t* dst);
+
+        protected:
+            void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
+            virtual void SetWeight(const int8_t* weight);
+            void Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst);
+
+            AlgParam _alg;
+            Array32i _offset;
+            ConvertPtr _convert;
+            ConvolutionPtr _convolutions[2];
+        };
+
         //------------------------------------------------------------------------------------------------
 
         void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);

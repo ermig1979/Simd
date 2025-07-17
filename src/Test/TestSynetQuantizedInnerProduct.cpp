@@ -287,10 +287,10 @@ namespace Test
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(4, 512, 1024, u8, i8, u8, f, t, f), o, f1, f2);
 #endif
 #if 1
+        //result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, f, f, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(256, 512, 1024, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, t, t, f), o, f1, f2);
-        //result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, f, f, f), o, f1, f2);
 #endif
 #else
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(64, 96, 128, u8, i8, u8, f, t, f), o, f1, f2);
