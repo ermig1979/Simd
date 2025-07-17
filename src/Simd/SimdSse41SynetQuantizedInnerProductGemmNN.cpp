@@ -226,7 +226,6 @@ namespace Simd
                 _gemm = QuantizedInnerProductGemm_2<Term8iLast8u>;
             else
                 _gemm = NULL;// QuantizedInnerProductGemm_2<Term8iLast32f>;
-
         }
     }
 #endif

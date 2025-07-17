@@ -129,9 +129,6 @@ namespace Simd
 
             a.bK = p.constB ? a.aK : a.macroK;
             a.cN = a.macroN;
-
-            _norm.Resize(a.aN, true);
-            _bias.Resize(a.aN, true);
         }
 
         size_t SynetQuantizedInnerProductGemmNN::ExternalBufferSize() const

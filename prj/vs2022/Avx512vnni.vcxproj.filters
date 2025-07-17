@@ -173,5 +173,11 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedConvolution.cpp">
       <Filter>Avx512vnni</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedInnerProductGemmNN.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedInnerProduct.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

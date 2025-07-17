@@ -6006,7 +6006,7 @@ SIMD_API void* SimdSynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, 
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetQuantizedInnerProductInitPtr) (size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
-    const static SimdSynetQuantizedInnerProductInitPtr simdSynetQuantizedInnerProductInit = SIMD_FUNC3(SynetQuantizedInnerProductInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC);
+    const static SimdSynetQuantizedInnerProductInitPtr simdSynetQuantizedInnerProductInit = SIMD_FUNC4(SynetQuantizedInnerProductInit, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AMXBF16_FUNC);
 
     return simdSynetQuantizedInnerProductInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
 #else

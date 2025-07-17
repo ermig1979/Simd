@@ -29,31 +29,13 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Avx512bw
+#if defined(SIMD_AVX512VNNI_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx512vnni
     {
         typedef Simd::QuantizedInnerProductParam QipParam;
         typedef Base::SynetQuantizedInnerProductGemmNN::AlgParam AlgParam;
         typedef Base::SynetQuantizedInnerProductGemmNN::PrepPtr PrepPtr;
         typedef Base::SynetQuantizedInnerProductGemmNN::GemmPtr GemmPtr;
-
-        //-------------------------------------------------------------------------------------------------
-
-        static void QuantizedInnerProductGemmNN_PrepA_8u(const uint8_t* src, float norm, uint8_t zero, const QipParam& p, const AlgParam& a, size_t M, size_t, uint8_t* dst)
-        {
-            size_t KA = Simd::AlignLo(p.K, A);
-            __mmask64 srcTail = TailMask64(p.K - KA), dstTail = TailMask64(a.aK - KA);
-            for (size_t i = 0; i < M; ++i)
-            {
-                size_t k = 0;
-                for (; k < KA; k += A)
-                    Copy(src + k, dst + k);
-                if(dstTail)
-                    Copy(src + k, dst + k, srcTail, dstTail);
-                src += p.K;
-                dst += a.aK;
-            }
-        }
 
         //-------------------------------------------------------------------------------------------------
 
@@ -104,18 +86,18 @@ namespace Simd
                 {
                     b0 = _mm512_loadu_si512((__m512i*)B0);
                     b1 = _mm512_loadu_si512((__m512i*)B1);
-                    if (M > 0x0) a0 = Set4(A0 + k0), Madd4<true>(c00, a0, b0), Madd4<true>(c01, a0, b1);
-                    if (M > 0x1) a0 = Set4(A1 + k0), Madd4<true>(c10, a0, b0), Madd4<true>(c11, a0, b1);
-                    if (M > 0x2) a0 = Set4(A2 + k0), Madd4<true>(c20, a0, b0), Madd4<true>(c21, a0, b1);
-                    if (M > 0x3) a0 = Set4(A3 + k0), Madd4<true>(c30, a0, b0), Madd4<true>(c31, a0, b1);
-                    if (M > 0x4) a0 = Set4(A4 + k0), Madd4<true>(c40, a0, b0), Madd4<true>(c41, a0, b1);
-                    if (M > 0x5) a0 = Set4(A5 + k0), Madd4<true>(c50, a0, b0), Madd4<true>(c51, a0, b1);
-                    if (M > 0x6) a0 = Set4(A0 + k6), Madd4<true>(c60, a0, b0), Madd4<true>(c61, a0, b1);
-                    if (M > 0x7) a0 = Set4(A1 + k6), Madd4<true>(c70, a0, b0), Madd4<true>(c71, a0, b1);
-                    if (M > 0x8) a0 = Set4(A2 + k6), Madd4<true>(c80, a0, b0), Madd4<true>(c81, a0, b1);
-                    if (M > 0x9) a0 = Set4(A3 + k6), Madd4<true>(c90, a0, b0), Madd4<true>(c91, a0, b1);
-                    if (M > 0xA) a0 = Set4(A4 + k6), Madd4<true>(ca0, a0, b0), Madd4<true>(ca1, a0, b1);
-                    if (M > 0xB) a0 = Set4(A5 + k6), Madd4<true>(cb0, a0, b0), Madd4<true>(cb1, a0, b1);
+                    if (M > 0x0) a0 = Set4(A0 + k0), Madd4<false>(c00, a0, b0), Madd4<false>(c01, a0, b1);
+                    if (M > 0x1) a0 = Set4(A1 + k0), Madd4<false>(c10, a0, b0), Madd4<false>(c11, a0, b1);
+                    if (M > 0x2) a0 = Set4(A2 + k0), Madd4<false>(c20, a0, b0), Madd4<false>(c21, a0, b1);
+                    if (M > 0x3) a0 = Set4(A3 + k0), Madd4<false>(c30, a0, b0), Madd4<false>(c31, a0, b1);
+                    if (M > 0x4) a0 = Set4(A4 + k0), Madd4<false>(c40, a0, b0), Madd4<false>(c41, a0, b1);
+                    if (M > 0x5) a0 = Set4(A5 + k0), Madd4<false>(c50, a0, b0), Madd4<false>(c51, a0, b1);
+                    if (M > 0x6) a0 = Set4(A0 + k6), Madd4<false>(c60, a0, b0), Madd4<false>(c61, a0, b1);
+                    if (M > 0x7) a0 = Set4(A1 + k6), Madd4<false>(c70, a0, b0), Madd4<false>(c71, a0, b1);
+                    if (M > 0x8) a0 = Set4(A2 + k6), Madd4<false>(c80, a0, b0), Madd4<false>(c81, a0, b1);
+                    if (M > 0x9) a0 = Set4(A3 + k6), Madd4<false>(c90, a0, b0), Madd4<false>(c91, a0, b1);
+                    if (M > 0xA) a0 = Set4(A4 + k6), Madd4<false>(ca0, a0, b0), Madd4<false>(ca1, a0, b1);
+                    if (M > 0xB) a0 = Set4(A5 + k6), Madd4<false>(cb0, a0, b0), Madd4<false>(cb1, a0, b1);
                     B0 += A, B1 += A;
                 }
                 __mmask16 tail = TailMask16(N - F);
@@ -168,18 +150,18 @@ namespace Simd
                 {
                     b0 = _mm512_loadu_si512((__m512i*)B0);
                     b1 = _mm512_loadu_si512((__m512i*)B1);
-                    if (M > 0x0) a0 = Set4(A0 + k0), Madd4<true>(c00, a0, b0);
-                    if (M > 0x1) a0 = Set4(A1 + k0), Madd4<true>(c10, a0, b0);
-                    if (M > 0x2) a0 = Set4(A2 + k0), Madd4<true>(c20, a0, b0);
-                    if (M > 0x3) a0 = Set4(A3 + k0), Madd4<true>(c30, a0, b0);
-                    if (M > 0x4) a0 = Set4(A4 + k0), Madd4<true>(c40, a0, b0);
-                    if (M > 0x5) a0 = Set4(A5 + k0), Madd4<true>(c50, a0, b0);
-                    if (M > 0x6) a0 = Set4(A0 + k6), Madd4<true>(c60, a0, b0);
-                    if (M > 0x7) a0 = Set4(A1 + k6), Madd4<true>(c70, a0, b0);
-                    if (M > 0x8) a0 = Set4(A2 + k6), Madd4<true>(c80, a0, b0);
-                    if (M > 0x9) a0 = Set4(A3 + k6), Madd4<true>(c90, a0, b0);
-                    if (M > 0xA) a0 = Set4(A4 + k6), Madd4<true>(ca0, a0, b0);
-                    if (M > 0xB) a0 = Set4(A5 + k6), Madd4<true>(cb0, a0, b0);
+                    if (M > 0x0) a0 = Set4(A0 + k0), Madd4<false>(c00, a0, b0);
+                    if (M > 0x1) a0 = Set4(A1 + k0), Madd4<false>(c10, a0, b0);
+                    if (M > 0x2) a0 = Set4(A2 + k0), Madd4<false>(c20, a0, b0);
+                    if (M > 0x3) a0 = Set4(A3 + k0), Madd4<false>(c30, a0, b0);
+                    if (M > 0x4) a0 = Set4(A4 + k0), Madd4<false>(c40, a0, b0);
+                    if (M > 0x5) a0 = Set4(A5 + k0), Madd4<false>(c50, a0, b0);
+                    if (M > 0x6) a0 = Set4(A0 + k6), Madd4<false>(c60, a0, b0);
+                    if (M > 0x7) a0 = Set4(A1 + k6), Madd4<false>(c70, a0, b0);
+                    if (M > 0x8) a0 = Set4(A2 + k6), Madd4<false>(c80, a0, b0);
+                    if (M > 0x9) a0 = Set4(A3 + k6), Madd4<false>(c90, a0, b0);
+                    if (M > 0xA) a0 = Set4(A4 + k6), Madd4<false>(ca0, a0, b0);
+                    if (M > 0xB) a0 = Set4(A5 + k6), Madd4<false>(cb0, a0, b0);
                     B0 += A, B1 += A;
                 }
                 __mmask16 tail = TailMask16(N);
@@ -255,20 +237,16 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         SynetQuantizedInnerProductGemmNN::SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p)
-            : Avx2::SynetQuantizedInnerProductGemmNN(p)
+            : Avx512bw::SynetQuantizedInnerProductGemmNN(p)
         {
             SetAlgParam(F, F * 2, 12, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            if (_sizeA)
+            if (p.M > 1)
             {
-                if (p.typeA == SimdTensorData8u)
-                    _prepA = QuantizedInnerProductGemmNN_PrepA_8u;
+                if (p.typeC == SimdTensorData8u)
+                    _gemm = QuantizedInnerProductGemm_2<Term8iLast8u>;
                 else
-                    _prepA = NULL;
+                    _gemm = NULL;// QuantizedInnerProductGemm_2<Term8iLast32f>;
             }
-            if (p.typeC == SimdTensorData8u)
-                _gemm = QuantizedInnerProductGemm_2<Term8iLast8u>;
-            else
-                _gemm = NULL;// QuantizedInnerProductGemm_2<Term8iLast32f>;
         }
     }
 #endif

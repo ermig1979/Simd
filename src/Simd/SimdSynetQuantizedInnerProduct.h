@@ -232,13 +232,22 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
-
     }
 #endif
 
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
     {
+        class SynetQuantizedInnerProductGemmNN : public Avx512bw::SynetQuantizedInnerProductGemmNN
+        {
+        public:
+            SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Avx512vnni"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
     }
 #endif
 
