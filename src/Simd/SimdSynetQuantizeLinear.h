@@ -452,6 +452,17 @@ namespace Simd
             QuntizedTerm8i<term>::template Save<0>(dst, buf, sum0, bias, norm, zero);
             QuntizedTerm8i<term>::template Save<1>(dst, buf, sum1, bias, norm, zero, tail);
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void Postprocess(const int32_t* src, const int32_t* bias, const float* norm, const __m512i& zero, uint8_t* dst, __mmask16 tail = -1)
+        {
+            __m512i _src = _mm512_loadu_si512((__m512i*)src);
+            __m512i _bias = _mm512_loadu_si512((__m512i*)bias);
+            __m512 _norm = _mm512_loadu_ps(norm);
+            __m512i i32 = _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(_src, _bias)), _norm)), zero);
+            _mm_mask_storeu_epi8(dst, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(i32, K_ZERO), K_ZERO)));
+        }
     }
 #endif
 
