@@ -195,12 +195,12 @@ namespace Simd
                         }
                         if (a.batch > 1)
                         {
-                            _convolution(buf + bufOffs, p, a, offs + mao, macroD, dstHb, nK, mac == 0 ? 1 : 0, weight, sum);
+                            _convolution(buf + bufOffs, p, a, offs + mao, macroD, dstHb, nK, mac == 0 ? 0 : 1, weight, sum);
                         }
                         else
                         {
                             _convolution(buf + bufOffs + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
-                                nK, mac == 0 ? 1 : 0, weight, sum + (dyBeg * a.srcW + dyN * a.F) * a.macroD);
+                                nK, mac == 0 ? 0 : 1, weight, sum + (dyBeg * a.srcW + dyN * a.F) * a.macroD);
                         }
                         if (mac + macroC == a.srcC)
                         {

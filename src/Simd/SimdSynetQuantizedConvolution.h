@@ -219,6 +219,16 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        class SynetQuantizedConvolutionNhwcSpecV0: public Base::SynetQuantizedConvolutionNhwcSpecV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
         void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 #endif
