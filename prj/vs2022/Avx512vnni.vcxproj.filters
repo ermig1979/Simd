@@ -179,5 +179,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedInnerProduct.cpp">
       <Filter>Avx512vnni</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedConvolutionNhwcSpecV0.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
