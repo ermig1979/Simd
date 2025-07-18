@@ -240,6 +240,8 @@ namespace Simd
             QuntizedTerm8i<term>::template Save<1>(dst, buf, sum1, bias, norm, zero, tail);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void Postprocess(const int32_t* src, const int32_t* bias, const float* norm, const __m128i& zero, uint8_t* dst)
         {
             __m128i _src = _mm_loadu_si128((__m128i*)src);
@@ -371,6 +373,25 @@ namespace Simd
         {
             QuntizedTerm8i<term>::template Save<0>(dst, buf, sum0, bias, norm, zero);
             QuntizedTerm8i<term>::template Save<1>(dst, buf, sum1, bias, norm, zero, tail);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void Postprocess(const int32_t* src, const int32_t* bias, const float* norm, const __m256i& zero, uint8_t* dst)
+        {
+            __m256i _src = _mm256_loadu_si256((__m256i*)src);
+            __m256i _bias = _mm256_loadu_si256((__m256i*)bias);
+            __m256 _norm = _mm256_loadu_ps(norm);
+            __m256i i32 = _mm256_add_epi32(_mm256_cvtps_epi32(_mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_add_epi32(_src, _bias)), _norm)), zero);
+            _mm_storel_epi64((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(i32, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void Postprocess(const int32_t* src, const int32_t* bias, const float* norm, const __m256i& zero, uint8_t* dst, size_t tail)
+        {
+            uint8_t tmp[F];
+            Postprocess(src, bias, norm, zero, tmp);
+            for (size_t i = 0; i < tail; i++)
+                dst[i] = tmp[i];
         }
     }
 #endif

@@ -219,6 +219,7 @@ namespace Simd
                     weight += macroC * a.kA * a.F;
                 }
                 bias += macroD;
+                norm += macroD;
                 dst += macroD * _elemD;
             }
         }
