@@ -260,5 +260,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedInnerProductGemmNN.cpp">
       <Filter>AmxBf16</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolutionNhwcSpecV0.cpp">
+      <Filter>AmxBf16</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
