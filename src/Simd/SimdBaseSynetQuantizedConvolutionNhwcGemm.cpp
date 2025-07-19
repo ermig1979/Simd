@@ -139,8 +139,8 @@ namespace Simd
                 uint8_t* buf = _convert ? bufB : (uint8_t*)src;
                 int32_t* sum = a.sumBuf ? bufS : (int32_t*)dst;
                 Forward(src, buf, sum, dst);
-                src += _sizeS * _elemS;
-                dst += _sizeD * _elemD;
+                src += _sizeS * a.batch * _elemS;
+                dst += _sizeD * a.batch * _elemD;
             }
         }
 
