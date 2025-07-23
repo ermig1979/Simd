@@ -149,7 +149,6 @@ namespace Simd
                 for (size_t k0 = 0, k6 = 6 * dA; k0 < K; k0 += 4, k6 += 4)
                 {
                     b0 = _mm512_loadu_si512((__m512i*)B0);
-                    b1 = _mm512_loadu_si512((__m512i*)B1);
                     if (M > 0x0) a0 = Set4(A0 + k0), Madd4<false>(c00, a0, b0);
                     if (M > 0x1) a0 = Set4(A1 + k0), Madd4<false>(c10, a0, b0);
                     if (M > 0x2) a0 = Set4(A2 + k0), Madd4<false>(c20, a0, b0);
@@ -162,7 +161,7 @@ namespace Simd
                     if (M > 0x9) a0 = Set4(A3 + k6), Madd4<false>(c90, a0, b0);
                     if (M > 0xA) a0 = Set4(A4 + k6), Madd4<false>(ca0, a0, b0);
                     if (M > 0xB) a0 = Set4(A5 + k6), Madd4<false>(cb0, a0, b0);
-                    B0 += A, B1 += A;
+                    B0 += A;
                 }
                 __mmask16 tail = TailMask16(N);
                 if (M > 0x0) Save1<term>(C, buf, c00, bias, norm, zero, tail), C += dC, buf += dB;
