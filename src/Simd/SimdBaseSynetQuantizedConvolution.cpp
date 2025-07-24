@@ -142,6 +142,37 @@ namespace Simd
 
     namespace Base
     {
+        static void GemmNchwV2(size_t D, size_t S, size_t C, size_t K, const int8_t* wgt, size_t ldw, const uint8_t* src, size_t lds, int32_t* dst, size_t ldd, bool overflow)
+        {
+            size_t KC = K * C, KC2 = overflow ? AlignLo(KC, 2) : 0;
+            for (size_t i = 0; i < D; ++i)
+            {
+                for (size_t j = 0; j < S; ++j)
+                    dst[j] = 0;
+                size_t kc = 0;
+                for (; kc < KC2; kc += 2)
+                {
+                    size_t k0 = (kc + 0) / C, c0 = (kc + 0) % C, kc0 = c0 * K + k0;
+                    size_t k1 = (kc + 1) / C, c1 = (kc + 1) % C, kc1 = c1 * K + k1;
+                    int32_t w0 = wgt[kc0], w1 = wgt[kc1];
+                    const uint8_t* s0 = src + kc0 * lds, * s1 = src + kc1 * lds;
+                    for (size_t j = 0; j < S; ++j)
+                        dst[j] += Simd::RestrictRange(s0[j] * w0 + s1[j] * w1, SHRT_MIN, SHRT_MAX);
+                }
+                for (; kc < KC; ++kc)
+                {
+                    int32_t w0 = wgt[kc];
+                    const uint8_t* s0 = src + kc * lds;
+                    for (size_t j = 0; j < S; ++j)
+                        dst[j] += s0[j] * w0;
+                }                
+                wgt += ldw;
+                dst += ldd;
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         SynetQuantizedConvolutionGemm::SynetQuantizedConvolutionGemm(const ConvParam& p)
             : SynetQuantizedConvolution(p)
         {
@@ -230,7 +261,7 @@ namespace Simd
                     if (p.trans)
                         GemmNhwc(_siS, _siD, _siK, _siC, src + _grS * g, _ldS, weight + _grW * g, _ldW, sum + _grD * g, _ldD, overflow);
                     else
-                        GemmNchw(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD, overflow);
+                        GemmNchwV2(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD, overflow);
                 }
             }
             if (p.activation == SimdConvolutionActivationIdentity || p.activation == SimdConvolutionActivationRelu || p.activation == SimdConvolutionActivationRestrictRange)
