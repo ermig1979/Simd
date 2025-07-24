@@ -203,6 +203,30 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        class SynetQuantizedConvolutionNhwcDepthwise : public SynetQuantizedConvolution
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwise(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                int32_t srcE, dstE;
+            };
+
+            typedef void(*ConvolutionPtr)(const uint8_t* src, uint32_t srcZero, const ConvParam& p, const AlgParam& a, const int8_t* weight, const int32_t* bias, const float* norm, uint32_t dstZero, uint8_t* dst);
+
+        protected:
+            AlgParam _alg;
+            ConvolutionPtr _convolution;
+        };
+
+        //------------------------------------------------------------------------------------------------
+
         void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 

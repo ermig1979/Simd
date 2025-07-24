@@ -259,7 +259,7 @@ namespace Simd
                 for (size_t g = 0; g < p.group; ++g)
                 {
                     if (p.trans)
-                        GemmNhwc(_siS, _siD, _siK, _siC, src + _grS * g, _ldS, weight + _grW * g, _ldW, sum + _grD * g, _ldD, overflow);
+                        GemmNhwc(_siS, _siD, 1, _siK * _siC, src + _grS * g, _ldS, weight + _grW * g, _ldW, sum + _grD * g, _ldD, overflow);
                     else
                         GemmNchwV2(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD, overflow);
                 }
