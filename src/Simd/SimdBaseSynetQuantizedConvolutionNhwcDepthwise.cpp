@@ -65,7 +65,7 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcDepthwise::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.IsDepthwise();
+            return p.trans != 0 && p.IsDepthwise() && p.group >= 4;
         }
     }
 #endif

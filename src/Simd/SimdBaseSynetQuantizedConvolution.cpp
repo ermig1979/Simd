@@ -255,7 +255,11 @@ namespace Simd
             }
             else
             {
+#if defined(__MINGW32__) || defined(__MINGW64__)
+                bool overflow = true;
+#else
                 bool overflow = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0;
+#endif
                 for (size_t g = 0; g < p.group; ++g)
                 {
                     if (p.trans)
