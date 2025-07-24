@@ -918,7 +918,7 @@ namespace Test
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "DescrIntCosineDistancesMxNa " << std::max<int>(options.testThreads, 1) << " threads special test [" << M << "x" << N << "x" << size << "]:");
+        TEST_LOG_SS(Info, "DescrIntCosineDistancesMxNa " << std::max<ptrdiff_t>(options.testThreads, 1) << " threads special test [" << M << "x" << N << "x" << size << "]:");
 
         const float threshold = 0.5f;
 

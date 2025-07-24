@@ -89,7 +89,7 @@ namespace Simd
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
 
-            int kX = (int)a.kX, kY = (int)p.kernelY, dY = (int)(p.srcC * a.srcW), dX = (int)a.microK, nK = a.K / a.microK;
+            int kX = (int)a.kX, kY = (int)p.kernelY, dY = (int)(p.srcC * a.srcW), dX = (int)a.microK, nK = int(a.K / a.microK);
             _offset.Resize(nK);
             for (int y = 0, i = 0; y < kY; y++)
                 for (int x = 0; x < kX; x += dX, i++)

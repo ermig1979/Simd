@@ -115,7 +115,7 @@ namespace Simd
         void SynetQuantizedAddUniform::Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst)
         {
             const QuantizedAddParam& p = _param;
-            _uniform(a, p.aBias, p.aNorm, b, p.bBias, p.bNorm, _size, p.actParams, p.dNorm, p.dZero, dst);
+            _uniform(a, (int)p.aBias, p.aNorm, b, (int)p.bBias, p.bNorm, _size, p.actParams, p.dNorm, (int)p.dZero, dst);
         }
 
         //-------------------------------------------------------------------------------------------------

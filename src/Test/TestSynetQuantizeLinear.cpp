@@ -76,7 +76,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, bias, norm, dst2));
 
-        result = result && Compare(dst1, dst2, EPS, true, 64);
+        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceBoth);
 
         return result;
     }

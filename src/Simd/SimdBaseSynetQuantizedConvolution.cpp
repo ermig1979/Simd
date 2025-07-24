@@ -255,7 +255,7 @@ namespace Simd
             }
             else
             {
-                bool overflow = true;// Overflow(p.compatibility);
+                bool overflow = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0;
                 for (size_t g = 0; g < p.group; ++g)
                 {
                     if (p.trans)

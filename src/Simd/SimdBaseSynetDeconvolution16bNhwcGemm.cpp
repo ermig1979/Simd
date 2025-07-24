@@ -175,7 +175,7 @@ namespace Simd
             float* buf32f = _is1x1 ? dst32f : bufB;
             for (size_t syBeg = 0, syEnd = 0; syBeg < p.srcH; syBeg = syEnd)
             {
-                syEnd = Min(syBeg + a.macroH, p.srcH);
+                syEnd = Simd::Min(syBeg + a.macroH, p.srcH);
                 if (!_src16b || a.bufK != a.K)
                     _convert(src, p, a, syBeg, syEnd, bufS);
                 else
@@ -184,7 +184,7 @@ namespace Simd
                 _gemm(src16b, _param, a, mEnd - mBeg, a.N, a.bufK, 1, _weight.data, buf32f);
                 if (!_is1x1)
                     _toImg(buf32f, p, a, p.dstC, syBeg, syEnd, dst32f);
-                size_t dyBeg = Max(int(syBeg * p.strideY - p.padY), 0);
+                size_t dyBeg = Simd::Max<ptrdiff_t>(syBeg * p.strideY - p.padY, 0);
                 size_t dyEnd = syEnd == p.srcH ? p.dstH : syEnd * p.strideY - p.padY;
                 _biasAct(dst32f, p, a, p.dstC, dyBeg, dyEnd, _bias.data, _params.data, dst);
             }
