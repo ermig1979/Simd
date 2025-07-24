@@ -144,7 +144,7 @@ namespace Simd
     {
         static void GemmNchwV2(size_t D, size_t S, size_t C, size_t K, const int8_t* wgt, size_t ldw, const uint8_t* src, size_t lds, int32_t* dst, size_t ldd, bool overflow)
         {
-            size_t KC = K * C, KC2 = overflow ? AlignLo(KC, 2) : 0;
+            size_t KC = K * C, KC2 = (overflow && C > 1) ? AlignLo(KC, 2) : 0;
             for (size_t i = 0; i < D; ++i)
             {
                 for (size_t j = 0; j < S; ++j)
