@@ -464,7 +464,7 @@ namespace Simd
             Term8i<term>::template Save<type>(dst, sum, params, scale, shift, upper, tail);
         }
 
-        //---------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template <Term8iType term> struct Term8iDepthwise
         {

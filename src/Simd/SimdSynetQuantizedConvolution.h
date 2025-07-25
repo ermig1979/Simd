@@ -221,6 +221,8 @@ namespace Simd
             typedef void(*ConvolutionPtr)(const uint8_t* src, uint32_t srcZero, const ConvParam& p, const AlgParam& a, const int8_t* weight, const int32_t* bias, const float* norm, uint32_t dstZero, uint8_t* dst);
 
         protected:
+            virtual void SetWeight(const int8_t* weight);
+
             AlgParam _alg;
             ConvolutionPtr _convolution;
         };
@@ -247,6 +249,16 @@ namespace Simd
         {
         public:
             SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwise : public Base::SynetQuantizedConvolutionNhwcDepthwise
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwise(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };

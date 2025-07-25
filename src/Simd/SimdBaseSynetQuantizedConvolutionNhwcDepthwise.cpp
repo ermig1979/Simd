@@ -63,6 +63,13 @@ namespace Simd
             }
         }
 
+        void SynetQuantizedConvolutionNhwcDepthwise::SetWeight(const int8_t* weight)
+        {
+            const ConvParam& p = _param;
+            _weight.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
+            _weight.Assign(weight, _weight.size);
+        }
+
         bool SynetQuantizedConvolutionNhwcDepthwise::Preferable(const ConvParam& p)
         {
             return p.trans != 0 && p.IsDepthwise() && p.group >= 4;
