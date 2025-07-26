@@ -22,6 +22,7 @@ set(MAX_ERRORS 5)
 
 if((NOT DEFINED SIMD_ROOT) OR (SIMD_ROOT STREQUAL ""))
 	set(SIMD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+	cmake_path(ABSOLUTE_PATH SIMD_ROOT NORMALIZE)
 endif()
 
 if((NOT DEFINED CMAKE_BUILD_TYPE) OR (CMAKE_BUILD_TYPE STREQUAL ""))
@@ -58,6 +59,9 @@ if(SIMD_INFO)
 	message("Toolchain: ${CMAKE_CXX_COMPILER}")
 	message("Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 	message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
+	message("AVX512: ${SIMD_AVX512}")
+	message("AVX512VNNI: ${SIMD_AVX512VNNI}")
+	message("AMXBF16: ${SIMD_AMXBF16}")
 	message("Test framework: ${SIMD_TEST}")
 	message("Performance statistic: ${SIMD_PERF}")
 	message("Synet: ${SIMD_SYNET}")
@@ -94,6 +98,18 @@ if(NOT SIMD_INT8_DEBUG)
 	add_definitions(-DSIMD_INT8_DEBUG_DISABLE)
 endif()
 
+if (NOT SIMD_AVX512)
+	add_definitions(-DSIMD_AVX512_DISABLE)
+endif()
+
+if (NOT SIMD_AVX512VNNI)
+	add_definitions(-DSIMD_AVX512VNNI_DISABLE)
+endif()
+
+if (NOT SIMD_AMXBF16)
+	add_definitions(-DSIMD_AMXBF16_DISABLE)
+endif()
+
 if(SIMD_HIDE)
 	add_definitions(-DSIMD_HIDE_INTERNAL)
 endif()
@@ -125,24 +141,32 @@ endif()
 
 string(REGEX REPLACE "(-march=[a-zA-Z0-9-]*)|(-mtune=[a-zA-Z0-9-]*)|(-msse[0-9,\\.]*)|(-mavx[a-z0-9]*)|(-mfma)|(-mamx-[a-z0-9]*)" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -O3")
-elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-	set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -O3 -g")
-elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -O0 -g")
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
+	# No flags needed
 else()
-    message(FATAL_ERROR "Unknown value of CMAKE_BUILD_TYPE!")
+	if(CMAKE_BUILD_TYPE STREQUAL "Release")
+		set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -O3")
+	elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+		set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -O3 -g")
+	elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+		set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -O0 -g")
+	else()
+		message(FATAL_ERROR "Unknown value of CMAKE_BUILD_TYPE!")
+	endif()
 endif()
 
-if((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang")  OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
+if((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
   set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -ferror-limit=${MAX_ERRORS}")
 else()
   set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fmax-errors=${MAX_ERRORS}")
 endif()
 
 if(SIMD_HIDE)
-  set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fvisibility=hidden")
+	if (CMAKE_GENERATOR MATCHES "Visual Studio")
+		# No flags needed
+	else()
+  		set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fvisibility=hidden")
+	endif()
 endif()
 
 if(SIMD_TEST AND SIMD_OPENCV)
@@ -166,6 +190,12 @@ else()
 	    message(FATAL_ERROR "Unknown value of CMAKE_SYSTEM_PROCESSOR!")
 	endif()
 endif()
+
+target_include_directories(Simd
+	PUBLIC
+		$<BUILD_INTERFACE:${SIMD_ROOT}src>
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 if(SIMD_PYTHON)
 	add_custom_command(TARGET Simd POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy 

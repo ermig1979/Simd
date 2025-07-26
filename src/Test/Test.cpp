@@ -621,7 +621,7 @@ namespace Test
         }
 
 #if defined(_MSC_VER)
-        static void PrintErrorMessage(int code)
+        static void PrintErrorMessage(unsigned long code)
         {
             String desc;
             switch (code)
