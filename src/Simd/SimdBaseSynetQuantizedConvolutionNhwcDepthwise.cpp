@@ -70,9 +70,9 @@ namespace Simd
             _weight.Assign(weight, _weight.size);
         }
 
-        bool SynetQuantizedConvolutionNhwcDepthwise::Preferable(const ConvParam& p)
+        bool SynetQuantizedConvolutionNhwcDepthwise::Preferable(const ConvParam& p, size_t F)
         {
-            return p.trans != 0 && p.IsDepthwise() && p.group >= 4;
+            return p.trans != 0 && p.IsDepthwise() && p.group >= F;
         }
     }
 #endif

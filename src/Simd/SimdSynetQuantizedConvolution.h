@@ -211,7 +211,7 @@ namespace Simd
             virtual String Desc() const;
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
-            static bool Preferable(const ConvParam& p);
+            static bool Preferable(const ConvParam& p, size_t F);
 
             struct AlgParam
             {
@@ -286,6 +286,16 @@ namespace Simd
         {
         public:
             SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwise : public Sse41::SynetQuantizedConvolutionNhwcDepthwise
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwise(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
