@@ -203,10 +203,10 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        class SynetQuantizedConvolutionNhwcDepthwise : public SynetQuantizedConvolution
+        class SynetQuantizedConvolutionNhwcDepthwiseV0 : public SynetQuantizedConvolution
         {
         public:
-            SynetQuantizedConvolutionNhwcDepthwise(const ConvParam& p);
+            SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
@@ -255,10 +255,10 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        class SynetQuantizedConvolutionNhwcDepthwise : public Base::SynetQuantizedConvolutionNhwcDepthwise
+        class SynetQuantizedConvolutionNhwcDepthwiseV0 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV0
         {
         public:
-            SynetQuantizedConvolutionNhwcDepthwise(const ConvParam& p);
+            SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -292,10 +292,10 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        class SynetQuantizedConvolutionNhwcDepthwise : public Sse41::SynetQuantizedConvolutionNhwcDepthwise
+        class SynetQuantizedConvolutionNhwcDepthwiseV0 : public Sse41::SynetQuantizedConvolutionNhwcDepthwiseV0
         {
         public:
-            SynetQuantizedConvolutionNhwcDepthwise(const ConvParam& p);
+            SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };

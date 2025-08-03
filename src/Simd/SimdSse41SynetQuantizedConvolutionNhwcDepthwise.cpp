@@ -35,8 +35,7 @@ namespace Simd
 #if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Sse41
     {
-        using AlgParam = SynetQuantizedConvolutionNhwcDepthwise::AlgParam;
-        using ConvolutionPtr = SynetQuantizedConvolutionNhwcDepthwise::ConvolutionPtr;
+        using AlgParamV0 = SynetQuantizedConvolutionNhwcDepthwiseV0::AlgParam;
 
         //------------------------------------------------------------------------------------------------
 
@@ -76,8 +75,8 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseDefault(const uint8_t* src, uint32_t srcZero, 
-            const ConvParam& p, const AlgParam& a, const int8_t* weight, const int32_t* bias, const float* norm, uint32_t dstZero, uint8_t* dst)
+        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV0_Default(const uint8_t* src, uint32_t srcZero, 
+            const ConvParam& p, const AlgParamV0& a, const int8_t* weight, const int32_t* bias, const float* norm, uint32_t dstZero, uint8_t* dst)
         {
             __m128i _srcZero = _mm_set1_epi32(srcZero);
             __m128i _dstZero = _mm_set1_epi32(dstZero);
@@ -152,8 +151,8 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template<Term8iType term> SIMD_INLINE void QuantizedConvolutionNhwcDepthwise3x3Edge(
-            const uint8_t* src, const __m128i &srcZero, const ConvParam& p, const AlgParam& a, size_t dy, size_t dx, 
+        template<Term8iType term> SIMD_INLINE void QuantizedConvolutionNhwcDepthwiseV0_3x3Edge(
+            const uint8_t* src, const __m128i &srcZero, const ConvParam& p, const AlgParamV0& a, size_t dy, size_t dx,
             const int8_t* weight, const int32_t* bias, const float* norm, const __m128i& dstZero, uint8_t* dst)
         {
             __m128i d00, d01, d02, d03, w0, s0;
@@ -219,8 +218,8 @@ namespace Simd
             }
         }
 
-        template<Term8iType term> SIMD_INLINE void QuantizedConvolutionNhwcDepthwise3x3Main1(
-            const uint8_t* src, const ConvParam& p, const AlgParam& a,
+        template<Term8iType term> SIMD_INLINE void QuantizedConvolutionNhwcDepthwiseV0_3x3Main1(
+            const uint8_t* src, const ConvParam& p, const AlgParamV0& a,
             const int8_t* weight, const int32_t* bias, const float* norm, const __m128i& dstZero, uint8_t* dst)
         {
             __m128i d00, d01, d02, d03, w0, s0;
@@ -273,8 +272,8 @@ namespace Simd
             }
         }
 
-        template<Term8iType term> SIMD_INLINE void QuantizedConvolutionNhwcDepthwise3x3Main2(
-            const uint8_t* src, const ConvParam& p, const AlgParam& a,
+        template<Term8iType term> SIMD_INLINE void QuantizedConvolutionNhwcDepthwiseV0_3x3Main2(
+            const uint8_t* src, const ConvParam& p, const AlgParamV0& a,
             const int8_t* weight, const int32_t* bias, const float* norm, const __m128i& dstZero, uint8_t* dst)
         {
             __m128i d00, d01, d02, d03, d10, d11, d12, d13, w0, w00, s0, s1;
@@ -349,8 +348,8 @@ namespace Simd
             }
         }
 
-        template<Term8iType term> void QuantizedConvolutionNhwcDepthwise3x3(const uint8_t* src, uint32_t srcZero,
-            const ConvParam& p, const AlgParam& a, const int8_t* weight, const int32_t* bias, const float* norm, uint32_t dstZero, uint8_t* dst)
+        template<Term8iType term> void QuantizedConvolutionNhwcDepthwiseV0_3x3(const uint8_t* src, uint32_t srcZero,
+            const ConvParam& p, const AlgParamV0& a, const int8_t* weight, const int32_t* bias, const float* norm, uint32_t dstZero, uint8_t* dst)
         {
             __m128i _srcZero = _mm_set1_epi32(srcZero);
             __m128i _dstZero = _mm_set1_epi32(dstZero);
@@ -363,49 +362,44 @@ namespace Simd
             size_t dy = 0;
             for (; dy < p.padY; ++dy)
                 for (size_t dx = 0; dx < p.dstW; ++dx)
-                    QuantizedConvolutionNhwcDepthwise3x3Edge<term>(src, _srcZero, p, a, dy, dx, weight, bias, norm, _dstZero, dst), dst += dstC;
+                    QuantizedConvolutionNhwcDepthwiseV0_3x3Edge<term>(src, _srcZero, p, a, dy, dx, weight, bias, norm, _dstZero, dst), dst += dstC;
             for (; dy < dstH; ++dy)
             {
                 size_t dx = 0;
                 for (; dx < p.padX; ++dx)
-                    QuantizedConvolutionNhwcDepthwise3x3Edge<term>(src, _srcZero, p, a, dy, dx, weight, bias, norm, _dstZero, dst), dst += dstC;
+                    QuantizedConvolutionNhwcDepthwiseV0_3x3Edge<term>(src, _srcZero, p, a, dy, dx, weight, bias, norm, _dstZero, dst), dst += dstC;
                 size_t offset = ((dy * p.strideY - p.padY) * p.srcW + dx * p.strideX - p.padX) * p.srcC;
                 for (; dx < dstW2; dx += 2)
-                    QuantizedConvolutionNhwcDepthwise3x3Main2<term>(src + offset, p, a, weight, bias, norm, _dstZero, dst), dst += dstC * 2, offset += srcX * 2;
+                    QuantizedConvolutionNhwcDepthwiseV0_3x3Main2<term>(src + offset, p, a, weight, bias, norm, _dstZero, dst), dst += dstC * 2, offset += srcX * 2;
                 for (; dx < dstW; dx += 1)
-                    QuantizedConvolutionNhwcDepthwise3x3Main1<term>(src + offset, p, a, weight, bias, norm, _dstZero, dst), dst += dstC, offset += srcX;
+                    QuantizedConvolutionNhwcDepthwiseV0_3x3Main1<term>(src + offset, p, a, weight, bias, norm, _dstZero, dst), dst += dstC, offset += srcX;
                 for (; dx < p.dstW; ++dx)
-                    QuantizedConvolutionNhwcDepthwise3x3Edge<term>(src, _srcZero, p, a, dy, dx, weight, bias, norm, _dstZero, dst), dst += dstC;
+                    QuantizedConvolutionNhwcDepthwiseV0_3x3Edge<term>(src, _srcZero, p, a, dy, dx, weight, bias, norm, _dstZero, dst), dst += dstC;
             }
             for (; dy < p.dstH; ++dy)
                 for (size_t dx = 0; dx < p.dstW; ++dx)
-                    QuantizedConvolutionNhwcDepthwise3x3Edge<term>(src, _srcZero, p, a, dy, dx, weight, bias, norm, _dstZero, dst), dst += dstC;
+                    QuantizedConvolutionNhwcDepthwiseV0_3x3Edge<term>(src, _srcZero, p, a, dy, dx, weight, bias, norm, _dstZero, dst), dst += dstC;
         }
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void Set(const ConvParam& p, ConvolutionPtr & convolution)
+        template <Term8iType term> void SetV0(const ConvParam& p, SynetQuantizedConvolutionNhwcDepthwiseV0::ConvolutionPtr& convolution)
         {
             if (p.IsKernel(3) && p.IsDilation(1))
-                convolution = QuantizedConvolutionNhwcDepthwise3x3<term>;
+                convolution = QuantizedConvolutionNhwcDepthwiseV0_3x3<term>;
             else
-                convolution = QuantizedConvolutionNhwcDepthwiseDefault<term>;
-        }
-        
-        static void Set(const ConvParam& p, ConvolutionPtr & convolution)
-        {
-            if(p.dstT == SimdTensorData8u)
-                Set<Term8iLast8u>(p, convolution);
-            //else
-            //    Set<Term8iLast32f>(p, convolution);
+                convolution = QuantizedConvolutionNhwcDepthwiseV0_Default<term>;
         }
 
         //------------------------------------------------------------------------------------------------
 
-        SynetQuantizedConvolutionNhwcDepthwise::SynetQuantizedConvolutionNhwcDepthwise(const ConvParam& p)
-            : Base::SynetQuantizedConvolutionNhwcDepthwise(p)
+        SynetQuantizedConvolutionNhwcDepthwiseV0::SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p)
+            : Base::SynetQuantizedConvolutionNhwcDepthwiseV0(p)
         {
-            Set(p, _convolution);
+            if(p.dstT == SimdTensorData8u)
+                SetV0<Term8iLast8u>(p, _convolution);
+            //else
+            //    SetV0<Term8iLast32f>(p, _convolution);
         }
     }
 #endif

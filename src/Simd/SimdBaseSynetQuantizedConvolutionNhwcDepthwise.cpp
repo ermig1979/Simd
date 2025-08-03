@@ -35,7 +35,7 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        SynetQuantizedConvolutionNhwcDepthwise::SynetQuantizedConvolutionNhwcDepthwise(const ConvParam& p)
+        SynetQuantizedConvolutionNhwcDepthwiseV0::SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p)
             : SynetQuantizedConvolution(p)
         {
             _convolution = 0;
@@ -44,14 +44,14 @@ namespace Simd
             a.dstE = _elemD;
         }
 
-        String SynetQuantizedConvolutionNhwcDepthwise::Desc() const
+        String SynetQuantizedConvolutionNhwcDepthwiseV0::Desc() const
         {
             std::stringstream desc;
-            desc << Ext() << "::NhwcDepthwise";
+            desc << Ext() << "::NhwcDepthwiseV0";
             return desc.str();
         }
 
-        void SynetQuantizedConvolutionNhwcDepthwise::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
+        void SynetQuantizedConvolutionNhwcDepthwiseV0::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
@@ -63,14 +63,14 @@ namespace Simd
             }
         }
 
-        void SynetQuantizedConvolutionNhwcDepthwise::SetWeight(const int8_t* weight)
+        void SynetQuantizedConvolutionNhwcDepthwiseV0::SetWeight(const int8_t* weight)
         {
             const ConvParam& p = _param;
             _weight.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
             _weight.Assign(weight, _weight.size);
         }
 
-        bool SynetQuantizedConvolutionNhwcDepthwise::Preferable(const ConvParam& p, size_t F)
+        bool SynetQuantizedConvolutionNhwcDepthwiseV0::Preferable(const ConvParam& p, size_t F)
         {
             return p.trans != 0 && p.IsDepthwise() && p.group >= F;
         }

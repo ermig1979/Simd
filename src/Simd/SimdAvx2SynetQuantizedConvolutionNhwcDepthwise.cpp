@@ -35,8 +35,7 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Avx2
     {
-        using AlgParam = SynetQuantizedConvolutionNhwcDepthwise::AlgParam;
-        using ConvolutionPtr = SynetQuantizedConvolutionNhwcDepthwise::ConvolutionPtr;
+        using AlgParamV0 = SynetQuantizedConvolutionNhwcDepthwiseV0::AlgParam;
 
         //------------------------------------------------------------------------------------------------
 
@@ -76,8 +75,8 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseDefault(const uint8_t* src, uint32_t srcZero, 
-            const ConvParam& p, const AlgParam& a, const int8_t* weight, const int32_t* bias, const float* norm, uint32_t dstZero, uint8_t* dst)
+        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV0_Default(const uint8_t* src, uint32_t srcZero,
+            const ConvParam& p, const AlgParamV0& a, const int8_t* weight, const int32_t* bias, const float* norm, uint32_t dstZero, uint8_t* dst)
         {
             __m256i _srcZero = _mm256_set1_epi32(srcZero);
             __m256i _dstZero = _mm256_set1_epi32(dstZero);
@@ -185,25 +184,20 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void Set(const ConvParam& p, ConvolutionPtr & convolution)
+        template <Term8iType term> void SetV0(const ConvParam& p, SynetQuantizedConvolutionNhwcDepthwiseV0::ConvolutionPtr& convolution)
         {
-            convolution = QuantizedConvolutionNhwcDepthwiseDefault<term>;
-        }
-        
-        static void Set(const ConvParam& p, ConvolutionPtr & convolution)
-        {
-            if(p.dstT == SimdTensorData8u)
-                Set<Term8iLast8u>(p, convolution);
-            //else
-            //    Set<Term8iLast32f>(p, convolution);
+            convolution = QuantizedConvolutionNhwcDepthwiseV0_Default<term>;
         }
 
         //------------------------------------------------------------------------------------------------
 
-        SynetQuantizedConvolutionNhwcDepthwise::SynetQuantizedConvolutionNhwcDepthwise(const ConvParam& p)
-            : Sse41::SynetQuantizedConvolutionNhwcDepthwise(p)
+        SynetQuantizedConvolutionNhwcDepthwiseV0::SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p)
+            : Sse41::SynetQuantizedConvolutionNhwcDepthwiseV0(p)
         {
-            Set(p, _convolution);
+            if (p.dstT == SimdTensorData8u)
+                SetV0<Term8iLast8u>(p, _convolution);
+            //else
+            //    SetV0<Term8iLast32f>(p, _convolution);
         }
     }
 #endif
