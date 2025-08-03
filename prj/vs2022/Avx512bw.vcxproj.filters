@@ -391,7 +391,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcDeptwise.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcDepthwise.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fDepthwise.cpp">

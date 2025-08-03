@@ -95,7 +95,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNchwGemm.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcDeptwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcSpecV1.cpp" />

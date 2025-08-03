@@ -403,7 +403,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcDeptwise.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcDepthwise.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32f.cpp">
