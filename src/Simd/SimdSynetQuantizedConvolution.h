@@ -366,6 +366,16 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        class SynetQuantizedConvolutionNhwcDepthwiseV0 : public Avx512bw::SynetQuantizedConvolutionNhwcDepthwiseV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx512vnni"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
         void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 #endif
