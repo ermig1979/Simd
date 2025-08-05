@@ -81,6 +81,21 @@ namespace Simd
             QuntizedTerm8i<term>::template Save<0>(dst + offset, (int32_t*)NULL, sum, &_bias, &_norm, zero, tail);
         }
 
+        template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, __m128i sum0, __m128i sum1, const int32_t* bias, const float* norm, const __m128i& zero, size_t offset)
+        {
+            __m128i _bias = _mm_loadu_si128((__m128i*)(bias + offset));
+            __m128 _norm = _mm_loadu_ps(norm + offset);
+            QuntizedTerm8i<term>::template Save<0>(dst0 + offset, (int32_t*)NULL, sum0, &_bias, &_norm, zero);
+            QuntizedTerm8i<term>::template Save<0>(dst1 + offset, (int32_t*)NULL, sum1, &_bias, &_norm, zero);
+        }
+        template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, __m128i sum0, __m128i sum1, const int32_t* bias, const float* norm, const __m128i& zero, size_t offset, size_t tail)
+        {
+            __m128i _bias = _mm_loadu_si128((__m128i*)(bias + offset));
+            __m128 _norm = _mm_loadu_ps(norm + offset);
+            QuntizedTerm8i<term>::template Save<0>(dst0 + offset, (int32_t*)NULL, sum0, &_bias, &_norm, zero, tail);
+            QuntizedTerm8i<term>::template Save<0>(dst1 + offset, (int32_t*)NULL, sum1, &_bias, &_norm, zero, tail);
+        }
+
         //------------------------------------------------------------------------------------------------
 
         template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV0_Default(const uint8_t* src, uint32_t srcZero, 
@@ -410,17 +425,18 @@ namespace Simd
             //    SetV0<Term8iLast32f>(p, _convolution);
         }
 
+
         //------------------------------------------------------------------------------------------------
 
         static void QuantizedConvolutionNhwcDepthwiseV1_Preprocess(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParamV1& a, size_t dyBeg, size_t dyEnd, int32_t* dst)
         {
             __m128i _zero = _mm_set1_epi32(zero);
             size_t srcC = p.srcC, srcCF = Simd::AlignLo(p.srcC, a.F), byMask = a.bufH - 1;
-            size_t byPad = p.kernelY - 1, srcR = p.srcW * p.srcC, bxPad = p.padX * a.bufC, bwPad = p.padW * a.bufC;
+            size_t byPad = p.kernelY - 1, srcR = p.srcW * p.srcC, bufR = a.bufW * a.bufC;
             size_t byBeg = dyBeg ? dyBeg * p.strideY + byPad : 0, byEnd = dyEnd * p.strideY + byPad;
             if (a.reorderType == 0)
             {
-                size_t bufR = a.bufW * a.bufC;
+                size_t bxPad = p.padX * a.bufC, bwPad = p.padW * a.bufC;
                 for (size_t by = byBeg; by < byEnd; ++by)
                 {
                     int32_t* pd = dst + (by & byMask) * bufR;
@@ -458,18 +474,50 @@ namespace Simd
             }
             else
             {
-                assert(0);
+                size_t bW = a.bufW, bC = a.bufC, xPad = p.padX, wPad = p.padW;
+                for (size_t by = byBeg; by < byEnd; ++by)
+                {
+                    int32_t* pd = dst + (by & byMask) * bufR;
+                    size_t sy = by - p.padY;
+                    if (sy < p.srcH)
+                    {
+                        const uint8_t* ps = src + sy * srcR;
+                        if (xPad)
+                        {
+                            for (size_t x = 0; x < xPad; x += 1, pd += a.F)
+                                for (size_t c = 0; c < bC; c += a.F)
+                                    _mm_storeu_si128((__m128i*)(pd + c * bW), _zero);
+                        }
+                        for (size_t sx = 0; sx < p.srcW; sx++, pd += a.F)
+                        {
+                            for (size_t sc = 0; sc < bC; sc += F)
+                                _mm_storeu_si128((__m128i*)(pd + sc * bW), _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(int32_t*)(ps + sc))));
+                            ps += p.srcC;
+                        }
+                        if (wPad)
+                        {
+                            for (size_t x = 0; x < wPad; x += 1, pd += a.F)
+                                for (size_t c = 0; c < bC; c += a.F)
+                                    _mm_storeu_si128((__m128i*)(pd + c * bW), _zero);                            
+                        }
+                    }
+                    else
+                    {
+
+                        for (size_t i = 0; i < bufR; i += F)
+                            _mm_storeu_si128((__m128i*)(pd + i), _zero);
+                    }
+                }
             }
         }
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV1_Default(const int32_t* src, const ConvParam& p, const AlgParamV1& a, 
+        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV1_Direct(const int32_t* src, const ConvParam& p, const AlgParamV1& a, 
             const int32_t* weight, const int32_t* bias, const float* norm, size_t dyBeg, size_t dyEnd, uint32_t zero, uint8_t* dst)
         {
-            __m128i _zero = _mm_set1_epi32(zero), _bias[1];
+            __m128i _zero = _mm_set1_epi32(zero);
             __m128i d00, d01, d02, d03, d10, d11, d12, d13, w0;
-            __m128 _norm[1];
             size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), srcCF4 = AlignLo(srcC, F * 4), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX;
             size_t byMask = a.bufH - 1, bufC = a.bufC, bufR = a.bufW * a.bufC, dstW2 = AlignLo(p.dstW, 2), dD = p.dstC * a.srcE, dX = sX * bufC;
             dst += dyBeg * p.dstW * p.dstC * a.srcE;
@@ -512,18 +560,10 @@ namespace Simd
                                 Madd1(d13, _mm_loadu_si128((__m128i*)ps1 + 3), w0);
                             }
                         }
-                        _bias[0] = _mm_loadu_si128((__m128i*)(bias + sc + F * 0)), _norm[0] = _mm_loadu_ps(norm + sc + F * 0);
-                        Save1<term>(dst0 + sc + F * 0, NULL, d00, _bias, _norm, _zero);
-                        Save1<term>(dst1 + sc + F * 0, NULL, d10, _bias, _norm, _zero);
-                        _bias[0] = _mm_loadu_si128((__m128i*)(bias + sc + F * 1)), _norm[0] = _mm_loadu_ps(norm + sc + F * 1);
-                        Save1<term>(dst0 + sc + F * 1, NULL, d01, _bias, _norm, _zero);
-                        Save1<term>(dst1 + sc + F * 1, NULL, d11, _bias, _norm, _zero);
-                        _bias[0] = _mm_loadu_si128((__m128i*)(bias + sc + F * 2)), _norm[0] = _mm_loadu_ps(norm + sc + F * 2);
-                        Save1<term>(dst0 + sc + F * 2, NULL, d02, _bias, _norm, _zero);
-                        Save1<term>(dst1 + sc + F * 2, NULL, d12, _bias, _norm, _zero);
-                        _bias[0] = _mm_loadu_si128((__m128i*)(bias + sc + F * 3)), _norm[0] = _mm_loadu_ps(norm + sc + F * 3);
-                        Save1<term>(dst0 + sc + F * 3, NULL, d03, _bias, _norm, _zero);
-                        Save1<term>(dst1 + sc + F * 3, NULL, d13, _bias, _norm, _zero);
+                        Save2<term>(dst, dst + dD, d00, d10, bias, norm, _zero, sc + F * 0);
+                        Save2<term>(dst, dst + dD, d01, d11, bias, norm, _zero, sc + F * 1);
+                        Save2<term>(dst, dst + dD, d02, d12, bias, norm, _zero, sc + F * 2);
+                        Save2<term>(dst, dst + dD, d03, d13, bias, norm, _zero, sc + F * 3);
                     }
                     for (; sc < srcCF; sc += F)
                     {
@@ -541,9 +581,7 @@ namespace Simd
                                 Madd1(d10, _mm_loadu_si128((__m128i*)ps1 + 0), w0);
                             }
                         }
-                        _bias[0] = _mm_loadu_si128((__m128i*)(bias + sc + F * 0)), _norm[0] = _mm_loadu_ps(norm + sc + F * 0);
-                        Save1<term>(dst0 + sc + F * 0, NULL, d00, _bias, _norm, _zero);
-                        Save1<term>(dst1 + sc + F * 0, NULL, d10, _bias, _norm, _zero);
+                        Save2<term>(dst, dst + dD, d00, d10, bias, norm, _zero, sc + F * 0);
                     }
                     for (; sc < srcC; sc += F)
                     {
@@ -561,9 +599,7 @@ namespace Simd
                                 Madd1(d10, _mm_loadu_si128((__m128i*)ps1 + 0), w0);
                             }
                         }
-                        _bias[0] = _mm_loadu_si128((__m128i*)(bias + sc + F * 0)), _norm[0] = _mm_loadu_ps(norm + sc + F * 0);
-                        Save1<term>(dst0 + sc + F * 0, NULL, d00, _bias, _norm, _zero, srcC - srcCF);
-                        Save1<term>(dst1 + sc + F * 0, NULL, d10, _bias, _norm, _zero, srcC - srcCF);
+                        Save2<term>(dst, dst + dD, d00, d10, bias, norm, _zero, sc + F * 0, srcC - srcCF);
                     }
                     dst += 2 * dD;
                 }
@@ -638,12 +674,14 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void SetV1(const ConvParam& p, SynetQuantizedConvolutionNhwcDepthwiseV1::ConvolutionPtr& convolution)
+        template <Term8iType term> void SetV1(const ConvParam& p, const AlgParamV1& a, SynetQuantizedConvolutionNhwcDepthwiseV1::ConvolutionPtr& convolution)
         {
             //if (p.IsKernel(3) && p.IsDilation(1))
             //    convolution = QuantizedConvolutionNhwcDepthwiseV0_3x3<term>;
             //else
-                convolution = QuantizedConvolutionNhwcDepthwiseV1_Default<term>;
+            {
+                convolution = QuantizedConvolutionNhwcDepthwiseV1_Direct<term>;
+            }
         }
 
         //------------------------------------------------------------------------------------------------
@@ -654,9 +692,9 @@ namespace Simd
             SetAlgParam(F);
             _preprocess = QuantizedConvolutionNhwcDepthwiseV1_Preprocess;
             if (p.dstT == SimdTensorData8u)
-                SetV1<Term8iLast8u>(p, _convolution);
+                SetV1<Term8iLast8u>(p, _alg, _convolution);
             //else
-            //    SetV0<Term8iLast32f>(p, _convolution);
+            //    SetV0<Term8iLast32f>(p, _alg, _convolution);
         }
     }
 #endif

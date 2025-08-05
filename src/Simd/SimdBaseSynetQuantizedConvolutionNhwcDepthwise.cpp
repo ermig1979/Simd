@@ -143,15 +143,15 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            size_t kernel = p.kernelY * p.kernelX;
-            _weight32i.Resize(kernel * a.bufC);
+            size_t K = p.kernelY * p.kernelX, C = p.srcC, F = a.F;
+            _weight32i.Resize(K * a.bufC);
             int32_t* dst = _weight32i.data;
             if (a.reorderType == 0)
             {
-                for (size_t k = 0; k < kernel; ++k)
+                for (size_t k = 0; k < K; ++k)
                 {
                     size_t c = 0;
-                    for (; c < p.srcC; ++c)
+                    for (; c < C; ++c)
                         dst[c] = src[c];
                     for (; c < a.bufC; ++c)
                         dst[c] = 0;
@@ -159,6 +159,24 @@ namespace Simd
                     dst += a.bufC;
                 }
             }
+            else if (a.reorderType == 1)
+            {
+                for (size_t c = 0; c < C; c += F)
+                {
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        for (size_t i = 0; i < F; ++i)
+                        {
+                            if (c + i < C)
+                                *dst++ = src[k * C + c + i];
+                            else
+                                *dst++ = 0;
+                        }
+                    }
+                }
+            }
+            else
+                assert(0);
         }
 
         bool SynetQuantizedConvolutionNhwcDepthwiseV1::Preferable(const ConvParam& p, size_t F)
