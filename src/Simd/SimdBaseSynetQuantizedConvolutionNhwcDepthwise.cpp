@@ -74,6 +74,95 @@ namespace Simd
         {
             return p.trans != 0 && p.IsDepthwise() && p.group >= F;
         }
-    }
+
+        //------------------------------------------------------------------------------------------------
+
+        SynetQuantizedConvolutionNhwcDepthwiseV1::SynetQuantizedConvolutionNhwcDepthwiseV1(const ConvParam& p)
+            : SynetQuantizedConvolution(p)
+        {
+            _preprocess = 0;
+            _convolution = 0;
+        }
+
+        String SynetQuantizedConvolutionNhwcDepthwiseV1::Desc() const
+        {
+            std::stringstream desc;
+            desc << Ext() << "::NhwcDepthwiseV1";
+            return desc.str();
+        }
+
+        size_t SynetQuantizedConvolutionNhwcDepthwiseV1::InternalBufferSize() const
+        {
+            return SynetQuantizedConvolution::InternalBufferSize() + _weight32i.RawSize();
+        }
+
+        size_t SynetQuantizedConvolutionNhwcDepthwiseV1::ExternalBufferSize() const
+        {
+            const AlgParam& a = _alg;
+            size_t size = 0;
+            size += a.bufC * a.bufH * a.bufW * sizeof(int32_t);
+            return size;
+        }
+
+        void SynetQuantizedConvolutionNhwcDepthwiseV1::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            buf8 = Buffer(buf8);
+            int32_t* buf = Allocate<int32_t>(buf8, a.bufC * a.bufH * a.bufW);
+            for (size_t b = 0; b < p.batch; b += 1)
+            {
+                for (size_t yBeg = 0; yBeg < p.dstH;)
+                {
+                    size_t yEnd = Simd::Min(yBeg + a.stepH, p.dstH);
+                    _preprocess(src, _srcZero[0], p, a, yBeg, yEnd, buf);
+                    _convolution(buf, p, a, _weight32i.data, _bias.data, _norm.data, _dstZero[0], yBeg, yEnd, dst);
+                    yBeg = yEnd;
+                }
+                src += _sizeS * _elemS;
+                dst += _sizeD * _elemD;
+            }
+        }
+
+        void SynetQuantizedConvolutionNhwcDepthwiseV1::SetAlgParam(size_t F)
+        {
+            const ConvParam& p = _param;
+            AlgParam& a = _alg;
+            a.srcE = _elemS;
+            a.dstE = _elemD;
+            a.F = F;
+            a.bufC = AlignHi(p.srcC, F);
+            a.bufW = p.srcW + p.padX + p.padW;
+            a.bufH = Pow2Hi(p.kernelY);
+            a.reorderType = 0;
+        }
+
+        void SynetQuantizedConvolutionNhwcDepthwiseV1::SetWeight(const int8_t* src)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            size_t kernel = p.kernelY * p.kernelX;
+            _weight32i.Resize(kernel * a.bufC);
+            int32_t* dst = _weight32i.data;
+            if (a.reorderType == 0)
+            {
+                for (size_t k = 0; k < kernel; ++k)
+                {
+                    size_t c = 0;
+                    for (; c < p.srcC; ++c)
+                        dst[c] = src[c];
+                    for (; c < a.bufC; ++c)
+                        dst[c] = 0;
+                    src += p.srcC;
+                    dst += a.bufC;
+                }
+            }
+        }
+
+        bool SynetQuantizedConvolutionNhwcDepthwiseV1::Preferable(const ConvParam& p, size_t F)
+        {
+            return p.trans != 0 && p.IsDepthwise() && p.group >= F;
+        }
+     }
 #endif
 }

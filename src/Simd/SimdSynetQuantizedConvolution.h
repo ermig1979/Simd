@@ -169,6 +169,7 @@ namespace Simd
             SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
+            virtual size_t InternalBufferSize() const;
             virtual size_t ExternalBufferSize() const;
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
@@ -224,6 +225,40 @@ namespace Simd
             virtual void SetWeight(const int8_t* weight);
 
             AlgParam _alg;
+            ConvolutionPtr _convolution;
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwiseV1 : public SynetQuantizedConvolution
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV1(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t InternalBufferSize() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p, size_t F);
+
+            struct AlgParam
+            {
+                int32_t srcE, dstE;
+                size_t F, bufC, bufH, bufW, stepH;
+                int reorderType;
+            };
+
+            typedef void(*PreprocessPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, int32_t* dst);
+            typedef void(*ConvolutionPtr)(const int32_t* src, const ConvParam& p, const AlgParam& a, const int32_t* weight, const int32_t* bias, const float* norm, size_t yBeg, size_t yEnd, uint32_t zero, uint8_t* dst);
+
+        protected:
+            void SetAlgParam(size_t F);
+            virtual void SetWeight(const int8_t* weight);
+
+            AlgParam _alg;
+            Array32i _weight32i;
+            PreprocessPtr _preprocess;
             ConvolutionPtr _convolution;
         };
 

@@ -111,6 +111,11 @@ namespace Simd
             return size;
         }
 
+        size_t SynetQuantizedConvolutionNhwcSpecV0::InternalBufferSize() const
+        {
+            return SynetQuantizedConvolution::InternalBufferSize() + _offset.RawSize();
+        }
+
         void SynetQuantizedConvolutionNhwcSpecV0::SetWeight(const int8_t* weight)
         {
             const ConvParam& p = _param;
