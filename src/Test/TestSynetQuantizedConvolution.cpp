@@ -333,7 +333,7 @@ namespace Test
 
 #endif
 #else
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(10, 128, 75, 75, 128, _1, _1, _2, _0, _0, 1, aRe, t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 32, 112, 112, 32, _3, _1, _1, _1, _1, 32, aId, t, u8, u8), o, f1, f2);
 #endif
 
         return result;

@@ -86,8 +86,9 @@ namespace Simd
 
         String SynetQuantizedConvolutionNhwcDepthwiseV1::Desc() const
         {
+            const AlgParam& a = _alg;
             std::stringstream desc;
-            desc << Ext() << "::NhwcDepthwiseV1";
+            desc << Ext() << "::NhwcDepthwiseV1-" << a.reorderType;
             return desc.str();
         }
 
@@ -116,7 +117,7 @@ namespace Simd
                 {
                     size_t yEnd = Simd::Min(yBeg + a.stepH, p.dstH);
                     _preprocess(src, _srcZero[0], p, a, yBeg, yEnd, buf);
-                    _convolution(buf, p, a, _weight32i.data, _bias.data, _norm.data, _dstZero[0], yBeg, yEnd, dst);
+                    _convolution(buf, p, a, _weight32i.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero[0], dst);
                     yBeg = yEnd;
                 }
                 src += _sizeS * _elemS;
@@ -134,6 +135,7 @@ namespace Simd
             a.bufC = AlignHi(p.srcC, F);
             a.bufW = p.srcW + p.padX + p.padW;
             a.bufH = Pow2Hi(p.kernelY);
+            a.stepH = 1;
             a.reorderType = 0;
         }
 
@@ -161,7 +163,7 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcDepthwiseV1::Preferable(const ConvParam& p, size_t F)
         {
-            return p.trans != 0 && p.IsDepthwise() && p.group >= F;
+            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F;
         }
      }
 #endif
