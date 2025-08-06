@@ -135,7 +135,7 @@ namespace Simd
             a.bufC = AlignHi(p.srcC, F);
             a.bufW = p.srcW + p.padX + p.padW;
             a.bufH = Pow2Hi(p.kernelY);
-            a.reorderType = 0;
+            a.reorderType = p.IsKernel(3) ? 1 : 0;
             a.stepH = 1;// Simd::Max<size_t>(1, (a.bufH - p.kernelY - 1) / p.strideY);
         }
 
