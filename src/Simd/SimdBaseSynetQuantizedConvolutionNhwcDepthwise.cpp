@@ -135,8 +135,8 @@ namespace Simd
             a.bufC = AlignHi(p.srcC, F);
             a.bufW = p.srcW + p.padX + p.padW;
             a.bufH = Pow2Hi(p.kernelY);
-            a.stepH = 1;
             a.reorderType = 0;
+            a.stepH = 1;// Simd::Max<size_t>(1, (a.bufH - p.kernelY - 1) / p.strideY);
         }
 
         void SynetQuantizedConvolutionNhwcDepthwiseV1::SetWeight(const int8_t* src)

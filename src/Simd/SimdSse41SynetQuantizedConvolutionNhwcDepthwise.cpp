@@ -81,6 +81,16 @@ namespace Simd
             QuntizedTerm8i<term>::template Save<0>(dst + offset, (int32_t*)NULL, sum, &_bias, &_norm, zero, tail);
         }
 
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum, const __m128i& bias, const __m128& norm, const __m128i& zero)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, (int32_t*)NULL, sum, &bias, &norm, zero);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum, const __m128i& bias, const __m128& norm, const __m128i& zero, size_t tail)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, (int32_t*)NULL, sum, &bias, &norm, zero, tail);
+        }
+
         template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, __m128i sum0, __m128i sum1, const int32_t* bias, const float* norm, const __m128i& zero, size_t offset)
         {
             __m128i _bias = _mm_loadu_si128((__m128i*)(bias + offset));
@@ -513,7 +523,7 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV1_Direct(const int32_t* src, const ConvParam& p, const AlgParamV1& a, 
+        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV1_AnyR0(const int32_t* src, const ConvParam& p, const AlgParamV1& a, 
             const int32_t* weight, const int32_t* bias, const float* norm, size_t dyBeg, size_t dyEnd, uint32_t zero, uint8_t* dst)
         {
             __m128i _zero = _mm_set1_epi32(zero);
@@ -674,13 +684,128 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV1_AnyR1(const int32_t* src, const ConvParam& p, const AlgParamV1& a,
+            const int32_t* weight, const int32_t* bias, const float* norm, size_t dyBeg, size_t dyEnd, uint32_t zero, uint8_t* dst)
+        {
+            __m128 _norm;
+            __m128i _zero = _mm_set1_epi32(zero), _bias;
+            __m128i d00, d10, d20, d30, w0;
+            size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX, dX = sX * F, dW = kY * kX;
+            size_t byMask = a.bufH - 1, bW = a.bufW, bufR = a.bufW * a.bufC, dstW2 = AlignLo(p.dstW, 2), dstW4 = AlignLo(p.dstW, 4), dD = p.dstC * a.srcE;
+            dst += dyBeg * p.dstW * dD;
+            for (size_t dy = dyBeg; dy < dyEnd; ++dy)
+            {
+                size_t sc = 0, sy = dy * sY;
+                for (; sc < srcCF; sc += F)
+                {
+                    uint8_t* pd = dst + sc;
+                    const int32_t* ps0 = src + sc * bW;
+                    _bias = _mm_loadu_si128((__m128i*)(bias + sc));
+                    _norm = _mm_loadu_ps(norm + sc);
+                    size_t dx = 0;
+                    for (; dx < dstW4; dx += 4, ps0 += 4 * dX)
+                    {
+                        d00 = _mm_setzero_si128();
+                        d10 = _mm_setzero_si128();
+                        d20 = _mm_setzero_si128();
+                        d30 = _mm_setzero_si128();
+                        const int32_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            {
+                                w0 = _mm_loadu_si128((__m128i*)pw);
+                                Madd1(d00, _mm_loadu_si128((__m128i*)(ps + 0 * dX)), w0);
+                                Madd1(d10, _mm_loadu_si128((__m128i*)(ps + 1 * dX)), w0);
+                                Madd1(d20, _mm_loadu_si128((__m128i*)(ps + 2 * dX)), w0);
+                                Madd1(d30, _mm_loadu_si128((__m128i*)(ps + 3 * dX)), w0);
+                            }
+                        }
+                        Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero);
+                        Save1<term>(pd + 1 * dD, d10, _bias, _norm, _zero);
+                        Save1<term>(pd + 2 * dD, d20, _bias, _norm, _zero);
+                        Save1<term>(pd + 3 * dD, d30, _bias, _norm, _zero);
+                        pd += 4 * dD;
+                    }
+                    for (; dx < dstW2; dx += 2, ps0 += 2 * dX)
+                    {
+                        d00 = _mm_setzero_si128();
+                        d10 = _mm_setzero_si128();
+                        const int32_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            {
+                                w0 = _mm_loadu_si128((__m128i*)pw);
+                                Madd1(d00, _mm_loadu_si128((__m128i*)(ps + 0 * dX)), w0);
+                                Madd1(d10, _mm_loadu_si128((__m128i*)(ps + 1 * dX)), w0);
+                            }
+                        }
+                        Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero);
+                        Save1<term>(pd + 1 * dD, d10, _bias, _norm, _zero);
+                        pd += 2 * dD;
+                    }
+                    for (; dx < p.dstW; ++dx, ps0 += dX)
+                    {
+                        d00 = _mm_setzero_si128();
+                        const int32_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            {
+                                w0 = _mm_loadu_si128((__m128i*)pw);
+                                Madd1(d00, _mm_loadu_si128((__m128i*)ps), w0);
+                            }
+                        }
+                        Save1<term>(pd, d00, _bias, _norm, _zero);
+                        pd += dD;
+                    }
+                }
+                for (; sc < srcC; sc += F)
+                {
+                    uint8_t* pd = dst + sc;
+                    const int32_t* ps0 = src + sc * bW;
+                    _bias = _mm_loadu_si128((__m128i*)(bias + sc));
+                    _norm = _mm_loadu_ps(norm + sc);
+                    size_t dx = 0, tail = srcC - srcCF;
+                    for (; dx < p.dstW; ++dx, ps0 += dX)
+                    {
+                        d00 = _mm_setzero_si128();
+                        const int32_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            {
+                                w0 = _mm_loadu_si128((__m128i*)pw);
+                                Madd1(d00, _mm_loadu_si128((__m128i*)ps), w0);
+                            }
+                        }
+                        Save1<term>(pd, d00, _bias, _norm, _zero, tail);
+                        pd += dD;
+                    }
+                }
+                dst += p.dstW * dD;
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         template <Term8iType term> void SetV1(const ConvParam& p, const AlgParamV1& a, SynetQuantizedConvolutionNhwcDepthwiseV1::ConvolutionPtr& convolution)
         {
             //if (p.IsKernel(3) && p.IsDilation(1))
             //    convolution = QuantizedConvolutionNhwcDepthwiseV0_3x3<term>;
             //else
             {
-                convolution = QuantizedConvolutionNhwcDepthwiseV1_Direct<term>;
+                if (a.reorderType == 0)
+                    convolution = QuantizedConvolutionNhwcDepthwiseV1_AnyR0<term>;
+                else if (a.reorderType == 1)
+                    convolution = QuantizedConvolutionNhwcDepthwiseV1_AnyR1<term>;
+                else
+                    assert(0);
             }
         }
 
