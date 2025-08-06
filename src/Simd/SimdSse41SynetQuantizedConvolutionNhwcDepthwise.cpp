@@ -435,7 +435,6 @@ namespace Simd
             //    SetV0<Term8iLast32f>(p, _convolution);
         }
 
-
         //------------------------------------------------------------------------------------------------
 
         static void QuantizedConvolutionNhwcDepthwiseV1_Preprocess(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParamV1& a, size_t dyBeg, size_t dyEnd, int32_t* dst)

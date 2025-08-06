@@ -41,6 +41,8 @@ namespace Simd
             if (!ValidQuantized(param))
                 return NULL;
             else if (SynetQuantizedConvolutionNhwcDepthwiseV0::Preferable(param, F))
+                return new SynetQuantizedConvolutionNhwcDepthwiseV1(param);
+            else if (SynetQuantizedConvolutionNhwcDepthwiseV0::Preferable(param, F))
                 return new SynetQuantizedConvolutionNhwcDepthwiseV0(param);
             else if (SynetQuantizedConvolutionNhwcSpecV0::Preferable(param))
                 return new SynetQuantizedConvolutionNhwcSpecV0(param);
