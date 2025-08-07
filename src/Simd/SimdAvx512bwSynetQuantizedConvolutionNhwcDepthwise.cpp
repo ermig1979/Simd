@@ -36,6 +36,7 @@ namespace Simd
     namespace Avx512bw
     {
         using AlgParamV0 = SynetQuantizedConvolutionNhwcDepthwiseV0::AlgParam;
+        using AlgParamV1 = SynetQuantizedConvolutionNhwcDepthwiseV1::AlgParam;
 
         //------------------------------------------------------------------------------------------------
 
@@ -61,6 +62,19 @@ namespace Simd
             __m512i _bias = _mm512_maskz_loadu_epi32(tail, bias + offset);
             __m512 _norm = _mm512_maskz_loadu_ps(tail, norm + offset);
             QuntizedTerm8i<term>::template Save<0>(dst + offset, (int32_t*)NULL, sum, &_bias, &_norm, zero, tail);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, __m512i sum, const __m512i& bias, const __m512& norm, const __m512i& zero, __mmask16 tail = -1)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, (int32_t*)NULL, sum, &bias, &norm, zero, tail);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, __m512i sum0, __m512i sum1, const int32_t* bias, const float* norm, const __m512i& zero, size_t offset, __mmask16 tail = -1)
+        {
+            __m512i _bias = _mm512_loadu_si512((__m512i*)(bias + offset));
+            __m512 _norm = _mm512_loadu_ps(norm + offset);
+            QuntizedTerm8i<term>::template Save<0>(dst0 + offset, (int32_t*)NULL, sum0, &_bias, &_norm, zero, tail);
+            QuntizedTerm8i<term>::template Save<0>(dst1 + offset, (int32_t*)NULL, sum1, &_bias, &_norm, zero, tail);
         }
 
         //------------------------------------------------------------------------------------------------
@@ -559,6 +573,487 @@ namespace Simd
                 SetV0<Term8iLast8u>(p, _convolution);
             //else
             //    SetV0<Term8iLast32f>(p, _convolution);
+        }
+
+        //------------------------------------------------------------------------------------------------
+
+        static void QuantizedConvolutionNhwcDepthwiseV1_Preprocess(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParamV1& a, size_t dyBeg, size_t dyEnd, int32_t* dst)
+        {
+            __m512i _zero = _mm512_set1_epi32(zero);
+            size_t srcC = p.srcC, srcCF = Simd::AlignLo(p.srcC, a.F), byMask = a.bufH - 1;
+            __mmask16 tail = TailMask16(srcC - srcCF);
+            size_t byPad = p.kernelY - 1, srcR = p.srcW * p.srcC, bufR = a.bufW * a.bufC;
+            size_t byBeg = dyBeg ? dyBeg * p.strideY + byPad : 0, byEnd = dyEnd * p.strideY + byPad;
+            if (a.reorderType == 0)
+            {
+                size_t bxPad = p.padX * a.bufC, bwPad = p.padW * a.bufC;
+                for (size_t by = byBeg; by < byEnd; ++by)
+                {
+                    int32_t* pd = dst + (by & byMask) * bufR;
+                    size_t sy = by - p.padY;
+                    if (sy < p.srcH)
+                    {
+                        const uint8_t* ps = src + sy * srcR;
+                        if (bxPad)
+                        {
+                            for (size_t i = 0; i < bxPad; i += F)
+                                _mm512_storeu_si512((__m512i*)(pd + i), _zero);
+                            pd += bxPad;
+                        }
+                        for (size_t sx = 0; sx < p.srcW; sx++)
+                        {
+                            size_t sc = 0;
+                            for (; sc < srcCF; sc += F)
+                                _mm512_storeu_si512((__m512i*)(pd + sc), _mm512_cvtepu8_epi32(_mm_loadu_epi8(ps + sc)));
+                            if(tail)
+                                _mm512_storeu_si512((__m512i*)(pd + sc), _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, ps + sc)));
+                            ps += p.srcC;
+                            pd += a.bufC;
+                        }
+                        if (bwPad)
+                        {
+                            for (size_t i = 0; i < bwPad; i += F)
+                                _mm512_storeu_si512((__m512i*)(pd + i), _zero);
+                            pd += bwPad;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < bufR; i += F)
+                            _mm512_storeu_si512((__m512i*)(pd + i), _zero);
+                    }
+                }
+            }
+            else
+            {
+                size_t bW = a.bufW, bC = a.bufC, xPad = p.padX, wPad = p.padW;
+                for (size_t by = byBeg; by < byEnd; ++by)
+                {
+                    int32_t* pd = dst + (by & byMask) * bufR;
+                    size_t sy = by - p.padY;
+                    if (sy < p.srcH)
+                    {
+                        const uint8_t* ps = src + sy * srcR;
+                        if (xPad)
+                        {
+                            for (size_t x = 0; x < xPad; x += 1, pd += a.F)
+                                for (size_t c = 0; c < bC; c += a.F)
+                                    _mm512_storeu_si512((__m512i*)(pd + c * bW), _zero);
+                        }
+                        for (size_t sx = 0; sx < p.srcW; sx++, pd += a.F)
+                        {
+                            size_t sc = 0;
+                            for (; sc < srcCF; sc += F)
+                                _mm512_storeu_si512((__m512i*)(pd + sc * bW), _mm512_cvtepu8_epi32(_mm_loadu_epi8(ps + sc)));
+                            for (; sc < srcC; sc += F)
+                                _mm512_storeu_si512((__m512i*)(pd + sc * bW), _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, ps + sc)));
+                            ps += p.srcC;
+                        }
+                        if (wPad)
+                        {
+                            for (size_t x = 0; x < wPad; x += 1, pd += a.F)
+                                for (size_t c = 0; c < bC; c += a.F)
+                                    _mm512_storeu_si512((__m512i*)(pd + c * bW), _zero);
+                        }
+                    }
+                    else
+                    {
+
+                        for (size_t i = 0; i < bufR; i += F)
+                            _mm512_storeu_si512((__m512i*)(pd + i), _zero);
+                    }
+                }
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
+        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV1_AnyR0(const int32_t* src, const ConvParam& p, const AlgParamV1& a,
+            const int32_t* weight, const int32_t* bias, const float* norm, size_t dyBeg, size_t dyEnd, uint32_t zero, uint8_t* dst)
+        {
+            __m512i _zero = _mm512_set1_epi32(zero);
+            __m512i d00, d01, d02, d03, d10, d11, d12, d13, w0;
+            size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), srcCF4 = AlignLo(srcC, F * 4), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX;
+            size_t byMask = a.bufH - 1, bufC = a.bufC, bufR = a.bufW * a.bufC, dstW2 = AlignLo(p.dstW, 2), dD = p.dstC * a.srcE, dX = sX * bufC;
+            __mmask16 tail = TailMask16(srcC - srcCF);
+            dst += dyBeg * p.dstW * p.dstC * a.srcE;
+            for (size_t dy = dyBeg; dy < dyEnd; ++dy)
+            {
+                size_t dx = 0;
+                for (; dx < dstW2; dx += 2)
+                {
+                    const int32_t* ps00 = src + (dx + 0) * sX * bufC;
+                    uint8_t* dst0 = dst, * dst1 = dst + dD;
+                    size_t sc = 0;
+                    for (; sc < srcCF4; sc += F * 4)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d01 = _mm512_setzero_si512();
+                        d02 = _mm512_setzero_si512();
+                        d03 = _mm512_setzero_si512();
+                        d10 = _mm512_setzero_si512();
+                        d11 = _mm512_setzero_si512();
+                        d12 = _mm512_setzero_si512();
+                        d13 = _mm512_setzero_si512();
+                        const int32_t* pw = weight + sc;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            size_t sy = dy * sY + ky;
+                            const int32_t* ps0 = ps00 + (sy & byMask) * bufR + sc, * ps1 = ps0 + dX;
+                            for (size_t kx = 0; kx < kX; ++kx, ps0 += bufC, ps1 += bufC, pw += bufC)
+                            {
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 0);
+                                Madd1(d00, _mm512_loadu_si512((__m512i*)ps0 + 0), w0);
+                                Madd1(d10, _mm512_loadu_si512((__m512i*)ps1 + 0), w0);
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 1);
+                                Madd1(d01, _mm512_loadu_si512((__m512i*)ps0 + 1), w0);
+                                Madd1(d11, _mm512_loadu_si512((__m512i*)ps1 + 1), w0);
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 2);
+                                Madd1(d02, _mm512_loadu_si512((__m512i*)ps0 + 2), w0);
+                                Madd1(d12, _mm512_loadu_si512((__m512i*)ps1 + 2), w0);
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 3);
+                                Madd1(d03, _mm512_loadu_si512((__m512i*)ps0 + 3), w0);
+                                Madd1(d13, _mm512_loadu_si512((__m512i*)ps1 + 3), w0);
+                            }
+                        }
+                        Save2<term>(dst, dst + dD, d00, d10, bias, norm, _zero, sc + F * 0);
+                        Save2<term>(dst, dst + dD, d01, d11, bias, norm, _zero, sc + F * 1);
+                        Save2<term>(dst, dst + dD, d02, d12, bias, norm, _zero, sc + F * 2);
+                        Save2<term>(dst, dst + dD, d03, d13, bias, norm, _zero, sc + F * 3);
+                    }
+                    for (; sc < srcCF; sc += F)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d10 = _mm512_setzero_si512();
+                        const int32_t* pw = weight + sc;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            size_t sy = dy * sY + ky;
+                            const int32_t* ps0 = ps00 + (sy & byMask) * bufR + sc, * ps1 = ps0 + dX;
+                            for (size_t kx = 0; kx < kX; ++kx, ps0 += bufC, ps1 += bufC, pw += bufC)
+                            {
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 0);
+                                Madd1(d00, _mm512_loadu_si512((__m512i*)ps0 + 0), w0);
+                                Madd1(d10, _mm512_loadu_si512((__m512i*)ps1 + 0), w0);
+                            }
+                        }
+                        Save2<term>(dst, dst + dD, d00, d10, bias, norm, _zero, sc + F * 0);
+                    }
+                    for (; sc < srcC; sc += F)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d10 = _mm512_setzero_si512();
+                        const int32_t* pw = weight + sc;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            size_t sy = dy * sY + ky;
+                            const int32_t* ps0 = ps00 + (sy & byMask) * bufR + sc, * ps1 = ps0 + dX;
+                            for (size_t kx = 0; kx < kX; ++kx, ps0 += bufC, ps1 += bufC, pw += bufC)
+                            {
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 0);
+                                Madd1(d00, _mm512_loadu_si512((__m512i*)ps0 + 0), w0);
+                                Madd1(d10, _mm512_loadu_si512((__m512i*)ps1 + 0), w0);
+                            }
+                        }
+                        Save2<term>(dst, dst + dD, d00, d10, bias, norm, _zero, sc + F * 0, tail);
+                    }
+                    dst += 2 * dD;
+                }
+                for (; dx < p.dstW; ++dx)
+                {
+                    const int32_t* ps0 = src + dx * sX * bufC;
+                    size_t sc = 0;
+                    for (; sc < srcCF4; sc += F * 4)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d01 = _mm512_setzero_si512();
+                        d02 = _mm512_setzero_si512();
+                        d03 = _mm512_setzero_si512();
+                        const int32_t* pw = weight + sc;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            size_t sy = dy * sY + ky;
+                            const int32_t* ps = ps0 + (sy & byMask) * bufR + sc;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += bufC, pw += bufC)
+                            {
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 0);
+                                Madd1(d00, _mm512_loadu_si512((__m512i*)ps + 0), w0);
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 1);
+                                Madd1(d01, _mm512_loadu_si512((__m512i*)ps + 1), w0);
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 2);
+                                Madd1(d02, _mm512_loadu_si512((__m512i*)ps + 2), w0);
+                                w0 = _mm512_loadu_si512((__m512i*)pw + 3);
+                                Madd1(d03, _mm512_loadu_si512((__m512i*)ps + 3), w0);
+                            }
+                        }
+                        Save1<term>(dst, d00, bias, norm, _zero, sc + F * 0);
+                        Save1<term>(dst, d01, bias, norm, _zero, sc + F * 1);
+                        Save1<term>(dst, d02, bias, norm, _zero, sc + F * 2);
+                        Save1<term>(dst, d03, bias, norm, _zero, sc + F * 3);
+                    }
+                    for (; sc < srcCF; sc += F)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        const int32_t* pw = weight + sc;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            size_t sy = dy * sY + ky;
+                            const int32_t* ps = ps0 + (sy & byMask) * bufR + sc;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += bufC, pw += bufC)
+                            {
+                                w0 = _mm512_loadu_si512((__m512i*)pw);
+                                Madd1(d00, _mm512_loadu_si512((__m512i*)ps), w0);
+                            }
+                        }
+                        Save1<term>(dst, d00, bias, norm, _zero, sc);
+                    }
+                    for (; sc < srcC; sc += F)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        const int32_t* pw = weight + sc;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            size_t sy = dy * sY + ky;
+                            const int32_t* ps = ps0 + (sy & byMask) * bufR + sc;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += bufC, pw += bufC)
+                            {
+                                w0 = _mm512_loadu_si512((__m512i*)pw);
+                                Madd1(d00, _mm512_loadu_si512((__m512i*)ps), w0);
+                            }
+                        }
+                        Save1<term>(dst, d00, bias, norm, _zero, sc, tail);
+                    }
+                    dst += dD;
+                }
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
+        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV1_AnyR1(const int32_t* src, const ConvParam& p, const AlgParamV1& a,
+            const int32_t* weight, const int32_t* bias, const float* norm, size_t dyBeg, size_t dyEnd, uint32_t zero, uint8_t* dst)
+        {
+            __m512 _norm;
+            __m512i _zero = _mm512_set1_epi32(zero), _bias;
+            __m512i d00, d10, d20, d30, w0;
+            size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX, dX = sX * F, dW = kY * kX;
+            size_t byMask = a.bufH - 1, bW = a.bufW, bufR = a.bufW * a.bufC, dstW2 = AlignLo(p.dstW, 2), dstW4 = AlignLo(p.dstW, 4), dD = p.dstC * a.srcE;
+            dst += dyBeg * p.dstW * dD;
+            for (size_t dy = dyBeg; dy < dyEnd; ++dy)
+            {
+                size_t sy = dy * sY;
+                for (size_t sc = 0; sc < srcC; sc += F)
+                {
+                    uint8_t* pd = dst + sc;
+                    const int32_t* ps0 = src + sc * bW;
+                    _bias = _mm512_loadu_si512((__m512i*)(bias + sc));
+                    _norm = _mm512_loadu_ps(norm + sc);
+                    __mmask16 tail = TailMask16(srcC - sc);
+                    size_t dx = 0;
+                    for (; dx < dstW4; dx += 4, ps0 += 4 * dX)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d10 = _mm512_setzero_si512();
+                        d20 = _mm512_setzero_si512();
+                        d30 = _mm512_setzero_si512();
+                        const int32_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            {
+                                w0 = _mm512_loadu_si512((__m512i*)pw);
+                                Madd1(d00, _mm512_loadu_si512((__m512i*)(ps + 0 * dX)), w0);
+                                Madd1(d10, _mm512_loadu_si512((__m512i*)(ps + 1 * dX)), w0);
+                                Madd1(d20, _mm512_loadu_si512((__m512i*)(ps + 2 * dX)), w0);
+                                Madd1(d30, _mm512_loadu_si512((__m512i*)(ps + 3 * dX)), w0);
+                            }
+                        }
+                        Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero, tail);
+                        Save1<term>(pd + 1 * dD, d10, _bias, _norm, _zero, tail);
+                        Save1<term>(pd + 2 * dD, d20, _bias, _norm, _zero, tail);
+                        Save1<term>(pd + 3 * dD, d30, _bias, _norm, _zero, tail);
+                        pd += 4 * dD;
+                    }
+                    for (; dx < dstW2; dx += 2, ps0 += 2 * dX)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d10 = _mm512_setzero_si512();
+                        const int32_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            {
+                                w0 = _mm512_loadu_si512((__m512i*)pw);
+                                Madd1(d00, _mm512_loadu_si512((__m512i*)(ps + 0 * dX)), w0);
+                                Madd1(d10, _mm512_loadu_si512((__m512i*)(ps + 1 * dX)), w0);
+                            }
+                        }
+                        Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero, tail);
+                        Save1<term>(pd + 1 * dD, d10, _bias, _norm, _zero, tail);
+                        pd += 2 * dD;
+                    }
+                    for (; dx < p.dstW; ++dx, ps0 += dX)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        const int32_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ++ky)
+                        {
+                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            {
+                                w0 = _mm512_loadu_si512((__m512i*)pw);
+                                Madd1(d00, _mm512_loadu_si512((__m512i*)ps), w0);
+                            }
+                        }
+                        Save1<term>(pd, d00, _bias, _norm, _zero, tail);
+                        pd += dD;
+                    }
+                }
+                dst += p.dstW * dD;
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
+        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV1_3x3R1(const int32_t* src, const ConvParam& p, const AlgParamV1& a,
+            const int32_t* weight, const int32_t* bias, const float* norm, size_t dyBeg, size_t dyEnd, uint32_t zero, uint8_t* dst)
+        {
+            __m512 _norm;
+            __m512i _zero = _mm512_set1_epi32(zero), _bias;
+            __m512i d00, d10, w0, w1, w2, w3, w4, w5, w6, w7, w8, s0;
+            size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), sY = p.strideY, sX = p.strideX, dX = sX * F, dW = 9;
+            size_t byMask = a.bufH - 1, bW = a.bufW, bufR = a.bufW * a.bufC, dD = p.dstC * a.srcE;
+            size_t dstW2 = sX == 1 ? AlignLo(p.dstW, 2) : 0;
+
+            dst += dyBeg * p.dstW * dD;
+            for (size_t dy = dyBeg; dy < dyEnd; ++dy)
+            {
+                size_t sc = 0, sy = dy * sY;
+                for (; sc < srcC; sc += F)
+                {
+                    uint8_t* pd = dst + sc;
+                    const int32_t* ps0 = src + ((sy + 0) & byMask) * bufR + sc * bW;
+                    const int32_t* ps1 = src + ((sy + 1) & byMask) * bufR + sc * bW;
+                    const int32_t* ps2 = src + ((sy + 2) & byMask) * bufR + sc * bW;
+                    const int32_t* pw = weight + sc * dW;
+                    _bias = _mm512_loadu_si512((__m512i*)(bias + sc));
+                    _norm = _mm512_loadu_ps(norm + sc);
+                    w0 = _mm512_loadu_si512((__m512i*)pw + 0);
+                    w1 = _mm512_loadu_si512((__m512i*)pw + 1);
+                    w2 = _mm512_loadu_si512((__m512i*)pw + 2);
+                    w3 = _mm512_loadu_si512((__m512i*)pw + 3);
+                    w4 = _mm512_loadu_si512((__m512i*)pw + 4);
+                    w5 = _mm512_loadu_si512((__m512i*)pw + 5);
+                    w6 = _mm512_loadu_si512((__m512i*)pw + 6);
+                    w7 = _mm512_loadu_si512((__m512i*)pw + 7);
+                    w8 = _mm512_loadu_si512((__m512i*)pw + 8);
+                    __mmask16 tail = TailMask16(srcC - sc);                    
+                    size_t dx = 0;
+                    for (; dx < dstW2; dx += 2, ps0 += DF, ps1 += DF, ps2 += DF)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d10 = _mm512_setzero_si512();
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 0);
+                        Madd1(d00, s0, w0);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 1);
+                        Madd1(d00, s0, w1);
+                        Madd1(d10, s0, w0);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 2);
+                        Madd1(d00, s0, w2);
+                        Madd1(d10, s0, w1);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 3);
+                        Madd1(d10, s0, w2);
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps1 + 0);
+                        Madd1(d00, s0, w3);
+                        s0 = _mm512_loadu_si512((__m512i*)ps1 + 1);
+                        Madd1(d00, s0, w4);
+                        Madd1(d10, s0, w3);
+                        s0 = _mm512_loadu_si512((__m512i*)ps1 + 2);
+                        Madd1(d00, s0, w5);
+                        Madd1(d10, s0, w4);
+                        s0 = _mm512_loadu_si512((__m512i*)ps1 + 3);
+                        Madd1(d10, s0, w5);
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps2 + 0);
+                        Madd1(d00, s0, w6);
+                        s0 = _mm512_loadu_si512((__m512i*)ps2 + 1);
+                        Madd1(d00, s0, w7);
+                        Madd1(d10, s0, w6);
+                        s0 = _mm512_loadu_si512((__m512i*)ps2 + 2);
+                        Madd1(d00, s0, w8);
+                        Madd1(d10, s0, w7);
+                        s0 = _mm512_loadu_si512((__m512i*)ps2 + 3);
+                        Madd1(d10, s0, w8);
+
+                        Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero, tail);
+                        Save1<term>(pd + 1 * dD, d10, _bias, _norm, _zero, tail);
+                        pd += 2 * dD;
+                    }
+                    for (; dx < p.dstW; ++dx, ps0 += dX, ps1 += dX, ps2 += dX)
+                    {
+                        d00 = _mm512_setzero_si512();
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 0);
+                        Madd1(d00, s0, w0);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 1);
+                        Madd1(d00, s0, w1);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 2);
+                        Madd1(d00, s0, w2);
+                        s0 = _mm512_loadu_si512((__m512i*)ps1 + 0);
+                        Madd1(d00, s0, w3);
+                        s0 = _mm512_loadu_si512((__m512i*)ps1 + 1);
+                        Madd1(d00, s0, w4);
+                        s0 = _mm512_loadu_si512((__m512i*)ps1 + 2);
+                        Madd1(d00, s0, w5);
+                        s0 = _mm512_loadu_si512((__m512i*)ps2 + 0);
+                        Madd1(d00, s0, w6);
+                        s0 = _mm512_loadu_si512((__m512i*)ps2 + 1);
+                        Madd1(d00, s0, w7);
+                        s0 = _mm512_loadu_si512((__m512i*)ps2 + 2);
+                        Madd1(d00, s0, w8);
+
+                        Save1<term>(pd, d00, _bias, _norm, _zero, tail);
+                        pd += dD;
+                    }
+                }
+                dst += p.dstW * dD;
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
+        template <Term8iType term> void SetV1(const ConvParam& p, const AlgParamV1& a, SynetQuantizedConvolutionNhwcDepthwiseV1::ConvolutionPtr& convolution)
+        {
+            if (p.IsKernel(3) && p.IsDilation(1) && a.reorderType == 1)
+            {
+                convolution = QuantizedConvolutionNhwcDepthwiseV1_3x3R1<term>;
+            }
+            else
+            {
+                if (a.reorderType == 0)
+                    convolution = QuantizedConvolutionNhwcDepthwiseV1_AnyR0<term>;
+                else if (a.reorderType == 1)
+                    convolution = QuantizedConvolutionNhwcDepthwiseV1_AnyR1<term>;
+                else
+                    assert(0);
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
+        SynetQuantizedConvolutionNhwcDepthwiseV1::SynetQuantizedConvolutionNhwcDepthwiseV1(const ConvParam& p)
+            : Avx2::SynetQuantizedConvolutionNhwcDepthwiseV1(p)
+        {
+            SetAlgParam(F);
+            _preprocess = QuantizedConvolutionNhwcDepthwiseV1_Preprocess;
+            if (p.dstT == SimdTensorData8u)
+                SetV1<Term8iLast8u>(p, _alg, _convolution);
+            //else
+            //    SetV0<Term8iLast32f>(p, _alg, _convolution);
         }
     }
 #endif

@@ -98,6 +98,7 @@ namespace Simd
             QuntizedTerm8i<term>::template Save<0>(dst0 + offset, (int32_t*)NULL, sum0, &_bias, &_norm, zero);
             QuntizedTerm8i<term>::template Save<0>(dst1 + offset, (int32_t*)NULL, sum1, &_bias, &_norm, zero);
         }
+
         template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, __m256i sum0, __m256i sum1, const int32_t* bias, const float* norm, const __m256i& zero, size_t offset, size_t tail)
         {
             __m256i _bias = _mm256_loadu_si256((__m256i*)(bias + offset));
