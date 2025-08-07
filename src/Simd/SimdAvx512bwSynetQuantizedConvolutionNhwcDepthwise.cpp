@@ -604,7 +604,7 @@ namespace Simd
                         {
                             size_t sc = 0;
                             for (; sc < srcCF; sc += F)
-                                _mm512_storeu_si512((__m512i*)(pd + sc), _mm512_cvtepu8_epi32(_mm_loadu_epi8(ps + sc)));
+                                _mm512_storeu_si512((__m512i*)(pd + sc), _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)(ps + sc))));
                             if(tail)
                                 _mm512_storeu_si512((__m512i*)(pd + sc), _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, ps + sc)));
                             ps += p.srcC;
@@ -644,7 +644,7 @@ namespace Simd
                         {
                             size_t sc = 0;
                             for (; sc < srcCF; sc += F)
-                                _mm512_storeu_si512((__m512i*)(pd + sc * bW), _mm512_cvtepu8_epi32(_mm_loadu_epi8(ps + sc)));
+                                _mm512_storeu_si512((__m512i*)(pd + sc), _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)(ps + sc))));
                             for (; sc < srcC; sc += F)
                                 _mm512_storeu_si512((__m512i*)(pd + sc * bW), _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, ps + sc)));
                             ps += p.srcC;

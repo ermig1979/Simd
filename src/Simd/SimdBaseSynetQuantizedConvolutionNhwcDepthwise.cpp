@@ -136,7 +136,7 @@ namespace Simd
             a.bufW = p.srcW + p.padX + p.padW;
             a.bufH = Pow2Hi(p.kernelY);
             a.reorderType = p.IsKernel(3) ? 1 : 0;
-            a.stepH = 1;// Simd::Max<size_t>(1, (a.bufH - p.kernelY - 1) / p.strideY);
+            a.stepH = (F == 16) ? Simd::Max<size_t>(1, (a.bufH - p.kernelY - 1) / p.strideY) : 1;
         }
 
         void SynetQuantizedConvolutionNhwcDepthwiseV1::SetWeight(const int8_t* src)
