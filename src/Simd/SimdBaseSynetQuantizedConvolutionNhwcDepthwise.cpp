@@ -183,6 +183,182 @@ namespace Simd
         {
             return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F;
         }
+
+        //------------------------------------------------------------------------------------------------
+
+        SynetQuantizedConvolutionNhwcDepthwiseV2::SynetQuantizedConvolutionNhwcDepthwiseV2(const ConvParam& p)
+            : SynetQuantizedConvolution(p)
+        {
+            _preprocess = 0;
+            _convolution = 0;
+        }
+
+        String SynetQuantizedConvolutionNhwcDepthwiseV2::Desc() const
+        {
+            const AlgParam& a = _alg;
+            std::stringstream desc;
+            desc << Ext() << "::NhwcDepthwiseV2-" << a.reorderType;
+            return desc.str();
+        }
+
+        size_t SynetQuantizedConvolutionNhwcDepthwiseV2::InternalBufferSize() const
+        {
+            return SynetQuantizedConvolution::InternalBufferSize() + _weight16i.RawSize();
+        }
+
+        size_t SynetQuantizedConvolutionNhwcDepthwiseV2::ExternalBufferSize() const
+        {
+            const AlgParam& a = _alg;
+            size_t size = 0;
+            size += a.bufC * a.bufH * a.bufW * sizeof(int32_t);
+            return size;
+        }
+
+        void SynetQuantizedConvolutionNhwcDepthwiseV2::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            buf8 = Buffer(buf8);
+            int16_t* buf = Allocate<int16_t>(buf8, a.bufC * a.bufH * a.bufW);
+            for (size_t b = 0; b < p.batch; b += 1)
+            {
+                for (size_t yBeg = 0; yBeg < p.dstH;)
+                {
+                    size_t yEnd = Simd::Min(yBeg + a.stepH, p.dstH);
+                    _preprocess(src, _srcZero[0], p, a, yBeg, yEnd, buf);
+                    _convolution(buf, p, a, _weight16i.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero[0], dst);
+                    yBeg = yEnd;
+                }
+                src += _sizeS * _elemS;
+                dst += _sizeD * _elemD;
+            }
+        }
+
+        void SynetQuantizedConvolutionNhwcDepthwiseV2::SetAlgParam(size_t F)
+        {
+            const ConvParam& p = _param;
+            AlgParam& a = _alg;
+            a.srcE = _elemS;
+            a.dstE = _elemD;
+            a.F = F;
+            a.bufC = AlignHi(p.srcC, F);
+            a.bufW = p.srcW + p.padX + p.padW;
+            a.bufH = Pow2Hi(AlignHi(p.kernelY, 2));
+            a.stepH = 2 / p.strideY;
+            a.reorderType = p.IsKernel(3) ? 1 : 0;
+        }
+
+        void SynetQuantizedConvolutionNhwcDepthwiseV2::SetWeight(const int8_t* src)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            size_t Y = p.kernelY, X = p.kernelX, C = p.srcC, F = a.F, Y2 = AlignLo(Y, 2);
+            _weight16i.Resize(X * AlignHi(Y, 2) * a.bufC);
+            int16_t* dst = _weight16i.data;
+            if (a.reorderType == 0)
+            {
+                size_t y = 0;
+                for (; y < Y2; y += 2)
+                {
+                    const int8_t* src0 = src + 0 * X * C;
+                    const int8_t* src1 = src + 1 * X * C;
+                    for (size_t x = 0; x < X; ++x)
+                    {
+                        size_t c = 0;
+                        for (; c < C; ++c)
+                        {
+                            *dst++ = src0[c];
+                            *dst++ = src1[c];
+                        }
+                        for (; c < a.bufC; ++c)
+                        {
+                            *dst++ = 0;
+                            *dst++ = 0;
+                        }
+                        src0 += C;
+                        src1 += C;
+                    }
+                    src += 2 * X * C;
+                }
+                if(y < Y)
+                {
+                    const int8_t* src0 = src + 0 * X * C;
+                    for (size_t x = 0; x < X; ++x)
+                    {
+                        size_t c = 0;
+                        for (; c < C; ++c)
+                        {
+                            *dst++ = src0[c];
+                            *dst++ = 0;
+                        }
+                        for (; c < a.bufC; ++c)
+                        {
+                            *dst++ = 0;
+                            *dst++ = 0;
+                        }
+                        src0 += C;
+                    }
+                }
+            }
+            else if (a.reorderType == 1)
+            {
+                for (size_t c = 0; c < C; c += F)
+                {
+                    size_t y = 0;
+                    for (; y < Y2; y += 2)
+                    {
+                        const int8_t* src0 = src + (y + 0) * X * C + c;
+                        const int8_t* src1 = src + (y + 1) * X * C + c;
+                        for (size_t x = 0; x < X; ++x)
+                        {
+                            for (size_t i = 0; i < F; ++i)
+                            {
+                                if (c + i < C)
+                                {
+                                    *dst++ = src0[i];
+                                    *dst++ = src1[i];
+                                }
+                                else
+                                {
+                                    *dst++ = 0;
+                                    *dst++ = 0;
+                                }
+                            }
+                            src0 += C;
+                            src1 += C;
+                        }
+                    }
+                    if (y < Y)
+                    {
+                        const int8_t* src0 = src + (y + 0) * X * C + c;
+                        for (size_t x = 0; x < X; ++x)
+                        {
+                            for (size_t i = 0; i < F; ++i)
+                            {
+                                if (c + i < C)
+                                {
+                                    *dst++ = src0[i];
+                                    *dst++ = 0;
+                                }
+                                else
+                                {
+                                    *dst++ = 0;
+                                    *dst++ = 0;
+                                }
+                            }
+                            src0 += C;
+                        }
+                    }
+                }
+            }
+            else
+                assert(0);
+        }
+
+        bool SynetQuantizedConvolutionNhwcDepthwiseV2::Preferable(const ConvParam& p, size_t F)
+        {
+            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F && (p.IsStride(1) || p.IsStride(2));
+        }
      }
 #endif
 }
