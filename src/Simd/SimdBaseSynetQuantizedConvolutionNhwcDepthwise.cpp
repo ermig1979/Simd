@@ -219,13 +219,19 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             buf8 = Buffer(buf8);
-            int16_t* buf = Allocate<int16_t>(buf8, a.bufC * a.bufH * a.bufW);
+            int16_t* buf = Allocate<int16_t>(buf8, a.bufR * a.bufH);
+            if (_srcZero.size != a.bufR)
+            {
+                uint8_t zero = _srcZero[0];
+                _srcZero.Resize(a.bufR);
+                memset(_srcZero.data, zero, _srcZero.size);
+            }
             for (size_t b = 0; b < p.batch; b += 1)
             {
                 for (size_t yBeg = 0; yBeg < p.dstH;)
                 {
                     size_t yEnd = Simd::Min(yBeg + a.stepH, p.dstH);
-                    _preprocess(src, _srcZero[0], p, a, yBeg, yEnd, buf);
+                    _preprocess(src, _srcZero.data, p, a, yBeg, yEnd, buf);
                     _convolution(buf, p, a, _weight16i.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero[0], dst);
                     yBeg = yEnd;
                 }
@@ -243,7 +249,9 @@ namespace Simd
             a.F = F;
             a.bufC = AlignHi(p.srcC, F);
             a.bufW = p.srcW + p.padX + p.padW;
+            a.bufR = a.bufW * a.bufC;
             a.bufH = Pow2Hi(AlignHi(p.kernelY, 2));
+            a.sizeW = p.kernelX * AlignHi(p.kernelY + 1, 2) * a.bufC;
             a.stepH = 2 / p.strideY;
             a.reorderType = p.IsKernel(3) ? 1 : 0;
         }
@@ -252,101 +260,53 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            size_t Y = p.kernelY, X = p.kernelX, C = p.srcC, F = a.F, Y2 = AlignLo(Y, 2);
-            _weight16i.Resize(X * AlignHi(Y, 2) * a.bufC);
-            int16_t* dst = _weight16i.data;
+            size_t Y = p.kernelY, X = p.kernelX, C = p.srcC, F = a.F, Y2 = AlignLo(Y, 2), B = a.bufC;
+            _weight16i.Resize(a.sizeW * 2);
+            int16_t* dstE = _weight16i.data, *dstO = dstE + a.sizeW;
             if (a.reorderType == 0)
             {
-                size_t y = 0;
-                for (; y < Y2; y += 2)
+                for (size_t y = 0; y < Y + 1; y += 2)
                 {
-                    const int8_t* src0 = src + 0 * X * C;
-                    const int8_t* src1 = src + 1 * X * C;
+                    const int8_t* src0 = src - 1 * X * C;
+                    const int8_t* src1 = src + 0 * X * C;
+                    const int8_t* src2 = src + 1 * X * C;
                     for (size_t x = 0; x < X; ++x)
                     {
-                        size_t c = 0;
-                        for (; c < C; ++c)
+                        for (size_t c = 0; c < B; ++c)
                         {
-                            *dst++ = src0[c];
-                            *dst++ = src1[c];
-                        }
-                        for (; c < a.bufC; ++c)
-                        {
-                            *dst++ = 0;
-                            *dst++ = 0;
+                            *dstE++ = (c < C) ? src1[c] : 0;
+                            *dstE++ = (c < C && y + 1 < Y) ? src2[c] : 0;
+                            *dstO++ = (c < C && y > 0) ? src0[c] : 0;
+                            *dstO++ = (c < C && y < Y) ? src1[c] : 0;
                         }
                         src0 += C;
                         src1 += C;
+                        src2 += C;
                     }
                     src += 2 * X * C;
-                }
-                if(y < Y)
-                {
-                    const int8_t* src0 = src + 0 * X * C;
-                    for (size_t x = 0; x < X; ++x)
-                    {
-                        size_t c = 0;
-                        for (; c < C; ++c)
-                        {
-                            *dst++ = src0[c];
-                            *dst++ = 0;
-                        }
-                        for (; c < a.bufC; ++c)
-                        {
-                            *dst++ = 0;
-                            *dst++ = 0;
-                        }
-                        src0 += C;
-                    }
                 }
             }
             else if (a.reorderType == 1)
             {
                 for (size_t c = 0; c < C; c += F)
                 {
-                    size_t y = 0;
-                    for (; y < Y2; y += 2)
+                    for (size_t y = 0; y < Y + 1; y += 2)
                     {
-                        const int8_t* src0 = src + (y + 0) * X * C + c;
-                        const int8_t* src1 = src + (y + 1) * X * C + c;
+                        const int8_t* src0 = src + (y - 1) * X * C + c;
+                        const int8_t* src1 = src + (y + 0) * X * C + c;
+                        const int8_t* src2 = src + (y + 1) * X * C + c;
                         for (size_t x = 0; x < X; ++x)
                         {
                             for (size_t i = 0; i < F; ++i)
                             {
-                                if (c + i < C)
-                                {
-                                    *dst++ = src0[i];
-                                    *dst++ = src1[i];
-                                }
-                                else
-                                {
-                                    *dst++ = 0;
-                                    *dst++ = 0;
-                                }
+                                *dstE++ = (i + c < C) ? src1[i] : 0;
+                                *dstE++ = (i + c < C && y + 1 < Y) ? src2[i] : 0;
+                                *dstO++ = (i + c < C && y > 0) ? src0[i] : 0;
+                                *dstO++ = (i + c < C && y < Y) ? src1[i] : 0;
                             }
                             src0 += C;
                             src1 += C;
-                        }
-                    }
-                    if (y < Y)
-                    {
-                        const int8_t* src0 = src + (y + 0) * X * C + c;
-                        for (size_t x = 0; x < X; ++x)
-                        {
-                            for (size_t i = 0; i < F; ++i)
-                            {
-                                if (c + i < C)
-                                {
-                                    *dst++ = src0[i];
-                                    *dst++ = 0;
-                                }
-                                else
-                                {
-                                    *dst++ = 0;
-                                    *dst++ = 0;
-                                }
-                            }
-                            src0 += C;
+                            src2 += C;
                         }
                     }
                 }
@@ -357,7 +317,7 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcDepthwiseV2::Preferable(const ConvParam& p, size_t F)
         {
-            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F && (p.IsStride(1) || p.IsStride(2));
+            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F && (/*p.IsStride(1) ||*/ p.IsStride(2));
         }
      }
 #endif

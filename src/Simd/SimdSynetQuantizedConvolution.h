@@ -279,11 +279,11 @@ namespace Simd
             struct AlgParam
             {
                 int32_t srcE, dstE;
-                size_t F, bufC, bufH, bufW, stepH;
+                size_t F, bufC, bufH, bufW, bufR, stepH, sizeW;
                 int reorderType;
             };
 
-            typedef void(*PreprocessPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, int16_t* dst);
+            typedef void(*PreprocessPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, int16_t* dst);
             typedef void(*ConvolutionPtr)(const int16_t* src, const ConvParam& p, const AlgParam& a, const int16_t* weight, const int32_t* bias, const float* norm, size_t yBeg, size_t yEnd, uint32_t zero, uint8_t* dst);
 
         protected:
@@ -338,6 +338,16 @@ namespace Simd
         {
         public:
             SynetQuantizedConvolutionNhwcDepthwiseV1(const ConvParam& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwiseV2 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV2
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV2(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
