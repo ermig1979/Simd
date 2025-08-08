@@ -317,7 +317,9 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcDepthwiseV2::Preferable(const ConvParam& p, size_t F)
         {
-            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F && (/*p.IsStride(1) ||*/ p.IsStride(2));
+            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F 
+                && (p.IsStride(1) || p.IsStride(2))
+                && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7));
         }
      }
 #endif
