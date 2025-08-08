@@ -251,7 +251,8 @@ namespace Simd
             a.bufW = p.srcW + p.padX + p.padW;
             a.bufR = a.bufW * a.bufC;
             a.bufH = Pow2Hi(AlignHi(p.kernelY, 2));
-            a.sizeW = p.kernelX * AlignHi(p.kernelY + 1, 2) * a.bufC;
+            a.stepW = p.kernelX * AlignHi(p.kernelY + 1, 2);
+            a.sizeW = a.stepW * a.bufC;
             a.stepH = 2 / p.strideY;
             a.reorderType = p.IsKernel(3) ? 1 : 0;
         }
@@ -260,7 +261,7 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            size_t Y = p.kernelY, X = p.kernelX, C = p.srcC, F = a.F, Y2 = AlignLo(Y, 2), B = a.bufC;
+            size_t Y = p.kernelY, X = p.kernelX, C = p.srcC, F = a.F, B = a.bufC;
             _weight16i.Resize(a.sizeW * 2);
             int16_t* dstE = _weight16i.data, *dstO = dstE + a.sizeW;
             if (a.reorderType == 0)

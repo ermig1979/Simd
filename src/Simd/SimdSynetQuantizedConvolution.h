@@ -279,7 +279,7 @@ namespace Simd
             struct AlgParam
             {
                 int32_t srcE, dstE;
-                size_t F, bufC, bufH, bufW, bufR, stepH, sizeW;
+                size_t F, bufC, bufH, bufW, bufR, stepH, sizeW, stepW;
                 int reorderType;
             };
 

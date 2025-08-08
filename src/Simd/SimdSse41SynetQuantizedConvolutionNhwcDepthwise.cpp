@@ -972,7 +972,7 @@ namespace Simd
         {
             __m128i _zero = _mm_set1_epi16(zero[0]);
             size_t srcC = p.srcC, srcCF = Simd::AlignLo(p.srcC, a.F), byMask = a.bufH - 1;
-            size_t byPad = p.kernelY - 1, srcR = p.srcW * p.srcC, bufR = a.bufW * a.bufC * 2;
+            size_t byPad = p.kernelY - 1, srcR = p.srcW * p.srcC, bufR = a.bufW * a.bufC;// *2;
             size_t byBeg = dyBeg ? dyBeg * p.strideY + byPad : 0, byEnd = dyEnd * p.strideY + byPad;
             if (a.reorderType == 0)
             {
@@ -1053,7 +1053,7 @@ namespace Simd
             __m128i _zero = _mm_set1_epi32(zero);
             __m128i d00, d01, d02, d03, d10, d11, d12, d13, w0, s0;
             size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), srcCF4 = AlignLo(srcC, F * 4), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX;
-            size_t byMask = a.bufH - 1, bufC = a.bufC * 2, bufR = a.bufR * 2, dstW2 = AlignLo(p.dstW, 2), dD = p.dstC * a.srcE, dX = sX * bufC;
+            size_t byMask = a.bufH - 1, bufC = a.bufC * 2, bufR = a.bufR, dstW2 = AlignLo(p.dstW, 2), dD = p.dstC * a.srcE, dX = sX * bufC;
             size_t dyEnd2 = dyBeg + (sY == 1 ? AlignLo(dyEnd - dyBeg, 2) : 0), sizeW = a.sizeW, dyD = p.dstW * dD;
             dst += dyBeg * p.dstW * p.dstC * a.srcE;
             size_t dy = dyBeg;
@@ -1292,14 +1292,14 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV2_AnyR1(const int32_t* src, const ConvParam& p, const AlgParamV2& a,
-            const int32_t* weight, const int32_t* bias, const float* norm, size_t dyBeg, size_t dyEnd, uint32_t zero, uint8_t* dst)
+        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV2_AnyR1(const int16_t* src, const ConvParam& p, const AlgParamV2& a,
+            const int16_t* weight, const int32_t* bias, const float* norm, size_t dyBeg, size_t dyEnd, uint32_t zero, uint8_t* dst)
         {
             __m128 _norm;
             __m128i _zero = _mm_set1_epi32(zero), _bias;
-            __m128i d00, d10, d20, d30, w0;
-            size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX, dX = sX * F, dW = kY * kX;
-            size_t byMask = a.bufH - 1, bW = a.bufW, bufR = a.bufW * a.bufC, dstW2 = AlignLo(p.dstW, 2), dstW4 = AlignLo(p.dstW, 4), dD = p.dstC * a.srcE;
+            __m128i d00, d10, d20, d30, d01, d11, d21, d31, w0, w1, s0;
+            size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX, dX = sX * DF, dW = a.stepW;
+            size_t byMask = a.bufH - 1, bW = a.bufW * 2, bufR = a.bufR, dstW2 = AlignLo(p.dstW, 2), dstW4 = AlignLo(p.dstW, 4), dD = p.dstC * a.srcE;
             dst += dyBeg * p.dstW * dD;
             for (size_t dy = dyBeg; dy < dyEnd; ++dy)
             {
@@ -1307,7 +1307,7 @@ namespace Simd
                 for (; sc < srcCF; sc += F)
                 {
                     uint8_t* pd = dst + sc;
-                    const int32_t* ps0 = src + sc * bW;
+                    const int16_t* ps0 = src + sc * bW;
                     _bias = _mm_loadu_si128((__m128i*)(bias + sc));
                     _norm = _mm_loadu_ps(norm + sc);
                     size_t dx = 0;
@@ -1317,17 +1317,17 @@ namespace Simd
                         d10 = _mm_setzero_si128();
                         d20 = _mm_setzero_si128();
                         d30 = _mm_setzero_si128();
-                        const int32_t* pw = weight + sc * dW;
-                        for (size_t ky = 0; ky < kY; ++ky)
+                        const int16_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ky += 2)
                         {
-                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            const int16_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += DF, pw += DF)
                             {
                                 w0 = _mm_loadu_si128((__m128i*)pw);
-                                Madd1(d00, _mm_loadu_si128((__m128i*)(ps + 0 * dX)), w0);
-                                Madd1(d10, _mm_loadu_si128((__m128i*)(ps + 1 * dX)), w0);
-                                Madd1(d20, _mm_loadu_si128((__m128i*)(ps + 2 * dX)), w0);
-                                Madd1(d30, _mm_loadu_si128((__m128i*)(ps + 3 * dX)), w0);
+                                Madd2(d00, _mm_loadu_si128((__m128i*)(ps + 0 * dX)), w0);
+                                Madd2(d10, _mm_loadu_si128((__m128i*)(ps + 1 * dX)), w0);
+                                Madd2(d20, _mm_loadu_si128((__m128i*)(ps + 2 * dX)), w0);
+                                Madd2(d30, _mm_loadu_si128((__m128i*)(ps + 3 * dX)), w0);
                             }
                         }
                         Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero);
@@ -1340,15 +1340,15 @@ namespace Simd
                     {
                         d00 = _mm_setzero_si128();
                         d10 = _mm_setzero_si128();
-                        const int32_t* pw = weight + sc * dW;
-                        for (size_t ky = 0; ky < kY; ++ky)
+                        const int16_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ky += 2)
                         {
-                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            const int16_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += DF, pw += DF)
                             {
                                 w0 = _mm_loadu_si128((__m128i*)pw);
-                                Madd1(d00, _mm_loadu_si128((__m128i*)(ps + 0 * dX)), w0);
-                                Madd1(d10, _mm_loadu_si128((__m128i*)(ps + 1 * dX)), w0);
+                                Madd2(d00, _mm_loadu_si128((__m128i*)(ps + 0 * dX)), w0);
+                                Madd2(d10, _mm_loadu_si128((__m128i*)(ps + 1 * dX)), w0);
                             }
                         }
                         Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero);
@@ -1358,14 +1358,14 @@ namespace Simd
                     for (; dx < p.dstW; ++dx, ps0 += dX)
                     {
                         d00 = _mm_setzero_si128();
-                        const int32_t* pw = weight + sc * dW;
-                        for (size_t ky = 0; ky < kY; ++ky)
+                        const int16_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ky += 2)
                         {
-                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            const int16_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += DF, pw += DF)
                             {
                                 w0 = _mm_loadu_si128((__m128i*)pw);
-                                Madd1(d00, _mm_loadu_si128((__m128i*)ps), w0);
+                                Madd2(d00, _mm_loadu_si128((__m128i*)ps), w0);
                             }
                         }
                         Save1<term>(pd, d00, _bias, _norm, _zero);
@@ -1375,21 +1375,21 @@ namespace Simd
                 for (; sc < srcC; sc += F)
                 {
                     uint8_t* pd = dst + sc;
-                    const int32_t* ps0 = src + sc * bW;
+                    const int16_t* ps0 = src + sc * bW;
                     _bias = _mm_loadu_si128((__m128i*)(bias + sc));
                     _norm = _mm_loadu_ps(norm + sc);
                     size_t dx = 0, tail = srcC - srcCF;
                     for (; dx < p.dstW; ++dx, ps0 += dX)
                     {
                         d00 = _mm_setzero_si128();
-                        const int32_t* pw = weight + sc * dW;
-                        for (size_t ky = 0; ky < kY; ++ky)
+                        const int16_t* pw = weight + sc * dW;
+                        for (size_t ky = 0; ky < kY; ky += 2)
                         {
-                            const int32_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += F, pw += F)
+                            const int16_t* ps = ps0 + ((sy + ky) & byMask) * bufR;
+                            for (size_t kx = 0; kx < kX; ++kx, ps += DF, pw += DF)
                             {
                                 w0 = _mm_loadu_si128((__m128i*)pw);
-                                Madd1(d00, _mm_loadu_si128((__m128i*)ps), w0);
+                                Madd2(d00, _mm_loadu_si128((__m128i*)ps), w0);
                             }
                         }
                         Save1<term>(pd, d00, _bias, _norm, _zero, tail);
@@ -1549,10 +1549,10 @@ namespace Simd
             {
                 if (a.reorderType == 0)
                     convolution = QuantizedConvolutionNhwcDepthwiseV2_AnyR0<term>;
-                //else if (a.reorderType == 1)
-                //    convolution = QuantizedConvolutionNhwcDepthwiseV2_AnyR1<term>;
-                //else
-                //    assert(0);
+                else if (a.reorderType == 1)
+                    convolution = QuantizedConvolutionNhwcDepthwiseV2_AnyR1<term>;
+                else
+                    assert(0);
             }
         }
 
@@ -1562,7 +1562,8 @@ namespace Simd
             : Base::SynetQuantizedConvolutionNhwcDepthwiseV2(p)
         {
             SetAlgParam(F);
-            _alg.reorderType = 0;
+            if(p.IsStride(1))
+                _alg.reorderType = 0;
             _preprocess = QuantizedConvolutionNhwcDepthwiseV2_Preprocess;
             if (p.dstT == SimdTensorData8u)
                 SetV2<Term8iLast8u>(p, _alg, _convolution);
