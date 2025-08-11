@@ -1554,7 +1554,7 @@ namespace Simd
             size_t dy = dyBeg;
             for (; dy < dyEnd2; dy += 2)
             {
-                __m128i d01, d11, w03, w36, w47, w58, w0, w1;
+                __m128i d01, w36, w47, w58;
                 size_t sc = 0, sy = dy * sY;
                 for (; sc < srcC; sc += F)
                 {
@@ -1573,62 +1573,6 @@ namespace Simd
                     if (sc < srcCF)
                     {
                         size_t dx = 0;
-#if 0
-                        for (; dx < dstW2; dx += 2, ps0 += QF, ps2 += QF)
-                        {
-                            d00 = _mm_setzero_si128();
-                            d10 = _mm_setzero_si128();
-                            d01 = _mm_setzero_si128();
-                            d11 = _mm_setzero_si128();
-
-                            s0 = _mm_loadu_si128((__m128i*)ps0 + 0);
-                            w0 = _mm_slli_epi32(w03, 16);
-                            Madd1(d00, s0, w03);
-                            Madd1(d01, s0, w0);
-                            s0 = _mm_loadu_si128((__m128i*)ps0 + 1);
-                            w1 = _mm_slli_epi32(w14, 16);
-                            Madd1(d00, s0, w14);
-                            Madd1(d10, s0, w03);
-                            Madd1(d01, s0, w1);
-                            Madd1(d11, s0, w0);
-                            s0 = _mm_loadu_si128((__m128i*)ps0 + 2);
-                            w0 = _mm_slli_epi32(w25, 16);
-                            Madd1(d00, s0, w25);
-                            Madd1(d10, s0, w14);
-                            Madd1(d01, s0, w0);
-                            Madd1(d11, s0, w1);
-                            s0 = _mm_loadu_si128((__m128i*)ps0 + 3);
-                            Madd1(d10, s0, w25);
-                            Madd1(d11, s0, w0);
-
-                            s0 = _mm_loadu_si128((__m128i*)ps2 + 0);
-                            w0 = _mm_srli_epi32(w36, 16);
-                            Madd1(d00, s0, w0);
-                            Madd1(d01, s0, w36);
-                            s0 = _mm_loadu_si128((__m128i*)ps2 + 1);
-                            w1 = _mm_srli_epi32(w47, 16);
-                            Madd1(d00, s0, w1);
-                            Madd1(d10, s0, w0);
-                            Madd1(d01, s0, w47);
-                            Madd1(d11, s0, w36);
-                            s0 = _mm_loadu_si128((__m128i*)ps2 + 2);
-                            w0 = _mm_srli_epi32(w58, 16);
-                            Madd1(d00, s0, w0);
-                            Madd1(d10, s0, w1);
-                            Madd1(d01, s0, w58);
-                            Madd1(d11, s0, w47);
-                            s0 = _mm_loadu_si128((__m128i*)ps2 + 3);
-                            Madd1(d10, s0, w0);
-                            Madd1(d11, s0, w58);
-
-                            Save1<term>(pd0 + 0 * dD, d00, _bias, _norm, _zero);
-                            Save1<term>(pd0 + 1 * dD, d10, _bias, _norm, _zero);
-                            Save1<term>(pd1 + 0 * dD, d01, _bias, _norm, _zero);
-                            Save1<term>(pd1 + 1 * dD, d11, _bias, _norm, _zero);
-                            pd0 += 2 * dD;
-                            pd1 += 2 * dD;
-                        }
-#endif
                         for (; dx < p.dstW; ++dx, ps0 += dX, ps2 += dX)
                         {
                             d00 = _mm_setzero_si128();

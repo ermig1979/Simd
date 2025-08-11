@@ -40,6 +40,8 @@ namespace Simd
             ConvParam param(batch, conv);
             if (!ValidQuantized(param))
                 return NULL;
+            else if (SynetQuantizedConvolutionNhwcDepthwiseV2::Preferable(param, F))
+                return new SynetQuantizedConvolutionNhwcDepthwiseV2(param);
             else if (SynetQuantizedConvolutionNhwcDepthwiseV0::Preferable(param, F))
                 return new SynetQuantizedConvolutionNhwcDepthwiseV1(param);
             else if (SynetQuantizedConvolutionNhwcDepthwiseV0::Preferable(param, F))
