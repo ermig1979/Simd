@@ -344,7 +344,7 @@ namespace Simd
         {
             const AlgParam& a = _alg;
             size_t size = 0;
-            size += a.bufC * a.bufH * a.bufW * sizeof(int32_t);
+            size += a.bufC * a.bufH * a.bufW * 2;
             return size;
         }
 
@@ -388,7 +388,7 @@ namespace Simd
             a.stepW = p.kernelX * AlignHi(p.kernelY + 1, 4);
             a.sizeW = a.stepW * a.bufC;
             a.stepH = 2 / p.strideY;
-            a.reorderType = p.IsKernel(3) ? 1 : 0;
+            a.reorderType = 1;// p.IsKernel(3) ? 1 : 0;
         }
 
         void SynetQuantizedConvolutionNhwcDepthwiseV3::SetWeight(const int8_t* src)
@@ -400,7 +400,7 @@ namespace Simd
             int8_t* dstE = _weight.data, * dstO = dstE + a.sizeW;
             if (a.reorderType == 0)
             {
-                for (size_t y = 0; y < Y + 1; y += 2)
+                for (size_t y = 0; y < Y + 1; y += 4)
                 {
                     const int8_t* src0 = src - 1 * X * C;
                     const int8_t* src1 = src + 0 * X * C;
@@ -433,7 +433,7 @@ namespace Simd
             {
                 for (size_t c = 0; c < C; c += F)
                 {
-                    for (size_t y = 0; y < Y + 1; y += 2)
+                    for (size_t y = 0; y < Y + 1; y += 4)
                     {
                         const int8_t* src0 = src + (y - 1) * X * C + c;
                         const int8_t* src1 = src + (y + 0) * X * C + c;
