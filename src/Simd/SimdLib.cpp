@@ -6070,6 +6070,21 @@ SIMD_API void SimdSynetQuantizedInnerProductForward(void* context, const uint8_t
 #endif
 }
 
+SIMD_API void SimdSynetQuantizedShuffleLayerForward(const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1, 
+    size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetQuantizedShuffleLayerForwardPtr) (const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1,
+        size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type);
+    const static SimdSynetQuantizedShuffleLayerForwardPtr simdSynetQuantizedShuffleLayerForward = SIMD_FUNC0(SynetQuantizedShuffleLayerForward);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+
+    simdSynetQuantizedShuffleLayerForward(src0, bias0, norm0, srcC0, src1, bias1, norm1, srcC1, spatial, dst0, dst1, scale, zero, format, type);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst)
 {
     SIMD_EMPTY();

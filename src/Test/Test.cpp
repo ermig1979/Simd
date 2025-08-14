@@ -420,6 +420,8 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetQuantizedInnerProductForward);
 
+    TEST_ADD_GROUP_A0(SynetQuantizedShuffleLayerForward);
+
     TEST_ADD_GROUP_A0(SynetDequantizeLinear);
     TEST_ADD_GROUP_A0(SynetQuantizeLinear);
 

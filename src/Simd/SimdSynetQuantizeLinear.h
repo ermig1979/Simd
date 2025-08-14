@@ -92,6 +92,13 @@ namespace Simd
         {
             return float(value + bias) * norm;
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE int DequantizeQuantizeLinear(int value, int bias, float norm, float scale, int zero, int min, int max)
+        {
+            return RestrictRange(NearByInt(float(value + bias) * norm * scale) + zero, min, max);
+        }
     }
 
 #ifdef SIMD_SSE41_ENABLE    

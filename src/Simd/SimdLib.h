@@ -7743,6 +7743,32 @@ extern "C"
 
     /*! @ingroup synet_quantized_other
 
+        \fn void SimdSynetQuantizedShuffleLayerForward(const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1, size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type);
+
+        \short This function is used for forward propagation of QuantizedShuffleLayer.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src0 - a pointer to the 8-bit integer array with the first input tensor.
+        \param [in] bias0 - a dequantization bias parameter of the first input tensor (-zero).
+        \param [in] norm0 - a dequantization norm parameter of the first input tensor (scale).
+        \param [in] srcC0 - a number of channels in the first input tensor. 
+        \param [in] src1 - a pointer to the 8-bit integer array with the second input tensor.
+        \param [in] bias1 - a dequantization bias parameter of the second input tensor (-zero).
+        \param [in] norm1 - a dequantization norm parameter of the second input tensor (scale).
+        \param [in] srcC1 - a number of channels in the second input tensor.
+        \param [in] spatial - a spatial size of (input/output) tensors.
+        \param [out] dst0 - a pointer to the 8-bit integer array with the first output tensor.
+        \param [out] dst1 - a pointer to the 8-bit integer array with the second output tensor.
+        \param [in] scale - an output quantization norm (1/scale).
+        \param [in] zero - an output quantization zero.
+        \param [in] format - a format of (input/output) tensors.
+        \param [in] type - a shuffle type (it can be 0 or 1).
+    */
+    SIMD_API void SimdSynetQuantizedShuffleLayerForward(const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1, size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type);
+
+    /*! @ingroup synet_quantized_other
+
         \fn void SimdSynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
 
         \short Performs UINT8 linear quantization.

@@ -53,6 +53,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gad261eff337f22143aa0a6755bd724e7e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#gad261eff337f22143aa0a6755bd724e7e">SimdSynetDequantizeLinear</a> (const uint8_t *src, size_t size, int32_t bias, const float *norm, float *dst)</td></tr>
 <tr class="memdesc:gad261eff337f22143aa0a6755bd724e7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs UINT8 linear dequantization.  <a href="group__synet__quantized__other.html#gad261eff337f22143aa0a6755bd724e7e">More...</a><br /></td></tr>
 <tr class="separator:gad261eff337f22143aa0a6755bd724e7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae59c5625beb1b0a1129f0ecd8fbe35c2"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#gae59c5625beb1b0a1129f0ecd8fbe35c2">SimdSynetQuantizedShuffleLayerForward</a> (const uint8_t *src0, int bias0, const float *norm0, size_t srcC0, const uint8_t *src1, int bias1, const float *norm1, size_t srcC1, size_t spatial, uint8_t *dst0, uint8_t *dst1, const float *scale, int zero, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, int type)</td></tr>
+<tr class="memdesc:gae59c5625beb1b0a1129f0ecd8fbe35c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of QuantizedShuffleLayer.  <a href="group__synet__quantized__other.html#gae59c5625beb1b0a1129f0ecd8fbe35c2">More...</a><br /></td></tr>
+<tr class="separator:gae59c5625beb1b0a1129f0ecd8fbe35c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5cbccbcb840d3ead9391d4f7e12d23fd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#ga5cbccbcb840d3ead9391d4f7e12d23fd">SimdSynetQuantizeLinear</a> (const float *src, size_t size, const float *norm, int32_t zero, uint8_t *dst)</td></tr>
 <tr class="memdesc:ga5cbccbcb840d3ead9391d4f7e12d23fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs UINT8 linear quantization.  <a href="group__synet__quantized__other.html#ga5cbccbcb840d3ead9391d4f7e12d23fd">More...</a><br /></td></tr>
 <tr class="separator:ga5cbccbcb840d3ead9391d4f7e12d23fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -114,6 +117,135 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a dequantization bias (-zero). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">norm</td><td>- a dequantization norm (scale). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to FP32 output tensor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gae59c5625beb1b0a1129f0ecd8fbe35c2" name="gae59c5625beb1b0a1129f0ecd8fbe35c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae59c5625beb1b0a1129f0ecd8fbe35c2">&#9670;&#160;</a></span>SimdSynetQuantizedShuffleLayerForward()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetQuantizedShuffleLayerForward </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bias0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>norm0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcC0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bias1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>norm1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcC1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>spatial</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>scale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>zero</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>type</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of QuantizedShuffleLayer. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src0</td><td>- a pointer to the 8-bit integer array with the first input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias0</td><td>- a dequantization bias parameter of the first input tensor (-zero). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">norm0</td><td>- a dequantization norm parameter of the first input tensor (scale). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcC0</td><td>- a number of channels in the first input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src1</td><td>- a pointer to the 8-bit integer array with the second input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias1</td><td>- a dequantization bias parameter of the second input tensor (-zero). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">norm1</td><td>- a dequantization norm parameter of the second input tensor (scale). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcC1</td><td>- a number of channels in the second input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of (input/output) tensors. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst0</td><td>- a pointer to the 8-bit integer array with the first output tensor. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst1</td><td>- a pointer to the 8-bit integer array with the second output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- an output quantization norm (1/scale). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">zero</td><td>- an output quantization zero. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a shuffle type (it can be 0 or 1). </td></tr>
   </table>
   </dd>
 </dl>
