@@ -1880,7 +1880,6 @@ namespace Simd
             : Sse41::SynetQuantizedConvolutionNhwcDepthwiseV2(p)
         {
             SetAlgParam(F);
-            _alg.reorderType = 0;
             _preprocess = QuantizedConvolutionNhwcDepthwiseV2_Preprocess;
             if (p.dstT == SimdTensorData8u)
                 SetV2<Term8iLast8u>(p, _alg, _convolution);
