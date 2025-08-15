@@ -270,6 +270,30 @@ namespace Simd
             for (size_t i = 0; i < tail; i++)
                 dst[i] = tmp[i];
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void DequantizeQuantizeLinear1(const uint8_t* src, const __m128i& bias, const __m128& norm, const __m128& scale, const __m128i &zero, uint8_t* dst)
+        {
+            __m128i d0 = QuantizeLinear(DequantizeLinear(_mm_set1_epi32(src[0]),bias, norm), scale, zero);
+            dst[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinear4(const uint8_t* src, const __m128i& bias, const __m128& norm, const __m128& scale, const __m128i& zero, uint8_t* dst)
+        {
+            __m128i d0 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_set1_epi32(((int32_t*)src)[0])), bias, norm), scale, zero);
+            ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinear16(const uint8_t* src, const __m128i& bias, const __m128& norm, const __m128& scale, const __m128i& zero, uint8_t* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i d0 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 0 * 4)), bias, norm), scale, zero);
+            __m128i d1 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 1 * 4)), bias, norm), scale, zero);
+            __m128i d2 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 2 * 4)), bias, norm), scale, zero);
+            __m128i d3 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 3 * 4)), bias, norm), scale, zero);
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+        }
     }
 #endif
 
