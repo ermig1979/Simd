@@ -424,6 +424,31 @@ namespace Simd
             for (size_t i = 0; i < tail; i++)
                 dst[i] = tmp[i];
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void DequantizeQuantizeLinear1(const uint8_t* src, const __m256i& bias, const __m256& norm, const __m256& scale, const __m256i& zero, uint8_t* dst)
+        {
+            __m256i d0 = QuantizeLinear(DequantizeLinear(_mm256_set1_epi32(src[0]), bias, norm), scale, zero);
+            dst[0] = _mm256_cvtsi256_si32(_mm256_packus_epi16(_mm256_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinear8(const uint8_t* src, const __m256i& bias, const __m256& norm, const __m256& scale, const __m256i& zero, uint8_t* dst)
+        {
+            __m256i d0 = QuantizeLinear(DequantizeLinear(_mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)src)), bias, norm), scale, zero);
+            _mm_storel_epi64((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinear32(const uint8_t* src, const __m256i& bias, const __m256& norm, const __m256& scale, const __m256i& zero, uint8_t* dst)
+        {
+            __m128i s0 = _mm_loadu_si128((__m128i*)src + 0);
+            __m256i d0 = QuantizeLinear(DequantizeLinear(_mm256_cvtepu8_epi32(_mm_srli_si128(s0, 0)), bias, norm), scale, zero);
+            __m256i d1 = QuantizeLinear(DequantizeLinear(_mm256_cvtepu8_epi32(_mm_srli_si128(s0, 8)), bias, norm), scale, zero);
+            __m128i s1 = _mm_loadu_si128((__m128i*)src + 1);
+            __m256i d2 = QuantizeLinear(DequantizeLinear(_mm256_cvtepu8_epi32(_mm_srli_si128(s1, 0)), bias, norm), scale, zero);
+            __m256i d3 = QuantizeLinear(DequantizeLinear(_mm256_cvtepu8_epi32(_mm_srli_si128(s1, 8)), bias, norm), scale, zero);
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
+        }
     }
 #endif
 

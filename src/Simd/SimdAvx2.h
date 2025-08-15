@@ -521,6 +521,9 @@ namespace Simd
 
         void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
 
+        void SynetQuantizedShuffleLayerForward(const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1,
+            size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type);
+
         void SynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
 
         void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
