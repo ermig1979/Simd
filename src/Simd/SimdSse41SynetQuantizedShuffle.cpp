@@ -99,27 +99,44 @@ namespace Simd
 
         void SynetQuantizedShuffleLayerForwardNchw1(const uint8_t* src0, int bias0, float norm0, size_t srcC0, const uint8_t* src1, int bias1, float norm1, size_t srcC1, size_t spatial, uint8_t* dst0, uint8_t* dst1, float scale, int zero)
         {
-            size_t dstC = (srcC0 + srcC1) / 2;
-            size_t cs = 0;
+            size_t dstC = (srcC0 + srcC1) / 2, cs = 0, spatial4 = AlignLo(spatial, 4), spatial16 = AlignLo(spatial, 16), s;
+            __m128i _bias0 = _mm_set1_epi32(bias0), _bias1 = _mm_set1_epi32(bias1), _zero = _mm_set1_epi32(zero);
+            __m128 _norm0 = _mm_set1_ps(norm0), _norm1 = _mm_set1_ps(norm1), _scale = _mm_set1_ps(scale);
             for (size_t cd = 0; cd < srcC0; cs += 1, cd += 2)
             {
-                for (size_t s = 0; s < spatial; ++s)
-                    dst0[s] = Base::DequantizeQuantizeLinear(src0[s], bias0, norm0, scale, zero, 0, 255);
+                for (s = 0; s < spatial16; s += 16)
+                    DequantizeQuantizeLinear16(src0 + s, _bias0, _norm0, _scale, _zero, dst0 + s);
+                for (; s < spatial4; s += 4)
+                    DequantizeQuantizeLinear4(src0 + s, _bias0, _norm0, _scale, _zero, dst0 + s);
+                for (; s < spatial; s += 1)
+                    DequantizeQuantizeLinear1(src0 + s, _bias0, _norm0, _scale, _zero, dst0 + s);
                 src0 += spatial;
                 dst0 += spatial;
-                for (size_t s = 0; s < spatial; ++s)
-                    dst0[s] = Base::DequantizeQuantizeLinear(src1[s], bias1, norm1, scale, zero, 0, 255);
+                for (s = 0; s < spatial16; s += 16)
+                    DequantizeQuantizeLinear16(src1 + s, _bias1, _norm1, _scale, _zero, dst0 + s);
+                for (; s < spatial4; s += 4)
+                    DequantizeQuantizeLinear4(src1 + s, _bias1, _norm1, _scale, _zero, dst0 + s);
+                for (; s < spatial; s += 1)
+                    DequantizeQuantizeLinear1(src1 + s, _bias1, _norm1, _scale, _zero, dst0 + s);
                 src1 += spatial;
                 dst0 += spatial;
             }
             for (size_t cd = 0; cd < srcC1; cs += 1, cd += 2)
             {
-                for (size_t s = 0; s < spatial; ++s)
-                    dst1[s] = Base::DequantizeQuantizeLinear(src0[s], bias0, norm0, scale, zero, 0, 255);
+                for (s = 0; s < spatial16; s += 16)
+                    DequantizeQuantizeLinear16(src0 + s, _bias0, _norm0, _scale, _zero, dst1 + s);
+                for (; s < spatial4; s += 4)
+                    DequantizeQuantizeLinear4(src0 + s, _bias0, _norm0, _scale, _zero, dst1 + s);
+                for (; s < spatial; s += 1)
+                    DequantizeQuantizeLinear1(src0 + s, _bias0, _norm0, _scale, _zero, dst1 + s);
                 src0 += spatial;
                 dst1 += spatial;
-                for (size_t s = 0; s < spatial; ++s)
-                    dst1[s] = Base::DequantizeQuantizeLinear(src1[s], bias1, norm1, scale, zero, 0, 255);
+                for (s = 0; s < spatial16; s += 16)
+                    DequantizeQuantizeLinear16(src1 + s, _bias1, _norm1, _scale, _zero, dst1 + s);
+                for (; s < spatial4; s += 4)
+                    DequantizeQuantizeLinear4(src1 + s, _bias1, _norm1, _scale, _zero, dst1 + s);
+                for (; s < spatial; s += 1)
+                    DequantizeQuantizeLinear1(src1 + s, _bias1, _norm1, _scale, _zero, dst1 + s);
                 src1 += spatial;
                 dst1 += spatial;
             }
