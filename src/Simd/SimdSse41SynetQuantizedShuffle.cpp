@@ -109,16 +109,37 @@ namespace Simd
             StoreHalf<1>((__m128i*)dst1, u0);
         }
 
+        SIMD_INLINE void DequantizeQuantizeLinearNhwc0_16(const uint8_t* src, const __m128i& bias, const __m128& norm, const __m128& scale, const __m128i& zero, uint8_t* dst0, uint8_t* dst1)
+        {
+            __m128i _src, d0, d1, d2, d3;
+            _src = _mm_loadu_si128((__m128i*)src + 0);
+            d0 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 0 * 4)), bias, norm), scale, zero);
+            d1 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 1 * 4)), bias, norm), scale, zero);
+            d2 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 2 * 4)), bias, norm), scale, zero);
+            d3 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 3 * 4)), bias, norm), scale, zero);
+            __m128i u0 = Deinterleave8To64(_mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+            _src = _mm_loadu_si128((__m128i*)src + 1);
+            d0 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 0 * 4)), bias, norm), scale, zero);
+            d1 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 1 * 4)), bias, norm), scale, zero);
+            d2 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 2 * 4)), bias, norm), scale, zero);
+            d3 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 3 * 4)), bias, norm), scale, zero);
+            __m128i u1 = Deinterleave8To64(_mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+            _mm_storeu_si128((__m128i*)dst0, Deinterleave64<0>(u0, u1));
+            _mm_storeu_si128((__m128i*)dst1, Deinterleave64<1>(u0, u1));
+        }
+
         void SynetQuantizedShuffleLayerForwardNhwc0(const uint8_t* src0, int bias0, float norm0, size_t srcC0, 
             const uint8_t* src1, int bias1, float norm1, size_t srcC1, size_t spatial, uint8_t* dst0, uint8_t* dst1, float scale, int zero)
         {
             size_t dstC = (srcC0 + srcC1) / 2, cs, cd, srcC0_8 = AlignLo(srcC0, 8), srcC1_8 = AlignLo(srcC1, 8);
-            size_t srcC0_16 = AlignLo(srcC0, 16), srcC1_16 = AlignLo(srcC1, 16);
+            size_t srcC0_16 = AlignLo(srcC0, 16), srcC1_16 = AlignLo(srcC1, 16), srcC0_32 = AlignLo(srcC0, 32), srcC1_32 = AlignLo(srcC1, 32);
             __m128i _bias0 = _mm_set1_epi32(bias0), _bias1 = _mm_set1_epi32(bias1), _zero = _mm_set1_epi32(zero);
             __m128 _norm0 = _mm_set1_ps(norm0), _norm1 = _mm_set1_ps(norm1), _scale = _mm_set1_ps(scale);
             for (size_t s = 0; s < spatial; ++s)
             {
                 cd = 0, cs = 0;
+                for (; cs < srcC0_32; cs += 32, cd += 16)
+                    DequantizeQuantizeLinearNhwc0_16(src0 + cs, _bias0, _norm0, _scale, _zero, dst0 + cd, dst1 + cd);
                 for (; cs < srcC0_16; cs += 16, cd += 8)
                     DequantizeQuantizeLinearNhwc0_8(src0 + cs, _bias0, _norm0, _scale, _zero, dst0 + cd, dst1 + cd);
                 for (; cs < srcC0_8; cs += 8, cd += 4)
@@ -126,6 +147,8 @@ namespace Simd
                 for (; cs < srcC0; cs += 2, cd += 1)
                     DequantizeQuantizeLinearNhwc0_1(src0 + cs, _bias0, _norm0, _scale, _zero, dst0 + cd, dst1 + cd);
                 cs = 0;
+                for (; cs < srcC1_32; cs += 32, cd += 16)
+                    DequantizeQuantizeLinearNhwc0_16(src1 + cs, _bias1, _norm1, _scale, _zero, dst0 + cd, dst1 + cd);
                 for (; cs < srcC1_16; cs += 16, cd += 8)
                     DequantizeQuantizeLinearNhwc0_8(src1 + cs, _bias1, _norm1, _scale, _zero, dst0 + cd, dst1 + cd);
                 for (; cs < srcC1_8; cs += 8, cd += 4)
@@ -189,23 +212,85 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void DequantizeQuantizeLinearNhwc1_1(const uint8_t* src0, const uint8_t* src1, const __m128i& bias, const __m128& norm, const __m128& scale, const __m128i& zero, uint8_t* dst)
+        {
+            __m128i s0 = _mm_set1_epi8(src0[0]);
+            __m128i s1 = _mm_set1_epi8(src1[0]);
+            __m128i s01 = _mm_unpacklo_epi8(s0, s1);
+            __m128i d0 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(s01), bias, norm), scale, zero);
+            __m128i u0 = _mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO);
+            ((uint16_t*)dst)[0] = _mm_cvtsi128_si32(u0);
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinearNhwc1_4(const uint8_t* src0, const uint8_t* src1, const __m128i& bias, const __m128& norm, const __m128& scale, const __m128i& zero, uint8_t* dst)
+        {
+            __m128i _src0 = _mm_set1_epi32(((int32_t*)src0)[0]);
+            __m128i _src1 = _mm_set1_epi32(((int32_t*)src1)[0]);
+            __m128i s0 = _mm_unpacklo_epi8(_src0, _src1);
+            __m128i d0 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 0 * 4)), bias, norm), scale, zero);
+            __m128i d1 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 1 * 4)), bias, norm), scale, zero);
+            __m128i u0 = _mm_packus_epi16(_mm_packs_epi32(d0, d1), K_ZERO);
+            _mm_storel_epi64((__m128i*)dst, u0);
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinearNhwc1_8(const uint8_t* src0, const uint8_t* src1, const __m128i& bias, const __m128& norm, const __m128& scale, const __m128i& zero, uint8_t* dst)
+        {
+            __m128i _src0 = _mm_loadl_epi64((__m128i*)src0);
+            __m128i _src1 = _mm_loadl_epi64((__m128i*)src1);
+            __m128i s0 = _mm_unpacklo_epi8(_src0, _src1);
+            __m128i d0 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 0 * 4)), bias, norm), scale, zero);
+            __m128i d1 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 1 * 4)), bias, norm), scale, zero);
+            __m128i d2 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 2 * 4)), bias, norm), scale, zero);
+            __m128i d3 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 3 * 4)), bias, norm), scale, zero);
+            __m128i u0 = _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3));
+            _mm_storeu_si128((__m128i*)dst, u0);
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinearNhwc1_16(const uint8_t* src0, const uint8_t* src1, const __m128i& bias, const __m128& norm, const __m128& scale, const __m128i& zero, uint8_t* dst)
+        {
+            __m128i _src0 = _mm_loadu_si128((__m128i*)src0);
+            __m128i _src1 = _mm_loadu_si128((__m128i*)src1);
+            __m128i d0, d1, d2, d3, s0;
+            s0 = _mm_unpacklo_epi8(_src0, _src1);
+            d0 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 0 * 4)), bias, norm), scale, zero);
+            d1 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 1 * 4)), bias, norm), scale, zero);
+            d2 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 2 * 4)), bias, norm), scale, zero);
+            d3 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 3 * 4)), bias, norm), scale, zero);
+            _mm_storeu_si128((__m128i*)dst + 0, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+            s0 = _mm_unpackhi_epi8(_src0, _src1);
+            d0 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 0 * 4)), bias, norm), scale, zero);
+            d1 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 1 * 4)), bias, norm), scale, zero);
+            d2 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 2 * 4)), bias, norm), scale, zero);
+            d3 = QuantizeLinear(DequantizeLinear(_mm_cvtepu8_epi32(_mm_srli_si128(s0, 3 * 4)), bias, norm), scale, zero);
+            _mm_storeu_si128((__m128i*)dst + 1, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+        }
+
         void SynetQuantizedShuffleLayerForwardNhwc1(const uint8_t* src0, int bias0, float norm0, size_t srcC0, 
             const uint8_t* src1, int bias1, float norm1, size_t srcC1, size_t spatial, uint8_t* dst0, uint8_t* dst1, float scale, int zero)
         {
-            size_t dstC = (srcC0 + srcC1) / 2;
+            size_t dstC = (srcC0 + srcC1) / 2, srcC0_8 = AlignLo(srcC0, 8), srcC1_8 = AlignLo(srcC1, 8);
+            size_t srcC0_16 = AlignLo(srcC0, 16), srcC1_16 = AlignLo(srcC1, 16), srcC0_32 = AlignLo(srcC0, 32), srcC1_32 = AlignLo(srcC1, 32);
+            __m128i _bias01 = SetInt32(bias0, bias1), _zero = _mm_set1_epi32(zero);
+            __m128 _norm01 = SetFloat(norm0, norm1), _scale = _mm_set1_ps(scale);
             for (size_t s = 0; s < spatial; ++s)
             {
-                size_t cs = 0;
-                for (size_t cd = 0; cd < srcC0; cd += 2, cs += 1)
-                {
-                    dst0[cd + 0] = Base::DequantizeQuantizeLinear(src0[cs], bias0, norm0, scale, zero, 0, 255);
-                    dst0[cd + 1] = Base::DequantizeQuantizeLinear(src1[cs], bias1, norm1, scale, zero, 0, 255);
-                }
-                for (size_t cd = 0; cd < srcC1; cd += 2, cs += 1)
-                {
-                    dst1[cd + 0] = Base::DequantizeQuantizeLinear(src0[cs], bias0, norm0, scale, zero, 0, 255);
-                    dst1[cd + 1] = Base::DequantizeQuantizeLinear(src1[cs], bias1, norm1, scale, zero, 0, 255);
-                }
+                size_t cs = 0, cd;
+                for (cd = 0; cd < srcC0_32; cd += 32, cs += 16)
+                    DequantizeQuantizeLinearNhwc1_16(src0 + cs, src1 + cs, _bias01, _norm01, _scale, _zero, dst0 + cd);
+                for (; cd < srcC0_16; cd += 16, cs += 8)
+                    DequantizeQuantizeLinearNhwc1_8(src0 + cs, src1 + cs, _bias01, _norm01, _scale, _zero, dst0 + cd);
+                for (; cd < srcC0_8; cd += 8, cs += 4)
+                    DequantizeQuantizeLinearNhwc1_4(src0 + cs, src1 + cs, _bias01, _norm01, _scale, _zero, dst0 + cd);
+                for (; cd < srcC0; cd += 2, cs += 1)
+                    DequantizeQuantizeLinearNhwc1_1(src0 + cs, src1 + cs, _bias01, _norm01, _scale, _zero, dst0 + cd);
+                for (cd = 0; cd < srcC1_32; cd += 32, cs += 16)
+                    DequantizeQuantizeLinearNhwc1_16(src0 + cs, src1 + cs, _bias01, _norm01, _scale, _zero, dst1 + cd);
+                for (; cd < srcC1_16; cd += 16, cs += 8)
+                    DequantizeQuantizeLinearNhwc1_8(src0 + cs, src1 + cs, _bias01, _norm01, _scale, _zero, dst1 + cd);
+                for (; cd < srcC1_8; cd += 8, cs += 4)
+                    DequantizeQuantizeLinearNhwc1_4(src0 + cs, src1 + cs, _bias01, _norm01, _scale, _zero, dst1 + cd);
+                for (; cd < srcC1; cd += 2, cs += 1)
+                    DequantizeQuantizeLinearNhwc1_1(src0 + cs, src1 + cs, _bias01, _norm01, _scale, _zero, dst1 + cd);
                 src0 += dstC;
                 src1 += dstC;
                 dst0 += srcC0;
@@ -218,7 +303,6 @@ namespace Simd
         void SynetQuantizedShuffleLayerForward(const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1,
             size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int shuffleType)
         {
-            size_t dstC = (srcC0 + srcC1) / 2;
             switch (shuffleType)
             {
             case 0:
