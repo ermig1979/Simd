@@ -212,7 +212,7 @@ namespace Simd
             __m128i s01 = _mm_unpacklo_epi8(s0, s1);
             __m256i d0 = QuantizeLinear(DequantizeLinear(_mm256_cvtepu8_epi32(s01), bias, norm), scale, zero);
             __m256i u0 = _mm256_packus_epi16(_mm256_packs_epi32(d0, K_ZERO), K_ZERO);
-            ((uint16_t*)dst)[0] = _mm256_cvtsi256_si32(u0);
+            ((uint16_t*)dst)[0] = _mm_cvtsi128_si32(_mm256_castsi256_si128(u0));
         }
 
         SIMD_INLINE void DequantizeQuantizeLinearNhwc1_8(const uint8_t* src0, const uint8_t* src1, const __m256i& bias, const __m256& norm, const __m256& scale, const __m256i& zero, uint8_t* dst)
