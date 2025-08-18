@@ -519,6 +519,23 @@ namespace Simd
             __m512i i32 = _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(_src, _bias)), _norm)), zero);
             _mm_mask_storeu_epi8(dst, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(i32, K_ZERO), K_ZERO)));
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void DequantizeQuantizeLinear16(const uint8_t* src, const __m512i& bias, const __m512& norm, const __m512& scale, const __m512i& zero, uint8_t* dst, __mmask16 tail = -1)
+        {
+            __m512i d0 = QuantizeLinear(DequantizeLinear(_mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, src)), bias, norm), scale, zero);
+            _mm_mask_storeu_epi8(dst, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinear64(const uint8_t* src, const __m512i& bias, const __m512& norm, const __m512& scale, const __m512i& zero, uint8_t* dst)
+        {
+            __m512i d0 = QuantizeLinear(DequantizeLinear(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 0)), bias, norm), scale, zero);
+            __m512i d1 = QuantizeLinear(DequantizeLinear(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 1)), bias, norm), scale, zero);
+            __m512i d2 = QuantizeLinear(DequantizeLinear(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 2)), bias, norm), scale, zero);
+            __m512i d3 = QuantizeLinear(DequantizeLinear(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 3)), bias, norm), scale, zero);
+            _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
+        }
     }
 #endif
 

@@ -132,10 +132,10 @@ namespace Test
             result = result && SynetQuantizedShuffleLayerForwardAutoTest(FUNC_SQSLF(Simd::Avx2::SynetQuantizedShuffleLayerForward), FUNC_SQSLF(SimdSynetQuantizedShuffleLayerForward));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw())
-//            result = result && SynetQuantizedShuffleLayerForwardAutoTest(FUNC_SQSLF(Simd::Avx512bw::SynetQuantizedShuffleLayerForward), FUNC_SQSLF(SimdSynetQuantizedShuffleLayerForward));
-//#endif 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
+            result = result && SynetQuantizedShuffleLayerForwardAutoTest(FUNC_SQSLF(Simd::Avx512bw::SynetQuantizedShuffleLayerForward), FUNC_SQSLF(SimdSynetQuantizedShuffleLayerForward));
+#endif 
 
         return result;
     }

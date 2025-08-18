@@ -136,6 +136,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProductGemmNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizeLinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale16b.cpp" />

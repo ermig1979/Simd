@@ -153,6 +153,16 @@ namespace Simd
             return _mm512_unpacklo_epi16(_mm512_set1_epi16(a0), _mm512_set1_epi16(a1));
         }
 
+        SIMD_INLINE __m512i SetInt32(int a0, int a1)
+        {
+            return _mm512_unpacklo_epi32(_mm512_set1_epi32(a0), _mm512_set1_epi32(a1));
+        }
+
+        SIMD_INLINE __m512 SetFloat(float a0, float a1)
+        {
+            return _mm512_unpacklo_ps(_mm512_set1_ps(a0), _mm512_set1_ps(a1));
+        }
+
         SIMD_INLINE __m512 Set(__m256 a0, __m256 a1)
         {
             return _mm512_insertf32x8(_mm512_castps256_ps512(a0), a1, 1);
