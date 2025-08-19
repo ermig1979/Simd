@@ -382,6 +382,11 @@ namespace Test
         return Shape({ axis0, axis1, axis2, axis3, axis4 });
     }
 
+    inline Shape Shp(size_t axis0, size_t axis1, size_t axis2, size_t axis3, size_t axis4, size_t axis5)
+    {
+        return Shape({ axis0, axis1, axis2, axis3, axis4, axis5 });
+    }
+
     //-------------------------------------------------------------------------------------------------
 
     template<class T> inline void Copy(const Tensor<T> & src, Tensor<T> & dst)

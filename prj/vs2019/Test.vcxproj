@@ -124,6 +124,7 @@
     <ClCompile Include="..\..\src\Test\TestSynetPermute.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedAdd.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizedConcat.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedShuffle.cpp" />

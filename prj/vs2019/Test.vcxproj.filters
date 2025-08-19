@@ -274,6 +274,9 @@
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedShuffle.cpp">
       <Filter>Test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizedConcat.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">

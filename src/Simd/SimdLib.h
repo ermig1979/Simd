@@ -7566,6 +7566,27 @@ extern "C"
     */
     SIMD_API void SimdSynetQuantizedAddForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
+    /*! @ingroup synet_quantized_other
+
+        \fn void SimdSynetQuantizedConcatLayerForward(size_t count, const uint8_t** src, size_t num, const size_t* size, const int32_t* bias, const float* norm, const float* scale, int32_t zero, uint8_t* dst);
+
+        \short This function is used for forward propagation of QuantizedConcatLayer.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] count - a number of input tensors.        
+        \param [in] src - an array with pointers to UINT8 input tensors.
+        \param [in] num - an output size of input/output tensors (number of concatenations).
+        \param [in] size - an array with concatenation sizes of input tensors.
+        \param [in] bias - an array with bias parameter of input tensors (-zero).
+        \param [in] norm - an array with dequantization norm parameter of input tensors (scale).
+        \param [in] scale - an output quantization norm (1/scale).
+        \param [in] zero - an output quantization zero.
+        \param [out] dst - a pointer to the UINT8 output tensor.
+    */
+    SIMD_API void SimdSynetQuantizedConcatLayerForward(size_t count, const uint8_t** src, size_t num, const size_t* size, const int32_t* bias, const float* norm, const float* scale, int32_t zero, uint8_t* dst);
+
+
     /*! @ingroup synet_quantized_convolution
 
         \fn void * SimdSynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);

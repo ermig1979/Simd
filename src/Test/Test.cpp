@@ -416,6 +416,8 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetQuantizedAddForward);
 
+    TEST_ADD_GROUP_A0(SynetQuantizedConcatLayerForward);
+
     TEST_ADD_GROUP_A0(SynetQuantizedConvolutionForward);
 
     TEST_ADD_GROUP_A0(SynetQuantizedInnerProductForward);
