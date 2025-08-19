@@ -105,9 +105,12 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetQuantizedConcatLayerForwardAutoTest(999, Shp(99, 100), f1, f2);
-        result = result && SynetQuantizedConcatLayerForwardAutoTest(999, Shp(99, 100, 101), f1, f2);
-        result = result && SynetQuantizedConcatLayerForwardAutoTest(999, Shp(99, 100, 101, 102), f1, f2);
+        result = result && SynetQuantizedConcatLayerForwardAutoTest(999, Shp(100), f1, f2);
+        result = result && SynetQuantizedConcatLayerForwardAutoTest(999, Shp(100, 101), f1, f2);
+        result = result && SynetQuantizedConcatLayerForwardAutoTest(999, Shp(100, 101, 102), f1, f2);
+        result = result && SynetQuantizedConcatLayerForwardAutoTest(999, Shp(100, 101, 102, 103), f1, f2);
+        result = result && SynetQuantizedConcatLayerForwardAutoTest(999, Shp(100, 101, 102, 103, 104), f1, f2);
+        result = result && SynetQuantizedConcatLayerForwardAutoTest(999, Shp(100, 101, 102, 103, 104, 105), f1, f2);
 
         return result;
     }
@@ -119,11 +122,11 @@ namespace Test
         if (TestBase())
             result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Base::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41())
-//            result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Sse41::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41())
+            result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Sse41::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2())
 //            result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx2::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
