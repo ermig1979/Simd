@@ -127,15 +127,15 @@ namespace Test
             result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Sse41::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2())
-//            result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx2::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
-//#endif 
-//
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw())
-//            result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx512bw::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
-//#endif 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx2::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw())
+            result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx512bw::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
+#endif 
 
         return result;
     }

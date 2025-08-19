@@ -5937,7 +5937,7 @@ SIMD_API void SimdSynetQuantizedConcatLayerForward(size_t count, const uint8_t**
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedConcatLayerForwardPtr) (size_t count, const uint8_t** src, size_t num, const size_t* size, const int32_t* bias, const float* norm, const float* scale, int32_t zero, uint8_t* dst);
-    const static SimdSynetQuantizedConcatLayerForwardPtr simdSynetQuantizedConcatLayerForward = SIMD_FUNC1(SynetQuantizedConcatLayerForward, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC);
+    const static SimdSynetQuantizedConcatLayerForwardPtr simdSynetQuantizedConcatLayerForward = SIMD_FUNC3(SynetQuantizedConcatLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     simdSynetQuantizedConcatLayerForward(count, src, num, size, bias, norm, scale, zero, dst);
 #else
