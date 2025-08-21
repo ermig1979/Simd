@@ -84,7 +84,7 @@ namespace Test
             FillRandom(src[i]);
             ptr[i] = src[i].Data();
             dstSize += size[i];
-            bias[i] = 33 + i * 3;
+            bias[i] = 33 + int(i) * 3;
             norm[i] = 0.01f + 0.01f * i;
         }
         Tensor8u dst1(Shp(num, dstSize));

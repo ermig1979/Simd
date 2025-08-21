@@ -308,7 +308,7 @@ namespace Simd
                         weight += srcC * DF;
                     }
                 }
-                else
+                else if(e1)
                 {
                     InputConvolution1x1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2<type, 0> : InputConvolution1x1_1x2<type, 0>;
                     InputConvolution1x1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1<type, 0> : InputConvolution1x1_1x1<type, 0>;
