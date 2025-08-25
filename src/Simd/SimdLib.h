@@ -7788,6 +7788,85 @@ extern "C"
     */
     SIMD_API void SimdSynetQuantizedShuffleLayerForward(const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1, size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type);
 
+    /*! @ingroup synet_quantized_merged_convolution
+
+        \fn void * SimdSynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+
+        \short Initilizes Quantized merged convolution algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] convs - an array with convolutions parameters.
+        \param [in] count - a number of merged convolutions.
+        \param [in] add - a flag that signilizes if we need to add source to output value.
+        \return a pointer to Quantized merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetQuantizedMergedConvolutionExternalBufferSize, ::SimdSynetQuantizedMergedConvolutionInternalBufferSize,
+            ::SimdSynetQuantizedMergedConvolutionInfo, ::SimdSynetQuantizedMergedConvolutionSetParams and ::SimdSynetQuantizedMergedConvolutionForward.
+    */
+    SIMD_API void* SimdSynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
+
+    /*! @ingroup synet_quantized_merged_convolution
+
+        \fn size_t SimdSynetQuantizedMergedConvolutionExternalBufferSize(const void * context);
+
+        \short Gets size of external temporary buffer required for Quantized merged convolution algorithm.
+
+        \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
+        \return size of external temporary buffer required for Quantized merged convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetQuantizedMergedConvolutionExternalBufferSize(const void* context);
+
+    /*! @ingroup synet_quantized_merged_convolution
+
+        \fn size_t SimdSynetQuantizedMergedConvolutionInternalBufferSize(const void * context);
+
+        \short Gets size of internal buffer used inside Quantized merged convolution algorithm.
+
+        \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside Quantized merged convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetQuantizedMergedConvolutionInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_quantized_merged_convolution
+
+        \fn const char* SimdSynetQuantizedMergedConvolutionInfo(const void* context);
+
+        \short Gets description of internal implementation of Quantized merged convolution algorithm.
+
+        \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
+        \return string with description of internal implementation of Quantized merged convolution algorithm.
+    */
+    SIMD_API const char* SimdSynetQuantizedMergedConvolutionInfo(const void* context);
+
+    /*! @ingroup synet_quantized_merged_convolution
+
+        \fn void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* srcScale, const uint8_t* srcZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias, const float* dstScale, const uint8_t* dstZero);
+
+        \short Sets weights, biases, input/output parameters required for Quantized merged convolution algorithm.
+
+        \param [in, out] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
+        \param [in] srcScale - a pointer to 32-bit float point input tensors scales.
+        \param [in] srcZero - a pointer to 8-bit unsigned integer input tensors zeros.
+        \param [in] weight - a pointer to 8-bit integer convolution weights.
+        \param [in] weightScale - a pointer to 32-bit float point weight scales.
+        \param [in] bias - a pointer to 32-bit integer biases.
+        \param [in] dstScale - a pointer to 32-bit float point output tensor scale.
+        \param [in] dstZero - a pointer to 8-bit unsigned integer output tensor zero.
+    */
+    SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* srcScale, const uint8_t* srcZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias, const float* dstScale, const uint8_t* dstZero);
+
+    /*! @ingroup synet_quantized_merged_convolution
+
+        \fn void SimdSynetQuantizedMergedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+        \short Performs forward propagation of Quantized merged convolution algorithm.
+
+        \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor.
+        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetQuantizedMergedConvolutionExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetQuantizedMergedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
     /*! @ingroup synet_quantized_other
 
         \fn void SimdSynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
