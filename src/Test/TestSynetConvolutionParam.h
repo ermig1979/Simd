@@ -203,6 +203,21 @@ namespace Test
             conv[0].dstW = (conv[0].srcW + conv[0].padX + conv[0].padW - conv[0].kernelX) / conv[0].strideX + 1;
         }
 
+        Shape SrcShape(size_t i) const
+        {
+            return Shp(batch, conv[i].srcC, conv[i].srcH, conv[i].srcW);
+        }
+
+        Shape DstShape(size_t i) const
+        {
+            return Shp(batch, conv[i].dstH, conv[i].dstW, conv[i].dstC);
+        }
+
+        Shape WeightShape(size_t i) const
+        {
+            return Shp(conv[i].kernelY, conv[i].kernelX, conv[i].srcC / conv[i].group, conv[i].dstC);
+        }
+
     private:
         static void SetConv(SimdConvolutionParameters* conv, const Cnv& c, const Shape& s = Shape())
         {
