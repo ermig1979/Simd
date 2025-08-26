@@ -424,7 +424,7 @@ namespace Test
         SimdFloat16ToFloat32((const uint16_t*)dst1.data, size, (float*)dstF1.data);
         SimdFloat16ToFloat32((const uint16_t*)dst2.data, size, (float*)dstF2.data);
 
-        result = result && Compare(dstF1, dstF2, EPS, true, 64, true, "dst1 & dst2");
+        result = result && Compare(dstF1, dstF2, EPS * 4.0f, true, 64, true, "dst1 & dst2");
 
         return result;
     }

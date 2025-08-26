@@ -7839,20 +7839,18 @@ extern "C"
 
     /*! @ingroup synet_quantized_merged_convolution
 
-        \fn void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* srcScale, const uint8_t* srcZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias, const float* dstScale, const uint8_t* dstZero);
+        \fn void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* imgScale, const uint8_t* imgZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
 
         \short Sets weights, biases, input/output parameters required for Quantized merged convolution algorithm.
 
         \param [in, out] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
-        \param [in] srcScale - a pointer to 32-bit float point input tensors scales.
-        \param [in] srcZero - a pointer to 8-bit unsigned integer input tensors zeros.
+        \param [in] imgScale - a pointer to 32-bit float point input/output tensors scales.
+        \param [in] imgZero - a pointer to 8-bit unsigned integer input/output tensors zeros.
         \param [in] weight - a pointer to 8-bit integer convolution weights.
         \param [in] weightScale - a pointer to 32-bit float point weight scales.
         \param [in] bias - a pointer to 32-bit integer biases.
-        \param [in] dstScale - a pointer to 32-bit float point output tensor scale.
-        \param [in] dstZero - a pointer to 8-bit unsigned integer output tensor zero.
     */
-    SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* srcScale, const uint8_t* srcZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias, const float* dstScale, const uint8_t* dstZero);
+    SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* imgScale, const uint8_t* imgZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
 
     /*! @ingroup synet_quantized_merged_convolution
 

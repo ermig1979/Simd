@@ -43,7 +43,7 @@ namespace Simd
         virtual size_t ExternalBufferSize() const;
         virtual size_t InternalBufferSize() const;
 
-        virtual void SetParams(const float* srcScale, const uint8_t* srcZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias, const float* dstScale, const uint8_t* dstZero);
+        virtual void SetParams(const float* imgScale, const uint8_t* imgZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
 
         virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst) = 0;
 
@@ -56,9 +56,11 @@ namespace Simd
         const char* Info() const;
 
     protected:
-        virtual void SetWeight(const int8_t* const* weight) = 0;
-        virtual void SetBias(const int8_t* const* weight, const int32_t* const* bias);
-        virtual void SetOther();
+        virtual void SetInput(const int8_t* weight, const ConvParam& p, Array8i & dst) = 0;
+        virtual void SetDepthwise(const int8_t* weight, const ConvParam& p, Array8i& dst) = 0;
+        virtual void SetOutput(const int8_t* weight, const ConvParam& p, Array8i& dst) = 0;
+        virtual void SetBias(const int8_t* weight, const int32_t* bias, int32_t zero, const ConvParam& p, Array32i & dst);
+        virtual void SetNorm(const float* weightScale, float srcScale, float dstScale, const ConvParam& p, Array32f& dst);
 
         MergConvParam _param;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
@@ -68,9 +70,9 @@ namespace Simd
         Array8u _buffer, _dwSrcZero;
         Array8i _weight[3];
         Array32i _bias[3];
-        Array32f _weightScale[3], _norm[3];
-        float _srcScale[4], _srcNorm, _dstNorm, _addScale;
-        int32_t _srcZero[4], _dstZero, _add, _addZero, _srcBias, _dstBias;
+        Array32f _norm[3];
+        float _imgScale[5], _srcNorm, _dstNorm, _addScale;
+        int32_t _imgZero[5], _dstZero, _add, _addZero, _srcBias, _dstBias;
         size_t _batch, _merge, _count, _sizeS, _sizeD;
     };
 

@@ -69,76 +69,68 @@ namespace Simd
     {
         size_t size = _buffer.RawSize() + _dwSrcZero.RawSize();
         for(size_t c = 0; c < _count; ++c)
-            size += _weight[c].RawSize() + _bias[c].RawSize() + _weightScale[3].RawSize() + _norm[3].RawSize();
+            size += _weight[c].RawSize() + _bias[c].RawSize() + _norm[c].RawSize();
         return size;
     }
 
-    void SynetQuantizedMergedConvolution::SetParams(const float* srcScale, const uint8_t* srcZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias, const float* dstScale, const uint8_t* dstZero)
+    void SynetQuantizedMergedConvolution::SetParams(const float* imgScale, const uint8_t* imgZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias)
     {
         const MergConvParam& p = _param;
-
-/*        _srcScale = srcScale ? srcScale[0] : 0.0f;
-
-        _srcZero.Resize(p.srcC, true);
-        if(srcZero)
-            memset(_srcZero.data, srcZero[0], p.srcC);
-
-        SetWeight(weight);
-
-        _weightScale.Assign(weightScale, p.dstC);
-
-        SetBias(weight, bias);
-
-        if (params)
-            _params.Assign(params, p.activation == SimdConvolutionActivationPrelu ? p.dstC : 2);
-        else
-            _params.Resize(p.dstC, true);
-
-        _dstScale = dstScale ? dstScale[0] : 0.0f;
-
-        _dstZero.Resize(p.dstC, true);
-        if (dstZero)
+        for (size_t i = 0, n = p.count + (p.add ? 1 : 0); i <= n; ++i)
         {
-            for (size_t d = 0; d < p.dstC; ++d)
-                _dstZero[d] = dstZero[0];
-        }*/
+            _imgScale[i] = imgScale[i];
+            _imgZero[i] = imgZero[i];
+        }
+        for (size_t c = 0; c < p.count; ++c)
+        {
+            if (p.conv[c].IsDepthwise())
+            {
+                _dwSrcZero.Resize(p.conv[c].group);
+                memset(_dwSrcZero.data, imgZero[c], p.conv[c].group);
+                SetDepthwise(weight[c], p.conv[c], _weight[c]);
+            }
+            else
+            {
+                if(c == 0)
+                    SetInput(weight[c], p.conv[c], _weight[c]);
+                else
+                    SetOutput(weight[c], p.conv[c], _weight[c]);
+            }
 
-        SetOther();
+            SetBias(weight[c], bias[c], imgZero[c], p.conv[c], _bias[c]);
+
+            SetNorm(weightScale[c], imgScale[c], imgScale[c + 1], p.conv[c], _norm[c]);
+        }
+        if (p.add)
+        {
+            assert(p.count == 3 && p.conv[0].srcC == p.conv[2].dstC && p.conv[0].srcH == p.conv[2].dstH && p.conv[0].srcW == p.conv[2].dstW);
+            _srcBias = -imgZero[0];
+            _srcNorm = imgScale[0];
+            _dstBias = -imgZero[3];
+            _dstNorm = imgScale[3];
+            _addZero = imgZero[4];
+            _addScale = 1.0f / imgScale[4];
+        }
     }
 
-    void SynetQuantizedMergedConvolution::SetBias(const int8_t* const* weight, const int32_t* const* bias)
+    void SynetQuantizedMergedConvolution::SetBias(const int8_t* weight, const int32_t* bias, int32_t zero, const ConvParam& p, Array32i& dst)
     {
-        const MergConvParam& p = _param;
-        //if (bias)
-        //    _bias.Assign(bias, p.dstC);
-        //else
-        //    _bias.Resize(p.dstC, true);
-        //size_t K = p.kernelY * p.kernelX * p.srcC / p.group, D = p.dstC;
-        //int srcZero = _srcZero[0];
-        //int32_t* pb = _bias.data;
-        //if (p.trans)
-        //{
-        //    for (size_t d = 0; d < D; ++d)
-        //        for (size_t k = 0; k < K; ++k)
-        //            pb[d] -= weight[k * D + d] * srcZero;
-        //}
-        //else
-        //{
-        //    for (size_t d = 0; d < D; ++d)
-        //        for (size_t k = 0; k < K; ++k)
-        //            pb[d] -= weight[d * K + k] * srcZero;
-        //}
+        if (bias)
+            dst.Assign(bias, p.dstC);
+        else
+            dst.Resize(p.dstC, true);
+        size_t K = p.kernelY * p.kernelX * p.srcC / p.group, D = p.dstC;
+        for (size_t d = 0; d < D; ++d)
+            for (size_t k = 0; k < K; ++k)
+                dst[d] -= weight[k * D + d] * zero;
     }
 
-    void SynetQuantizedMergedConvolution::SetOther()
+    void SynetQuantizedMergedConvolution::SetNorm(const float* weightScale, float srcScale, float dstScale, const ConvParam& p, Array32f& dst)
     {
-        const MergConvParam& p = _param;
-        //size_t D = p.dstC;
-        //_norm.Resize(D);
-        //const float* psw = _weightScale.data;
-        //float* pn = _norm.data;
-        //for (size_t d = 0; d < D; ++d)
-        //    pn[d] = _srcScale * psw[d] / _dstScale;
+        size_t D = p.dstC;
+        dst.Resize(D);
+        for (size_t d = 0; d < D; ++d)
+            dst[d] = srcScale * weightScale[d] / dstScale;
     }
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))

@@ -6131,11 +6131,11 @@ SIMD_API const char* SimdSynetQuantizedMergedConvolutionInfo(const void* context
 #endif
 }
 
-SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* srcScale, const uint8_t* srcZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias, const float* dstScale, const uint8_t* dstZero)
+SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* imgScale, const uint8_t* imgZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    //((SynetQuantizedMergedConvolution*)context)->SetParams(srcScale, srcZero, weight, weightScale, bias, dstScale, dstZero);
+    //((SynetQuantizedMergedConvolution*)context)->SetParams(imgScale, imgZero, weight, weightScale, bias);
 #else
     assert(0);
 #endif

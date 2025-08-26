@@ -149,7 +149,7 @@ namespace Test
         bool Init(const Param & p, const QmcParams32f & f32, SimdBool overflow)
         {
             last = p.count + (p.add ? 1 : 0);
-            for(size_t i = 0; i < last; ++i)
+            for(size_t i = 0; i <= last; ++i)
                 if (!QuantizeImage(f32.image[i], image[i], imageZero[i], imageScale[i]))
                     return false;
 
@@ -263,8 +263,8 @@ namespace Test
         buf8u.Extend({ ::SimdSynetQuantizedMergedConvolutionExternalBufferSize(context1) });
         buf8u.Extend({ ::SimdSynetQuantizedMergedConvolutionExternalBufferSize(context2) });
 
-        ::SimdSynetQuantizedMergedConvolutionSetParams(context1, p8i.imageScale, p8i.imageZero, p8i.ptrW, p8i.ptrWS, p8i.ptrB, p8i.imageScale + p8i.last, p8i.imageZero + p8i.last);
-        ::SimdSynetQuantizedMergedConvolutionSetParams(context2, p8i.imageScale, p8i.imageZero, p8i.ptrW, p8i.ptrWS, p8i.ptrB, p8i.imageScale + p8i.last, p8i.imageZero + p8i.last);
+        ::SimdSynetQuantizedMergedConvolutionSetParams(context1, p8i.imageScale, p8i.imageZero, p8i.ptrW, p8i.ptrWS, p8i.ptrB);
+        ::SimdSynetQuantizedMergedConvolutionSetParams(context2, p8i.imageScale, p8i.imageZero, p8i.ptrW, p8i.ptrWS, p8i.ptrB);
 
         TEST_ALIGN(SIMD_ALIGN);
 
