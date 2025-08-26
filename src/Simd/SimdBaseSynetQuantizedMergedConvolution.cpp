@@ -39,7 +39,12 @@ namespace Simd
         , _perf(NULL)
 #endif
     {
+        _count = p.count;
+        _batch = p.conv[0].batch;
         _merge = 1;
+        const ConvParam& beg = p.conv[0], &end = p.conv[p.count - 1];
+        _sizeS = beg.srcC * beg.srcH * beg.srcW;
+        _sizeD = end.dstC * end.dstH * end.dstW;
     }
 
     uint8_t* SynetQuantizedMergedConvolution::Buffer(uint8_t* buffer)
@@ -146,6 +151,114 @@ namespace Simd
 
     namespace Base
     {
+        SynetQuantizedMergedConvolutionRef::SynetQuantizedMergedConvolutionRef(const MergConvParam& p)
+            : Simd::SynetQuantizedMergedConvolution(p)
+        {
+            _sizeB = 0;
+            for (size_t c = 0; c < _param.count; ++c)
+            {
+                const ConvParam& p = _param.conv[c];
+                _sizeB = Simd::Max(_sizeB, p.dstC * p.dstH * p.dstW);
+            }
+        }
+
+        size_t SynetQuantizedMergedConvolutionRef::ExternalBufferSize() const
+        {
+            return _sizeB * 5 + SIMD_ALIGN;
+        }
+
+        void SynetQuantizedMergedConvolutionRef::SetInput(const int8_t* weight, const ConvParam& p, Array8i& dst)
+        {
+            dst.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
+            dst.Assign(weight, dst.size);
+        }
+
+        void SynetQuantizedMergedConvolutionRef::SetDepthwise(const int8_t* weight, const ConvParam& p, Array8i& dst)
+        {
+            dst.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
+            dst.Assign(weight, dst.size);
+        }
+
+        void SynetQuantizedMergedConvolutionRef::SetOutput(const int8_t* weight, const ConvParam& p, Array8i& dst)
+        {
+            dst.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
+            dst.Assign(weight, dst.size);
+        }
+
+        void SynetQuantizedMergedConvolutionRef::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
+        {
+            buf8 = Buffer(buf8);
+            int32_t* sum = Allocate<int32_t>(buf8, _sizeB);
+            uint8_t* buf = Allocate<uint8_t>(buf8, _sizeB);
+#if defined(__MINGW32__) || defined(__MINGW64__)
+            bool overflow = true;
+#else
+            bool overflow = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0;
+#endif
+            for (size_t b = 0; b < _batch; b += 1)
+            {
+                for (size_t c = 0; c < _count; ++c)
+                {
+                    const ConvParam& p = _param.conv[c];
+                    const uint8_t* ps = c ? buf : src;
+                    const int8_t* pw = _weight[c].data;
+                    uint8_t* pd = c + 1 < _count ? buf : dst;
+                    if (p.IsDepthwise())
+                        Depthwise(ps, _dwSrcZero.data, p, pw, sum);
+                    else
+                        GemmNhwc(p.dstH * p.dstW, p.dstC, 1, p.srcC, ps, p.srcC, pw, p.dstC, sum, p.dstC, overflow);
+                    QuantizeSumLinear(sum, 1, p.dstC, p.dstH, p.dstW, p.dstF, _bias[c].data, _norm[c].data, _imgZero[c + 1], pd);
+                }
+                if (_param.add)
+                    AddSrc(src, dst);
+                src += _sizeS;
+                dst += _sizeD;
+            }
+        }
+
+        void SynetQuantizedMergedConvolutionRef::Depthwise(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const int8_t* weight, int32_t* dst)
+        {
+            size_t C = p.srcC;
+            for (size_t dy = 0; dy < p.dstH; ++dy)
+            {
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                {
+                    for (size_t c = 0; c < C; ++c)
+                        dst[c] = 0;
+                    for (size_t ky = 0; ky < p.kernelY; ++ky)
+                    {
+                        size_t sy = dy * p.strideY + ky - p.padY;
+                        for (size_t kx = 0; kx < p.kernelX; ++kx)
+                        {                        
+                            size_t sx = dx * p.strideX + kx - p.padX;
+                            const int8_t* pw = weight + (ky * p.kernelX + kx) * C;
+                            if (sy < p.srcH && sx < p.srcW)
+                            {
+                                const uint8_t* ps = src + (sy * p.srcW + sx) * C;
+                                for (size_t c = 0; c < C; ++c)
+                                    dst[c] += ps[c] * pw[c];
+                            }
+                            else
+                            {
+                                for (size_t c = 0; c < C; ++c)
+                                    dst[c] += zero[c] * pw[c];
+                            }
+                        }
+                    }
+                    dst += C;
+                }
+            }
+        }
+
+        void SynetQuantizedMergedConvolutionRef::AddSrc(const uint8_t* src, uint8_t* dst)
+        {
+            for (size_t i = 0; i < _sizeS; ++i)
+            {
+                float _src = DequantizeLinear(src[i], _srcBias, _srcNorm);
+                float _dst = DequantizeLinear(dst[i], _dstBias, _dstNorm);
+                dst[i] = QuantizeLinear(_src + _dst, _addScale, _addZero, 0, 255);
+            }
+        }
 
         //-------------------------------------------------------------------------------------------------
 
@@ -154,7 +267,7 @@ namespace Simd
             MergConvParam param(batch, convs, count, add);
             if (!param.Valid(SimdTensorData8u, SimdTensorData8u))
                 return NULL;
-            return NULL;
+            return new SynetQuantizedMergedConvolutionRef(param);
         }
     }
 #endif

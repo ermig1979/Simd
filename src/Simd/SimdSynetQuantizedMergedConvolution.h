@@ -72,7 +72,7 @@ namespace Simd
         Array32i _bias[3];
         Array32f _norm[3];
         float _imgScale[5], _srcNorm, _dstNorm, _addScale;
-        int32_t _imgZero[5], _dstZero, _add, _addZero, _srcBias, _dstBias;
+        int32_t _imgZero[5], _dstZero, _addZero, _srcBias, _dstBias;
         size_t _batch, _merge, _count, _sizeS, _sizeD;
     };
 
@@ -83,15 +83,22 @@ namespace Simd
         class SynetQuantizedMergedConvolutionRef : public SynetQuantizedMergedConvolution
         {
         public:
-            SynetQuantizedMergedConvolutionRef(const ConvParam & p);
+            SynetQuantizedMergedConvolutionRef(const MergConvParam & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::Ref"; }
             virtual size_t ExternalBufferSize() const;
 
         protected:
-            virtual void SetWeight(const int8_t* const* weight);
+            virtual void SetInput(const int8_t* weight, const ConvParam& p, Array8i& dst);
+            virtual void SetDepthwise(const int8_t* weight, const ConvParam& p, Array8i& dst);
+            virtual void SetOutput(const int8_t* weight, const ConvParam& p, Array8i& dst);
 
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            void Depthwise(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const int8_t* weight, int32_t* dst);
+            void AddSrc(const uint8_t* src, uint8_t* dst);
+
+            size_t _sizeB;
         };
 
         //------------------------------------------------------------------------------------------------

@@ -86,6 +86,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetQuantizedAdd.h"
 #include "Simd/SimdSynetQuantizedConvolution.h"
 #include "Simd/SimdSynetQuantizedInnerProduct.h"
+#include "Simd/SimdSynetQuantizedMergedConvolution.h"
 #include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdWarpAffine.h"
@@ -6089,9 +6090,9 @@ SIMD_API void* SimdSynetQuantizedMergedConvolutionInit(size_t batch, const SimdC
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetQuantizedMergedConvolutionInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
-    const static SimdSynetQuantizedMergedConvolutionInitPtr simdSynetQuantizedMergedConvolutionInit = 0;// SIMD_FUNC0(SynetQuantizedMergedConvolutionInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedMergedConvolutionInitPtr simdSynetQuantizedMergedConvolutionInit = SIMD_FUNC0(SynetQuantizedMergedConvolutionInit);//, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
-    return 0;// simdSynetQuantizedMergedConvolutionInit(batch, convs, count, add);
+    return simdSynetQuantizedMergedConvolutionInit(batch, convs, count, add);
 #else
     assert(0);
     return 0;
@@ -6102,7 +6103,7 @@ SIMD_API size_t SimdSynetQuantizedMergedConvolutionExternalBufferSize(const void
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return 1;// ((SynetQuantizedMergedConvolution*)context)->ExternalBufferSize();
+    return ((SynetQuantizedMergedConvolution*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6113,7 +6114,7 @@ SIMD_API size_t SimdSynetQuantizedMergedConvolutionInternalBufferSize(const void
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return 0;// ((SynetQuantizedMergedConvolution*)context)->InternalBufferSize();
+    return ((SynetQuantizedMergedConvolution*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6124,7 +6125,7 @@ SIMD_API const char* SimdSynetQuantizedMergedConvolutionInfo(const void* context
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return 0;// ((SynetQuantizedMergedConvolution*)context)->Info();
+    return ((SynetQuantizedMergedConvolution*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6135,7 +6136,7 @@ SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const 
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    //((SynetQuantizedMergedConvolution*)context)->SetParams(imgScale, imgZero, weight, weightScale, bias);
+    ((SynetQuantizedMergedConvolution*)context)->SetParams(imgScale, imgZero, weight, weightScale, bias);
 #else
     assert(0);
 #endif
@@ -6145,9 +6146,9 @@ SIMD_API void SimdSynetQuantizedMergedConvolutionForward(void* context, const ui
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    //SynetQuantizedMergedConvolution* c = (SynetQuantizedMergedConvolution*)context;
-    //SIMD_PERF_EXT(c);
-    //c->Forward(src, buf, dst);
+    SynetQuantizedMergedConvolution* c = (SynetQuantizedMergedConvolution*)context;
+    SIMD_PERF_EXT(c);
+    c->Forward(src, buf, dst);
 #else
     assert(0);
 #endif

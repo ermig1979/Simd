@@ -241,6 +241,12 @@ namespace Test
     {
         bool result = true;
 
+        for (size_t c = 0; c < p.count; ++c)
+        {
+            p.conv[c].srcT = SimdTensorData8u;
+            p.conv[c].dstT = SimdTensorData8u;
+        }
+
         f1.Update(p);
         f2.Update(p);
 
@@ -256,8 +262,6 @@ namespace Test
 
         void * context1 = f1.func(p.batch, p.conv, p.count, p.add);
         void * context2 = f2.func(p.batch, p.conv, p.count, p.add);
-        if (context1 == 0)
-            return true;
 
         Tensor8u buf8u;
         buf8u.Extend({ ::SimdSynetQuantizedMergedConvolutionExternalBufferSize(context1) });
@@ -270,7 +274,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, p8i.image[0].Data(), buf8u.Data(), p8i.dst1.Data()));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, p8i.image[0].Data(), buf8u.Data(), p8i.dst1.Data()));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, p8i.image[0].Data(), buf8u.Data(), p8i.dst2.Data()));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
@@ -298,7 +302,7 @@ namespace Test
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
 #ifdef NDEBUG
-#if 0
+#if 1
         result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 16, 112, 112), Cnv(aId, 1, 1, 96), Cnv(aId, 3, 2), Cnv(aId, 1, 1, 24), f, u8, u8), o, f1, f2);
 #endif
 #else
