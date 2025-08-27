@@ -113,8 +113,8 @@ namespace Simd
 
             struct AlgParam
             {
-                int dwE;
-                size_t miC, maC, miK, yStep[3], yStart[3], bufH[3], dW[3], padX, padW, srcW;
+                size_t miC, maC, miK, yStep[3], yStart[3], bufH[3], dW[3];
+                size_t bufW, bufR, stepH, sizeW, stepW, dwE;
             };
 
             typedef void(*InputPreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);

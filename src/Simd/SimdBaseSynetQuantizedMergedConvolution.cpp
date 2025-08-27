@@ -307,9 +307,72 @@ namespace Simd
             }
         }
 
-        void SynetQuantizedMergedConvolution::SetDepthwise(const int8_t* weight, const ConvParam& p, Array8i& dst)
+        void SynetQuantizedMergedConvolution::SetDepthwise(const int8_t* src, const ConvParam& p, Array8i& dst)
         {
-
+            assert(IsDepthwise(p));
+            const AlgParam& a = _alg;
+            size_t Y = p.kernelY, X = p.kernelX, C = p.srcC, F = a.miC, B = AlignHi(p.srcC, a.miC);
+            dst.Resize(a.sizeW * 2 * a.dwE);
+            if (a.dwE == 2)
+            {
+                int16_t* dstE = (int16_t*)dst.data, * dstO = dstE + a.sizeW;
+                for (size_t c = 0; c < C; c += F)
+                {
+                    for (size_t y = 0; y < Y + 1; y += 2)
+                    {
+                        const int8_t* src0 = src + (y - 1) * X * C + c;
+                        const int8_t* src1 = src + (y + 0) * X * C + c;
+                        const int8_t* src2 = src + (y + 1) * X * C + c;
+                        for (size_t x = 0; x < X; ++x)
+                        {
+                            for (size_t i = 0; i < F; ++i)
+                            {
+                                *dstE++ = (i + c < C) ? src1[i] : 0;
+                                *dstE++ = (i + c < C && y + 1 < Y) ? src2[i] : 0;
+                                *dstO++ = (i + c < C && y > 0) ? src0[i] : 0;
+                                *dstO++ = (i + c < C && y < Y) ? src1[i] : 0;
+                            }
+                            src0 += C;
+                            src1 += C;
+                            src2 += C;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                int8_t* dstE = dst.data, * dstO = dstE + a.sizeW;
+                for (size_t c = 0; c < C; c += F)
+                {
+                    for (size_t y = 0; y < Y + 1; y += 4)
+                    {
+                        const int8_t* src0 = src + (y - 1) * X * C + c;
+                        const int8_t* src1 = src + (y + 0) * X * C + c;
+                        const int8_t* src2 = src + (y + 1) * X * C + c;
+                        const int8_t* src3 = src + (y + 2) * X * C + c;
+                        const int8_t* src4 = src + (y + 3) * X * C + c;
+                        for (size_t x = 0; x < X; ++x)
+                        {
+                            for (size_t i = 0; i < F; ++i)
+                            {
+                                *dstE++ = (i + c < C) ? src1[i] : 0;
+                                *dstE++ = (i + c < C && y + 1 < Y) ? src2[i] : 0;
+                                *dstE++ = (i + c < C && y + 2 < Y) ? src3[i] : 0;
+                                *dstE++ = (i + c < C && y + 3 < Y) ? src4[i] : 0;
+                                *dstO++ = (i + c < C && y > 0) ? src0[i] : 0;
+                                *dstO++ = (i + c < C && y + 0 < Y) ? src1[i] : 0;
+                                *dstO++ = (i + c < C && y + 1 < Y) ? src2[i] : 0;
+                                *dstO++ = (i + c < C && y + 2 < Y) ? src3[i] : 0;
+                            }
+                            src0 += C;
+                            src1 += C;
+                            src2 += C;
+                            src3 += C;
+                            src4 += C;
+                        }
+                    }
+                }
+            }
         }
 
         void SynetQuantizedMergedConvolution::SetOutput(const int8_t* src, const ConvParam& p, Array8i& dst)
