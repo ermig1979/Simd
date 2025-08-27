@@ -262,6 +262,88 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SynetQuantizedMergedConvolution::SynetQuantizedMergedConvolution(const MergConvParam& p)
+            : Simd::SynetQuantizedMergedConvolution(p)
+            , _inputPreprocess(NULL)
+            , _inputConvolution(NULL)
+            , _depthwisePreprocess(NULL)
+            , _depthwiseConvolution(NULL)
+            , _outputConvolution{NULL, NULL}
+            , _addInputToOutput(NULL)
+        {
+            for (size_t i = 0; i < 6; ++i)
+                _sizeB[i] = 0;
+        }
+
+        size_t SynetQuantizedMergedConvolution::ExternalBufferSize() const
+        {
+            return SIMD_ALIGN + _sizeB[0] + _sizeB[1] * 4 + _sizeB[2] + _sizeB[3] * _alg.dwE + _sizeB[4] + _sizeB[5] * 4;
+        }
+
+        void SynetQuantizedMergedConvolution::SetInput(const int8_t* src, const ConvParam& p, Array8i& dst)
+        {
+            assert(Is1x1(p));
+            size_t F = _alg.miC, C = AlignHi(p.srcC, _alg.miK), D = DivHi(p.dstC, F);
+            dst.Resize(C * D * F, true);
+            int8_t* pd = dst.data;
+            for (size_t d = 0; d < D; d++)
+            {
+                for (size_t c = 0; c < C; c += 4)
+                {
+                    const int8_t* ps = src + c * p.dstC + d * F;
+                    for (size_t f = 0; f < F; ++f)
+                    {
+                        for (size_t i = 0; i < 4; ++i)
+                        {
+                            if (d * F + f < p.dstC && c + i < p.srcC)
+                                *(pd++) = ps[i * p.dstC];
+                            else
+                                *(pd++) = 0;
+                        }
+                        if (c < p.srcC)
+                            ps++;
+                    }
+                }
+            }
+        }
+
+        void SynetQuantizedMergedConvolution::SetDepthwise(const int8_t* weight, const ConvParam& p, Array8i& dst)
+        {
+
+        }
+
+        void SynetQuantizedMergedConvolution::SetOutput(const int8_t* src, const ConvParam& p, Array8i& dst)
+        {
+            size_t F = _alg.miC, C = DivHi(AlignHi(p.srcC, _alg.miK), 4), D = DivHi(p.dstC, F), M = DivHi(_alg.maC, 4);
+            dst.Resize(C * D * F * 4, true);
+            int8_t* pd = dst.data;
+            for (size_t cB = 0; cB < C; cB += M)
+            {
+                size_t cE = Simd::Min(C, cB + M);
+                for (size_t d = 0; d < D; d++)
+                {
+                    for (size_t c = cB; c < cE; ++c)
+                    {
+                        const int8_t* ps = src + c * 4 * p.dstC + d * F;
+                        for (size_t f = 0; f < F; ++f)
+                        {
+                            for (size_t i = 0; i < 4; ++i)
+                            {
+                                if (d * F + f < p.dstC && c * 4 + i < p.srcC)
+                                    *(pd++) = ps[i * p.dstC];
+                                else
+                                    *(pd++) = 0;
+                            }
+                            if (c * 4 < p.srcC)
+                                ps++;
+                        }
+                    }
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add)
         {
             MergConvParam param(batch, convs, count, add);

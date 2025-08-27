@@ -117,17 +117,14 @@ namespace Simd
                 size_t miC, maC, miK, yStep[3], yStart[3], bufH[3], dW[3], padX, padW, srcW;
             };
 
+            typedef void(*InputPreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);
+
             typedef void(*InputConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst);
 
-            typedef void(*DepthwisePreprocess16iPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, int16_t* dst);
+            typedef void(*DepthwisePreprocessPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, uint8_t* dst);
 
-            typedef void(*DepthwiseConvolution16iPtr)(const int16_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-                const int16_t* weight, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst);
-
-            typedef void(*DepthwisePreprocess8uPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, uint8_t* dst);
-
-            typedef void(*DepthwiseConvolution8uPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*DepthwiseConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst);
 
             typedef void(*OutputConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
@@ -142,14 +139,13 @@ namespace Simd
             virtual void SetOutput(const int8_t* weight, const ConvParam& p, Array8i& dst);
 
             AlgParam _alg;
+            InputPreprocessPtr _inputPreprocess;
             InputConvolutionPtr _inputConvolution;
-            DepthwisePreprocess16iPtr _depthwisePreprocess16i;
-            DepthwiseConvolution16iPtr _depthwiseConvolution16i;
-            DepthwisePreprocess8uPtr _depthwisePreprocess8u;
-            DepthwiseConvolution8uPtr _depthwiseConvolution8u;
+            DepthwisePreprocessPtr _depthwisePreprocess;
+            DepthwiseConvolutionPtr _depthwiseConvolution;
             OutputConvolutionPtr _outputConvolution[2];
             AddInputToOutputPtr _addInputToOutput;
-            size_t _sizeB[5];
+            size_t _sizeB[6];
         };
 
         //------------------------------------------------------------------------------------------------
