@@ -43,7 +43,7 @@ namespace Simd
         virtual size_t ExternalBufferSize() const;
         virtual size_t InternalBufferSize() const;
 
-        virtual void SetParams(const float* imgScale, const uint8_t* imgZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
+        virtual void SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
 
         virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst) = 0;
 
@@ -71,8 +71,8 @@ namespace Simd
         Array8i _weight[3];
         Array32i _bias[3];
         Array32f _norm[3];
-        float _imgScale[5], _srcNorm, _dstNorm, _addScale;
-        int32_t _imgZero[5], _dstZero, _addZero, _srcBias, _dstBias;
+        float _ioScale[5], _srcNorm, _dstNorm, _addScale;
+        int32_t _ioZero[5], _dstZero, _addZero, _srcBias, _dstBias;
         size_t _batch, _merge, _count, _sizeS, _sizeD;
     };
 

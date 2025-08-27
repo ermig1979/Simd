@@ -78,20 +78,20 @@ namespace Simd
         return size;
     }
 
-    void SynetQuantizedMergedConvolution::SetParams(const float* imgScale, const uint8_t* imgZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias)
+    void SynetQuantizedMergedConvolution::SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias)
     {
         const MergConvParam& p = _param;
         for (size_t i = 0, n = p.count + (p.add ? 1 : 0); i <= n; ++i)
         {
-            _imgScale[i] = imgScale[i];
-            _imgZero[i] = imgZero[i];
+            _ioScale[i] = ioScale[i];
+            _ioZero[i] = ioZero[i];
         }
         for (size_t c = 0; c < p.count; ++c)
         {
             if (p.conv[c].IsDepthwise())
             {
                 _dwSrcZero.Resize(p.conv[c].group);
-                memset(_dwSrcZero.data, imgZero[c], p.conv[c].group);
+                memset(_dwSrcZero.data, ioZero[c], p.conv[c].group);
                 SetDepthwise(weight[c], p.conv[c], _weight[c]);
             }
             else
@@ -102,19 +102,19 @@ namespace Simd
                     SetOutput(weight[c], p.conv[c], _weight[c]);
             }
 
-            SetBias(weight[c], bias[c], imgZero[c], p.conv[c], _bias[c]);
+            SetBias(weight[c], bias[c], ioZero[c], p.conv[c], _bias[c]);
 
-            SetNorm(weightScale[c], imgScale[c], imgScale[c + 1], p.conv[c], _norm[c]);
+            SetNorm(weightScale[c], ioScale[c], ioScale[c + 1], p.conv[c], _norm[c]);
         }
         if (p.add)
         {
             assert(p.count == 3 && p.conv[0].srcC == p.conv[2].dstC && p.conv[0].srcH == p.conv[2].dstH && p.conv[0].srcW == p.conv[2].dstW);
-            _srcBias = -imgZero[0];
-            _srcNorm = imgScale[0];
-            _dstBias = -imgZero[3];
-            _dstNorm = imgScale[3];
-            _addZero = imgZero[4];
-            _addScale = 1.0f / imgScale[4];
+            _srcBias = -ioZero[0];
+            _srcNorm = ioScale[0];
+            _dstBias = -ioZero[3];
+            _dstNorm = ioScale[3];
+            _addZero = ioZero[4];
+            _addScale = 1.0f / ioScale[4];
         }
     }
 
@@ -207,7 +207,7 @@ namespace Simd
                         Depthwise(ps, _dwSrcZero.data, p, pw, sum);
                     else
                         GemmNhwc(p.dstH * p.dstW, p.dstC, 1, p.srcC, ps, p.srcC, pw, p.dstC, sum, p.dstC, overflow);
-                    QuantizeSumLinear(sum, 1, p.dstC, p.dstH, p.dstW, p.dstF, _bias[c].data, _norm[c].data, _imgZero[c + 1], pd);
+                    QuantizeSumLinear(sum, 1, p.dstC, p.dstH, p.dstW, p.dstF, _bias[c].data, _norm[c].data, _ioZero[c + 1], pd);
                 }
                 if (_param.add)
                     AddSrc(src, dst);

@@ -74,17 +74,17 @@ namespace Test
 
     struct QmcParams32f
     {
-        Tensor32f image[5], weight[3], bias[3], params[3];
+        Tensor32f io[5], weight[3], bias[3], params[3];
 
         bool Init(Param p)
         {
-            image[0].Reshape(p.SrcShape(0));
-            FillRandom(image[0], -0.9, 1.1f);
+            io[0].Reshape(p.SrcShape(0));
+            FillRandom(io[0], -0.9, 1.1f);
             for (size_t c = 0; c < p.count; ++c)
             {
                 p.conv[c].srcT = SimdTensorData32f;
                 p.conv[c].dstT = SimdTensorData32f;
-                image[c + 1].Reshape(p.DstShape(c));
+                io[c + 1].Reshape(p.DstShape(c));
 
                 weight[c].Reshape(p.WeightShape(c));
                 FillRandom(weight[c], -1.1, 1.0f);
@@ -121,14 +121,14 @@ namespace Test
 
                 SimdSynetConvolution32fSetParams(context, weight[c].Data(), NULL, bias[c].Data(), params[c].Data());
 
-                SimdSynetConvolution32fForward(context, image[c + 0].Data(), buf.Data(), image[c + 1].Data());
+                SimdSynetConvolution32fForward(context, io[c].Data(), buf.Data(), io[c + 1].Data());
 
                 SimdRelease(context);
             }
             if (p.add)
             {
-                image[4].Clone(image[3]);
-                SimdNeuralAddVector(image[0].Data(), image[0].Size(), image[4].Data());
+                io[4].Clone(io[3]);
+                SimdNeuralAddVector(io[0].Data(), io[0].Size(), io[4].Data());
             }
             return true;
         }
@@ -136,11 +136,11 @@ namespace Test
 
     struct QmcParams8i
     {
-        Tensor8u image[5], dst1, dst2;
+        Tensor8u io[5], dst1, dst2;
         Tensor8i weight[3];
         Tensor32i bias[3];
-        uint8_t imageZero[5];
-        float imageScale[5], *ptrWS[3];
+        uint8_t ioZero[5];
+        float ioScale[5], *ptrWS[3];
         Tensor32f weightScale[3];
         size_t last;
         int8_t* ptrW[3];
@@ -150,14 +150,14 @@ namespace Test
         {
             last = p.count + (p.add ? 1 : 0);
             for(size_t i = 0; i <= last; ++i)
-                if (!QuantizeImage(f32.image[i], image[i], imageZero[i], imageScale[i]))
+                if (!QuantizeIO(f32.io[i], io[i], ioZero[i], ioScale[i]))
                     return false;
 
             for (size_t c = 0; c < p.count; ++c)
             {
                 if (!QuantizeWeight(f32.weight[c], overflow, weight[c], weightScale[c]))
                     return false;
-                if (!QuantizeBias(f32.bias[c], imageScale[c], weightScale[c], bias[c]))
+                if (!QuantizeBias(f32.bias[c], ioScale[c], weightScale[c], bias[c]))
                     return false;
                 ptrW[c] = weight[c].Data();
                 ptrB[c] = bias[c].Data();
@@ -171,7 +171,7 @@ namespace Test
         }
 
     protected:
-        static bool QuantizeImage(const Tensor32f& src, Tensor8u& dst, uint8_t& zero, float& scale)
+        static bool QuantizeIO(const Tensor32f& src, Tensor8u& dst, uint8_t& zero, float& scale)
         {
             size_t batch = src.Axis(0), size = src.Size();
             size_t channels = src.Axis(3);
@@ -267,14 +267,14 @@ namespace Test
         buf8u.Extend({ ::SimdSynetQuantizedMergedConvolutionExternalBufferSize(context1) });
         buf8u.Extend({ ::SimdSynetQuantizedMergedConvolutionExternalBufferSize(context2) });
 
-        ::SimdSynetQuantizedMergedConvolutionSetParams(context1, p8i.imageScale, p8i.imageZero, p8i.ptrW, p8i.ptrWS, p8i.ptrB);
-        ::SimdSynetQuantizedMergedConvolutionSetParams(context2, p8i.imageScale, p8i.imageZero, p8i.ptrW, p8i.ptrWS, p8i.ptrB);
+        ::SimdSynetQuantizedMergedConvolutionSetParams(context1, p8i.ioScale, p8i.ioZero, p8i.ptrW, p8i.ptrWS, p8i.ptrB);
+        ::SimdSynetQuantizedMergedConvolutionSetParams(context2, p8i.ioScale, p8i.ioZero, p8i.ptrW, p8i.ptrWS, p8i.ptrB);
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, p8i.image[0].Data(), buf8u.Data(), p8i.dst1.Data()));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, p8i.io[0].Data(), buf8u.Data(), p8i.dst1.Data()));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, p8i.image[0].Data(), buf8u.Data(), p8i.dst2.Data()));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, p8i.io[0].Data(), buf8u.Data(), p8i.dst2.Data()));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
@@ -283,7 +283,7 @@ namespace Test
         result = result && Compare(p8i.dst1, p8i.dst2, diffMax, true, 64);
 
         int controlDiffMax = 4;
-        result = result && Compare(p8i.dst1, p8i.image[p8i.last], controlDiffMax, true, 64, "control");
+        result = result && Compare(p8i.dst1, p8i.io[p8i.last], controlDiffMax, true, 64, "control");
 
         return result;
     }

@@ -7839,18 +7839,18 @@ extern "C"
 
     /*! @ingroup synet_quantized_merged_convolution
 
-        \fn void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* imgScale, const uint8_t* imgZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
+        \fn void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* ioScale, const uint8_t* ioZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
 
         \short Sets weights, biases, input/output parameters required for Quantized merged convolution algorithm.
 
         \param [in, out] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
-        \param [in] imgScale - a pointer to 32-bit float point input/output tensors scales.
-        \param [in] imgZero - a pointer to 8-bit unsigned integer input/output tensors zeros.
+        \param [in] ioScale - a pointer to 32-bit float point input/output tensors scales.
+        \param [in] ioZero - a pointer to 8-bit unsigned integer input/output tensors zeros.
         \param [in] weight - a pointer to 8-bit integer convolution weights.
         \param [in] weightScale - a pointer to 32-bit float point weight scales.
         \param [in] bias - a pointer to 32-bit integer biases.
     */
-    SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* imgScale, const uint8_t* imgZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
+    SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* ioScale, const uint8_t* ioZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
 
     /*! @ingroup synet_quantized_merged_convolution
 
