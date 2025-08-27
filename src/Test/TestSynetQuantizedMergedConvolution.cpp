@@ -57,7 +57,7 @@ namespace Test
                 ss << "[" << p.count << ":" << p.batch << "x" << p.conv[0].srcC << "x" << p.conv[0].srcH << "x" << p.conv[0].srcW;
                 for (size_t i = 0; i < p.count; ++i)
                     ss << "-" << (p.conv[i].group != 1 ? String("") : ToString(p.conv[i].dstC) + "x") << p.conv[i].kernelY << "x" << p.conv[i].strideY;
-                ss << "-" << (p.count == 3 ? ToString(p.add) : "") << "]";
+                ss << (p.add ? "-1" : "") << "]";
                 desc = ss.str();
             }
 
@@ -303,7 +303,18 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 32, 112, 112), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 16), u8, u8), o, f1, f2);
         result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 16, 112, 112), Cnv(aId, 1, 1, 96), Cnv(aId, 3, 2), Cnv(aId, 1, 1, 24), f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 24, 56, 56), Cnv(aId, 1, 1, 144), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 24), t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 24, 56, 56), Cnv(aId, 1, 1, 144), Cnv(aId, 3, 2), Cnv(aId, 1, 1, 32), f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 32, 28, 28), Cnv(aId, 1, 1, 192), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 32), t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 32, 28, 28), Cnv(aId, 1, 1, 192), Cnv(aId, 3, 2), Cnv(aId, 1, 1, 64), f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 64, 14, 14), Cnv(aId, 1, 1, 384), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 64), t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 64, 14, 14), Cnv(aId, 1, 1, 384), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 96), f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 96, 14, 14), Cnv(aId, 1, 1, 576), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 96), t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 96, 14, 14), Cnv(aId, 1, 1, 576), Cnv(aId, 3, 2), Cnv(aId, 1, 1, 160), f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 160, 7, 7), Cnv(aId, 1, 1, 960), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 160), t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 160, 7, 7), Cnv(aId, 1, 1, 960), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 320), f, u8, u8), o, f1, f2);
 #endif
 #else
         result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 16, 112, 112), Cnv(aId, 1, 1, 96), Cnv(aId, 3, 2), Cnv(aId, 1, 1, 24), f, u8, u8), o, f1, f2);

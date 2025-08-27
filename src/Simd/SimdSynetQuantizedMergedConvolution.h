@@ -80,7 +80,7 @@ namespace Simd
 
     namespace Base
     {
-        class SynetQuantizedMergedConvolutionRef : public SynetQuantizedMergedConvolution
+        class SynetQuantizedMergedConvolutionRef : public Simd::SynetQuantizedMergedConvolution
         {
         public:
             SynetQuantizedMergedConvolutionRef(const MergConvParam & p);
@@ -99,6 +99,57 @@ namespace Simd
             void AddSrc(const uint8_t* src, uint8_t* dst);
 
             size_t _sizeB;
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolution : public Simd::SynetQuantizedMergedConvolution
+        {
+        public:
+            SynetQuantizedMergedConvolution(const MergConvParam& p);
+
+            virtual String Ext() const { return "Base"; }
+            virtual size_t ExternalBufferSize() const;
+
+            struct AlgParam
+            {
+                int dwE;
+                size_t miC, maC, miK, yStep[3], yStart[3], bufH[3], dW[3], padX, padW, srcW;
+            };
+
+            typedef void(*InputConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+                const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst);
+
+            typedef void(*DepthwisePreprocess16iPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, int16_t* dst);
+
+            typedef void(*DepthwiseConvolution16iPtr)(const int16_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+                const int16_t* weight, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst);
+
+            typedef void(*DepthwisePreprocess8uPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, uint8_t* dst);
+
+            typedef void(*DepthwiseConvolution8uPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+                const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst);
+
+            typedef void(*OutputConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+                int update, const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t* sum, uint8_t* dst);
+
+            typedef void(*AddInputToOutputPtr)(const uint8_t* a, int aBias, float aNorm, const uint8_t* b, int bBias, float bNorm, 
+                const ConvParam& p, size_t yBeg, size_t yEnd, float dNorm, int dZero, uint8_t* dst);
+
+        protected:
+            virtual void SetInput(const int8_t* weight, const ConvParam& p, Array8i& dst);
+            virtual void SetDepthwise(const int8_t* weight, const ConvParam& p, Array8i& dst);
+            virtual void SetOutput(const int8_t* weight, const ConvParam& p, Array8i& dst);
+
+            AlgParam _alg;
+            InputConvolutionPtr _inputConvolution;
+            DepthwisePreprocess16iPtr _depthwisePreprocess16i;
+            DepthwiseConvolution16iPtr _depthwiseConvolution16i;
+            DepthwisePreprocess8uPtr _depthwisePreprocess8u;
+            DepthwiseConvolution8uPtr _depthwiseConvolution8u;
+            OutputConvolutionPtr _outputConvolution[2];
+            AddInputToOutputPtr _addInputToOutput;
+            size_t _sizeB[5];
         };
 
         //------------------------------------------------------------------------------------------------
