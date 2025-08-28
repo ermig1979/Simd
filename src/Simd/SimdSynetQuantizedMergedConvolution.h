@@ -109,12 +109,19 @@ namespace Simd
             SynetQuantizedMergedConvolution(const MergConvParam& p);
 
             virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext(); }
             virtual size_t ExternalBufferSize() const;
 
             struct AlgParam
             {
-                size_t miC, maC, miK, yStep[3], yStart[3], bufH[3], dW[3];
-                size_t bufW, bufR, stepH, sizeW, stepW, dwE;
+                size_t miC, maC, miK, dbE;
+                size_t dsStep, dbStep, ddStep, dsStart;
+                size_t isH, dsH, dbH, ddH;
+                size_t isB, idB, dsB, dbB, ddB, odB;
+                size_t dbW, dwC, dwStep, dwSize;
+
+                //size_t yStep[3], yStart[3], bufH[3], dW[3];
+                //size_t bufW, bufR, stepH, sizeW, stepW;// , dwE;
             };
 
             typedef void(*InputPreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);
@@ -145,7 +152,21 @@ namespace Simd
             DepthwiseConvolutionPtr _depthwiseConvolution;
             OutputConvolutionPtr _outputConvolution[2];
             AddInputToOutputPtr _addInputToOutput;
-            size_t _sizeB[6];
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolutionCdc : public SynetQuantizedMergedConvolution
+        {
+        public:
+            SynetQuantizedMergedConvolutionCdc(const MergConvParam& p);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const MergConvParam& p);
+
+        protected:
+            void SetSize(size_t miC, size_t miK, size_t dbE);
         };
 
         //------------------------------------------------------------------------------------------------

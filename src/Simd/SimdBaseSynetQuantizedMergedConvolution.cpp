@@ -271,13 +271,13 @@ namespace Simd
             , _outputConvolution{NULL, NULL}
             , _addInputToOutput(NULL)
         {
-            for (size_t i = 0; i < 6; ++i)
-                _sizeB[i] = 0;
+            memset(&_alg, 0, sizeof(_alg));
         }
 
         size_t SynetQuantizedMergedConvolution::ExternalBufferSize() const
         {
-            return SIMD_ALIGN + _sizeB[0] + _sizeB[1] * 4 + _sizeB[2] + _sizeB[3] * _alg.dwE + _sizeB[4] + _sizeB[5] * 4;
+            const AlgParam& a = _alg;
+            return a.isB + a.idB * 4 + a.dsB + a.dbB * a.dbE + a.ddB + a.odB * 4 + SIMD_ALIGN;
         }
 
         void SynetQuantizedMergedConvolution::SetInput(const int8_t* src, const ConvParam& p, Array8i& dst)
@@ -312,10 +312,10 @@ namespace Simd
             assert(IsDepthwise(p));
             const AlgParam& a = _alg;
             size_t Y = p.kernelY, X = p.kernelX, C = p.srcC, F = a.miC, B = AlignHi(p.srcC, a.miC);
-            dst.Resize(a.sizeW * 2 * a.dwE);
-            if (a.dwE == 2)
+            dst.Resize(a.dwSize * 2 * a.dbE);
+            if (a.dbE == 2)
             {
-                int16_t* dstE = (int16_t*)dst.data, * dstO = dstE + a.sizeW;
+                int16_t* dstE = (int16_t*)dst.data, * dstO = dstE + a.dwSize;
                 for (size_t c = 0; c < C; c += F)
                 {
                     for (size_t y = 0; y < Y + 1; y += 2)
@@ -341,7 +341,7 @@ namespace Simd
             }
             else
             {
-                int8_t* dstE = dst.data, * dstO = dstE + a.sizeW;
+                int8_t* dstE = dst.data, * dstO = dstE + a.dwSize;
                 for (size_t c = 0; c < C; c += F)
                 {
                     for (size_t y = 0; y < Y + 1; y += 4)
@@ -403,6 +403,85 @@ namespace Simd
                     }
                 }
             }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SynetQuantizedMergedConvolutionCdc::SynetQuantizedMergedConvolutionCdc(const MergConvParam& p)
+            : SynetQuantizedMergedConvolution(p)
+        {
+        }
+
+        bool SynetQuantizedMergedConvolutionCdc::Preferable(const MergConvParam& p)
+        {
+            return p.count == 3 && Is1x1(p.conv[0]);
+        }
+
+        void SynetQuantizedMergedConvolutionCdc::SetSize(size_t miC, size_t miK, size_t dbE)
+        {
+            const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
+            const MergConvParam& p = _param;
+            const ConvParam& c0 = p.conv[0];
+            const ConvParam& c1 = p.conv[1];
+            const ConvParam& c2 = p.conv[2];
+            AlgParam& a = _alg;
+
+            a.miC = miC;
+            a.miK = miK;
+            a.dbE = dbE;
+
+            a.dwC = AlignHi(c1.srcC, a.miC);
+            a.dbStep = 2 / c1.strideY;
+            a.dbH = Pow2Hi(AlignHi(c1.kernelY, 4 / a.dbE));
+            a.dbW = c1.srcW + c1.padX + c1.padW;
+            a.dwStep = c1.kernelX * AlignHi(c1.kernelY + 1, 4 / a.dbE);
+            a.dwSize = a.dwStep * a.dwC;
+
+            size_t size = 0;
+            for (size_t i = 0; i < 3; ++i)
+            {
+                const ConvParam& c = p.conv[i];
+                if (c.group == 1)
+                    size += AlignHi(c.srcC, a.miK) * AlignHi(c.dstC, a.miC * 2);
+                else
+                    size += a.dwSize * a.dbE * 2;
+            }
+            size_t count = size / (L3 / 2) + 1;
+            a.maC = AlignHi(AlignHi(c0.dstC / count, 2 * a.miC), a.miK);
+            for (size_t yStep = c1.dstH; yStep >= 1; yStep--)
+            {
+                a.ddStep = Simd::Max<size_t>(1, yStep);
+                a.ddH = Pow2Hi(a.ddStep);
+
+                a.dsStep = a.ddStep * c1.strideY;
+                a.dsStart = Simd::Min((a.ddStep - 1) * c1.strideY + c1.kernelY - c1.padY, c1.srcH);
+                a.dsH = Pow2Hi(Simd::Max((a.ddStep - 1) * c1.strideY + c1.kernelY, a.dsStart));
+
+                a.isH = Aligned(c0.srcC, a.miK) ? 0 : Simd::Max(a.dsStep, a.dsStart);
+
+                a.isB = Aligned(c0.srcC, a.miK) ? 0 : a.isH * c0.srcW * AlignHi(c0.srcC, a.miK);
+                a.dsB = a.dsH * c1.srcW * a.maC;
+                a.dbB = a.dbH * a.dbW * a.maC;
+                a.ddB = a.ddH * c1.dstW * a.maC;
+                if (a.isB + a.dsB + a.dbB * a.dbE + a.ddB <= L2)
+                    break;
+            }
+            //a.dw[0] = AlignHi(c0.srcC, a.miK);
+            //a.dw[1] = c1.kernelY * c1.kernelX;
+            //a.dw[2] = AlignHi(c2.dstC, a.miC);
+            if (a.miK == 32)
+            {
+                bool aligned = Aligned(c2.dstC, a.miC) && Aligned(c2.dstH * c2.dstW, a.miC) && Aligned((c2.dstH % a.ddStep) * c2.dstW, a.miC);
+                a.odB = (count > 1 || !aligned) ? AlignHi(c2.dstC, a.miC) * AlignHi(c2.dstH * c2.dstW + a.miC, a.miC) : 0;
+                a.idB = 1024;
+            }
+            else
+                a.odB = count > 1 ? _sizeD : 0;
+        }
+
+        void SynetQuantizedMergedConvolutionCdc::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+        {
+
         }
 
         //-------------------------------------------------------------------------------------------------
