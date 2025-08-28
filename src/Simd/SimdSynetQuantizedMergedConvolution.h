@@ -72,7 +72,7 @@ namespace Simd
         Array32i _bias[3];
         Array32f _norm[3];
         float _ioScale[5], _srcNorm, _dstNorm, _addScale;
-        int32_t _ioZero[5], _dstZero, _addZero, _srcBias, _dstBias;
+        int32_t _ioZero[5], _addZero, _srcBias, _dstBias;
         size_t _batch, _merge, _count, _sizeS, _sizeD;
     };
 
@@ -118,16 +118,13 @@ namespace Simd
                 size_t dsStep, dbStep, ddStep, dsStart;
                 size_t isH, dsH, dbH, ddH;
                 size_t isB, idB, dsB, dbB, ddB, odB;
-                size_t dbW, dwC, dwStep, dwSize;
-
-                //size_t yStep[3], yStart[3], bufH[3], dW[3];
-                //size_t bufW, bufR, stepH, sizeW, stepW;// , dwE;
+                size_t dbW, dwC, dwStep, dwSize, iwStep, owStep;
             };
 
             typedef void(*InputPreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);
 
             typedef void(*InputConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-                const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst);
+                const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t * sum, uint8_t* dst);
 
             typedef void(*DepthwisePreprocessPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, uint8_t* dst);
 
