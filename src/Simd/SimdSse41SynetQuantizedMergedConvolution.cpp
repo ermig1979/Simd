@@ -43,6 +43,7 @@ namespace Simd
             : Base::SynetQuantizedMergedConvolutionCdc(p)
         {
             SetSize(F, 4, 2);
+            SetInputPreprocess(p.conv[0], _alg, _inputPreprocess);
             SetInputConvolution(p.conv[0], _alg, _inputConvolution);
         }
 
