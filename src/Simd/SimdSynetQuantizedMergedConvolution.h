@@ -174,6 +174,23 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        void SetInputPreprocess(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::InputPreprocessPtr& func);
+
+        void SetInputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::InputConvolutionPtr & func);
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolutionCdc : public Base::SynetQuantizedMergedConvolutionCdc
+        {
+        public:
+            SynetQuantizedMergedConvolutionCdc(const MergConvParam& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
     }
 #endif
 

@@ -144,6 +144,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProductGemmNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizeLinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp" />
