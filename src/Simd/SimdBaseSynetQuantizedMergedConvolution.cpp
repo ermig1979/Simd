@@ -90,9 +90,8 @@ namespace Simd
         {
             if (p.conv[c].IsDepthwise())
             {
-                _dwSrcZero.Resize(p.conv[c].group);
-                memset(_dwSrcZero.data, ioZero[c], p.conv[c].group);
                 SetDepthwise(weight[c], p.conv[c], _weight[c]);
+                SetZero(ioZero[c], p.conv[c], _dwSrcZero);
             }
             else
             {
@@ -183,6 +182,12 @@ namespace Simd
         {
             dst.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
             dst.Assign(weight, dst.size);
+        }
+
+        void SynetQuantizedMergedConvolutionRef::SetZero(uint8_t zero, const ConvParam& p, Array8u& dst)
+        {
+            dst.Resize(p.group);
+            memset(dst.data, zero, p.group);
         }
 
         void SynetQuantizedMergedConvolutionRef::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
@@ -403,6 +408,13 @@ namespace Simd
                     }
                 }
             }
+        }
+
+        void SynetQuantizedMergedConvolution::SetZero(uint8_t zero, const ConvParam& p, Array8u& dst)
+        {
+            const AlgParam& a = _alg;
+            dst.Resize(a.dbW * AlignHi(p.dstC, 16));
+            memset(dst.data, zero, dst.size);
         }
 
         //-------------------------------------------------------------------------------------------------

@@ -53,8 +53,8 @@ namespace Simd
                     {
                         int16_t* pd = (int16_t*)dst + (by & byMask) * bR;
                         size_t sy = by - p.padY;
-                        const uint8_t* ps0 = (sy + 0) < p.srcH ? src + (sy + 0) * sR : zero;
-                        const uint8_t* ps1 = (sy + 1) < p.srcH ? src + (sy + 1) * sR : zero;
+                        const uint8_t* ps0 = (sy + 0) < p.srcH ? src + ((sy + 0) & syMask) * sR : zero;
+                        const uint8_t* ps1 = (sy + 1) < p.srcH ? src + ((sy + 1) & syMask) * sR : zero;
                         if (xPad)
                         {
                             for (size_t x = 0; x < xPad; x += 2, pd += DF)
@@ -142,7 +142,10 @@ namespace Simd
             size_t sC = maC, sCF = AlignLo(sC, F), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX, dX = sX * DF, dW = a.dwStep;
             size_t byMask = a.dbH - 1, bW = a.dbW * 2, bR = a.dbW * a.maC, dstW2 = AlignLo(p.dstW, 2), dstW4 = AlignLo(p.dstW, 4), dD = a.ddB ? a.maC : p.dstC;
             size_t dyEnd2 = dyBeg + (sY == 1 ? AlignLo(dyEnd - dyBeg, 2) : 0), sizeW = a.dwSize, dyD = p.dstW * dD;
-            dst += dyBeg * p.dstW * dD;
+            if(a.ddB)
+                dst += (dyBeg % a.ddStep) * p.dstW * dD;
+            else
+                dst += dyBeg * p.dstW * dD;
             size_t dy = dyBeg;
             for (; dy < dyEnd2; dy += 2)
             {

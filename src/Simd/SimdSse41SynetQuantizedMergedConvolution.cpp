@@ -57,7 +57,7 @@ namespace Simd
             MergConvParam param(batch, convs, count, add);
             if (!param.Valid(SimdTensorData8u, SimdTensorData8u))
                 return NULL;
-            else if (SynetQuantizedMergedConvolutionCdc::Preferable(param) && 0)
+            else if (SynetQuantizedMergedConvolutionCdc::Preferable(param) && 1)
                 return new SynetQuantizedMergedConvolutionCdc(param);
             return new Base::SynetQuantizedMergedConvolutionRef(param);
         }

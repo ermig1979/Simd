@@ -59,6 +59,7 @@ namespace Simd
         virtual void SetInput(const int8_t* weight, const ConvParam& p, Array8i & dst) = 0;
         virtual void SetDepthwise(const int8_t* weight, const ConvParam& p, Array8i& dst) = 0;
         virtual void SetOutput(const int8_t* weight, const ConvParam& p, Array8i& dst) = 0;
+        virtual void SetZero(uint8_t zero, const ConvParam& p, Array8u& dst) = 0;
         virtual void SetBias(const int8_t* weight, const int32_t* bias, int32_t zero, const ConvParam& p, Array32i & dst);
         virtual void SetNorm(const float* weightScale, float srcScale, float dstScale, const ConvParam& p, Array32f& dst);
 
@@ -92,6 +93,7 @@ namespace Simd
             virtual void SetInput(const int8_t* weight, const ConvParam& p, Array8i& dst);
             virtual void SetDepthwise(const int8_t* weight, const ConvParam& p, Array8i& dst);
             virtual void SetOutput(const int8_t* weight, const ConvParam& p, Array8i& dst);
+            virtual void SetZero(uint8_t zero, const ConvParam& p, Array8u& dst);
 
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
@@ -141,6 +143,7 @@ namespace Simd
             virtual void SetInput(const int8_t* weight, const ConvParam& p, Array8i& dst);
             virtual void SetDepthwise(const int8_t* weight, const ConvParam& p, Array8i& dst);
             virtual void SetOutput(const int8_t* weight, const ConvParam& p, Array8i& dst);
+            virtual void SetZero(uint8_t zero, const ConvParam& p, Array8u& dst);
 
             AlgParam _alg;
             InputPreprocessPtr _inputPreprocess;
