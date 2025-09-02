@@ -464,11 +464,11 @@ namespace Simd
             a.maC = AlignHi(AlignHi(c0.dstC / count, 2 * a.miC), a.miK);
             for (size_t yStep = c1.dstH; yStep >= 1; yStep--)
             {
-                a.ddStep = AlignHi(Simd::Max<size_t>(1, yStep), a.dbStep);
+                a.ddStep = Simd::Min(AlignHi(Simd::Max<size_t>(1, yStep), a.dbStep), c1.dstH);
                 a.ddH = Pow2Hi(a.ddStep);
 
                 a.dsStep = a.ddStep * c1.strideY;
-                a.dsStart = Simd::Min((a.ddStep - 1) * c1.strideY + c1.kernelY - c1.padY, c1.srcH);
+                a.dsStart = Simd::Min(AlignHi((a.ddStep - 1) * c1.strideY + c1.kernelY - c1.padY, c1.strideY), c1.srcH);
                 a.dsH = Pow2Hi(Simd::Max((a.ddStep - 1) * c1.strideY + c1.kernelY, a.dsStart));
 
                 a.isH = Aligned(c0.srcC, a.miK) ? 0 : a.dsH;

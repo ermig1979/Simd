@@ -187,6 +187,8 @@ namespace Simd
 
         void SetOutputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::OutputConvolutionPtr *funcs);
 
+        void SetAddInputToOutput(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::AddInputToOutputPtr& func);
+
         //------------------------------------------------------------------------------------------------
 
         class SynetQuantizedMergedConvolutionCdc : public Base::SynetQuantizedMergedConvolutionCdc

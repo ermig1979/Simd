@@ -190,10 +190,63 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE __m128i QuantizedAdd(const __m128i& a, const __m128i& aBias, const __m128& aNorm, const __m128i& b, const __m128i& bBias, const __m128& bNorm, const __m128& dNorm, const __m128i& dZero)
+        {
+            return QuantizeLinear(_mm_add_ps(DequantizeLinear(a, aBias, aNorm), DequantizeLinear(b, bBias, bNorm)), dNorm, dZero);
+        }
+
+        SIMD_INLINE void AddInputToOutput1(const uint8_t* a, const __m128i& aBias, const __m128& aNorm, const uint8_t* b, const __m128i& bBias, const __m128& bNorm, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128i d0 = QuantizedAdd(_mm_set1_epi32(a[0]), aBias, aNorm, _mm_set1_epi32(b[0]), bBias, bNorm, dNorm, dZero);
+            dst[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void AddInputToOutput4(const uint8_t* a, const __m128i& aBias, const __m128& aNorm, const uint8_t* b, const __m128i& bBias, const __m128& bNorm, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128i a0 = _mm_cvtepu8_epi32(_mm_set1_epi32(((int32_t*)a)[0]));
+            __m128i b0 = _mm_cvtepu8_epi32(_mm_set1_epi32(((int32_t*)b)[0]));
+            __m128i d0 = QuantizedAdd(a0, aBias, aNorm, b0, bBias, bNorm, dNorm, dZero);
+            ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void AddInputToOutput16(const uint8_t* a, const __m128i& aBias, const __m128& aNorm, const uint8_t* b, const __m128i& bBias, const __m128& bNorm, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128i _a = _mm_loadu_si128((__m128i*)a);
+            __m128i _b = _mm_loadu_si128((__m128i*)b);
+            __m128i d0 = QuantizedAdd(_mm_cvtepu8_epi32(_mm_srli_si128(_a, 0 * 4)), aBias, aNorm, _mm_cvtepu8_epi32(_mm_srli_si128(_b, 0 * 4)), bBias, bNorm, dNorm, dZero);
+            __m128i d1 = QuantizedAdd(_mm_cvtepu8_epi32(_mm_srli_si128(_a, 1 * 4)), aBias, aNorm, _mm_cvtepu8_epi32(_mm_srli_si128(_b, 1 * 4)), bBias, bNorm, dNorm, dZero);
+            __m128i d2 = QuantizedAdd(_mm_cvtepu8_epi32(_mm_srli_si128(_a, 2 * 4)), aBias, aNorm, _mm_cvtepu8_epi32(_mm_srli_si128(_b, 2 * 4)), bBias, bNorm, dNorm, dZero);
+            __m128i d3 = QuantizedAdd(_mm_cvtepu8_epi32(_mm_srli_si128(_a, 3 * 4)), aBias, aNorm, _mm_cvtepu8_epi32(_mm_srli_si128(_b, 3 * 4)), bBias, bNorm, dNorm, dZero);
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+        }
+
+        void QuantizedMergedConvolutionAddInputToOutput(const uint8_t* a, int aBias, float aNorm, const uint8_t* b, int bBias, float bNorm,
+            const ConvParam& p, size_t yBeg, size_t yEnd, float dNorm, int dZero, uint8_t* dst)
+        {
+            __m128i _aBias = _mm_set1_epi32(aBias), _bBias = _mm_set1_epi32(bBias), _dZero = _mm_set1_epi32(dZero);
+            __m128 _aNorm = _mm_set1_ps(aNorm), _bNorm = _mm_set1_ps(bNorm), _dNorm = _mm_set1_ps(dNorm);
+            size_t beg = yBeg * p.dstW * p.dstC, end = yEnd * p.dstW * p.dstC;
+            size_t i = beg, end4 = beg + AlignLo(end - beg, 4), end16 = beg + AlignLo(end - beg, 16);
+            for (; i < end16; i += 16)
+                AddInputToOutput16(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero);
+            for (; i < end4; i += 4)
+                AddInputToOutput4(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero);
+            for (; i < end; i += 1)
+                AddInputToOutput1(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero);
+
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         void SetOutputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::OutputConvolutionPtr* funcs)
         {
             funcs[0] = QuantizedMergedConvolutionOutputConvolution_2<Term8iInterim>;
             funcs[1] = QuantizedMergedConvolutionOutputConvolution_2<Term8iLast8u>;
+        }
+
+        void SetAddInputToOutput(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::AddInputToOutputPtr& func)
+        {
+            func = QuantizedMergedConvolutionAddInputToOutput;
         }
     }
 #endif

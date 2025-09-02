@@ -48,6 +48,7 @@ namespace Simd
             SetDepthwisePreprocess(p.conv[1], _alg, _depthwisePreprocess);
             SetDepthwiseConvolution(p.conv[1], _alg, _depthwiseConvolution);
             SetOutputConvolution(p.conv[2], _alg, _outputConvolution);
+            SetAddInputToOutput(p.conv[2], _alg, _addInputToOutput);
         }
 
         //------------------------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ namespace Simd
             MergConvParam param(batch, convs, count, add);
             if (!param.Valid(SimdTensorData8u, SimdTensorData8u))
                 return NULL;
-            else if (SynetQuantizedMergedConvolutionCdc::Preferable(param) && 1)
+            else if (SynetQuantizedMergedConvolutionCdc::Preferable(param))
                 return new SynetQuantizedMergedConvolutionCdc(param);
             return new Base::SynetQuantizedMergedConvolutionRef(param);
         }
