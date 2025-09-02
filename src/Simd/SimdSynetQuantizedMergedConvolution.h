@@ -182,6 +182,8 @@ namespace Simd
 
         void SetDepthwiseConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwiseConvolutionPtr& func);
 
+        void SetOutputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::OutputConvolutionPtr *funcs);
+
         //------------------------------------------------------------------------------------------------
 
         class SynetQuantizedMergedConvolutionCdc : public Base::SynetQuantizedMergedConvolutionCdc

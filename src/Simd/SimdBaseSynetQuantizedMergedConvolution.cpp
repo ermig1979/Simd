@@ -534,10 +534,10 @@ namespace Simd
                         }
 
                         if (c + maC == C)
-                            _outputConvolution[0](ddBuf, c2, a, maC, dyBeg, dyEnd, maC != C ? 1 : 0,
+                            _outputConvolution[1](ddBuf, c2, a, maC, dyBeg, dyEnd, maC != C ? 1 : 0,
                                 _weight[2].data + c * a.owStep, _bias[2].data, _norm[2].data, _ioZero[3], odBuf, dst);
                         else
-                            _outputConvolution[1](ddBuf, c2, a, maC, dyBeg, dyEnd, c != 0 ? 1 : 0,
+                            _outputConvolution[0](ddBuf, c2, a, maC, dyBeg, dyEnd, c != 0 ? 1 : 0,
                                 _weight[2].data + c * a.owStep, _bias[2].data, _norm[2].data, _ioZero[3], odBuf, dst);
                          
                         if (p.add && c + maC == C)
