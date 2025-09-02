@@ -180,6 +180,8 @@ namespace Simd
 
         void SetDepthwisePreprocess(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwisePreprocessPtr& func);
 
+        void SetDepthwiseConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwiseConvolutionPtr& func);
+
         //------------------------------------------------------------------------------------------------
 
         class SynetQuantizedMergedConvolutionCdc : public Base::SynetQuantizedMergedConvolutionCdc

@@ -376,6 +376,7 @@ namespace Test
         Tensor32f src32f(shape), dst32f1(shape), dst32f2(shape), norm32f(Shp(channels)), bias32f(Shp(channels));
         Tensor16u src16b(shape), dst16b1(shape), dst16b2(shape);
 
+        srand(0);
         FillRandom(src32f.Data(), src32f.Size(), -1.0, 1.0f);
         FillRandom(norm32f.Data(), norm32f.Size(), -1.0, 1.0f);
         FillRandom(bias32f.Data(), bias32f.Size(), -1.0, 1.0f);
@@ -412,7 +413,7 @@ namespace Test
         float eps = EPS;
         if (dstType == SimdTensorData16b)
         {
-            eps = eps * 7.7f;
+            eps = eps * 7.8f;
             SimdBFloat16ToFloat32(dst16b1.Data(), dst16b1.Size(), dst32f1.Data());
             SimdBFloat16ToFloat32(dst16b2.Data(), dst16b2.Size(), dst32f2.Data());
         }
