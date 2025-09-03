@@ -322,7 +322,7 @@ namespace Test
         result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 160, 7, 7), Cnv(aId, 1, 1, 960), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 320), f, u8, u8), o, f1, f2);
 #endif
 #else
-        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 25, 55, 55), Cnv(aId, 1, 1, 145), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 25), f, u8, u8), o, f1, f2); 
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 32, 112, 112), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 16), u8, u8), o, f1, f2);
 #endif
 
         return result;

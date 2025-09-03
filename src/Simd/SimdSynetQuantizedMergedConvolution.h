@@ -186,6 +186,21 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        class SynetQuantizedMergedConvolutionDc : public SynetQuantizedMergedConvolution
+        {
+        public:
+            SynetQuantizedMergedConvolutionDc(const MergConvParam& p);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const MergConvParam& p);
+
+        protected:
+            void SetSize(size_t miC, size_t miK, size_t dbE);
+        };
+
+        //------------------------------------------------------------------------------------------------
+
         void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
     }
 
@@ -220,6 +235,16 @@ namespace Simd
         {
         public:
             SynetQuantizedMergedConvolutionCd(const MergConvParam& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolutionDc : public Base::SynetQuantizedMergedConvolutionDc
+        {
+        public:
+            SynetQuantizedMergedConvolutionDc(const MergConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
