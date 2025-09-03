@@ -471,9 +471,9 @@ namespace Simd
                 a.dsStart = Simd::Min(AlignHi((a.ddStep - 1) * c1.strideY + c1.kernelY - c1.padY, c1.strideY), c1.srcH);
                 a.dsH = Pow2Hi(Simd::Max((a.ddStep - 1) * c1.strideY + c1.kernelY, a.dsStart));
 
-                a.isH = Aligned(c0.srcC, a.miK) ? 0 : a.dsH;
+                a.isH = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : a.dsH;
 
-                a.isB = Aligned(c0.srcC, a.miK) ? 0 : a.isH * c0.srcW * AlignHi(c0.srcC, a.miK);
+                a.isB = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : a.isH * c0.srcW * AlignHi(c0.srcC, a.miK);
                 a.dsB = a.dsH * c1.srcW * a.maC;
                 a.dbB = a.dbH * a.dbW * a.maC;
                 a.ddB = a.ddH * c1.dstW * a.maC;
@@ -488,13 +488,6 @@ namespace Simd
             }
             else
                 a.odB = count > 1 ? _sizeD : 0;
-
-            size_t zeroB = a.dbW * AlignHi(c1.dstC, 16);
-            if (_dwSrcZero.size != zeroB)
-            {
-                _dwSrcZero.Resize(zeroB);
-                memset(_dwSrcZero.data, _ioZero[1], _dwSrcZero.size);
-            }
         }
 
         void SynetQuantizedMergedConvolutionCdc::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)

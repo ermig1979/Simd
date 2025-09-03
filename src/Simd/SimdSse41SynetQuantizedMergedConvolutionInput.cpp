@@ -132,7 +132,7 @@ namespace Simd
         void QuantizedMergedConvolutionInput_2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
             const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t* sum, uint8_t* dst)
         {
-            size_t dstM = a.dsH - 1, dstS = a.dsH * p.dstW * F, srcC = a.isB ? a.iwStep : p.srcC, y0 = a.isH ? yBeg : 0;
+            size_t dstM = a.dsH - 1, dstS = a.dsH * p.dstW * F, srcC = a.isB ? a.iwStep : p.srcC, y0 = a.isB ? yBeg : 0;
             __m128 _norm[2]; 
             __m128i _bias[2], _zero = _mm_set1_epi32(zero);
             size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, a.dsH)), n = 5;
