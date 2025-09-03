@@ -53,6 +53,18 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        SynetQuantizedMergedConvolutionCd::SynetQuantizedMergedConvolutionCd(const MergConvParam& p)
+            : Base::SynetQuantizedMergedConvolutionCd(p)
+        {
+            SetSize(F, 4, 2);
+            SetInputPreprocess(p.conv[0], _alg, _inputPreprocess);
+            SetInputConvolution(p.conv[0], _alg, _inputConvolution);
+            SetDepthwisePreprocess(p.conv[1], _alg, _depthwisePreprocess);
+            SetDepthwiseConvolution(p.conv[1], _alg, _depthwiseConvolution);
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add)
         {
             MergConvParam param(batch, convs, count, add);
@@ -60,6 +72,8 @@ namespace Simd
                 return NULL;
             else if (SynetQuantizedMergedConvolutionCdc::Preferable(param))
                 return new SynetQuantizedMergedConvolutionCdc(param);
+            else if (SynetQuantizedMergedConvolutionCd::Preferable(param))
+                return new SynetQuantizedMergedConvolutionCd(param);
             return new Base::SynetQuantizedMergedConvolutionRef(param);
         }
     }
