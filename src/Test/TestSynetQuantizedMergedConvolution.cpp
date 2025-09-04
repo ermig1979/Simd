@@ -342,11 +342,11 @@ namespace Test
             result = result && SynetQuantizedMergedConvolutionForwardAutoTest(t, FUNC_QMC(Simd::Sse41::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2())
-//            result = result && SynetQuantizedMergedConvolutionForwardAutoTest(t, FUNC_QMC(Simd::Avx2::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
-//#endif
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2())
+            result = result && SynetQuantizedMergedConvolutionForwardAutoTest(t, FUNC_QMC(Simd::Avx2::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
+#endif
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw())
 //            result = result && SynetQuantizedMergedConvolutionForwardAutoTest(t, FUNC_QMC(Simd::Avx512bw::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));

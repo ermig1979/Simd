@@ -137,6 +137,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedInnerProductGemmNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolutionDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolutionInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolutionOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizeLinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp" />
@@ -241,7 +245,11 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
