@@ -282,7 +282,7 @@ namespace Simd
         size_t SynetQuantizedMergedConvolution::ExternalBufferSize() const
         {
             const AlgParam& a = _alg;
-            return a.isB + a.idB * 4 + a.dsB + a.dbB * a.dbE + a.ddB + a.odB * 4 + SIMD_ALIGN * 3;
+            return a.isB + a.idB * 4 + a.dsB + a.dbB + a.ddB + a.odB * 4 + SIMD_ALIGN * 3;
         }
 
         void SynetQuantizedMergedConvolution::SetInput(const int8_t* src, const ConvParam& p, Array8i& dst)
@@ -475,9 +475,9 @@ namespace Simd
 
                 a.isB = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : a.isH * c0.srcW * AlignHi(c0.srcC, a.miK);
                 a.dsB = a.dsH * c1.srcW * a.maC;
-                a.dbB = a.dbH * a.dbW * a.maC;
+                a.dbB = a.dbH * a.dbW * a.maC * 2;
                 a.ddB = a.ddH * c1.dstW * a.maC;
-                if (a.isB + a.dsB + a.dbB * a.dbE + a.ddB <= L2)
+                if (a.isB + a.dsB + a.dbB + a.ddB <= L2)
                     break;
             }
             if (a.miK == 32)
@@ -504,7 +504,7 @@ namespace Simd
             int32_t* idBuf = Allocate<int32_t>(buf, a.idB);
             uint8_t* dsBuf = Allocate<uint8_t>(buf, a.dsB);
             SetGap(buf);
-            uint8_t* dbBuf = Allocate<uint8_t>(buf, a.dbB * a.dbE);
+            uint8_t* dbBuf = Allocate<uint8_t>(buf, a.dbB);
             uint8_t* ddBuf = Allocate<uint8_t>(buf, a.ddB);
             SetGap(buf);
             int32_t* odBuf = Allocate<int32_t>(buf, a.odB);
@@ -613,8 +613,8 @@ namespace Simd
 
                 a.isB = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : a.isH * c0.srcW * AlignHi(c0.srcC, a.miK);
                 a.dsB = a.dsH * c1.srcW * a.maC;
-                a.dbB = a.dbH * a.dbW * a.maC;
-                if (a.isB + a.dsB + a.dbB * a.dbE <= L2)
+                a.dbB = a.dbH * a.dbW * a.maC * 2;
+                if (a.isB + a.dsB + a.dbB <= L2)
                     break;
             }
             if (a.miK == 32)
@@ -634,7 +634,7 @@ namespace Simd
             int32_t* idBuf = Allocate<int32_t>(buf, a.idB);
             uint8_t* dsBuf = Allocate<uint8_t>(buf, a.dsB);
             SetGap(buf);
-            uint8_t* dbBuf = Allocate<uint8_t>(buf, a.dbB * a.dbE);
+            uint8_t* dbBuf = Allocate<uint8_t>(buf, a.dbB);
 
             for (size_t b = 0; b < c0.batch; ++b)
             {
@@ -724,9 +724,9 @@ namespace Simd
                 a.dsStep = a.ddStep * c0.strideY;
                 a.dsStart = Simd::Min(AlignHi((a.ddStep - 1) * c0.strideY + c0.kernelY, c0.strideY), c0.srcH);
 
-                a.dbB = a.dbH * a.dbW * a.maC;
+                a.dbB = a.dbH * a.dbW * a.maC * 2;
                 a.ddB = a.ddH * c0.dstW * a.maC;
-                if (a.dbB * a.dbE + a.ddB <= L2)
+                if (a.dbB + a.ddB <= L2)
                     break;
             }
             if (a.miK == 32)
@@ -746,7 +746,7 @@ namespace Simd
             const AlgParam& a = _alg;
 
             buf = Buffer(buf);
-            uint8_t* dbBuf = Allocate<uint8_t>(buf, a.dbB * a.dbE);
+            uint8_t* dbBuf = Allocate<uint8_t>(buf, a.dbB);
             uint8_t* ddBuf = Allocate<uint8_t>(buf, a.ddB);
             SetGap(buf);
             int32_t* odBuf = Allocate<int32_t>(buf, a.odB);
@@ -780,8 +780,6 @@ namespace Simd
                             _outputConvolution[0](ddBuf, c1, a, maC, dyBeg, dyEnd, c != 0 ? 1 : 0,
                                 _weight[1].data + c * a.owStep, _bias[1].data, _norm[1].data, _ioZero[2], odBuf, dst);
 
-                        if (p.add && c + maC == C)
-                            _addInputToOutput(src, _srcBias, _srcNorm, dst, _dstBias, _dstNorm, c1, dyBeg, dyEnd, _addScale, _addZero, dst);
                         dyBeg = dyEnd;
                         syBeg = syEnd;
                     }

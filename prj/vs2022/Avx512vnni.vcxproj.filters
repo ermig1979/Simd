@@ -132,6 +132,18 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAvx2.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCopy.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDepthwise.cpp">
@@ -183,6 +195,18 @@
       <Filter>Avx512vnni</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedConvolutionNhwcDepthwise.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedMergedConvolutionOutput.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedMergedConvolutionDepthwise.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedMergedConvolutionInput.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedMergedConvolution.cpp">
       <Filter>Avx512vnni</Filter>
     </ClCompile>
   </ItemGroup>

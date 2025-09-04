@@ -302,6 +302,9 @@ namespace Test
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
 #ifdef NDEBUG
+#if 0
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 16, 8, 8), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 16), u8, u8), o, f1, f2);
+#endif
 #if 1
         //result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 512, 55, 55), Cnv(aId, 1, 1, 1024), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 512), f, u8, u8), o, f1, f2);
         result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 25, 55, 55), Cnv(aId, 1, 1, 145), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 25), f, u8, u8), o, f1, f2);
@@ -352,11 +355,11 @@ namespace Test
             result = result && SynetQuantizedMergedConvolutionForwardAutoTest(t, FUNC_QMC(Simd::Avx512bw::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
 #endif
 
-//#if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
-//        if (Simd::Avx512vnni::Enable && TestAvx512vnni())
-//            result = result && SynetQuantizedMergedConvolutionForwardAutoTest(f, FUNC_QMC(Simd::Avx512vnni::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
-//#endif
-//
+#if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
+        if (Simd::Avx512vnni::Enable && TestAvx512vnni())
+            result = result && SynetQuantizedMergedConvolutionForwardAutoTest(f, FUNC_QMC(Simd::Avx512vnni::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
+#endif
+
 //#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
 //        if (Simd::AmxBf16::Enable && TestAmxBf16())
 //            result = result && SynetQuantizedMergedConvolutionForwardAutoTest(f, FUNC_QMC(Simd::AmxBf16::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
