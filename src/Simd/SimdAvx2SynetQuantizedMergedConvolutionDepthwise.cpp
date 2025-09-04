@@ -94,7 +94,7 @@ namespace Simd
                     }
                     for (size_t sx = 0; sx < p.srcW; sx++, pd += DF)
                     {
-                        for (size_t sc = 0; sc < bC; sc += F)
+                        for (size_t sc = 0; sc < maC; sc += F)
                         {
                             __m256i s0 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)(ps0 + sc)));
                             __m256i s1 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)(ps1 + sc)));

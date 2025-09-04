@@ -434,7 +434,7 @@ namespace Simd
         template<Term8iType term> void QuantizedConvolutionNhwcGemm_2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
             size_t srcC, int update, const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t* buf, uint8_t* dst)
         {
-            size_t n1 = dstH * p.dstW, n = 5;
+            size_t n1 = dstH * p.dstW, n = 12;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * DF;
             size_t dB = a.dB, dD = p.dstC * a.elem, dS = a.bufK;
             QuantizedConvolutionNhwcGemm_2xM_Ptr convolution_2xN = GetQuantizedConvolutionNhwcGemm_2xM<term>(n);

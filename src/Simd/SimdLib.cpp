@@ -6090,7 +6090,7 @@ SIMD_API void* SimdSynetQuantizedMergedConvolutionInit(size_t batch, const SimdC
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetQuantizedMergedConvolutionInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
-    const static SimdSynetQuantizedMergedConvolutionInitPtr simdSynetQuantizedMergedConvolutionInit = SIMD_FUNC2(SynetQuantizedMergedConvolutionInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC);
+    const static SimdSynetQuantizedMergedConvolutionInitPtr simdSynetQuantizedMergedConvolutionInit = SIMD_FUNC3(SynetQuantizedMergedConvolutionInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC);
 
     return simdSynetQuantizedMergedConvolutionInit(batch, convs, count, add);
 #else

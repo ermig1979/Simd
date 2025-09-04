@@ -43,7 +43,7 @@ namespace Simd
             size_t srcC, size_t dstC, int update, const int8_t* weight0, const __m256i* bias, const __m256* norm, const __m256i& zero, int32_t* buf, uint8_t* dst)
         {
             __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
-            size_t dS = a.maC * p.strideX, dB = p.dstC, dD = p.dstC;
+            size_t dS = a.maC * p.strideX, dB = a.owStep, dD = p.dstC;
             const int8_t* weight1 = weight0 + AlignHi(srcC, 4) * F;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
@@ -177,12 +177,12 @@ namespace Simd
                 _norm[0] = _mm256_loadu_ps(norm + dc + 0);
                 _norm[1] = _mm256_loadu_ps(norm + dc + F);
                 const uint8_t* s = src;
-                int32_t* b = buf + dc + yBeg * p.dstW * p.dstC;
+                int32_t* b = buf + dc + yBeg * p.dstW * a.owStep;
                 uint8_t* d = dst + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
-                for (; i < nn; i += n, s += a.maC * n, b += p.dstC * n, d += p.dstC * n)
+                for (; i < nn; i += n, s += a.maC * n, b += a.owStep * n, d += p.dstC * n)
                     outputConvolution1x1_2xN(s, p, a, maC, dC, update, weight, _bias, _norm, _zero, b, d);
-                for (; i < n1; i += m, s += a.maC * m, b += p.dstC * m, d += p.dstC * m)
+                for (; i < n1; i += m, s += a.maC * m, b += a.owStep * m, d += p.dstC * m)
                     outputConvolution1x1_2xM(s, p, a, maC, dC, update, weight, _bias, _norm, _zero, b, d);
                 weight += AlignHi(maC, 4) * DF;
             }

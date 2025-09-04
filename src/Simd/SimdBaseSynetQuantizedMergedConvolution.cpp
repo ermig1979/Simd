@@ -483,7 +483,7 @@ namespace Simd
             if (a.miK == 32)
             {
                 bool aligned = Aligned(c2.dstC, a.miC) && Aligned(c2.dstH * c2.dstW, a.miC) && Aligned((c2.dstH % a.ddStep) * c2.dstW, a.miC);
-                a.odB = (count > 1 || !aligned) ? AlignHi(c2.dstC, a.miC) * AlignHi(c2.dstH * c2.dstW + a.miC, a.miC) : 0;
+                a.odB = (count > 1 || !aligned) ? a.owStep * AlignHi(c2.dstH * c2.dstW + a.miC, a.miC) : 0;
                 a.idB = 4 * 16 * 16;
             }
             else
@@ -732,7 +732,7 @@ namespace Simd
             if (a.miK == 32)
             {
                 bool aligned = Aligned(c1.dstC, a.miC) && Aligned(c1.dstH * c1.dstW, a.miC) && Aligned((c1.dstH % a.ddStep) * c1.dstW, a.miC);
-                a.odB = (count > 1 || !aligned) ? AlignHi(c1.dstC, a.miC) * AlignHi(c1.dstH * c1.dstW + a.miC, a.miC) : 0;
+                a.odB = (count > 1 || !aligned) ? a.owStep * AlignHi(c1.dstH * c1.dstW + a.miC, a.miC) : 0;
             }
             else
                 a.odB = count > 1 ? _sizeD : 0;
@@ -765,7 +765,7 @@ namespace Simd
                         {
                             size_t byEnd = Simd::Min(byBeg + a.dbStep, dyEnd);
 
-                            _depthwisePreprocess(src, _dwSrcZero.data, c0, a, maC, byBeg, byEnd, dbBuf);
+                            _depthwisePreprocess(src + c, _dwSrcZero.data, c0, a, maC, byBeg, byEnd, dbBuf);
 
                             _depthwiseConvolution(dbBuf, c0, a, maC, byBeg, byEnd, _weight[0].data + c * a.dwStep * a.dbE,
                                 _bias[0].data + c, _norm[0].data + c, _ioZero[1], ddBuf);
