@@ -29,7 +29,8 @@ jobs:
       run: nuget restore ./prj/vs2022 -Project2ProjectTimeOut 300
 
     - name: Host properties
-      run: wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors /format:value
+      shell: powershell
+      run: echo CPU: (Get-CimInstance Win32_Processor).Name CORE: (Get-CimInstance Win32_Processor).NumberOfCores THREADS: (Get-CimInstance Win32_Processor).CORE: (Get-CimInstance Win32_Processor).NumberOfCores
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -58,7 +59,8 @@ jobs:
       run: nuget restore ./prj/vs2019 -Project2ProjectTimeOut 300
 
     - name: Host properties
-      run: wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors /format:value
+      shell: powershell
+      run: echo CPU: (Get-CimInstance Win32_Processor).Name CORE: (Get-CimInstance Win32_Processor).NumberOfCores THREADS: (Get-CimInstance Win32_Processor).CORE: (Get-CimInstance Win32_Processor).NumberOfCores
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
