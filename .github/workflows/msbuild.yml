@@ -30,7 +30,7 @@ jobs:
 
     - name: Host properties
       shell: powershell
-      run: echo CPU: (Get-CimInstance Win32_Processor).Name CORE: (Get-CimInstance Win32_Processor).NumberOfCores THREADS: (Get-CimInstance Win32_Processor).CORE: (Get-CimInstance Win32_Processor).NumberOfCores
+      run: echo "$((Get-CimInstance Win32_Processor).Name), $((Get-CimInstance Win32_Processor).NumberOfCores) cores, $((Get-CimInstance Win32_Processor).NumberOfLogicalProcessors) threads."
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -60,7 +60,7 @@ jobs:
 
     - name: Host properties
       shell: powershell
-      run: echo CPU: (Get-CimInstance Win32_Processor).Name CORE: (Get-CimInstance Win32_Processor).NumberOfCores THREADS: (Get-CimInstance Win32_Processor).CORE: (Get-CimInstance Win32_Processor).NumberOfCores
+      run: echo "$((Get-CimInstance Win32_Processor).Name), $((Get-CimInstance Win32_Processor).NumberOfCores) cores, $((Get-CimInstance Win32_Processor).NumberOfLogicalProcessors) threads."
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
