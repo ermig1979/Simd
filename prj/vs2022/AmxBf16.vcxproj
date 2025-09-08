@@ -12,6 +12,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAmxBf16.h" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
     <ClInclude Include="..\..\src\Simd\SimdBFloat16.h" />
@@ -56,6 +57,10 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h" />
     <ClInclude Include="..\..\src\Simd\SimdTile.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h" />
@@ -96,6 +101,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedInnerProductGemmNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolutionDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolutionInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolutionOutput.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemDefinitionGroup>

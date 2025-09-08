@@ -411,7 +411,51 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE)  
     namespace AmxBf16
     {
+        void SetInputPreprocess(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::InputPreprocessPtr& func);
 
+        void SetInputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::InputConvolutionPtr& func);
+
+        void SetDepthwisePreprocess(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwisePreprocessPtr& func);
+
+        void SetDepthwiseConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwiseConvolutionPtr& func);
+
+        void SetOutputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::OutputConvolutionPtr* funcs);
+
+        void SetAddInputToOutput(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::AddInputToOutputPtr& func);
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolutionCdc : public Avx512vnni::SynetQuantizedMergedConvolutionCdc
+        {
+        public:
+            SynetQuantizedMergedConvolutionCdc(const MergConvParam& p);
+
+            virtual String Ext() const { return "AmxBf16"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolutionCd : public Avx512vnni::SynetQuantizedMergedConvolutionCd
+        {
+        public:
+            SynetQuantizedMergedConvolutionCd(const MergConvParam& p);
+
+            virtual String Ext() const { return "AmxBf16"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolutionDc : public Avx512vnni::SynetQuantizedMergedConvolutionDc
+        {
+        public:
+            SynetQuantizedMergedConvolutionDc(const MergConvParam& p);
+
+            virtual String Ext() const { return "AmxBf16"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
     }
 #endif
 
