@@ -166,5 +166,6 @@ jobs:
       run: cmake --build build --config ${{matrix.build_type}} --parallel4
 
     - name: Test
+      shell: cmd
       working-directory: build
-      run: ./Test.exe "-r=.." -m=a -tt=-1 -ts=10
+      run: ./Test.exe "-r=.." -m=a -tt=0 -ts=10
