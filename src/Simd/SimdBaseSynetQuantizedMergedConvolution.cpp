@@ -473,14 +473,14 @@ namespace Simd
 
                 a.isH = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : a.dsH;
 
-                a.isB = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : a.isH * c0.srcW * AlignHi(c0.srcC, a.miK);
+                a.isB = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : AlignHi(a.isH * c0.srcW, a.miC) * AlignHi(c0.srcC, a.miK);
                 a.dsB = a.dsH * c1.srcW * a.maC;
                 a.dbB = a.dbH * a.dbW * a.maC * 2;
                 a.ddB = a.ddH * c1.dstW * a.maC;
                 if (a.isB + a.dsB + a.dbB + a.ddB <= L2)
                     break;
             }
-            if (a.miK == 32)
+            if (a.miK == 64)
             {
                 bool aligned = Aligned(c2.dstC, a.miC) && Aligned(c2.dstH * c2.dstW, a.miC) && Aligned((c2.dstH % a.ddStep) * c2.dstW, a.miC);
                 a.odB = (count > 1 || !aligned) ? a.owStep * AlignHi(c2.dstH * c2.dstW + a.miC, a.miC) : 0;
@@ -516,13 +516,14 @@ namespace Simd
                     size_t maC = Simd::Min(C, c + a.maC) - c;
                     for (size_t dyBeg = 0, syBeg = 0; dyBeg < c1.dstH;)
                     {
+                        //std::cout << 
                         size_t dyEnd = Simd::RestrictRange(dyBeg + a.ddStep, a.ddStep, c1.dstH);
                         size_t syEnd = Simd::RestrictRange(syBeg + a.dsStep, a.dsStart, c1.srcH);
 
-                        if (_inputPreprocess)
+                        if (_inputPreprocess && isBuf)
                             _inputPreprocess(src, c0, a, syBeg, syEnd, isBuf);
 
-                        const uint8_t* isPtr = _inputPreprocess ? isBuf : src;
+                        const uint8_t* isPtr = (_inputPreprocess && isBuf) ? isBuf : src;
                         _inputConvolution(isPtr, c0, a, maC, syBeg, syEnd, _weight[0].data + c * a.iwStep,
                             _bias[0].data + c, _norm[0].data + c, _ioZero[1], idBuf, dsBuf);
 
@@ -611,13 +612,13 @@ namespace Simd
 
                 a.isH = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : a.dsH;
 
-                a.isB = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : a.isH * c0.srcW * AlignHi(c0.srcC, a.miK);
+                a.isB = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : AlignHi(a.isH * c0.srcW, a.miC) * AlignHi(c0.srcC, a.miK);
                 a.dsB = a.dsH * c1.srcW * a.maC;
                 a.dbB = a.dbH * a.dbW * a.maC * 2;
                 if (a.isB + a.dsB + a.dbB <= L2)
                     break;
             }
-            if (a.miK == 32)
+            if (a.miK == 64)
                 a.idB = 4 * 16 * 16;
         }
 
@@ -646,10 +647,10 @@ namespace Simd
                         size_t dyEnd = Simd::RestrictRange(dyBeg + a.ddStep, a.ddStep, c1.dstH);
                         size_t syEnd = Simd::RestrictRange(syBeg + a.dsStep, a.dsStart, c1.srcH);
 
-                        if (_inputPreprocess)
+                        if (_inputPreprocess && isBuf)
                             _inputPreprocess(src, c0, a, syBeg, syEnd, isBuf);
 
-                        const uint8_t* isPtr = _inputPreprocess ? isBuf : src;
+                        const uint8_t* isPtr = (_inputPreprocess && isBuf) ? isBuf : src;
                         _inputConvolution(isPtr, c0, a, maC, syBeg, syEnd, _weight[0].data + c * a.iwStep,
                             _bias[0].data + c, _norm[0].data + c, _ioZero[1], idBuf, dsBuf);
 
@@ -729,7 +730,7 @@ namespace Simd
                 if (a.dbB + a.ddB <= L2)
                     break;
             }
-            if (a.miK == 32)
+            if (a.miK == 64)
             {
                 bool aligned = Aligned(c1.dstC, a.miC) && Aligned(c1.dstH * c1.dstW, a.miC) && Aligned((c1.dstH % a.ddStep) * c1.dstW, a.miC);
                 a.odB = (count > 1 || !aligned) ? a.owStep * AlignHi(c1.dstH * c1.dstW + a.miC, a.miC) : 0;

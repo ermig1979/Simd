@@ -26,8 +26,9 @@
 #include "Simd/SimdSynetConvolution8iCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdBase.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdCopy.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdLog.h"
 
 namespace Simd
@@ -36,6 +37,38 @@ namespace Simd
     namespace AmxBf16
     {
         typedef Base::SynetQuantizedMergedConvolution::AlgParam AlgParam;
+
+        //-------------------------------------------------------------------------------------------------
+
+        void QuantizedMergedConvolutionInputPreprocess(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
+        {
+            size_t srcC64 = AlignLo(p.srcC, 64), n = (yEnd - yBeg) * p.dstW;
+            __mmask64 srcMask = TailMask64(p.srcC - srcC64);
+            src += yBeg * p.srcW * p.srcC;
+            for (size_t i = 0; i < n; i += 16)
+            {
+                size_t m = Min(i + 16, n) - i;
+                size_t sc = 0;
+                for (; sc < srcC64; sc += 64)
+                {
+                    size_t j = 0;
+                    for (; j < m; ++j)
+                        Avx512bw::Copy(src + sc + j * p.srcC, dst + j * 64 + sc * 16);
+                    for (; j < 16; ++j)
+                        SetZero(dst + j * 64 + sc * 16, _mm512_setzero_si512());
+                }
+                if (srcC64 < p.srcC)
+                {
+                    size_t j = 0;
+                    for (; j < m; ++j)
+                        Avx512bw::Copy(src + sc + j * p.srcC, dst + j * 64 + sc * 16, srcMask);
+                    for (; j < 16; ++j)
+                        SetZero(dst + j * 64 + sc * 16, _mm512_setzero_si512());
+                }
+                src += p.srcC * 16;
+                dst += a.iwStep * 16;
+            }
+        }
 
         //-------------------------------------------------------------------------------------------------
 
@@ -223,9 +256,12 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+
+        //------------------------------------------------------------------------------------------------
+
         void SetInputPreprocess(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::InputPreprocessPtr& func)
         {
-            func = NULL;
+            func = QuantizedMergedConvolutionInputPreprocess;
         }
 
         void SetInputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::InputConvolutionPtr& func)
