@@ -156,7 +156,8 @@ jobs:
         pacboy: toolchain:p cmake:p ninja:p
 
     - name: Host properties
-      run: wmic cpu get /format:value
+      shell: powershell
+      run: echo "$((Get-CimInstance Win32_Processor).Name), $((Get-CimInstance Win32_Processor).NumberOfCores) cores, $((Get-CimInstance Win32_Processor).NumberOfLogicalProcessors) threads."
 
     - name: Configure CMake
       run: cmake ./prj/cmake -B build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TARGET="x86_64" -DSIMD_GET_VERSION=OFF -DSIMD_TEST_FLAGS="-march=native"
