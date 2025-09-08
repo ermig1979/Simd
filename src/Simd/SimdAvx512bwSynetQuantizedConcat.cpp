@@ -36,7 +36,7 @@ namespace Simd
             {
                 for (size_t s = 0; s < count; ++s)
                 {
-                    size_t size1 = size[s], size16 = size1 & (~16), size64 = size1 & (~63), i = 0;
+                    size_t size1 = size[s], size16 = size1 & (~15), size64 = size1 & (~63), i = 0;
                     __mmask16 tail = __mmask16(-1) >> (size16 + 16 - size1);
                     const uint8_t* ps = src[s] + o * size1;
                     _bias = _mm512_set1_epi32(bias[s]);
