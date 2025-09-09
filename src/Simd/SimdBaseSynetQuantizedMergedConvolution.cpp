@@ -516,7 +516,6 @@ namespace Simd
                     size_t maC = Simd::Min(C, c + a.maC) - c;
                     for (size_t dyBeg = 0, syBeg = 0; dyBeg < c1.dstH;)
                     {
-                        //std::cout << 
                         size_t dyEnd = Simd::RestrictRange(dyBeg + a.ddStep, a.ddStep, c1.dstH);
                         size_t syEnd = Simd::RestrictRange(syBeg + a.dsStep, a.dsStart, c1.srcH);
 
