@@ -162,8 +162,8 @@ namespace Simd
             {
                 for (size_t s = 16; s < dstS; ++s)
                 {
-                    Apply1(buf + 2 * 256 + s * 16, dst0 + 1 * 256 + s * 16, bias[0], norm[0], zero);
-                    Apply1(buf + 3 * 256 + s * 16, dst1 + 1 * 256 + s * 16, bias[1], norm[1], zero);
+                    Apply1(buf + 1 * 256 + s * 16, dst0 + s * 16, bias[0], norm[0], zero);
+                    Apply1(buf + 2 * 256 + s * 16, dst1 + s * 16, bias[1], norm[1], zero);
                 }
             }
         }
@@ -203,7 +203,7 @@ namespace Simd
             else
             {
                 for (size_t s = 16; s < dstS; ++s)
-                    Apply1(buf + 2 * 256 + s * 16, dst0 + 1 * 256 + s * 16, bias[0], norm[0], zero);
+                    Apply1(buf + 1 * 256 + s * 16, dst0 + s * 16, bias[0], norm[0], zero);
             }
         }
 
@@ -245,8 +245,8 @@ namespace Simd
             {
                 for (size_t s = 0; s < dstS; ++s)
                 {
-                    Apply1(buf + 0 * 256 + s * 16, dst0 + 0 * 256 + s * 16, bias[0], norm[0], zero);
-                    Apply1(buf + 1 * 256 + s * 16, dst1 + 0 * 256 + s * 16, bias[1], norm[1], zero);
+                    Apply1(buf + 0 * 256 + s * 16, dst0 + s * 16, bias[0], norm[0], zero);
+                    Apply1(buf + 1 * 256 + s * 16, dst1 + s * 16, bias[1], norm[1], zero);
                 }
             }
         }
@@ -273,7 +273,7 @@ namespace Simd
             else
             {
                 for (size_t s = 0; s < dstS; ++s)
-                    Apply1(buf + 0 * 256 + s * 16, dst0 + 0 * 256 + s * 16, bias[0], norm[0], zero);
+                    Apply1(buf + 0 * 256 + s * 16, dst0 + s * 16, bias[0], norm[0], zero);
             }
         }
 
@@ -292,9 +292,10 @@ namespace Simd
 
             if (yInt == yBeg)
             {
-                if (en)
+                if (en || a.isB)
                 {
-                    e = AlignHi(e, 16), en = e1 - e;
+                    if(a.isB == 0)
+                        e = AlignHi(e, 16), en = e1 - e;
                     QuantizedMergedConvolutionInputPtr conv_2x2 = QuantizedMergedConvolutionInput_2x2<0>;
                     QuantizedMergedConvolutionInputPtr conv_2x1 = QuantizedMergedConvolutionInput_2x1<0>;
                     QuantizedMergedConvolutionInputPtr conv_Ex2 = e > 16 ? QuantizedMergedConvolutionInput_2x2<0> : QuantizedMergedConvolutionInput_1x2<0>;
