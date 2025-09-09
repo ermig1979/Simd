@@ -167,4 +167,4 @@ jobs:
 
     - name: Test
       working-directory: build
-      run: .\Test.exe "-r=.." -m=a -tt=4 -ts=10
+      run: Test.exe "-r=.." -m=a -tt=4 -ts=10

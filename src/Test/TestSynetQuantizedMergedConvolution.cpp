@@ -78,6 +78,8 @@ namespace Test
 
         bool Init(Param p)
         {
+            ::srand(0);
+
             io[0].Reshape(p.SrcShape(0));
             FillRandom(io[0], -0.9, 1.1f);
             for (size_t c = 0; c < p.count; ++c)
