@@ -133,7 +133,7 @@ jobs:
       run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
 
   build_and_test_mingw:
-    runs-on: windows-22
+    runs-on: windows-latest
 
     defaults:
       run:
