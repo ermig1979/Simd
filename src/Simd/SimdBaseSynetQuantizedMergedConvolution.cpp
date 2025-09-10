@@ -468,7 +468,7 @@ namespace Simd
                 a.ddH = Pow2Hi(a.ddStep);
 
                 a.dsStep = a.ddStep * c1.strideY;
-                a.dsStart = Simd::Min(AlignHi((a.ddStep - 1) * c1.strideY + c1.kernelY + (2 - a.dbE), c1.strideY), c1.srcH);
+                a.dsStart = Simd::Min(AlignHi((a.ddStep - 1) * c1.strideY + c1.kernelY + (2 - a.dbE) + (c1.padY == 0 && c1.strideY == 2 ? 1 : 0), c1.strideY), c1.srcH);
                 a.dsH = Pow2Hi(Simd::Max((a.ddStep - 1) * c1.strideY + c1.kernelY, a.dsStart));
 
                 a.isH = (Aligned(c0.srcC, a.miK) || a.miK == 4) ? 0 : a.dsH;

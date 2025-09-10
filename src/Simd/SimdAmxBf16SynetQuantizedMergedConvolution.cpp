@@ -42,8 +42,6 @@ namespace Simd
         SynetQuantizedMergedConvolutionCdc::SynetQuantizedMergedConvolutionCdc(const MergConvParam& p)
             : Avx512vnni::SynetQuantizedMergedConvolutionCdc(p)
         {
-            if (!p.conv[1].IsStride(1))
-                return;
             SetSize(F, 64, 1);
             SetInputPreprocess(p.conv[0], _alg, _inputPreprocess);
             SetInputConvolution(p.conv[0], _alg, _inputConvolution);
