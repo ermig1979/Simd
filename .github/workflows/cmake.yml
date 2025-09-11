@@ -169,5 +169,5 @@ jobs:
       shell: cmd
       working-directory: build
       run: |
-          $env:PATH="C:\msys64\ucrt64\bin;C:\msys64\usr\bin;$env:PATH"
+          echo "C:\msys64\ucrt64\bin;C:\msys64\usr\bin;" >> "$GITHUB_PATH"
           Test.exe "-r=.." -m=a -tt=4 -ot=log_${{matrix.build_type}}.txt -ts=10
