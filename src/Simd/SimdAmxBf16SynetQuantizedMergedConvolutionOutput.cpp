@@ -233,6 +233,9 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+
+        //------------------------------------------------------------------------------------------------
+
         SIMD_INLINE __m512i QuantizedAdd(const __m512i& a, const __m512i& aBias, const __m512& aNorm, const __m512i& b, const __m512i& bBias, const __m512& bNorm, const __m512& dNorm, const __m512i& dZero)
         {
             return QuantizeLinear(_mm512_add_ps(DequantizeLinear(a, aBias, aNorm), DequantizeLinear(b, bBias, bNorm)), dNorm, dZero);
