@@ -166,10 +166,7 @@ jobs:
       run: cmake --build build --config ${{matrix.build_type}} --parallel4
 
     - name: Test
-      shell: cmd
+      shell: D:\a\_temp\setup-msys2\msys2.CMD {0}
       working-directory: build
       run: |
-          echo "$GITHUB_PATH"
-          echo ";D:/a/_temp/msys64/ucrt64/bin;" >> "$GITHUB_PATH"
-          echo "$GITHUB_PATH"
           Test.exe "-r=.." -m=a -tt=4 -ot=log_${{matrix.build_type}}.txt -ts=10
