@@ -166,7 +166,5 @@ jobs:
       run: cmake --build build --config ${{matrix.build_type}} --parallel4
 
     - name: Test
-      shell: msys2 {0}
       working-directory: build
-      run: |
-          Test.exe "-r=.." -m=a -tt=4 -ot=log_${{matrix.build_type}}.txt -ts=10
+      run: ./Test.exe "-r=.." -m=a -tt=4 -ot=log_${{matrix.build_type}}.txt -ts=10
