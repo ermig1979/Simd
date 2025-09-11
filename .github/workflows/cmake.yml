@@ -167,5 +167,5 @@ jobs:
 
     - name: Test
       shell: cmd
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: build\Test.exe "-r=." -m=a -tt=4 -ot=log_${{matrix.build_type}}.txt -ts=10
+      working-directory: ${{env.GITHUB_WORKSPACE}}\build
+      run: Test.exe "-r=.." -m=a -tt=4 -ot=log_${{matrix.build_type}}.txt -ts=10
