@@ -195,27 +195,22 @@ namespace Simd
 
         static std::string Execute(const char* cmd)
         {
-            // NOTE: Don't use _popen, it will display a console window
             std::string result;
 
-            // Set up security attributes for the pipe
             SECURITY_ATTRIBUTES saAttr;
             saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
             saAttr.bInheritHandle = TRUE;
             saAttr.lpSecurityDescriptor = NULL;
 
-            // Create a pipe for the child process's STDOUT
             HANDLE hReadPipe = NULL;
             HANDLE hWritePipe = NULL;
             if (!CreatePipe(&hReadPipe, &hWritePipe, &saAttr, 0))
                 return "";
             SetHandleInformation(hReadPipe, HANDLE_FLAG_INHERIT, 0);
 
-            // Set up members of the PROCESS_INFORMATION structure
             PROCESS_INFORMATION piProcInfo;
             ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
 
-            // Set up the start-up information struct.
             STARTUPINFOA siStartInfo;
             ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
             siStartInfo.cb = sizeof(STARTUPINFO);
@@ -223,24 +218,13 @@ namespace Simd
             siStartInfo.hStdOutput = hWritePipe;
             siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-            // Create the child process
-            BOOL bSuccess = CreateProcessA(NULL,
-                (LPSTR)cmd,          // command line
-                NULL,                // process security attributes
-                NULL,                // primary thread security attributes
-                TRUE,                // handles are inherited
-                CREATE_NO_WINDOW,    // creation flags, hide console window
-                NULL,                // use parent's environment
-                NULL,                // use parent's current directory
-                &siStartInfo,        // STARTUPINFO pointer
-                &piProcInfo);        // receives PROCESS_INFORMATION
+            BOOL bSuccess = CreateProcessA(NULL, (LPSTR)cmd, NULL, NULL, TRUE, 
+                CREATE_NO_WINDOW, NULL,  NULL, &siStartInfo, &piProcInfo);
 
-            // Close write end of pipe
             CloseHandle(hWritePipe);
 
             if (bSuccess)
             {
-                // Read output from the child process's pipe for STDOUT
                 char buffer[4096];
                 DWORD dwRead = 0;
                 while (ReadFile(hReadPipe, buffer, sizeof(buffer), &dwRead, NULL) && dwRead > 0)
@@ -255,12 +239,22 @@ namespace Simd
 
         std::string CpuModel()
         {
-            std::string raw = Execute("wmic cpu get Name /format:value");
-            size_t beg = raw.find('=') + 1;
-            size_t end = raw.find('\r', beg);
-            while (raw[end - 1] == ' ')
-                end--;
-            return raw.substr(beg, end - beg);
+            int cpuInfo[4] = { -1 };
+            char cpuModel[64] = { 0 };
+            __cpuid(cpuInfo, 0x80000000);
+            for (unsigned i = 0x80000000, n = cpuInfo[0]; i <= n; ++i)
+            {
+                __cpuid(cpuInfo, i);
+                if (i == 0x80000002)
+                    memcpy(cpuModel, cpuInfo, sizeof(cpuInfo));
+                else if (i == 0x80000003)
+                    memcpy(cpuModel + 16, cpuInfo, sizeof(cpuInfo));
+                else if (i == 0x80000004)
+                    memcpy(cpuModel + 32, cpuInfo, sizeof(cpuInfo));
+            }
+            for (int i = 63; i >= 0 && (cpuModel[i] == ' ' || cpuModel[i] == 0); --i)
+                cpuModel[i] = 0;
+            return cpuModel;
         }
 
         uint64_t CpuCurrentFrequency()

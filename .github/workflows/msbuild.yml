@@ -15,8 +15,7 @@ jobs:
     
     strategy:
       matrix:
-        #build_type: [Debug, Release]
-        build_type: [Release]
+        build_type: [Debug, Release]
         platform: [Win32, x64]
 
     steps:
@@ -46,8 +45,7 @@ jobs:
     
     strategy:
       matrix:
-        #build_type: [Debug, Release]
-        build_type: [Release]
+        build_type: [Debug, Release]
         platform: [Win32, x64]
 
     steps:
