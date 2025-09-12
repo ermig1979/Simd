@@ -169,4 +169,11 @@ namespace Test
     }
 }
 
+#if !defined(NDEBUG) && defined( __MINGW32__)
+//#if defined(_MSC_VER) && !defined(NDEBUG)
+#define TEST_CONTROL_POINT() {std::cout << " File: " << __FILE__ <<  " Line: " << __LINE__ << std::endl << std::flush; }
+#else
+#define TEST_CONTROL_POINT()
+#endif
+
 #endif//__TestConfig_h__

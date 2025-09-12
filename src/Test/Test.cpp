@@ -673,18 +673,19 @@ namespace Test
 
     int MakeAutoTests(Groups & groups, const Options & options)
     {
+        TEST_CONTROL_POINT();
         if (options.testThreads > 0)
         {
             if (options.pinThreads)
                 PinThread(SimdCpuInfo(SimdCpuInfoThreads) - 1);
-
+            TEST_CONTROL_POINT();
             Test::Log::s_log.SetLevel(Test::Log::Error);
-
+            TEST_CONTROL_POINT();
             size_t testThreads = Simd::Min<size_t>(options.testThreads, groups.size());
             size_t total = groups.size();
             size_t block = Simd::DivHi(total, testThreads);
             testThreads = Simd::Min(testThreads, Simd::DivHi(total, block));
-
+            TEST_CONTROL_POINT();
             TEST_LOG_SS(Info, "Test threads count = " << testThreads);
             Test::TaskPtrs tasks;
             for (size_t i = 0; i < testThreads; ++i)
@@ -693,7 +694,7 @@ namespace Test
                 size_t end = std::min(total, beg + block);
                 tasks.push_back(Test::TaskPtr(new Test::Task(options, i, groups.data() + beg, end - beg, true)));
             }
-
+            TEST_CONTROL_POINT();
             std::cout << std::endl;
             double progress, previous = -1.0;
             do
@@ -710,7 +711,7 @@ namespace Test
                 Test::Sleep(40);
             } while (progress < 1.0 && !Test::Task::s_stopped);
             std::cout << std::endl << std::endl;
-
+            TEST_CONTROL_POINT();
             if (!Test::Task::s_stopped)
                 Test::Log::s_log.SetLevel(Test::Log::Info);
         }
@@ -719,7 +720,7 @@ namespace Test
             Test::Task task(options, 0, groups.data(), groups.size(), false);
             task.Run();
         }
-
+        TEST_CONTROL_POINT();
         if (Test::Task::s_stopped)
             return 1;
 
@@ -733,7 +734,7 @@ namespace Test
         if (!options.html.empty())
             Test::PerformanceMeasurerStorage::s_storage.HtmlReport(options.html, options.printAlign);
 #endif
-
+        TEST_CONTROL_POINT();
         if (options.testStatistics)
         {
             std::sort(groups.begin(), groups.end(), [](const Group& a, const Group& b) { return a.time > b.time; });
@@ -743,7 +744,7 @@ namespace Test
                     TEST_LOG_SS(Info, "Test " << groups[i].name << " elapsed " << ToString(groups[i].time, 1, false) << " s.");
             }
         }
-
+        TEST_CONTROL_POINT();
         return 0;
     }
 
@@ -862,15 +863,15 @@ void TmpTest()
 int main(int argc, char* argv[])
 {
     TmpTest();
-
+    TEST_CONTROL_POINT();
     Test::Options options(argc, argv);
-
+    TEST_CONTROL_POINT();
     if (options.help)
         return Test::PrintHelp();
 
     if(options.checkCpp)
         Test::CheckCpp();
-
+    TEST_CONTROL_POINT();
     Test::Groups groups;
     for (const Test::Group& group : Test::g_groups)
     {
@@ -895,12 +896,12 @@ int main(int argc, char* argv[])
         TEST_LOG_SS(Error, ss.str());
         return 1;
     }
-
+    TEST_CONTROL_POINT();
     ::SimdSetThreadNumber(options.workThreads);
 #ifdef SIMD_OPENCV_ENABLE
     cv::setNumThreads(options.workThreads);
 #endif
-
+    TEST_CONTROL_POINT();
     switch (options.mode)
     {
     case Test::Options::Auto:
