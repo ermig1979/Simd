@@ -600,7 +600,20 @@ namespace Test
                 Group & group = _groups[i];
                 TEST_LOG_SS(Info, group.name << "AutoTest is started :");
                 group.time = GetTime();
-                bool result = RunGroup(group);
+                bool result = false;
+                try
+                {
+                    result = RunGroup(group);
+                }
+                catch (const std::exception &e)
+                {
+                    s_stopped = true;
+                    TEST_LOG_SS(Error, group.name << "AutoTest rised exception: " << e.what() << ". TEST EXECUTION IS TERMINATED!" << std::endl);
+                    return;
+                }
+                catch (...)
+                {
+                }
                 group.time = GetTime() - group.time;
                 if (result)
                 {
@@ -633,8 +646,8 @@ namespace Test
             std::vector<__sighandler_t> handlers;
             for(size_t i = 0; i < NSIG; ++i)
                 handlers.push_back(signal(i, (__sighandler_t)PrintErrorMessage));
-            bool result = false;
             int rc = setjmp(s_threadData);
+            bool result = false;
             if (rc == 0)
                 result = group.autoTest();
             for (size_t i = 0; i < handlers.size(); ++i)
@@ -670,7 +683,9 @@ namespace Test
             switch (code)
             {
             case SIGILL: desc = "Illegal instruction"; break;
+            case SIGABRT: desc = "Aborted"; break;
             case SIGSEGV: desc = "Segment violation"; break;
+            case SIGCHLD: desc = "Child exited"; break;
             default:
                 desc = "Unknown error(" + std::to_string(code) + ")";
             }
