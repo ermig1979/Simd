@@ -37,6 +37,11 @@
 #include <windows.h>
 #endif
 
+#if defined(__linux__)
+#include <signal.h>
+#include <setjmp.h>
+#endif
+
 #ifdef SIMD_OPENCV_ENABLE
 #include <opencv2/core/core.hpp>
 #endif
@@ -553,6 +558,9 @@ namespace Test
         size_t _id, _size;
         std::thread _thread;
         volatile double _progress;
+#if defined(__linux__)
+        static __thread jmp_buf s_threadData;
+#endif
     public:
         static volatile bool s_stopped;
 
@@ -621,6 +629,17 @@ namespace Test
                 PrintErrorMessage(GetExceptionCode());
                 return false;
             }
+#elif defined(__linux__)
+            std::vector<__sighandler_t> handlers;
+            for(size_t i = 0; i < NSIG; ++i)
+                handlers.push_back(signal(i, (__sighandler_t)PrintErrorMessage));
+            bool result = false;
+            int rc = setjmp(s_threadData);
+            if (rc == 0)
+                result = group.autoTest();
+            for (size_t i = 0; i < handlers.size(); ++i)
+                signal(SIGSEGV, handlers[i]);
+            return result;
 #else
             return group.autoTest();
 #endif
@@ -640,11 +659,30 @@ namespace Test
             default:
                 desc = "Unknown error(" + std::to_string(code) + ")";
             }
-            TEST_LOG_SS(Error, "There is unhandled exception: " << desc << " !");
+            TEST_LOG_SS(Error, "There is unhandled Windows exception: " << desc << " !");
+        }
+#endif
+
+#if defined(__linux__)
+        static void PrintErrorMessage(int code)
+        {
+            String desc;
+            switch (code)
+            {
+            case SIGILL: desc = "Illegal instruction"; break;
+            case SIGSEGV: desc = "Segment violation"; break;
+            default:
+                desc = "Unknown error(" + std::to_string(code) + ")";
+            }
+            TEST_LOG_SS(Error, "There is unhandled Linux signal: " << desc << " !");
+            longjmp(s_threadData, 1);
         }
 #endif
     };
     volatile bool Task::s_stopped = false;
+#if defined(__linux__)
+    __thread jmp_buf Task::s_threadData;
+#endif
     typedef std::shared_ptr<Task> TaskPtr;
     typedef std::vector<TaskPtr> TaskPtrs;
 
