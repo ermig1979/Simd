@@ -644,8 +644,12 @@ namespace Test
             }
 #elif defined(__linux__)
             std::vector<__sighandler_t> handlers;
-            for(size_t i = 0; i < NSIG; ++i)
+            for (size_t i = 0; i < NSIG; ++i)
+            {
                 handlers.push_back(signal(i, (__sighandler_t)PrintErrorMessage));
+                if (handlers.back() == SIG_IGN)
+                    signal(i, SIG_IGN);
+            }
             int rc = setjmp(s_threadData);
             bool result = false;
             if (rc == 0)
