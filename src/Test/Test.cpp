@@ -643,19 +643,20 @@ namespace Test
                 return false;
             }
 #elif defined(__linux__)
-            std::vector<__sighandler_t> handlers;
-            for (size_t i = 0; i < NSIG; ++i)
+            std::vector<__sighandler_t> prevs;
+            for (size_t i = 0; i <= SIGSYS; ++i)
             {
-                handlers.push_back(signal(i, (__sighandler_t)PrintErrorMessage));
-                if (handlers.back() == SIG_IGN)
-                    signal(i, SIG_IGN);
+                __sighandler_t prev = signal(i, (__sighandler_t)PrintErrorMessage);
+                if (prev == SIG_IGN)
+                    signal(i, prev);
+                prevs.push_back(prev);
             }
             int rc = setjmp(s_threadData);
             bool result = false;
             if (rc == 0)
                 result = group.autoTest();
-            for (size_t i = 0; i < handlers.size(); ++i)
-                signal(SIGSEGV, handlers[i]);
+            for (size_t i = 0; i < prevs.size(); ++i)
+                signal(i, prevs[i]);
             return result;
 #else
             return group.autoTest();
