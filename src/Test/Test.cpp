@@ -643,20 +643,27 @@ namespace Test
                 return false;
             }
 #elif defined(__linux__)
+            Ints types;
             std::vector<__sighandler_t> prevs;
-            for (size_t i = 0; i <= SIGSYS; ++i)
+            for (int i = 0; i <= SIGSYS; ++i)
             {
+                if (i == SIGCHLD)
+                    continue;
                 __sighandler_t prev = signal(i, (__sighandler_t)PrintErrorMessage);
                 if (prev == SIG_IGN)
                     signal(i, prev);
-                prevs.push_back(prev);
+                else
+                {
+                    types.push_back(i);
+                    prevs.push_back(prev);
+                }
             }
             int rc = setjmp(s_threadData);
             bool result = false;
             if (rc == 0)
                 result = group.autoTest();
             for (size_t i = 0; i < prevs.size(); ++i)
-                signal(i, prevs[i]);
+                signal(types[i], prevs[i]);
             return result;
 #else
             return group.autoTest();
