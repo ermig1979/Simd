@@ -480,10 +480,10 @@ namespace Simd
                 if (a.isB + a.dsB + a.dbB + a.ddB <= L2)
                     break;
             }
+            a.idB = a.miK == 64 ? 4 * 16 * 16 : 0;
             if (a.miK == 64)
             {
                 bool aligned = Aligned(c2.dstC, a.miC) && Aligned(c2.dstH * c2.dstW, a.miC) && Aligned((c2.dstH % a.ddStep) * c2.dstW, a.miC);
-                a.idB = 4 * 16 * 16;
                 if (count > 1 || !aligned)
                 {
                     a.obStep = a.owStep;

@@ -354,13 +354,8 @@ namespace Simd
 
         void SetOutputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::OutputConvolutionPtr* funcs)
         {
-            if (p.srcC < 16)
-                Avx512vnni::SetOutputConvolution(p, a, funcs);
-            else
-            {
-                funcs[0] = QuantizedMergedConvolutionOutputConvolution_2<Term8iInterim>;
-                funcs[1] = QuantizedMergedConvolutionOutputConvolution_2<Term8iLast8u>;
-            }
+            funcs[0] = QuantizedMergedConvolutionOutputConvolution_2<Term8iInterim>;
+            funcs[1] = QuantizedMergedConvolutionOutputConvolution_2<Term8iLast8u>;
         }
 
         void SetAddInputToOutput(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::AddInputToOutputPtr& func)

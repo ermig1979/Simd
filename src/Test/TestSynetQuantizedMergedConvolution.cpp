@@ -305,8 +305,10 @@ namespace Test
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
 #ifdef NDEBUG
-#if 1
-        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 16, 112, 112), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 32), u8, u8), o, f1, f2);
+#if 0
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 16, 112, 112), Cnv(aId, 1, 1, 24), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 32), f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 64, 112, 112), Cnv(aId, 1, 1, 24), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 32), f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 16, 112, 112), Cnv(aId, 1, 1, 128), Cnv(aId, 3, 1), Cnv(aId, 1, 1, 32), f, u8, u8), o, f1, f2);
 #endif
 #if 1
         result = result && SynetQuantizedMergedConvolutionForwardAutoTest(e, Param(Shp(1, 64, 16, 16), Cnv(aId, 1, 1, 128), Cnv(aId, 3, 1), u8, u8), o, f1, f2);

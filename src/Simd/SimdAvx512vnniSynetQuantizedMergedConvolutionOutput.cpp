@@ -44,7 +44,7 @@ namespace Simd
         {
             __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
             size_t dS = a.maC * p.strideX, dB = a.owStep, dD = p.dstC;
-            const int8_t* weight1 = weight0 + AlignHi(srcC, 4) * F;
+            const int8_t* weight1 = weight0 + AlignHi(srcC, a.miK) * F;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
