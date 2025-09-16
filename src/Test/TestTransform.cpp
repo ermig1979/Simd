@@ -142,26 +142,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && TransformImageAutoTest(FUNC_TI(Simd::Base::TransformImage), FUNC_TI(SimdTransformImage));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41(options) && W >= Simd::Sse41::A)
             result = result && TransformImageAutoTest(FUNC_TI(Simd::Sse41::TransformImage), FUNC_TI(SimdTransformImage));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2(options) && W >= Simd::Avx2::A)
             result = result && TransformImageAutoTest(FUNC_TI(Simd::Avx2::TransformImage), FUNC_TI(SimdTransformImage));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw() && W >= Simd::Avx2::A)
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options) && W >= Simd::Avx2::A)
             result = result && TransformImageAutoTest(FUNC_TI(Simd::Avx512bw::TransformImage), FUNC_TI(SimdTransformImage));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::HA)
+        if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::HA)
             result = result && TransformImageAutoTest(FUNC_TI(Simd::Neon::TransformImage), FUNC_TI(SimdTransformImage));
 #endif 
 

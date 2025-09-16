@@ -327,26 +327,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::Base::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::Sse41::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::Avx2::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bw::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
 #endif 
 
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
-        if (Simd::AmxBf16::Enable && TestAmxBf16())
+        if (Simd::AmxBf16::Enable && TestAmxBf16(options))
             result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::AmxBf16::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
 #endif
 

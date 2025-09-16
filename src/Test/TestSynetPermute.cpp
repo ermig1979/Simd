@@ -135,26 +135,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Base::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Sse41::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Avx2::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Avx512bw::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon())
+        if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Neon::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 #endif 
 

@@ -120,7 +120,7 @@ namespace Simd
                 size_t dsStep, dbStep, ddStep, dsStart;
                 size_t isH, dsH, dbH, ddH;
                 size_t isB, idB, dsB, dbB, ddB, odB;
-                size_t dbW, dwC, dwStep, dwSize, iwStep, owStep;
+                size_t dbW, dwC, dwStep, dwSize, iwStep, owStep, obStep;
             };
 
             typedef void(*InputPreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);

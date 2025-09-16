@@ -89,26 +89,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Base::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41() && W > Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41(options) && W > Simd::Sse41::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Sse41::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2() && W > Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2(options) && W > Simd::Avx2::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx2::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw() && W > Simd::Avx512bw::A)
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options) && W > Simd::Avx512bw::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx512bw::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon() && W > Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon(options) && W > Simd::Neon::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Neon::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif
 
@@ -175,26 +175,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Base::ContourAnchors), FUNC_A(SimdContourAnchors));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41() && W > Simd::Sse41::A)
+        if (Simd::Sse41::Enable && TestSse41(options) && W > Simd::Sse41::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Sse41::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2() && W > Simd::Avx2::A)
+        if (Simd::Avx2::Enable && TestAvx2(options) && W > Simd::Avx2::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx2::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw() && W > Simd::Avx512bw::A)
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options) && W > Simd::Avx512bw::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx512bw::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon() && W > Simd::Neon::A)
+        if (Simd::Neon::Enable && TestNeon(options) && W > Simd::Neon::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Neon::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif
 

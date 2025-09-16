@@ -90,26 +90,26 @@ namespace Test
 	{
 		bool result = true;
 
-		if (TestBase())
+		if (TestBase(options))
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Base::AbsDifference), FUNC1(SimdAbsDifference), 1);
 
 #ifdef SIMD_SSE41_ENABLE
-		if (Simd::Sse41::Enable && TestSse41() && W >= Simd::Sse41::A)
+		if (Simd::Sse41::Enable && TestSse41(options) && W >= Simd::Sse41::A)
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Sse41::AbsDifference), FUNC1(SimdAbsDifference), 1);
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-		if (Simd::Avx2::Enable && TestAvx2() && W >= Simd::Avx2::A)
+		if (Simd::Avx2::Enable && TestAvx2(options) && W >= Simd::Avx2::A)
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Avx2::AbsDifference), FUNC1(SimdAbsDifference), 1);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable && TestAvx512bw())
+		if (Simd::Avx512bw::Enable && TestAvx512bw(options))
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Avx512bw::AbsDifference), FUNC1(SimdAbsDifference), 1);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable && TestNeon() && W >= Simd::Neon::A)
+		if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Neon::AbsDifference), FUNC1(SimdAbsDifference), 1);
 #endif
 

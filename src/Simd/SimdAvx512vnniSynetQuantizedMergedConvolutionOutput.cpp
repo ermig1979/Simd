@@ -227,7 +227,7 @@ namespace Simd
                     outputConvolution1x1_2xN(s, p, a, maC, dC, update, weight, _bias, _norm, _zero, b, d);
                 for (; i < n1; i += m, s += a.maC * m, b += a.owStep * m, d += p.dstC * m)
                     outputConvolution1x1_2xM(s, p, a, maC, dC, update, weight, _bias, _norm, _zero, b, d);
-                weight += AlignHi(maC, 4) * DF;
+                weight += AlignHi(maC, a.miK) * DF;
             }
         }
 

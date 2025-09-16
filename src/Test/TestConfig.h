@@ -111,7 +111,7 @@ namespace Test
     extern int H;    
     extern int W;
 
-    extern uint32_t DISABLED_EXTENSIONS;
+    //extern uint32_t DISABLED_EXTENSIONS;
 
     extern String ROOT_PATH;
     extern String REAL_IMAGE;
@@ -126,47 +126,6 @@ namespace Test
         DifferenceAny,
         DifferenceLogical,
     };
-
-    //-------------------------------------------------------------------------------------------------
-
-    SIMD_INLINE bool TestBase()
-    {
-        return (DISABLED_EXTENSIONS & 0x000000001) == 0;
-    }
-
-    SIMD_INLINE bool TestSse41()
-    {
-        return (DISABLED_EXTENSIONS & 0x000000002) == 0;
-    }
-
-    SIMD_INLINE bool TestAvx2()
-    {
-        return (DISABLED_EXTENSIONS & 0x000000004) == 0;
-    }
-
-
-    SIMD_INLINE bool TestAvx512bw()
-    {
-        return (DISABLED_EXTENSIONS & 0x000000008) == 0;
-    }
-
-
-    SIMD_INLINE bool TestAvx512vnni()
-    {
-        return (DISABLED_EXTENSIONS & 0x000000010) == 0;
-    }
-
-
-    SIMD_INLINE bool TestAmxBf16()
-    {
-        return (DISABLED_EXTENSIONS & 0x000000020) == 0;
-    }
-
-
-    SIMD_INLINE bool TestNeon()
-    {
-        return (DISABLED_EXTENSIONS & 0x000000002) == 0;
-    }
 }
 
 #endif

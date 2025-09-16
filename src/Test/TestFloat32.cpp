@@ -85,26 +85,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Base::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Sse41::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Avx2::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Avx512bw::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon())
+        if (Simd::Neon::Enable && TestNeon(options))
             result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Neon::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
 #endif 
 
@@ -168,26 +168,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Base::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Sse41::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Avx2::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Avx512bw::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon())
+        if (Simd::Neon::Enable && TestNeon(options))
             result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Neon::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
 #endif 
 

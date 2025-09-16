@@ -483,11 +483,23 @@ namespace Simd
             if (a.miK == 64)
             {
                 bool aligned = Aligned(c2.dstC, a.miC) && Aligned(c2.dstH * c2.dstW, a.miC) && Aligned((c2.dstH % a.ddStep) * c2.dstW, a.miC);
-                a.odB = (count > 1 || !aligned) ? a.owStep * AlignHi(c2.dstH * c2.dstW + a.miC, a.miC) : 0;
                 a.idB = 4 * 16 * 16;
+                if (count > 1 || !aligned)
+                {
+                    a.obStep = a.owStep;
+                    a.odB = a.owStep * AlignHi(c1.dstH * c1.dstW + a.miC, a.miC);
+                }
+                else
+                {
+                    a.obStep = 0;
+                    a.odB = 4 * 16 * 16 + a.maC;
+                }
             }
             else
+            {
+                a.obStep = a.owStep;
                 a.odB = count > 1 ? _sizeD : 0;
+            }
         }
 
         void SynetQuantizedMergedConvolutionCdc::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
@@ -732,10 +744,22 @@ namespace Simd
             if (a.miK == 64)
             {
                 bool aligned = Aligned(c1.dstC, a.miC) && Aligned(c1.dstH * c1.dstW, a.miC) && Aligned((c1.dstH % a.ddStep) * c1.dstW, a.miC);
-                a.odB = (count > 1 || !aligned) ? a.owStep * AlignHi(c1.dstH * c1.dstW + a.miC, a.miC) : 0;
+                if (count > 1 || !aligned)
+                {
+                    a.obStep = a.owStep;
+                    a.odB = a.owStep * AlignHi(c1.dstH * c1.dstW + a.miC, a.miC);
+                }
+                else
+                {
+                    a.obStep = 0;
+                    a.odB = 4 * 16 * 16 + a.maC;
+                }
             }
             else
+            {
+                a.obStep = a.owStep;
                 a.odB = count > 1 ? _sizeD : 0;
+            }
         }
 
         void SynetQuantizedMergedConvolutionDc::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)

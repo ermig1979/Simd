@@ -96,21 +96,21 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Base::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Sse41::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Avx2::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Avx512bw::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
 #endif 
 
@@ -180,21 +180,21 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Base::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Sse41::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Avx2::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Avx512bw::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
 #endif 
 

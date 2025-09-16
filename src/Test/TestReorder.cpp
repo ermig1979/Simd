@@ -85,26 +85,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder16bit), FUNC(SimdReorder16bit), 2);
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && ReorderAutoTest(FUNC(Simd::Sse41::Reorder16bit), FUNC(SimdReorder16bit), 2);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && ReorderAutoTest(FUNC(Simd::Avx2::Reorder16bit), FUNC(SimdReorder16bit), 2);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && ReorderAutoTest(FUNC(Simd::Avx512bw::Reorder16bit), FUNC(SimdReorder16bit), 2);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon())
+        if (Simd::Neon::Enable && TestNeon(options))
             result = result && ReorderAutoTest(FUNC(Simd::Neon::Reorder16bit), FUNC(SimdReorder16bit), 2);
 #endif
 
@@ -115,26 +115,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder32bit), FUNC(SimdReorder32bit), 4);
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && ReorderAutoTest(FUNC(Simd::Sse41::Reorder32bit), FUNC(SimdReorder32bit), 4);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && ReorderAutoTest(FUNC(Simd::Avx2::Reorder32bit), FUNC(SimdReorder32bit), 4);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && ReorderAutoTest(FUNC(Simd::Avx512bw::Reorder32bit), FUNC(SimdReorder32bit), 4);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon())
+        if (Simd::Neon::Enable && TestNeon(options))
             result = result && ReorderAutoTest(FUNC(Simd::Neon::Reorder32bit), FUNC(SimdReorder32bit), 4);
 #endif
 
@@ -145,26 +145,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder64bit), FUNC(SimdReorder64bit), 8);
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && ReorderAutoTest(FUNC(Simd::Sse41::Reorder64bit), FUNC(SimdReorder64bit), 8);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && ReorderAutoTest(FUNC(Simd::Avx2::Reorder64bit), FUNC(SimdReorder64bit), 8);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && ReorderAutoTest(FUNC(Simd::Avx512bw::Reorder64bit), FUNC(SimdReorder64bit), 8);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon())
+        if (Simd::Neon::Enable && TestNeon(options))
             result = result && ReorderAutoTest(FUNC(Simd::Neon::Reorder64bit), FUNC(SimdReorder64bit), 8);
 #endif
 

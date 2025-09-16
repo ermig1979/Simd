@@ -117,26 +117,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Base::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Sse41::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Avx2::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Avx512bw::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon())
+        if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Neon::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 #endif 
 
@@ -202,21 +202,21 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Base::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Sse41::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Avx2::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Avx512bw::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
 #endif 
 
@@ -310,26 +310,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Base::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Sse41::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Avx2::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw() && (W / 5 + O >= Simd::Avx512bw::A))
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options) && (W / 5 + O >= Simd::Avx512bw::A))
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Avx512bw::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon())
+        if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Neon::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 #endif
 

@@ -868,7 +868,7 @@ namespace Test
     double MINIMAL_TEST_EXECUTION_TIME = 0.1;
     //double WARM_UP_TIME = 0.0;
     int LITTER_CPU_CACHE = 0;
-    uint32_t DISABLED_EXTENSIONS = 0;
+    //uint32_t DISABLED_EXTENSIONS = 0;
 
     void CheckCpp();
 }

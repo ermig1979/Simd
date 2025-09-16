@@ -120,21 +120,21 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && SynetQuantizedShuffleLayerForwardAutoTest(FUNC_SQSLF(Simd::Base::SynetQuantizedShuffleLayerForward), FUNC_SQSLF(SimdSynetQuantizedShuffleLayerForward));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetQuantizedShuffleLayerForwardAutoTest(FUNC_SQSLF(Simd::Sse41::SynetQuantizedShuffleLayerForward), FUNC_SQSLF(SimdSynetQuantizedShuffleLayerForward));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetQuantizedShuffleLayerForwardAutoTest(FUNC_SQSLF(Simd::Avx2::SynetQuantizedShuffleLayerForward), FUNC_SQSLF(SimdSynetQuantizedShuffleLayerForward));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetQuantizedShuffleLayerForwardAutoTest(FUNC_SQSLF(Simd::Avx512bw::SynetQuantizedShuffleLayerForward), FUNC_SQSLF(SimdSynetQuantizedShuffleLayerForward));
 #endif 
 

@@ -96,7 +96,7 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && CopyAutoTest(FUNC(Simd::Base::Copy), FUNC(SimdCopy));
 
         return result;
@@ -175,7 +175,7 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && CopyFrameAutoTest(FUNC_F(Simd::Base::CopyFrame), FUNC_F(SimdCopyFrame));
 
         return result;

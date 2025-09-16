@@ -142,21 +142,21 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Base::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Sse41::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Avx2::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Avx512bw::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
 #endif 
 

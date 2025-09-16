@@ -244,26 +244,26 @@ namespace Test
     {
         bool result = true;
 
-        if (TestBase())
+        if (TestBase(options))
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Base::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41())
+        if (Simd::Sse41::Enable && TestSse41(options))
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Sse41::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2())
+        if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Avx2::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw())
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Avx512bw::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 #endif
 
 //#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable && TestNeon())
+//        if (Simd::Neon::Enable && TestNeon(options))
 //            result = result && ResizerAutoTest(FUNC_RS(Simd::Neon::ResizerInit), FUNC_RS(SimdResizerInit));
 //#endif 
 
