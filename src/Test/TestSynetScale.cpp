@@ -27,6 +27,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynetScale16b.h"
@@ -117,7 +118,7 @@ namespace Test
         return result;
     }
 
-    bool SynetScaleLayerForwardAutoTest()
+    bool SynetScaleLayerForwardAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -309,7 +310,7 @@ namespace Test
         return result;
     }
 
-    bool SynetScale8iForwardAutoTest()
+    bool SynetScale8iForwardAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -452,7 +453,7 @@ namespace Test
         return result;
     }
 
-    bool SynetScale16bAutoTest()
+    bool SynetScale16bAutoTest(const Options & options)
     {
         bool result = true;
 

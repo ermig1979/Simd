@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -94,7 +95,7 @@ namespace Test
         return result;
     }
 
-    bool BinarizationAutoTest()
+    bool BinarizationAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -195,7 +196,7 @@ namespace Test
         return result;
     }
 
-    bool AveragingBinarizationAutoTest()
+    bool AveragingBinarizationAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -285,7 +286,7 @@ namespace Test
         return result;
     }
 
-    bool AveragingBinarizationV2AutoTest()
+    bool AveragingBinarizationV2AutoTest(const Options & options)
     {
         bool result = true;
 

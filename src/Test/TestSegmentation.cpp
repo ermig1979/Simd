@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -80,7 +81,7 @@ namespace Test
         return result;
     }
 
-    bool SegmentationShrinkRegionAutoTest()
+    bool SegmentationShrinkRegionAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -163,7 +164,7 @@ namespace Test
         return result;
     }
 
-    bool SegmentationFillSingleHolesAutoTest()
+    bool SegmentationFillSingleHolesAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -246,7 +247,7 @@ namespace Test
         return result;
     }
 
-    bool SegmentationChangeIndexAutoTest()
+    bool SegmentationChangeIndexAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -337,7 +338,7 @@ namespace Test
         return result;
     }
 
-    bool SegmentationPropagate2x2AutoTest()
+    bool SegmentationPropagate2x2AutoTest(const Options & options)
     {
         bool result = true;
 

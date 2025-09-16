@@ -29,6 +29,7 @@
 #include "Test/TestString.h"
 #include "Test/TestTensor.h"
 #include "Test/TestOptions.h"
+#include "Test/TestGroup.h"
 
 #if defined(_MSC_VER)
 #ifndef NOMINMAX
@@ -48,24 +49,6 @@
 
 namespace Test
 {
-    typedef bool(*AutoTestPtr)();
-    typedef bool(*SpecialTestPtr)(const Options& options);
-
-    struct Group
-    {
-        String name;
-        AutoTestPtr autoTest;
-        SpecialTestPtr specialTest;
-        double time;
-        Group(const String & n, const AutoTestPtr & a, const SpecialTestPtr & s)
-            : name(n)
-            , autoTest(a)
-            , specialTest(s)
-            , time(0.0)
-        {
-        }
-    };
-    typedef std::vector<Group> Groups;
     Groups g_groups;
 
 #define TEST_ADD_GROUP_0S(name) \
@@ -74,12 +57,12 @@ namespace Test
     bool name##AtList = name##AddToList();
 
 #define TEST_ADD_GROUP_A0(name) \
-    bool name##AutoTest(); \
+    bool name##AutoTest(const Options & options); \
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, NULL)); return true; } \
     bool name##AtList = name##AddToList();
 
 #define TEST_ADD_GROUP_AS(name) \
-    bool name##AutoTest(); \
+    bool name##AutoTest(const Options & options); \
     bool name##SpecialTest(const Options & options); \
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##SpecialTest)); return true; } \
     bool name##AtList = name##AddToList();
@@ -599,11 +582,11 @@ namespace Test
                 _progress = double(i) / double(_size);
                 Group & group = _groups[i];
                 TEST_LOG_SS(Info, group.name << "AutoTest is started :");
-                group.time = GetTime();
+                group.start = GetTime();
                 bool result = false;
                 try
                 {
-                    result = RunGroup(group);
+                    result = RunGroup(group, _options);
                 }
                 catch (const std::exception &e)
                 {
@@ -614,10 +597,10 @@ namespace Test
                 catch (...)
                 {
                 }
-                group.time = GetTime() - group.time;
+                group.finish = GetTime();
                 if (result)
                 {
-                    TEST_LOG_SS(Info, group.name << "AutoTest is finished successfully in " << ToString(group.time, 1, false) << " s." << std::endl);
+                    TEST_LOG_SS(Info, group.name << "AutoTest is finished successfully in " << ToString(group.Time(), 1, false) << " s." << std::endl);
                 }
                 else
                 {
@@ -630,12 +613,12 @@ namespace Test
         }
 
     private:
-        static bool RunGroup(const Group & group)
+        static bool RunGroup(const Group & group, const Options& options)
         {
 #if defined(_MSC_VER)
             __try
             {
-                return group.autoTest();
+                return group.autoTest(options);
             }
             __except (EXCEPTION_EXECUTE_HANDLER)
             {
@@ -661,12 +644,12 @@ namespace Test
             int rc = setjmp(s_threadData);
             bool result = false;
             if (rc == 0)
-                result = group.autoTest();
+                result = group.autoTest(options);
             for (size_t i = 0; i < prevs.size(); ++i)
                 signal(types[i], prevs[i]);
             return result;
 #else
-            return group.autoTest();
+            return group.autoTest(options);
 #endif
         }
 
@@ -718,22 +701,6 @@ namespace Test
     inline void Sleep(unsigned int miliseconds)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds));
-    }
-
-    bool Required(const Options & options, const Group& group)
-    {
-        if (options.mode == Options::Auto && group.autoTest == NULL)
-            return false;
-        if (options.mode == Options::Special && group.specialTest == NULL)
-            return false;
-        bool required = options.include.empty();
-        for (size_t i = 0; i < options.include.size() && !required; ++i)
-            if (group.name.find(options.include[i]) != std::string::npos)
-                required = true;
-        for (size_t i = 0; i < options.exclude.size() && required; ++i)
-            if (group.name.find(options.exclude[i]) != std::string::npos)
-                required = false;
-        return required;
     }
 
     int MakeAutoTests(Groups & groups, const Options & options)
@@ -801,11 +768,12 @@ namespace Test
 
         if (options.testStatistics)
         {
-            std::sort(groups.begin(), groups.end(), [](const Group& a, const Group& b) { return a.time > b.time; });
+            std::sort(groups.begin(), groups.end(), [](const Group& a, const Group& b) { return a.Time() > b.Time(); });
             for (size_t i = 0; i < groups.size(); ++i)
             {
-                if(groups[i].time >= options.testStatistics)
-                    TEST_LOG_SS(Info, "Test " << groups[i].name << " elapsed " << ToString(groups[i].time, 1, false) << " s.");
+                
+                if(groups[i].Time() >= options.testStatistics)
+                    TEST_LOG_SS(Info, "Test " << groups[i].name << " elapsed " << ToString(groups[i].Time(), 1, false) << " s.");
             }
         }
 
@@ -817,9 +785,9 @@ namespace Test
         for (Test::Group & group : groups)
         {
             TEST_LOG_SS(Info, group.name << "SpecialTest is started :");
-            group.time = GetTime();
+            group.start = GetTime();
             bool result = group.specialTest(options);
-            group.time = GetTime() - group.time;
+            group.finish = GetTime();
             TEST_LOG_SS(Info, group.name << "SpecialTest is finished " << (result ? "successfully." : "with errors!") << std::endl);
             if (!result)
             {

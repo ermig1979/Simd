@@ -26,6 +26,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -82,7 +83,7 @@ namespace Test
         return result;
     }
 
-    bool Uyvy422ToBgrAutoTest()
+    bool Uyvy422ToBgrAutoTest(const Options & options)
     {
         bool result = true;
 

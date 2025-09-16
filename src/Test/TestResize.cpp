@@ -328,7 +328,7 @@ namespace Test
         return result;
     }
 
-    bool ResizerAutoTest()
+    bool ResizerAutoTest(const Options & options)
     {
         bool result = true;
 

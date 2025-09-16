@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -84,7 +85,7 @@ namespace Test
         return result;
     }
 
-    bool HogDirectionHistogramsAutoTest()
+    bool HogDirectionHistogramsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -169,7 +170,7 @@ namespace Test
         return result;
     }
 
-    bool HogExtractFeaturesAutoTest()
+    bool HogExtractFeaturesAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -262,7 +263,7 @@ namespace Test
         return result;
     }
 
-    bool HogDeinterleaveAutoTest()
+    bool HogDeinterleaveAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -361,7 +362,7 @@ namespace Test
         return result;
     }
 
-    bool HogFilterSeparableAutoTest()
+    bool HogFilterSeparableAutoTest(const Options & options)
     {
         bool result = true;
 

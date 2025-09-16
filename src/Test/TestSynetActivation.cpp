@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestTensor.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -84,7 +85,7 @@ namespace Test
         return result;
     }
 
-    bool SynetElu32fAutoTest()
+    bool SynetElu32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -170,7 +171,7 @@ namespace Test
         return result;
     }
 
-    bool SynetGelu32fAutoTest()
+    bool SynetGelu32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -258,7 +259,7 @@ namespace Test
         return result;
     }
 
-    bool SynetHardSigmoid32fAutoTest()
+    bool SynetHardSigmoid32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -346,7 +347,7 @@ namespace Test
         return result;
     }
 
-    bool SynetHswish32fAutoTest()
+    bool SynetHswish32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -433,7 +434,7 @@ namespace Test
         return result;
     }
 
-    bool SynetMish32fAutoTest()
+    bool SynetMish32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -531,7 +532,7 @@ namespace Test
         return result;
     }
 
-    bool SynetPreluLayerForwardAutoTest()
+    bool SynetPreluLayerForwardAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -615,7 +616,7 @@ namespace Test
         return result;
     }
 
-    bool SynetRelu32fAutoTest()
+    bool SynetRelu32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -709,7 +710,7 @@ namespace Test
         return result;
     }
 
-    bool SynetRelu16bAutoTest()
+    bool SynetRelu16bAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -789,7 +790,7 @@ namespace Test
         return result;
     }
 
-    bool SynetRestrictRange32fAutoTest()
+    bool SynetRestrictRange32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -873,7 +874,7 @@ namespace Test
         return result;
     }
 
-    bool SynetSigmoid32fAutoTest()
+    bool SynetSigmoid32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -957,7 +958,7 @@ namespace Test
         return result;
     }
 
-    bool SynetSwish32fAutoTest()
+    bool SynetSwish32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -1042,7 +1043,7 @@ namespace Test
         return result;
     }
 
-    bool SynetSoftplus32fAutoTest()
+    bool SynetSoftplus32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -1126,7 +1127,7 @@ namespace Test
         return result;
     }
 
-    bool SynetTanh32fAutoTest()
+    bool SynetTanh32fAutoTest(const Options & options)
     {
         bool result = true;
 

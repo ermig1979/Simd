@@ -27,6 +27,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynetPermute.h"
 
@@ -130,7 +131,7 @@ namespace Test
         return result;
     }
 
-    bool SynetPermuteAutoTest()
+    bool SynetPermuteAutoTest(const Options & options)
     {
         bool result = true;
 

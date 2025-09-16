@@ -143,7 +143,7 @@ namespace Test
         return result;
     }
 
-    bool MeanFilter3x3AutoTest()
+    bool MeanFilter3x3AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -173,7 +173,7 @@ namespace Test
         return result;
     }
 
-    bool MedianFilterRhomb3x3AutoTest()
+    bool MedianFilterRhomb3x3AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -203,7 +203,7 @@ namespace Test
         return result;
     }
 
-    bool MedianFilterRhomb5x5AutoTest()
+    bool MedianFilterRhomb5x5AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -233,7 +233,7 @@ namespace Test
         return result;
     }
 
-    bool MedianFilterSquare3x3AutoTest()
+    bool MedianFilterSquare3x3AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -263,7 +263,7 @@ namespace Test
         return result;
     }
 
-    bool MedianFilterSquare5x5AutoTest()
+    bool MedianFilterSquare5x5AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -293,7 +293,7 @@ namespace Test
         return result;
     }
 
-    bool GaussianBlur3x3AutoTest()
+    bool GaussianBlur3x3AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -378,7 +378,7 @@ namespace Test
         return result;
     }
 
-    bool AbsGradientSaturatedSumAutoTest()
+    bool AbsGradientSaturatedSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -408,7 +408,7 @@ namespace Test
         return result;
     }
 
-    bool LbpEstimateAutoTest()
+    bool LbpEstimateAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -438,7 +438,7 @@ namespace Test
         return result;
     }
 
-    bool NormalizeHistogramAutoTest()
+    bool NormalizeHistogramAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -458,7 +458,7 @@ namespace Test
         return result;
     }
 
-    bool SobelDxAutoTest()
+    bool SobelDxAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -488,7 +488,7 @@ namespace Test
         return result;
     }
 
-    bool SobelDxAbsAutoTest()
+    bool SobelDxAbsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -518,7 +518,7 @@ namespace Test
         return result;
     }
 
-    bool SobelDyAutoTest()
+    bool SobelDyAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -548,7 +548,7 @@ namespace Test
         return result;
     }
 
-    bool SobelDyAbsAutoTest()
+    bool SobelDyAbsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -578,7 +578,7 @@ namespace Test
         return result;
     }
 
-    bool ContourMetricsAutoTest()
+    bool ContourMetricsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -608,7 +608,7 @@ namespace Test
         return result;
     }
 
-    bool LaplaceAutoTest()
+    bool LaplaceAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -638,7 +638,7 @@ namespace Test
         return result;
     }
 
-    bool LaplaceAbsAutoTest()
+    bool LaplaceAbsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -764,7 +764,7 @@ namespace Test
         return result;
     }
 
-    bool GaussianBlurAutoTest()
+    bool GaussianBlurAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -928,7 +928,7 @@ namespace Test
         return result;
     }
 
-    bool RecursiveBilateralFilterAutoTest()
+    bool RecursiveBilateralFilterAutoTest(const Options & options)
     {
         bool result = true;
 

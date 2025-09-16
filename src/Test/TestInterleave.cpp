@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -82,7 +83,7 @@ namespace Test
         return result;
     }
 
-    bool InterleaveUvAutoTest()
+    bool InterleaveUvAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -169,7 +170,7 @@ namespace Test
         return result;
     }
 
-    bool InterleaveBgrAutoTest()
+    bool InterleaveBgrAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -258,7 +259,7 @@ namespace Test
         return result;
     }
 
-    bool InterleaveBgraAutoTest()
+    bool InterleaveBgraAutoTest(const Options & options)
     {
         bool result = true;
 

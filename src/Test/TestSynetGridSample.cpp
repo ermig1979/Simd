@@ -27,6 +27,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynetGridSample.h"
 
@@ -199,7 +200,7 @@ namespace Test
         return result;
     }
 
-    bool SynetGridSample2dAutoTest()
+    bool SynetGridSample2dAutoTest(const Options & options)
     {
         bool result = true;
 

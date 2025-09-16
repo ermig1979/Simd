@@ -25,6 +25,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -85,7 +86,7 @@ namespace Test
 		return result;
 	}
 
-	bool AbsDifferenceAutoTest()
+	bool AbsDifferenceAutoTest(const Options & options)
 	{
 		bool result = true;
 

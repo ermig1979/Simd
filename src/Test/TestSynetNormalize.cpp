@@ -27,6 +27,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynet.h"
 
@@ -115,7 +116,7 @@ namespace Test
         return result;
     }
 
-    bool SynetNormalizeLayerForwardAutoTest()
+    bool SynetNormalizeLayerForwardAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -216,7 +217,7 @@ namespace Test
         return result;
     }
 
-    bool SynetNormalizeLayerForwardV2AutoTest()
+    bool SynetNormalizeLayerForwardV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -241,7 +242,7 @@ namespace Test
         return result;
     }
 
-    bool SynetNormalizeLayerForwardV3AutoTest()
+    bool SynetNormalizeLayerForwardV3AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -267,7 +268,7 @@ namespace Test
     }
 
 
-    bool SynetNormalizeLayerForwardV4AutoTest()
+    bool SynetNormalizeLayerForwardV4AutoTest(const Options & options)
     {
         bool result = true;
 

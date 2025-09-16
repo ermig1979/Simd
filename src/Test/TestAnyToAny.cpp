@@ -108,7 +108,7 @@ namespace Test
         return result;
     }
 
-    bool BgraToBgrAutoTest()
+    bool BgraToBgrAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -138,7 +138,7 @@ namespace Test
         return result;
     }
 
-    bool BgraToGrayAutoTest()
+    bool BgraToGrayAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -168,7 +168,7 @@ namespace Test
         return result;
     }
 
-    bool BgraToRgbAutoTest()
+    bool BgraToRgbAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -198,7 +198,7 @@ namespace Test
         return result;
     }
 
-    bool BgraToRgbaAutoTest()
+    bool BgraToRgbaAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -228,7 +228,7 @@ namespace Test
         return result;
     }
 
-    bool BgrToGrayAutoTest()
+    bool BgrToGrayAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -258,7 +258,7 @@ namespace Test
         return result;
     }
 
-    bool BgrToHslAutoTest()
+    bool BgrToHslAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -268,7 +268,7 @@ namespace Test
         return result;
     }
 
-    bool BgrToHsvAutoTest()
+    bool BgrToHsvAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -278,7 +278,7 @@ namespace Test
         return result;
     }
 
-    bool BgrToLabAutoTest()
+    bool BgrToLabAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -303,7 +303,7 @@ namespace Test
         return result;
     }
 
-    bool BgrToRgbAutoTest()
+    bool BgrToRgbAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -333,7 +333,7 @@ namespace Test
         return result;
     }
 
-    bool GrayToBgrAutoTest()
+    bool GrayToBgrAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -363,7 +363,7 @@ namespace Test
         return result;
     }
 
-    bool GrayToYAutoTest()
+    bool GrayToYAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -393,7 +393,7 @@ namespace Test
         return result;
     }
 
-    bool Int16ToGrayAutoTest()
+    bool Int16ToGrayAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -423,7 +423,7 @@ namespace Test
         return result;
     }
 
-    bool RgbToGrayAutoTest()
+    bool RgbToGrayAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -453,7 +453,7 @@ namespace Test
         return result;
     }
 
-    bool RgbaToGrayAutoTest()
+    bool RgbaToGrayAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -483,7 +483,7 @@ namespace Test
         return result;
     }
 
-    bool YToGrayAutoTest()
+    bool YToGrayAutoTest(const Options & options)
     {
         bool result = true;
 

@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -86,7 +87,7 @@ namespace Test
         return result;
     }
 
-    bool Crc32AutoTest()
+    bool Crc32AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -96,7 +97,7 @@ namespace Test
         return result;
     }
 
-    bool Crc32cAutoTest()
+    bool Crc32cAutoTest(const Options & options)
     {
         bool result = true;
 

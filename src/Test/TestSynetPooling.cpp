@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestTensor.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -165,7 +166,7 @@ namespace Test
         return result;
     }
 
-    bool SynetPoolingAverageAutoTest()
+    bool SynetPoolingAverageAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -294,7 +295,7 @@ namespace Test
         return result;
     }
 
-    bool SynetPoolingMax32fAutoTest()
+    bool SynetPoolingMax32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -408,7 +409,7 @@ namespace Test
         return result;
     }
 
-    bool SynetPoolingMax8uAutoTest()
+    bool SynetPoolingMax8uAutoTest(const Options & options)
     {
         bool result = true;
 

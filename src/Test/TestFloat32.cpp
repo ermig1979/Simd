@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -80,7 +81,7 @@ namespace Test
         return result;
     }
 
-    bool Float32ToUint8AutoTest()
+    bool Float32ToUint8AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -163,7 +164,7 @@ namespace Test
         return result;
     }
 
-    bool Uint8ToFloat32AutoTest()
+    bool Uint8ToFloat32AutoTest(const Options & options)
     {
         bool result = true;
 

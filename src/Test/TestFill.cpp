@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -89,7 +90,7 @@ namespace Test
         return result;
     }
 
-    bool FillAutoTest()
+    bool FillAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -167,7 +168,7 @@ namespace Test
         return result;
     }
 
-    bool FillFrameAutoTest()
+    bool FillFrameAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -234,7 +235,7 @@ namespace Test
         return result;
     }
 
-    bool FillBgraAutoTest()
+    bool FillBgraAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -320,7 +321,7 @@ namespace Test
         return result;
     }
 
-    bool FillBgrAutoTest()
+    bool FillBgrAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -412,7 +413,7 @@ namespace Test
         return result;
     }
 
-    bool FillPixelAutoTest()
+    bool FillPixelAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -495,7 +496,7 @@ namespace Test
         return result;
     }
 
-    bool Fill32fAutoTest()
+    bool Fill32fAutoTest(const Options & options)
     {
         bool result = true;
 

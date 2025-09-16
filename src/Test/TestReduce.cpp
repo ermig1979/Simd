@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -95,7 +96,7 @@ namespace Test
         return result;
     }
 
-    bool ReduceColor2x2AutoTest()
+    bool ReduceColor2x2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -204,7 +205,7 @@ namespace Test
         return result;
     }
 
-    bool ReduceGray2x2AutoTest()
+    bool ReduceGray2x2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -234,7 +235,7 @@ namespace Test
         return result;
     }
 
-    bool ReduceGray3x3AutoTest()
+    bool ReduceGray3x3AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -279,7 +280,7 @@ namespace Test
         return result;
     }
 
-    bool ReduceGray4x4AutoTest()
+    bool ReduceGray4x4AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -309,7 +310,7 @@ namespace Test
         return result;
     }
 
-    bool ReduceGray5x5AutoTest()
+    bool ReduceGray5x5AutoTest(const Options & options)
     {
         bool result = true;
 

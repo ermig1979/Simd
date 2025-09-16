@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -121,7 +122,7 @@ namespace Test
         return result;
     }
 
-    bool HistogramAutoTest()
+    bool HistogramAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -165,7 +166,7 @@ namespace Test
         return result;
     }
 
-    bool HistogramMaskedAutoTest()
+    bool HistogramMaskedAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -229,7 +230,7 @@ namespace Test
         return result;
     }
 
-    bool AbsSecondDerivativeHistogramAutoTest()
+    bool AbsSecondDerivativeHistogramAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -316,7 +317,7 @@ namespace Test
         return result;
     }
 
-    bool ChangeColorsAutoTest()
+    bool ChangeColorsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -401,7 +402,7 @@ namespace Test
         return result;
     }
 
-    bool HistogramConditionalAutoTest()
+    bool HistogramConditionalAutoTest(const Options & options)
     {
         bool result = true;
 

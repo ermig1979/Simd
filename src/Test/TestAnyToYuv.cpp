@@ -25,6 +25,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -113,7 +114,7 @@ namespace Test
         return result;
     }
 
-    bool Uyvy422ToYuv420pAutoTest()
+    bool Uyvy422ToYuv420pAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -209,7 +210,7 @@ namespace Test
         return result;
     }
 
-    bool BgraToYuv420pV2AutoTest()
+    bool BgraToYuv420pV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -239,7 +240,7 @@ namespace Test
         return result;
     }
 
-    bool BgraToYuv422pV2AutoTest()
+    bool BgraToYuv422pV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -269,7 +270,7 @@ namespace Test
         return result;
     }
 
-    bool BgraToYuv444pV2AutoTest()
+    bool BgraToYuv444pV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -299,7 +300,7 @@ namespace Test
         return result;
     }
 
-    bool BgrToYuv420pV2AutoTest()
+    bool BgrToYuv420pV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -329,7 +330,7 @@ namespace Test
         return result;
     }
 
-    bool BgrToYuv422pV2AutoTest()
+    bool BgrToYuv422pV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -359,7 +360,7 @@ namespace Test
         return result;
     }
 
-    bool BgrToYuv444pV2AutoTest()
+    bool BgrToYuv444pV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -457,7 +458,7 @@ namespace Test
         return result;
     }
 
-    bool BgraToYuva420pV2AutoTest()
+    bool BgraToYuva420pV2AutoTest(const Options & options)
     {
         bool result = true;
 

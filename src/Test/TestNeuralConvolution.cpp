@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 #define SIMD_CHECK_PERFORMANCE() TEST_PERFORMANCE_TEST_(SIMD_FUNCTION)
@@ -98,7 +99,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution2x2ForwardAutoTest()
+    bool NeuralAddConvolution2x2ForwardAutoTest(const Options & options)
     {
         Size core(2, 2);
         bool result = true;
@@ -129,7 +130,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution3x3ForwardAutoTest()
+    bool NeuralAddConvolution3x3ForwardAutoTest(const Options & options)
     {
         Size core(3, 3);
         bool result = true;
@@ -160,7 +161,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution4x4ForwardAutoTest()
+    bool NeuralAddConvolution4x4ForwardAutoTest(const Options & options)
     {
         Size core(4, 4);
         bool result = true;
@@ -191,7 +192,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution5x5ForwardAutoTest()
+    bool NeuralAddConvolution5x5ForwardAutoTest(const Options & options)
     {
         Size core(5, 5);
         bool result = true;
@@ -222,7 +223,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution2x2BackwardAutoTest()
+    bool NeuralAddConvolution2x2BackwardAutoTest(const Options & options)
     {
         Size core(2, 2);
         bool result = true;
@@ -253,7 +254,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution3x3BackwardAutoTest()
+    bool NeuralAddConvolution3x3BackwardAutoTest(const Options & options)
     {
         Size core(3, 3);
         bool result = true;
@@ -284,7 +285,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution4x4BackwardAutoTest()
+    bool NeuralAddConvolution4x4BackwardAutoTest(const Options & options)
     {
         Size core(4, 4);
         bool result = true;
@@ -315,7 +316,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution5x5BackwardAutoTest()
+    bool NeuralAddConvolution5x5BackwardAutoTest(const Options & options)
     {
         Size core(5, 5);
         bool result = true;
@@ -405,7 +406,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution2x2SumAutoTest()
+    bool NeuralAddConvolution2x2SumAutoTest(const Options & options)
     {
         Size core(2, 2);
         bool result = true;
@@ -436,7 +437,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution3x3SumAutoTest()
+    bool NeuralAddConvolution3x3SumAutoTest(const Options & options)
     {
         Size core(3, 3);
         bool result = true;
@@ -467,7 +468,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution4x4SumAutoTest()
+    bool NeuralAddConvolution4x4SumAutoTest(const Options & options)
     {
         Size core(4, 4);
         bool result = true;
@@ -498,7 +499,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution5x5SumAutoTest()
+    bool NeuralAddConvolution5x5SumAutoTest(const Options & options)
     {
         Size core(5, 5);
         bool result = true;
@@ -683,7 +684,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralConvolutionForwardAutoTest()
+    bool NeuralConvolutionForwardAutoTest(const Options & options)
     {
         bool result = true;
 

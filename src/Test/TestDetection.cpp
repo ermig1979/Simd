@@ -253,7 +253,7 @@ namespace Test
         return result;
     }
 
-    bool DetectionHaarDetect32fpAutoTest()
+    bool DetectionHaarDetect32fpAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -283,7 +283,7 @@ namespace Test
         return result;
     }
 
-    bool DetectionHaarDetect32fiAutoTest()
+    bool DetectionHaarDetect32fiAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -313,7 +313,7 @@ namespace Test
         return result;
     }
 
-    bool DetectionLbpDetect32fpAutoTest()
+    bool DetectionLbpDetect32fpAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -343,7 +343,7 @@ namespace Test
         return result;
     }
 
-    bool DetectionLbpDetect32fiAutoTest()
+    bool DetectionLbpDetect32fiAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -373,7 +373,7 @@ namespace Test
         return result;
     }
 
-    bool DetectionLbpDetect16ipAutoTest()
+    bool DetectionLbpDetect16ipAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -403,7 +403,7 @@ namespace Test
         return result;
     }
 
-    bool DetectionLbpDetect16iiAutoTest()
+    bool DetectionLbpDetect16iiAutoTest(const Options & options)
     {
         bool result = true;
 

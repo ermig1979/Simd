@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -90,7 +91,7 @@ namespace Test
         return result;
     }
 
-    bool Yuva420pToBgraV2AutoTest()
+    bool Yuva420pToBgraV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -120,7 +121,7 @@ namespace Test
         return result;
     }
 
-    bool Yuva422pToBgraV2AutoTest()
+    bool Yuva422pToBgraV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -150,7 +151,7 @@ namespace Test
         return result;
     }
 
-    bool Yuva444pToBgraV2AutoTest()
+    bool Yuva444pToBgraV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -244,7 +245,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv420pToBgraV2AutoTest()
+    bool Yuv420pToBgraV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -274,7 +275,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv422pToBgraV2AutoTest()
+    bool Yuv422pToBgraV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -304,7 +305,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv444pToBgraV2AutoTest()
+    bool Yuv444pToBgraV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -334,7 +335,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv444pToRgbaV2AutoTest()
+    bool Yuv444pToRgbaV2AutoTest(const Options & options)
     {
         bool result = true;
 

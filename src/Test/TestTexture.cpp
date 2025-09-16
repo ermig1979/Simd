@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -93,7 +94,7 @@ namespace Test
         return result;
     }
 
-    bool TextureBoostedSaturatedGradientAutoTest()
+    bool TextureBoostedSaturatedGradientAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -191,7 +192,7 @@ namespace Test
         return result;
     }
 
-    bool TextureBoostedUvAutoTest()
+    bool TextureBoostedUvAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -276,7 +277,7 @@ namespace Test
         return result;
     }
 
-    bool TextureGetDifferenceSumAutoTest()
+    bool TextureGetDifferenceSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -372,7 +373,7 @@ namespace Test
         return result;
     }
 
-    bool TexturePerformCompensationAutoTest()
+    bool TexturePerformCompensationAutoTest(const Options & options)
     {
         bool result = true;
 

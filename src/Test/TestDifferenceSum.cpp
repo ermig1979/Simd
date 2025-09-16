@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -187,7 +188,7 @@ namespace Test
         return result;
     }
 
-    bool SquaredDifferenceSumAutoTest()
+    bool SquaredDifferenceSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -217,7 +218,7 @@ namespace Test
         return result;
     }
 
-    bool SquaredDifferenceSumMaskedAutoTest()
+    bool SquaredDifferenceSumMaskedAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -247,7 +248,7 @@ namespace Test
         return result;
     }
 
-    bool AbsDifferenceSumAutoTest()
+    bool AbsDifferenceSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -277,7 +278,7 @@ namespace Test
         return result;
     }
 
-    bool AbsDifferenceSumMaskedAutoTest()
+    bool AbsDifferenceSumMaskedAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -307,7 +308,7 @@ namespace Test
         return result;
     }
 
-    bool AbsDifferenceSums3x3AutoTest()
+    bool AbsDifferenceSums3x3AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -337,7 +338,7 @@ namespace Test
         return result;
     }
 
-    bool AbsDifferenceSums3x3MaskedAutoTest()
+    bool AbsDifferenceSums3x3MaskedAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -367,7 +368,7 @@ namespace Test
         return result;
     }
 
-    bool SquaredDifferenceSum32fAutoTest()
+    bool SquaredDifferenceSum32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -397,7 +398,7 @@ namespace Test
         return result;
     }
 
-    bool SquaredDifferenceKahanSum32fAutoTest()
+    bool SquaredDifferenceKahanSum32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -427,7 +428,7 @@ namespace Test
         return result;
     }
 
-    bool CosineDistance32fAutoTest()
+    bool CosineDistance32fAutoTest(const Options & options)
     {
         bool result = true;
 

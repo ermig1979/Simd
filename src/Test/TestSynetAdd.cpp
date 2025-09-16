@@ -27,6 +27,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdSynetAdd16b.h"
@@ -102,7 +103,7 @@ namespace Test
         return result;
     }
 
-    bool SynetAddBiasAutoTest()
+    bool SynetAddBiasAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -235,7 +236,7 @@ namespace Test
         return result;
     }
 
-    bool SynetAdd8iAutoTest()
+    bool SynetAdd8iAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -380,7 +381,7 @@ namespace Test
         return result;
     }
 
-    bool SynetAdd16bAutoTest()
+    bool SynetAdd16bAutoTest(const Options & options)
     {
         bool result = true;
 

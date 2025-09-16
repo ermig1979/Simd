@@ -240,7 +240,7 @@ namespace Test
         return result;
     }
 
-    bool WarpAffineAutoTest()
+    bool WarpAffineAutoTest(const Options & options)
     {
         bool result = true;
 

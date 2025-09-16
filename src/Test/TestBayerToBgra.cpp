@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -82,7 +83,7 @@ namespace Test
         return result;
     }
 
-    bool BayerToBgraAutoTest()
+    bool BayerToBgraAutoTest(const Options & options)
     {
         bool result = true;
 

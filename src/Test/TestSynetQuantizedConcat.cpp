@@ -27,6 +27,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestRandom.h"
 #include "Test/TestString.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -115,7 +116,7 @@ namespace Test
         return result;
     }
 
-    bool SynetQuantizedConcatLayerForwardAutoTest()
+    bool SynetQuantizedConcatLayerForwardAutoTest(const Options & options)
     {
         bool result = true;
 

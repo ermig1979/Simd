@@ -26,6 +26,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestSynetConvolutionParam.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynet.h"
@@ -287,7 +288,7 @@ namespace Test
         return result;
     }
 
-    bool SynetConvolution32fForwardAutoTest()
+    bool SynetConvolution32fForwardAutoTest(const Options & options)
     {
         const float EPS = 0.001f;
         bool result = true;

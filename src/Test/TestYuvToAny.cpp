@@ -93,7 +93,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv444pToHslAutoTest()
+    bool Yuv444pToHslAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -103,7 +103,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv444pToHsvAutoTest()
+    bool Yuv444pToHsvAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -119,7 +119,7 @@ namespace Test
     const int MAX_DIFFERECE = 0;
 #endif
 
-    bool Yuv444pToHueAutoTest()
+    bool Yuv444pToHueAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -149,7 +149,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv420pToHueAutoTest()
+    bool Yuv420pToHueAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -179,7 +179,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv420pToUyvy422AutoTest()
+    bool Yuv420pToUyvy422AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -272,7 +272,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv420pToBgrV2AutoTest()
+    bool Yuv420pToBgrV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -302,7 +302,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv422pToBgrV2AutoTest()
+    bool Yuv422pToBgrV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -332,7 +332,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv444pToBgrV2AutoTest()
+    bool Yuv444pToBgrV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -362,7 +362,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv420pToRgbV2AutoTest()
+    bool Yuv420pToRgbV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -392,7 +392,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv422pToRgbV2AutoTest()
+    bool Yuv422pToRgbV2AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -422,7 +422,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv444pToRgbV2AutoTest()
+    bool Yuv444pToRgbV2AutoTest(const Options & options)
     {
         bool result = true;
 

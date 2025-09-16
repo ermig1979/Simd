@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestTensor.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -210,7 +211,7 @@ namespace Test
         return result;
     }
 
-    bool Gemm32fNNAutoTest()
+    bool Gemm32fNNAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -283,7 +284,7 @@ namespace Test
         return result;
     }
 
-    bool Gemm32fNTAutoTest()
+    bool Gemm32fNTAutoTest(const Options & options)
     {
         bool result = true;
 

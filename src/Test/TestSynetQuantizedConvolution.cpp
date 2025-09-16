@@ -27,6 +27,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestSynetConvolutionParam.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynetQuantizedConvolution.h"
 #include "Simd/SimdSynet.h"
@@ -352,7 +353,7 @@ namespace Test
         return result;
     }
 
-    bool SynetQuantizedConvolutionForwardAutoTest()
+    bool SynetQuantizedConvolutionForwardAutoTest(const Options & options)
     {
         bool result = true;
 

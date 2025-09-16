@@ -26,6 +26,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdSynetInnerProduct32f.h"
@@ -189,7 +190,7 @@ namespace Test
         return result;
     }
 
-    bool SynetInnerProduct32fForwardAutoTest()
+    bool SynetInnerProduct32fForwardAutoTest(const Options & options)
     {
         const float EPS = 0.001f;
         bool result = true;
@@ -286,7 +287,7 @@ namespace Test
         return result;
     }
 
-    bool SynetInnerProductLayerForwardAutoTest()
+    bool SynetInnerProductLayerForwardAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -402,7 +403,7 @@ namespace Test
         return result;
     }
 
-    bool SynetInnerProduct8iAutoTest()
+    bool SynetInnerProduct8iAutoTest(const Options & options)
     {
         bool result = true;
 

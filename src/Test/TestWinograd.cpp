@@ -93,7 +93,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel1x3Block1x4SetFilterAutoTest()
+    bool WinogradKernel1x3Block1x4SetFilterAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -125,7 +125,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel1x5Block1x4SetFilterAutoTest()
+    bool WinogradKernel1x5Block1x4SetFilterAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -156,7 +156,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel2x2Block2x2SetFilterAutoTest()
+    bool WinogradKernel2x2Block2x2SetFilterAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -187,7 +187,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel2x2Block4x4SetFilterAutoTest()
+    bool WinogradKernel2x2Block4x4SetFilterAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -218,7 +218,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block2x2SetFilterAutoTest()
+    bool WinogradKernel3x3Block2x2SetFilterAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -249,7 +249,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block3x3SetFilterAutoTest()
+    bool WinogradKernel3x3Block3x3SetFilterAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -280,7 +280,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block4x4SetFilterAutoTest()
+    bool WinogradKernel3x3Block4x4SetFilterAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -396,7 +396,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel1x3Block1x4SetInputAutoTest()
+    bool WinogradKernel1x3Block1x4SetInputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -448,7 +448,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel1x5Block1x4SetInputAutoTest()
+    bool WinogradKernel1x5Block1x4SetInputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -502,7 +502,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel2x2Block2x2SetInputAutoTest()
+    bool WinogradKernel2x2Block2x2SetInputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -531,7 +531,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel2x2Block4x4SetInputAutoTest()
+    bool WinogradKernel2x2Block4x4SetInputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -593,7 +593,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block2x2SetInputAutoTest()
+    bool WinogradKernel3x3Block2x2SetInputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -622,7 +622,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block3x3SetInputAutoTest()
+    bool WinogradKernel3x3Block3x3SetInputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -651,7 +651,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block4x4SetInputAutoTest()
+    bool WinogradKernel3x3Block4x4SetInputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -758,7 +758,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel1x3Block1x4SetOutputAutoTest()
+    bool WinogradKernel1x3Block1x4SetOutputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -808,7 +808,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel1x5Block1x4SetOutputAutoTest()
+    bool WinogradKernel1x5Block1x4SetOutputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -859,7 +859,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel2x2Block2x2SetOutputAutoTest()
+    bool WinogradKernel2x2Block2x2SetOutputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -888,7 +888,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel2x2Block4x4SetOutputAutoTest()
+    bool WinogradKernel2x2Block4x4SetOutputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -943,7 +943,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block2x2SetOutputAutoTest()
+    bool WinogradKernel3x3Block2x2SetOutputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -972,7 +972,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block3x3SetOutputAutoTest()
+    bool WinogradKernel3x3Block3x3SetOutputAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -1001,7 +1001,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block4x4SetOutputAutoTest()
+    bool WinogradKernel3x3Block4x4SetOutputAutoTest(const Options & options)
     {
         bool result = true;
 

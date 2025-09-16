@@ -232,7 +232,7 @@ namespace Test
         return result;
     }
 
-    bool ImageSaveToMemoryAutoTest()
+    bool ImageSaveToMemoryAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -385,7 +385,7 @@ namespace Test
         return result;
     }
 
-    bool Nv12SaveAsJpegToMemoryAutoTest()
+    bool Nv12SaveAsJpegToMemoryAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -531,7 +531,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv420pSaveAsJpegToMemoryAutoTest()
+    bool Yuv420pSaveAsJpegToMemoryAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -688,7 +688,7 @@ namespace Test
         return result;
     }
 
-    bool ImageLoadFromMemoryAutoTest()
+    bool ImageLoadFromMemoryAutoTest(const Options & options)
     {
         bool result = true;
 

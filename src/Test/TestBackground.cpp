@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -436,7 +437,7 @@ namespace Test
         return result;
     }
 
-    bool BackgroundGrowRangeSlowAutoTest()
+    bool BackgroundGrowRangeSlowAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -466,7 +467,7 @@ namespace Test
         return result;
     }
 
-    bool BackgroundGrowRangeFastAutoTest()
+    bool BackgroundGrowRangeFastAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -495,7 +496,7 @@ namespace Test
         return result;
     }
 
-    bool BackgroundIncrementCountAutoTest()
+    bool BackgroundIncrementCountAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -525,7 +526,7 @@ namespace Test
         return result;
     }
 
-    bool BackgroundAdjustRangeAutoTest()
+    bool BackgroundAdjustRangeAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -554,7 +555,7 @@ namespace Test
         return result;
     }
 
-    bool BackgroundAdjustRangeMaskedAutoTest()
+    bool BackgroundAdjustRangeMaskedAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -584,7 +585,7 @@ namespace Test
         return result;
     }
 
-    bool BackgroundShiftRangeAutoTest()
+    bool BackgroundShiftRangeAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -614,7 +615,7 @@ namespace Test
         return result;
     }
 
-    bool BackgroundShiftRangeMaskedAutoTest()
+    bool BackgroundShiftRangeMaskedAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -644,7 +645,7 @@ namespace Test
         return result;
     }
 
-    bool BackgroundInitMaskAutoTest()
+    bool BackgroundInitMaskAutoTest(const Options & options)
     {
         bool result = true;
 

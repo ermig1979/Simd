@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -80,7 +81,7 @@ namespace Test
         return result;
     }
 
-    bool BgrToBgraAutoTest()
+    bool BgrToBgraAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -110,7 +111,7 @@ namespace Test
         return result;
     }
 
-    bool GrayToBgraAutoTest()
+    bool GrayToBgraAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -140,7 +141,7 @@ namespace Test
         return result;
     }
 
-    bool RgbToBgraAutoTest()
+    bool RgbToBgraAutoTest(const Options & options)
     {
         bool result = true;
 

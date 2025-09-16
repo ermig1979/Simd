@@ -82,7 +82,7 @@ namespace Test
         return result;
     }
 
-    bool Float32ToFloat16AutoTest()
+    bool Float32ToFloat16AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -168,7 +168,7 @@ namespace Test
         return result;
     }
 
-    bool Float16ToFloat32AutoTest()
+    bool Float16ToFloat32AutoTest(const Options & options)
     {
         bool result = true;
 
@@ -259,7 +259,7 @@ namespace Test
         return result;
     }
 
-    bool SquaredDifferenceSum16fAutoTest()
+    bool SquaredDifferenceSum16fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -286,7 +286,7 @@ namespace Test
         return result;
     }
 
-    bool CosineDistance16fAutoTest()
+    bool CosineDistance16fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -408,7 +408,7 @@ namespace Test
         return result;
     }
 
-    bool CosineDistancesMxNp16fAutoTest()
+    bool CosineDistancesMxNp16fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -506,7 +506,7 @@ namespace Test
         return result;
     }
 
-    bool CosineDistancesMxNa16fAutoTest()
+    bool CosineDistancesMxNa16fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -593,7 +593,7 @@ namespace Test
         return result;
     }
 
-    bool VectorNormNp16fAutoTest()
+    bool VectorNormNp16fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -681,7 +681,7 @@ namespace Test
         return result;
     }
 
-    bool VectorNormNa16fAutoTest()
+    bool VectorNormNa16fAutoTest(const Options & options)
     {
         bool result = true;
 

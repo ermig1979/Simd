@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -175,7 +176,7 @@ namespace Test
         return result;
     }
 
-    bool OperationBinary8uAutoTest()
+    bool OperationBinary8uAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -242,7 +243,7 @@ namespace Test
         return result;
     }
 
-    bool OperationBinary16iAutoTest()
+    bool OperationBinary16iAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -305,7 +306,7 @@ namespace Test
         return result;
     }
 
-    bool VectorProductAutoTest()
+    bool VectorProductAutoTest(const Options & options)
     {
         bool result = true;
 

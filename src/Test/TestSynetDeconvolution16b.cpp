@@ -26,6 +26,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestSynetConvolutionParam.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynetDeconvolution16b.h"
 
@@ -211,7 +212,7 @@ namespace Test
         return result;
     }
 
-    bool SynetDeconvolution16bForwardAutoTest()
+    bool SynetDeconvolution16bForwardAutoTest(const Options & options)
     {
         bool result = true;
 

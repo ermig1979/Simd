@@ -87,7 +87,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralConvertAutoTest()
+    bool NeuralConvertAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -186,7 +186,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralProductSumAutoTest()
+    bool NeuralProductSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -274,7 +274,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddVectorMultipliedByValueAutoTest()
+    bool NeuralAddVectorMultipliedByValueAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -360,7 +360,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddVectorAutoTest()
+    bool NeuralAddVectorAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -445,7 +445,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddValueAutoTest()
+    bool NeuralAddValueAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -542,7 +542,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralPowAutoTest()
+    bool NeuralPowAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -628,7 +628,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralDerivativeSigmoidAutoTest()
+    bool NeuralDerivativeSigmoidAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -658,7 +658,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralDerivativeTanhAutoTest()
+    bool NeuralDerivativeTanhAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -688,7 +688,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralDerivativeReluAutoTest()
+    bool NeuralDerivativeReluAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -781,7 +781,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralUpdateWeightsAutoTest()
+    bool NeuralUpdateWeightsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -875,7 +875,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralAdaptiveGradientUpdateAutoTest()
+    bool NeuralAdaptiveGradientUpdateAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -957,7 +957,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralPooling1x1Max3x3AutoTest()
+    bool NeuralPooling1x1Max3x3AutoTest(const Options & options)
     {
         bool result = true;
         Size stride(1, 1), pooling(3, 3), pad(1, 1);
@@ -988,7 +988,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralPooling2x2Max2x2AutoTest()
+    bool NeuralPooling2x2Max2x2AutoTest(const Options & options)
     {
         bool result = true;
         Size stride(2, 2), pooling(2, 2), pad(0, 0);
@@ -1019,7 +1019,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralPooling2x2Max3x3AutoTest()
+    bool NeuralPooling2x2Max3x3AutoTest(const Options & options)
     {
         bool result = true;
         Size stride(2, 2), pooling(3, 3), pad(0, 0);

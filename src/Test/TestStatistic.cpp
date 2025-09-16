@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -84,7 +85,7 @@ namespace Test
         return result;
     }
 
-    bool GetStatisticAutoTest()
+    bool GetStatisticAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -194,7 +195,7 @@ namespace Test
         return result;
     }
 
-    bool GetMomentsAutoTest()
+    bool GetMomentsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -307,7 +308,7 @@ namespace Test
         return result;
     }
 
-    bool GetObjectMomentsAutoTest()
+    bool GetObjectMomentsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -393,7 +394,7 @@ namespace Test
         return result;
     }
 
-    bool GetRowSumsAutoTest()
+    bool GetRowSumsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -423,7 +424,7 @@ namespace Test
         return result;
     }
 
-    bool GetColSumsAutoTest()
+    bool GetColSumsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -452,7 +453,7 @@ namespace Test
         return result;
     }
 
-    bool GetAbsDyRowSumsAutoTest()
+    bool GetAbsDyRowSumsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -482,7 +483,7 @@ namespace Test
         return result;
     }
 
-    bool GetAbsDxColSumsAutoTest()
+    bool GetAbsDxColSumsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -567,7 +568,7 @@ namespace Test
         return result;
     }
 
-    bool ValueSumAutoTest()
+    bool ValueSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -597,7 +598,7 @@ namespace Test
         return result;
     }
 
-    bool SquareSumAutoTest()
+    bool SquareSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -627,7 +628,7 @@ namespace Test
         return result;
     }
 
-    bool SobelDxAbsSumAutoTest()
+    bool SobelDxAbsSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -657,7 +658,7 @@ namespace Test
         return result;
     }
 
-    bool SobelDyAbsSumAutoTest()
+    bool SobelDyAbsSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -687,7 +688,7 @@ namespace Test
         return result;
     }
 
-    bool LaplaceAbsSumAutoTest()
+    bool LaplaceAbsSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -772,7 +773,7 @@ namespace Test
         return result;
     }
 
-    bool ValueSquareSumAutoTest()
+    bool ValueSquareSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -869,7 +870,7 @@ namespace Test
         return result;
     }
 
-    bool ValueSquareSumsAutoTest()
+    bool ValueSquareSumsAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -958,7 +959,7 @@ namespace Test
         return result;
     }
 
-    bool CorrelationSumAutoTest()
+    bool CorrelationSumAutoTest(const Options & options)
     {
         bool result = true;
 

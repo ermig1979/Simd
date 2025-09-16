@@ -26,6 +26,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestTensor.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynet.h"
 
@@ -91,7 +92,7 @@ namespace Test
         return result;
     }
 
-    bool SynetDequantizeLinearAutoTest()
+    bool SynetDequantizeLinearAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -175,7 +176,7 @@ namespace Test
         return result;
     }
 
-    bool SynetQuantizeLinearAutoTest()
+    bool SynetQuantizeLinearAutoTest(const Options & options)
     {
         bool result = true;
 

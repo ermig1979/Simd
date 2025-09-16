@@ -92,7 +92,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlendingAutoTest()
+    bool AlphaBlendingAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -193,7 +193,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlending2xAutoTest()
+    bool AlphaBlending2xAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -286,7 +286,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlendingBgraToYuv420pAutoTest()
+    bool AlphaBlendingBgraToYuv420pAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -381,7 +381,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlendingUniformAutoTest()
+    bool AlphaBlendingUniformAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -476,7 +476,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaFillingAutoTest()
+    bool AlphaFillingAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -567,7 +567,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaPremultiplyAutoTest()
+    bool AlphaPremultiplyAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -597,7 +597,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaUnpremultiplyAutoTest()
+    bool AlphaUnpremultiplyAutoTest(const Options & options)
     {
         bool result = true;
 

@@ -184,7 +184,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntEncode32fAutoTest()
+    bool DescrIntEncode32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -269,7 +269,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntEncode16fAutoTest()
+    bool DescrIntEncode16fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -355,7 +355,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntDecode32fAutoTest()
+    bool DescrIntDecode32fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -444,7 +444,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntDecode16fAutoTest()
+    bool DescrIntDecode16fAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -531,7 +531,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntCosineDistanceAutoTest()
+    bool DescrIntCosineDistanceAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -620,7 +620,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntCosineDistancesMxNaAutoTest()
+    bool DescrIntCosineDistancesMxNaAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -707,7 +707,7 @@ namespace Test
         return result;
     }
 
-    bool DescrIntCosineDistancesMxNpAutoTest()
+    bool DescrIntCosineDistancesMxNpAutoTest(const Options & options)
     {
         bool result = true;
 

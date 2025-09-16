@@ -182,6 +182,8 @@ namespace Test
 
         double warmUpTime;
 
+        uint32_t disabledExtensions;
+
         Options(int argc, char* argv[])
             : ArgsParser(argc, argv, true)
             , mode(Auto)
@@ -202,6 +204,7 @@ namespace Test
             source = GetArg("-s", "", false);
             output = GetArg("-o", "", false);
             warmUpTime = FromString<int>(GetArg("-wu", "0", false)) * 0.001;
+            disabledExtensions = FromString<uint32_t>(GetArg("-de", "0", false));
 
             for (int i = 1; i < argc; ++i)
             {

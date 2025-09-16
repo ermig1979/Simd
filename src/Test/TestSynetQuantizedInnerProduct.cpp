@@ -26,6 +26,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestTensor.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynetQuantizedInnerProduct.h"
 
@@ -300,7 +301,7 @@ namespace Test
         return result;
     }
 
-    bool SynetQuantizedInnerProductForwardAutoTest()
+    bool SynetQuantizedInnerProductForwardAutoTest(const Options & options)
     {
         bool result = true;
 

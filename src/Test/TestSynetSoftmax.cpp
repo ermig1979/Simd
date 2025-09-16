@@ -27,6 +27,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynet.h"
 
@@ -98,7 +99,7 @@ namespace Test
         return result;
     }
 
-    bool SynetSoftmaxLayerForwardAutoTest()
+    bool SynetSoftmaxLayerForwardAutoTest(const Options & options)
     {
         bool result = true;
 

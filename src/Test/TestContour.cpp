@@ -85,7 +85,7 @@ namespace Test
         return result;
     }
 
-    bool ContourMetricsMaskedAutoTest()
+    bool ContourMetricsMaskedAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -171,7 +171,7 @@ namespace Test
         return result;
     }
 
-    bool ContourAnchorsAutoTest()
+    bool ContourAnchorsAutoTest(const Options & options)
     {
         bool result = true;
 

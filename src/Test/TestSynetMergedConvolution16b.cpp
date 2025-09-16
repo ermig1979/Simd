@@ -28,6 +28,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 #include "Simd/SimdSynetMergedConvolution16b.h"
 #include "Simd/SimdSynet.h"
@@ -322,7 +323,7 @@ namespace Test
         return result;
     }
 
-    bool SynetMergedConvolution16bForwardAutoTest()
+    bool SynetMergedConvolution16bForwardAutoTest(const Options & options)
     {
         bool result = true;
 

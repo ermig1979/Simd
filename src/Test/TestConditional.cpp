@@ -26,6 +26,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestString.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -91,7 +92,7 @@ namespace Test
         return result;
     }
 
-    bool ConditionalCount8uAutoTest()
+    bool ConditionalCount8uAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -183,7 +184,7 @@ namespace Test
         return result;
     }
 
-    bool ConditionalCount16iAutoTest()
+    bool ConditionalCount16iAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -277,7 +278,7 @@ namespace Test
         return result;
     }
 
-    bool ConditionalSumAutoTest()
+    bool ConditionalSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -307,7 +308,7 @@ namespace Test
         return result;
     }
 
-    bool ConditionalSquareSumAutoTest()
+    bool ConditionalSquareSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -337,7 +338,7 @@ namespace Test
         return result;
     }
 
-    bool ConditionalSquareGradientSumAutoTest()
+    bool ConditionalSquareGradientSumAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -433,7 +434,7 @@ namespace Test
         return result;
     }
 
-    bool ConditionalFillAutoTest()
+    bool ConditionalFillAutoTest(const Options & options)
     {
         bool result = true;
 

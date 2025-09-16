@@ -24,6 +24,7 @@
 #include "Test/TestCompare.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
 
 namespace Test
 {
@@ -90,7 +91,7 @@ namespace Test
         return result;
     }
 
-    bool Base64DecodeAutoTest()
+    bool Base64DecodeAutoTest(const Options & options)
     {
         bool result = true;
 
@@ -178,7 +179,7 @@ namespace Test
         return result;
     }
 
-    bool Base64EncodeAutoTest()
+    bool Base64EncodeAutoTest(const Options & options)
     {
         bool result = true;
 

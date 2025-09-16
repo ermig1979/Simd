@@ -108,7 +108,7 @@ namespace Test
         return result;
     }
 
-    bool ShiftBilinearAutoTest()
+    bool ShiftBilinearAutoTest(const Options & options)
     {
         bool result = true;
 
