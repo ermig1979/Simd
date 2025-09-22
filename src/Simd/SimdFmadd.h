@@ -25,13 +25,48 @@
 #define __SimdFmadd_h__
 
 #include "Simd/SimdDefs.h"
+#include "Simd/SimdConvert.h"
 
 namespace Simd
 {
+    namespace Base
+    {
+        template<bool nofma> SIMD_INLINE float Fmadd(float a, float b, float c);
+
+        template <> SIMD_INLINE float Fmadd<false>(float a, float b, float c)
+        {
+            return float(double(a) * double(b) + double(c));
+        }
+
+        template <> SIMD_INLINE float Fmadd<true>(float a, float b, float c)
+        {
+            return a * b + c;
+        }
+    }
+
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        template<bool nofma> SIMD_INLINE __m128 Fmadd(__m128 a, __m128 b, __m128 c);
+
+        template <> SIMD_INLINE __m128 Fmadd<false>(__m128 a, __m128 b, __m128 c)
+        {
+            __m128d lo = _mm_add_pd(_mm_mul_pd(Fp32ToFp64<0>(a), Fp32ToFp64<0>(b)), Fp32ToFp64<0>(c));
+            __m128d hi = _mm_add_pd(_mm_mul_pd(Fp32ToFp64<1>(a), Fp32ToFp64<1>(b)), Fp32ToFp64<1>(c));
+            return Fp64ToFp32(lo, hi);
+        }
+
+        template <> SIMD_INLINE __m128 Fmadd<true>(__m128 a, __m128 b, __m128 c)
+        {
+            return _mm_add_ps(_mm_mul_ps(a, b), c);
+        }
+    }
+#endif
+
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
-        template<bool nofma> __m128 Fmadd(__m128 a, __m128 b, __m128 c);
+        template<bool nofma> SIMD_INLINE __m128 Fmadd(__m128 a, __m128 b, __m128 c);
 
         template <> SIMD_INLINE __m128 Fmadd<false>(__m128 a, __m128 b, __m128 c)
         {
@@ -45,7 +80,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool nofma> __m128 Fmadd(__m128 a, __m128 b, __m128 c, const __m128 & d);
+        template<bool nofma> SIMD_INLINE __m128 Fmadd(__m128 a, __m128 b, __m128 c, const __m128 & d);
 
         template <> SIMD_INLINE __m128 Fmadd<false>(__m128 a, __m128 b, __m128 c, const __m128 & d)
         {
@@ -59,7 +94,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool nofma> __m256 Fmadd(__m256 a, __m256 b, __m256 c);
+        template<bool nofma> SIMD_INLINE __m256 Fmadd(__m256 a, __m256 b, __m256 c);
 
         template <> SIMD_INLINE __m256 Fmadd<false>(__m256 a, __m256 b, __m256 c)
         {
@@ -73,7 +108,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool nofma> __m256 Fmadd(__m256 a, __m256 b, __m256 c, const __m256 &  d);
+        template<bool nofma> SIMD_INLINE __m256 Fmadd(__m256 a, __m256 b, __m256 c, const __m256 &  d);
 
         template <> SIMD_INLINE __m256 Fmadd<false>(__m256 a, __m256 b, __m256 c, const __m256 & d)
         {
@@ -90,7 +125,7 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template<bool nofma> __m512 Fmadd(__m512 a, __m512 b, __m512 c);
+        template<bool nofma> SIMD_INLINE __m512 Fmadd(__m512 a, __m512 b, __m512 c);
 
         template <> SIMD_INLINE __m512 Fmadd<false>(__m512 a, __m512 b, __m512 c)
         {

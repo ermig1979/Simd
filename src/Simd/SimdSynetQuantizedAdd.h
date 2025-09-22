@@ -37,26 +37,26 @@ namespace Simd
     {
         Shape aShape, bShape;
         SimdTensorDataType aType, bType, dType;
-        size_t aBias, bBias, dZero;
-        float aNorm, bNorm, dNorm, actParams[2];
+        float aScale, bScale, dScale, actParams[2];
+        size_t aZero, bZero, dZero;
         SimdConvolutionActivationType actType;
 
         QuantizedAddParam(
-            const size_t* as, size_t ac, SimdTensorDataType at, int32_t ab, const float* an, 
-            const size_t* bs, size_t bc, SimdTensorDataType bt, int32_t bb, const float* bn,
-            SimdConvolutionActivationType act, const float *ap, SimdTensorDataType dt, const float* dn, int32_t dz)
+            const size_t* as, size_t ac, SimdTensorDataType at, const float* aSc, int32_t aZr, 
+            const size_t* bs, size_t bc, SimdTensorDataType bt, const float* bSc, int32_t bZr,
+            SimdConvolutionActivationType act, const float *ap, SimdTensorDataType dt, const float* dSc, int32_t dZr)
             : aShape(as, as + ac)
             , aType(at)
-            , aBias(ab)
-            , aNorm(an ? *an : 1.0f)
+            , aScale(aSc ? *aSc : 1.0f)
+            , aZero(aZr)
             , bShape(bs, bs + bc)
             , bType(bt)
-            , bBias(bb)
-            , bNorm(bn ? *bn : 1.0f)
+            , bScale(bSc ? *bSc : 1.0f)
+            , bZero(bZr)
             , actType(act)
             , dType(dt)
-            , dNorm(dn ? *dn : 1.0f)
-            , dZero(dz)
+            , dScale(dSc ? *dSc : 1.0f)
+            , dZero(dZr)
         {
             actParams[0] = ap ? ap[0] : 0.0f;
             actParams[1] = ap ? ap[1] : 0.0f;
@@ -86,6 +86,8 @@ namespace Simd
 
     namespace Base
     {
+        //------------------------------------------------------------------------------------------------
+
         class SynetQuantizedAddUniform : public SynetQuantizedAdd
         {
         public:
@@ -95,7 +97,7 @@ namespace Simd
 
             virtual void Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
-            typedef void(*UniformPtr)(const uint8_t* a8, int aBias, float aNorm, const uint8_t* b8, int bBias, float bNorm, size_t size, const float* params, float dNorm, int dZero, uint8_t* dst8);
+            typedef void(*UniformPtr)(const uint8_t* a8, float aScale, int aZero, const uint8_t* b8, float bScale, int bZero, size_t size, const float* params, float dScale, int dZero, uint8_t* dst8);
 
         protected:
             size_t _size;
@@ -104,9 +106,9 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
-            const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm,
-            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+            const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -120,9 +122,9 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
-            const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm,
-            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+            const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
     }
 #endif
 
@@ -137,9 +139,9 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
-            const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm,
-            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+            const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
     }
 #endif
 
@@ -154,9 +156,9 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
-            const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm,
-            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+            const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
     }
 #endif
 }

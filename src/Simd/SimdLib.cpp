@@ -5904,18 +5904,18 @@ SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope,
 #endif
 }
 
-SIMD_API void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
-    const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm,
-    SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero)
+SIMD_API void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+    const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+    SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetQuantizedAddInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
-        const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm,
-        SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+    typedef void* (*SimdSynetQuantizedAddInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+        const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+        SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
     const static SimdSynetQuantizedAddInitPtr simdSynetQuantizedAddInit = SIMD_FUNC3(SynetQuantizedAddInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
-    return simdSynetQuantizedAddInit(aShape, aCount, aType, aBias, aNorm, bShape, bCount, bType, bBias, bNorm, actType, actParams, dstType, dstNorm, dstZero);
+    return simdSynetQuantizedAddInit(aShape, aCount, aType, aScale, aZero, bShape, bCount, bType, bScale, bZero, actType, actParams, dstType, dstScale, dstZero);
 #else
     assert(0);
     return 0;

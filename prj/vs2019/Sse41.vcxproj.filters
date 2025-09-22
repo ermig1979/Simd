@@ -773,13 +773,13 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConvert.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

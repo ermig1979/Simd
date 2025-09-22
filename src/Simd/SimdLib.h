@@ -7526,32 +7526,32 @@ extern "C"
 
     /*! @ingroup synet_quantized_add
 
-        \fn void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm, const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm, SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+        \fn void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero, const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
 
         \short Initilizes quantized addition algorithm.
 
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
         \param [in] aType - a type of input A tensor. Can be FP32 of UINT8.
-        \param [in] aBias - a dequantization bias parameter of A tensor (-zero).
-        \param [in] aNorm - a dequantization norm parameter of A tensor (scale).
+        \param [in] aScale - a quantization scale parameter of A tensor.
+        \param [in] aZero - a quantization zero parameter of A tensor.
         \param [in] bShape - a pointer to shape of input B tensor.
         \param [in] bCount - a count of dimensions of input B tensor.
         \param [in] bType - a type of input B tensor. Can be FP32 of UINT8.
-        \param [in] bBias - a dequantization bias parameter of B tensor (-zero).
-        \param [in] bNorm - a dequantization norm parameter of B tensor (scale).
+        \param [in] bScale - a quantization scale parameter of B tensor.
+        \param [in] bZero - a quantization zero parameter of B tensor.
         \param [in] actType - an activation function type (if it merged to quantized addition).
         \param [in] actParams - a pointer to activation function parameters. Can be NULL.
         \param [in] dstType - a type of output tensor. Can be FP32 of UINT8.
-        \param [in] dstNorm - an output quantization norm (1/scale). 
+        \param [in] dstScale - an output quantization scale. 
         \param [in] dstZero - an output quantization zero.
         \return a pointer to quantized addition context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in function ::SimdSynetQuantizedAddForward.
     */
     SIMD_API void* SimdSynetQuantizedAddInit(
-        const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
-        const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm, 
-        SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+        const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+        const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, 
+        SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
 
     /*! @ingroup synet_quantized_add
 

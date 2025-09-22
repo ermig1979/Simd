@@ -38,9 +38,9 @@ namespace Test
     {
         struct FuncQa
         {
-            typedef void* (*FuncPtr)(const size_t* aShape, size_t aCount, SimdTensorDataType aType, int32_t aBias, const float* aNorm,
-                const size_t* bShape, size_t bCount, SimdTensorDataType bType, int32_t bBias, const float* bNorm,
-                SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstNorm, int32_t dstZero);
+            typedef void* (*FuncPtr)(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+                const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+                SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
 
             FuncPtr func;
             String desc;
@@ -94,11 +94,11 @@ namespace Test
         uint8_t* dst1 = dstType == SimdTensorData32f ? (uint8_t*)dst1f.Data() : (uint8_t*)dst1u.Data();
         uint8_t* dst2 = dstType == SimdTensorData32f ? (uint8_t*)dst2f.Data() : (uint8_t*)dst2u.Data();
 
-        int32_t aBias = 47, bBias = 30, dZero = 3;
-        float aNorm = 0.01f, bNorm = 0.02f, dNorm = 100.0f, actParams[2] = { 0.0f, 6.0f };
+        float aScale = 0.010f, bScale = 0.020f, dScale = 0.015f, actParams[2] = { 0.0f, 6.0f };
+        int32_t aZero = 47, bZero = 30, dZero = 38;
 
-        void* context1 = f1.func(aShape.data(), aShape.size(), aType, aBias, &aNorm, bShape.data(), bShape.size(), bType, bBias, &bNorm, actType, actParams, dstType, &dNorm, dZero);
-        void* context2 = f2.func(aShape.data(), aShape.size(), aType, aBias, &aNorm, bShape.data(), bShape.size(), bType, bBias, &bNorm, actType, actParams, dstType, &dNorm, dZero);
+        void* context1 = f1.func(aShape.data(), aShape.size(), aType, &aScale, aZero, bShape.data(), bShape.size(), bType, &bScale, bZero, actType, actParams, dstType, &dScale, dZero);
+        void* context2 = f2.func(aShape.data(), aShape.size(), aType, &aScale, aZero, bShape.data(), bShape.size(), bType, &bScale, bZero, actType, actParams, dstType, &dScale, dZero);
 
         if (context1 == NULL)
             return true;

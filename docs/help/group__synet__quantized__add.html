@@ -50,9 +50,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gade92e8969cb9377a4ff2b7b934371540"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__add.html#gade92e8969cb9377a4ff2b7b934371540">SimdSynetQuantizedAddInit</a> (const size_t *aShape, size_t aCount, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> aType, int32_t aBias, const float *aNorm, const size_t *bShape, size_t bCount, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> bType, int32_t bBias, const float *bNorm, <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> actType, const float *actParams, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> dstType, const float *dstNorm, int32_t dstZero)</td></tr>
-<tr class="memdesc:gade92e8969cb9377a4ff2b7b934371540"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes quantized addition algorithm.  <a href="group__synet__quantized__add.html#gade92e8969cb9377a4ff2b7b934371540">More...</a><br /></td></tr>
-<tr class="separator:gade92e8969cb9377a4ff2b7b934371540"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5fcc723e03d0ab761231434e7158f9b3"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3">SimdSynetQuantizedAddInit</a> (const size_t *aShape, size_t aCount, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> aType, const float *aScale, int32_t aZero, const size_t *bShape, size_t bCount, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> bType, const float *bScale, int32_t bZero, <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> actType, const float *actParams, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> dstType, const float *dstScale, int32_t dstZero)</td></tr>
+<tr class="memdesc:ga5fcc723e03d0ab761231434e7158f9b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes quantized addition algorithm.  <a href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3">More...</a><br /></td></tr>
+<tr class="separator:ga5fcc723e03d0ab761231434e7158f9b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4ac762cb4d76eacf764bbed5eb65887c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__add.html#ga4ac762cb4d76eacf764bbed5eb65887c">SimdSynetQuantizedAddForward</a> (void *context, const uint8_t *a, const uint8_t *b, uint8_t *dst)</td></tr>
 <tr class="memdesc:ga4ac762cb4d76eacf764bbed5eb65887c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of quantized addition algorithm.  <a href="group__synet__quantized__add.html#ga4ac762cb4d76eacf764bbed5eb65887c">More...</a><br /></td></tr>
 <tr class="separator:ga4ac762cb4d76eacf764bbed5eb65887c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -60,8 +60,8 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >A framework to accelerate Quantized addition in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="gade92e8969cb9377a4ff2b7b934371540" name="gade92e8969cb9377a4ff2b7b934371540"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gade92e8969cb9377a4ff2b7b934371540">&#9670;&#160;</a></span>SimdSynetQuantizedAddInit()</h2>
+<a id="ga5fcc723e03d0ab761231434e7158f9b3" name="ga5fcc723e03d0ab761231434e7158f9b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5fcc723e03d0ab761231434e7158f9b3">&#9670;&#160;</a></span>SimdSynetQuantizedAddInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -87,14 +87,14 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int32_t&#160;</td>
-          <td class="paramname"><em>aBias</em>, </td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>aScale</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>aNorm</em>, </td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>aZero</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -117,14 +117,14 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int32_t&#160;</td>
-          <td class="paramname"><em>bBias</em>, </td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>bScale</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>bNorm</em>, </td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>bZero</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -148,7 +148,7 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>dstNorm</em>, </td>
+          <td class="paramname"><em>dstScale</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -170,17 +170,17 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">aShape</td><td>- a pointer to shape of input A tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">aCount</td><td>- a count of dimensions of input A tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">aType</td><td>- a type of input A tensor. Can be FP32 of UINT8. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">aBias</td><td>- a dequantization bias parameter of A tensor (-zero). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">aNorm</td><td>- a dequantization norm parameter of A tensor (scale). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">aScale</td><td>- a quantization scale parameter of A tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">aZero</td><td>- a quantization zero parameter of A tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bShape</td><td>- a pointer to shape of input B tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bCount</td><td>- a count of dimensions of input B tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bType</td><td>- a type of input B tensor. Can be FP32 of UINT8. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bBias</td><td>- a dequantization bias parameter of B tensor (-zero). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bNorm</td><td>- a dequantization norm parameter of B tensor (scale). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bScale</td><td>- a quantization scale parameter of B tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bZero</td><td>- a quantization zero parameter of B tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">actType</td><td>- an activation function type (if it merged to quantized addition). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">actParams</td><td>- a pointer to activation function parameters. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstType</td><td>- a type of output tensor. Can be FP32 of UINT8. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstNorm</td><td>- an output quantization norm (1/scale). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstScale</td><td>- an output quantization scale. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstZero</td><td>- an output quantization zero. </td></tr>
   </table>
   </dd>
@@ -230,7 +230,7 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of quantized addition algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized addition context. It must be created by function <a class="el" href="group__synet__quantized__add.html#gade92e8969cb9377a4ff2b7b934371540" title="Initilizes quantized addition algorithm.">SimdSynetQuantizedAddInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized addition context. It must be created by function <a class="el" href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3" title="Initilizes quantized addition algorithm.">SimdSynetQuantizedAddInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to input A tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to input B tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>
