@@ -296,9 +296,9 @@ namespace Simd
     {
         ConvParam conv[3];
         size_t count;
-        SimdBool add;
+        int add;
 
-        MergConvParam(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility = SimdSynetCompatibilityDefault)
+        MergConvParam(size_t batch, const SimdConvolutionParameters* convs, size_t count, int add, SimdSynetCompatibilityType compatibility = SimdSynetCompatibilityDefault)
         {
             assert(count <= 3);
             this->count = count;

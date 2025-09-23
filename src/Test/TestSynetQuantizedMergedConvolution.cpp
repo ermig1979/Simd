@@ -44,7 +44,7 @@ namespace Test
 
         struct FuncQMC
         {
-            typedef void*(*FuncPtr)(size_t batch, const SimdConvolutionParameters* params, size_t count, SimdBool add);
+            typedef void*(*FuncPtr)(size_t batch, const SimdConvolutionParameters* params, size_t count, int add);
 
             FuncPtr func;
             String desc;

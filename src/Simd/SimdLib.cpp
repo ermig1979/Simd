@@ -6085,11 +6085,11 @@ SIMD_API void SimdSynetQuantizedInnerProductForward(void* context, const uint8_t
 #endif
 }
 
-SIMD_API void* SimdSynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add)
+SIMD_API void* SimdSynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, int add)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetQuantizedMergedConvolutionInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
+    typedef void* (*SimdSynetQuantizedMergedConvolutionInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, int add);
     const static SimdSynetQuantizedMergedConvolutionInitPtr simdSynetQuantizedMergedConvolutionInit = SIMD_FUNC5(SynetQuantizedMergedConvolutionInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     return simdSynetQuantizedMergedConvolutionInit(batch, convs, count, add);

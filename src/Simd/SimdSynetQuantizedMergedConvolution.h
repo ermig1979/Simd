@@ -72,7 +72,7 @@ namespace Simd
         Array8i _weight[3];
         Array32i _bias[3];
         Array32f _norm[3];
-        float _ioScale[5], _srcNorm, _dstNorm, _addBias;
+        float _ioScale[5], _aNorm, _bNorm, _term;
         int32_t _ioZero[5];
         size_t _batch, _merge, _count, _sizeS, _sizeD;
     };
@@ -98,7 +98,7 @@ namespace Simd
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
             void Depthwise(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const int8_t* weight, int32_t* dst);
-            void AddSrc(const uint8_t* src, uint8_t* dst);
+            void Add(const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
             size_t _sizeB;
         };
@@ -200,7 +200,7 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
+        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, int add);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -250,7 +250,7 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
+        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, int add);
     }
 #endif
 
@@ -301,7 +301,7 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
+        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, int add);
     }
 #endif
 
@@ -352,7 +352,7 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
+        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, int add);
     }
 #endif
 
@@ -401,7 +401,7 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
+        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, int add);
     }
 #endif
 
@@ -450,7 +450,7 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
+        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, int add);
     }
 #endif
 

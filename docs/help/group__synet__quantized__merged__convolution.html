@@ -50,9 +50,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga262dddd5ae5a3ba59c74a3f92537b5e5"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__merged__convolution.html#ga262dddd5ae5a3ba59c74a3f92537b5e5">SimdSynetQuantizedMergedConvolutionInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> add)</td></tr>
-<tr class="memdesc:ga262dddd5ae5a3ba59c74a3f92537b5e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes Quantized merged convolution algorithm.  <a href="group__synet__quantized__merged__convolution.html#ga262dddd5ae5a3ba59c74a3f92537b5e5">More...</a><br /></td></tr>
-<tr class="separator:ga262dddd5ae5a3ba59c74a3f92537b5e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa9f441e637281d082be3f121f6364a0b"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b">SimdSynetQuantizedMergedConvolutionInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, int add)</td></tr>
+<tr class="memdesc:gaa9f441e637281d082be3f121f6364a0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes Quantized merged convolution algorithm.  <a href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b">More...</a><br /></td></tr>
+<tr class="separator:gaa9f441e637281d082be3f121f6364a0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae670512bddad450107bd87e79f78754d"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__merged__convolution.html#gae670512bddad450107bd87e79f78754d">SimdSynetQuantizedMergedConvolutionExternalBufferSize</a> (const void *context)</td></tr>
 <tr class="memdesc:gae670512bddad450107bd87e79f78754d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of external temporary buffer required for Quantized merged convolution algorithm.  <a href="group__synet__quantized__merged__convolution.html#gae670512bddad450107bd87e79f78754d">More...</a><br /></td></tr>
 <tr class="separator:gae670512bddad450107bd87e79f78754d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -72,8 +72,8 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >A framework to accelerate Quantized merged convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ga262dddd5ae5a3ba59c74a3f92537b5e5" name="ga262dddd5ae5a3ba59c74a3f92537b5e5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga262dddd5ae5a3ba59c74a3f92537b5e5">&#9670;&#160;</a></span>SimdSynetQuantizedMergedConvolutionInit()</h2>
+<a id="gaa9f441e637281d082be3f121f6364a0b" name="gaa9f441e637281d082be3f121f6364a0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa9f441e637281d082be3f121f6364a0b">&#9670;&#160;</a></span>SimdSynetQuantizedMergedConvolutionInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -99,7 +99,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>add</em>&#160;</td>
         </tr>
         <tr>
@@ -143,7 +143,7 @@ Functions</h2></td></tr>
 <p>Gets size of external temporary buffer required for Quantized merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#ga262dddd5ae5a3ba59c74a3f92537b5e5" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -170,7 +170,7 @@ Functions</h2></td></tr>
 <p>Gets size of internal buffer used inside Quantized merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#ga262dddd5ae5a3ba59c74a3f92537b5e5" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -197,7 +197,7 @@ Functions</h2></td></tr>
 <p>Gets description of internal implementation of Quantized merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#ga262dddd5ae5a3ba59c74a3f92537b5e5" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -258,7 +258,7 @@ Functions</h2></td></tr>
 <p>Sets weights, biases, input/output parameters required for Quantized merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#ga262dddd5ae5a3ba59c74a3f92537b5e5" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">ioScale</td><td>- a pointer to 32-bit float point input/output tensors scales. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">ioZero</td><td>- a pointer to 8-bit unsigned integer input/output tensors zeros. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to 8-bit integer convolution weights. </td></tr>
@@ -311,7 +311,7 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of Quantized merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#ga262dddd5ae5a3ba59c74a3f92537b5e5" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initilizes Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size of the external temporary buffer is determined by function <a class="el" href="group__synet__quantized__merged__convolution.html#gae670512bddad450107bd87e79f78754d" title="Gets size of external temporary buffer required for Quantized merged convolution algorithm.">SimdSynetQuantizedMergedConvolutionExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>
