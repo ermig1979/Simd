@@ -72,8 +72,8 @@ namespace Simd
         Array8i _weight[3];
         Array32i _bias[3];
         Array32f _norm[3];
-        float _ioScale[5], _srcNorm, _dstNorm, _addScale;
-        int32_t _ioZero[5], _addZero, _srcBias, _dstBias;
+        float _ioScale[5], _srcNorm, _dstNorm, _addBias;
+        int32_t _ioZero[5];
         size_t _batch, _merge, _count, _sizeS, _sizeD;
     };
 
@@ -136,8 +136,7 @@ namespace Simd
             typedef void(*OutputConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 int update, const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t* sum, uint8_t* dst);
 
-            typedef void(*AddInputToOutputPtr)(const uint8_t* a, int aBias, float aNorm, const uint8_t* b, int bBias, float bNorm, 
-                const ConvParam& p, size_t yBeg, size_t yEnd, float dNorm, int dZero, uint8_t* dst);
+            typedef void(*AddInputToOutputPtr)(const uint8_t* a, float aNorm, const uint8_t* b, float bNorm, const ConvParam& p, size_t yBeg, size_t yEnd, float dBias, uint8_t* dst);
 
         protected:
             virtual void SetInput(const int8_t* weight, const ConvParam& p, Array8i& dst);
@@ -370,8 +369,6 @@ namespace Simd
 
         void SetOutputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::OutputConvolutionPtr* funcs);
 
-        void SetAddInputToOutput(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::AddInputToOutputPtr& func);
-
         //------------------------------------------------------------------------------------------------
 
         class SynetQuantizedMergedConvolutionCdc : public Avx512bw::SynetQuantizedMergedConvolutionCdc
@@ -420,8 +417,6 @@ namespace Simd
         void SetDepthwiseConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwiseConvolutionPtr& func);
 
         void SetOutputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::OutputConvolutionPtr* funcs);
-
-        void SetAddInputToOutput(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::AddInputToOutputPtr& func);
 
         //------------------------------------------------------------------------------------------------
 

@@ -24,6 +24,8 @@
 #include "Simd/SimdSynetQuantizedMergedConvolution.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetConvolution8iCommon.h"
+#include "Simd/SimdSynetQuantizedAddCommon.h"
+#include "Simd/SimdFmadd.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
@@ -108,12 +110,9 @@ namespace Simd
         if (p.add)
         {
             assert(p.count == 3 && p.conv[0].srcC == p.conv[2].dstC && p.conv[0].srcH == p.conv[2].dstH && p.conv[0].srcW == p.conv[2].dstW);
-            _srcBias = -ioZero[0];
-            _srcNorm = ioScale[0];
-            _dstBias = -ioZero[3];
-            _dstNorm = ioScale[3];
-            _addZero = ioZero[4];
-            _addScale = 1.0f / ioScale[4];
+            _srcNorm = ioScale[0] / ioScale[4];
+            _dstNorm = ioScale[3] / ioScale[4];
+            _addBias = float(ioZero[4]) - (_srcNorm * float(ioZero[0]) + _dstNorm * float(ioZero[3]));
         }
     }
 
@@ -258,11 +257,7 @@ namespace Simd
         void SynetQuantizedMergedConvolutionRef::AddSrc(const uint8_t* src, uint8_t* dst)
         {
             for (size_t i = 0; i < _sizeS; ++i)
-            {
-                float _src = DequantizeLinear(src[i], _srcBias, _srcNorm);
-                float _dst = DequantizeLinear(dst[i], _dstBias, _dstNorm);
-                dst[i] = QuantizeLinear(_src + _dst, _addScale, _addZero, 0, 255);
-            }
+                QuantizedAdd(src[i], _srcNorm, dst[i], _dstNorm, _addBias, dst[i]);
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -558,7 +553,7 @@ namespace Simd
                                 _weight[2].data + c * a.owStep, _bias[2].data, _norm[2].data, _ioZero[3], odBuf, dst);
                          
                         if (p.add && c + maC == C)
-                            _addInputToOutput(src, _srcBias, _srcNorm, dst, _dstBias, _dstNorm, c2, dyBeg, dyEnd, _addScale, _addZero, dst);
+                            _addInputToOutput(src, _srcNorm, dst, _dstNorm, c2, dyBeg, dyEnd, _addBias, dst);
                         dyBeg = dyEnd;
                         syBeg = syEnd;
                     }

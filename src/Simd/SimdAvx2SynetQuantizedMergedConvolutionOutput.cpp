@@ -24,6 +24,7 @@
 #include "Simd/SimdSynetQuantizedMergedConvolution.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetConvolution8iCommon.h"
+#include "Simd/SimdSynetQuantizedAddCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
@@ -190,61 +191,19 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE __m256i QuantizedAdd(const __m256i& a, const __m256i& aBias, const __m256& aNorm, const __m256i& b, const __m256i& bBias, const __m256& bNorm, const __m256& dNorm, const __m256i& dZero)
+        void QuantizedMergedConvolutionAddInputToOutput(const uint8_t* a, float aNorm, const uint8_t* b, float bNorm, const ConvParam& p, size_t yBeg, size_t yEnd, float dBias, uint8_t* dst)
         {
-            return QuantizeLinear(_mm256_add_ps(DequantizeLinear(a, aBias, aNorm), DequantizeLinear(b, bBias, bNorm)), dNorm, dZero);
-        }
-
-        SIMD_INLINE void AddInputToOutput1(const uint8_t* a, const __m256i& aBias, const __m256& aNorm, const uint8_t* b, const __m256i& bBias, const __m256& bNorm, uint8_t* dst, const __m256& dNorm, const __m256i& dZero)
-        {
-            __m256i d0 = QuantizedAdd(_mm256_set1_epi32(a[0]), aBias, aNorm, _mm256_set1_epi32(b[0]), bBias, bNorm, dNorm, dZero);
-            dst[0] = _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_packus_epi16(_mm256_packs_epi32(d0, K_ZERO), K_ZERO)));
-        }
-
-        SIMD_INLINE void AddInputToOutput4(const uint8_t* a, const __m256i& aBias, const __m256& aNorm, const uint8_t* b, const __m256i& bBias, const __m256& bNorm, uint8_t* dst, const __m256& dNorm, const __m256i& dZero)
-        {
-            __m256i a0 = _mm256_cvtepu8_epi32(_mm_set1_epi32(((int32_t*)a)[0]));
-            __m256i b0 = _mm256_cvtepu8_epi32(_mm_set1_epi32(((int32_t*)b)[0]));
-            __m256i d0 = QuantizedAdd(a0, aBias, aNorm, b0, bBias, bNorm, dNorm, dZero);
-            ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_packus_epi16(_mm256_packs_epi32(d0, K_ZERO), K_ZERO)));
-        }
-
-        SIMD_INLINE void AddInputToOutput16(const uint8_t* a, const __m256i& aBias, const __m256& aNorm, const uint8_t* b, const __m256i& bBias, const __m256& bNorm, uint8_t* dst, const __m256& dNorm, const __m256i& dZero)
-        {
-            __m128i _a = _mm_loadu_si128((__m128i*)a);
-            __m128i _b = _mm_loadu_si128((__m128i*)b);
-            __m256i d0 = QuantizedAdd(_mm256_cvtepu8_epi32(_mm_srli_si128(_a, 0 * 8)), aBias, aNorm, _mm256_cvtepu8_epi32(_mm_srli_si128(_b, 0 * 8)), bBias, bNorm, dNorm, dZero);
-            __m256i d1 = QuantizedAdd(_mm256_cvtepu8_epi32(_mm_srli_si128(_a, 1 * 8)), aBias, aNorm, _mm256_cvtepu8_epi32(_mm_srli_si128(_b, 1 * 8)), bBias, bNorm, dNorm, dZero);
-            _mm_storeu_si128((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(d0, d1), K_ZERO)));
-        }
-
-        SIMD_INLINE void AddInputToOutput32(const uint8_t* a, const __m256i& aBias, const __m256& aNorm, const uint8_t* b, const __m256i& bBias, const __m256& bNorm, uint8_t* dst, const __m256& dNorm, const __m256i& dZero)
-        {
-            __m128i a0 = _mm_loadu_si128((__m128i*)a + 0), b0 = _mm_loadu_si128((__m128i*)b + 0);
-            __m256i d0 = QuantizedAdd(_mm256_cvtepu8_epi32(_mm_srli_si128(a0, 0 * 8)), aBias, aNorm, _mm256_cvtepu8_epi32(_mm_srli_si128(b0, 0 * 8)), bBias, bNorm, dNorm, dZero);
-            __m256i d1 = QuantizedAdd(_mm256_cvtepu8_epi32(_mm_srli_si128(a0, 1 * 8)), aBias, aNorm, _mm256_cvtepu8_epi32(_mm_srli_si128(b0, 1 * 8)), bBias, bNorm, dNorm, dZero);
-            __m128i a1 = _mm_loadu_si128((__m128i*)a + 1), b1 = _mm_loadu_si128((__m128i*)b + 1);
-            __m256i d2 = QuantizedAdd(_mm256_cvtepu8_epi32(_mm_srli_si128(a1, 0 * 8)), aBias, aNorm, _mm256_cvtepu8_epi32(_mm_srli_si128(b1, 0 * 8)), bBias, bNorm, dNorm, dZero);
-            __m256i d3 = QuantizedAdd(_mm256_cvtepu8_epi32(_mm_srli_si128(a1, 1 * 8)), aBias, aNorm, _mm256_cvtepu8_epi32(_mm_srli_si128(b1, 1 * 8)), bBias, bNorm, dNorm, dZero);
-            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
-        }
-
-        void QuantizedMergedConvolutionAddInputToOutput(const uint8_t* a, int aBias, float aNorm, const uint8_t* b, int bBias, float bNorm,
-            const ConvParam& p, size_t yBeg, size_t yEnd, float dNorm, int dZero, uint8_t* dst)
-        {
-            __m256i _aBias = _mm256_set1_epi32(aBias), _bBias = _mm256_set1_epi32(bBias), _dZero = _mm256_set1_epi32(dZero);
-            __m256 _aNorm = _mm256_set1_ps(aNorm), _bNorm = _mm256_set1_ps(bNorm), _dNorm = _mm256_set1_ps(dNorm);
+            __m256 _aNorm = _mm256_set1_ps(aNorm), _bNorm = _mm256_set1_ps(bNorm), _dBias = _mm256_set1_ps(dBias);
             size_t beg = yBeg * p.dstW * p.dstC, end = yEnd * p.dstW * p.dstC;
             size_t i = beg, end4 = beg + AlignLo(end - beg, 4), end16 = beg + AlignLo(end - beg, 16), end32 = beg + AlignLo(end - beg, 32);
             for (; i < end32; i += 32)
-                AddInputToOutput32(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero);
+                QuantizedAdd8u8u8u32(a + i, _aNorm, b + i, _bNorm, _dBias, dst + i);
             for (; i < end16; i += 16)
-                AddInputToOutput16(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero);
+                QuantizedAdd8u8u8u16(a + i, _aNorm, b + i, _bNorm, _dBias, dst + i);
             for (; i < end4; i += 4)
-                AddInputToOutput4(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero);
+                QuantizedAdd8u8u8u4(a + i, _aNorm, b + i, _bNorm, _dBias, dst + i);
             for (; i < end; i += 1)
-                AddInputToOutput1(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero);
-
+                QuantizedAdd8u8u8u1(a + i, _aNorm, b + i, _bNorm, _dBias, dst + i);
         }
 
         //------------------------------------------------------------------------------------------------

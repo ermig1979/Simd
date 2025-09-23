@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetQuantizedAdd.h"
+#include "Simd/SimdSynetQuantizedAddCommon.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdFmadd.h"
 
@@ -30,26 +31,6 @@ namespace Simd
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx512bw
     {
-        SIMD_INLINE __m512i QuantizedAdd(const __m512i& a, const __m512& adScale, const __m512i& b, const __m512& bdScale, const __m512& term)
-        {
-            return _mm512_cvtps_epi32(Fmadd<false>(_mm512_cvtepi32_ps(a), adScale, Fmadd<false>(_mm512_cvtepi32_ps(b), bdScale, term)));
-        }
-
-        SIMD_INLINE void QuantizedAdd8u8u8u16(const uint8_t* a, const __m512& adScale, const uint8_t* b, const __m512& bdScale, const __m512& term, uint8_t* dst, __mmask16 tail = -1)
-        {
-            __m512i d0 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, a)), adScale, _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, b)), bdScale, term);
-            _mm_mask_storeu_epi8(dst, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(d0), K_ZERO)));
-        }
-
-        SIMD_INLINE void QuantizedAdd8u8u8u64(const uint8_t* a, const __m512& adScale, const uint8_t* b, const __m512& bdScale, const __m512& term, uint8_t* dst)
-        {
-            __m512i d0 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 0)), adScale, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 0)), bdScale, term);
-            __m512i d1 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 1)), adScale, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 1)), bdScale, term);
-            __m512i d2 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 2)), adScale, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 2)), bdScale, term);
-            __m512i d3 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 3)), adScale, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 3)), bdScale, term);
-            _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
-        }
-
         static void QuantizedAddUniform8u8u8u(const uint8_t* a, float aScale, int aZero, const uint8_t* b, float bScale, int bZero, size_t size, const float*, float dScale, int dZero, uint8_t* dst)
         {
             float adScale = aScale / dScale;

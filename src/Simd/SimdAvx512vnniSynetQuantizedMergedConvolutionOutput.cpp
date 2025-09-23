@@ -233,54 +233,10 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE __m512i QuantizedAdd(const __m512i& a, const __m512i& aBias, const __m512& aNorm, const __m512i& b, const __m512i& bBias, const __m512& bNorm, const __m512& dNorm, const __m512i& dZero)
-        {
-            return QuantizeLinear(_mm512_add_ps(DequantizeLinear(a, aBias, aNorm), DequantizeLinear(b, bBias, bNorm)), dNorm, dZero);
-        }
-
-        SIMD_INLINE void AddInputToOutput16(const uint8_t* a, const __m512i& aBias, const __m512& aNorm, const uint8_t* b, const __m512i& bBias, const __m512& bNorm, uint8_t* dst, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
-        {
-            __m512i d0 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, a)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, b)), bBias, bNorm, dNorm, dZero);
-            _mm_mask_storeu_epi8(dst, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(d0), K_ZERO)));
-        }
-
-        SIMD_INLINE void AddInputToOutput64(const uint8_t* a, const __m512i& aBias, const __m512& aNorm, const uint8_t* b, const __m512i& bBias, const __m512& bNorm, uint8_t* dst, const __m512& dNorm, const __m512i& dZero)
-        {
-            __m512i d0 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 0)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 0)), bBias, bNorm, dNorm, dZero);
-            __m512i d1 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 1)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 1)), bBias, bNorm, dNorm, dZero);
-            __m512i d2 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 2)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 2)), bBias, bNorm, dNorm, dZero);
-            __m512i d3 = QuantizedAdd(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)a + 3)), aBias, aNorm, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)b + 3)), bBias, bNorm, dNorm, dZero);
-            _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
-        }
-
-        void QuantizedMergedConvolutionAddInputToOutput(const uint8_t* a, int aBias, float aNorm, const uint8_t* b, int bBias, float bNorm,
-            const ConvParam& p, size_t yBeg, size_t yEnd, float dNorm, int dZero, uint8_t* dst)
-        {
-            __m512i _aBias = _mm512_set1_epi32(aBias), _bBias = _mm512_set1_epi32(bBias), _dZero = _mm512_set1_epi32(dZero);
-            __m512 _aNorm = _mm512_set1_ps(aNorm), _bNorm = _mm512_set1_ps(bNorm), _dNorm = _mm512_set1_ps(dNorm);
-            size_t beg = yBeg * p.dstW * p.dstC, end = yEnd * p.dstW * p.dstC;
-            size_t i = beg, end16 = beg + AlignLo(end - beg, 16), end64 = beg + AlignLo(end - beg, 64);
-            __mmask16 tail = TailMask16(end - end16);
-            for (; i < end64; i += 64)
-                AddInputToOutput64(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero);
-            for (; i < end16; i += 16)
-                AddInputToOutput16(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero);
-            if (i < end)
-                AddInputToOutput16(a + i, _aBias, _aNorm, b + i, _bBias, _bNorm, dst + i, _dNorm, _dZero, tail);
-
-        }
-
-        //------------------------------------------------------------------------------------------------
-
         void SetOutputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::OutputConvolutionPtr* funcs)
         {
             funcs[0] = QuantizedMergedConvolutionOutputConvolution_2<Term8iInterim>;
             funcs[1] = QuantizedMergedConvolutionOutputConvolution_2<Term8iLast8u>;
-        }
-
-        void SetAddInputToOutput(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::AddInputToOutputPtr& func)
-        {
-            func = QuantizedMergedConvolutionAddInputToOutput;
         }
     }
 #endif

@@ -55,7 +55,6 @@ namespace Simd
                 SetDepthwisePreprocess(p.conv[1], _alg, _depthwisePreprocess);
                 SetDepthwiseConvolution(p.conv[1], _alg, _depthwiseConvolution);
                 SetOutputConvolution(p.conv[2], _alg, _outputConvolution);
-                SetAddInputToOutput(p.conv[2], _alg, _addInputToOutput);
             }
         }
 
@@ -85,7 +84,6 @@ namespace Simd
                 SetDepthwisePreprocess(p.conv[0], _alg, _depthwisePreprocess);
                 SetDepthwiseConvolution(p.conv[0], _alg, _depthwiseConvolution);
                 SetOutputConvolution(p.conv[1], _alg, _outputConvolution);
-                SetAddInputToOutput(p.conv[1], _alg, _addInputToOutput);
             }
         }
 

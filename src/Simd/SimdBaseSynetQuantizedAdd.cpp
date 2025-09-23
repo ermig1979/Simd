@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetQuantizedAdd.h"
+#include "Simd/SimdSynetQuantizedAddCommon.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetActivation.h"
 #include "Simd/SimdFmadd.h"
@@ -122,12 +123,6 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
-
-        SIMD_INLINE void QuantizedAdd(int a, float adScale, int b, float bdScale, float term, uint8_t& dst)
-        {
-            float val = Fmadd<false>(float(a), adScale, Fmadd<false>(float(b), bdScale, term));
-            dst = (uint8_t)RestrictRange(NearByInt(val), 0, 255);
-        }
 
         static void QuantizedAddUniform(const uint8_t* a, float aScale, int aZero, const uint8_t* b, float bScale, int bZero, size_t size, const float*, float dScale, int dZero, uint8_t* dst)
         {
