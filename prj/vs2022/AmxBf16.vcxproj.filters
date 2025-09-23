@@ -287,8 +287,5 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolutionOutput.cpp">
       <Filter>AmxBf16</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolutionDepthwise.cpp">
-      <Filter>AmxBf16</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

@@ -43,7 +43,6 @@ namespace Simd
             : Avx2::SynetQuantizedMergedConvolutionCdc(p)
         {
             SetSize(F, 4, 2);
-            SetInputPreprocess(p.conv[0], _alg, _inputPreprocess);
             SetInputConvolution(p.conv[0], _alg, _inputConvolution);
             SetDepthwisePreprocess(p.conv[1], _alg, _depthwisePreprocess);
             SetDepthwiseConvolution(p.conv[1], _alg, _depthwiseConvolution);
@@ -57,7 +56,6 @@ namespace Simd
             : Avx2::SynetQuantizedMergedConvolutionCd(p)
         {
             SetSize(F, 4, 2);
-            SetInputPreprocess(p.conv[0], _alg, _inputPreprocess);
             SetInputConvolution(p.conv[0], _alg, _inputConvolution);
             SetDepthwisePreprocess(p.conv[1], _alg, _depthwisePreprocess);
             SetDepthwiseConvolution(p.conv[1], _alg, _depthwiseConvolution);

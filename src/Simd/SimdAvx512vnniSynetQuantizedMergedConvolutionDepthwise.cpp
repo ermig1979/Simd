@@ -491,6 +491,271 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        void QuantizedMergedConvolutionDepthwiseConvolution5x5(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t dyBeg, size_t dyEnd,
+            const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst)
+        {
+            __m512 _norm;
+            __m512i _zero = _mm512_set1_epi32(zero), _bias;
+            __m512i d00, d10, w00, w10, w20, w30, w40, w50, w60, w70, w80, w90, s0;
+            size_t sC = maC, sCF = AlignLo(sC, F), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX, dX = sX * QF, dW = a.dwStep;
+            size_t byMask = a.dbH - 1, bW = a.dbW * 4, bR = a.dbW * a.maC * 2, dstW2 = (sX == 1 ? AlignLo(p.dstW, 2) : 0), dD = a.ddB ? a.maC : p.dstC;
+            size_t dyEnd2 = dyBeg + (sY == 1 ? AlignLo(dyEnd - dyBeg, 2) : 0), sizeW = a.dwSize, dyD = p.dstW * dD;
+            if (a.ddB)
+                dst += (dyBeg % a.ddStep) * p.dstW * dD;
+            else
+                dst += dyBeg * p.dstW * dD;
+            size_t dy = dyBeg;
+            for (; dy < dyEnd2; dy += 2)
+            {
+                __m512i d01, d11, w01, w11, w21, w31, w41, w51, w61, w71, w81, w91;
+                size_t sc = 0, sy = dy * sY;
+                for (; sc < sC; sc += F)
+                {
+                    uint8_t* pd0 = dst + sc, * pd1 = pd0 + dyD;
+                    const uint8_t* ps0 = src + ((sy + 0) & byMask) * bR + sc * bW;
+                    const uint8_t* ps4 = src + ((sy + 4) & byMask) * bR + sc * bW;
+                    const int8_t* pw0 = weight + sc * dW, * pw1 = pw0 + sizeW;
+                    _bias = _mm512_loadu_si512((__m512i*)(bias + sc));
+                    _norm = _mm512_loadu_ps(norm + sc);
+                    __mmask16 tail = TailMask16(sC - sc);
+                    w00 = _mm512_loadu_si512((__m512i*)pw0 + 0);
+                    w10 = _mm512_loadu_si512((__m512i*)pw0 + 1);
+                    w20 = _mm512_loadu_si512((__m512i*)pw0 + 2);
+                    w30 = _mm512_loadu_si512((__m512i*)pw0 + 3);
+                    w40 = _mm512_loadu_si512((__m512i*)pw0 + 4);
+                    w50 = _mm512_loadu_si512((__m512i*)pw0 + 5);
+                    w60 = _mm512_loadu_si512((__m512i*)pw0 + 6);
+                    w70 = _mm512_loadu_si512((__m512i*)pw0 + 7);
+                    w80 = _mm512_loadu_si512((__m512i*)pw0 + 8);
+                    w90 = _mm512_loadu_si512((__m512i*)pw0 + 9);
+                    w01 = _mm512_loadu_si512((__m512i*)pw1 + 0);
+                    w11 = _mm512_loadu_si512((__m512i*)pw1 + 1);
+                    w21 = _mm512_loadu_si512((__m512i*)pw1 + 2);
+                    w31 = _mm512_loadu_si512((__m512i*)pw1 + 3);
+                    w41 = _mm512_loadu_si512((__m512i*)pw1 + 4);
+                    w51 = _mm512_loadu_si512((__m512i*)pw1 + 5);
+                    w61 = _mm512_loadu_si512((__m512i*)pw1 + 6);
+                    w71 = _mm512_loadu_si512((__m512i*)pw1 + 7);
+                    w81 = _mm512_loadu_si512((__m512i*)pw1 + 8);
+                    w91 = _mm512_loadu_si512((__m512i*)pw1 + 9);
+
+                    size_t dx = 0;
+                    for (; dx < dstW2; dx += 2, ps0 += 2 * QF, ps4 += 2 * QF)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d10 = _mm512_setzero_si512();
+                        d01 = _mm512_setzero_si512();
+                        d11 = _mm512_setzero_si512();
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 0);
+                        Madd4(d00, s0, w00);
+                        Madd4(d01, s0, w01);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 1);
+                        Madd4(d00, s0, w10);
+                        Madd4(d10, s0, w00);
+                        Madd4(d01, s0, w11);
+                        Madd4(d11, s0, w01);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 2);
+                        Madd4(d00, s0, w20);
+                        Madd4(d10, s0, w10);
+                        Madd4(d01, s0, w21);
+                        Madd4(d11, s0, w11);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 3);
+                        Madd4(d00, s0, w30);
+                        Madd4(d10, s0, w20);
+                        Madd4(d01, s0, w31);
+                        Madd4(d11, s0, w21);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 4);
+                        Madd4(d00, s0, w40);
+                        Madd4(d10, s0, w30);
+                        Madd4(d01, s0, w41);
+                        Madd4(d11, s0, w31);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 5);
+                        Madd4(d10, s0, w40);
+                        Madd4(d11, s0, w41);
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 0);
+                        Madd4(d00, s0, w50);
+                        Madd4(d01, s0, w51);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 1);
+                        Madd4(d00, s0, w60);
+                        Madd4(d10, s0, w50);
+                        Madd4(d01, s0, w61);
+                        Madd4(d11, s0, w51);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 2);
+                        Madd4(d00, s0, w70);
+                        Madd4(d10, s0, w60);
+                        Madd4(d01, s0, w71);
+                        Madd4(d11, s0, w61);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 3);
+                        Madd4(d00, s0, w80);
+                        Madd4(d10, s0, w70);
+                        Madd4(d01, s0, w81);
+                        Madd4(d11, s0, w71);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 4);
+                        Madd4(d00, s0, w90);
+                        Madd4(d10, s0, w80);
+                        Madd4(d01, s0, w91);
+                        Madd4(d11, s0, w81);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 5);
+                        Madd4(d10, s0, w90);
+                        Madd4(d11, s0, w91);
+
+                        Save1(pd0 + 0 * dD, d00, _bias, _norm, _zero, tail);
+                        Save1(pd0 + 1 * dD, d10, _bias, _norm, _zero, tail);
+                        Save1(pd1 + 0 * dD, d01, _bias, _norm, _zero, tail);
+                        Save1(pd1 + 1 * dD, d11, _bias, _norm, _zero, tail);
+                        pd0 += 2 * dD;
+                        pd1 += 2 * dD;
+                    }
+                    for (; dx < p.dstW; ++dx, ps0 += dX, ps4 += dX)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d01 = _mm512_setzero_si512();
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 0);
+                        Madd4(d00, s0, w00);
+                        Madd4(d01, s0, w01);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 1);
+                        Madd4(d00, s0, w10);
+                        Madd4(d01, s0, w11);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 2);
+                        Madd4(d00, s0, w20);
+                        Madd4(d01, s0, w21);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 3);
+                        Madd4(d00, s0, w30);
+                        Madd4(d01, s0, w31);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 4);
+                        Madd4(d00, s0, w40);
+                        Madd4(d01, s0, w41);
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 0);
+                        Madd4(d00, s0, w50);
+                        Madd4(d01, s0, w51);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 1);
+                        Madd4(d00, s0, w60);
+                        Madd4(d01, s0, w61);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 2);
+                        Madd4(d00, s0, w70);
+                        Madd4(d01, s0, w71);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 3);
+                        Madd4(d00, s0, w80);
+                        Madd4(d01, s0, w81);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 4);
+                        Madd4(d00, s0, w90);
+                        Madd4(d01, s0, w91);
+
+                        Save1(pd0, d00, _bias, _norm, _zero, tail);
+                        Save1(pd1, d01, _bias, _norm, _zero, tail);
+                        pd0 += dD;
+                        pd1 += dD;
+                    }
+                }
+                dst += p.dstW * dD * 2;
+            }
+            for (; dy < dyEnd; ++dy)
+            {
+                size_t sc = 0, sy = dy * sY;
+                for (; sc < sC; sc += F)
+                {
+                    uint8_t* pd = dst + sc;
+                    const uint8_t* ps0 = src + ((sy + 0) & byMask) * bR + sc * bW;
+                    const uint8_t* ps4 = src + ((sy + 4) & byMask) * bR + sc * bW;
+                    const int8_t* pw0 = weight + sc * dW;
+                    _bias = _mm512_loadu_si512((__m512i*)(bias + sc));
+                    _norm = _mm512_loadu_ps(norm + sc);
+                    __mmask16 tail = TailMask16(sC - sc);
+                    w00 = _mm512_loadu_si512((__m512i*)pw0 + 0);
+                    w10 = _mm512_loadu_si512((__m512i*)pw0 + 1);
+                    w20 = _mm512_loadu_si512((__m512i*)pw0 + 2);
+                    w30 = _mm512_loadu_si512((__m512i*)pw0 + 3);
+                    w40 = _mm512_loadu_si512((__m512i*)pw0 + 4);
+                    w50 = _mm512_loadu_si512((__m512i*)pw0 + 5);
+                    w60 = _mm512_loadu_si512((__m512i*)pw0 + 6);
+                    w70 = _mm512_loadu_si512((__m512i*)pw0 + 7);
+                    w80 = _mm512_loadu_si512((__m512i*)pw0 + 8);
+                    w90 = _mm512_loadu_si512((__m512i*)pw0 + 9);
+
+                    size_t dx = 0;
+                    for (; dx < dstW2; dx += 2, ps0 += 2 * QF, ps4 += 2 * QF)
+                    {
+                        d00 = _mm512_setzero_si512();
+                        d10 = _mm512_setzero_si512();
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 0);
+                        Madd4(d00, s0, w00);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 1);
+                        Madd4(d00, s0, w10);
+                        Madd4(d10, s0, w00);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 2);
+                        Madd4(d00, s0, w20);
+                        Madd4(d10, s0, w10);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 3);
+                        Madd4(d00, s0, w30);
+                        Madd4(d10, s0, w20);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 4);
+                        Madd4(d00, s0, w40);
+                        Madd4(d10, s0, w30);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 5);
+                        Madd4(d10, s0, w40);
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 0);
+                        Madd4(d00, s0, w50);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 1);
+                        Madd4(d00, s0, w60);
+                        Madd4(d10, s0, w50);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 2);
+                        Madd4(d00, s0, w70);
+                        Madd4(d10, s0, w60);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 3);
+                        Madd4(d00, s0, w80);
+                        Madd4(d10, s0, w70);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 4);
+                        Madd4(d00, s0, w90);
+                        Madd4(d10, s0, w80);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 5);
+                        Madd4(d10, s0, w90);
+
+                        Save1(pd + 0 * dD, d00, _bias, _norm, _zero, tail);
+                        Save1(pd + 1 * dD, d10, _bias, _norm, _zero, tail);
+                        pd += 2 * dD;
+                    }
+                    for (; dx < p.dstW; ++dx, ps0 += dX, ps4 += dX)
+                    {
+                        d00 = _mm512_setzero_si512();
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 0);
+                        Madd4(d00, s0, w00);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 1);
+                        Madd4(d00, s0, w10);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 2);
+                        Madd4(d00, s0, w20);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 3);
+                        Madd4(d00, s0, w30);
+                        s0 = _mm512_loadu_si512((__m512i*)ps0 + 4);
+                        Madd4(d00, s0, w40);
+
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 0);
+                        Madd4(d00, s0, w50);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 1);
+                        Madd4(d00, s0, w60);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 2);
+                        Madd4(d00, s0, w70);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 3);
+                        Madd4(d00, s0, w80);
+                        s0 = _mm512_loadu_si512((__m512i*)ps4 + 4);
+                        Madd4(d00, s0, w90);
+
+                        Save1(pd, d00, _bias, _norm, _zero, tail);
+                        pd += dD;
+                    }
+                }
+                dst += p.dstW * dD;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         void SetDepthwisePreprocess(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwisePreprocessPtr& func)
         {
             func = QuantizedMergedConvolutionDepthwisePreprocess;
@@ -498,8 +763,10 @@ namespace Simd
 
         void SetDepthwiseConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwiseConvolutionPtr& func)
         {
-            if(p.IsKernel(3))
+            if (p.IsKernel(3))
                 func = QuantizedMergedConvolutionDepthwiseConvolution3x3;
+            else if(p.IsKernel(5))
+                func = QuantizedMergedConvolutionDepthwiseConvolution5x5;
             else
                 func = QuantizedMergedConvolutionDepthwiseConvolutionAny;
         }

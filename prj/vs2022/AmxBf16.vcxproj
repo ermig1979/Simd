@@ -102,7 +102,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedInnerProductGemmNN.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolution.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolutionDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolutionInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedMergedConvolutionOutput.cpp" />
   </ItemGroup>

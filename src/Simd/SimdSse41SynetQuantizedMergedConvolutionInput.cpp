@@ -173,11 +173,6 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        void SetInputPreprocess(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::InputPreprocessPtr& func)
-        {
-            func = NULL;
-        }
-
         void SetInputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::InputConvolutionPtr& func)
         {
             func = QuantizedMergedConvolutionInput_2;
