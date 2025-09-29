@@ -430,6 +430,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedMergedConvolution.cpp">
       <Filter>Base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedScale.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

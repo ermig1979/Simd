@@ -412,6 +412,8 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetQuantizedMergedConvolutionForward);
 
+    TEST_ADD_GROUP_A0(SynetQuantizedScaleLayerForward);
+
     TEST_ADD_GROUP_A0(SynetQuantizedShuffleLayerForward);
 
     TEST_ADD_GROUP_A0(SynetDequantizeLinear);
