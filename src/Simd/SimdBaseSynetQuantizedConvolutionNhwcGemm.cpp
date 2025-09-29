@@ -73,7 +73,7 @@ namespace Simd
             if (bufSize * 2 <= L2 && p.batch > 1)
             {
                 for (size_t batch = 1; batch <= p.batch; ++batch)
-                    if (p.batch % batch == 0 && batch * bufSize <= L2)
+                    if (p.batch % batch == 0 && batch * bufSize <= L2 && (a.bufK > 512 || microK == 4 || batch * a.M <= 32 * microM))
                         a.batch = batch;
             }
             a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW, size_t(1), p.dstH * a.batch);
