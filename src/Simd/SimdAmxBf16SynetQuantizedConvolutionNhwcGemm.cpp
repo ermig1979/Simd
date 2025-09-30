@@ -494,6 +494,8 @@ namespace Simd
         SynetQuantizedConvolutionNhwcGemm::SynetQuantizedConvolutionNhwcGemm(const ConvParam& p)
             : Avx512vnni::SynetQuantizedConvolutionNhwcGemm(p)
         {
+            if (_alg.K <= 32)
+                return;
             SetAlgParam(F, F * 2, F * 2, 64, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5), Base::AlgCacheL3());
             AlgParam& a = _alg;
             if (_src8u)

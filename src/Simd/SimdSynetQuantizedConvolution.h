@@ -579,7 +579,7 @@ namespace Simd
         public:
             SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
 
-            virtual String Ext() const { return "AmxBf16"; }
+            virtual String Ext() const { return _alg.microK == 64 ? "AmxBf16" : "Avx512vnni"; }
         };
 
         //------------------------------------------------------------------------------------------------
@@ -589,7 +589,7 @@ namespace Simd
         public:
             SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
 
-            virtual String Ext() const { return "AmxBf16"; }
+            virtual String Ext() const { return _alg.microC == 64 ? "AmxBf16" : "Avx512vnni"; }
         };
 
         //------------------------------------------------------------------------------------------------
