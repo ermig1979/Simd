@@ -1,36 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Test\TestAbsDifference.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestAddFeatureDifference.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestAnyToAny.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestAnyToBayer.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestAnyToBgra.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestAnyToYuv.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestBackground.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestBayerToBgra.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestBgr48pToBgra32.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp">
       <Filter>Test</Filter>
     </ClCompile>
@@ -43,34 +13,19 @@
     <ClCompile Include="..\..\src\Test\TestCopy.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestCrc32.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestDetection.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestDrawing.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestFill.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestFilter.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestFloat16.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestFloat32.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestFont.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestHtml.cpp">
@@ -103,12 +58,6 @@
     <ClCompile Include="..\..\src\Test\TestIntegral.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestInterleave.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestMotion.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestNeural.cpp">
       <Filter>Test</Filter>
     </ClCompile>
@@ -124,9 +73,6 @@
     <ClCompile Include="..\..\src\Test\TestResize.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSegmentation.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestShift.cpp">
       <Filter>Test</Filter>
     </ClCompile>
@@ -136,43 +82,10 @@
     <ClCompile Include="..\..\src\Test\TestStretchGray.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynet.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetActivation.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetConversion.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetConvolution8i.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetConvolution32f.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetDeconvolution32f.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution32f.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetPooling.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestTexture.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestTransform.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestWinograd.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestYuvToAny.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp">
@@ -187,16 +100,7 @@
     <ClCompile Include="..\..\src\Test\Test.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetScale.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution8i.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestImageIO.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetInnerProduct.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestFile.cpp">
@@ -204,12 +108,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestString.cpp">
       <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestUyvyToBgr.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestBase64.cpp">
-      <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestBFloat16.cpp">
       <Filter>Test</Filter>
@@ -223,65 +121,170 @@
     <ClCompile Include="..\..\src\Test\TestCompare.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetNormalize.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestWarpAffine.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetPermute.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetAdd.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetSoftmax.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetUnaryOperation.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestDescrInt.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetGridSample.cpp">
-      <Filter>Test</Filter>
+    <ClCompile Include="..\..\src\Test\TestSynet.cpp">
+      <Filter>Test\Synet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetConvolution16b.cpp">
-      <Filter>Test</Filter>
+    <ClCompile Include="..\..\src\Test\TestSynetActivation.cpp">
+      <Filter>Test\Synet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution16b.cpp">
-      <Filter>Test</Filter>
+    <ClCompile Include="..\..\src\Test\TestSynetAdd.cpp">
+      <Filter>Test\Synet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetInnerProduct16b.cpp">
-      <Filter>Test</Filter>
+    <ClCompile Include="..\..\src\Test\TestSynetConversion.cpp">
+      <Filter>Test\Synet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetDeconvolution16b.cpp">
-      <Filter>Test</Filter>
+      <Filter>Test\Synet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetQuantizedConvolution.cpp">
-      <Filter>Test</Filter>
+    <ClCompile Include="..\..\src\Test\TestSynetDeconvolution32f.cpp">
+      <Filter>Test\Synet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetQuantizeLinear.cpp">
-      <Filter>Test</Filter>
+    <ClCompile Include="..\..\src\Test\TestSynetGridSample.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetInnerProduct.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetInnerProduct16b.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution8i.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution16b.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution32f.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetNormalize.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetPermute.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetPooling.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetScale.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetSoftmax.cpp">
+      <Filter>Test\Synet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetUnaryOperation.cpp">
+      <Filter>Test\Synet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedAdd.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetQuantizedInnerProduct.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetQuantizedShuffle.cpp">
-      <Filter>Test</Filter>
+      <Filter>Test\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedConcat.cpp">
-      <Filter>Test</Filter>
+      <Filter>Test\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizedConvolution.cpp">
+      <Filter>Test\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizedInnerProduct.cpp">
+      <Filter>Test\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedMergedConvolution.cpp">
-      <Filter>Test</Filter>
+      <Filter>Test\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedScale.cpp">
-      <Filter>Test</Filter>
+      <Filter>Test\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizedShuffle.cpp">
+      <Filter>Test\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizeLinear.cpp">
+      <Filter>Test\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizedActivation.cpp">
+      <Filter>Test\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetConvolution8i.cpp">
+      <Filter>Test\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetConvolution16b.cpp">
+      <Filter>Test\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetConvolution32f.cpp">
+      <Filter>Test\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestAnyToAny.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestAnyToBayer.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestAnyToBgra.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestAnyToYuv.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestBayerToBgra.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestUyvyToBgr.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestYuvToAny.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestDrawing.cpp">
+      <Filter>Test\Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestFont.cpp">
+      <Filter>Test\Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestBgr48pToBgra32.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestInterleave.cpp">
+      <Filter>Test\Conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestBackground.cpp">
+      <Filter>Test\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestAddFeatureDifference.cpp">
+      <Filter>Test\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSegmentation.cpp">
+      <Filter>Test\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestTexture.cpp">
+      <Filter>Test\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestMotion.cpp">
+      <Filter>Test\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestBase64.cpp">
+      <Filter>Test\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestCrc32.cpp">
+      <Filter>Test\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestFilter.cpp">
+      <Filter>Test\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestAbsDifference.cpp">
+      <Filter>Test\Filter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -340,6 +343,30 @@
     </Filter>
     <Filter Include="Utils">
       <UniqueIdentifier>{17be243d-9755-44ac-9c2e-41002d7a9e06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Synet">
+      <UniqueIdentifier>{01a53925-60c5-419c-a567-8624fa7d3cd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Synet\Quantized">
+      <UniqueIdentifier>{ffcf9269-12c8-4ced-a54c-7cb42c861ff6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Synet\Convolution">
+      <UniqueIdentifier>{868ae6a5-4ca6-4bc0-9b9d-45d1f65e9ee2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Conversion">
+      <UniqueIdentifier>{a27c5f49-7a0d-4f94-98be-ea367d353638}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Drawing">
+      <UniqueIdentifier>{80742bdf-6dd0-4a9c-9f0e-b33514c853e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Motion">
+      <UniqueIdentifier>{45546c8b-5921-4354-b1cf-f0470c6218d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\System">
+      <UniqueIdentifier>{953ed394-14a3-4d56-aa35-e5b0ae390a40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Filter">
+      <UniqueIdentifier>{e289b263-6a27-4930-9686-aad393913ae0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

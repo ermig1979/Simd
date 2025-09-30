@@ -433,6 +433,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetGridSample2dRef.cpp">
       <Filter>Base\Synet\GridSample</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedActivation.cpp">
+      <Filter>Base\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

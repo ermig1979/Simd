@@ -6154,6 +6154,19 @@ SIMD_API void SimdSynetQuantizedMergedConvolutionForward(void* context, const ui
 #endif
 }
 
+SIMD_API void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetQuantizedPreluLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
+    const static SimdSynetQuantizedPreluLayerForwardPtr simdSynetQuantizedPreluLayerForward = SIMD_FUNC0(SynetQuantizedPreluLayerForward);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+
+    simdSynetQuantizedPreluLayerForward(src, srcScale, srcZero, channels, spatial, slope, dst, dstScale, dstZero, format);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetQuantizedScaleLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* scale, const float* bias, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format)
 {
     SIMD_EMPTY();

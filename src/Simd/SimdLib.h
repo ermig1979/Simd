@@ -7839,6 +7839,27 @@ extern "C"
     */
     SIMD_API void SimdSynetQuantizedMergedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
+    /*! @ingroup synet_quantized_activation
+
+        \fn void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
+
+        \short This function is used for forward propagation of QuantizedPreluLayer.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the 8-bit integer array with input tensor.
+        \param [in] srcScale - a quantization scale parameter of input tensor.
+        \param [in] srcZero - a quantization zero parameter of input tensor.
+        \param [in] channels - a number of channels in (input/output) tensors.
+        \param [in] spatial - a spatial size of (input/output) tensors.
+        \param [in] slope - a pointer to the 32-bit float array with slope coefficients. The size of the array is equal to channels.
+        \param [out] dst - a pointer to the 8-bit integer array with output tensor.
+        \param [in] dstScale - an output quantization scale.
+        \param [in] dstZero - an output quantization zero.
+        \param [in] format - a format of (input/output) tensors.
+    */
+    SIMD_API void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
+
     /*! @ingroup synet_quantized_other
 
         \fn void SimdSynetQuantizedScaleLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* scale, const float* bias, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
