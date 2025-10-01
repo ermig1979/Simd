@@ -10,6 +10,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41AbsGradientSaturatedSum.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionOutput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizeLinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp" />

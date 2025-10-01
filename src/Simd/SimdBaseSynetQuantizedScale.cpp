@@ -44,7 +44,7 @@ namespace Simd
                 defaultBias.Resize(channels, true);
                 bias = defaultBias.data;
             }
-            float sBias = - srcZero;
+            float sBias = -srcZero;
             float sNorm = srcScale[0], dNorm = 1.0f / dstScale[0];
             if (format == SimdTensorFormatNhwc)
             {
