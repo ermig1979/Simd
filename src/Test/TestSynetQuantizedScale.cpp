@@ -72,6 +72,7 @@ namespace Test
         Tensor8u dst1(ToShape(channels, spatial, format));
         Tensor32f scale(Shp(channels)), bias(Shp(channels));
 
+        srand(0);
         FillRandom(src);
         FillRandom(scale.Data(), scale.Size(), 0.5f, 1.5f);
         FillRandom(bias.Data(), bias.Size(), -10.0f, 10.0f);

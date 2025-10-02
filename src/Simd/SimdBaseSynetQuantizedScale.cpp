@@ -55,7 +55,6 @@ namespace Simd
                         QuantizedScale(src[c], sBias, sNorm, scale[c], bias[c], dst[c], dNorm, dstZero);
                     src += channels;
                     dst += channels;
-
                 }
             }
             else

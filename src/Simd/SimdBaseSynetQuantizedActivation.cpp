@@ -49,7 +49,6 @@ namespace Simd
                         QuantizedPrelu(src[c], sBias, sNorm, slope[c], dst[c], dNorm, dstZero);
                     src += channels;
                     dst += channels;
-
                 }
             }
             else

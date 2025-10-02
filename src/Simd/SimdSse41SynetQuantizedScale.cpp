@@ -36,7 +36,7 @@ namespace Simd
             return QuantizeLinear(_dst, dNorm, dZero);
         }
 
-        SIMD_INLINE void QuantizedScale1(const uint8_t* src, const __m128i & sBias, const __m128& sNorm, const __m128& scale, const __m128& bias, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        SIMD_INLINE void QuantizedScale1(const uint8_t* src, const __m128i& sBias, const __m128& sNorm, const __m128& scale, const __m128& bias, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
         {
             __m128i _src = _mm_set1_epi32(src[0]);
             __m128i d0 = QuantizedScale(_src, sBias, sNorm, scale, bias, dNorm, dZero);

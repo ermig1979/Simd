@@ -72,6 +72,7 @@ namespace Test
         Tensor8u dst1(ToShape(channels, spatial, format));
         Tensor32f slope(Shp(channels));
 
+        srand(0);
         FillRandom(src);
         FillRandom(slope.Data(), slope.Size(), 0.0f, 0.1f);
 
@@ -112,11 +113,11 @@ namespace Test
         if (TestBase(options))
             result = result && SynetQuantizedPreluLayerForwardAutoTest(FUNC_SQPLF(Simd::Base::SynetQuantizedPreluLayerForward), FUNC_SQPLF(SimdSynetQuantizedPreluLayerForward));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41(options))
-//            result = result && SynetQuantizedPreluLayerForwardAutoTest(FUNC_SQPLF(Simd::Sse41::SynetQuantizedPreluLayerForward), FUNC_SQPLF(SimdSynetQuantizedPreluLayerForward));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetQuantizedPreluLayerForwardAutoTest(FUNC_SQPLF(Simd::Sse41::SynetQuantizedPreluLayerForward), FUNC_SQPLF(SimdSynetQuantizedPreluLayerForward));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2(options))
 //            result = result && SynetQuantizedPreluLayerForwardAutoTest(FUNC_SQPLF(Simd::Avx2::SynetQuantizedPreluLayerForward), FUNC_SQPLF(SimdSynetQuantizedPreluLayerForward));

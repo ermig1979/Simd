@@ -478,6 +478,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedScale.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedActivation.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
