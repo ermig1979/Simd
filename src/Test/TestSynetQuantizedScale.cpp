@@ -119,11 +119,11 @@ namespace Test
             result = result && SynetQuantizedScaleLayerForwardAutoTest(FUNC_SQCLF(Simd::Sse41::SynetQuantizedScaleLayerForward), FUNC_SQCLF(SimdSynetQuantizedScaleLayerForward));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2(options))
-//            result = result && SynetQuantizedScaleLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx2::SynetQuantizedScaleLayerForward), FUNC_SQCLF(SimdSynetQuantizedScaleLayerForward));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && SynetQuantizedScaleLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx2::SynetQuantizedScaleLayerForward), FUNC_SQCLF(SimdSynetQuantizedScaleLayerForward));
+#endif 
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
 //            result = result && SynetQuantizedScaleLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx512bw::SynetQuantizedScaleLayerForward), FUNC_SQCLF(SimdSynetQuantizedScaleLayerForward));

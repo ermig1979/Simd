@@ -2,454 +2,457 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsDifference.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2AbsDifferenceSum.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Filter</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsGradientSaturatedSum.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Filter</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2AddFeatureDifference.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Motion</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2AlphaBlending.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Image</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2Background.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2AbsDifferenceSum.cpp">
+      <Filter>Avx2\Statistics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2BayerToBgr.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2BayerToBgra.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToBgra.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToGray.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToRgb.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Binarization.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Conditional.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Deinterleave.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Detection.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Float16.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Float32.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Gemm32f.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgr.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgra.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Histogram.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Hog.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Int16ToGray.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Integral.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Interleave.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Laplace.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Lbp.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2MeanFilter3x3.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilter.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Neural.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Operation.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Reduce.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray2x2.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray3x3.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray4x4.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray5x5.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Reorder.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Resizer.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Segmentation.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ShiftBilinear.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Sobel.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SquaredDifferenceSum.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Statistic.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2StatisticMoments.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2StretchGray2x2.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Synet.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetActivation.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConversion.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32f.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect2f.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect2r.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect3r.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution32f.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Texture.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToHue.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToBgr.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Convert</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDepthwise.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDirect.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8i.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Cpu.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2GaussianBlur.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSave.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoad.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetInnerProduct32f.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSavePng.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSaveJpeg.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDirect1x1.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDirectAny.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8iDepthwise.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8iInput.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8iOutput.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fDirectNchw.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Transform.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2UyvyToBgr.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2UyvyToYuv.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Base64.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerArea.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerBicubic.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerBilinear.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerNearest.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToUyvy.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2BFloat16.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2NeuralConvolution.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2RecursiveBilateralFilter.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2WarpAffine.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPermute.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetAdd.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetSoftmax.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetUnaryOperation.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrInt.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntCdd.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntCdu.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntDec.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntEnc.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetGridSample2d32fBlZ.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetGridSample.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgrV2.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgraV2.cpp">
-      <Filter>Avx2</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp">
+      <Filter>Avx2\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToYuvV2.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Convert</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToYuvV2.cpp">
-      <Filter>Avx2</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToBgra.cpp">
+      <Filter>Avx2\Convert</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcGrouped.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2YToGray.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToY.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Winograd1.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Winograd2.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Winograd3.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcGemm.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16b.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16b.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16bDepthwise.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16bInput.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16bOutput.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetInnerProduct16b.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetInnerProduct16bGemmNN.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetAdd16b.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNchwGemm.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution16bNhwcGemm.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution16b.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fGemm.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDepthwise.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcDepthwise.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32f.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fDepthwise.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fInput.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fOutput.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoadJpeg.cpp">
-      <Filter>Avx2</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToGray.cpp">
+      <Filter>Avx2\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToLab.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Convert</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale16b.cpp">
-      <Filter>Avx2</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToRgb.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToYuvV2.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgr.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgra.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToY.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoad.cpp">
+      <Filter>Avx2\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoadJpeg.cpp">
+      <Filter>Avx2\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSave.cpp">
+      <Filter>Avx2\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSaveJpeg.cpp">
+      <Filter>Avx2\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSavePng.cpp">
+      <Filter>Avx2\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Int16ToGray.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MeanFilter3x3.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilter.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Laplace.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Lbp.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Reduce.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray2x2.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray3x3.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray4x4.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray5x5.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Resizer.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerArea.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerBicubic.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerBilinear.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerNearest.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SquaredDifferenceSum.cpp">
+      <Filter>Avx2\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Statistic.cpp">
+      <Filter>Avx2\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2StatisticMoments.cpp">
+      <Filter>Avx2\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Histogram.cpp">
+      <Filter>Avx2\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Segmentation.cpp">
+      <Filter>Avx2\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Interleave.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Deinterleave.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Integral.cpp">
+      <Filter>Avx2\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2StretchGray2x2.cpp">
+      <Filter>Avx2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDepthwise.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDirect.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDirect1x1.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDirectAny.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16b.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNchwGemm.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcDepthwise.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcGemm.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcSpecV0.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcSpecV1.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolution.cpp">
-      <Filter>Avx2</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32f.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcGemm.cpp">
-      <Filter>Avx2</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fDirectNchw.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizeLinear.cpp">
-      <Filter>Avx2</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fGemm.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDepthwise.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect2f.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect2r.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect3r.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcGrouped.cpp">
+      <Filter>Avx2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8i.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8iDepthwise.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8iInput.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8iOutput.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16b.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16bDepthwise.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16bInput.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution16bOutput.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32f.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fDepthwise.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fInput.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fOutput.cpp">
+      <Filter>Avx2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrInt.cpp">
+      <Filter>Avx2\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntCdd.cpp">
+      <Filter>Avx2\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntCdu.cpp">
+      <Filter>Avx2\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntDec.cpp">
+      <Filter>Avx2\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntEnc.cpp">
+      <Filter>Avx2\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Float16.cpp">
+      <Filter>Avx2\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Float32.cpp">
+      <Filter>Avx2\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BFloat16.cpp">
+      <Filter>Avx2\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Hog.cpp">
+      <Filter>Avx2\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Neural.cpp">
+      <Filter>Avx2\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2NeuralConvolution.cpp">
+      <Filter>Avx2\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Detection.cpp">
+      <Filter>Avx2\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Base64.cpp">
+      <Filter>Avx2\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Cpu.cpp">
+      <Filter>Avx2\System</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedAdd.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedInnerProductGemmNN.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedInnerProduct.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcSpecV0.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcDepthwise.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedShuffle.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConcat.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolution.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcDepthwise.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcGemm.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcSpecV0.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedInnerProduct.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedInnerProductGemmNN.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolution.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolutionDepthwise.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolutionInput.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolutionOutput.cpp">
-      <Filter>Avx2</Filter>
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedScale.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedShuffle.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizeLinear.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2UyvyToBgr.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2UyvyToYuv.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2YToGray.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgraV2.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgrV2.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToHue.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToUyvy.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution16b.cpp">
+      <Filter>Avx2\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution16bNhwcGemm.cpp">
+      <Filter>Avx2\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution32f.cpp">
+      <Filter>Avx2\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetInnerProduct16b.cpp">
+      <Filter>Avx2\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetInnerProduct16bGemmNN.cpp">
+      <Filter>Avx2\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetInnerProduct32f.cpp">
+      <Filter>Avx2\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Synet.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetActivation.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetAdd.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetAdd16b.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConversion.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetGridSample.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetGridSample2d32fBlZ.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPermute.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale16b.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetSoftmax.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetUnaryOperation.cpp">
+      <Filter>Avx2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Winograd1.cpp">
+      <Filter>Avx2\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Winograd2.cpp">
+      <Filter>Avx2\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Winograd3.cpp">
+      <Filter>Avx2\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Gemm32f.cpp">
+      <Filter>Avx2\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2RecursiveBilateralFilter.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp">
+      <Filter>Avx2\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Binarization.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Texture.cpp">
+      <Filter>Avx2\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GaussianBlur.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Sobel.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Reorder.cpp">
+      <Filter>Avx2\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ShiftBilinear.cpp">
+      <Filter>Avx2\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Transform.cpp">
+      <Filter>Avx2\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2WarpAffine.cpp">
+      <Filter>Avx2\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Conditional.cpp">
+      <Filter>Avx2\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Operation.cpp">
+      <Filter>Avx2\Math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -458,6 +461,60 @@
     </Filter>
     <Filter Include="Inc">
       <UniqueIdentifier>{d10e2ea2-1b27-485c-af9d-7912073dffaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Filter">
+      <UniqueIdentifier>{6ed5e337-62ae-456e-a516-431622f0c1b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Motion">
+      <UniqueIdentifier>{70eeebd8-e2ed-4b3e-ab31-9f0c8a734b05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Image">
+      <UniqueIdentifier>{9dd9ad7a-26be-4c5c-9ab0-8e89c6fa99f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Statistics">
+      <UniqueIdentifier>{8de96fca-706e-4a07-80fd-09e8f71fa723}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Convert">
+      <UniqueIdentifier>{43949167-3b7a-4017-9c6b-e329603d6f3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Resize">
+      <UniqueIdentifier>{80b4fb50-1f9c-4fe5-bd68-d0d260a814d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet">
+      <UniqueIdentifier>{97949d32-0a0b-4d7f-901b-4f0bbc22377c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\Convolution">
+      <UniqueIdentifier>{88ccb49e-f406-4291-a40b-bfde4faff863}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\MergedConvolution">
+      <UniqueIdentifier>{33ea535c-7b32-4a54-9439-e0ed51c09eed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Descriptors">
+      <UniqueIdentifier>{82f64dbe-94de-495b-9499-369a82b1f128}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Legacy">
+      <UniqueIdentifier>{4df1ec29-b3e9-4672-924f-a8d31ebccc41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\System">
+      <UniqueIdentifier>{29052495-c03b-4e4e-ba03-e9f10edf16a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\Quantized">
+      <UniqueIdentifier>{1a963e78-c762-4c0a-b02e-620718e8ed87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\Deconvolution">
+      <UniqueIdentifier>{728721af-27bc-42ea-87cf-084d1ffa7a6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\InnerProduct">
+      <UniqueIdentifier>{0896d351-6789-4460-8dca-59ef48777657}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\Other">
+      <UniqueIdentifier>{affc6b8e-de25-43f9-881b-bf2361476b5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Math">
+      <UniqueIdentifier>{905151f3-bb37-4404-a0c1-0988a9209541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Transform">
+      <UniqueIdentifier>{03870f81-3415-432d-8124-db5502f137e8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

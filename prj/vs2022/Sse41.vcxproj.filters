@@ -1,485 +1,485 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8i.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41AlphaBlending.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ImageSave.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoad.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct32f.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ImageSaveJpeg.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoadPng.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iDepthwise.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iInput.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iOutput.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect1x1.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirectAny.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Float16.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32f.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41NeuralConvolution.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Crc32.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgr.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBayer.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBgr.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBayer.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBgra.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToGray.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToRgb.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Transform.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Deinterleave.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur3x3.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgr.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Interleave.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41MeanFilter3x3.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Reduce.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray2x2.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray4x4.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Reorder.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Sobel.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SquaredDifferenceSum.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Texture.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToBgr.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToYuv.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Base64.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerArea.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerBicubic.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerBilinear.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerNearest.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToUyvy.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BFloat16.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifference.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifferenceSum.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41AbsGradientSaturatedSum.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41AddFeatureDifference.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Background.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgra.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToGray.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Binarization.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Conditional.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Fill.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Float32.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgra.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Histogram.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Int16ToGray.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Lbp.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41MedianFilter.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Operation.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray3x3.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray5x5.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ShiftBilinear.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41StatisticMoments.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41StretchGray2x2.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToHue.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDeconvolution32f.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDepthwise.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fDirectNchw.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect2f.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect2r.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect3r.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct8i.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetActivation.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fNN.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fNT.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fPack.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Winograd1.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Winograd2.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Winograd3.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41RecursiveBilateralFilter.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetNormalize.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41WarpAffine.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetPermute.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetSoftmax.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetUnaryOperation.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41DescrInt.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoadJpeg.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntEnc.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntDec.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdd.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdu.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample2d32fBlZ.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgrV2.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgraV2.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToYuvV2.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToYuvV2.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcGrouped.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41GrayToY.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41YToGray.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcGemm.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16b.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16b.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bDepthwise.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bInput.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bOutput.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct16b.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct16bGemmNN.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd16b.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNchwGemm.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDeconvolution16b.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDeconvolution16bNhwcGemm.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fGemm.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDepthwise.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcDepthwise.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32f.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fDepthwise.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fInput.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fOutput.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToLab.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale16b.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcSpecV0.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcSpecV1.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolution.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcGemm.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizeLinear.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedAdd.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProduct.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProductGemmNN.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcSpecV0.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcDepthwise.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedShuffle.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConcat.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolution.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionDepthwise.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionInput.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionOutput.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionOutput.cpp">
       <Filter>Inc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedScale.cpp">
-      <Filter>Sse41</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgr.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgra.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BFloat16.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBayer.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBgr.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToGray.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToYuvV2.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBayer.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBgra.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToGray.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToLab.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToRgb.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToYuvV2.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgr.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgra.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41GrayToY.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifference.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41AbsGradientSaturatedSum.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur3x3.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41MeanFilter3x3.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41MedianFilter.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Sobel.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrInt.cpp">
+      <Filter>Sse41\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdd.cpp">
+      <Filter>Sse41\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdu.cpp">
+      <Filter>Sse41\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntDec.cpp">
+      <Filter>Sse41\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntEnc.cpp">
+      <Filter>Sse41\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoad.cpp">
+      <Filter>Sse41\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoadJpeg.cpp">
+      <Filter>Sse41\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoadPng.cpp">
+      <Filter>Sse41\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageSave.cpp">
+      <Filter>Sse41\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageSaveJpeg.cpp">
+      <Filter>Sse41\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp">
+      <Filter>Sse41\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp">
+      <Filter>Sse41\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp">
+      <Filter>Sse41\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41NeuralConvolution.cpp">
+      <Filter>Sse41\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp">
+      <Filter>Sse41\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Lbp.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Reduce.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray2x2.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray3x3.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray4x4.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray5x5.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerArea.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerBicubic.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerBilinear.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerNearest.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41StretchGray2x2.cpp">
+      <Filter>Sse41\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41RecursiveBilateralFilter.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Deinterleave.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Interleave.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Int16ToGray.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToBgr.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToYuv.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41YToGray.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgraV2.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgrV2.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToHue.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToUyvy.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Transform.cpp">
+      <Filter>Sse41\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41WarpAffine.cpp">
+      <Filter>Sse41\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Reorder.cpp">
+      <Filter>Sse41\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ShiftBilinear.cpp">
+      <Filter>Sse41\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Background.cpp">
+      <Filter>Sse41\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Texture.cpp">
+      <Filter>Sse41\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41AddFeatureDifference.cpp">
+      <Filter>Sse41\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp">
+      <Filter>Sse41\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Binarization.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SquaredDifferenceSum.cpp">
+      <Filter>Sse41\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp">
+      <Filter>Sse41\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41StatisticMoments.cpp">
+      <Filter>Sse41\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Histogram.cpp">
+      <Filter>Sse41\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifferenceSum.cpp">
+      <Filter>Sse41\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fNN.cpp">
+      <Filter>Sse41\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fNT.cpp">
+      <Filter>Sse41\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fPack.cpp">
+      <Filter>Sse41\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Operation.cpp">
+      <Filter>Sse41\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Winograd1.cpp">
+      <Filter>Sse41\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Winograd2.cpp">
+      <Filter>Sse41\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Winograd3.cpp">
+      <Filter>Sse41\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp">
+      <Filter>Sse41\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Crc32.cpp">
+      <Filter>Sse41\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Base64.cpp">
+      <Filter>Sse41\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Conditional.cpp">
+      <Filter>Sse41\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Float16.cpp">
+      <Filter>Sse41\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Float32.cpp">
+      <Filter>Sse41\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41AlphaBlending.cpp">
+      <Filter>Sse41\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Fill.cpp">
+      <Filter>Sse41\Image</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedActivation.cpp">
-      <Filter>Sse41</Filter>
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedAdd.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConcat.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolution.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcDepthwise.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcGemm.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcSpecV0.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProduct.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProductGemmNN.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolution.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionDepthwise.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionInput.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionOutput.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedScale.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedShuffle.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizeLinear.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDepthwise.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect1x1.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirectAny.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16b.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNchwGemm.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcDepthwise.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcGemm.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcSpecV0.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcSpecV1.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32f.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fDirectNchw.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fGemm.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDepthwise.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect2f.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect2r.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect3r.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcGrouped.cpp">
+      <Filter>Sse41\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8i.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iDepthwise.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iInput.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iOutput.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16b.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bDepthwise.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bInput.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16bOutput.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32f.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fDepthwise.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fInput.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fOutput.cpp">
+      <Filter>Sse41\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct8i.cpp">
+      <Filter>Sse41\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct16b.cpp">
+      <Filter>Sse41\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct16bGemmNN.cpp">
+      <Filter>Sse41\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct32f.cpp">
+      <Filter>Sse41\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDeconvolution16b.cpp">
+      <Filter>Sse41\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDeconvolution16bNhwcGemm.cpp">
+      <Filter>Sse41\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDeconvolution32f.cpp">
+      <Filter>Sse41\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetActivation.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd16b.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample2d32fBlZ.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetNormalize.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetPermute.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale16b.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetSoftmax.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetUnaryOperation.cpp">
+      <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -488,6 +488,60 @@
     </Filter>
     <Filter Include="Inc">
       <UniqueIdentifier>{0e8f5035-4f53-4f54-9af6-461ae7a4e707}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet">
+      <UniqueIdentifier>{5e09eb90-fe55-400d-a871-98b515111ed6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Convert">
+      <UniqueIdentifier>{bdae608e-cb57-4e41-9aa2-4e6cddc12c94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Filter">
+      <UniqueIdentifier>{141c910d-2e52-4fc1-a11b-ee5710135342}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Descriptors">
+      <UniqueIdentifier>{c008a811-0131-4407-ae15-dca2f2c0ec5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Image">
+      <UniqueIdentifier>{f92b2b44-0315-4bd9-a6cc-7f1c0da94752}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Legacy">
+      <UniqueIdentifier>{228f94a0-02bd-43b9-80d5-463c0c7b5602}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Resize">
+      <UniqueIdentifier>{d955e3d2-7810-47de-b767-3fabd90fe4da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Transform">
+      <UniqueIdentifier>{2a28fdf5-fb3d-45a6-912c-969b46491976}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Motion">
+      <UniqueIdentifier>{6cd69823-aad6-4e25-a6ae-f034ae98134d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Statistics">
+      <UniqueIdentifier>{2e9342e6-9fe3-4526-865b-05143f600f38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Math">
+      <UniqueIdentifier>{88a6ccb7-0699-48f8-94d4-98fd50366f1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\System">
+      <UniqueIdentifier>{aef401be-5c7c-405a-abbe-13d3cc76308e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\Quantized">
+      <UniqueIdentifier>{9f0a7b11-75ca-4931-bf53-f8ee96d44ca5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\Convolution">
+      <UniqueIdentifier>{544e0cbf-fefb-450f-afff-55e794a7e336}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\MergedConvolution">
+      <UniqueIdentifier>{9b1da620-5b0c-4851-812b-02e493b2a5b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\InnerProduct">
+      <UniqueIdentifier>{f9117ae0-532d-4e50-8aea-80f1d3f54305}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\Deconvolution">
+      <UniqueIdentifier>{9ab22a17-f47f-464d-91a4-1ed88df55225}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\Other">
+      <UniqueIdentifier>{7521bba2-dca9-4177-8ab8-03223a7b4c08}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

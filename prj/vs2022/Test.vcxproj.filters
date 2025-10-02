@@ -4,16 +4,10 @@
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestConditional.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestContour.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestCopy.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestDetection.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp">
@@ -43,13 +37,7 @@
     <ClCompile Include="..\..\src\Test\TestVideo.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestGemm.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestHistogram.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestHog.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestImageMatcher.cpp">
@@ -58,34 +46,16 @@
     <ClCompile Include="..\..\src\Test\TestIntegral.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestNeural.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestOperation.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestReduce.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestReorder.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestResize.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestShift.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestStatistic.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestStretchGray.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestTransform.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestWinograd.cpp">
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp">
@@ -112,17 +82,11 @@
     <ClCompile Include="..\..\src\Test\TestBFloat16.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestNeuralConvolution.cpp">
-      <Filter>Test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestRandom.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestCompare.cpp">
       <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestWarpAffine.cpp">
-      <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestDescrInt.cpp">
       <Filter>Test</Filter>
@@ -286,6 +250,42 @@
     <ClCompile Include="..\..\src\Test\TestAbsDifference.cpp">
       <Filter>Test\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestTransform.cpp">
+      <Filter>Test\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestWarpAffine.cpp">
+      <Filter>Test\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestReorder.cpp">
+      <Filter>Test\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestShift.cpp">
+      <Filter>Test\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestNeural.cpp">
+      <Filter>Test\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestNeuralConvolution.cpp">
+      <Filter>Test\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestHog.cpp">
+      <Filter>Test\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestDetection.cpp">
+      <Filter>Test\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestWinograd.cpp">
+      <Filter>Test\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestGemm.cpp">
+      <Filter>Test\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestConditional.cpp">
+      <Filter>Test\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestOperation.cpp">
+      <Filter>Test\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">
@@ -367,6 +367,15 @@
     </Filter>
     <Filter Include="Test\Filter">
       <UniqueIdentifier>{e289b263-6a27-4930-9686-aad393913ae0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Transform">
+      <UniqueIdentifier>{af2f8c6f-651a-4dd1-a132-d2e8634aee1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Legacy">
+      <UniqueIdentifier>{a2a21e4b-7460-471b-b9c1-a3040df40e1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Math">
+      <UniqueIdentifier>{e143c12a-73b0-43ae-8781-07c3a5866830}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
