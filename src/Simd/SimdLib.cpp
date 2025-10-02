@@ -6172,7 +6172,7 @@ SIMD_API void SimdSynetQuantizedScaleLayerForward(const uint8_t* src, const floa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedScaleLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* scale, const float* bias, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
-    const static SimdSynetQuantizedScaleLayerForwardPtr simdSynetQuantizedScaleLayerForward = SIMD_FUNC2(SynetQuantizedScaleLayerForward, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC);
+    const static SimdSynetQuantizedScaleLayerForwardPtr simdSynetQuantizedScaleLayerForward = SIMD_FUNC3(SynetQuantizedScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     simdSynetQuantizedScaleLayerForward(src, srcScale, srcZero, channels, spatial, scale, bias, dst, dstScale, dstZero, format);
 #else

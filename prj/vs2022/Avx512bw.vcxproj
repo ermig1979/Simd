@@ -141,6 +141,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionOutput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizeLinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp" />
