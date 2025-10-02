@@ -123,10 +123,10 @@ namespace Test
             result = result && SynetQuantizedPreluLayerForwardAutoTest(FUNC_SQPLF(Simd::Avx2::SynetQuantizedPreluLayerForward), FUNC_SQPLF(SimdSynetQuantizedPreluLayerForward));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-//            result = result && SynetQuantizedPreluLayerForwardAutoTest(FUNC_SQPLF(Simd::Avx512bw::SynetQuantizedPreluLayerForward), FUNC_SQPLF(SimdSynetQuantizedPreluLayerForward));
-//#endif 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetQuantizedPreluLayerForwardAutoTest(FUNC_SQPLF(Simd::Avx512bw::SynetQuantizedPreluLayerForward), FUNC_SQPLF(SimdSynetQuantizedPreluLayerForward));
+#endif 
 
         return result;
     }
