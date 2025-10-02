@@ -454,6 +454,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Operation.cpp">
       <Filter>Avx2\Math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedActivation.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">

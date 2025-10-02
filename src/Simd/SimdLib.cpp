@@ -6159,7 +6159,7 @@ SIMD_API void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const floa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedPreluLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
-    const static SimdSynetQuantizedPreluLayerForwardPtr simdSynetQuantizedPreluLayerForward = SIMD_FUNC1(SynetQuantizedPreluLayerForward, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC);
+    const static SimdSynetQuantizedPreluLayerForwardPtr simdSynetQuantizedPreluLayerForward = SIMD_FUNC2(SynetQuantizedPreluLayerForward, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC);
 
     simdSynetQuantizedPreluLayerForward(src, srcScale, srcZero, channels, spatial, slope, dst, dstScale, dstZero, format);
 #else
