@@ -73,7 +73,7 @@ namespace Test
 
     struct QcParams32f
     {
-        Tensor32f src, weight, bias, params, dst, dst1, dst2;
+        Tensor32f src, weight, bias, params, tmp, dst, dst1, dst2;
 
         bool Init(Param p)
         {
@@ -124,11 +124,39 @@ namespace Test
 
             ::SimdRelease(context);
 
+            tmp.Reshape(p.DstShape());
+
+            p.conv.activation = SimdConvolutionActivationIdentity;
+
+            context = ::SimdSynetConvolution32fInit(p.batch, &p.conv);
+            if (context == NULL)
+                return false;
+
+            ::SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
+
+            ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), tmp.Data());
+
+            ::SimdRelease(context);
+
             if (p.conv.dstT == SimdTensorData32f)
             {
                 dst1.Reshape(p.DstShape(), p.conv.dstF);
                 dst2.Reshape(p.DstShape(), p.conv.dstF);
             }
+
+            tmp.Reshape(p.DstShape());
+
+            p.conv.activation = SimdConvolutionActivationIdentity;
+
+            context = ::SimdSynetConvolution32fInit(p.batch, &p.conv);
+            if (context == NULL)
+                return false;
+
+            ::SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
+
+            ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), tmp.Data());
+
+            ::SimdRelease(context);
 
             return true;
         }
@@ -136,7 +164,7 @@ namespace Test
 
     struct QcParams8i
     {
-        Tensor8u src, dst, dst1, dst2;
+        Tensor8u src, tmp, dst, dst1, dst2;
         Tensor8i weight;
         Tensor32i bias;
         uint8_t zero[3];
@@ -150,7 +178,10 @@ namespace Test
             if (!QuantizeSrcDst(f32.src, trans, src, zero[0], scale[0]))
                 return false;
 
-            if (!QuantizeSrcDst(f32.dst, trans, dst, zero[1], scale[1]))
+            if (!QuantizeSrcDst(f32.tmp, trans, tmp, zero[1], scale[1]))
+                return false;
+
+            if (!QuantizeSrcDst(f32.dst, trans, dst, zero[2], scale[2]))
                 return false;
 
             if (!QuantizeWeight(f32.weight, trans, overflow, weight, weightScale))
@@ -284,8 +315,8 @@ namespace Test
             int diffMax = 0;
             result = result && Compare(p8i.dst1, p8i.dst2, diffMax, true, 64);
 
-            //int controlDiffMax = 4;
-            //result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
+            int controlDiffMax = 4;
+            result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
         }
 
         return result;

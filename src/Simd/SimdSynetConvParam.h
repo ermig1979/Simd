@@ -93,6 +93,14 @@ namespace Simd
         return String(tdts[int(t) + 1]);
     }
 
+    SIMD_INLINE bool SimpleQuantized(const SimdConvolutionParameters& p)
+    {
+        return 
+            p.activation == SimdConvolutionActivationIdentity ||
+            p.activation == SimdConvolutionActivationRelu ||
+            p.activation == SimdConvolutionActivationRestrictRange;
+    }
+
     //-------------------------------------------------------------------------------------------------
 
     struct ConvParam : public SimdConvolutionParameters

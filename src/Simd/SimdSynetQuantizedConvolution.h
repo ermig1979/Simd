@@ -95,8 +95,8 @@ namespace Simd
         Array8i _weight;
         Array32i _bias;
         Array32f _weightScale, _norm, _params; 
-        int32_t _dstZero, _actZero;
-        float _srcScale, _dstScale, _actScale;
+        int32_t _intZero, _dstZero;
+        float _srcScale, _intScale, _dstScale;
         bool _src8u, _dst8u, _is1x1;
         size_t _merge, _sizeS, _sizeD, _elemS, _elemD;
     };

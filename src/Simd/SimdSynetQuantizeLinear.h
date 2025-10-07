@@ -46,46 +46,6 @@ namespace Simd
             return RestrictRange(NearByInt(float(sum + bias) * norm) + zero, min, max);
         }
 
-        SIMD_INLINE void QuantizeSumLinear(const int32_t * sum, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const int32_t * bias, const float* norm, const int32_t * zero, uint8_t * dst)
-        {
-            constexpr int min = std::numeric_limits<uint8_t>::min();
-            constexpr int max = std::numeric_limits<uint8_t>::max();
-            for (size_t b = 0; b < batch; ++b)
-            {
-                if (format == SimdTensorFormatNchw)
-                {
-                    for (size_t c = 0; c < channels; ++c)
-                    {
-                        int32_t _bias = bias[c];
-                        float _norm = norm[c];
-                        int32_t _zero = zero[c];
-                        for (size_t h = 0; h < height; ++h)
-                        {
-                            for (size_t w = 0; w < width; ++w)
-                                dst[w] = (uint8_t)QuantizeSumLinear(sum[w], _bias, _norm, _zero, min, max);
-                            sum += width;
-                            dst += width;
-                        }
-                    }
-                }
-                else if (format == SimdTensorFormatNhwc)
-                {
-                    for (size_t h = 0; h < height; ++h)
-                    {
-                        for (size_t w = 0; w < width; ++w)
-                        {
-                            for (size_t c = 0; c < channels; ++c)
-                                dst[c] = (uint8_t)QuantizeSumLinear(sum[c], bias[c], norm[c], zero[c], min, max);
-                            sum += channels;
-                            dst += channels;
-                        }
-                    }
-                }
-                else
-                    assert(0);
-            }
-        }
-
         SIMD_INLINE void QuantizeSumLinear(const int32_t* sum, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst)
         {
             constexpr int min = std::numeric_limits<uint8_t>::min();

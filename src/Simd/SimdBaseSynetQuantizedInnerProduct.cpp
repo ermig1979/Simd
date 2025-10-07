@@ -172,7 +172,7 @@ namespace Simd
             int32_t* bufC = Allocate<int32_t>(buf, _sizeC);
             Gemm(bufA, bufB, bufC);
             if (_c8u)
-                QuantizeSumLinear(bufC, 1, p.N, 1, p.M, SimdTensorFormatNhwc, _bias.data, _norm.data, _cZero.data, C);
+                QuantizeSumLinear(bufC, 1, p.N, 1, p.M, SimdTensorFormatNhwc, _bias.data, _norm.data, _cZero[0], C);
             else
                 assert(0);
         }

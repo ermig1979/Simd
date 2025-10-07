@@ -72,7 +72,7 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcDepthwiseV0::Preferable(const ConvParam& p, size_t F)
         {
-            return p.trans != 0 && p.IsDepthwise() && p.group >= F;
+            return p.trans != 0 && p.IsDepthwise() && p.group >= F && SimpleQuantized(p);
         }
 
         //------------------------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcDepthwiseV1::Preferable(const ConvParam& p, size_t F)
         {
-            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F;
+            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F && SimpleQuantized(p);
         }
 
         //------------------------------------------------------------------------------------------------
@@ -320,7 +320,8 @@ namespace Simd
         {
             return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F 
                 && (p.IsStride(1) || p.IsStride(2))
-                && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7));
+                && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7))
+                && SimpleQuantized(p);
         }
 
         //------------------------------------------------------------------------------------------------
@@ -470,7 +471,8 @@ namespace Simd
         {
             return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F
                 && (p.IsStride(1) || p.IsStride(2))
-                && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7));
+                && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7))
+                && SimpleQuantized(p);
         }
      }
 #endif

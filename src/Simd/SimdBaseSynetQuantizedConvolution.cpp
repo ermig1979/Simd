@@ -81,11 +81,11 @@ namespace Simd
         else
             _params.Resize(p.dstC, true);
 
-        _dstScale = ioScale[1];
-        _actScale = ioScale[2];
+        _intScale = ioScale[1];
+        _dstScale = ioScale[2];
 
-        _dstZero = ioZero[1];
-        _actZero = ioZero[2];
+        _intZero = ioZero[1];
+        _dstZero = ioZero[2];
 
         SetOther();
     }
