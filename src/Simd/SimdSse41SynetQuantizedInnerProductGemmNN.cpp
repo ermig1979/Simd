@@ -214,7 +214,7 @@ namespace Simd
         SynetQuantizedInnerProductGemmNN::SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p)
             : Base::SynetQuantizedInnerProductGemmNN(p)
         {
-            SetAlgParam(F, F * 2, 5, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(F, 5, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_sizeA)
             {
                 if (p.typeA == SimdTensorData8u)

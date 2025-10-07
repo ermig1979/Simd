@@ -179,7 +179,7 @@ namespace Simd
                             _prepA(A + i * p.K * a.eA, _aScale, _aZero[0], p, a, macroM, p.K, bufA + offsA);
                         //if (i == 0 && _prepB && !p.constB)
                         //    _prepB(B + (p.transB ? j * p.K + k : k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
-                        _gemm(bufA + offsA + k, p, a, macroM, macroN, macroK, (int)k, bufB + offsB, bufC + offsC,
+                        _gemm(bufA + offsA + k, p, a, macroM, macroN, macroK, k ? 1 : 0, bufB + offsB, bufC + offsC,
                             k + macroK == p.K && (_sizeC || p.bias), _bias.data + j, _norm.data + j, _cZero[0], C + (i * p.N + j) * a.eC);
                     }
                 }

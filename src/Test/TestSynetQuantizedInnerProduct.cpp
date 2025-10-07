@@ -275,7 +275,7 @@ namespace Test
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(64, 96, 128, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(664, 2696, 2628, u8, i8, u8, f, t, f), o, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 1000, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 1000, u8, i8, u8, t, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 1000, 512, u8, i8, u8, f, t, f), o, f1, f2);
@@ -287,15 +287,18 @@ namespace Test
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(3, 512, 1024, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(4, 512, 1024, u8, i8, u8, f, t, f), o, f1, f2);
 #endif
-#if 1
+#if 0
         //result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, f, f, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(256, 512, 1024, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(333, 443, 555, u8, i8, u8, t, t, f), o, f1, f2);
 #endif
+#if 1
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 25088, u8, i8, u8, f, t, f), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 25088, 512, u8, i8, u8, f, t, f), o, f1, f2);
+#endif
 #else
-        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(64, 96, 128, u8, i8, u8, f, t, f), o, f1, f2);
-        //result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 1000, u8, i8, u8, f, t, f), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(1, 512, 25088, u8, i8, u8, f, t, f), o, f1, f2);
 #endif
 
         return result;

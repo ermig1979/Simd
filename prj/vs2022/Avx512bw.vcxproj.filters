@@ -1,467 +1,467 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAbsDifferenceSum.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAbsGradientSaturatedSum.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAddFeatureDifference.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAlphaBlending.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBackground.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBayerToBgr.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBayerToBgra.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToBayer.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToBgr.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToGray.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToBayer.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToBgra.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToGray.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToRgb.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBinarization.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwConditional.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDeinterleave.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDetection.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwFill.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat16.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat32.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgr.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgra.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHistogram.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwInt16ToGray.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwIntegral.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwInterleave.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwLaplace.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwLbp.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMeanFilter3x3.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMedianFilter.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeural.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwOperation.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduce.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray2x2.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray3x3.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray4x4.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray5x5.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReorder.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizer.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSegmentation.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwShiftBilinear.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSobel.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSquaredDifferenceSum.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwStatistic.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwStatisticMoments.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwStretchGray2x2.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConversion.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPooling.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTexture.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynet.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDepthwise.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8i.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGaussianBlur.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSave.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageLoad.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSavePng.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSaveJpeg.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect1x1.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirectAny.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iDepthwise.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iInput.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iOutput.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAbsDifference.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTransform.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBase64.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerArea.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerBicubic.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerBilinear.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerNearest.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgraV2.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToUyvy.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToYuv.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToBgr.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBFloat16.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32f.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeuralConvolution.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTile.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDeconvolution32f.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetInnerProduct32f.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fNN.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fNT.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fPack.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd1.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd2.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd3.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetActivation.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fDirectNchw.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect2f.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect2r.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect3r.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32f.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetNormalize.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWarpAffine.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPermute.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetAdd.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetSoftmax.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetUnaryOperation.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrInt.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntCdd.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntCdu.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntDec.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntEnc.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgrV2.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToYuvV2.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToYuvV2.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcGrouped.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToY.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYToGray.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvaToBgraV2.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcGemm.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16b.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16bDepthwise.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16bOutput.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16bInput.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16b.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetInnerProduct16bGemmNN.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetInnerProduct16b.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetAdd16b.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNchwGemm.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDeconvolution16b.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDeconvolution16bNhwcGemm.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fGemm.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDepthwise.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcDepthwise.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fDepthwise.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fInput.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fOutput.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToLab.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale16b.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcSpecV0.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcSpecV1.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcGemm.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolution.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizeLinear.cpp">
-      <Filter>Avx512bw</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedActivation.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedAdd.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProduct.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProductGemmNN.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcSpecV0.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcDepthwise.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedShuffle.cpp">
-      <Filter>Avx512bw</Filter>
+      <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConcat.cpp">
-      <Filter>Avx512bw</Filter>
+      <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionDepthwise.cpp">
-      <Filter>Avx512bw</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolution.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionOutput.cpp">
-      <Filter>Avx512bw</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcDepthwise.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionInput.cpp">
-      <Filter>Avx512bw</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcGemm.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcSpecV0.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProduct.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProductGemmNN.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolution.cpp">
-      <Filter>Avx512bw</Filter>
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionDepthwise.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionInput.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionOutput.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedScale.cpp">
-      <Filter>Avx512bw</Filter>
+      <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedActivation.cpp">
-      <Filter>Avx512bw</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedShuffle.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizeLinear.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDepthwise.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect1x1.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirectAny.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16b.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNchwGemm.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcDepthwise.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcGemm.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcSpecV0.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcSpecV1.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32f.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fDirectNchw.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fGemm.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDepthwise.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect2f.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect2r.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcDirect3r.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fNhwcGrouped.cpp">
+      <Filter>Avx512bw\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetInnerProduct16b.cpp">
+      <Filter>Avx512bw\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetInnerProduct16bGemmNN.cpp">
+      <Filter>Avx512bw\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetInnerProduct32f.cpp">
+      <Filter>Avx512bw\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8i.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iDepthwise.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iInput.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iOutput.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16b.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16bDepthwise.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16bInput.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution16bOutput.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32f.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fDepthwise.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fInput.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fOutput.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDeconvolution16b.cpp">
+      <Filter>Avx512bw\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDeconvolution16bNhwcGemm.cpp">
+      <Filter>Avx512bw\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDeconvolution32f.cpp">
+      <Filter>Avx512bw\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynet.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetActivation.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetAdd.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetAdd16b.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConversion.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetNormalize.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPermute.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPooling.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale16b.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetSoftmax.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetUnaryOperation.cpp">
+      <Filter>Avx512bw\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToBayer.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToBgr.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToGray.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToYuvV2.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToBayer.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToBgra.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToGray.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToLab.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToRgb.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToYuvV2.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBayerToBgr.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBayerToBgra.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYToGray.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvaToBgraV2.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgraV2.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgrV2.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToUyvy.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToYuv.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToBgr.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwInt16ToGray.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgr.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgra.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToY.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAddFeatureDifference.cpp">
+      <Filter>Avx512bw\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBackground.cpp">
+      <Filter>Avx512bw\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrInt.cpp">
+      <Filter>Avx512bw\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntCdd.cpp">
+      <Filter>Avx512bw\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntCdu.cpp">
+      <Filter>Avx512bw\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntDec.cpp">
+      <Filter>Avx512bw\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntEnc.cpp">
+      <Filter>Avx512bw\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDetection.cpp">
+      <Filter>Avx512bw\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fNN.cpp">
+      <Filter>Avx512bw\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fNT.cpp">
+      <Filter>Avx512bw\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fPack.cpp">
+      <Filter>Avx512bw\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageLoad.cpp">
+      <Filter>Avx512bw\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSave.cpp">
+      <Filter>Avx512bw\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSaveJpeg.cpp">
+      <Filter>Avx512bw\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSavePng.cpp">
+      <Filter>Avx512bw\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduce.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray2x2.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray3x3.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray4x4.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray5x5.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizer.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerArea.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerBicubic.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerBilinear.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerNearest.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd1.cpp">
+      <Filter>Avx512bw\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd2.cpp">
+      <Filter>Avx512bw\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd3.cpp">
+      <Filter>Avx512bw\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwOperation.cpp">
+      <Filter>Avx512bw\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwConditional.cpp">
+      <Filter>Avx512bw\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeural.cpp">
+      <Filter>Avx512bw\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeuralConvolution.cpp">
+      <Filter>Avx512bw\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp">
+      <Filter>Avx512bw\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMeanFilter3x3.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMedianFilter.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwLbp.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwLaplace.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGaussianBlur.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTexture.cpp">
+      <Filter>Avx512bw\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSegmentation.cpp">
+      <Filter>Avx512bw\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTransform.cpp">
+      <Filter>Avx512bw\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWarpAffine.cpp">
+      <Filter>Avx512bw\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAbsDifferenceSum.cpp">
+      <Filter>Avx512bw\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAbsGradientSaturatedSum.cpp">
+      <Filter>Avx512bw\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAbsDifference.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAlphaBlending.cpp">
+      <Filter>Avx512bw\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwShiftBilinear.cpp">
+      <Filter>Avx512bw\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDeinterleave.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwInterleave.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwFill.cpp">
+      <Filter>Avx512bw\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHistogram.cpp">
+      <Filter>Avx512bw\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBase64.cpp">
+      <Filter>Avx512bw\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBFloat16.cpp">
+      <Filter>Avx512bw\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat16.cpp">
+      <Filter>Avx512bw\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat32.cpp">
+      <Filter>Avx512bw\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBinarization.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp">
+      <Filter>Avx512bw\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSquaredDifferenceSum.cpp">
+      <Filter>Avx512bw\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwStatistic.cpp">
+      <Filter>Avx512bw\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwStatisticMoments.cpp">
+      <Filter>Avx512bw\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwStretchGray2x2.cpp">
+      <Filter>Avx512bw\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwIntegral.cpp">
+      <Filter>Avx512bw\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTile.cpp">
+      <Filter>Avx512bw\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSobel.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReorder.cpp">
+      <Filter>Avx512bw\Transform</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -470,6 +470,60 @@
     </Filter>
     <Filter Include="Inc">
       <UniqueIdentifier>{7b9dfadb-70b2-434d-8cce-95985b7cca91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet">
+      <UniqueIdentifier>{d8e04758-82ca-4e7a-8435-5949970bb436}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet\Quantized">
+      <UniqueIdentifier>{37c911a1-f7a4-485b-ae43-f7dc1bda60d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet\Convolution">
+      <UniqueIdentifier>{79ec4b73-4d77-4e0a-a494-2be5994500fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet\InnerProduct">
+      <UniqueIdentifier>{9ad2dadc-9567-4f60-8133-ae0ee9551c12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet\MergedConvolution">
+      <UniqueIdentifier>{d80f47b3-8d6f-4ff2-817f-a92c47b6186b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet\Deconvolution">
+      <UniqueIdentifier>{aef4e8d0-269f-410f-bcff-c3e670edc811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet\Other">
+      <UniqueIdentifier>{96af6533-5366-481d-b0c1-98688f359626}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Convert">
+      <UniqueIdentifier>{e83490b5-ddf0-4ee4-98b0-d2c6a065b872}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Motion">
+      <UniqueIdentifier>{3823285d-79ea-4d21-82d6-d222aa476d7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Descriptors">
+      <UniqueIdentifier>{6e732392-63f8-40aa-a4f0-670edb27a737}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Legacy">
+      <UniqueIdentifier>{c9b52c63-50a1-44bf-b2b7-0ad80d3c981e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Math">
+      <UniqueIdentifier>{a3762cb0-4b85-458c-a945-705fecd7c9b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Filter">
+      <UniqueIdentifier>{4bf5f629-75c7-4c51-abe9-baae4ff7a13f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Image">
+      <UniqueIdentifier>{7a3ed587-a5b4-4e95-894b-c55efecccbd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Resize">
+      <UniqueIdentifier>{242ab8a4-bbd0-4d07-8996-a181402beb4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Transform">
+      <UniqueIdentifier>{7c347bdf-0b45-4a36-b872-0c63e89b03c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Statistics">
+      <UniqueIdentifier>{3ad32515-138c-4810-8e58-77eedcd047a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\System">
+      <UniqueIdentifier>{0183bb7d-127f-4da0-b3e4-9b106b2dc54a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
