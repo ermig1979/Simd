@@ -62,9 +62,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gafcd47c51b810a4845eafb5f6ba4e2b2a"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#gafcd47c51b810a4845eafb5f6ba4e2b2a">SimdSynetQuantizedConvolutionInfo</a> (const void *context)</td></tr>
 <tr class="memdesc:gafcd47c51b810a4845eafb5f6ba4e2b2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets description of internal implementation of Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#gafcd47c51b810a4845eafb5f6ba4e2b2a">More...</a><br /></td></tr>
 <tr class="separator:gafcd47c51b810a4845eafb5f6ba4e2b2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga01a79a80bab698c715ef7cde9bf713ed"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#ga01a79a80bab698c715ef7cde9bf713ed">SimdSynetQuantizedConvolutionSetParams</a> (void *context, const float *srcScale, const uint8_t *srcZero, const int8_t *weight, const float *weightScale, const int32_t *bias, const float *params, const float *dstScale, const uint8_t *dstZero)</td></tr>
-<tr class="memdesc:ga01a79a80bab698c715ef7cde9bf713ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, biases, input/output parameters required for Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#ga01a79a80bab698c715ef7cde9bf713ed">More...</a><br /></td></tr>
-<tr class="separator:ga01a79a80bab698c715ef7cde9bf713ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6a8f99441e8bc8b9bdd3d561a9e08f35"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#ga6a8f99441e8bc8b9bdd3d561a9e08f35">SimdSynetQuantizedConvolutionSetParams</a> (void *context, const float *ioScale, const uint8_t *ioZero, const int8_t *weight, const float *weightScale, const int32_t *bias, const float *params)</td></tr>
+<tr class="memdesc:ga6a8f99441e8bc8b9bdd3d561a9e08f35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, biases, input/output parameters required for Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#ga6a8f99441e8bc8b9bdd3d561a9e08f35">More...</a><br /></td></tr>
+<tr class="separator:ga6a8f99441e8bc8b9bdd3d561a9e08f35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga14bfb110331518424c64839040c55780"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#ga14bfb110331518424c64839040c55780">SimdSynetQuantizedConvolutionForward</a> (void *context, const uint8_t *src, uint8_t *buf, uint8_t *dst)</td></tr>
 <tr class="memdesc:ga14bfb110331518424c64839040c55780"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#ga14bfb110331518424c64839040c55780">More...</a><br /></td></tr>
 <tr class="separator:ga14bfb110331518424c64839040c55780"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -106,7 +106,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to Quantized convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__quantized__convolution.html#ga3ecd6531da17e3aee500d445f2824687" title="Gets size in bytes of external temporary buffer required for Quantized convolution algorithm.">SimdSynetQuantizedConvolutionExternalBufferSize</a>, <a class="el" href="group__synet__quantized__convolution.html#ga90d4d31b8be9c685d8eddad6b2cf3527" title="Gets size of internal buffer used inside Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInternalBufferSize</a>, <a class="el" href="group__synet__quantized__convolution.html#gafcd47c51b810a4845eafb5f6ba4e2b2a" title="Gets description of internal implementation of Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInfo</a>, <a class="el" href="group__synet__quantized__convolution.html#ga01a79a80bab698c715ef7cde9bf713ed" title="Sets weights, biases, input/output parameters required for Quantized convolution algorithm.">SimdSynetQuantizedConvolutionSetParams</a> and <a class="el" href="group__synet__quantized__convolution.html#ga14bfb110331518424c64839040c55780" title="Performs forward propagation of Quantized convolution algorithm.">SimdSynetQuantizedConvolutionForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to Quantized convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__quantized__convolution.html#ga3ecd6531da17e3aee500d445f2824687" title="Gets size in bytes of external temporary buffer required for Quantized convolution algorithm.">SimdSynetQuantizedConvolutionExternalBufferSize</a>, <a class="el" href="group__synet__quantized__convolution.html#ga90d4d31b8be9c685d8eddad6b2cf3527" title="Gets size of internal buffer used inside Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInternalBufferSize</a>, <a class="el" href="group__synet__quantized__convolution.html#gafcd47c51b810a4845eafb5f6ba4e2b2a" title="Gets description of internal implementation of Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInfo</a>, <a class="el" href="group__synet__quantized__convolution.html#ga6a8f99441e8bc8b9bdd3d561a9e08f35" title="Sets weights, biases, input/output parameters required for Quantized convolution algorithm.">SimdSynetQuantizedConvolutionSetParams</a> and <a class="el" href="group__synet__quantized__convolution.html#ga14bfb110331518424c64839040c55780" title="Performs forward propagation of Quantized convolution algorithm.">SimdSynetQuantizedConvolutionForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -191,8 +191,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga01a79a80bab698c715ef7cde9bf713ed" name="ga01a79a80bab698c715ef7cde9bf713ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga01a79a80bab698c715ef7cde9bf713ed">&#9670;&#160;</a></span>SimdSynetQuantizedConvolutionSetParams()</h2>
+<a id="ga6a8f99441e8bc8b9bdd3d561a9e08f35" name="ga6a8f99441e8bc8b9bdd3d561a9e08f35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6a8f99441e8bc8b9bdd3d561a9e08f35">&#9670;&#160;</a></span>SimdSynetQuantizedConvolutionSetParams()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -207,13 +207,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>srcScale</em>, </td>
+          <td class="paramname"><em>ioScale</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>srcZero</em>, </td>
+          <td class="paramname"><em>ioZero</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -237,19 +237,7 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>params</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>dstScale</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>dstZero</em>&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -263,14 +251,12 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initilizes Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcScale</td><td>- a pointer to 32-bit float point input tensor scale. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcZero</td><td>- a pointer to 8-bit unsigned integer input tensor zero. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ioScale</td><td>- a pointer to 32-bit float point input/output tensors scales. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ioZero</td><td>- a pointer to 8-bit unsigned integer input/output tensors zeros. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to 8-bit integer convolution weight. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weightScale</td><td>- a pointer to 32-bit float point weight scale. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to 32-bit integer bias. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to 32-bit float point parameters of activation functions (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstScale</td><td>- a pointer to 32-bit float point output tensor scale. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstZero</td><td>- a pointer to 8-bit unsigned integer output tensor zero. </td></tr>
   </table>
   </dd>
 </dl>

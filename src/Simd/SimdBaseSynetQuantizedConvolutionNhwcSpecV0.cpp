@@ -171,7 +171,6 @@ namespace Simd
             const AlgParam& a = _alg;
             const int32_t* bias = _bias.data;
             const float* norm = _norm.data;
-            int32_t zero = _dstZero[0];
             const int* offs = _offset.data;
             size_t dstH = p.dstH * a.batch, dstHb = a.srcH * a.batch - a.gapV;
             size_t bufOffs = ((a.padV - p.padY) * a.srcW + (a.padH - p.padX)) * a.microC;
@@ -214,10 +213,10 @@ namespace Simd
                                 size_t dS = a.srcH * a.srcW * a.macroD;
                                 size_t dD = p.dstH * p.dstW * p.dstC * a.elem;
                                 for (size_t b = 0; b < a.batch; ++b)
-                                    _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, norm, zero, dst + b * dD);
+                                    _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, norm, _dstZero, dst + b * dD);
                             }
                             else
-                                _postprocess(sum + dyN * a.F * a.macroD, p, a, macroD, dyBeg, dyEnd, bias, norm, zero, dst);
+                                _postprocess(sum + dyN * a.F * a.macroD, p, a, macroD, dyBeg, dyEnd, bias, norm, _dstZero, dst);
                         }
                         dyBeg = dyEnd;
                     }

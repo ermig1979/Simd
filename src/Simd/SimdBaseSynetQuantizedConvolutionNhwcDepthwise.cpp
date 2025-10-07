@@ -57,7 +57,7 @@ namespace Simd
             const AlgParam& a = _alg;
             for (size_t b = 0; b < p.batch; b += _merge)
             {
-                _convolution(src, _srcZero[0], p, a, _weight.data, _bias.data, _norm.data, _dstZero[0], dst);
+                _convolution(src, _srcZero[0], p, a, _weight.data, _bias.data, _norm.data, _dstZero, dst);
                 src += _sizeS * _elemS;
                 dst += _sizeD * _elemD;
             }
@@ -117,7 +117,7 @@ namespace Simd
                 {
                     size_t yEnd = Simd::Min(yBeg + a.stepH, p.dstH);
                     _preprocess(src, _srcZero[0], p, a, yBeg, yEnd, buf);
-                    _convolution(buf, p, a, _weight32i.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero[0], dst);
+                    _convolution(buf, p, a, _weight32i.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero, dst);
                     yBeg = yEnd;
                 }
                 src += _sizeS * _elemS;
@@ -232,7 +232,7 @@ namespace Simd
                 {
                     size_t yEnd = Simd::Min(yBeg + a.stepH, p.dstH);
                     _preprocess(src, _srcZero.data, p, a, yBeg, yEnd, buf);
-                    _convolution(buf, p, a, _weight16i.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero[0], dst);
+                    _convolution(buf, p, a, _weight16i.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero, dst);
                     yBeg = yEnd;
                 }
                 src += _sizeS * _elemS;
@@ -366,7 +366,7 @@ namespace Simd
                 {
                     size_t yEnd = Simd::Min(yBeg + a.stepH, p.dstH);
                     _preprocess(src, _srcZero.data, p, a, yBeg, yEnd, buf);
-                    _convolution(buf, p, a, _weight.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero[0], dst);
+                    _convolution(buf, p, a, _weight.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero, dst);
                     yBeg = yEnd;
                 }
                 src += _sizeS * _elemS;

@@ -56,7 +56,7 @@ namespace Simd
         virtual size_t ExternalBufferSize() const;
         virtual size_t InternalBufferSize() const;
 
-        virtual void SetParams(const float* srcScale, const uint8_t* srcZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params, const float* dstScale, const uint8_t* dstZero);
+        virtual void SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params);
 
         virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst) = 0;
 
@@ -93,9 +93,10 @@ namespace Simd
         mutable String _info;
         Array8u _buffer, _srcZero;
         Array8i _weight;
-        Array32i _bias, _dstZero;
+        Array32i _bias;
         Array32f _weightScale, _norm, _params; 
-        float _srcScale, _dstScale;
+        int32_t _dstZero, _actZero;
+        float _srcScale, _dstScale, _actScale;
         bool _src8u, _dst8u, _is1x1;
         size_t _merge, _sizeS, _sizeD, _elemS, _elemD;
     };

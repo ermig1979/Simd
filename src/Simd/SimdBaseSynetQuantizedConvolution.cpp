@@ -57,19 +57,18 @@ namespace Simd
 
     size_t SynetQuantizedConvolution::InternalBufferSize() const
     {
-        return _buffer.RawSize() + _weight.RawSize() + _srcZero.RawSize() + _dstZero.RawSize() + _norm.RawSize() + 
+        return _buffer.RawSize() + _weight.RawSize() + _srcZero.RawSize() + _norm.RawSize() + 
             _bias.RawSize() + _weightScale.RawSize() + _norm.RawSize();
     }
 
-    void SynetQuantizedConvolution::SetParams(const float* srcScale, const uint8_t* srcZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params, const float* dstScale, const uint8_t* dstZero)
+    void SynetQuantizedConvolution::SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params)
     {
         const ConvParam& p = _param;
 
-        _srcScale = srcScale ? srcScale[0] : 0.0f;
+        _srcScale = ioScale[0];
 
         _srcZero.Resize(p.srcC, true);
-        if(srcZero)
-            memset(_srcZero.data, srcZero[0], p.srcC);
+        memset(_srcZero.data, ioZero[0], p.srcC);
 
         SetWeight(weight);
 
@@ -82,14 +81,11 @@ namespace Simd
         else
             _params.Resize(p.dstC, true);
 
-        _dstScale = dstScale ? dstScale[0] : 0.0f;
+        _dstScale = ioScale[1];
+        _actScale = ioScale[2];
 
-        _dstZero.Resize(p.dstC, true);
-        if (dstZero)
-        {
-            for (size_t d = 0; d < p.dstC; ++d)
-                _dstZero[d] = dstZero[0];
-        }
+        _dstZero = ioZero[1];
+        _actZero = ioZero[2];
 
         SetOther();
     }
@@ -272,8 +268,7 @@ namespace Simd
             {
                 const float* norm = _norm.data;
                 const int32_t* bias = _bias.data;
-                const int32_t* zero = _dstZero.data;
-                QuantizeSumLinear(sum, 1, p.dstC, p.dstH, p.dstW, p.dstF, bias, norm, zero, dst);
+                QuantizeSumLinear(sum, 1, p.dstC, p.dstH, p.dstW, p.dstF, bias, norm, _dstZero, dst);
             }
             else
                 assert(0);

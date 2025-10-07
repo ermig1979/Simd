@@ -139,24 +139,24 @@ namespace Test
         Tensor8u src, dst, dst1, dst2;
         Tensor8i weight;
         Tensor32i bias;
-        uint8_t srcZero, dstZero;
-        float srcScale, dstScale;
+        uint8_t zero[3];
+        float scale[3];
         Tensor32f weightScale;
 
         bool Init(const Param & p, const QcParams32f & f32, SimdBool overflow)
         {
             bool trans = p.conv.srcF == SimdTensorFormatNhwc;
 
-            if (!QuantizeSrcDst(f32.src, trans, src, srcZero, srcScale))
+            if (!QuantizeSrcDst(f32.src, trans, src, zero[0], scale[0]))
                 return false;
 
-            if (!QuantizeSrcDst(f32.dst, trans, dst, dstZero, dstScale))
+            if (!QuantizeSrcDst(f32.dst, trans, dst, zero[1], scale[1]))
                 return false;
 
             if (!QuantizeWeight(f32.weight, trans, overflow, weight, weightScale))
                 return false;
 
-            if (!QuantizeBias(f32.bias, srcScale, weightScale, bias))
+            if (!QuantizeBias(f32.bias, scale[0], weightScale, bias))
                 return false;
 
             if (p.conv.dstT == SimdTensorData8u)
@@ -259,8 +259,8 @@ namespace Test
         buf8u.Extend({ ::SimdSynetQuantizedConvolutionExternalBufferSize(context1) });
         buf8u.Extend({ ::SimdSynetQuantizedConvolutionExternalBufferSize(context2) });
 
-        ::SimdSynetQuantizedConvolutionSetParams(context1, &p8i.srcScale, &p8i.srcZero, p8i.weight.Data(), p8i.weightScale.Data(), p8i.bias.Data(), p32f.params.Data(), &p8i.dstScale, &p8i.dstZero);
-        ::SimdSynetQuantizedConvolutionSetParams(context2, &p8i.srcScale, &p8i.srcZero, p8i.weight.Data(), p8i.weightScale.Data(), p8i.bias.Data(), p32f.params.Data(), &p8i.dstScale, &p8i.dstZero);
+        ::SimdSynetQuantizedConvolutionSetParams(context1, p8i.scale, p8i.zero, p8i.weight.Data(), p8i.weightScale.Data(), p8i.bias.Data(), p32f.params.Data());
+        ::SimdSynetQuantizedConvolutionSetParams(context2, p8i.scale, p8i.zero, p8i.weight.Data(), p8i.weightScale.Data(), p8i.bias.Data(), p32f.params.Data());
 
         const uint8_t * src = p.conv.srcT == SimdTensorData32f ? (uint8_t*)p32f.src.Data() : p8i.src.Data();
         uint8_t* dst1 = p.conv.dstT == SimdTensorData32f ? (uint8_t*)p32f.dst1.Data() : p8i.dst1.Data();
@@ -274,7 +274,6 @@ namespace Test
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
-
 
         if (p.conv.dstT == SimdTensorData32f)
         {
