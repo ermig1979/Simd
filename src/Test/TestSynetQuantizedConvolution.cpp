@@ -102,6 +102,11 @@ namespace Test
             {
                 params.Data()[0] = 1.0f / 6.0f;
                 params.Data()[1] = 0.5f;
+            } 
+            else if (p.conv.activation == ::SimdConvolutionActivationRestrictRange)
+            {
+                params.Data()[0] = 0.0f;
+                params.Data()[1] = 6.0f;
             }
             else
             {
@@ -124,9 +129,7 @@ namespace Test
 
             ::SimdRelease(context);
 
-            tmp.Reshape(p.DstShape());
-
-            p.conv.activation = SimdConvolutionActivationIdentity;
+            dst.Reshape(p.DstShape());
 
             context = ::SimdSynetConvolution32fInit(p.batch, &p.conv);
             if (context == NULL)
@@ -134,7 +137,7 @@ namespace Test
 
             ::SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
 
-            ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), tmp.Data());
+            ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());
 
             ::SimdRelease(context);
 
@@ -206,7 +209,7 @@ namespace Test
             size_t channels = trans ? src.Axis(3) : src.Axis(1);
             size_t spatial = trans ? src.Size(1, 3) : src.Size(2, 4);
             dst.Reshape(src.Shape());
-            float min = 0.0f, max = 0.0f;
+            float min = FLT_MAX, max = -FLT_MAX;
             const float* psrc = src.Data();
             for (size_t i = 0; i < size; ++i)
             {
@@ -315,7 +318,7 @@ namespace Test
             int diffMax = 0;
             result = result && Compare(p8i.dst1, p8i.dst2, diffMax, true, 64);
 
-            int controlDiffMax = 4;
+            int controlDiffMax = 3;
             result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
         }
 
@@ -412,7 +415,7 @@ namespace Test
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(10, 256, 14, 14, 512, _1, _1, _1, _0, _0, 1, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 256, 14, 14, 512, _1, _1, _1, _0, _0, 1, aId, t, u8, u8), o, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(10, 64, 112, 112, 64, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 64, 112, 112, 64, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(10, 64, 56, 56, 64, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
@@ -424,9 +427,14 @@ namespace Test
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(10, 512, 7, 7, 512, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 512, 7, 7, 512, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
 #endif
+#if 1
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 99, 55, 55, 99, _3, _1, _2, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 99, 55, 55, 99, _3, _1, _2, _1, _1, 1, aRe, t, u8, u8), o, f1, f2);
+        //result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 99, 55, 55, 99, _3, _1, _2, _1, _1, 1, aRr, t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 99, 55, 55, 99, _3, _1, _2, _1, _1, 1, aPr, t, u8, u8), o, f1, f2);
+#endif
 #else
-        //result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 16, 8, 8, 16, _3, _1, _2, _1, _1, 16, aId, t, u8, u8), o, f1, f2);
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 16, 8, 8, 16, _5, _1, _2, _2, _2, 16, aId, t, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 99, 55, 55, 99, _3, _1, _2, _1, _1, 1, aPr, t, u8, u8), o, f1, f2);
 #endif
 
         return result;

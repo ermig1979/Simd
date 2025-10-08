@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetQuantizedConvolution.h"
+#include "Simd/SimdSynetQuantizedActivation.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetConvolution8iCommon.h"
 #include "Simd/SimdSynet.h"
@@ -121,8 +122,9 @@ namespace Simd
         _norm.Resize(D);
         const float* psw = _weightScale.data;
         float* pn = _norm.data;
+        float dstScale = SimpleQuantized(p) ? _dstScale : _intScale;
         for (size_t d = 0; d < D; ++d)
-            pn[d] = _srcScale * psw[d] / _dstScale;
+            pn[d] = _srcScale * psw[d] / dstScale;
     }
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
@@ -164,6 +166,90 @@ namespace Simd
                 }                
                 wgt += ldw;
                 dst += ldd;
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type> static void QuantizeActivateSumV0(const int32_t* sum, size_t channels, size_t spatial, SimdTensorFormatType format, 
+            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float * params, float dNorm, int32_t dZero, uint8_t* dst)
+        {
+            if (format == SimdTensorFormatNchw)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    int32_t _sBias = sBias[c];
+                    float _sNorm = sNorm[c];
+                    for (size_t s = 0; s < spatial; ++s)
+                        dst[s] = (uint8_t)QuantizeActivateSum<type>(sum[s], _sBias, _sNorm, iZero, iScale, params, c, dNorm, dZero, 0, 255);
+                    sum += spatial;
+                    dst += spatial;
+                }
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                        dst[c] = (uint8_t)QuantizeActivateSum<type>(sum[c], sBias[c], sNorm[c], iZero, iScale, params, c, dNorm, dZero, 0, 255);
+                    sum += channels;
+                    dst += channels;
+                }
+            }
+            else
+                assert(0);
+        }
+
+        template<SimdConvolutionActivationType type> static void QuantizeActivateSumV1(const int32_t* sum, size_t channels, size_t spatial, SimdTensorFormatType format,
+            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
+        {
+            if (format == SimdTensorFormatNchw)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    int32_t _sBias = sBias[c];
+                    float _sNorm = sNorm[c];
+                    for (size_t s = 0; s < spatial; ++s)
+                        dst[s] = (uint8_t)QuantizeActivateSum<type>(sum[s], _sBias, _sNorm, iScale, params, c, dNorm, dZero, 0, 255);
+                    sum += spatial;
+                    dst += spatial;
+                }
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                        dst[c] = (uint8_t)QuantizeActivateSum<type>(sum[c], sBias[c], sNorm[c], iScale, params, c, dNorm, dZero, 0, 255);
+                    sum += channels;
+                    dst += channels;
+                }
+            }
+            else
+                assert(0);
+        }
+
+        typedef void (*QuantizeActivateSumPtr)(const int32_t* sum, size_t channels, size_t spatial, SimdTensorFormatType format,
+            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst);
+
+        template<SimdConvolutionActivationType type> QuantizeActivateSumPtr GetQuantizeActivateSum(int version)
+        {
+            switch (version)
+            {
+            case 0: return QuantizeActivateSumV0<type>;
+            case 1: return QuantizeActivateSumV1<type>;
+            default:
+                return NULL;
+            }
+        }
+
+        QuantizeActivateSumPtr GetQuantizeActivateSum(SimdConvolutionActivationType type, int version)
+        {
+            switch (type)
+            {
+            case SimdConvolutionActivationPrelu: return GetQuantizeActivateSum<SimdConvolutionActivationPrelu>(version);
+            default:
+                return NULL;
             }
         }
 
@@ -264,14 +350,19 @@ namespace Simd
                         GemmNchwV2(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD, overflow);
                 }
             }
-            if (p.activation == SimdConvolutionActivationIdentity || p.activation == SimdConvolutionActivationRelu || p.activation == SimdConvolutionActivationRestrictRange)
+            if (SimpleQuantized(p))
             {
                 const float* norm = _norm.data;
                 const int32_t* bias = _bias.data;
                 QuantizeSumLinear(sum, 1, p.dstC, p.dstH, p.dstW, p.dstF, bias, norm, _dstZero, dst);
             }
             else
-                assert(0);
+            {
+                float dstNorm = 1.0f / _dstScale;
+                QuantizeActivateSumPtr quantizeActivateSum = GetQuantizeActivateSum(p.activation, 1);
+                assert(quantizeActivateSum);
+                quantizeActivateSum(sum, p.dstC, p.dstH * p.dstW, p.dstF, _bias.data, _norm.data, _intZero, _intScale, _params.data, dstNorm, _dstZero, dst);
+            }
         }
 
         //-------------------------------------------------------------------------------------------------

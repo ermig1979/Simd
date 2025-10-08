@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetQuantizeLinear.h"
+#include "Simd/SimdSynetQuantizedActivation.h"
 #include "Simd/SimdFmadd.h"
 
 namespace Simd
@@ -29,13 +30,6 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        SIMD_INLINE void QuantizedPrelu(const uint8_t& src, int sBias, float sNorm, float slope, uint8_t& dst, float dNorm, int dZero)
-        {
-            float _src = DequantizeLinear(src, sBias, sNorm);
-            float _dst = Simd::Max(0.0f, _src) + slope * Simd::Min(_src, 0.0f);
-            dst = (uint8_t)QuantizeLinear(_dst, dNorm, dZero, 0, 255);
-        }
-
         void SynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format)
         {
             float sBias = - srcZero;
