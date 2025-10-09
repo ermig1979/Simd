@@ -234,22 +234,23 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void SynetQuantizedConvolutionNhwcSpecV0Postprocess8u(const int32_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const int32_t* bias, const float* norm, int32_t zero, uint8_t* dst)
+        void SynetQuantizedConvolutionNhwcSpecV0PostprocessI(const int32_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd,
+            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
         {
             size_t dstCF = AlignLo(dstC, F), tailD = dstC - dstCF;
             size_t rowGap = a.gapH * a.macroD;
             src += dyBeg * a.srcW * a.macroD;
             dst += dyBeg * p.dstW * p.dstC * a.elem;
-            __m256i _zero = _mm256_set1_epi32(zero);
+            __m256i _zero = _mm256_set1_epi32(dZero);
             for (size_t dy = dyBeg; dy < dyEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx)
                 {
                     size_t dc = 0;
                     for (; dc < dstCF; dc += F)
-                        Avx2::Postprocess(src + dc, bias + dc, norm + dc, _zero, dst + dc);
+                        Avx2::Postprocess(src + dc, sBias + dc, sNorm + dc, _zero, dst + dc);
                     if (tailD)
-                        Avx2::Postprocess(src + dc, bias + dc, norm + dc, _zero, dst + dc, tailD);
+                        Avx2::Postprocess(src + dc, sBias + dc, sNorm + dc, _zero, dst + dc, tailD);
                     src += a.macroD;
                     dst += p.dstC * a.elem;
                 }
@@ -273,12 +274,10 @@ namespace Simd
             _convolution = QuantizedConvolutionNhwcSpecV0_2;
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity:
-            case SimdConvolutionActivationRelu:
-            case SimdConvolutionActivationRestrictRange: 
-                _postprocess = _dst8u ? SynetQuantizedConvolutionNhwcSpecV0Postprocess8u : NULL; 
-                break;
-            default: assert(0);
+            case SimdConvolutionActivationIdentity: _postprocess = SynetQuantizedConvolutionNhwcSpecV0PostprocessI; break;
+            default:
+                _postprocess = NULL;
+                assert(0);
             }
         }
     }

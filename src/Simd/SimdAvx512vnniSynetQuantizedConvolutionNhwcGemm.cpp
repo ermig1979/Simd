@@ -242,10 +242,12 @@ namespace Simd
         SIMD_INLINE void Set(const ConvParam& p, const AlgParam& a, Convolution* convolutions)
         {
             convolutions[0] = QuantizedConvolutionNhwcGemm_i2<Term8iInterim>;
-            if (p.dstT == SimdTensorData8u)
-                convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u>;
-            else
-                convolutions[1] = NULL;// QuantizedConvolutionNhwcGemm_2<Term8iLast32f>;
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u>; break;
+            default:
+                convolutions[1] = NULL;
+            }
         }
 
         SynetQuantizedConvolutionNhwcGemm::SynetQuantizedConvolutionNhwcGemm(const ConvParam& p)

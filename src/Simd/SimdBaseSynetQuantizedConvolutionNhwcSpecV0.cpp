@@ -169,9 +169,11 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            const int32_t* bias = _bias.data;
-            const float* norm = _norm.data;
+            const int32_t* sBias = _bias.data;
+            const float* sNorm = _norm.data;
             const int* offs = _offset.data;
+            const float* params = _params.data;
+            float dNorm = 1.0f / _dstScale;
             size_t dstH = p.dstH * a.batch, dstHb = a.srcH * a.batch - a.gapV;
             size_t bufOffs = ((a.padV - p.padY) * a.srcW + (a.padH - p.padX)) * a.microC;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
@@ -213,25 +215,27 @@ namespace Simd
                                 size_t dS = a.srcH * a.srcW * a.macroD;
                                 size_t dD = p.dstH * p.dstW * p.dstC * a.elem;
                                 for (size_t b = 0; b < a.batch; ++b)
-                                    _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, norm, _dstZero, dst + b * dD);
+                                    _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, sBias, sNorm, _intZero, _intScale, params, dNorm, _dstZero, dst + b * dD);
                             }
                             else
-                                _postprocess(sum + dyN * a.F * a.macroD, p, a, macroD, dyBeg, dyEnd, bias, norm, _dstZero, dst);
+                                _postprocess(sum + dyN * a.F * a.macroD, p, a, macroD, dyBeg, dyEnd, sBias, sNorm, _intZero, _intScale, params, dNorm, _dstZero, dst);
                         }
                         dyBeg = dyEnd;
                     }
                     weight += macroC * a.kA * a.F;
                 }
-                bias += macroD;
-                norm += macroD;
+                sBias += macroD;
+                sBias += macroD;
+                if (p.activation == SimdConvolutionActivationPrelu)
+                    params += macroD;
                 dst += macroD * _elemD;
             }
         }
 
-        bool SynetQuantizedConvolutionNhwcSpecV0::Preferable(const ConvParam& p)
+        bool SynetQuantizedConvolutionNhwcSpecV0::Preferable(const ConvParam& p, bool imp)
         {
             return p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) 
-                && p.dstC >= 4 && p.srcC * p.kernelX * p.kernelY >= 32 && p.activation == SimdConvolutionActivationIdentity;
+                && p.dstC >= 4 && p.srcC * p.kernelX * p.kernelY >= 32 && (p.activation == SimdConvolutionActivationIdentity || imp);
         }
     }
 #endif
