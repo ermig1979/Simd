@@ -42,7 +42,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term8iType term, int M> void QuantizedConvolutionNhwcGemm_2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
+        template<Term8iType term, int M> void QuantizedConvolutionNhwcGemm_i2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstC, int update, const int8_t* weight0, const __m512i* bias, const __m512* norm, const __m512i& zero, int32_t* buf, uint8_t* dst)
         {
             __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
@@ -182,49 +182,49 @@ namespace Simd
             }
         }
 
-        typedef void(*QuantizedConvolutionNhwcGemm_2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
+        typedef void(*QuantizedConvolutionNhwcGemm_i2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstC, int update, const int8_t* weight, const __m512i* bias, const __m512* norm, const __m512i& zero, int32_t* buf, uint8_t* dst);
 
-        template<Term8iType term> QuantizedConvolutionNhwcGemm_2xM_Ptr GetQuantizedConvolutionNhwcGemm_2xM(size_t M)
+        template<Term8iType term> QuantizedConvolutionNhwcGemm_i2xM_Ptr GetQuantizedConvolutionNhwcGemm_i2xM(size_t M)
         {
             switch (M)
             {
             case 0x0: return NULL;
-            case 0x1: return QuantizedConvolutionNhwcGemm_2xM<term, 0x1>;
-            case 0x2: return QuantizedConvolutionNhwcGemm_2xM<term, 0x2>;
-            case 0x3: return QuantizedConvolutionNhwcGemm_2xM<term, 0x3>;
-            case 0x4: return QuantizedConvolutionNhwcGemm_2xM<term, 0x4>;
-            case 0x5: return QuantizedConvolutionNhwcGemm_2xM<term, 0x5>;
-            case 0x6: return QuantizedConvolutionNhwcGemm_2xM<term, 0x6>;
-            case 0x7: return QuantizedConvolutionNhwcGemm_2xM<term, 0x7>;
-            case 0x8: return QuantizedConvolutionNhwcGemm_2xM<term, 0x8>;
-            case 0x9: return QuantizedConvolutionNhwcGemm_2xM<term, 0x9>;
-            case 0xA: return QuantizedConvolutionNhwcGemm_2xM<term, 0xA>;
-            case 0xB: return QuantizedConvolutionNhwcGemm_2xM<term, 0xB>;
-            case 0xC: return QuantizedConvolutionNhwcGemm_2xM<term, 0xC>;
+            case 0x1: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x1>;
+            case 0x2: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x2>;
+            case 0x3: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x3>;
+            case 0x4: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x4>;
+            case 0x5: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x5>;
+            case 0x6: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x6>;
+            case 0x7: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x7>;
+            case 0x8: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x8>;
+            case 0x9: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x9>;
+            case 0xA: return QuantizedConvolutionNhwcGemm_i2xM<term, 0xA>;
+            case 0xB: return QuantizedConvolutionNhwcGemm_i2xM<term, 0xB>;
+            case 0xC: return QuantizedConvolutionNhwcGemm_i2xM<term, 0xC>;
             }
             assert(0);
             return NULL;
         }
 
-        template<Term8iType term> void QuantizedConvolutionNhwcGemm_2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-            size_t srcC, int update, const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t* buf, uint8_t* dst)
+        template<Term8iType term> void QuantizedConvolutionNhwcGemm_i2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int update, const int8_t* weight,
+            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* buf, uint8_t* dst)
         {
             size_t n1 = dstH * p.dstW, n = 12;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * DF;
             size_t dB = a.dB, dD = p.dstC * a.elem, dS = a.bufK;
-            QuantizedConvolutionNhwcGemm_2xM_Ptr convolution_2xN = GetQuantizedConvolutionNhwcGemm_2xM<term>(n);
-            QuantizedConvolutionNhwcGemm_2xM_Ptr convolution_2xM = GetQuantizedConvolutionNhwcGemm_2xM<term>(m);
+            QuantizedConvolutionNhwcGemm_i2xM_Ptr convolution_2xN = GetQuantizedConvolutionNhwcGemm_i2xM<term>(n);
+            QuantizedConvolutionNhwcGemm_i2xM_Ptr convolution_2xM = GetQuantizedConvolutionNhwcGemm_i2xM<term>(m);
 
             __m512 _norm[2];
-            __m512i _bias[2], _zero = _mm512_set1_epi32(zero);
+            __m512i _bias[2], _zero = _mm512_set1_epi32(dZero);
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
-                _bias[0] = _mm512_loadu_si512((__m512i*)(bias + dc) + 0);
-                _bias[1] = _mm512_loadu_si512((__m512i*)(bias + dc) + 1);
-                _norm[0] = _mm512_loadu_ps(norm + dc + 0);
-                _norm[1] = _mm512_loadu_ps(norm + dc + F);
+                _bias[0] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 0);
+                _bias[1] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 1);
+                _norm[0] = _mm512_loadu_ps(sNorm + dc + 0);
+                _norm[1] = _mm512_loadu_ps(sNorm + dc + F);
                 const uint8_t* s = src;
                 int32_t* b = buf + dc;
                 uint8_t* d = dst + dc * a.elem;
@@ -241,9 +241,9 @@ namespace Simd
 
         SIMD_INLINE void Set(const ConvParam& p, const AlgParam& a, Convolution* convolutions)
         {
-            convolutions[0] = QuantizedConvolutionNhwcGemm_2<Term8iInterim>;
+            convolutions[0] = QuantizedConvolutionNhwcGemm_i2<Term8iInterim>;
             if (p.dstT == SimdTensorData8u)
-                convolutions[1] = QuantizedConvolutionNhwcGemm_2<Term8iLast8u>;
+                convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u>;
             else
                 convolutions[1] = NULL;// QuantizedConvolutionNhwcGemm_2<Term8iLast32f>;
         }

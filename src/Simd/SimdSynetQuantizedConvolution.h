@@ -133,7 +133,7 @@ namespace Simd
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
 
-            static bool Preferable(const ConvParam& p);
+            static bool Preferable(const ConvParam& p, bool imp = true);
 
             struct AlgParam
             {
@@ -146,8 +146,8 @@ namespace Simd
 
             typedef void(*ConvertPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-                size_t srcC, int update, const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t* sum, uint8_t* dst);
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int update, const int8_t* weight, 
+                const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);

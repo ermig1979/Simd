@@ -148,8 +148,10 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            const int32_t* bias = _bias.data;
-            const float* norm = _norm.data;
+            const int32_t* sBias = _bias.data;
+            const float* sNorm = _norm.data;
+            const float* params = _params.data;
+            float dNorm = 1.0f / _dstScale;
             size_t dstH = p.dstH * a.batch;
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
@@ -179,25 +181,27 @@ namespace Simd
                         }
                         if (mak + macroK == a.bufK)
                             _convolutions[1](buf + bufOffs, p, a, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 0 : 1,
-                                weight, bias, norm, _dstZero, sum + sumOffs, dst + dstOffs);
+                                weight, sBias, sNorm, _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, dst + dstOffs);
                         else
                             _convolutions[0](buf + bufOffs, p, a, macroD, yEnd - yBeg, macroK, mak == 0 ? 0 : 1,
-                                weight, bias, norm, _dstZero, sum + sumOffs, dst + dstOffs);
+                                weight, sBias, sNorm, _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, dst + dstOffs);
                         yBeg = yEnd;
                     }
                     weight += macroK * a.F;
                 }
-                bias += macroD;
-                norm += macroD;
+                sBias += macroD;
+                sBias += macroD;
+                if (p.activation == SimdConvolutionActivationPrelu)
+                    params += macroD;
                 dst += macroD * _elemD;
                 if (!a.sumBuf)
                     sum += macroD;
             }
         }
 
-        bool SynetQuantizedConvolutionNhwcGemm::Preferable(const ConvParam& p)
+        bool SynetQuantizedConvolutionNhwcGemm::Preferable(const ConvParam& p, bool imp)
         {
-            return p.trans != 0 && p.group == 1 && p.activation == SimdConvolutionActivationIdentity;
+            return p.trans != 0 && p.group == 1 && (p.activation == SimdConvolutionActivationIdentity || imp);
         }
     }
 #endif

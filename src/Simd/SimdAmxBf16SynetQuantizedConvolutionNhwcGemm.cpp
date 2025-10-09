@@ -135,7 +135,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term8iType term, int cfg> void QuantizedConvolutionNhwcGemm_32x32(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
+        template<Term8iType term, int cfg> void QuantizedConvolutionNhwcGemm_i32x32(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0, const __m512i* bias, const __m512* norm, const __m512i& zero, int32_t* buf, uint8_t* dst)
         {
             int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
@@ -214,7 +214,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, int cfg> void QuantizedConvolutionNhwcGemm_32x16(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
+        template<Term8iType term, int cfg> void QuantizedConvolutionNhwcGemm_i32x16(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0, const __m512i* bias, const __m512* norm, const __m512i& zero, int32_t* buf, uint8_t* dst)
         {
             int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
@@ -268,7 +268,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, int cfg> void QuantizedConvolutionNhwcGemm_16x32(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
+        template<Term8iType term, int cfg> void QuantizedConvolutionNhwcGemm_i16x32(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0, const __m512i* bias, const __m512* norm, const __m512i& zero, int32_t* buf, uint8_t* dst)
         {
             int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
@@ -322,7 +322,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, int cfg> void QuantizedConvolutionNhwcGemm_16x16(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
+        template<Term8iType term, int cfg> void QuantizedConvolutionNhwcGemm_i16x16(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0, const __m512i* bias, const __m512* norm, const __m512i& zero, int32_t* buf, uint8_t* dst)
         {
             int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
@@ -362,34 +362,34 @@ namespace Simd
             }
         }
 
-        typedef void (*QuantizedConvolutionNhwcGemmPtr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
+        typedef void (*QuantizedConvolutionNhwcGemm_iPtr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0, const __m512i* bias, const __m512* norm, const __m512i& zero, int32_t* buf, uint8_t* dst);
 
-        template<Term8iType term> void QuantizedConvolutionNhwcGemm_2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-                size_t srcC, int update, const int8_t* weight, const int32_t* bias, const float* norm, int32_t zero, int32_t* buf, uint8_t* dst)
+        template<Term8iType term> void QuantizedConvolutionNhwcGemm_i2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int update, const int8_t* weight,
+            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* buf, uint8_t* dst)
         {
             size_t n = 32, n1 = dstH * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * DF;
             size_t dB = a.macroK < a.bufK ? a.dB : 0, dD = p.dstC * a.elem, dS = a.bufK;
 
             __m512 _norm[2];
-            __m512i _bias[2], _zero = _mm512_set1_epi32(zero);
+            __m512i _bias[2], _zero = _mm512_set1_epi32(dZero);
             if (nn)
             {
                 bool avoidSrcOverflow = !(a.reorderType == 1 && p.Is1x1());
                 if (avoidSrcOverflow)
                     m = AlignHi(m, 16), nn = n1 - m;
-                QuantizedConvolutionNhwcGemmPtr body_2 = QuantizedConvolutionNhwcGemm_32x32<term, 0>;
-                QuantizedConvolutionNhwcGemmPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemm_32x32<term, 0> : QuantizedConvolutionNhwcGemm_16x32<term, 0>;
-                QuantizedConvolutionNhwcGemmPtr body_1 = QuantizedConvolutionNhwcGemm_32x16<term, 0>;
-                QuantizedConvolutionNhwcGemmPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemm_32x16<term, 0> : QuantizedConvolutionNhwcGemm_16x16<term, 0>;
+                QuantizedConvolutionNhwcGemm_iPtr body_2 = QuantizedConvolutionNhwcGemm_i32x32<term, 0>;
+                QuantizedConvolutionNhwcGemm_iPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemm_i32x32<term, 0> : QuantizedConvolutionNhwcGemm_i16x32<term, 0>;
+                QuantizedConvolutionNhwcGemm_iPtr body_1 = QuantizedConvolutionNhwcGemm_i32x16<term, 0>;
+                QuantizedConvolutionNhwcGemm_iPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemm_i32x16<term, 0> : QuantizedConvolutionNhwcGemm_i16x16<term, 0>;
                 SetTileConfFull();
                 for (size_t dc = 0; dc < dstC; dc += DF)
                 {
                     size_t dC = Simd::Min(DF, dstC - dc);
-                    _bias[0] = _mm512_loadu_si512((__m512i*)(bias + dc) + 0);
-                    _bias[1] = _mm512_loadu_si512((__m512i*)(bias + dc) + 1);
-                    _norm[0] = _mm512_loadu_ps(norm + dc + 0);
-                    _norm[1] = _mm512_loadu_ps(norm + dc + F);
+                    _bias[0] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 0);
+                    _bias[1] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 1);
+                    _norm[0] = _mm512_loadu_ps(sNorm + dc + 0);
+                    _norm[1] = _mm512_loadu_ps(sNorm + dc + F);
                     const uint8_t* s = src;
                     int32_t* b = buf + dc;
                     uint8_t* d = dst + dc * a.elem;
@@ -413,8 +413,8 @@ namespace Simd
             }
             else
             {
-                QuantizedConvolutionNhwcGemmPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemm_32x32<term, 0> : QuantizedConvolutionNhwcGemm_16x32<term, 0>;
-                QuantizedConvolutionNhwcGemmPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemm_32x16<term, 0> : QuantizedConvolutionNhwcGemm_16x16<term, 0>;
+                QuantizedConvolutionNhwcGemm_iPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemm_i32x32<term, 0> : QuantizedConvolutionNhwcGemm_i16x32<term, 0>;
+                QuantizedConvolutionNhwcGemm_iPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemm_i32x16<term, 0> : QuantizedConvolutionNhwcGemm_i16x16<term, 0>;
                 if (m > 16)
                     SetTileConf2x2(m, 32);
                 else
@@ -422,10 +422,10 @@ namespace Simd
                 for (size_t dc = 0; dc < dstC; dc += DF)
                 {
                     size_t dC = Simd::Min(DF, dstC - dc);
-                    _bias[0] = _mm512_loadu_si512((__m512i*)(bias + dc) + 0);
-                    _bias[1] = _mm512_loadu_si512((__m512i*)(bias + dc) + 1);
-                    _norm[0] = _mm512_loadu_ps(norm + dc + 0);
-                    _norm[1] = _mm512_loadu_ps(norm + dc + F);
+                    _bias[0] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 0);
+                    _bias[1] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 1);
+                    _norm[0] = _mm512_loadu_ps(sNorm + dc + 0);
+                    _norm[1] = _mm512_loadu_ps(sNorm + dc + F);
                     const uint8_t* s = src;
                     int32_t* b = buf + dc;
                     uint8_t* d = dst + dc * a.elem;
@@ -443,9 +443,9 @@ namespace Simd
 
         SIMD_INLINE void Set(const ConvParam& p, const AlgParam& a, Convolution* convolutions)
         {
-            convolutions[0] = QuantizedConvolutionNhwcGemm_2<Term8iInterim>;
+            convolutions[0] = QuantizedConvolutionNhwcGemm_i2<Term8iInterim>;
             if (p.dstT == SimdTensorData8u)
-                convolutions[1] = QuantizedConvolutionNhwcGemm_2<Term8iLast8u>;
+                convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u>;
             else
                 convolutions[1] = NULL;// QuantizedConvolutionNhwcGemm_2<Term8iLast32f>;
         }
