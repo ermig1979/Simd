@@ -265,7 +265,6 @@ namespace Simd
             __m128i i32 = _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(_src, _bias)), _norm)), zero);
             uint8_t tmp[F];
             ((int32_t*)tmp)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
-            _mm_storeu_si128((__m128i*)tmp, i32);
             for (size_t i = 0; i < tail; i++)
                 dst[i] = tmp[i];
         }

@@ -122,7 +122,7 @@ namespace Simd
         _norm.Resize(D);
         const float* psw = _weightScale.data;
         float* pn = _norm.data;
-        float dstScale = SimpleQuantized(p) ? _dstScale : _intScale;
+        float dstScale = p.activation == SimdConvolutionActivationIdentity ? _dstScale : _intScale;
         for (size_t d = 0; d < D; ++d)
             pn[d] = _srcScale * psw[d] / dstScale;
     }
@@ -131,7 +131,7 @@ namespace Simd
     Base::PerformanceMeasurer * SynetQuantizedConvolution::Perf(const char* func)
     {
         if (_perf == NULL)
-            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info(true) + " " + Desc(), Param().Flop());
         return _perf;
     }
 #endif
@@ -247,7 +247,16 @@ namespace Simd
         {
             switch (type)
             {
+            case SimdConvolutionActivationRelu: return GetQuantizeActivateSum<SimdConvolutionActivationRelu>(version);
+            case SimdConvolutionActivationLeakyRelu: return GetQuantizeActivateSum<SimdConvolutionActivationLeakyRelu>(version);
+            case SimdConvolutionActivationRestrictRange: return GetQuantizeActivateSum<SimdConvolutionActivationRestrictRange>(version);
             case SimdConvolutionActivationPrelu: return GetQuantizeActivateSum<SimdConvolutionActivationPrelu>(version);
+            case SimdConvolutionActivationElu: return GetQuantizeActivateSum<SimdConvolutionActivationElu>(version);
+            case SimdConvolutionActivationHswish: return GetQuantizeActivateSum<SimdConvolutionActivationHswish>(version);
+            case SimdConvolutionActivationMish: return GetQuantizeActivateSum<SimdConvolutionActivationMish>(version);
+            case SimdConvolutionActivationHardSigmoid: return GetQuantizeActivateSum<SimdConvolutionActivationHardSigmoid>(version);
+            case SimdConvolutionActivationSwish: return GetQuantizeActivateSum<SimdConvolutionActivationSwish>(version);
+            case SimdConvolutionActivationGelu: return GetQuantizeActivateSum<SimdConvolutionActivationGelu>(version);
             default:
                 return NULL;
             }
@@ -287,6 +296,11 @@ namespace Simd
             _siC = p.srcC / p.group;
             _siD = p.dstC / p.group;
             _siS = p.dstH * p.dstW;
+        }
+
+        String SynetQuantizedConvolutionGemm::Desc() const 
+        { 
+            return Ext() + "::Gemm"; 
         }
 
         size_t SynetQuantizedConvolutionGemm::ExternalBufferSize() const
@@ -350,7 +364,7 @@ namespace Simd
                         GemmNchwV2(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD, overflow);
                 }
             }
-            if (SimpleQuantized(p))
+            if (p.activation == SimdConvolutionActivationIdentity)
             {
                 const float* norm = _norm.data;
                 const int32_t* bias = _bias.data;

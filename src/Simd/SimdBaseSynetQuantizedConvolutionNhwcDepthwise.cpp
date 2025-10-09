@@ -72,7 +72,7 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcDepthwiseV0::Preferable(const ConvParam& p, size_t F)
         {
-            return p.trans != 0 && p.IsDepthwise() && p.group >= F && SimpleQuantized(p);
+            return p.trans != 0 && p.IsDepthwise() && p.group >= F && p.activation == SimdConvolutionActivationIdentity;
         }
 
         //------------------------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcDepthwiseV1::Preferable(const ConvParam& p, size_t F)
         {
-            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F && SimpleQuantized(p);
+            return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F && p.activation == SimdConvolutionActivationIdentity;
         }
 
         //------------------------------------------------------------------------------------------------
@@ -321,7 +321,7 @@ namespace Simd
             return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F 
                 && (p.IsStride(1) || p.IsStride(2))
                 && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7))
-                && SimpleQuantized(p);
+                && p.activation == SimdConvolutionActivationIdentity;
         }
 
         //------------------------------------------------------------------------------------------------
@@ -338,6 +338,7 @@ namespace Simd
             const AlgParam& a = _alg;
             std::stringstream desc;
             desc << Ext() << "::NhwcDepthwiseV3-" << a.reorderType;
+
             return desc.str();
         }
 
@@ -472,7 +473,7 @@ namespace Simd
             return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F
                 && (p.IsStride(1) || p.IsStride(2))
                 && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7))
-                && SimpleQuantized(p);
+                && p.activation == SimdConvolutionActivationIdentity;
         }
      }
 #endif

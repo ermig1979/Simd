@@ -1118,7 +1118,7 @@ namespace Simd
                             for (; dx < rsFS; dx += fs)
                             {
                                 size_t sx0 = _ix[dx];
-                                __m512i idx = _mm512_sub_epi32(_mm512_loadu_si512(_ix.data + dx), _mm512_set1_epi32(sx0));
+                                __m512i idx = _mm512_sub_epi32(_mm512_loadu_si512(_ix.data + dx), _mm512_set1_epi32((int)sx0));
                                __m512 _src = _mm512_loadu_ps(ps + sx0);
                                 __m512 s0 = _mm512_permutexvar_ps(idx, _src);
                                 __m512 s1 = _mm512_permutexvar_ps(_mm512_add_epi32(idx, _cn), _src);
@@ -1129,7 +1129,7 @@ namespace Simd
                             if (dx < rs)
                             {
                                 size_t sx0 = _ix[dx];
-                                __m512i idx = _mm512_sub_epi32(_mm512_maskz_loadu_epi32(rsMST, _ix.data + dx), _mm512_set1_epi32(sx0));
+                                __m512i idx = _mm512_sub_epi32(_mm512_maskz_loadu_epi32(rsMST, _ix.data + dx), _mm512_set1_epi32((int)sx0));
                                 __m512 _src = _mm512_maskz_loadu_ps(rsMSTS, ps + sx0);
                                 __m512 s0 = _mm512_permutexvar_ps(idx, _src);
                                 __m512 s1 = _mm512_permutexvar_ps(_mm512_add_epi32(idx, _cn), _src);
@@ -1143,7 +1143,7 @@ namespace Simd
                             for (; dx < rsFS; dx += fs)
                             {
                                 size_t sx0 = _ix[dx];
-                                __m512i idx = _mm512_sub_epi32(_mm512_loadu_si512(_ix.data + dx), _mm512_set1_epi32(sx0));
+                                __m512i idx = _mm512_sub_epi32(_mm512_loadu_si512(_ix.data + dx), _mm512_set1_epi32((int)sx0));
                                 __m512 s0 = _mm512_permutexvar_ps(idx, _mm512_loadu_ps(ps + sx0));
                                 __m512 s1 = _mm512_permutexvar_ps(idx, _mm512_loadu_ps(ps + sx0 + cn));
                                 __m512 fx1 = _mm512_loadu_ps(_ax.data + dx);
@@ -1153,7 +1153,7 @@ namespace Simd
                             if (dx < rs)
                             {
                                 size_t sx0 = _ix[dx];
-                                __m512i idx = _mm512_sub_epi32(_mm512_maskz_loadu_epi32(rsMST, _ix.data + dx), _mm512_set1_epi32(sx0));
+                                __m512i idx = _mm512_sub_epi32(_mm512_maskz_loadu_epi32(rsMST, _ix.data + dx), _mm512_set1_epi32((int)sx0));
                                 __m512 s0 = _mm512_permutexvar_ps(idx, _mm512_maskz_loadu_ps(rsMSTS, ps + sx0));
                                 __m512 s1 = _mm512_permutexvar_ps(idx, _mm512_maskz_loadu_ps(rsMSTS, ps + sx0 + cn));
                                 __m512 fx1 = _mm512_loadu_ps(_ax.data + dx);

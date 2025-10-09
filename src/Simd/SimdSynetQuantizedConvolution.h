@@ -110,7 +110,7 @@ namespace Simd
         public:
             SynetQuantizedConvolutionGemm(const ConvParam & p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::Gemm"; }
+            virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
 
         protected:

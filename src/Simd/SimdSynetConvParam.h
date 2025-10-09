@@ -83,22 +83,14 @@ namespace Simd
 
     SIMD_INLINE String ToStr(SimdConvolutionActivationType t)
     {
-        const char* cats[] = { "id", "re", "lr", "rr", "pr", "el", "hs", "mi", "hi", "sw", "ge" };
+        static const char* cats[] = { "id", "re", "lr", "rr", "pr", "el", "hs", "mi", "hi", "sw", "ge" };
         return String(cats[t]);
     }
 
     SIMD_INLINE String ToChar(SimdTensorDataType t)
     {
-        const char* tdts[] = { "?", "f", "i", "u", "u", "l", "l", "~", "b", "b"};
+        static const char* tdts[] = { "?", "f", "i", "u", "u", "l", "l", "~", "b", "b"};
         return String(tdts[int(t) + 1]);
-    }
-
-    SIMD_INLINE bool SimpleQuantized(const SimdConvolutionParameters& p)
-    {
-        return 
-            p.activation == SimdConvolutionActivationIdentity ||
-            p.activation == SimdConvolutionActivationRelu ||
-            p.activation == SimdConvolutionActivationRestrictRange;
     }
 
     //-------------------------------------------------------------------------------------------------

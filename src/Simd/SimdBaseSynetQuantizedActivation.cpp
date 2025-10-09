@@ -32,7 +32,7 @@ namespace Simd
     {
         void SynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format)
         {
-            float sBias = - srcZero;
+            int sBias = -srcZero;
             float sNorm = srcScale[0], dNorm = 1.0f / dstScale[0];
             if (format == SimdTensorFormatNhwc)
             {
