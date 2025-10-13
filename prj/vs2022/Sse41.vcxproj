@@ -10,7 +10,6 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41AbsGradientSaturatedSum.cpp" />
@@ -142,6 +141,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConcat.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcDepthwiseV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProduct.cpp" />
@@ -256,6 +256,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedDepthwise.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h" />

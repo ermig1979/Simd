@@ -134,6 +134,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConcat.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcDepthwiseV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProduct.cpp" />

@@ -220,6 +220,7 @@ namespace Simd
             const AlgParam& a = _alg;
             buf8 = Buffer(buf8);
             int16_t* buf = Allocate<int16_t>(buf8, a.bufR * a.bufH);
+            float dNorm = 1.0f / _dstScale;
             if (_srcZero.size != a.bufR)
             {
                 uint8_t zero = _srcZero[0];
@@ -232,7 +233,7 @@ namespace Simd
                 {
                     size_t yEnd = Simd::Min(yBeg + a.stepH, p.dstH);
                     _preprocess(src, _srcZero.data, p, a, yBeg, yEnd, buf);
-                    _convolution(buf, p, a, _weight16i.data, _bias.data, _norm.data, yBeg, yEnd, _dstZero, dst);
+                    _convolution(buf, p, a, yBeg, yEnd, _weight16i.data, _bias.data, _norm.data, _intZero, _intScale, _params.data, dNorm, _dstZero, dst);
                     yBeg = yEnd;
                 }
                 src += _sizeS * _elemS;

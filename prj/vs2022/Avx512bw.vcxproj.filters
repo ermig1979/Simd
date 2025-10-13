@@ -463,6 +463,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwReorder.cpp">
       <Filter>Avx512bw\Transform</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcDepthwiseV2.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">

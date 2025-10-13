@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionOutput.cpp">
-      <Filter>Inc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgr.cpp">
       <Filter>Sse41\Convert</Filter>
     </ClCompile>
@@ -481,6 +478,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetUnaryOperation.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcDepthwiseV2.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
@@ -843,6 +843,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdConvert.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedDepthwise.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
