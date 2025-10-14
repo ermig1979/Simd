@@ -321,8 +321,7 @@ namespace Simd
         {
             return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F 
                 && (p.IsStride(1) || p.IsStride(2))
-                && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7))
-                && (p.activation == SimdConvolutionActivationIdentity || (F == 4 || F == 8 || F == 1));
+                && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7));
         }
 
         //------------------------------------------------------------------------------------------------
@@ -474,8 +473,7 @@ namespace Simd
         {
             return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F
                 && (p.IsStride(1) || p.IsStride(2))
-                && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7))
-                && p.activation == SimdConvolutionActivationIdentity;
+                && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7));
         }
      }
 #endif
