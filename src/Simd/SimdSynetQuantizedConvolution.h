@@ -320,7 +320,8 @@ namespace Simd
             };
 
             typedef void(*PreprocessPtr)(const uint8_t* src, const uint8_t* zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);
-            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, const int8_t* weight, const int32_t* bias, const float* norm, size_t yBeg, size_t yEnd, uint32_t zero, uint8_t* dst);
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, const int8_t* weight,
+                const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F);
