@@ -257,6 +257,8 @@ namespace Simd
                     const int16_t* ps0 = src + sc * bW;
                     _sBias = _mm_loadu_si128((__m128i*)(sBias + sc));
                     _sNorm = _mm_loadu_ps(sNorm + sc);
+                    if (type == SimdConvolutionActivationPrelu)
+                        _params[0] = _mm_loadu_ps(params + sc);
                     size_t dx = 0, tail = srcC - srcCF;
                     for (; dx < p.dstW; ++dx, ps0 += dX)
                     {
@@ -362,6 +364,8 @@ namespace Simd
                     const int16_t* ps0 = src + sc * bW;
                     _sBias = _mm_loadu_si128((__m128i*)(sBias + sc));
                     _sNorm = _mm_loadu_ps(sNorm + sc);
+                    if (type == SimdConvolutionActivationPrelu)
+                        _params[0] = _mm_loadu_ps(params + sc);
                     size_t dx = 0, tail = srcC - srcCF;
                     for (; dx < p.dstW; ++dx, ps0 += dX)
                     {

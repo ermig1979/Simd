@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetQuantizedConvolution.h"
+#include "Simd/SimdSynetQuantizedActivation.h"
 #include "Simd/SimdSynetQuantizedDepthwise.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetConvolution8iCommon.h"
@@ -126,261 +127,23 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV2_AnyR0(const int16_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, const int16_t* weight,
-            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
+        template <Term8iType term, SimdConvolutionActivationType type> void QuantizedConvolutionNhwcDepthwiseV2_AnyR1(const int16_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, 
+            const int16_t* weight, const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
         {
-            __m256i _zero = _mm256_set1_epi32(dZero);
-            __m256i d00, d01, d02, d03, d10, d11, d12, d13, w0, s0;
-            size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), srcCF4 = AlignLo(srcC, F * 4), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX;
-            size_t byMask = a.bufH - 1, bufC = a.bufC * 2, bufR = a.bufR, dstW2 = AlignLo(p.dstW, 2), dD = p.dstC * a.srcE, dX = sX * bufC;
-            size_t dyEnd2 = dyBeg + (sY == 1 ? AlignLo(dyEnd - dyBeg, 2) : 0), sizeW = a.sizeW, dyD = p.dstW * dD;
-            dst += dyBeg * p.dstW * p.dstC * a.srcE;
-            size_t dy = dyBeg;
-            for (; dy < dyEnd2; dy += 2)
-            {
-                size_t dx = 0;
-                for (; dx < p.dstW; ++dx)
-                {
-                    const int16_t* ps0 = src + dx * sX * bufC;
-                    size_t sc = 0;
-                    for (; sc < srcCF4; sc += F * 4)
-                    {
-                        d00 = _mm256_setzero_si256();
-                        d01 = _mm256_setzero_si256();
-                        d02 = _mm256_setzero_si256();
-                        d03 = _mm256_setzero_si256();
-                        d10 = _mm256_setzero_si256();
-                        d11 = _mm256_setzero_si256();
-                        d12 = _mm256_setzero_si256();
-                        d13 = _mm256_setzero_si256();
-                        const int16_t* pw0 = weight + sc * 2, * pw1 = pw0 + sizeW;
-                        for (size_t ky = 0; ky < kY; ky += 2)
-                        {
-                            size_t sy = dy * sY + ky;
-                            const int16_t* ps = ps0 + (sy & byMask) * bufR + sc * 2;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += bufC, pw0 += bufC, pw1 += bufC)
-                            {
-                                s0 = _mm256_loadu_si256((__m256i*)ps + 0);
-                                Madd2(d00, s0, _mm256_loadu_si256((__m256i*)pw0 + 0));
-                                Madd2(d10, s0, _mm256_loadu_si256((__m256i*)pw1 + 0));
-                                s0 = _mm256_loadu_si256((__m256i*)ps + 1);
-                                Madd2(d01, s0, _mm256_loadu_si256((__m256i*)pw0 + 1));
-                                Madd2(d11, s0, _mm256_loadu_si256((__m256i*)pw1 + 1));
-                                s0 = _mm256_loadu_si256((__m256i*)ps + 2);
-                                Madd2(d02, s0, _mm256_loadu_si256((__m256i*)pw0 + 2));
-                                Madd2(d12, s0, _mm256_loadu_si256((__m256i*)pw1 + 2));
-                                s0 = _mm256_loadu_si256((__m256i*)ps + 3);
-                                Madd2(d03, s0, _mm256_loadu_si256((__m256i*)pw0 + 3));
-                                Madd2(d13, s0, _mm256_loadu_si256((__m256i*)pw1 + 3));
-                            }
-                        }
-                        Save2<term>(dst, dst + dyD, d00, d10, sBias, sNorm, _zero, sc + F * 0);
-                        Save2<term>(dst, dst + dyD, d01, d11, sBias, sNorm, _zero, sc + F * 1);
-                        Save2<term>(dst, dst + dyD, d02, d12, sBias, sNorm, _zero, sc + F * 2);
-                        Save2<term>(dst, dst + dyD, d03, d13, sBias, sNorm, _zero, sc + F * 3);
-                    }
-                    for (; sc < srcCF; sc += F)
-                    {
-                        d00 = _mm256_setzero_si256();
-                        d10 = _mm256_setzero_si256();
-                        const int16_t* pw0 = weight + sc * 2, * pw1 = pw0 + sizeW;
-                        for (size_t ky = 0; ky < kY; ky += 2)
-                        {
-                            size_t sy = dy * sY + ky;
-                            const int16_t* ps = ps0 + (sy & byMask) * bufR + sc * 2;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += bufC, pw0 += bufC, pw1 += bufC)
-                            {
-                                s0 = _mm256_loadu_si256((__m256i*)ps + 0);
-                                Madd2(d00, s0, _mm256_loadu_si256((__m256i*)pw0 + 0));
-                                Madd2(d10, s0, _mm256_loadu_si256((__m256i*)pw1 + 0));
-                            }
-                        }
-                        Save2<term>(dst, dst + dyD, d00, d10, sBias, sNorm, _zero, sc + F * 0);
-                    }
-                    for (; sc < srcC; sc += F)
-                    {
-                        d00 = _mm256_setzero_si256();
-                        d10 = _mm256_setzero_si256();
-                        const int16_t* pw0 = weight + sc * 2, * pw1 = pw0 + sizeW;
-                        for (size_t ky = 0; ky < kY; ky += 2)
-                        {
-                            size_t sy = dy * sY + ky;
-                            const int16_t* ps = ps0 + (sy & byMask) * bufR + sc * 2;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += bufC, pw0 += bufC, pw1 += bufC)
-                            {
-                                s0 = _mm256_loadu_si256((__m256i*)ps + 0);
-                                Madd2(d00, s0, _mm256_loadu_si256((__m256i*)pw0 + 0));
-                                Madd2(d10, s0, _mm256_loadu_si256((__m256i*)pw1 + 0));
-                            }
-                        }
-                        Save2<term>(dst, dst + dyD, d00, d10, sBias, sNorm, _zero, sc + F * 0, srcC - srcCF);
-                    }
-                    dst += dD;
-                }
-            }
-            for (; dy < dyEnd; ++dy)
-            {
-                size_t dx = 0;
-                for (; dx < dstW2; dx += 2)
-                {
-                    const int16_t* ps00 = src + (dx + 0) * sX * bufC;
-                    uint8_t* dst0 = dst, * dst1 = dst + dD;
-                    size_t sc = 0;
-                    for (; sc < srcCF4; sc += F * 4)
-                    {
-                        d00 = _mm256_setzero_si256();
-                        d01 = _mm256_setzero_si256();
-                        d02 = _mm256_setzero_si256();
-                        d03 = _mm256_setzero_si256();
-                        d10 = _mm256_setzero_si256();
-                        d11 = _mm256_setzero_si256();
-                        d12 = _mm256_setzero_si256();
-                        d13 = _mm256_setzero_si256();
-                        const int16_t* pw = weight + sc * 2;
-                        for (size_t ky = 0; ky < kY; ky += 2)
-                        {
-                            size_t sy = dy * sY + ky;
-                            const int16_t* ps0 = ps00 + (sy & byMask) * bufR + sc * 2, * ps1 = ps0 + dX;
-                            for (size_t kx = 0; kx < kX; ++kx, ps0 += bufC, ps1 += bufC, pw += bufC)
-                            {
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 0);
-                                Madd2(d00, _mm256_loadu_si256((__m256i*)ps0 + 0), w0);
-                                Madd2(d10, _mm256_loadu_si256((__m256i*)ps1 + 0), w0);
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 1);
-                                Madd2(d01, _mm256_loadu_si256((__m256i*)ps0 + 1), w0);
-                                Madd2(d11, _mm256_loadu_si256((__m256i*)ps1 + 1), w0);
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 2);
-                                Madd2(d02, _mm256_loadu_si256((__m256i*)ps0 + 2), w0);
-                                Madd2(d12, _mm256_loadu_si256((__m256i*)ps1 + 2), w0);
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 3);
-                                Madd2(d03, _mm256_loadu_si256((__m256i*)ps0 + 3), w0);
-                                Madd2(d13, _mm256_loadu_si256((__m256i*)ps1 + 3), w0);
-                            }
-                        }
-                        Save2<term>(dst, dst + dD, d00, d10, sBias, sNorm, _zero, sc + F * 0);
-                        Save2<term>(dst, dst + dD, d01, d11, sBias, sNorm, _zero, sc + F * 1);
-                        Save2<term>(dst, dst + dD, d02, d12, sBias, sNorm, _zero, sc + F * 2);
-                        Save2<term>(dst, dst + dD, d03, d13, sBias, sNorm, _zero, sc + F * 3);
-                    }
-                    for (; sc < srcCF; sc += F)
-                    {
-                        d00 = _mm256_setzero_si256();
-                        d10 = _mm256_setzero_si256();
-                        const int16_t* pw = weight + sc * 2;
-                        for (size_t ky = 0; ky < kY; ky += 2)
-                        {
-                            size_t sy = dy * sY + ky;
-                            const int16_t* ps0 = ps00 + (sy & byMask) * bufR + sc * 2, * ps1 = ps0 + dX;
-                            for (size_t kx = 0; kx < kX; ++kx, ps0 += bufC, ps1 += bufC, pw += bufC)
-                            {
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 0);
-                                Madd2(d00, _mm256_loadu_si256((__m256i*)ps0 + 0), w0);
-                                Madd2(d10, _mm256_loadu_si256((__m256i*)ps1 + 0), w0);
-                            }
-                        }
-                        Save2<term>(dst, dst + dD, d00, d10, sBias, sNorm, _zero, sc + F * 0);
-                    }
-                    for (; sc < srcC; sc += F)
-                    {
-                        d00 = _mm256_setzero_si256();
-                        d10 = _mm256_setzero_si256();
-                        const int16_t* pw = weight + sc * 2;
-                        for (size_t ky = 0; ky < kY; ky += 2)
-                        {
-                            size_t sy = dy * sY + ky;
-                            const int16_t* ps0 = ps00 + (sy & byMask) * bufR + sc * 2, * ps1 = ps0 + dX;
-                            for (size_t kx = 0; kx < kX; ++kx, ps0 += bufC, ps1 += bufC, pw += bufC)
-                            {
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 0);
-                                Madd2(d00, _mm256_loadu_si256((__m256i*)ps0 + 0), w0);
-                                Madd2(d10, _mm256_loadu_si256((__m256i*)ps1 + 0), w0);
-                            }
-                        }
-                        Save2<term>(dst, dst + dD, d00, d10, sBias, sNorm, _zero, sc + F * 0, srcC - srcCF);
-                    }
-                    dst += 2 * dD;
-                }
-                for (; dx < p.dstW; ++dx)
-                {
-                    const int16_t* ps0 = src + dx * sX * bufC;
-                    size_t sc = 0;
-                    for (; sc < srcCF4; sc += F * 4)
-                    {
-                        d00 = _mm256_setzero_si256();
-                        d01 = _mm256_setzero_si256();
-                        d02 = _mm256_setzero_si256();
-                        d03 = _mm256_setzero_si256();
-                        const int16_t* pw = weight + sc * 2;
-                        for (size_t ky = 0; ky < kY; ky += 2)
-                        {
-                            size_t sy = dy * sY + ky;
-                            const int16_t* ps = ps0 + (sy & byMask) * bufR + sc * 2;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += bufC, pw += bufC)
-                            {
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 0);
-                                Madd2(d00, _mm256_loadu_si256((__m256i*)ps + 0), w0);
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 1);
-                                Madd2(d01, _mm256_loadu_si256((__m256i*)ps + 1), w0);
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 2);
-                                Madd2(d02, _mm256_loadu_si256((__m256i*)ps + 2), w0);
-                                w0 = _mm256_loadu_si256((__m256i*)pw + 3);
-                                Madd2(d03, _mm256_loadu_si256((__m256i*)ps + 3), w0);
-                            }
-                        }
-                        Save1<term>(dst, d00, sBias, sNorm, _zero, sc + F * 0);
-                        Save1<term>(dst, d01, sBias, sNorm, _zero, sc + F * 1);
-                        Save1<term>(dst, d02, sBias, sNorm, _zero, sc + F * 2);
-                        Save1<term>(dst, d03, sBias, sNorm, _zero, sc + F * 3);
-                    }
-                    for (; sc < srcCF; sc += F)
-                    {
-                        d00 = _mm256_setzero_si256();
-                        const int16_t* pw = weight + sc * 2;
-                        for (size_t ky = 0; ky < kY; ky += 2)
-                        {
-                            size_t sy = dy * sY + ky;
-                            const int16_t* ps = ps0 + (sy & byMask) * bufR + sc * 2;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += bufC, pw += bufC)
-                            {
-                                w0 = _mm256_loadu_si256((__m256i*)pw);
-                                Madd2(d00, _mm256_loadu_si256((__m256i*)ps), w0);
-                            }
-                        }
-                        Save1<term>(dst, d00, sBias, sNorm, _zero, sc);
-                    }
-                    for (; sc < srcC; sc += F)
-                    {
-                        d00 = _mm256_setzero_si256();
-                        const int16_t* pw = weight + sc * 2;
-                        for (size_t ky = 0; ky < kY; ky += 2)
-                        {
-                            size_t sy = dy * sY + ky;
-                            const int16_t* ps = ps0 + (sy & byMask) * bufR + sc * 2;
-                            for (size_t kx = 0; kx < kX; ++kx, ps += bufC, pw += bufC)
-                            {
-                                w0 = _mm256_loadu_si256((__m256i*)pw);
-                                Madd2(d00, _mm256_loadu_si256((__m256i*)ps), w0);
-                            }
-                        }
-                        Save1<term>(dst, d00, sBias, sNorm, _zero, sc, srcC - srcCF);
-                    }
-                    dst += dD;
-                }
-            }
-        }
-
-        //------------------------------------------------------------------------------------------------
-
-        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV2_AnyR1(const int16_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, const int16_t* weight,
-            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
-        {
-            __m256 _norm;
-            __m256i _zero = _mm256_set1_epi32(dZero), _bias;
+            __m256 _sNorm, _iScale, _params[2], _dNorm;
+            __m256i _dZero = _mm256_set1_epi32(dZero), _sBias;
             __m256i d00, d10, d20, d30, d01, d11, d21, d31, w0, w1, s0;
             size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX, dX = sX * DF, dW = a.stepW;
             size_t byMask = a.bufH - 1, bW = a.bufW * 2, bufR = a.bufR, dstW2 = AlignLo(p.dstW, 2), dstW4 = AlignLo(p.dstW, 4), dD = p.dstC * a.srcE;
             size_t dyEnd2 = dyBeg + (sY == 1 ? AlignLo(dyEnd - dyBeg, 2) : 0), sizeW = a.sizeW, dyD = p.dstW * dD;
             dst += dyBeg * p.dstW * dD;
+            if (type != SimdConvolutionActivationIdentity)
+            {
+                _iScale = _mm256_set1_ps(iScale);
+                _dNorm = _mm256_set1_ps(dNorm);
+                _params[0] = _mm256_set1_ps(params[0]);
+                _params[1] = _mm256_set1_ps(params[1]);
+            }
             size_t dy = dyBeg;
             for (; dy < dyEnd2; dy += 2)
             {
@@ -389,8 +152,10 @@ namespace Simd
                 {
                     uint8_t* pd0 = dst + sc, * pd1 = pd0 + dyD;
                     const int16_t* ps0 = src + sc * bW;
-                    _bias = _mm256_loadu_si256((__m256i*)(sBias + sc));
-                    _norm = _mm256_loadu_ps(sNorm + sc);
+                    _sBias = _mm256_loadu_si256((__m256i*)(sBias + sc));
+                    _sNorm = _mm256_loadu_ps(sNorm + sc);
+                    if (type == SimdConvolutionActivationPrelu)
+                        _params[0] = _mm256_loadu_ps(params + sc);
                     size_t dx = 0;
                     for (; dx < dstW4; dx += 4, ps0 += 4 * dX)
                     {
@@ -424,14 +189,14 @@ namespace Simd
                                 Madd2(d31, s0, w1);
                             }
                         }
-                        Save1<term>(pd0 + 0 * dD, d00, _bias, _norm, _zero);
-                        Save1<term>(pd0 + 1 * dD, d10, _bias, _norm, _zero);
-                        Save1<term>(pd0 + 2 * dD, d20, _bias, _norm, _zero);
-                        Save1<term>(pd0 + 3 * dD, d30, _bias, _norm, _zero);
-                        Save1<term>(pd1 + 0 * dD, d01, _bias, _norm, _zero);
-                        Save1<term>(pd1 + 1 * dD, d11, _bias, _norm, _zero);
-                        Save1<term>(pd1 + 2 * dD, d21, _bias, _norm, _zero);
-                        Save1<term>(pd1 + 3 * dD, d31, _bias, _norm, _zero);
+                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 1 * dD, d10, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 2 * dD, d20, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 3 * dD, d30, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 1 * dD, d11, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 2 * dD, d21, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 3 * dD, d31, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
                         pd0 += 4 * dD;
                         pd1 += 4 * dD;
                     }
@@ -457,10 +222,10 @@ namespace Simd
                                 Madd2(d11, s0, w1);
                             }
                         }
-                        Save1<term>(pd0 + 0 * dD, d00, _bias, _norm, _zero);
-                        Save1<term>(pd0 + 1 * dD, d10, _bias, _norm, _zero);
-                        Save1<term>(pd1 + 0 * dD, d01, _bias, _norm, _zero);
-                        Save1<term>(pd1 + 1 * dD, d11, _bias, _norm, _zero);
+                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 1 * dD, d10, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 1 * dD, d11, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
                         pd0 += 2 * dD;
                         pd1 += 2 * dD;
                     }
@@ -481,8 +246,8 @@ namespace Simd
                                 Madd2(d01, s0, w1);
                             }
                         }
-                        Save1<term>(pd0 + 0 * dD, d00, _bias, _norm, _zero);
-                        Save1<term>(pd1 + 0 * dD, d01, _bias, _norm, _zero);
+                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
                         pd0 += dD;
                         pd1 += dD;
                     }
@@ -491,8 +256,10 @@ namespace Simd
                 {
                     uint8_t* pd0 = dst + sc, * pd1 = pd0 + dyD;
                     const int16_t* ps0 = src + sc * bW;
-                    _bias = _mm256_loadu_si256((__m256i*)(sBias + sc));
-                    _norm = _mm256_loadu_ps(sNorm + sc);
+                    _sBias = _mm256_loadu_si256((__m256i*)(sBias + sc));
+                    _sNorm = _mm256_loadu_ps(sNorm + sc);
+                    if (type == SimdConvolutionActivationPrelu)
+                        _params[0] = _mm256_loadu_ps(params + sc);
                     size_t dx = 0, tail = srcC - srcCF;
                     for (; dx < p.dstW; ++dx, ps0 += dX)
                     {
@@ -511,8 +278,8 @@ namespace Simd
                                 Madd2(d01, s0, w1);
                             }
                         }
-                        Save1<term>(pd0 + 0 * dD, d00, _bias, _norm, _zero, tail);
-                        Save1<term>(pd1 + 0 * dD, d01, _bias, _norm, _zero, tail);
+                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, tail);
+                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, tail);
                         pd0 += dD;
                         pd1 += dD;
                     }
@@ -526,8 +293,10 @@ namespace Simd
                 {
                     uint8_t* pd = dst + sc;
                     const int16_t* ps0 = src + sc * bW;
-                    _bias = _mm256_loadu_si256((__m256i*)(sBias + sc));
-                    _norm = _mm256_loadu_ps(sNorm + sc);
+                    _sBias = _mm256_loadu_si256((__m256i*)(sBias + sc));
+                    _sNorm = _mm256_loadu_ps(sNorm + sc);
+                    if (type == SimdConvolutionActivationPrelu)
+                        _params[0] = _mm256_loadu_ps(params + sc);
                     size_t dx = 0;
                     for (; dx < dstW4; dx += 4, ps0 += 4 * dX)
                     {
@@ -548,10 +317,10 @@ namespace Simd
                                 Madd2(d30, _mm256_loadu_si256((__m256i*)(ps + 3 * dX)), w0);
                             }
                         }
-                        Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero);
-                        Save1<term>(pd + 1 * dD, d10, _bias, _norm, _zero);
-                        Save1<term>(pd + 2 * dD, d20, _bias, _norm, _zero);
-                        Save1<term>(pd + 3 * dD, d30, _bias, _norm, _zero);
+                        Save1<term, type>(pd + 0 * dD, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd + 1 * dD, d10, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd + 2 * dD, d20, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd + 3 * dD, d30, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
                         pd += 4 * dD;
                     }
                     for (; dx < dstW2; dx += 2, ps0 += 2 * dX)
@@ -569,8 +338,8 @@ namespace Simd
                                 Madd2(d10, _mm256_loadu_si256((__m256i*)(ps + 1 * dX)), w0);
                             }
                         }
-                        Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero);
-                        Save1<term>(pd + 1 * dD, d10, _bias, _norm, _zero);
+                        Save1<term, type>(pd + 0 * dD, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd + 1 * dD, d10, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
                         pd += 2 * dD;
                     }
                     for (; dx < p.dstW; ++dx, ps0 += dX)
@@ -586,7 +355,7 @@ namespace Simd
                                 Madd2(d00, _mm256_loadu_si256((__m256i*)ps), w0);
                             }
                         }
-                        Save1<term>(pd, d00, _bias, _norm, _zero);
+                        Save1<term, type>(pd, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
                         pd += dD;
                     }
                 }
@@ -594,8 +363,10 @@ namespace Simd
                 {
                     uint8_t* pd = dst + sc;
                     const int16_t* ps0 = src + sc * bW;
-                    _bias = _mm256_loadu_si256((__m256i*)(sBias + sc));
-                    _norm = _mm256_loadu_ps(sNorm + sc);
+                    _sBias = _mm256_loadu_si256((__m256i*)(sBias + sc));
+                    _sNorm = _mm256_loadu_ps(sNorm + sc);
+                    if (type == SimdConvolutionActivationPrelu)
+                        _params[0] = _mm256_loadu_ps(params + sc);
                     size_t dx = 0, tail = srcC - srcCF;
                     for (; dx < p.dstW; ++dx, ps0 += dX)
                     {
@@ -610,7 +381,7 @@ namespace Simd
                                 Madd2(d00, _mm256_loadu_si256((__m256i*)ps), w0);
                             }
                         }
-                        Save1<term>(pd, d00, _bias, _norm, _zero, tail);
+                        Save1<term, type>(pd, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, tail);
                         pd += dD;
                     }
                 }
@@ -620,16 +391,23 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void QuantizedConvolutionNhwcDepthwiseV2_3x3R1(const int16_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, const int16_t* weight,
-            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
+        template <Term8iType term, SimdConvolutionActivationType type> void QuantizedConvolutionNhwcDepthwiseV2_3x3R1(const int16_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, 
+            const int16_t* weight, const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
         {
-            __m256 _norm;
-            __m256i _zero = _mm256_set1_epi32(dZero), _bias;
+            __m256 _sNorm, _iScale, _params[2], _dNorm;
+            __m256i _dZero = _mm256_set1_epi32(dZero), _sBias;
             __m256i d00, d10, w03, w14, w25, s0;
             size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), sY = p.strideY, sX = p.strideX, dX = sX * DF, dW = a.stepW;
             size_t byMask = a.bufH - 1, bW = a.bufW * 2, bufR = a.bufW * a.bufC, dstW2 = sX == 1 ? AlignLo(p.dstW, 2) : 0, dD = p.dstC * a.srcE;
             size_t dyEnd2 = dyBeg + (sY == 1 ? AlignLo(dyEnd - dyBeg, 2) : 0), sizeW = a.sizeW, dyD = p.dstW * dD;
             dst += dyBeg * p.dstW * dD;
+            if (type != SimdConvolutionActivationIdentity)
+            {
+                _iScale = _mm256_set1_ps(iScale);
+                _dNorm = _mm256_set1_ps(dNorm);
+                _params[0] = _mm256_set1_ps(params[0]);
+                _params[1] = _mm256_set1_ps(params[1]);
+            }
             size_t dy = dyBeg;
             for (; dy < dyEnd2; dy += 2)
             {
@@ -641,8 +419,10 @@ namespace Simd
                     const int16_t* ps0 = src + ((sy + 0) & byMask) * bufR + sc * bW;
                     const int16_t* ps2 = src + ((sy + 2) & byMask) * bufR + sc * bW;
                     const int16_t* pw0 = weight + sc * dW, * pw1 = pw0 + sizeW;
-                    _bias = _mm256_loadu_si256((__m256i*)(sBias + sc));
-                    _norm = _mm256_loadu_ps(sNorm + sc);
+                    _sBias = _mm256_loadu_si256((__m256i*)(sBias + sc));
+                    _sNorm = _mm256_loadu_ps(sNorm + sc);
+                    if (type == SimdConvolutionActivationPrelu)
+                        _params[0] = _mm256_loadu_ps(params + sc);
                     w03 = _mm256_loadu_si256((__m256i*)pw0 + 0);
                     w14 = _mm256_loadu_si256((__m256i*)pw0 + 1);
                     w25 = _mm256_loadu_si256((__m256i*)pw0 + 2);
@@ -676,8 +456,8 @@ namespace Simd
                             Madd2(d00, s0, _mm256_srli_epi32(w58, 16));
                             Madd2(d01, s0, w58);
 
-                            Save1<term>(pd0, d00, _bias, _norm, _zero);
-                            Save1<term>(pd1, d01, _bias, _norm, _zero);
+                            Save1<term, type>(pd0, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                            Save1<term, type>(pd1, d01, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
                             pd0 += dD;
                             pd1 += dD;
                         }
@@ -709,8 +489,8 @@ namespace Simd
                             Madd2(d00, s0, _mm256_srli_epi32(w58, 16));
                             Madd2(d01, s0, w58);
 
-                            Save1<term>(pd0, d00, _bias, _norm, _zero, tail);
-                            Save1<term>(pd1, d01, _bias, _norm, _zero, tail);
+                            Save1<term, type>(pd0, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, tail);
+                            Save1<term, type>(pd1, d01, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, tail);
                             pd0 += dD;
                             pd1 += dD;
                         }
@@ -728,8 +508,10 @@ namespace Simd
                     const int16_t* ps0 = src + ((sy + 0) & byMask) * bufR + sc * bW;
                     const int16_t* ps2 = src + ((sy + 2) & byMask) * bufR + sc * bW;
                     const int16_t* pw = weight + sc * dW;
-                    _bias = _mm256_loadu_si256((__m256i*)(sBias + sc));
-                    _norm = _mm256_loadu_ps(sNorm + sc);
+                    _sBias = _mm256_loadu_si256((__m256i*)(sBias + sc));
+                    _sNorm = _mm256_loadu_ps(sNorm + sc);
+                    if (type == SimdConvolutionActivationPrelu)
+                        _params[0] = _mm256_loadu_ps(params + sc);
                     w03 = _mm256_loadu_si256((__m256i*)pw + 0);
                     w14 = _mm256_loadu_si256((__m256i*)pw + 1);
                     w25 = _mm256_loadu_si256((__m256i*)pw + 2);
@@ -766,8 +548,8 @@ namespace Simd
                             s0 = _mm256_loadu_si256((__m256i*)ps2 + 3);
                             Madd2(d10, s0, w8);
 
-                            Save1<term>(pd + 0 * dD, d00, _bias, _norm, _zero);
-                            Save1<term>(pd + 1 * dD, d10, _bias, _norm, _zero);
+                            Save1<term, type>(pd + 0 * dD, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                            Save1<term, type>(pd + 1 * dD, d10, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
                             pd += 2 * dD;
                         }
                         for (; dx < p.dstW; ++dx, ps0 += dX, ps2 += dX)
@@ -787,7 +569,7 @@ namespace Simd
                             s0 = _mm256_loadu_si256((__m256i*)ps2 + 2);
                             Madd2(d00, s0, w8);
 
-                            Save1<term>(pd, d00, _bias, _norm, _zero);
+                            Save1<term, type>(pd, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
                             pd += dD;
                         }
                     }
@@ -811,7 +593,7 @@ namespace Simd
                             s0 = _mm256_loadu_si256((__m256i*)ps2 + 2);
                             Madd2(d00, s0, w8);
 
-                            Save1<term>(pd, d00, _bias, _norm, _zero, tail);
+                            Save1<term, type>(pd, d00, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, tail);
                             pd += dD;
                         }
                     }
@@ -822,16 +604,14 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        template <Term8iType term> void SetV2(const ConvParam& p, const AlgParam& a, SynetQuantizedConvolutionNhwcDepthwiseV2::ConvolutionPtr& convolution)
+        template <Term8iType term, SimdConvolutionActivationType type> void SetV2(const ConvParam& p, const AlgParam& a, SynetQuantizedConvolutionNhwcDepthwiseV2::ConvolutionPtr& convolution)
         {
             if (p.IsKernel(3) && p.IsDilation(1) && a.reorderType == 1)
-                convolution = QuantizedConvolutionNhwcDepthwiseV2_3x3R1<term>;
+                convolution = QuantizedConvolutionNhwcDepthwiseV2_3x3R1<term, type>;
             else
             {
-                if (a.reorderType == 0)
-                    convolution = QuantizedConvolutionNhwcDepthwiseV2_AnyR0<term>;
-                else if (a.reorderType == 1)
-                    convolution = QuantizedConvolutionNhwcDepthwiseV2_AnyR1<term>;
+                if (a.reorderType == 1)
+                    convolution = QuantizedConvolutionNhwcDepthwiseV2_AnyR1<term, type>;
                 else
                     assert(0);
             }
@@ -845,9 +625,26 @@ namespace Simd
             SetAlgParam(F);
             _preprocess = QuantizedConvolutionNhwcDepthwiseV2_Preprocess;
             if (p.dstT == SimdTensorData8u)
-                SetV2<Term8iLast8u>(p, _alg, _convolution);
-            //else
-            //    SetV2<Term8iLast32f>(p, _alg, _convolution);
+            {
+                switch (p.activation)
+                {
+                case SimdConvolutionActivationIdentity: SetV2<Term8iLast8u, SimdConvolutionActivationIdentity>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationRelu: SetV2<Term8iLast8u, SimdConvolutionActivationRelu>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationLeakyRelu: SetV2<Term8iLast8u, SimdConvolutionActivationLeakyRelu>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationRestrictRange: SetV2<Term8iLast8u, SimdConvolutionActivationRestrictRange>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationPrelu: SetV2<Term8iLast8u, SimdConvolutionActivationPrelu>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationElu: SetV2<Term8iLast8u, SimdConvolutionActivationElu>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationHswish: SetV2<Term8iLast8u, SimdConvolutionActivationHswish>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationMish: SetV2<Term8iLast8u, SimdConvolutionActivationMish>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationHardSigmoid: SetV2<Term8iLast8u, SimdConvolutionActivationHardSigmoid>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationSwish: SetV2<Term8iLast8u, SimdConvolutionActivationSwish>(p, _alg, _convolution); break;
+                case SimdConvolutionActivationGelu: SetV2<Term8iLast8u, SimdConvolutionActivationGelu>(p, _alg, _convolution); break;
+                default:
+                    assert(0);
+                }
+            }
+            else
+                assert(0);
         }
     }
 #endif

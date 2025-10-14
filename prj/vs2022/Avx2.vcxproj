@@ -179,6 +179,7 @@
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConvert.h" />
     <ClInclude Include="..\..\src\Simd\SimdCopy.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
@@ -248,8 +249,11 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedDepthwise.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h" />
