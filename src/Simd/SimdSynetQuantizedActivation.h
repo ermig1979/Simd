@@ -410,6 +410,86 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        template <Term8iType term> struct QuntizedTerm8i
+        {
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
+                const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1);
+        };
+
+        template <> struct QuntizedTerm8i<Term8iLast8u>
+        {
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
+                const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+            {
+                __m512i i32 = _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(sum, bias[index])), norm[index])), zero);
+                _mm_mask_storeu_epi8(dst + index * F, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(i32, K_ZERO), K_ZERO)));
+            }
+        };
+
+        template <> struct QuntizedTerm8i<Term8iInterim>
+        {
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
+                const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+            {
+                _mm512_mask_storeu_epi32(buf + index * F, tail, sum);
+            }
+        };
+
+        template<Term8iType term>
+        SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m512i sum,
+            const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, buf, sum, bias, norm, zero, tail);
+        }
+
+        template<Term8iType term>
+        SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m512i sum0, __m512i sum1,
+            const __m512i* bias, const __m512* norm, const __m512i& zero, __mmask16 tail = -1)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, buf, sum0, bias, norm, zero);
+            QuntizedTerm8i<term>::template Save<1>(dst, buf, sum1, bias, norm, zero, tail);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type, int index> SIMD_INLINE __m512i ToSave32i(__m512i sum,
+            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero)
+        {
+            if (type == SimdConvolutionActivationIdentity)
+            {
+                return _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(sum, sBias[index])), sNorm[index])), dZero);
+            }
+            else
+            {
+                __m512 f32 = _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(sum, sBias[index])), sNorm[index]))), iScale);
+                return QuantizeLinear(Activate<type>(f32, params, index), dNorm, dZero);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type, int index> SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
+            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
+        {
+            if (term == Term8iInterim)
+            {
+                _mm512_mask_storeu_epi32(buf + index * F, tail, sum);
+            }
+            else if (term == Term8iLast8u)
+            {
+                __m512i d0 = ToSave32i<type, index>(sum, sBias, sNorm, iScale, params, dNorm, dZero);
+                _mm_mask_storeu_epi8(dst + index * F, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
+            }
+            else
+            {
+                assert(0);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum0, __m512i sum1,
+            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
+        {
+            Save<term, type, 0>(dst, buf, sum0, sBias, sNorm, iScale, params, dNorm, dZero);
+            Save<term, type, 1>(dst, buf, sum1, sBias, sNorm, iScale, params, dNorm, dZero, tail);
+        }
     }
 #endif
 }

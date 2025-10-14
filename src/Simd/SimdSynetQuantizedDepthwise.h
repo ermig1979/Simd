@@ -174,6 +174,14 @@ namespace Simd
             QuntizedTerm8i<term>::template Save<0>(dst0 + offset, (int32_t*)NULL, sum0, &_bias, &_norm, zero, tail);
             QuntizedTerm8i<term>::template Save<0>(dst1 + offset, (int32_t*)NULL, sum1, &_bias, &_norm, zero, tail);
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template <Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m512i sum, const __m512i& sBias,
+            const __m512& sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
+        {
+            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iScale, params, dNorm, dZero, tail);
+        }
     }
 #endif
 }
