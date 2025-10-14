@@ -62,6 +62,174 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        template <Term8iType term> struct QuntizedTerm8i
+        {
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i& zero);
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i& zero, size_t tail);
+
+            static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+                const __m128i* bias, const __m128* norm, const __m128i& zero);
+        };
+
+        template <> struct QuntizedTerm8i<Term8iLast8u>
+        {
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i& zero)
+            {
+                __m128i i32 = _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(sum, bias[index])), norm[index])), zero);
+                ((int32_t*)dst)[index] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
+            }
+
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i& zero, size_t tail)
+            {
+                uint8_t tmp[F];
+                QuntizedTerm8i::Save<index>(tmp - index * F, buf, sum, bias, norm, zero);
+                for (size_t i = 0; i < tail; ++i)
+                    dst[index * F + i] = tmp[i];
+            }
+
+            static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+                const __m128i* bias, const __m128* norm, const __m128i& zero)
+            {
+                __m128i d0 = _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(sum0, bias[0])), norm[0])), zero);
+                __m128i d1 = _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(sum1, bias[1])), norm[1])), zero);
+                _mm_storel_epi64((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), K_ZERO));
+            }
+        };
+
+        template <> struct QuntizedTerm8i<Term8iInterim>
+        {
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i& zero)
+            {
+                _mm_storeu_si128((__m128i*)buf + index, sum);
+            }
+
+            template<int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+                const __m128i* bias, const __m128* norm, const __m128i& zero, size_t tail)
+            {
+                int32_t tmp[F];
+                _mm_storeu_si128((__m128i*)tmp, sum);
+                for (size_t i = 0; i < tail; ++i)
+                    buf[index * F + i] = tmp[i];
+            }
+
+            static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+                const __m128i* bias, const __m128* norm, const __m128i& zero)
+            {
+                _mm_storeu_si128((__m128i*)buf + 0, sum0);
+                _mm_storeu_si128((__m128i*)buf + 1, sum1);
+            }
+        };
+
+        template<Term8iType term>
+        SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum,
+            const __m128i* bias, const __m128* norm, const __m128i& zero)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, buf, sum, bias, norm, zero);
+        }
+
+        template<Term8iType term>
+        SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum,
+            const __m128i* bias, const __m128* norm, const __m128i& zero, size_t tail)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, buf, sum, bias, norm, zero, tail);
+        }
+
+        template<Term8iType term>
+        SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+            const __m128i* bias, const __m128* norm, const __m128i& zero)
+        {
+            QuntizedTerm8i<term>::Save(dst, buf, sum0, sum1, bias, norm, zero);
+        }
+
+        template<Term8iType term>
+        SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+            const __m128i* bias, const __m128* norm, const __m128i& zero, size_t tail)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, buf, sum0, bias, norm, zero);
+            QuntizedTerm8i<term>::template Save<1>(dst, buf, sum1, bias, norm, zero, tail);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type, int index> SIMD_INLINE __m128i ToSave32i(__m128i sum,
+            const __m128i* sBias, const __m128* sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero)
+        {
+            if (type == SimdConvolutionActivationIdentity)
+            {
+                return _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(sum, sBias[index])), sNorm[index])), dZero);
+            }
+            else
+            {
+                __m128 f32 = _mm_mul_ps(_mm_cvtepi32_ps(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(sum, sBias[index])), sNorm[index]))), iScale);
+                return QuantizeLinear(Activate<type>(f32, params, index), dNorm, dZero);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type, int index> SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+            const __m128i* sBias, const __m128* sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero)
+        {
+            if (term == Term8iInterim)
+            {
+                _mm_storeu_si128((__m128i*)buf + index, sum);
+            }
+            else if(term == Term8iLast8u)
+            {
+                __m128i d0 = ToSave32i<type, index>(sum, sBias, sNorm, iScale, params, dNorm, dZero);
+                ((int32_t*)dst)[index] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+            }
+            else
+            {
+                assert(0);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
+            const __m128i* sBias, const __m128* sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero, size_t tail)
+        {
+            if (term == Term8iInterim)
+            {
+                int32_t tmp[F];
+                _mm_storeu_si128((__m128i*)tmp, sum);
+                for (size_t i = 0; i < tail; ++i)
+                    buf[index * F + i] = tmp[i];
+            }
+            else if (term == Term8iLast8u)
+            {
+                uint8_t tmp[F];
+                Save<term, type, index>(tmp - index * F, buf, sum, sBias, sNorm, iScale, params, dNorm, dZero);
+                for (size_t i = 0; i < tail; ++i)
+                    dst[index * F + i] = tmp[i];                
+            }
+            else
+            {
+                assert(0);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+            const __m128i* sBias, const __m128* sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero)
+        {
+            if (term == Term8iInterim)
+            {
+                _mm_storeu_si128((__m128i*)buf + 0, sum0);
+                _mm_storeu_si128((__m128i*)buf + 1, sum1);
+            }
+            else if (term == Term8iLast8u)
+            {
+                __m128i d0 = ToSave32i<type, 0>(sum0, sBias, sNorm, iScale, params, dNorm, dZero);
+                __m128i d1 = ToSave32i<type, 1>(sum1, sBias, sNorm, iScale, params, dNorm, dZero);
+                _mm_storel_epi64((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), K_ZERO));                
+            }
+            else
+            {
+                assert(0);
+            }
+        }
     }
 #endif
 

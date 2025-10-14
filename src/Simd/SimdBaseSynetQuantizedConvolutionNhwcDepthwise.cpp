@@ -322,7 +322,7 @@ namespace Simd
             return p.trans != 0 && p.IsDepthwise() && p.IsDilation(1) && p.group >= F 
                 && (p.IsStride(1) || p.IsStride(2))
                 && (p.IsKernel(3) || p.IsKernel(5) || p.IsKernel(7))
-                && p.activation == SimdConvolutionActivationIdentity;
+                && (p.activation == SimdConvolutionActivationIdentity || (F == 4));
         }
 
         //------------------------------------------------------------------------------------------------

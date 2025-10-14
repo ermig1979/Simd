@@ -25,7 +25,7 @@
 #define __SimdSynetQuantizedDepthwise_h__
 
 #include "Simd/SimdSynetQuantizeLinear.h"
-#include "Simd/SimdSynetActivation.h"
+#include "Simd/SimdSynetQuantizedActivation.h"
 
 namespace Simd
 {
@@ -75,6 +75,20 @@ namespace Simd
             __m128 _norm = _mm_loadu_ps(norm + offset);
             QuntizedTerm8i<term>::template Save<0>(dst0 + offset, (int32_t*)NULL, sum0, &_bias, &_norm, zero, tail);
             QuntizedTerm8i<term>::template Save<0>(dst1 + offset, (int32_t*)NULL, sum1, &_bias, &_norm, zero, tail);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template <Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum, const __m128i& sBias, 
+            const __m128& sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero)
+        {
+            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iScale, params, dNorm, dZero);
+        }
+
+        template <Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum, const __m128i& sBias, 
+            const __m128& sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero, size_t tail)
+        {
+            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iScale, params, dNorm, dZero, tail);
         }
     }
 #endif
