@@ -267,8 +267,8 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term8iType term, int M> void QuantizedConvolutionNhwcGemm_i2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int update, const int8_t* weight0, const __m512i* bias, const __m512* norm, const __m512i& zero, int32_t* buf, uint8_t* dst)
+        template<Term8iType term, SimdConvolutionActivationType type, int M> void QuantizedConvolutionNhwcGemm_i2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC,
+            int update, const int8_t* weight0, const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
             __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
             size_t dB = a.dB, dD = p.dstC * a.elem, dS = a.bufK;
@@ -329,18 +329,18 @@ namespace Simd
                     weight0 += A, weight1 += A;
                 }
                 __mmask16 tail = TailMask16(dstC - F);
-                if (M > 0x0) Save2<term>(dst, buf, d00, d01, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x1) Save2<term>(dst, buf, d10, d11, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x2) Save2<term>(dst, buf, d20, d21, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x3) Save2<term>(dst, buf, d30, d31, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x4) Save2<term>(dst, buf, d40, d41, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x5) Save2<term>(dst, buf, d50, d51, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x6) Save2<term>(dst, buf, d60, d61, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x7) Save2<term>(dst, buf, d70, d71, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x8) Save2<term>(dst, buf, d80, d81, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x9) Save2<term>(dst, buf, d90, d91, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0xA) Save2<term>(dst, buf, dA0, dA1, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0xB) Save2<term>(dst, buf, dB0, dB1, bias, norm, zero, tail), dst += dD, buf += dB;
+                if (M > 0x0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x5) Save2<term, type>(dst, buf, d50, d51, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x6) Save2<term, type>(dst, buf, d60, d61, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x7) Save2<term, type>(dst, buf, d70, d71, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x8) Save2<term, type>(dst, buf, d80, d81, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x9) Save2<term, type>(dst, buf, d90, d91, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0xA) Save2<term, type>(dst, buf, dA0, dA1, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0xB) Save2<term, type>(dst, buf, dB0, dB1, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
             }
             else
             {
@@ -392,72 +392,84 @@ namespace Simd
                     weight0 += A;
                 }
                 __mmask16 tail = TailMask16(dstC);
-                if (M > 0x0) Save1<term>(dst, buf, d00, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x1) Save1<term>(dst, buf, d10, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x2) Save1<term>(dst, buf, d20, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x3) Save1<term>(dst, buf, d30, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x4) Save1<term>(dst, buf, d40, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x5) Save1<term>(dst, buf, d50, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x6) Save1<term>(dst, buf, d60, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x7) Save1<term>(dst, buf, d70, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x8) Save1<term>(dst, buf, d80, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0x9) Save1<term>(dst, buf, d90, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0xA) Save1<term>(dst, buf, dA0, bias, norm, zero, tail), dst += dD, buf += dB;
-                if (M > 0xB) Save1<term>(dst, buf, dB0, bias, norm, zero, tail), dst += dD, buf += dB;
+                if (M > 0x0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x5) Save1<term, type>(dst, buf, d50, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x6) Save1<term, type>(dst, buf, d60, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x7) Save1<term, type>(dst, buf, d70, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x8) Save1<term, type>(dst, buf, d80, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x9) Save1<term, type>(dst, buf, d90, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0xA) Save1<term, type>(dst, buf, dA0, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0xB) Save1<term, type>(dst, buf, dB0, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
             }
         }
 
-        typedef void(*QuantizedConvolutionNhwcGemm_i2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int update, const int8_t* weight, const __m512i* bias, const __m512* norm, const __m512i& zero, int32_t* buf, uint8_t* dst);
+        typedef void(*QuantizedConvolutionNhwcGemm_i2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int update, const int8_t* weight,
+            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst);
 
-        template<Term8iType term> QuantizedConvolutionNhwcGemm_i2xM_Ptr GetQuantizedConvolutionNhwcGemm_i2xM(size_t M)
+        template<Term8iType term, SimdConvolutionActivationType type> QuantizedConvolutionNhwcGemm_i2xM_Ptr GetQuantizedConvolutionNhwcGemm_i2xM(size_t M)
         {
             switch (M)
             {
             case 0x0: return NULL;
-            case 0x1: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x1>;
-            case 0x2: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x2>;
-            case 0x3: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x3>;
-            case 0x4: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x4>;
-            case 0x5: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x5>;
-            case 0x6: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x6>;
-            case 0x7: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x7>;
-            case 0x8: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x8>;
-            case 0x9: return QuantizedConvolutionNhwcGemm_i2xM<term, 0x9>;
-            case 0xA: return QuantizedConvolutionNhwcGemm_i2xM<term, 0xA>;
-            case 0xB: return QuantizedConvolutionNhwcGemm_i2xM<term, 0xB>;
-            case 0xC: return QuantizedConvolutionNhwcGemm_i2xM<term, 0xC>;
+            case 0x1: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0x1>;
+            case 0x2: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0x2>;
+            case 0x3: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0x3>;
+            case 0x4: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0x4>;
+            case 0x5: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0x5>;
+            case 0x6: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0x6>;
+            case 0x7: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0x7>;
+            case 0x8: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0x8>;
+            case 0x9: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0x9>;
+            case 0xA: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0xA>;
+            case 0xB: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0xB>;
+            case 0xC: return QuantizedConvolutionNhwcGemm_i2xM<term, type, 0xC>;
             }
             assert(0);
             return NULL;
         }
 
-        template<Term8iType term> void QuantizedConvolutionNhwcGemm_i2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int update, const int8_t* weight,
-            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* buf, uint8_t* dst)
+        template<Term8iType term, SimdConvolutionActivationType type> void QuantizedConvolutionNhwcGemm_i2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, 
+            int update, const int8_t* weight, const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* buf, uint8_t* dst)
         {
             size_t n1 = dstH * p.dstW, n = 12;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * DF;
             size_t dB = a.dB, dD = p.dstC * a.elem, dS = a.bufK;
-            QuantizedConvolutionNhwcGemm_i2xM_Ptr convolution_i2xN = GetQuantizedConvolutionNhwcGemm_i2xM<term>(n);
-            QuantizedConvolutionNhwcGemm_i2xM_Ptr convolution_i2xM = GetQuantizedConvolutionNhwcGemm_i2xM<term>(m);
+            QuantizedConvolutionNhwcGemm_i2xM_Ptr convolution_i2xN = GetQuantizedConvolutionNhwcGemm_i2xM<term, type>(n);
+            QuantizedConvolutionNhwcGemm_i2xM_Ptr convolution_i2xM = GetQuantizedConvolutionNhwcGemm_i2xM<term, type>(m);
 
-            __m512 _norm[2];
-            __m512i _bias[2], _zero = _mm512_set1_epi32(dZero);
+            __m512 _sNorm[2], _iScale, _params[2], _dNorm;
+            __m512i _sBias[2], _dZero = _mm512_set1_epi32(dZero);
+            if (type != SimdConvolutionActivationIdentity)
+            {
+                _iScale = _mm512_set1_ps(iScale);
+                _dNorm = _mm512_set1_ps(dNorm);
+                _params[0] = _mm512_set1_ps(params[0]);
+                _params[1] = _mm512_set1_ps(params[1]);
+            }
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
-                _bias[0] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 0);
-                _bias[1] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 1);
-                _norm[0] = _mm512_loadu_ps(sNorm + dc + 0);
-                _norm[1] = _mm512_loadu_ps(sNorm + dc + F);
+                _sBias[0] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 0);
+                _sBias[1] = _mm512_loadu_si512((__m512i*)(sBias + dc) + 1);
+                _sNorm[0] = _mm512_loadu_ps(sNorm + dc + 0);
+                _sNorm[1] = _mm512_loadu_ps(sNorm + dc + F);
+                if (type == SimdConvolutionActivationPrelu)
+                {
+                    _params[0] = _mm512_loadu_ps(params + dc + 0);
+                    _params[1] = _mm512_loadu_ps(params + dc + F);
+                }
                 const uint8_t* s = src;
                 int32_t* b = buf + dc;
                 uint8_t* d = dst + dc * a.elem;
                 size_t i = 0;
                 for (; i < nn; i += n, s += n * dS, b += n * dB, d += n * dD)
-                    convolution_i2xN(s, p, a, srcC, dC, update, weight, _bias, _norm, _zero, b, d);
+                    convolution_i2xN(s, p, a, srcC, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b, d);
                 for (; i < n1; i += m, s += m * dS, b += m * dB, d += m * dD)
-                    convolution_i2xM(s, p, a, srcC, dC, update, weight, _bias, _norm, _zero, b, d);
+                    convolution_i2xM(s, p, a, srcC, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b, d);
                 weight += dW;
             }
         }
@@ -466,10 +478,20 @@ namespace Simd
 
         SIMD_INLINE void Set(const ConvParam& p, const AlgParam& a, Convolution* convolutions)
         {
-            convolutions[0] = QuantizedConvolutionNhwcGemm_i2<Term8iInterim>;
+            convolutions[0] = QuantizedConvolutionNhwcGemm_i2<Term8iInterim, SimdConvolutionActivationIdentity>;
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u>; break;
+            case SimdConvolutionActivationIdentity: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationIdentity>; break;
+            case SimdConvolutionActivationRelu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationRelu>; break;
+            case SimdConvolutionActivationLeakyRelu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationLeakyRelu>; break;
+            case SimdConvolutionActivationRestrictRange: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationRestrictRange>; break;
+            case SimdConvolutionActivationPrelu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationPrelu>; break;
+            case SimdConvolutionActivationElu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationElu>; break;
+            case SimdConvolutionActivationHswish: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationHswish>; break;
+            case SimdConvolutionActivationMish: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationMish>; break;
+            case SimdConvolutionActivationHardSigmoid: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationHardSigmoid>; break;
+            case SimdConvolutionActivationSwish: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationSwish>; break;
+            case SimdConvolutionActivationGelu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationGelu>; break;
             default:
                 convolutions[1] = NULL;
             }

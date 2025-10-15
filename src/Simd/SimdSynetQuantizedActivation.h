@@ -522,11 +522,17 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum0, __m512i sum1,
+        template<Term8iType term, SimdConvolutionActivationType type> static SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m512i sum0, __m512i sum1,
             const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
         {
             Save<term, type, 0>(dst, buf, sum0, sBias, sNorm, iScale, params, dNorm, dZero);
             Save<term, type, 1>(dst, buf, sum1, sBias, sNorm, iScale, params, dNorm, dZero, tail);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m512i sum,
+            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
+        {
+            Save<term, type, 0>(dst, buf, sum, sBias, sNorm, iScale, params, dNorm, dZero, tail);
         }
     }
 #endif

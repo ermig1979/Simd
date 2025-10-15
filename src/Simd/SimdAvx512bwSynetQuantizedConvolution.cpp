@@ -48,7 +48,7 @@ namespace Simd
                 return new SynetQuantizedConvolutionNhwcDepthwiseV0(param);
             else if (SynetQuantizedConvolutionNhwcSpecV0::Preferable(param, false))
                 return new SynetQuantizedConvolutionNhwcSpecV0(param);
-            else if(SynetQuantizedConvolutionNhwcGemm::Preferable(param, false))
+            else if(SynetQuantizedConvolutionNhwcGemm::Preferable(param))
                 return new SynetQuantizedConvolutionNhwcGemm(param);
             else
                 return Avx2::SynetQuantizedConvolutionInit(batch, conv);
