@@ -152,30 +152,6 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst,  _mm_packus_epi16(_mm_packs_epi32(i0, i1), _mm_packs_epi32(i2, i3)));
         }
 
-
-        //--------------------------------------------------------------------------------------------------
-
-        SIMD_INLINE void Postprocess(const int32_t* src, const int32_t* bias, const float* norm, const __m128i& zero, uint8_t* dst)
-        {
-            __m128i _src = _mm_loadu_si128((__m128i*)src);
-            __m128i _bias = _mm_loadu_si128((__m128i*)bias);
-            __m128 _norm = _mm_loadu_ps(norm);
-            __m128i i32 = _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(_src, _bias)), _norm)), zero);
-            ((int32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
-        }
-
-        SIMD_INLINE void Postprocess(const int32_t* src, const int32_t* bias, const float* norm, const __m128i& zero, uint8_t* dst, size_t tail)
-        {
-            __m128i _src = _mm_loadu_si128((__m128i*)src);
-            __m128i _bias = _mm_loadu_si128((__m128i*)bias);
-            __m128 _norm = _mm_loadu_ps(norm);
-            __m128i i32 = _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(_src, _bias)), _norm)), zero);
-            uint8_t tmp[F];
-            ((int32_t*)tmp)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
-            for (size_t i = 0; i < tail; i++)
-                dst[i] = tmp[i];
-        }
-
         //--------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void DequantizeQuantizeLinear1(const uint8_t* src, const __m128i& bias, const __m128& norm, const __m128& scale, const __m128i &zero, uint8_t* dst)
