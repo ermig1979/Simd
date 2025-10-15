@@ -211,7 +211,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+        template<Term8iType term, SimdConvolutionActivationType type> static SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
             const __m128i* sBias, const __m128* sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero)
         {
             if (term == Term8iInterim)
@@ -229,6 +229,25 @@ namespace Simd
             {
                 assert(0);
             }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1,
+            const __m128i* sBias, const __m128* sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero, size_t tail)
+        {
+            Save<term, type, 0>(dst, buf, sum0, sBias, sNorm, iScale, params, dNorm, dZero);
+            Save<term, type, 1>(dst, buf, sum1, sBias, sNorm, iScale, params, dNorm, dZero, tail);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum,
+            const __m128i* sBias, const __m128* sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero)
+        {
+            Save<term, type, 0>(dst, buf, sum, sBias, sNorm, iScale, params, dNorm, dZero);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum,
+            const __m128i* sBias, const __m128* sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero, size_t tail)
+        {
+            Save<term, type, 0>(dst, buf, sum, sBias, sNorm, iScale, params, dNorm, dZero, tail);
         }
     }
 #endif
