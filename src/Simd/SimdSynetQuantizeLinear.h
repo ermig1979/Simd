@@ -257,17 +257,6 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void Postprocess(const int32_t* src, const int32_t* bias, const float* norm, const __m512i& zero, uint8_t* dst, __mmask16 tail = -1)
-        {
-            __m512i _src = _mm512_loadu_si512((__m512i*)src);
-            __m512i _bias = _mm512_loadu_si512((__m512i*)bias);
-            __m512 _norm = _mm512_loadu_ps(norm);
-            __m512i i32 = _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(_src, _bias)), _norm)), zero);
-            _mm_mask_storeu_epi8(dst, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(i32, K_ZERO), K_ZERO)));
-        }
-
-        //--------------------------------------------------------------------------------------------------
-
         SIMD_INLINE void DequantizeQuantizeLinear16(const uint8_t* src, const __m512i& bias, const __m512& norm, const __m512& scale, const __m512i& zero, uint8_t* dst, __mmask16 tail = -1)
         {
             __m512i d0 = QuantizeLinear(DequantizeLinear(_mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, src)), bias, norm), scale, zero);

@@ -40,9 +40,9 @@ namespace Simd
             ConvParam param(batch, conv);
             if (!ValidQuantized(param))
                 return NULL;
-            else if (SynetQuantizedConvolutionNhwcSpecV0::Preferable(param, false))
+            else if (SynetQuantizedConvolutionNhwcSpecV0::Preferable(param))
                 return new SynetQuantizedConvolutionNhwcSpecV0(param);
-            else if(SynetQuantizedConvolutionNhwcGemm::Preferable(param, false))
+            else if(SynetQuantizedConvolutionNhwcGemm::Preferable(param))
                 return new SynetQuantizedConvolutionNhwcGemm(param);
             else
                 return Avx512vnni::SynetQuantizedConvolutionInit(batch, conv);
