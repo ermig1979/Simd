@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdSynetQuantizedConvolution.h"
 #include "Simd/SimdSynetQuantizedActivation.h"
+#include "Simd/SimdSynetQuantizedDepthwise.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetConvolution8iCommon.h"
 #include "Simd/SimdSynet.h"
@@ -291,24 +292,46 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void SynetQuantizedConvolutionNhwcSpecV0PostprocessI(const int32_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd,
-            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
+        template<SimdConvolutionActivationType type> void SynetQuantizedConvolutionNhwcSpecV0Postprocess(const int32_t* src, const ConvParam& p, const AlgParam& a,
+            size_t dstC, size_t dyBeg, size_t dyEnd, const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
         {
             size_t dstCF = AlignLo(dstC, F);
             __mmask16 tailD = TailMask16(dstC - dstCF);
             size_t rowGap = a.gapH * a.macroD;
             src += dyBeg * a.srcW * a.macroD;
             dst += dyBeg * p.dstW * p.dstC * a.elem;
-            __m512i _zero = _mm512_set1_epi32(dZero);
+            __m512 _sNorm, _iScale, _params[2], _dNorm;
+            __m512i _src, _dZero = _mm512_set1_epi32(dZero), _sBias;
+            if (type != SimdConvolutionActivationIdentity)
+            {
+                _iScale = _mm512_set1_ps(iScale);
+                _dNorm = _mm512_set1_ps(dNorm);
+                _params[0] = _mm512_set1_ps(params[0]);
+                _params[1] = _mm512_set1_ps(params[1]);
+            }
             for (size_t dy = dyBeg; dy < dyEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx)
                 {
                     size_t dc = 0;
                     for (; dc < dstCF; dc += F)
-                        Postprocess(src + dc, sBias + dc, sNorm + dc, _zero, dst + dc);
+                    {
+                        _src = _mm512_loadu_si512((__m512i*)(src + dc));
+                        _sBias = _mm512_loadu_si512((__m512i*)(sBias + dc));
+                        _sNorm = _mm512_loadu_ps(sNorm + dc);
+                        if (type == SimdConvolutionActivationPrelu)
+                            _params[0] = _mm512_loadu_ps(params + dc);
+                        Save1<Term8iLast8u, type>(dst + dc, _src, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                    }
                     if (tailD)
-                        Postprocess(src + dc, sBias + dc, sNorm + dc, _zero, dst + dc, tailD);
+                    {
+                        _src = _mm512_loadu_si512((__m512i*)(src + dc));
+                        _sBias = _mm512_loadu_si512((__m512i*)(sBias + dc));
+                        _sNorm = _mm512_loadu_ps(sNorm + dc);
+                        if (type == SimdConvolutionActivationPrelu)
+                            _params[0] = _mm512_loadu_ps(params + dc);
+                        Save1<Term8iLast8u, type>(dst + dc, _src, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, tailD);
+                    }
                     src += a.macroD;
                     dst += p.dstC * a.elem;
                 }
@@ -332,7 +355,17 @@ namespace Simd
             _convolution = QuantizedConvolutionNhwcSpecV0_2;
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: _postprocess = SynetQuantizedConvolutionNhwcSpecV0PostprocessI; break;
+            case SimdConvolutionActivationIdentity: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationIdentity>; break;
+            case SimdConvolutionActivationRelu: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationRelu>; break;
+            case SimdConvolutionActivationLeakyRelu: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationLeakyRelu>; break;
+            case SimdConvolutionActivationRestrictRange: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationRestrictRange>; break;
+            case SimdConvolutionActivationPrelu: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationPrelu>; break;
+            case SimdConvolutionActivationElu: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationElu>; break;
+            case SimdConvolutionActivationHswish: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationHswish>; break;
+            case SimdConvolutionActivationMish: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationMish>; break;
+            case SimdConvolutionActivationHardSigmoid: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationHardSigmoid>; break;
+            case SimdConvolutionActivationSwish: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationSwish>; break;
+            case SimdConvolutionActivationGelu: _postprocess = SynetQuantizedConvolutionNhwcSpecV0Postprocess<SimdConvolutionActivationGelu>; break;
             default:
                 _postprocess = NULL;
                 assert(0);
