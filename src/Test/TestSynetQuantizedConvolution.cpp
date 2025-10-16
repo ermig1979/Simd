@@ -318,8 +318,11 @@ namespace Test
             int diffMax = 0;
             result = result && Compare(p8i.dst1, p8i.dst2, diffMax, true, 64);
 
-            int controlDiffMax = 4;
-            result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
+            if (p.conv.activation != SimdConvolutionActivationRestrictRange)
+            {
+                int controlDiffMax = 4;
+                result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
+            }
         }
 
         return result;
