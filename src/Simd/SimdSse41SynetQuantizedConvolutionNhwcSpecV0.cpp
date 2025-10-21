@@ -244,9 +244,11 @@ namespace Simd
             src += dyBeg * a.srcW * a.macroD;
             dst += dyBeg * p.dstW * p.dstC * a.elem;
             __m128 _sNorm, _iScale, _params[2], _dNorm;
-            __m128i _src, _dZero = _mm_set1_epi32(dZero), _sBias;
+            __m128i _src, _dZero = _mm_set1_epi32(dZero), _sBias, _iLo, _iHi;
             if (type != SimdConvolutionActivationIdentity)
             {
+                _iLo = _mm_set1_epi32(-iZero);
+                _iHi = _mm_set1_epi32(255 - iZero);
                 _iScale = _mm_set1_ps(iScale);
                 _dNorm = _mm_set1_ps(dNorm);
                 _params[0] = _mm_set1_ps(params[0]);
@@ -264,7 +266,7 @@ namespace Simd
                         _sNorm = _mm_loadu_ps(sNorm + dc);
                         if (type == SimdConvolutionActivationPrelu)
                             _params[0] = _mm_loadu_ps(params + dc);
-                        Save1<Term8iLast8u, type>(dst + dc, _src, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero);
+                        Save1<Term8iLast8u, type>(dst + dc, _src, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
                     }
                     if (tailD)
                     {
@@ -273,7 +275,7 @@ namespace Simd
                         _sNorm = _mm_loadu_ps(sNorm + dc);
                         if (type == SimdConvolutionActivationPrelu)
                             _params[0] = _mm_loadu_ps(params + dc);
-                        Save1<Term8iLast8u, type>(dst + dc, _src, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, tailD);
+                        Save1<Term8iLast8u, type>(dst + dc, _src, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, tailD);
                     }
                     src += a.macroD;
                     dst += p.dstC * a.elem;

@@ -138,7 +138,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemm_i32x32(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
-            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
+            const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
             int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
             int stepS = a.reorderType ? 1024 : 64, strideS = a.reorderType ? 64 : dS;
@@ -194,9 +194,9 @@ namespace Simd
                 __mmask32 tailD = TailMask32(dstC);
                 size_t dstS8 = AlignLo(dstS, 8), ds = 0;
                 for (; ds < dstS8; ds += 8)
-                    Apply8u2x8<type>(dst + ds * dD, dD, buf + ds * dB, dB, sBias, sNorm, iScale, params, dNorm, dZero, tailD);
+                    Apply8u2x8<type>(dst + ds * dD, dD, buf + ds * dB, dB, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tailD);
                 for (; ds < dstS; ++ds)
-                    Apply8u2<type>(dst + ds * dD, buf + ds * dB, sBias, sNorm, iScale, params, dNorm, dZero, tailD);
+                    Apply8u2<type>(dst + ds * dD, buf + ds * dB, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tailD);
             }
             else if (term == Term8iLast32f)
             {
@@ -218,7 +218,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemm_i32x16(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
-            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
+            const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
             int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
             int stepS = a.reorderType ? 1024 : 64, strideS = a.reorderType ? 64 : dS;
@@ -260,9 +260,9 @@ namespace Simd
                 __mmask16 tailD = TailMask16(dstC);
                 size_t dstS8 = AlignLo(dstS, 8), ds = 0;
                 for (; ds < dstS8; ds += 8)
-                    Apply1x8<term, type>(dst + ds * dD, dD, buf + ds * dB, dB, sBias, sNorm, iScale, params, dNorm, dZero, tailD);
+                    Apply1x8<term, type>(dst + ds * dD, dD, buf + ds * dB, dB, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tailD);
                 for (; ds < dstS; ++ds)
-                    Apply1<term, type>(dst + ds * dD, buf + ds * dB, sBias, sNorm, iScale, params, dNorm, dZero, tailD);
+                    Apply1<term, type>(dst + ds * dD, buf + ds * dB, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tailD);
             }
             else
             {
@@ -273,7 +273,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemm_i16x32(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
-            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
+            const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
             int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
             int stepS = a.reorderType ? 1024 : 64, strideS = a.reorderType ? 64 : dS;
@@ -315,9 +315,9 @@ namespace Simd
                 __mmask16 tailD = TailMask16(dstC - F);
                 size_t dstS8 = AlignLo(dstS, 8), ds = 0;
                 for (; ds < dstS8; ds += 8)
-                    Apply2x8<term, type>(dst + ds * dD, dD, buf + ds * dB, dB, sBias, sNorm, iScale, params, dNorm, dZero, tailD);
+                    Apply2x8<term, type>(dst + ds * dD, dD, buf + ds * dB, dB, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tailD);
                 for (; ds < dstS; ++ds)
-                    Apply2<term, type>(dst + ds * dD, buf + ds * dB, sBias, sNorm, iScale, params, dNorm, dZero, tailD);
+                    Apply2<term, type>(dst + ds * dD, buf + ds * dB, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tailD);
             }
             else
             {
@@ -328,7 +328,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemm_i16x16(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0, 
-            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
+            const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
             int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, strideW = 64;
             int stepS = a.reorderType ? 1024 : 64, strideS = a.reorderType ? 64 : dS;
@@ -357,9 +357,9 @@ namespace Simd
                 __mmask16 tailD = TailMask16(dstC);
                 size_t dstS8 = AlignLo(dstS, 8), ds = 0;
                 for (; ds < dstS8; ds += 8)
-                    Apply1x8<term, type>(dst + ds * dD, dD, buf + ds * dB, dB, sBias, sNorm, iScale, params, dNorm, dZero, tailD);
+                    Apply1x8<term, type>(dst + ds * dD, dD, buf + ds * dB, dB, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tailD);
                 for (; ds < dstS; ++ds)
-                    Apply1<term, type>(dst + ds * dD, buf + ds * dB, sBias, sNorm, iScale, params, dNorm, dZero, tailD);
+                    Apply1<term, type>(dst + ds * dD, buf + ds * dB, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tailD);
             }
             else
             {
@@ -368,7 +368,7 @@ namespace Simd
         }
 
         typedef void (*QuantizedConvolutionNhwcGemm_iPtr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
-            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst);
+            const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst);
 
         template<Term8iType term, SimdConvolutionActivationType type> void QuantizedConvolutionNhwcGemm_i2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int update, const int8_t* weight,
             const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* buf, uint8_t* dst)
@@ -377,9 +377,11 @@ namespace Simd
             size_t dB = a.macroK < a.bufK ? a.dB : 0, dD = p.dstC * a.elem, dS = a.bufK;
 
             __m512 _sNorm[2], _iScale, _params[2], _dNorm;
-            __m512i _sBias[2], _dZero = _mm512_set1_epi32(dZero);
+            __m512i _sBias[2], _dZero = _mm512_set1_epi32(dZero), _iLo, _iHi;
             if (type != SimdConvolutionActivationIdentity)
             {
+                _iLo = _mm512_set1_epi32(-iZero);
+                _iHi = _mm512_set1_epi32(255 - iZero);
                 _iScale = _mm512_set1_ps(iScale);
                 _dNorm = _mm512_set1_ps(dNorm);
                 _params[0] = _mm512_set1_ps(params[0]);
@@ -414,16 +416,16 @@ namespace Simd
                     if (dC > F)
                     {
                         for (; i < nn; i += n)
-                            body_2(s + i * dS, p, a, srcC, n, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b + i * dB, d + i * dD);
+                            body_2(s + i * dS, p, a, srcC, n, dC, update, weight, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, b + i * dB, d + i * dD);
                         if (m)
-                            tail_2(s + nn * dS, p, a, srcC, m, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b + i * dB, d + nn * dD);
+                            tail_2(s + nn * dS, p, a, srcC, m, dC, update, weight, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, b + i * dB, d + nn * dD);
                     }
                     else
                     {
                         for (; i < nn; i += n)
-                            body_1(s + i * dS, p, a, srcC, n, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b + i * dB, d + i * dD);
+                            body_1(s + i * dS, p, a, srcC, n, dC, update, weight, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, b + i * dB, d + i * dD);
                         if (m)
-                            tail_1(s + nn * dS, p, a, srcC, m, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b + i * dB, d + nn * dD);
+                            tail_1(s + nn * dS, p, a, srcC, m, dC, update, weight, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, b + i * dB, d + nn * dD);
                     }
                     weight += dW;
                 }
@@ -453,9 +455,9 @@ namespace Simd
                     uint8_t* d = dst + dc * a.elem;
                     size_t i = 0;
                     if (dC > F)
-                        tail_2(s, p, a, srcC, m, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b, d);
+                        tail_2(s, p, a, srcC, m, dC, update, weight, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, b, d);
                     else
-                        tail_1(s, p, a, srcC, m, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b, d);
+                        tail_1(s, p, a, srcC, m, dC, update, weight, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, b, d);
                     weight += dW;
                 }
             }

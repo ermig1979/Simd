@@ -59,7 +59,7 @@ namespace Simd
     size_t SynetQuantizedConvolution::InternalBufferSize() const
     {
         return _buffer.RawSize() + _weight.RawSize() + _srcZero.RawSize() + _norm.RawSize() + 
-            _bias.RawSize() + _weightScale.RawSize() + _norm.RawSize();
+            _bias.RawSize() + _weightScale.RawSize() + _params.RawSize();
     }
 
     void SynetQuantizedConvolution::SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params)
@@ -229,6 +229,36 @@ namespace Simd
                 assert(0);
         }
 
+        template<SimdConvolutionActivationType type> static void QuantizeActivateSumV2(const int32_t* sum, size_t channels, size_t spatial, SimdTensorFormatType format,
+            const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst)
+        {
+            int iLo = -iZero, iHi = 255 - iZero;
+            if (format == SimdTensorFormatNchw)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    int32_t _sBias = sBias[c];
+                    float _sNorm = sNorm[c];
+                    for (size_t s = 0; s < spatial; ++s)
+                        dst[s] = (uint8_t)QuantizeActivateSum<type>(sum[s], _sBias, _sNorm, iLo, iHi, iScale, params, c, dNorm, dZero, 0, 255);
+                    sum += spatial;
+                    dst += spatial;
+                }
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                        dst[c] = (uint8_t)QuantizeActivateSum<type>(sum[c], sBias[c], sNorm[c], iLo, iHi, iScale, params, c, dNorm, dZero, 0, 255);
+                    sum += channels;
+                    dst += channels;
+                }
+            }
+            else
+                assert(0);
+        }
+
         typedef void (*QuantizeActivateSumPtr)(const int32_t* sum, size_t channels, size_t spatial, SimdTensorFormatType format,
             const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, uint8_t* dst);
 
@@ -238,6 +268,7 @@ namespace Simd
             {
             case 0: return QuantizeActivateSumV0<type>;
             case 1: return QuantizeActivateSumV1<type>;
+            case 2: return QuantizeActivateSumV2<type>;
             default:
                 return NULL;
             }
@@ -373,7 +404,7 @@ namespace Simd
             else
             {
                 float dstNorm = 1.0f / _dstScale;
-                QuantizeActivateSumPtr quantizeActivateSum = GetQuantizeActivateSum(p.activation, 1);
+                QuantizeActivateSumPtr quantizeActivateSum = GetQuantizeActivateSum(p.activation, 2);
                 assert(quantizeActivateSum);
                 quantizeActivateSum(sum, p.dstC, p.dstH * p.dstW, p.dstF, _bias.data, _norm.data, _intZero, _intScale, _params.data, dstNorm, _dstZero, dst);
             }

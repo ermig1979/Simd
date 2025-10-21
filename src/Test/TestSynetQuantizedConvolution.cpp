@@ -318,11 +318,8 @@ namespace Test
             int diffMax = 0;
             result = result && Compare(p8i.dst1, p8i.dst2, diffMax, true, 64);
 
-            if (p.conv.activation != SimdConvolutionActivationRestrictRange)
-            {
-                int controlDiffMax = 4;
-                result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
-            }
+            int controlDiffMax = p.conv.activation ? 5 : 4;
+            result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
         }
 
         return result;
@@ -452,6 +449,9 @@ namespace Test
         result = result && SynetQuantizedConvolutionForwardAutoTestA(e, Param(1, 128, 48, 48, 128, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTestA(e, Param(1, 128, 48, 48, 128, _3, _1, _1, _1, _1, 128, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTestA(e, Param(1, 128, 48, 48, 128, _3, _1, _2, _1, _1, 128, aId, t, u8, u8), o, f1, f2);
+#endif
+#if 0
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 3, 224, 224, 24, _3, _1, _2, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
 #endif
 #else
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 99, 55, 55, 99, _3, _1, _1, _1, _1, 1, aRe, t, u8, u8), o, f1, f2);

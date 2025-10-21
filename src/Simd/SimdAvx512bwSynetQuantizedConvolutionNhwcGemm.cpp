@@ -267,8 +267,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term8iType term, SimdConvolutionActivationType type, int M> void QuantizedConvolutionNhwcGemm_i2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC,
-            int update, const int8_t* weight0, const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
+        template<Term8iType term, SimdConvolutionActivationType type, int M> void QuantizedConvolutionNhwcGemm_i2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a, 
+            size_t srcC, size_t dstC, int update, const int8_t* weight0, const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, 
+            const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
             __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
             size_t dB = a.dB, dD = p.dstC * a.elem, dS = a.bufK;
@@ -329,18 +330,18 @@ namespace Simd
                     weight0 += A, weight1 += A;
                 }
                 __mmask16 tail = TailMask16(dstC - F);
-                if (M > 0x0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x5) Save2<term, type>(dst, buf, d50, d51, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x6) Save2<term, type>(dst, buf, d60, d61, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x7) Save2<term, type>(dst, buf, d70, d71, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x8) Save2<term, type>(dst, buf, d80, d81, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x9) Save2<term, type>(dst, buf, d90, d91, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0xA) Save2<term, type>(dst, buf, dA0, dA1, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0xB) Save2<term, type>(dst, buf, dB0, dB1, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x5) Save2<term, type>(dst, buf, d50, d51, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x6) Save2<term, type>(dst, buf, d60, d61, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x7) Save2<term, type>(dst, buf, d70, d71, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x8) Save2<term, type>(dst, buf, d80, d81, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x9) Save2<term, type>(dst, buf, d90, d91, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0xA) Save2<term, type>(dst, buf, dA0, dA1, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0xB) Save2<term, type>(dst, buf, dB0, dB1, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
             }
             else
             {
@@ -392,23 +393,23 @@ namespace Simd
                     weight0 += A;
                 }
                 __mmask16 tail = TailMask16(dstC);
-                if (M > 0x0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x5) Save1<term, type>(dst, buf, d50, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x6) Save1<term, type>(dst, buf, d60, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x7) Save1<term, type>(dst, buf, d70, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x8) Save1<term, type>(dst, buf, d80, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0x9) Save1<term, type>(dst, buf, d90, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0xA) Save1<term, type>(dst, buf, dA0, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
-                if (M > 0xB) Save1<term, type>(dst, buf, dB0, sBias, sNorm, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x5) Save1<term, type>(dst, buf, d50, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x6) Save1<term, type>(dst, buf, d60, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x7) Save1<term, type>(dst, buf, d70, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x8) Save1<term, type>(dst, buf, d80, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0x9) Save1<term, type>(dst, buf, d90, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0xA) Save1<term, type>(dst, buf, dA0, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
+                if (M > 0xB) Save1<term, type>(dst, buf, dB0, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
             }
         }
 
         typedef void(*QuantizedConvolutionNhwcGemm_i2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, int update, const int8_t* weight,
-            const __m512i* sBias, const __m512* sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst);
+            const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst);
 
         template<Term8iType term, SimdConvolutionActivationType type> QuantizedConvolutionNhwcGemm_i2xM_Ptr GetQuantizedConvolutionNhwcGemm_i2xM(size_t M)
         {
@@ -442,9 +443,11 @@ namespace Simd
             QuantizedConvolutionNhwcGemm_i2xM_Ptr convolution_i2xM = GetQuantizedConvolutionNhwcGemm_i2xM<term, type>(m);
 
             __m512 _sNorm[2], _iScale, _params[2], _dNorm;
-            __m512i _sBias[2], _dZero = _mm512_set1_epi32(dZero);
+            __m512i _sBias[2], _dZero = _mm512_set1_epi32(dZero), _iLo, _iHi;
             if (type != SimdConvolutionActivationIdentity)
             {
+                _iLo = _mm512_set1_epi32(-iZero);
+                _iHi = _mm512_set1_epi32(255 - iZero);
                 _iScale = _mm512_set1_ps(iScale);
                 _dNorm = _mm512_set1_ps(dNorm);
                 _params[0] = _mm512_set1_ps(params[0]);
@@ -467,9 +470,9 @@ namespace Simd
                 uint8_t* d = dst + dc * a.elem;
                 size_t i = 0;
                 for (; i < nn; i += n, s += n * dS, b += n * dB, d += n * dD)
-                    convolution_i2xN(s, p, a, srcC, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b, d);
+                    convolution_i2xN(s, p, a, srcC, dC, update, weight, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, b, d);
                 for (; i < n1; i += m, s += m * dS, b += m * dB, d += m * dD)
-                    convolution_i2xM(s, p, a, srcC, dC, update, weight, _sBias, _sNorm, _iScale, _params, _dNorm, _dZero, b, d);
+                    convolution_i2xM(s, p, a, srcC, dC, update, weight, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, b, d);
                 weight += dW;
             }
         }

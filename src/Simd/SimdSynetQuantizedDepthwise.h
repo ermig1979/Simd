@@ -80,15 +80,15 @@ namespace Simd
         //--------------------------------------------------------------------------------------------------
 
         template <Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum, const __m128i& sBias, 
-            const __m128& sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero)
+            const __m128& sNorm, const __m128i& iLo, const __m128i& iHi, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero)
         {
-            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iScale, params, dNorm, dZero);
+            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iLo, iHi, iScale, params, dNorm, dZero);
         }
 
         template <Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum, const __m128i& sBias, 
-            const __m128& sNorm, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero, size_t tail)
+            const __m128& sNorm, const __m128i& iLo, const __m128i& iHi, const __m128& iScale, const __m128* params, const __m128& dNorm, const __m128i& dZero, size_t tail)
         {
-            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iScale, params, dNorm, dZero, tail);
+            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail);
         }
     }
 #endif
@@ -139,15 +139,15 @@ namespace Simd
         //--------------------------------------------------------------------------------------------------
 
         template <Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m256i sum, const __m256i& sBias,
-            const __m256& sNorm, const __m256& iScale, const __m256* params, const __m256& dNorm, const __m256i& dZero)
+            const __m256& sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const __m256* params, const __m256& dNorm, const __m256i& dZero)
         {
-            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iScale, params, dNorm, dZero);
+            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iLo, iHi, iScale, params, dNorm, dZero);
         }
 
         template <Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m256i sum, const __m256i& sBias,
-            const __m256& sNorm, const __m256& iScale, const __m256* params, const __m256& dNorm, const __m256i& dZero, size_t tail)
+            const __m256& sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const __m256* params, const __m256& dNorm, const __m256i& dZero, size_t tail)
         {
-            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iScale, params, dNorm, dZero, tail);
+            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail);
         }
     }
 #endif
@@ -178,9 +178,9 @@ namespace Simd
         //--------------------------------------------------------------------------------------------------
 
         template <Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m512i sum, const __m512i& sBias,
-            const __m512& sNorm, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
+            const __m512& sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
         {
-            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iScale, params, dNorm, dZero, tail);
+            Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail);
         }
     }
 #endif
