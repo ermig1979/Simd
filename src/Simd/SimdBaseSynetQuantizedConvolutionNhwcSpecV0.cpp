@@ -225,17 +225,17 @@ namespace Simd
                     weight += macroC * a.kA * a.F;
                 }
                 sBias += macroD;
-                sBias += macroD;
+                sNorm += macroD;
                 if (p.activation == SimdConvolutionActivationPrelu)
                     params += macroD;
                 dst += macroD * _elemD;
             }
         }
 
-        bool SynetQuantizedConvolutionNhwcSpecV0::Preferable(const ConvParam& p, bool imp)
+        bool SynetQuantizedConvolutionNhwcSpecV0::Preferable(const ConvParam& p)
         {
             return p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) 
-                && p.dstC >= 4 && p.srcC * p.kernelX * p.kernelY >= 32 && (p.activation == SimdConvolutionActivationIdentity || imp);
+                && p.dstC >= 4 && p.srcC * p.kernelX * p.kernelY >= 32;
         }
     }
 #endif

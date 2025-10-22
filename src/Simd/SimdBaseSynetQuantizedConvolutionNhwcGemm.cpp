@@ -199,9 +199,9 @@ namespace Simd
             }
         }
 
-        bool SynetQuantizedConvolutionNhwcGemm::Preferable(const ConvParam& p, bool imp)
+        bool SynetQuantizedConvolutionNhwcGemm::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && (p.activation == SimdConvolutionActivationIdentity || imp);
+            return p.trans != 0 && p.group == 1;
         }
     }
 #endif

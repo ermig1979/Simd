@@ -133,7 +133,7 @@ namespace Simd
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
 
-            static bool Preferable(const ConvParam& p, bool imp = true);
+            static bool Preferable(const ConvParam& p);
 
             struct AlgParam
             {
@@ -174,7 +174,7 @@ namespace Simd
             virtual size_t ExternalBufferSize() const;
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
-            static bool Preferable(const ConvParam& p, bool imp = true);
+            static bool Preferable(const ConvParam& p);
 
             struct AlgParam
             {
