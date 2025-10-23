@@ -47,7 +47,10 @@
  <li>Arbitrary activation function in Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VNNI optimizations of class SynetQuantizedConvolutionNhwcDepthwiseV2.</li>
  <li>Arbitrary activation function in Base implementation, AVX-512VNNI optimizations of class SynetQuantizedConvolutionNhwcDepthwiseV3.</li>
 </ul>
-
+<h5>Improve</h5>
+<ul>
+ <li>AMX-BF16 optimizations of class SynetConvolution16bNhwcGemm (case of small srcC).</li>
+</ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Performance bug in AMX-INT8 optimizations of class SynetQuantizedConvolutionNhwcGemm.</li>

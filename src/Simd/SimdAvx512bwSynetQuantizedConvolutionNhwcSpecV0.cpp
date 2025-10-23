@@ -47,56 +47,95 @@ namespace Simd
         static void QuantizedConvolutionNhwcSpecV0Reorder(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint8_t* dst)
         {
             assert(a.microC == A);
-            size_t srcCA = Simd::AlignLo(p.srcC, A);
-            size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad);
+            size_t sC = p.srcC, sCA = Simd::AlignLo(sC, A), asC = a.srcC, sW = p.srcW, asW = a.srcW;
+            size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad), apH = a.padH;
             size_t cD = a.batch * a.srcH * a.srcW + a.padE, sD = a.microC;
             __m512i _zero = _mm512_set1_epi8(zero);
-            __mmask64 tailC = TailMask64(p.srcC - srcCA);
+            __mmask64 tailC = TailMask64(sC - sCA);
             if (dyBeg == 0)
             {
-                for (size_t s = 0, n = a.padV * a.srcW; s < n; ++s)
-                    for (size_t c = 0; c < a.srcC; c += a.microC)
+                for (size_t s = 0, n = a.padV * asW; s < n; ++s)
+                    for (size_t c = 0; c < asC; c += A)
                         _mm512_storeu_si512((__m512i*)(dst + c * cD + s * sD), _zero);
-                dst += a.padV * a.srcW * sD;
+                dst += a.padV * asW * sD;
                 syBeg = 0;
             }
             else
             {
                 syBeg = dyBeg + syPad;
-                src += syBeg * p.srcW * p.srcC;
-                dst += (dyBeg + p.kernelY - 1 + a.padV - p.padY) * a.srcW * sD;
+                src += syBeg * sW * sC;
+                dst += (dyBeg + p.kernelY - 1 + a.padV - p.padY) * asW * sD;
             }
             for (size_t sy = syBeg; sy < syEnd; ++sy)
             {
-                if (a.padH)
+                if (apH)
                 {
-                    for (size_t s = 0; s < a.padH; ++s)
-                        for (size_t c = 0; c < a.srcC; c += a.microC)
+                    for (size_t s = 0; s < apH; ++s)
+                        for (size_t c = 0; c < asC; c += A)
                             _mm512_storeu_si512((__m512i*)(dst + c * cD + s * sD), _zero);
-                    dst += a.padH * sD;
+                    dst += apH * sD;
                 }
-                for (size_t sx = 0; sx < p.srcW; ++sx)
+                for (size_t sx = 0; sx < sW; ++sx)
                 {
                     size_t sc = 0;
-                    for (; sc < srcCA; sc += A)
+                    for (; sc < sCA; sc += A)
                         Copy(src + sc, dst + sc * cD);
                     if (tailC)
                         Copy(src + sc, dst + sc * cD, tailC);
-                    src += p.srcC;
+                    src += sC;
                     dst += sD;
                 }
             }
             if (end)
             {
                 for (size_t s = 0, n = a.padE; s < n; ++s)
-                    for (size_t c = 0; c < a.srcC; c += a.microC)
+                    for (size_t c = 0; c < asC; c += A)
                         _mm512_storeu_si512((__m512i*)(dst + c * cD + s * sD), _zero);
             }
             else if (dyEnd != p.dstH)
             {
-                for (size_t s = 0, n = a.padH; s < n; ++s)
-                    for (size_t c = 0; c < a.srcC; c += a.microC)
+                for (size_t s = 0; s < apH; ++s)
+                    for (size_t c = 0; c < asC; c += A)
                         _mm512_storeu_si512((__m512i*)(dst + c * cD + s * sD), _zero);
+            }
+        }
+
+        static void QuantizedConvolutionNhwcSpecV0Reorder64(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint8_t* dst)
+        {
+            assert(a.microC == A && p.srcC <= A);
+            size_t sC = p.srcC, sW = p.srcW, asW = a.srcW;
+            size_t syPad = p.kernelY - 1 - p.padY, syBeg, syEnd = (dyEnd == p.dstH ? p.srcH : dyEnd + syPad), apH = a.padH;
+            size_t cD = a.batch * a.srcH * a.srcW + a.padE, sD = a.microC;
+            __m512i _zero = _mm512_set1_epi8(zero);
+            __mmask64 tailC = TailMask64(sC);
+            if (dyBeg == 0)
+            {
+                for (size_t s = 0, n = a.padV * asW; s < n; ++s, dst += A)
+                     _mm512_storeu_si512((__m512i*)dst, _zero);
+                syBeg = 0;
+            }
+            else
+            {
+                syBeg = dyBeg + syPad;
+                src += syBeg * sW * sC;
+                dst += (dyBeg + p.kernelY - 1 + a.padV - p.padY) * asW * sD;
+            }
+            for (size_t sy = syBeg; sy < syEnd; ++sy)
+            {
+                for (size_t s = 0; s < apH; ++s, dst += A)
+                    _mm512_storeu_si512((__m512i*)dst, _zero);
+                for (size_t sx = 0; sx < sW; ++sx, src += sC, dst += A)
+                    Copy(src, dst, tailC);
+            }
+            if (end)
+            {
+                for (size_t s = 0, n = a.padE; s < n; ++s, dst += A)
+                    _mm512_storeu_si512((__m512i*)dst, _zero);
+            }
+            else if (dyEnd != p.dstH)
+            {
+                for (size_t s = 0; s < apH; ++s, dst += A)
+                    _mm512_storeu_si512((__m512i*)dst, _zero);
             }
         }
 
@@ -350,7 +389,10 @@ namespace Simd
             AlgParam& a = _alg;
             if (_src8u)
             {
-                _preprocess = QuantizedConvolutionNhwcSpecV0Reorder;
+                if(p.srcC <= 64)
+                    _preprocess = QuantizedConvolutionNhwcSpecV0Reorder64;
+                else
+                    _preprocess = QuantizedConvolutionNhwcSpecV0Reorder;
             }
             else
                 assert(0);

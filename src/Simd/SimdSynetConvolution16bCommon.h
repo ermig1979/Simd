@@ -934,6 +934,18 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void ConvertAq(const float* src, uint16_t* dst, __mmask8 mask = __mmask8(-1))
+        {
+            __m256 s0 = _mm256_maskz_loadu_ps(mask, src);
+            _mm_mask_storeu_epi16(dst, mask, (__m128i)_mm256_cvtneps_pbh(s0));
+        }
+
+        SIMD_INLINE void ConvertAh(const float* src, uint16_t* dst, __mmask16 mask = __mmask16(-1))
+        {
+            __m512 s0 = _mm512_maskz_loadu_ps(mask, src);
+            _mm256_mask_storeu_epi16(dst, mask, (__m256i)_mm512_cvtneps_pbh(s0));
+        }
+
         SIMD_INLINE void ConvertA(const float* src, uint16_t* dst, __mmask16 srcMask0 = __mmask16(-1), __mmask16 srcMask1 = __mmask16(-1), __mmask32 dstMask = __mmask32(-1))
         {
             __m512 s0 = _mm512_maskz_loadu_ps(srcMask0, src + 0 * 16);
