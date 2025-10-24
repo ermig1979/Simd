@@ -2752,7 +2752,7 @@ namespace Simd
 
         All images must have the same width, height and pixel format.
 
-        \note This function is a C++ wrapper for functionû ::SimdRecursiveBilateralFilterInit and ::SimdRecursiveBilateralFilterRun.
+        \note This function is a C++ wrapper for functionÃ» ::SimdRecursiveBilateralFilterInit and ::SimdRecursiveBilateralFilterRun.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
@@ -2791,7 +2791,7 @@ namespace Simd
         \param [in] src - an original input image.
         \param [out] dst - a reduced output image.
     */
-    template<template<class> class A> SIMD_INLINE void ReduceGray2x2(const View<A>& src, View<A>& dst)
+    template<template<class> class A> SIMD_INLINE void ReduceGray2x2(const View<A>& src, View<A>const& dst)
     {
         assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8 && Scale(src.Size()) == dst.Size());
 
@@ -4890,4 +4890,5 @@ namespace Simd
 }
 
 #endif
+
 
