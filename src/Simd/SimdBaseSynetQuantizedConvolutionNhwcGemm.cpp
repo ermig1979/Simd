@@ -190,7 +190,7 @@ namespace Simd
                     weight += macroK * a.F;
                 }
                 sBias += macroD;
-                sBias += macroD;
+                sNorm += macroD;
                 if (p.activation == SimdConvolutionActivationPrelu)
                     params += macroD;
                 dst += macroD * _elemD;
