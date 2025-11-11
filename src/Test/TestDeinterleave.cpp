@@ -37,25 +37,33 @@ namespace Test
                 uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
             FuncPtr func;
-            String description;
+            String desc;
 
-            Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func2(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Call(const View & uv, View & u, View & v) const
+            void Call(const View & uv, View * u, View * v) const
             {
-                TEST_PERFORMANCE_TEST(description);
-                func(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
+                TEST_PERFORMANCE_TEST(desc);
+                func(uv.data, uv.stride, uv.width, uv.height, u ? u->data : 0, u ? u->stride : 0, v ? v->data : 0, v ? v->stride : 0);
+            }
+
+            void Update(int hasU, int hasV)
+            {
+                desc = desc + "-" + std::to_string(hasU) + std::to_string(hasV);
             }
         };
     }
 
 #define FUNC2(function) Func2(function, #function)
 
-    bool DeinterleaveUvAutoTest(int width, int height, const Func2 & f1, const Func2 & f2)
+    bool DeinterleaveUvAutoTest(int width, int height, int hasU, int hasV, Func2 f1, Func2 f2)
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        f1.Update(hasU, hasV);
+        f2.Update(hasU, hasV);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
         View uv(width, height, View::Uv16, NULL, TEST_ALIGN(width));
         FillRandom(uv);
@@ -65,22 +73,31 @@ namespace Test
         View u2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View v2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(uv, u1, v1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(uv, hasU ? &u1 : 0, hasV ? &v1 : 0));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(uv, u2, v2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(uv, hasU ? &u2 : 0, hasV ? &v2 : 0));
 
-        result = result && Compare(u1, u2, 0, true, 64, 0, "u");
-        result = result && Compare(v1, v2, 0, true, 64, 0, "v");
+        if (hasU) result = result && Compare(u1, u2, 0, true, 64, 0, "u");
+        if (hasV) result = result && Compare(v1, v2, 0, true, 64, 0, "v");
 
         return result;
     }
 
-    bool DeinterleaveUvAutoTest(const Func2 & f1, const Func2 & f2)
+    bool DeinterleaveUvAutoTest(int hasU, int hasV, const Func2 & f1, const Func2 & f2)
     {
         bool result = true;
 
-        result = result && DeinterleaveUvAutoTest(W, H, f1, f2);
-        result = result && DeinterleaveUvAutoTest(W + O, H - O, f1, f2);
+        result = result && DeinterleaveUvAutoTest(W, H, hasU, hasV, f1, f2);
+        result = result && DeinterleaveUvAutoTest(W + O, H - O, hasU, hasV, f1, f2);
+
+        return result;
+    }
+
+    bool DeinterleaveUvAutoTest(const Func2& f1, const Func2& f2)
+    {
+        bool result = true;
+
+        result = result && DeinterleaveUvAutoTest(1, 1, f1, f2);
 
         return result;
     }
