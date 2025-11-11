@@ -2752,7 +2752,7 @@ namespace Simd
 
         All images must have the same width, height and pixel format.
 
-        \note This function is a C++ wrapper for functionû ::SimdRecursiveBilateralFilterInit and ::SimdRecursiveBilateralFilterRun.
+        \note This function is a C++ wrapper for function ::SimdRecursiveBilateralFilterInit and ::SimdRecursiveBilateralFilterRun.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
@@ -2775,7 +2775,7 @@ namespace Simd
 
     /*! @ingroup resizing
 
-        \fn void ReduceGray2x2(const View<A>& src, View<A>& dst)
+        \fn void ReduceGray2x2(const View<A>& src, View<A>const& dst)
 
         \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 2x2.
 

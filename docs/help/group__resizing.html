@@ -110,10 +110,10 @@ Functions</h2></td></tr>
 <tr class="memitem:gae0a1ed704ca676df7f4fef89a10e6675"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__resizing.html#gae0a1ed704ca676df7f4fef89a10e6675">SimdStretchGray2x2</a> (const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)</td></tr>
 <tr class="memdesc:gae0a1ed704ca676df7f4fef89a10e6675"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stretches input 8-bit gray image in two times.  <a href="group__resizing.html#gae0a1ed704ca676df7f4fef89a10e6675">More...</a><br /></td></tr>
 <tr class="separator:gae0a1ed704ca676df7f4fef89a10e6675"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa7a82dcd5c54ea2227e82d34f31dd211"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:gaa7a82dcd5c54ea2227e82d34f31dd211"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#gaa7a82dcd5c54ea2227e82d34f31dd211">ReduceGray2x2</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:gaa7a82dcd5c54ea2227e82d34f31dd211"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 2x2.  <a href="group__resizing.html#gaa7a82dcd5c54ea2227e82d34f31dd211">More...</a><br /></td></tr>
-<tr class="separator:gaa7a82dcd5c54ea2227e82d34f31dd211"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3d381a42d14354488264a113334ad62b"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga3d381a42d14354488264a113334ad62b"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga3d381a42d14354488264a113334ad62b">ReduceGray2x2</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt;const &amp;dst)</td></tr>
+<tr class="memdesc:ga3d381a42d14354488264a113334ad62b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 2x2.  <a href="group__resizing.html#ga3d381a42d14354488264a113334ad62b">More...</a><br /></td></tr>
+<tr class="separator:ga3d381a42d14354488264a113334ad62b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad1fd1f3529a3138ca3b06178a27a65dc"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad1fd1f3529a3138ca3b06178a27a65dc"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#gad1fd1f3529a3138ca3b06178a27a65dc">ReduceGray3x3</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, bool compensation=true)</td></tr>
 <tr class="memdesc:gad1fd1f3529a3138ca3b06178a27a65dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 3x3.  <a href="group__resizing.html#gad1fd1f3529a3138ca3b06178a27a65dc">More...</a><br /></td></tr>
@@ -286,7 +286,7 @@ Functions</h2></td></tr>
 <p>Performs reducing and Gaussian blurring (in two time) a 8-bit channel color image with using window 2x2. </p>
 <p >For input and output image must be performed: dstWidth = (srcWidth + 1)/2, dstHeight = (srcHeight + 1)/2.</p>
 <p >For all points: </p><pre class="fragment">dst[x, y, c] = (src[2*x, 2*y, c] + src[2*x, 2*y + 1, c] + src[2*x + 1, 2*y, c] + src[2*x + 1, 2*y + 1, c] + 2)/4;
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::Reduce2x2(const View&lt;A&gt; &amp; src, View&lt;A&gt; &amp; dst).</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::Reduce2x2(const View&lt;A&gt; &amp; src, View&lt;A&gt; const&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
@@ -874,8 +874,8 @@ if (resizer)
 
 </div>
 </div>
-<a id="gaa7a82dcd5c54ea2227e82d34f31dd211" name="gaa7a82dcd5c54ea2227e82d34f31dd211"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaa7a82dcd5c54ea2227e82d34f31dd211">&#9670;&#160;</a></span>ReduceGray2x2()</h2>
+<a id="ga3d381a42d14354488264a113334ad62b" name="ga3d381a42d14354488264a113334ad62b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3d381a42d14354488264a113334ad62b">&#9670;&#160;</a></span>ReduceGray2x2()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -889,7 +889,7 @@ if (resizer)
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt;const &amp;&#160;</td>
           <td class="paramname"><em>dst</em>&#160;</td>
         </tr>
         <tr>

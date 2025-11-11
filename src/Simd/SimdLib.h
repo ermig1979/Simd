@@ -2667,9 +2667,9 @@ extern "C"
         \param [in] uvStride - a row size of the uv image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] u - a pointer to pixels data of 8-bit U planar image.
+        \param [out] u - a pointer to pixels data of 8-bit U planar image. Can be NULL if you don't need U image.
         \param [in] uStride - a row size of the u image.
-        \param [out] v - a pointer to pixels data of 8-bit V planar image.
+        \param [out] v - a pointer to pixels data of 8-bit V planar image. Can be NULL if you don't need V image.
         \param [in] vStride - a row size of the v image.
     */
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
@@ -4896,7 +4896,7 @@ extern "C"
         dst[x, y, c] = (src[2*x, 2*y, c] + src[2*x, 2*y + 1, c] + src[2*x + 1, 2*y, c] + src[2*x + 1, 2*y + 1, c] + 2)/4;
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::Reduce2x2(const View<A> & src, View<A> & dst).
+        \note This function has a C++ wrappers: Simd::Reduce2x2(const View<A> & src, View<A> const& dst).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
