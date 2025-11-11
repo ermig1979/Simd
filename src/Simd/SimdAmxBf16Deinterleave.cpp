@@ -42,23 +42,23 @@ namespace Simd
             0x41, 0x43, 0x45, 0x47, 0x49, 0x4B, 0x4D, 0x4F, 0x51, 0x53, 0x55, 0x57, 0x59, 0x5B, 0x5D, 0x5F,
             0x61, 0x63, 0x65, 0x67, 0x69, 0x6B, 0x6D, 0x6F, 0x71, 0x73, 0x75, 0x77, 0x79, 0x7B, 0x7D, 0x7F);
 
-        SIMD_INLINE void DeinterleaveUv(const uint8_t * uv, uint8_t * u, uint8_t * v)
+        template <int U, int V> SIMD_INLINE void DeinterleaveUv(const uint8_t * uv, uint8_t * u, uint8_t * v)
         {
             const __m512i uv0 = _mm512_loadu_si512(uv + 0);
             const __m512i uv1 = _mm512_loadu_si512(uv + A);
-            _mm512_storeu_si512(u, _mm512_permutex2var_epi8(uv0, K8_UV_TO_U, uv1));
-            _mm512_storeu_si512(v, _mm512_permutex2var_epi8(uv0, K8_UV_TO_V, uv1));
+            if (U) _mm512_storeu_si512(u, _mm512_permutex2var_epi8(uv0, K8_UV_TO_U, uv1));
+            if (V) _mm512_storeu_si512(v, _mm512_permutex2var_epi8(uv0, K8_UV_TO_V, uv1));
         }
 
-        SIMD_INLINE void DeinterleaveUv(const uint8_t* uv, uint8_t* u, uint8_t* v, __mmask64 tail)
+        template <int U, int V> SIMD_INLINE void DeinterleaveUv(const uint8_t* uv, uint8_t* u, uint8_t* v, __mmask64 tail)
         {
             const __m512i uv0 = _mm512_maskz_loadu_epi16(__mmask32(tail >> 00), (uint16_t*)(uv + 0));
             const __m512i uv1 = _mm512_maskz_loadu_epi16(__mmask32(tail >> 32), (uint16_t*)(uv + A));
-            _mm512_mask_storeu_epi8(u, tail, _mm512_permutex2var_epi8(uv0, K8_UV_TO_U, uv1));
-            _mm512_mask_storeu_epi8(v, tail, _mm512_permutex2var_epi8(uv0, K8_UV_TO_V, uv1));
+            if (U) _mm512_mask_storeu_epi8(u, tail, _mm512_permutex2var_epi8(uv0, K8_UV_TO_U, uv1));
+            if (V) _mm512_mask_storeu_epi8(v, tail, _mm512_permutex2var_epi8(uv0, K8_UV_TO_V, uv1));
         }
 
-        void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+        template <int U, int V> void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
             size_t widthA = AlignLo(width, A);
             __mmask64 tail = TailMask64(width - widthA);
@@ -66,13 +66,24 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < widthA; col += A)
-                    DeinterleaveUv(uv + col * 2, u + col, v + col);
+                    DeinterleaveUv<U, V>(uv + col * 2, u + col, v + col);
                 if (col < width)
-                    DeinterleaveUv(uv + col * 2, u + col, v + col, tail);
+                    DeinterleaveUv<U, V>(uv + col * 2, u + col, v + col, tail);
                 uv += uvStride;
-                u += uStride;
-                v += vStride;
+                if (U) u += uStride;
+                if (V) v += vStride;
             }
+        }
+
+        void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            if (u && v)
+                DeinterleaveUv<1, 1>(uv, uvStride, width, height, u, uStride, v, vStride);
+            else if (u)
+                DeinterleaveUv<1, 0>(uv, uvStride, width, height, u, uStride, v, vStride);
+            else if (v)
+                DeinterleaveUv<0, 1>(uv, uvStride, width, height, u, uStride, v, vStride);
         }
 
         //-------------------------------------------------------------------------------------------------
