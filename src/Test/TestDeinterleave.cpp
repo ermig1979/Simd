@@ -98,8 +98,8 @@ namespace Test
         bool result = true;
 
         result = result && DeinterleaveUvAutoTest(1, 1, f1, f2);
-        //result = result && DeinterleaveUvAutoTest(1, 0, f1, f2);
-        //result = result && DeinterleaveUvAutoTest(0, 1, f1, f2);
+        result = result && DeinterleaveUvAutoTest(1, 0, f1, f2);
+        result = result && DeinterleaveUvAutoTest(0, 1, f1, f2);
 
         return result;
     }

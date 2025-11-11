@@ -29,13 +29,15 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        template <bool align> void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
+        template <int U, int V, bool align> void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
             assert(width >= A);
             if (align)
             {
-                assert(Aligned(uv) && Aligned(uvStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
+                assert(Aligned(uv) && Aligned(uvStride));
+                if (U) assert(Aligned(u) && Aligned(uStride));
+                if (V) assert(Aligned(v) && Aligned(vStride));
             }
 
             size_t bodyWidth = AlignLo(width, A);
@@ -45,21 +47,32 @@ namespace Simd
                 for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += DA)
                 {
                     uint8x16x2_t _uv = Load2<align>(uv + offset);
-                    Store<align>(u + col, _uv.val[0]);
-                    Store<align>(v + col, _uv.val[1]);
+                    if (U) Store<align>(u + col, _uv.val[0]);
+                    if (V) Store<align>(v + col, _uv.val[1]);
                 }
                 if (tail)
                 {
                     size_t col = width - A;
                     size_t offset = 2 * col;
                     uint8x16x2_t _uv = Load2<false>(uv + offset);
-                    Store<false>(u + col, _uv.val[0]);
-                    Store<false>(v + col, _uv.val[1]);
+                    if (U) Store<false>(u + col, _uv.val[0]);
+                    if (V) Store<false>(v + col, _uv.val[1]);
                 }
                 uv += uvStride;
-                u += uStride;
-                v += vStride;
+                if (U) u += uStride;
+                if (V) v += vStride;
             }
+        }
+
+        template <bool align> void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            if (u && v)
+                DeinterleaveUv<1, 1, align>(uv, uvStride, width, height, u, uStride, v, vStride);
+            else if (u)
+                DeinterleaveUv<1, 0, align>(uv, uvStride, width, height, u, uStride, v, vStride);
+            else if (v)
+                DeinterleaveUv<0, 1, align>(uv, uvStride, width, height, u, uStride, v, vStride);
         }
 
         void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
