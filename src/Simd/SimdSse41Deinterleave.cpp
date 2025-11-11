@@ -37,7 +37,9 @@ namespace Simd
             assert(width >= A);
             if (align)
             {
-                assert(Aligned(uv) && Aligned(uvStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
+                assert(Aligned(uv) && Aligned(uvStride));
+                if (U) assert(Aligned(u) && Aligned(uStride));
+                if (V) assert(Aligned(v) && Aligned(vStride));
             }
 
             size_t bodyWidth = AlignLo(width, A);

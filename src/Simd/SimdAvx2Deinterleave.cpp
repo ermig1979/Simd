@@ -31,13 +31,15 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool align> void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
+        template <int U, int V, bool align> void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
             assert(width >= A);
             if (align)
             {
-                assert(Aligned(uv) && Aligned(uvStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
+                assert(Aligned(uv) && Aligned(uvStride));
+                if (U) assert(Aligned(u) && Aligned(uStride));
+                if (V) assert(Aligned(v) && Aligned(vStride));
             }
 
             size_t bodyWidth = AlignLo(width, A);
@@ -48,8 +50,8 @@ namespace Simd
                 {
                     __m256i uv0 = Deinterleave8To64(Load<align>((__m256i*)(uv + offset)));
                     __m256i uv1 = Deinterleave8To64(Load<align>((__m256i*)(uv + offset + A)));
-                    Store<align>((__m256i*)(u + col), Deinterleave64<0>(uv0, uv1));
-                    Store<align>((__m256i*)(v + col), Deinterleave64<1>(uv0, uv1));
+                    if (U) Store<align>((__m256i*)(u + col), Deinterleave64<0>(uv0, uv1));
+                    if (V) Store<align>((__m256i*)(v + col), Deinterleave64<1>(uv0, uv1));
                 }
                 if (tail)
                 {
@@ -57,13 +59,24 @@ namespace Simd
                     size_t offset = 2 * col;
                     __m256i uv0 = Deinterleave8To64(Load<false>((__m256i*)(uv + offset)));
                     __m256i uv1 = Deinterleave8To64(Load<false>((__m256i*)(uv + offset + A)));
-                    Store<false>((__m256i*)(u + col), Deinterleave64<0>(uv0, uv1));
-                    Store<false>((__m256i*)(v + col), Deinterleave64<1>(uv0, uv1));
+                    if (U) Store<false>((__m256i*)(u + col), Deinterleave64<0>(uv0, uv1));
+                    if (V) Store<false>((__m256i*)(v + col), Deinterleave64<1>(uv0, uv1));
                 }
                 uv += uvStride;
-                u += uStride;
-                v += vStride;
+                if (U) u += uStride;
+                if (V) v += vStride;
             }
+        }
+
+        template <bool align> void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            if (u && v)
+                DeinterleaveUv<1, 1, align>(uv, uvStride, width, height, u, uStride, v, vStride);
+            else if (u)
+                DeinterleaveUv<1, 0, align>(uv, uvStride, width, height, u, uStride, v, vStride);
+            else if (v)
+                DeinterleaveUv<0, 1, align>(uv, uvStride, width, height, u, uStride, v, vStride);
         }
 
         void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
