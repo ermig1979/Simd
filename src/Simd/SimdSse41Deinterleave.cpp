@@ -90,18 +90,25 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <bool align> SIMD_INLINE void DeinterleaveBgr(const uint8_t * bgr, uint8_t * b, uint8_t * g, uint8_t * r, size_t offset)
+        template <int B, int G, int R, bool align> SIMD_INLINE void DeinterleaveBgr(const uint8_t * bgr, uint8_t * b, uint8_t * g, uint8_t * r, size_t offset)
         {
             __m128i _bgr[3] = { Load<align>((__m128i*)bgr + 0), Load<align>((__m128i*)bgr + 1), Load<align>((__m128i*)bgr + 2) };
-            Store<align>((__m128i*)(b + offset), BgrToBlue(_bgr));
-            Store<align>((__m128i*)(g + offset), BgrToGreen(_bgr));
-            Store<align>((__m128i*)(r + offset), BgrToRed(_bgr));
+            if (B) Store<align>((__m128i*)(b + offset), BgrToBlue(_bgr));
+            if (G) Store<align>((__m128i*)(g + offset), BgrToGreen(_bgr));
+            if (R) Store<align>((__m128i*)(r + offset), BgrToRed(_bgr));
         }
 
-        template <bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
+        template <int B, int G, int R, bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
         {
             assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(bgr) && Aligned(bgrStride));
+                if (B) assert(Aligned(b) && Aligned(bStride));
+                if (G) assert(Aligned(g) && Aligned(gStride));
+                if (R) assert(Aligned(r) && Aligned(rStride));
+            }
             if (align)
                 assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride));
 
@@ -110,14 +117,33 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    DeinterleaveBgr<align>(bgr + col * 3, b, g, r, col);
+                    DeinterleaveBgr<B, G, R, align>(bgr + col * 3, b, g, r, col);
                 if (width != alignedWidth)
-                    DeinterleaveBgr<false>(bgr + 3 * (width - A), b, g, r, width - A);
+                    DeinterleaveBgr<B, G, R, false>(bgr + 3 * (width - A), b, g, r, width - A);
                 bgr += bgrStride;
-                b += bStride;
-                g += gStride;
-                r += rStride;
+                if (B) b += bStride;
+                if (G) g += gStride;
+                if (R) r += rStride;
             }
+        }
+
+        template<bool align> void DeinterleaveBgr(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride)
+        {
+            if (b && g && r)
+                DeinterleaveBgr<1, 1, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (b && g)
+                DeinterleaveBgr<1, 1, 0, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (b && r)
+                DeinterleaveBgr<1, 0, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (g && r)
+                DeinterleaveBgr<0, 1, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (b)
+                DeinterleaveBgr<1, 0, 0, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (g)
+                DeinterleaveBgr<0, 1, 0, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (r)
+                DeinterleaveBgr<0, 0, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
         }
 
         void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
