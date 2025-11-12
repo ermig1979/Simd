@@ -84,16 +84,18 @@ namespace Simd
                 DeinterleaveUv<false>(uv, uvStride, width, height, u, uStride, v, vStride);
         }
 
-        //---------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
 
-        template <bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
+        template <int B, int G, int R, bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
         {
             assert(width >= A);
             if (align)
             {
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(b) && Aligned(bStride));
-                assert(Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride));
+                assert(Aligned(bgr) && Aligned(bgrStride));
+                if (B) assert(Aligned(b) && Aligned(bStride));
+                if (G) assert(Aligned(g) && Aligned(gStride));
+                if (R) assert(Aligned(r) && Aligned(rStride));
             }
 
             size_t bodyWidth = AlignLo(width, A);
@@ -104,24 +106,43 @@ namespace Simd
                 for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += A3)
                 {
                     uint8x16x3_t _bgr = Load3<align>(bgr + offset);
-                    Store<align>(b + col, _bgr.val[0]);
-                    Store<align>(g + col, _bgr.val[1]);
-                    Store<align>(r + col, _bgr.val[2]);
+                    if (B) Store<align>(b + col, _bgr.val[0]);
+                    if (G) Store<align>(g + col, _bgr.val[1]);
+                    if (R) Store<align>(r + col, _bgr.val[2]);
                 }
                 if (tail)
                 {
                     size_t col = width - A;
                     size_t offset = 3 * col;
                     uint8x16x3_t _bgr = Load3<false>(bgr + offset);
-                    Store<false>(b + col, _bgr.val[0]);
-                    Store<false>(g + col, _bgr.val[1]);
-                    Store<false>(r + col, _bgr.val[2]);
+                    if (B) Store<false>(b + col, _bgr.val[0]);
+                    if (G) Store<false>(g + col, _bgr.val[1]);
+                    if (R) Store<false>(r + col, _bgr.val[2]);
                 }
                 bgr += bgrStride;
-                b += bStride;
-                g += gStride;
-                r += rStride;
+                if (B) b += bStride;
+                if (G) g += gStride;
+                if (R) r += rStride;
             }
+        }
+
+        template<bool align> void DeinterleaveBgr(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride)
+        {
+            if (b && g && r)
+                DeinterleaveBgr<1, 1, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (b && g)
+                DeinterleaveBgr<1, 1, 0, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (b && r)
+                DeinterleaveBgr<1, 0, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (g && r)
+                DeinterleaveBgr<0, 1, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (b)
+                DeinterleaveBgr<1, 0, 0, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (g)
+                DeinterleaveBgr<0, 1, 0, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (r)
+                DeinterleaveBgr<0, 0, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
         }
 
         void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
@@ -133,7 +154,7 @@ namespace Simd
                 DeinterleaveBgr<false>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
         }
 
-        //---------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
 
         template <bool align> void DeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride)

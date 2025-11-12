@@ -215,12 +215,12 @@ namespace Test
         bool result = true;
 
         result = result && DeinterleaveBgrAutoTest(1, 1, 1, f1, f2);
-        //result = result && DeinterleaveBgrAutoTest(1, 1, 0, f1, f2);
-        //result = result && DeinterleaveBgrAutoTest(1, 0, 1, f1, f2);
-        //result = result && DeinterleaveBgrAutoTest(0, 1, 1, f1, f2);
-        //result = result && DeinterleaveBgrAutoTest(1, 0, 0, f1, f2);
-        //result = result && DeinterleaveBgrAutoTest(0, 1, 0, f1, f2);
-        //result = result && DeinterleaveBgrAutoTest(0, 0, 1, f1, f2);
+        result = result && DeinterleaveBgrAutoTest(1, 1, 0, f1, f2);
+        result = result && DeinterleaveBgrAutoTest(1, 0, 1, f1, f2);
+        result = result && DeinterleaveBgrAutoTest(0, 1, 1, f1, f2);
+        result = result && DeinterleaveBgrAutoTest(1, 0, 0, f1, f2);
+        result = result && DeinterleaveBgrAutoTest(0, 1, 0, f1, f2);
+        result = result && DeinterleaveBgrAutoTest(0, 0, 1, f1, f2);
 
         return result;
     }
