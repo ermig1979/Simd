@@ -139,6 +139,8 @@ namespace Test
         return result;
     }
 
+    //------------------------------------------------------------------------------------------------
+
     namespace
     {
         struct Func3
@@ -148,25 +150,34 @@ namespace Test
                 uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride);
 
             FuncPtr func;
-            String description;
+            String desc;
 
-            Func3(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func3(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Call(const View & bgr, View & b, View & g, View & r) const
+            void Call(const View & bgr, View * b, View * g, View * r) const
             {
-                TEST_PERFORMANCE_TEST(description);
-                func(bgr.data, bgr.stride, bgr.width, bgr.height, b.data, b.stride, g.data, g.stride, r.data, r.stride);
+                TEST_PERFORMANCE_TEST(desc);
+                func(bgr.data, bgr.stride, bgr.width, bgr.height, b ? b->data : 0, b ? b->stride : 0,
+                    g ? g->data : 0, g ? g->stride : 0, r ? r->data : 0, r ? r->stride : 0);
+            }
+
+            void Update(int hasB, int hasG, int hasR)
+            {
+                desc = desc + "-" + std::to_string(hasB) + std::to_string(hasG) + std::to_string(hasR);
             }
         };
     }
 
 #define FUNC3(function) Func3(function, #function)
 
-    bool DeinterleaveBgrAutoTest(int width, int height, const Func3 & f1, const Func3 & f2)
+    bool DeinterleaveBgrAutoTest(int width, int height, int hasB, int hasG, int hasR, Func3 f1, Func3 f2)
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        f1.Update(hasB, hasG, hasR);
+        f2.Update(hasB, hasG, hasR);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
         View bgr(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
         FillRandom(bgr);
@@ -178,23 +189,38 @@ namespace Test
         View g2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View r2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bgr, b1, g1, r1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bgr, hasB ? &b1 : 0, hasG ? &g1 : 0, hasR ? &r1 : 0));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bgr, b2, g2, r2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bgr, hasB ? &b2 : 0, hasG ? &g2 : 0, hasR ? &r2 : 0));
 
-        result = result && Compare(b1, b2, 0, true, 64, 0, "b");
-        result = result && Compare(g1, g2, 0, true, 64, 0, "g");
-        result = result && Compare(r1, r2, 0, true, 64, 0, "r");
+        if (hasB) result = result && Compare(b1, b2, 0, true, 64, 0, "b");
+        if (hasG) result = result && Compare(g1, g2, 0, true, 64, 0, "g");
+        if (hasR) result = result && Compare(r1, r2, 0, true, 64, 0, "r");
 
         return result;
     }
 
-    bool DeinterleaveBgrAutoTest(const Func3 & f1, const Func3 & f2)
+    bool DeinterleaveBgrAutoTest(int hasB, int hasG, int hasR, const Func3 & f1, const Func3 & f2)
     {
         bool result = true;
 
-        result = result && DeinterleaveBgrAutoTest(W, H, f1, f2);
-        result = result && DeinterleaveBgrAutoTest(W + O, H - O, f1, f2);
+        result = result && DeinterleaveBgrAutoTest(W, H, hasB, hasG, hasR, f1, f2);
+        result = result && DeinterleaveBgrAutoTest(W + O, H - O, hasB, hasG, hasR, f1, f2);
+
+        return result;
+    }
+
+    bool DeinterleaveBgrAutoTest(const Func3& f1, const Func3& f2)
+    {
+        bool result = true;
+
+        result = result && DeinterleaveBgrAutoTest(1, 1, 1, f1, f2);
+        //result = result && DeinterleaveBgrAutoTest(1, 1, 0, f1, f2);
+        //result = result && DeinterleaveBgrAutoTest(1, 0, 1, f1, f2);
+        //result = result && DeinterleaveBgrAutoTest(0, 1, 1, f1, f2);
+        //result = result && DeinterleaveBgrAutoTest(1, 0, 0, f1, f2);
+        //result = result && DeinterleaveBgrAutoTest(0, 1, 0, f1, f2);
+        //result = result && DeinterleaveBgrAutoTest(0, 0, 1, f1, f2);
 
         return result;
     }
@@ -233,6 +259,8 @@ namespace Test
 
         return result;
     }
+
+    //------------------------------------------------------------------------------------------------
 
     namespace
     {
