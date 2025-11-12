@@ -156,84 +156,93 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        template <bool align> void DeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
+        template <int B, int G, int R, int A, bool align> void DeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride)
         {
-            assert(width >= A);
+            assert(width >= Neon::A);
             if (align)
             {
-                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(b) && Aligned(bStride));
-                assert(Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && (Aligned(aStride) || a == NULL));
+                assert(Aligned(bgra) && Aligned(bgraStride));
+                if (B) assert(Aligned(b) && Aligned(bStride));
+                if (G) assert(Aligned(g) && Aligned(gStride));
+                if (R) assert(Aligned(r) && Aligned(rStride));
+                if (A) assert(Aligned(r) && Aligned(rStride));
             }
 
-            size_t bodyWidth = AlignLo(width, A);
+            size_t bodyWidth = AlignLo(width, Neon::A);
             size_t tail = width - bodyWidth;
-            if (a)
+            for (size_t row = 0; row < height; ++row)
             {
-                for (size_t row = 0; row < height; ++row)
+                for (size_t col = 0, offset = 0; col < bodyWidth; col += Neon::A, offset += Neon::QA)
                 {
-                    for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += QA)
-                    {
-                        uint8x16x4_t _bgra = Load4<align>(bgra + offset);
-                        Store<align>(b + col, _bgra.val[0]);
-                        Store<align>(g + col, _bgra.val[1]);
-                        Store<align>(r + col, _bgra.val[2]);
-                        Store<align>(a + col, _bgra.val[3]);
-                    }
-                    if (tail)
-                    {
-                        size_t col = width - A;
-                        size_t offset = 4 * col;
-                        uint8x16x4_t _bgra = Load4<false>(bgra + offset);
-                        Store<false>(b + col, _bgra.val[0]);
-                        Store<false>(g + col, _bgra.val[1]);
-                        Store<false>(r + col, _bgra.val[2]);
-                        Store<false>(a + col, _bgra.val[3]);
-                    }
-                    bgra += bgraStride;
-                    b += bStride;
-                    g += gStride;
-                    r += rStride;
-                    a += aStride;
+                    uint8x16x4_t _bgra = Load4<align>(bgra + offset);
+                    if (B) Store<align>(b + col, _bgra.val[0]);
+                    if (G) Store<align>(g + col, _bgra.val[1]);
+                    if (R) Store<align>(r + col, _bgra.val[2]);
+                    if (A) Store<align>(a + col, _bgra.val[3]);
                 }
-            }
-            else
-            {
-                for (size_t row = 0; row < height; ++row)
+                if (tail)
                 {
-                    for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += QA)
-                    {
-                        uint8x16x4_t _bgra = Load4<align>(bgra + offset);
-                        Store<align>(b + col, _bgra.val[0]);
-                        Store<align>(g + col, _bgra.val[1]);
-                        Store<align>(r + col, _bgra.val[2]);
-                    }
-                    if (tail)
-                    {
-                        size_t col = width - A;
-                        size_t offset = 4 * col;
-                        uint8x16x4_t _bgra = Load4<false>(bgra + offset);
-                        Store<false>(b + col, _bgra.val[0]);
-                        Store<false>(g + col, _bgra.val[1]);
-                        Store<false>(r + col, _bgra.val[2]);
-                    }
-                    bgra += bgraStride;
-                    b += bStride;
-                    g += gStride;
-                    r += rStride;
+                    size_t col = width - Neon::A;
+                    size_t offset = 4 * col;
+                    uint8x16x4_t _bgra = Load4<false>(bgra + offset);
+                    if (B) Store<false>(b + col, _bgra.val[0]);
+                    if (G) Store<false>(g + col, _bgra.val[1]);
+                    if (R) Store<false>(r + col, _bgra.val[2]);
+                    if (A) Store<false>(a + col, _bgra.val[3]);
                 }
+                bgra += bgraStride;
+                if (B) b += bStride;
+                if (G) g += gStride;
+                if (R) r += rStride;
+                if (A) a += aStride;
             }
+        }
+
+        template <bool align> void DeinterleaveBgra(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride, uint8_t* a, size_t aStride)
+        {
+            if (b && g && r && a)
+                DeinterleaveBgra<1, 1, 1, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && g && r)
+                DeinterleaveBgra<1, 1, 1, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && g && a)
+                DeinterleaveBgra<1, 1, 0, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && r && a)
+                DeinterleaveBgra<1, 0, 1, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (g && r && a)
+                DeinterleaveBgra<0, 1, 1, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && g)
+                DeinterleaveBgra<1, 1, 0, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && r)
+                DeinterleaveBgra<1, 0, 1, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && a)
+                DeinterleaveBgra<1, 0, 0, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (g && r)
+                DeinterleaveBgra<0, 1, 1, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (g && a)
+                DeinterleaveBgra<0, 1, 0, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (r && a)
+                DeinterleaveBgra<0, 0, 1, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b)
+                DeinterleaveBgra<1, 0, 0, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (g)
+                DeinterleaveBgra<0, 1, 0, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (r)
+                DeinterleaveBgra<0, 0, 1, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (a)
+                DeinterleaveBgra<0, 0, 0, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
         }
 
         void DeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride)
         {
             if (Aligned(bgra) && Aligned(bgraStride) && Aligned(b) && Aligned(bStride) &&
-                Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && (Aligned(aStride) || a == NULL))
+                Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && Aligned(aStride))
                 DeinterleaveBgra<true>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
             else
                 DeinterleaveBgra<false>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }
