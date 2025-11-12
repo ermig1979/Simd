@@ -258,5 +258,5 @@ namespace Simd
                 DeinterleaveBgra<false>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
         }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 }
