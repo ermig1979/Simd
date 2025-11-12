@@ -127,7 +127,7 @@ namespace Simd
         const __m512i K32_PERMUTE_BGR_R0 = SIMD_MM512_SETR_EPI32(0x02, 0x06, 0x0A, 0x0E, 0x12, 0x16, 0x1A, 0x1E, -1, -1, -1, -1, -1, -1, -1, -1);
         const __m512i K32_PERMUTE_BGR_R1 = SIMD_MM512_SETR_EPI32(-1, -1, -1, -1, -1, -1, -1, -1, 0x02, 0x06, 0x0A, 0x0E, 0x12, 0x16, 0x1A, 0x1E);
 
-        template <bool align, bool mask> SIMD_INLINE void DeinterleaveBgr(const uint8_t * bgr, uint8_t * b, uint8_t * g, uint8_t * r, const __mmask64 * tailMasks)
+        template <int B, int G, int R, bool align, bool mask> SIMD_INLINE void DeinterleaveBgr(const uint8_t * bgr, uint8_t * b, uint8_t * g, uint8_t * r, const __mmask64 * tailMasks)
         {
             const __m512i bgr0 = Load<align, mask>(bgr + 0 * A, tailMasks[0]);
             const __m512i bgr1 = Load<align, mask>(bgr + 1 * A, tailMasks[1]);
@@ -138,16 +138,22 @@ namespace Simd
             const __m512i sp2 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(bgr1, K32_PERMUTE_BGR_TO_BGRA_2, bgr2), K8_SHUFFLE_DEINTERLEAVE_BGR);
             const __m512i sp3 = _mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_3, bgr2), K8_SHUFFLE_DEINTERLEAVE_BGR);
 
-            Store<align, mask>(b, _mm512_or_si512(_mm512_permutex2var_epi32(sp0, K32_PERMUTE_BGR_B0, sp1), _mm512_permutex2var_epi32(sp2, K32_PERMUTE_BGR_B1, sp3)), tailMasks[3]);
-            Store<align, mask>(g, _mm512_or_si512(_mm512_permutex2var_epi32(sp0, K32_PERMUTE_BGR_G0, sp1), _mm512_permutex2var_epi32(sp2, K32_PERMUTE_BGR_G1, sp3)), tailMasks[3]);
-            Store<align, mask>(r, _mm512_or_si512(_mm512_permutex2var_epi32(sp0, K32_PERMUTE_BGR_R0, sp1), _mm512_permutex2var_epi32(sp2, K32_PERMUTE_BGR_R1, sp3)), tailMasks[3]);
+            if (B) Store<align, mask>(b, _mm512_or_si512(_mm512_permutex2var_epi32(sp0, K32_PERMUTE_BGR_B0, sp1), _mm512_permutex2var_epi32(sp2, K32_PERMUTE_BGR_B1, sp3)), tailMasks[3]);
+            if (G) Store<align, mask>(g, _mm512_or_si512(_mm512_permutex2var_epi32(sp0, K32_PERMUTE_BGR_G0, sp1), _mm512_permutex2var_epi32(sp2, K32_PERMUTE_BGR_G1, sp3)), tailMasks[3]);
+            if (R) Store<align, mask>(r, _mm512_or_si512(_mm512_permutex2var_epi32(sp0, K32_PERMUTE_BGR_R0, sp1), _mm512_permutex2var_epi32(sp2, K32_PERMUTE_BGR_R1, sp3)), tailMasks[3]);
         }
 
-        template <bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
+        template <int B, int G, int R, bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
         {
+            assert(width >= A);
             if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride));
+            {
+                assert(Aligned(bgr) && Aligned(bgrStride));
+                if (B) assert(Aligned(b) && Aligned(bStride));
+                if (G) assert(Aligned(g) && Aligned(gStride));
+                if (R) assert(Aligned(r) && Aligned(rStride));
+            }
 
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMasks[4];
@@ -158,14 +164,33 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    DeinterleaveBgr<align, false>(bgr + col * 3, b + col, g + col, r + col, tailMasks);
+                    DeinterleaveBgr<B, G, R, align, false>(bgr + col * 3, b + col, g + col, r + col, tailMasks);
                 if (col < width)
-                    DeinterleaveBgr<align, true>(bgr + col * 3, b + col, g + col, r + col, tailMasks);
+                    DeinterleaveBgr<B, G, R, align, true>(bgr + col * 3, b + col, g + col, r + col, tailMasks);
                 bgr += bgrStride;
-                b += bStride;
-                g += gStride;
-                r += rStride;
+                if (B) b += bStride;
+                if (G) g += gStride;
+                if (R) r += rStride;
             }
+        }
+
+        template<bool align> void DeinterleaveBgr(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride)
+        {
+            if (b && g && r)
+                DeinterleaveBgr<1, 1, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (b && g)
+                DeinterleaveBgr<1, 1, 0, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (b && r)
+                DeinterleaveBgr<1, 0, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (g && r)
+                DeinterleaveBgr<0, 1, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (b)
+                DeinterleaveBgr<1, 0, 0, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (g)
+                DeinterleaveBgr<0, 1, 0, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else if (r)
+                DeinterleaveBgr<0, 0, 1, align>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
         }
 
         void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
