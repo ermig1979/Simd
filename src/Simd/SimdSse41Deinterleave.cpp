@@ -109,8 +109,6 @@ namespace Simd
                 if (G) assert(Aligned(g) && Aligned(gStride));
                 if (R) assert(Aligned(r) && Aligned(rStride));
             }
-            if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride));
 
             size_t alignedWidth = AlignLo(width, A);
 
