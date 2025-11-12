@@ -146,7 +146,6 @@ namespace Simd
         template <int B, int G, int R, bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
         {
-            assert(width >= A);
             if (align)
             {
                 assert(Aligned(bgr) && Aligned(bgrStride));
