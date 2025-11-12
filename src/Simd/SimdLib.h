@@ -2667,9 +2667,9 @@ extern "C"
         \param [in] uvStride - a row size of the uv image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] u - a pointer to pixels data of 8-bit U planar image. Can be NULL if you don't need U image.
+        \param [out] u - a pointer to pixels data of 8-bit U planar image. It can be NULL if you don't need this image.
         \param [in] uStride - a row size of the u image.
-        \param [out] v - a pointer to pixels data of 8-bit V planar image. Can be NULL if you don't need V image.
+        \param [out] v - a pointer to pixels data of 8-bit V planar image. It can be NULL if you don't need this image.
         \param [in] vStride - a row size of the v image.
     */
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
@@ -2691,11 +2691,11 @@ extern "C"
         \param [in] bgrStride - a row size of the bgr image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] b - a pointer to pixels data of 8-bit Blue planar image. Can be NULL if you don't need Blue image.
+        \param [out] b - a pointer to pixels data of 8-bit Blue planar image. It can be NULL if you don't need this image.
         \param [in] bStride - a row size of the b image.
-        \param [out] g - a pointer to pixels data of 8-bit Green planar image. Can be NULL if you don't need Green image.
+        \param [out] g - a pointer to pixels data of 8-bit Green planar image. It can be NULL if you don't need this image.
         \param [in] gStride - a row size of the g image.
-        \param [out] r - a pointer to pixels data of 8-bit Red planar image. Can be NULL if you don't need Red image.
+        \param [out] r - a pointer to pixels data of 8-bit Red planar image. It can be NULL if you don't need this image.
         \param [in] rStride - a row size of the r image.
     */
     SIMD_API void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
@@ -2711,21 +2711,19 @@ extern "C"
 
         \note This function has C++ wrappers:
             Simd::DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a),
-            Simd::DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r),
-            Simd::DeinterleaveRgba(const View<A>& rgba, View<A>& r, View<A>& g, View<A>& b, View<A>& a),
-            Simd::DeinterleaveRgba(const View<A>& rgba, View<A>& r, View<A>& g, View<A>& b).
+            Simd::DeinterleaveRgba(const View<A>& rgba, View<A>& r, View<A>& g, View<A>& b, View<A>& a).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA interleaved image.
         \param [in] bgraStride - a row size of the bgra image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] b - a pointer to pixels data of 8-bit Blue planar image.
+        \param [out] b - a pointer to pixels data of 8-bit Blue planar image. It can be NULL if you don't need this image.
         \param [in] bStride - a row size of the b image.
-        \param [out] g - a pointer to pixels data of 8-bit Green planar image.
+        \param [out] g - a pointer to pixels data of 8-bit Green planar image. It can be NULL if you don't need this image.
         \param [in] gStride - a row size of the g image.
-        \param [out] r - a pointer to pixels data of 8-bit Red planar image.
+        \param [out] r - a pointer to pixels data of 8-bit Red planar image. It can be NULL if you don't need this image.
         \param [in] rStride - a row size of the r image.
-        \param [out] a - a pointer to pixels data of 8-bit Alpha planar image. It can be NULL.
+        \param [out] a - a pointer to pixels data of 8-bit Alpha planar image. It can be NULL if you don't need this image.
         \param [in] aStride - a row size of the a image. 
     */
     SIMD_API void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,

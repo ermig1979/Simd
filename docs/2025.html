@@ -42,6 +42,16 @@
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VBMI, NEON optimizations of function DeinterleaveUv (some outputs can be NULL).</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VBMI, NEON optimizations of function DeinterleaveBgr (some outputs can be NULL).</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VBMI, NEON optimizations of function DeinterleaveBgra (some outputs can be NULL).</li>
+ <li>C++ wrapper Simd::DeinterleaveUv (support of empty outputs).</li>
+ <li>C++ wrapper Simd::DeinterleaveBgr (support of empty outputs).</li>
+ <li>C++ wrapper Simd::DeinterleaveBgra (support of empty outputs).</li>
+ <li>C++ wrapper Simd::DeinterleaveRgb (support of empty outputs).</li>
+ <li>C++ wrapper Simd::DeinterleaveRgba (support of empty outputs).</li>
+</ul>
+<h5>Removing</h5>
+<ul>
+ <li>C++ wrapper Simd::DeinterleaveBgra with 4 arguments.</li>
+ <li>C++ wrapper Simd::DeinterleaveRgba with 4 arguments.</li>
 </ul>
 
 <h4>Test framework</h4>
