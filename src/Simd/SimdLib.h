@@ -2691,11 +2691,11 @@ extern "C"
         \param [in] bgrStride - a row size of the bgr image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] b - a pointer to pixels data of 8-bit Blue planar image.
+        \param [out] b - a pointer to pixels data of 8-bit Blue planar image. Can be NULL if you don't need Blue image.
         \param [in] bStride - a row size of the b image.
-        \param [out] g - a pointer to pixels data of 8-bit Green planar image.
+        \param [out] g - a pointer to pixels data of 8-bit Green planar image. Can be NULL if you don't need Green image.
         \param [in] gStride - a row size of the g image.
-        \param [out] r - a pointer to pixels data of 8-bit Red planar image.
+        \param [out] r - a pointer to pixels data of 8-bit Red planar image. Can be NULL if you don't need Red image.
         \param [in] rStride - a row size of the r image.
     */
     SIMD_API void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
