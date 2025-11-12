@@ -161,76 +161,98 @@ namespace Simd
 
         const __m256i K32_PERMUTE_BGRA = SIMD_MM256_SETR_EPI32(0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7);
 
-        template <bool align, bool alpha> SIMD_INLINE void DeinterleaveBgra(const uint8_t * bgra, uint8_t * b, uint8_t * g, uint8_t * r, uint8_t *a, size_t offset)
+        template <int B, int G, int R, int A, bool align> SIMD_INLINE void DeinterleaveBgra(const uint8_t * bgra, uint8_t * b, uint8_t * g, uint8_t * r, uint8_t *a, size_t offset)
         {
             __m256i _bgra[4];
             _bgra[0] = _mm256_shuffle_epi8(Load<align>((__m256i*)bgra + 0), K8_SHUFFLE_BGRA);
             _bgra[1] = _mm256_shuffle_epi8(Load<align>((__m256i*)bgra + 1), K8_SHUFFLE_BGRA);
             _bgra[2] = _mm256_shuffle_epi8(Load<align>((__m256i*)bgra + 2), K8_SHUFFLE_BGRA);
             _bgra[3] = _mm256_shuffle_epi8(Load<align>((__m256i*)bgra + 3), K8_SHUFFLE_BGRA);
+            if (B || G)
+            {
+                __m256i bbgg0 = _mm256_unpacklo_epi32(_bgra[0], _bgra[1]);
+                __m256i bbgg1 = _mm256_unpacklo_epi32(_bgra[2], _bgra[3]);
+                if (B) Store<align>((__m256i*)(b + offset), _mm256_permutevar8x32_epi32(_mm256_unpacklo_epi64(bbgg0, bbgg1), K32_PERMUTE_BGRA));
+                if (G) Store<align>((__m256i*)(g + offset), _mm256_permutevar8x32_epi32(_mm256_unpackhi_epi64(bbgg0, bbgg1), K32_PERMUTE_BGRA));
+            }
+            if (R || A)
+            {
+                __m256i rraa0 = _mm256_unpackhi_epi32(_bgra[0], _bgra[1]);
+                __m256i rraa1 = _mm256_unpackhi_epi32(_bgra[2], _bgra[3]);
+                if (R) Store<align>((__m256i*)(r + offset), _mm256_permutevar8x32_epi32(_mm256_unpacklo_epi64(rraa0, rraa1), K32_PERMUTE_BGRA));
+                if (A) Store<align>((__m256i*)(a + offset), _mm256_permutevar8x32_epi32(_mm256_unpackhi_epi64(rraa0, rraa1), K32_PERMUTE_BGRA));
+            }
+        }
 
-            __m256i bbgg0 = _mm256_unpacklo_epi32(_bgra[0], _bgra[1]);
-            __m256i bbgg1 = _mm256_unpacklo_epi32(_bgra[2], _bgra[3]);
+        template <int B, int G, int R, int A, bool align> void DeinterleaveBgra(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride, uint8_t* a, size_t aStride)
+        {
+            assert(width >= Avx2::A);
+            if (align)
+            {
+                assert(Aligned(bgra) && Aligned(bgraStride));
+                if (B) assert(Aligned(b) && Aligned(bStride));
+                if (G) assert(Aligned(g) && Aligned(gStride));
+                if (R) assert(Aligned(r) && Aligned(rStride));
+                if (A) assert(Aligned(r) && Aligned(rStride));
+            }
 
-            Store<align>((__m256i*)(b + offset), _mm256_permutevar8x32_epi32(_mm256_unpacklo_epi64(bbgg0, bbgg1), K32_PERMUTE_BGRA));
-            Store<align>((__m256i*)(g + offset), _mm256_permutevar8x32_epi32(_mm256_unpackhi_epi64(bbgg0, bbgg1), K32_PERMUTE_BGRA));
+            size_t alignedWidth = AlignLo(width, Avx2::A);
 
-            __m256i rraa0 = _mm256_unpackhi_epi32(_bgra[0], _bgra[1]);
-            __m256i rraa1 = _mm256_unpackhi_epi32(_bgra[2], _bgra[3]);
-
-            Store<align>((__m256i*)(r + offset), _mm256_permutevar8x32_epi32(_mm256_unpacklo_epi64(rraa0, rraa1), K32_PERMUTE_BGRA));
-            if(alpha)
-                Store<align>((__m256i*)(a + offset), _mm256_permutevar8x32_epi32(_mm256_unpackhi_epi64(rraa0, rraa1), K32_PERMUTE_BGRA));
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += Avx2::A)
+                    DeinterleaveBgra<B, G, R, A, align>(bgra + col * 4, b, g, r, a, col);
+                if (width != alignedWidth)
+                    DeinterleaveBgra<B, G, R, A, false>(bgra + 4 * (width - Avx2::A), b, g, r, a, width - Avx2::A);
+                bgra += bgraStride;
+                if (B) b += bStride;
+                if (G) g += gStride;
+                if (R) r += rStride;
+                if (A) a += aStride;
+            }
         }
 
         template <bool align> void DeinterleaveBgra(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride, uint8_t* a, size_t aStride)
         {
-            assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(b) && Aligned(bStride));
-                assert(Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && (Aligned(aStride) || a == NULL));
-            }
-
-            size_t alignedWidth = AlignLo(width, A);
-
-            if (a)
-            {
-                for (size_t row = 0; row < height; ++row)
-                {
-                    for (size_t col = 0; col < alignedWidth; col += A)
-                        DeinterleaveBgra<align, true>(bgra + col * 4, b, g, r, a, col);
-                    if (width != alignedWidth)
-                        DeinterleaveBgra<false, true>(bgra + 4 * (width - A), b, g, r, a, width - A);
-                    bgra += bgraStride;
-                    b += bStride;
-                    g += gStride;
-                    r += rStride;
-                    a += aStride;
-                }
-            }
-            else
-            {
-                for (size_t row = 0; row < height; ++row)
-                {
-                    for (size_t col = 0; col < alignedWidth; col += A)
-                        DeinterleaveBgra<align, false>(bgra + col * 4, b, g, r, NULL, col);
-                    if (width != alignedWidth)
-                        DeinterleaveBgra<false, false>(bgra + 4 * (width - A), b, g, r, NULL, width - A);
-                    bgra += bgraStride;
-                    b += bStride;
-                    g += gStride;
-                    r += rStride;
-                }
-            }
+            if (b && g && r && a)
+                DeinterleaveBgra<1, 1, 1, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && g && r)
+                DeinterleaveBgra<1, 1, 1, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && g && a)
+                DeinterleaveBgra<1, 1, 0, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && r && a)
+                DeinterleaveBgra<1, 0, 1, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (g && r && a)
+                DeinterleaveBgra<0, 1, 1, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && g)
+                DeinterleaveBgra<1, 1, 0, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && r)
+                DeinterleaveBgra<1, 0, 1, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b && a)
+                DeinterleaveBgra<1, 0, 0, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (g && r)
+                DeinterleaveBgra<0, 1, 1, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (g && a)
+                DeinterleaveBgra<0, 1, 0, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (r && a)
+                DeinterleaveBgra<0, 0, 1, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (b)
+                DeinterleaveBgra<1, 0, 0, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (g)
+                DeinterleaveBgra<0, 1, 0, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (r)
+                DeinterleaveBgra<0, 0, 1, 0, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            else if (a)
+                DeinterleaveBgra<0, 0, 0, 1, align>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
         }
 
         void DeinterleaveBgra(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride, uint8_t* a, size_t aStride)
         {
             if (Aligned(bgra) && Aligned(bgraStride) && Aligned(b) && Aligned(bStride) &&
-                Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && (Aligned(aStride) || a == NULL))
+                Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && Aligned(aStride))
                 DeinterleaveBgra<true>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
             else
                 DeinterleaveBgra<false>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
