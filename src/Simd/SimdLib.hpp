@@ -1642,8 +1642,8 @@ namespace Simd
     template<template<class> class A> SIMD_INLINE void DeinterleaveUv(const View<A>& uv, View<A>& u, View<A>& v)
     {
         assert(uv.format == View<A>::Uv16);
-        assert(u.format == View<A>::Empty || (EqualSize(uv, u) && u.format == View<A>::Gray8));
-        assert(v.format == View<A>::Empty || (EqualSize(uv, v) && v.format == View<A>::Gray8));
+        assert(u.format == View<A>::None || (EqualSize(uv, u) && u.format == View<A>::Gray8));
+        assert(v.format == View<A>::None || (EqualSize(uv, v) && v.format == View<A>::Gray8));
 
         SimdDeinterleaveUv(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
     }
@@ -1666,9 +1666,9 @@ namespace Simd
     template<template<class> class A> SIMD_INLINE void DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r)
     {
         assert(bgr.format == View<A>::Bgr24);
-        assert(b.format == View<A>::Empty || (EqualSize(bgr, b) && b.format == View<A>::Gray8));
-        assert(g.format == View<A>::Empty || (EqualSize(bgr, g) && g.format == View<A>::Gray8));
-        assert(r.format == View<A>::Empty || (EqualSize(bgr, r) && r.format == View<A>::Gray8));
+        assert(b.format == View<A>::None || (EqualSize(bgr, b) && b.format == View<A>::Gray8));
+        assert(g.format == View<A>::None || (EqualSize(bgr, g) && g.format == View<A>::Gray8));
+        assert(r.format == View<A>::None || (EqualSize(bgr, r) && r.format == View<A>::Gray8));
 
         SimdDeinterleaveBgr(bgr.data, bgr.stride, bgr.width, bgr.height, b.data, b.stride, g.data, g.stride, r.data, r.stride);
     }
@@ -1692,10 +1692,10 @@ namespace Simd
     template<template<class> class A> SIMD_INLINE void DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a)
     {
         assert(bgra.format == View<A>::Bgr32);
-        assert(b.format == View<A>::Empty || (EqualSize(bgra, b) && b.format == View<A>::Gray8));
-        assert(g.format == View<A>::Empty || (EqualSize(bgra, g) && g.format == View<A>::Gray8));
-        assert(r.format == View<A>::Empty || (EqualSize(bgra, r) && r.format == View<A>::Gray8));
-        assert(a.format == View<A>::Empty || (EqualSize(bgra, a) && a.format == View<A>::Gray8));
+        assert(b.format == View<A>::None || (EqualSize(bgra, b) && b.format == View<A>::Gray8));
+        assert(g.format == View<A>::None || (EqualSize(bgra, g) && g.format == View<A>::Gray8));
+        assert(r.format == View<A>::None || (EqualSize(bgra, r) && r.format == View<A>::Gray8));
+        assert(a.format == View<A>::None || (EqualSize(bgra, a) && a.format == View<A>::Gray8));
 
         SimdDeinterleaveBgra(bgra.data, bgra.stride, bgra.width, bgra.height, b.data, b.stride, g.data, g.stride, r.data, r.stride, a.data, a.stride);
     }
