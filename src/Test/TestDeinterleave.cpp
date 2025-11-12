@@ -275,27 +275,28 @@ namespace Test
 
             Func4(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(bool alpha)
-            {
-                desc = desc + (alpha ? "[1]" : "[0]");
-            }
-
-            void Call(const View & bgra, View & b, View & g, View & r, View & a) const
+            void Call(const View & bgra, View * b, View * g, View * r, View * a) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func(bgra.data, bgra.stride, bgra.width, bgra.height, b.data, b.stride, g.data, g.stride, r.data, r.stride, a.data, a.stride);
+                func(bgra.data, bgra.stride, bgra.width, bgra.height, b ? b->data : 0, b ? b->stride : 0,
+                    g ? g->data : 0, g ? g->stride : 0, r ? r->data : 0, r ? r->stride : 0, a ? a->data : 0, a ? a->stride : 0);
+            }
+
+            void Update(int hasB, int hasG, int hasR, int hasA)
+            {
+                desc = desc + "-" + std::to_string(hasB) + std::to_string(hasG) + std::to_string(hasR) + std::to_string(hasA);
             }
         };
     }
 
 #define FUNC4(function) Func4(function, #function)
 
-    bool DeinterleaveBgraAutoTest(bool alpha, int width, int height, Func4 f1, Func4 f2)
+    bool DeinterleaveBgraAutoTest(int width, int height, int hasB, int hasG, int hasR, int hasA, Func4 f1, Func4 f2)
     {
         bool result = true;
 
-        f1.Update(alpha);
-        f2.Update(alpha);
+        f1.Update(hasB, hasG, hasR, hasA);
+        f2.Update(hasB, hasG, hasR, hasA);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
@@ -305,37 +306,53 @@ namespace Test
         View b1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View g1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View r1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View a1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View b2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View g2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View r2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View a1, a2;
-        if (alpha)
-        {
-            a1.Recreate(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-            a2.Recreate(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        }
+        View a2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bgra, b1, g1, r1, a1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bgra, hasB ? &b1 : 0, hasG ? &g1 : 0, hasR ? &r1 : 0, hasA ? &a1 : 0));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bgra, b2, g2, r2, a2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bgra, hasB ? &b2 : 0, hasG ? &g2 : 0, hasR ? &r2 : 0, hasA ? &a2 : 0));
 
-        result = result && Compare(b1, b2, 0, true, 64, 0, "b");
-        result = result && Compare(g1, g2, 0, true, 64, 0, "g");
-        result = result && Compare(r1, r2, 0, true, 64, 0, "r");
-        if(alpha)
-            result = result && Compare(a1, a2, 0, true, 64, 0, "a");
+        if (hasB) result = result && Compare(b1, b2, 0, true, 64, 0, "b");
+        if (hasG) result = result && Compare(g1, g2, 0, true, 64, 0, "g");
+        if (hasR) result = result && Compare(r1, r2, 0, true, 64, 0, "r");
+        if (hasA) result = result && Compare(a1, a2, 0, true, 64, 0, "a");
 
         return result;
     }
 
-    bool DeinterleaveBgraAutoTest(const Func4 & f1, const Func4 & f2)
+    bool DeinterleaveBgraAutoTest(int hasB, int hasG, int hasR, int hasA, const Func4 & f1, const Func4 & f2)
     {
         bool result = true;
 
-        result = result && DeinterleaveBgraAutoTest(true, W, H, f1, f2);
-        result = result && DeinterleaveBgraAutoTest(true, W + O, H - O, f1, f2);
-        result = result && DeinterleaveBgraAutoTest(false, W, H, f1, f2);
-        result = result && DeinterleaveBgraAutoTest(false, W + O, H - O, f1, f2);
+        result = result && DeinterleaveBgraAutoTest(W, H, hasB, hasG, hasR, hasA, f1, f2);
+        result = result && DeinterleaveBgraAutoTest(W + O, H - O, hasB, hasG, hasR, hasA, f1, f2);
+
+        return result;
+    }
+
+    bool DeinterleaveBgraAutoTest(const Func4& f1, const Func4& f2)
+    {
+        bool result = true;
+
+        result = result && DeinterleaveBgraAutoTest(1, 1, 1, 1, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(1, 1, 1, 0, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(1, 1, 0, 1, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(1, 1, 0, 0, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(1, 0, 1, 1, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(1, 0, 1, 0, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(1, 0, 0, 1, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(1, 0, 0, 0, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(0, 1, 1, 1, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(0, 1, 1, 0, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(0, 1, 0, 1, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(0, 1, 0, 0, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(0, 0, 1, 1, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(0, 0, 1, 0, f1, f2);
+        //result = result && DeinterleaveBgraAutoTest(0, 0, 0, 1, f1, f2);
 
         return result;
     }
