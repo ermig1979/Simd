@@ -293,7 +293,7 @@ namespace Test
 
 #if  1 
         {
-            std::vector<SimdResizeMethodType> methods = { SimdResizeMethodBilinear, SimdResizeMethodBilinearOpenCv };
+            std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear };
             for (size_t m = 0; m < methods.size(); ++m)
             {
                 result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 1, f1, f2);

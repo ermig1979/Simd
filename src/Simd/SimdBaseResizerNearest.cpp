@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdCopy.h"
+#include "Simd/SimdParallel.hpp"
 
 namespace Simd
 {
@@ -76,11 +77,12 @@ namespace Simd
             EstimateIndex(_param.srcH, _param.dstH, 1, 1, _iy.data);
             _ix.Resize(_param.dstW, false, _param.align);
             EstimateIndex(_param.srcW, _param.dstW, _pixelSize, 1, _ix.data);
+            _threads = Simd::Min(_threads, _param.dstH * _param.dstW * _pixelSize / (1024 * 1024));
         }
 
-        void ResizerNearest::Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Resize(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dy = dyBeg; dy < dyEnd; dy++)
             {
                 const uint8_t* srcRow = src + _iy[dy] * srcStride;
                 for (size_t dx = 0, offset = 0; dx < _param.dstW; dx++, offset += _pixelSize)
@@ -89,9 +91,9 @@ namespace Simd
             }
         }
 
-        template<size_t N> void ResizerNearest::Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        template<size_t N> void ResizerNearest::Resize(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const uint8_t * srcRow = src + _iy[dy] * srcStride;
                 for (size_t dx = 0, offset = 0; dx < _param.dstW; dx++, offset += N)
@@ -100,21 +102,29 @@ namespace Simd
             }
         }
 
+        void ResizerNearest::Run(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
+        {
+            switch (_pixelSize)
+            {
+            case 1: Resize<1>(src, srcStride, dyBeg, dyEnd, dst, dstStride); break;
+            case 2: Resize<2>(src, srcStride, dyBeg, dyEnd, dst, dstStride); break;
+            case 3: Resize<3>(src, srcStride, dyBeg, dyEnd, dst, dstStride); break;
+            case 4: Resize<4>(src, srcStride, dyBeg, dyEnd, dst, dstStride); break;
+            case 6: Resize<6>(src, srcStride, dyBeg, dyEnd, dst, dstStride); break;
+            case 8: Resize<8>(src, srcStride, dyBeg, dyEnd, dst, dstStride); break;
+            case 12: Resize<12>(src, srcStride, dyBeg, dyEnd, dst, dstStride); break;
+            default:
+                Resize(src, srcStride, dyBeg, dyEnd, dst, dstStride);
+            }
+        }
+
         void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             EstimateParams();
-            switch (_pixelSize)
+            Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
             {
-            case 1: Resize<1>(src, srcStride, dst, dstStride); break;
-            case 2: Resize<2>(src, srcStride, dst, dstStride); break;
-            case 3: Resize<3>(src, srcStride, dst, dstStride); break;
-            case 4: Resize<4>(src, srcStride, dst, dstStride); break;
-            case 6: Resize<6>(src, srcStride, dst, dstStride); break;
-            case 8: Resize<8>(src, srcStride, dst, dstStride); break;
-            case 12: Resize<12>(src, srcStride, dst, dstStride); break;
-            default:
-                Resize(src, srcStride, dst, dstStride);
-            }
+                this->Run(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+            }, _threads, 1);
         }
     }
 }

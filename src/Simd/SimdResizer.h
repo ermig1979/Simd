@@ -26,6 +26,7 @@
 
 #include "Simd/SimdArray.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdBase.h"
 
 #define SIMD_RESIZER_BICUBIC_BITS 7 // 7, 11
 
@@ -118,6 +119,7 @@ namespace Simd
     public:
         Resizer(const ResParam & param)
             : _param(param)
+            , _threads(Base::GetThreadNumber())
         {
         }
 
@@ -125,6 +127,7 @@ namespace Simd
 
     protected:
         ResParam _param;
+        size_t _threads;
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -133,8 +136,8 @@ namespace Simd
     {
         class ResizerNearest : public Resizer
         {
-            void Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-            template<size_t N> void Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Resize(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride);
+            template<size_t N> void Resize(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride);
         protected:
             size_t _pixelSize;
             Array32i _ix, _iy;
@@ -142,6 +145,8 @@ namespace Simd
             void EstimateIndex(size_t srcSize, size_t dstSize, size_t channelSize, size_t channels, int32_t* indices);
 
             void EstimateParams();
+
+            virtual void Run(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride);
         public:
             ResizerNearest(const ResParam& param);
 
