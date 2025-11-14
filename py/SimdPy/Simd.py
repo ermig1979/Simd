@@ -285,7 +285,9 @@ class ResizeChannel(enum.Enum) :
     Short = 1
     ## 32-bit float channel type.
     Float = 2
-	
+    ## 16-bit BFloat16 (Brain Floating Point) channel type.
+    Bf16 = 3
+
 ## @ingroup python
 # Describes methods used in order to resize image.
 class ResizeMethod(enum.Enum) :
