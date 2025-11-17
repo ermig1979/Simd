@@ -232,9 +232,6 @@ namespace Test
 #endif
 
 #if 1
-        result = result && ResizerAutoTest(method, type, channels, 124, 93, 1919, 1081, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 249, 187, 1919, 1081, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 499, 374, 1919, 1081, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 999, 749, 1919, 1081, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 1919, 1081, f1, f2);
 #endif

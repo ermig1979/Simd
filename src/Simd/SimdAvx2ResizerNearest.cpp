@@ -27,6 +27,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdParallel.hpp"
 
 namespace Simd
 {
@@ -63,11 +64,11 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst, _mm256_castsi256_si128(uv));
         }
 
-        void ResizerNearest::Gather2(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Gather2(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
             size_t body = AlignLo(_param.dstW, 8);
             size_t tail = _param.dstW - 8;
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const uint8_t* srcRow = src + _iy[dy] * srcStride;
                 for (size_t dx = 0, offs = 0; dx < body; dx += 8, offs += 16)
@@ -84,11 +85,11 @@ namespace Simd
             return _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(bgrx, K8_SHUFFLE_BGRA_TO_BGR), K32_PERMUTE_BGRA_TO_BGR);
         }
 
-        void ResizerNearest::Gather3(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Gather3(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
             size_t body = AlignLo(_param.dstW - 1, 8);
             size_t tail = _param.dstW - 8;
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const uint8_t* srcRow = src + _iy[dy] * srcStride;
                 for (size_t dx = 0, offs = 0; dx < body; dx +=8, offs += 24)
@@ -105,11 +106,11 @@ namespace Simd
             _mm256_storeu_si256((__m256i*)dst, val);
         }
 
-        void ResizerNearest::Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Gather4(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
             size_t body = AlignLo(_param.dstW, 8);
             size_t tail = _param.dstW - 8;
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const int32_t* srcRow = (int32_t*)(src + _iy[dy] * srcStride);
                 for (size_t dx = 0; dx < body; dx += 8)
@@ -126,11 +127,11 @@ namespace Simd
             _mm256_storeu_si256((__m256i*)dst, val);
         }
 
-        void ResizerNearest::Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Gather8(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
             size_t body = AlignLo(_param.dstW, 4);
             size_t tail = _param.dstW - 4;
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const int64_t* srcRow = (int64_t*)(src + _iy[dy] * srcStride);
                 for (size_t dx = 0; dx < body; dx += 4)
@@ -144,13 +145,33 @@ namespace Simd
         {
             EstimateParams();
             if (_pixelSize == 2 && _param.dstW * 2 <= _param.srcW)
-                Gather2(src, srcStride, dst, dstStride);
+            {
+                Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                {
+                    this->Gather2(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                }, _threads, 1);
+            }
             else if (_pixelSize == 3 && _param.dstW <= _param.srcW)
-                Gather3(src, srcStride, dst, dstStride);
+            {
+                Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                {
+                    this->Gather3(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                }, _threads, 1);
+            }
             else if (_pixelSize == 4)
-                Gather4(src, srcStride, dst, dstStride);
+            {
+                Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                {
+                    this->Gather4(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                }, _threads, 1);
+            }
             else if (_pixelSize == 8)
-                Gather8(src, srcStride, dst, dstStride);
+            {
+                Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                {
+                    this->Gather8(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                }, _threads, 1);
+            }
             else 
                 Sse41::ResizerNearest::Run(src, srcStride, dst, dstStride);
         }
