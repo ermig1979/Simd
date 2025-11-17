@@ -77,7 +77,7 @@ namespace Simd
             EstimateIndex(_param.srcH, _param.dstH, 1, 1, _iy.data);
             _ix.Resize(_param.dstW, false, _param.align);
             EstimateIndex(_param.srcW, _param.dstW, _pixelSize, 1, _ix.data);
-            _threads = Simd::Min(_threads, _param.dstH * _param.dstW * _pixelSize / (1024 * 1024));
+            _threads = Simd::Min(Base::GetThreadNumber(), _param.dstH * _param.dstW * _pixelSize / (4 * 1024 * 1024));
         }
 
         void ResizerNearest::Resize(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)

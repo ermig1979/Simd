@@ -26,6 +26,7 @@
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdCopy.h"
+#include "Simd/SimdParallel.hpp"
 
 namespace Simd
 {
@@ -88,10 +89,10 @@ namespace Simd
             }
         }
 
-        void ResizerNearest::Shuffle16x1(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Shuffle16x1(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
             size_t body = _blocks - _tails;
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const uint8_t* srcRow = src + _iy[dy] * srcStride;
                 size_t i = 0, t = 0;
@@ -119,10 +120,10 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst, val);
         }
         
-        void ResizerNearest::Resize12(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Resize12(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
             size_t body = _param.dstW - 1;
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const uint8_t* srcRow = src + _iy[dy] * srcStride;
                 size_t dx = 0, offset = 0;
@@ -137,9 +138,19 @@ namespace Simd
         {
             EstimateParams();
             if (_blocks)
-                Shuffle16x1(src, srcStride, dst, dstStride);
+            {
+                Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                {
+                    this->Shuffle16x1(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                }, _threads, 1);
+            }
             else if (_pixelSize == 12)
-                Resize12(src, srcStride, dst, dstStride);
+            {
+                Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                {
+                    this->Resize12(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                }, _threads, 1);
+            }
             else
                 Base::ResizerNearest::Run(src, srcStride, dst, dstStride);
         }

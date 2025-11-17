@@ -223,12 +223,21 @@ namespace Test
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, const FuncRS& f1, const FuncRS& f2)
     {
         bool result = true;
-
+#if 0
         result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
+#endif
+
+#if 1
+        result = result && ResizerAutoTest(method, type, channels, 124, 93, 1919, 1081, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 249, 187, 1919, 1081, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 499, 374, 1919, 1081, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 999, 749, 1919, 1081, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 1919, 1081, f1, f2);
+#endif
 
 #if 0
         result = result && ResizerAutoTest(method, type, channels, 1919, 1081, 299, 168, f1, f2);
