@@ -27,6 +27,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdParallel.hpp"
 
 namespace Simd
 {
@@ -90,11 +91,11 @@ namespace Simd
             _mm512_mask_storeu_epi32(dst, mask, val);
         }
 
-        void ResizerNearest::Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Gather4(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
             size_t body = AlignLo(_param.dstW, F);
             __mmask16 tail = TailMask16(_param.dstW - body);
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const int32_t* srcRow = (int32_t*)(src + _iy[dy] * srcStride);
                 size_t dx = 0;
@@ -113,11 +114,11 @@ namespace Simd
             _mm512_storeu_si512((__m512i*)dst, val);
         }
 
-        void ResizerNearest::Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Gather8(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
             size_t body = AlignLo(_param.dstW, 8);
             size_t tail = _param.dstW - 8;
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const int64_t* srcRow = (int64_t*)(src + _iy[dy] * srcStride);
                 for (size_t dx = 0; dx < body; dx += 8)
@@ -127,10 +128,10 @@ namespace Simd
             }
         }
 
-        void ResizerNearest::Shuffle32x2(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Shuffle32x2(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
         {
             size_t body = _blocks - _tails;
-            for (size_t dy = 0; dy < _param.dstH; dy++)
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
             {
                 const uint8_t* srcRow = src + _iy[dy] * srcStride;
                 size_t i = 0, t = 0;
@@ -156,14 +157,29 @@ namespace Simd
         {
             EstimateParams();
             if (_blocks)
-                Shuffle32x2(src, srcStride, dst, dstStride);
+            {
+                Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                {
+                    this->Shuffle32x2(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                }, _threads, 1);
+            }
             else
             {
                 Avx2::ResizerNearest::EstimateParams();
                 if (_pixelSize == 4)
-                    Gather4(src, srcStride, dst, dstStride);
+                {
+                    Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                    {
+                        this->Gather4(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                    }, _threads, 1);
+                }
                 else if (_pixelSize == 8)
-                    Gather8(src, srcStride, dst, dstStride);
+                {
+                    Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                    {
+                        this->Gather8(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                    }, _threads, 1);
+                }
                 else
                     Avx2::ResizerNearest::Run(src, srcStride, dst, dstStride);
             }
