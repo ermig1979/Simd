@@ -36,8 +36,8 @@ namespace Simd
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
     namespace AmxBf16
 	{
-		typedef Base::SynetConvolution16bNhwcGemm::AlgParam AlgParam;
-		typedef Base::SynetConvolution16bNhwcGemm::ConvolutionPtr Convolution;
+		typedef Base::SynetConvolution16bNhwcGemmV0::AlgParam AlgParam;
+		typedef Base::SynetConvolution16bNhwcGemmV0::ConvolutionPtr Convolution;
 
 #define SIMD_CONV_REORDER_TYPE 1
 
@@ -1211,8 +1211,8 @@ namespace Simd
             }
         }
 
-        SynetConvolution16bNhwcGemm::SynetConvolution16bNhwcGemm(const ConvParam & p)
-            : Avx512bw::SynetConvolution16bNhwcGemm(p)
+        SynetConvolution16bNhwcGemmV0::SynetConvolution16bNhwcGemmV0(const ConvParam & p)
+            : Avx512bw::SynetConvolution16bNhwcGemmV0(p)
         {
             SetAlgParam(F, F * 2, F * 2, 32, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5), Base::AlgCacheL3());
             AlgParam& a = _alg;            

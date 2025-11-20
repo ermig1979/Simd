@@ -298,7 +298,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcDepthwise.cpp">
       <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcGemm.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcGemmV0.cpp">
       <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV0.cpp">

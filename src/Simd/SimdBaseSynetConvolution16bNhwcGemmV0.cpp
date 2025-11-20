@@ -34,7 +34,7 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        SynetConvolution16bNhwcGemm::SynetConvolution16bNhwcGemm(const ConvParam& p)
+        SynetConvolution16bNhwcGemmV0::SynetConvolution16bNhwcGemmV0(const ConvParam& p)
             : SynetConvolution16b(p)
         {
             _convert = 0;
@@ -42,10 +42,10 @@ namespace Simd
             _convolutions[1] = 0;
         }
 
-        String SynetConvolution16bNhwcGemm::Desc() const
+        String SynetConvolution16bNhwcGemmV0::Desc() const
         {
             std::stringstream desc;
-            desc << Ext() << "::NhwcGemm";
+            desc << Ext() << "::NhwcGemmV0";
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
             if (_alg.reorderType)
@@ -53,7 +53,7 @@ namespace Simd
             return desc.str();
         }
 
-        void SynetConvolution16bNhwcGemm::SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
+        void SynetConvolution16bNhwcGemmV0::SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam& p = _param;
             AlgParam& a = _alg;
@@ -89,7 +89,7 @@ namespace Simd
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
         }
 
-        size_t SynetConvolution16bNhwcGemm::ExternalBufferSize() const
+        size_t SynetConvolution16bNhwcGemmV0::ExternalBufferSize() const
         {
             const AlgParam& a = _alg;
             size_t size = 0;
@@ -100,14 +100,14 @@ namespace Simd
             return size;
         }
 
-        void SynetConvolution16bNhwcGemm::SetParams(const float* weight, const float* bias, const float* params)
+        void SynetConvolution16bNhwcGemmV0::SetParams(const float* weight, const float* bias, const float* params)
         {
             SetWeight(weight);
             SynetConvolution16b::SetBias(bias, _alg.microD);
             SynetConvolution16b::SetParams(params, _alg.microD);
         }
 
-        void SynetConvolution16bNhwcGemm::SetWeight(const float* weight)
+        void SynetConvolution16bNhwcGemmV0::SetWeight(const float* weight)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
@@ -134,7 +134,7 @@ namespace Simd
             }
         }
 
-        void SynetConvolution16bNhwcGemm::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
+        void SynetConvolution16bNhwcGemmV0::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
@@ -151,7 +151,7 @@ namespace Simd
             }
         }
 
-        void SynetConvolution16bNhwcGemm::Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
+        void SynetConvolution16bNhwcGemmV0::Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
@@ -202,7 +202,7 @@ namespace Simd
             }
         }
 
-        bool SynetConvolution16bNhwcGemm::Preferable(const ConvParam& p)
+        bool SynetConvolution16bNhwcGemmV0::Preferable(const ConvParam& p)
         {
             return p.trans != 0 && p.group == 1;
         }

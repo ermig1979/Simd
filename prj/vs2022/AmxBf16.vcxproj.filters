@@ -242,7 +242,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNchwGemm.cpp">
       <Filter>AmxBf16\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNhwcGemm.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNhwcGemmV0.cpp">
       <Filter>AmxBf16\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNhwcSpecV0.cpp">

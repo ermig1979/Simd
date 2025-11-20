@@ -37,8 +37,8 @@ namespace Simd
             //    return new AmxBf16::SynetConvolution16bNhwcSpecV1(param);
             if (SynetConvolution16bNhwcSpecV0::Preferable(param))
                 return new AmxBf16::SynetConvolution16bNhwcSpecV0(param);
-            if (SynetConvolution16bNhwcGemm::Preferable(param))
-                return new AmxBf16::SynetConvolution16bNhwcGemm(param);
+            if (SynetConvolution16bNhwcGemmV0::Preferable(param))
+                return new AmxBf16::SynetConvolution16bNhwcGemmV0(param);
             if (SynetConvolution16bNchwGemm::Preferable(param))
                 return new AmxBf16::SynetConvolution16bNchwGemm(param);
             if (Base::SynetConvolution16bNhwcDepthwise::Preferable(param))

@@ -70,7 +70,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcDepthwise.cpp">
       <Filter>Avx512bw\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcGemm.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcGemmV0.cpp">
       <Filter>Avx512bw\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16bNhwcSpecV0.cpp">

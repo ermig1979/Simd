@@ -123,10 +123,10 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        class SynetConvolution16bNhwcGemm : public SynetConvolution16b
+        class SynetConvolution16bNhwcGemmV0 : public SynetConvolution16b
         {
         public:
-            SynetConvolution16bNhwcGemm(const ConvParam& p);
+            SynetConvolution16bNhwcGemmV0(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
@@ -157,6 +157,43 @@ namespace Simd
             AlgParam _alg;
             ConvertPtr _convert;
             ConvolutionPtr _convolutions[2];
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class SynetConvolution16bNhwcGemmV1 : public SynetConvolution16b
+        {
+        public:
+            SynetConvolution16bNhwcGemmV1(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t batch, K, M;
+                size_t F, microD, microM, microK;
+                size_t macroD, macroH;
+                size_t bufD, bufM, bufK, elem, dB;
+            };
+
+            typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
+                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst);
+
+        protected:
+            void SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
+            virtual void SetWeight(const float* weight);
+            void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
+
+            AlgParam _alg;
+            ConvertPtr _convert;
+            ConvolutionPtr _convolution;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -312,10 +349,10 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        class SynetConvolution16bNhwcGemm : public Base::SynetConvolution16bNhwcGemm
+        class SynetConvolution16bNhwcGemmV0 : public Base::SynetConvolution16bNhwcGemmV0
         {
         public:
-            SynetConvolution16bNhwcGemm(const ConvParam& p);
+            SynetConvolution16bNhwcGemmV0(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -361,10 +398,10 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class SynetConvolution16bNhwcGemm : public Sse41::SynetConvolution16bNhwcGemm
+        class SynetConvolution16bNhwcGemmV0 : public Sse41::SynetConvolution16bNhwcGemmV0
         {
         public:
-            SynetConvolution16bNhwcGemm(const ConvParam& p);
+            SynetConvolution16bNhwcGemmV0(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -410,10 +447,10 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        class SynetConvolution16bNhwcGemm : public Avx2::SynetConvolution16bNhwcGemm
+        class SynetConvolution16bNhwcGemmV0 : public Avx2::SynetConvolution16bNhwcGemmV0
         {
         public:
-            SynetConvolution16bNhwcGemm(const ConvParam& p);
+            SynetConvolution16bNhwcGemmV0(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
@@ -459,10 +496,10 @@ namespace Simd
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
     namespace AmxBf16
     {
-        class SynetConvolution16bNhwcGemm : public Avx512bw::SynetConvolution16bNhwcGemm
+        class SynetConvolution16bNhwcGemmV0 : public Avx512bw::SynetConvolution16bNhwcGemmV0
         {
         public:
-            SynetConvolution16bNhwcGemm(const ConvParam& p);
+            SynetConvolution16bNhwcGemmV0(const ConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };

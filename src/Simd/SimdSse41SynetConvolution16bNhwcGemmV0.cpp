@@ -25,23 +25,22 @@
 #include "Simd/SimdSynetConvolution16bCommon.h"
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdAvx2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE) 
-    namespace Avx2
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+    namespace Sse41
     {
-        typedef Base::SynetConvolution16bNhwcGemm::AlgParam AlgParam;
-        typedef Base::SynetConvolution16bNhwcGemm::ConvolutionPtr Convolution;
+        typedef Base::SynetConvolution16bNhwcGemmV0::AlgParam AlgParam;
+        typedef Base::SynetConvolution16bNhwcGemmV0::ConvolutionPtr Convolution;
 
         //-----------------------------------------------------------------------------------------
 
         static void Convert16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const float* src = (float*)src8;
-            size_t srcC16 = Simd::AlignLo(p.srcC, 16);
             size_t srcC8 = Simd::AlignLo(p.srcC, 8);
             size_t srcC4 = Simd::AlignLo(p.srcC, 4);
             size_t gap = a.bufK - a.K;
@@ -62,12 +61,6 @@ namespace Simd
                                 {
                                     const float* ps = src + (sy * p.srcW + sx) * p.srcC;
                                     size_t sc = 0;
-                                    for (; sc < srcC16; sc += 16)
-                                    {
-                                        __m256i d0 = Float32ToBFloat16(_mm256_loadu_ps(ps + sc + 0));
-                                        __m256i d1 = Float32ToBFloat16(_mm256_loadu_ps(ps + sc + 8));
-                                        _mm256_storeu_si256((__m256i*)(row + sc), _mm256_permute4x64_epi64(_mm256_packus_epi32(d0, d1), 0xD8));
-                                    }
                                     for (; sc < srcC8; sc += 8)
                                     {
                                         __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + sc + 0));
@@ -147,9 +140,9 @@ namespace Simd
         //-----------------------------------------------------------------------------------------
 
         template<Term16bType term, SimdConvolutionActivationType type, int M> void Convolution16bNhwcGemm_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a, 
-            size_t srcC, size_t dstC, int zero, const uint16_t* weight0, const __m256* bias, const __m256* params, float* buf, uint8_t* dst)
+            size_t srcC, size_t dstC, int zero, const uint16_t* weight0, const __m128* bias, const __m128* params, float* buf, uint8_t* dst)
         {
-            __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm256_castsi256_ps(Bf16::MASK);
+            __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
             size_t dB = a.dB, dD = p.dstC * a.elem, dS = a.bufK;
             const uint16_t* weight1 = weight0 + a.bufK * F;
             const uint16_t* src1 = src0 + 1 * dS;
@@ -160,72 +153,72 @@ namespace Simd
             {
                 if (zero)
                 {
-                    if (M > 0) d00 = _mm256_setzero_ps(), d01 = _mm256_setzero_ps();
-                    if (M > 1) d10 = _mm256_setzero_ps(), d11 = _mm256_setzero_ps();
-                    if (M > 2) d20 = _mm256_setzero_ps(), d21 = _mm256_setzero_ps();
-                    if (M > 3) d30 = _mm256_setzero_ps(), d31 = _mm256_setzero_ps();
-                    if (M > 4) d40 = _mm256_setzero_ps(), d41 = _mm256_setzero_ps();
+                    if (M > 0) d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+                    if (M > 1) d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
+                    if (M > 2) d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+                    if (M > 3) d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
+                    if (M > 4) d40 = _mm_setzero_ps(), d41 = _mm_setzero_ps();
                 }
                 else
                 {
-                    if (M > 0) d00 = _mm256_loadu_ps(buf + 0 * dB + 0), d01 = _mm256_loadu_ps(buf + 0 * dB + F);
-                    if (M > 1) d10 = _mm256_loadu_ps(buf + 1 * dB + 0), d11 = _mm256_loadu_ps(buf + 1 * dB + F);
-                    if (M > 2) d20 = _mm256_loadu_ps(buf + 2 * dB + 0), d21 = _mm256_loadu_ps(buf + 2 * dB + F);
-                    if (M > 3) d30 = _mm256_loadu_ps(buf + 3 * dB + 0), d31 = _mm256_loadu_ps(buf + 3 * dB + F);
-                    if (M > 4) d40 = _mm256_loadu_ps(buf + 4 * dB + 0), d41 = _mm256_loadu_ps(buf + 4 * dB + F);
+                    if (M > 0) d00 = _mm_loadu_ps(buf + 0 * dB + 0), d01 = _mm_loadu_ps(buf + 0 * dB + F);
+                    if (M > 1) d10 = _mm_loadu_ps(buf + 1 * dB + 0), d11 = _mm_loadu_ps(buf + 1 * dB + F);
+                    if (M > 2) d20 = _mm_loadu_ps(buf + 2 * dB + 0), d21 = _mm_loadu_ps(buf + 2 * dB + F);
+                    if (M > 3) d30 = _mm_loadu_ps(buf + 3 * dB + 0), d31 = _mm_loadu_ps(buf + 3 * dB + F);
+                    if (M > 4) d40 = _mm_loadu_ps(buf + 4 * dB + 0), d41 = _mm_loadu_ps(buf + 4 * dB + F);
                 }
                 for (size_t offs = 0; offs < srcC; offs += 2)
                 {
-                    w01 = _mm256_loadu_ps((float*)weight0);
-                    w00 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(w01), Base::Bf16::SHIFT));
-                    w01 = _mm256_and_ps(w01, m);
-                    w11 = _mm256_loadu_ps((float*)weight1);
-                    w10 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(w11), Base::Bf16::SHIFT));
-                    w11 = _mm256_and_ps(w11, m);
+                    w01 = _mm_loadu_ps((float*)weight0);
+                    w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
+                    w01 = _mm_and_ps(w01, m);
+                    w11 = _mm_loadu_ps((float*)weight1);
+                    w10 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w11), Base::Bf16::SHIFT));
+                    w11 = _mm_and_ps(w11, m);
                     if (M > 0)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src0 + offs - 1)), m);
-                        d00 = _mm256_fmadd_ps(s0, w00, d00);
-                        d01 = _mm256_fmadd_ps(s0, w10, d01);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src0 + offs - 0)), m);
-                        d00 = _mm256_fmadd_ps(s0, w01, d00);
-                        d01 = _mm256_fmadd_ps(s0, w11, d01);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 1)), m);
+                        d00 = _mm_add_ps(_mm_mul_ps(s0, w00), d00);
+                        d01 = _mm_add_ps(_mm_mul_ps(s0, w10), d01);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 0)), m);
+                        d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00);
+                        d01 = _mm_add_ps(_mm_mul_ps(s0, w11), d01);
                     }
                     if (M > 1)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src1 + offs - 1)), m);
-                        d10 = _mm256_fmadd_ps(s0, w00, d10);
-                        d11 = _mm256_fmadd_ps(s0, w10, d11);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src1 + offs - 0)), m);
-                        d10 = _mm256_fmadd_ps(s0, w01, d10);
-                        d11 = _mm256_fmadd_ps(s0, w11, d11);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 1)), m);
+                        d10 = _mm_add_ps(_mm_mul_ps(s0, w00), d10);
+                        d11 = _mm_add_ps(_mm_mul_ps(s0, w10), d11);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 0)), m);
+                        d10 = _mm_add_ps(_mm_mul_ps(s0, w01), d10);
+                        d11 = _mm_add_ps(_mm_mul_ps(s0, w11), d11);
                     }
                     if (M > 2)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src2 + offs - 1)), m);
-                        d20 = _mm256_fmadd_ps(s0, w00, d20);
-                        d21 = _mm256_fmadd_ps(s0, w10, d21);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src2 + offs - 0)), m);
-                        d20 = _mm256_fmadd_ps(s0, w01, d20);
-                        d21 = _mm256_fmadd_ps(s0, w11, d21);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 1)), m);
+                        d20 = _mm_add_ps(_mm_mul_ps(s0, w00), d20);
+                        d21 = _mm_add_ps(_mm_mul_ps(s0, w10), d21);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 0)), m);
+                        d20 = _mm_add_ps(_mm_mul_ps(s0, w01), d20);
+                        d21 = _mm_add_ps(_mm_mul_ps(s0, w11), d21);
                     }
                     if (M > 3)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src3 + offs - 1)), m);
-                        d30 = _mm256_fmadd_ps(s0, w00, d30);
-                        d31 = _mm256_fmadd_ps(s0, w10, d31);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src3 + offs - 0)), m);
-                        d30 = _mm256_fmadd_ps(s0, w01, d30);
-                        d31 = _mm256_fmadd_ps(s0, w11, d31);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 1)), m);
+                        d30 = _mm_add_ps(_mm_mul_ps(s0, w00), d30);
+                        d31 = _mm_add_ps(_mm_mul_ps(s0, w10), d31);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 0)), m);
+                        d30 = _mm_add_ps(_mm_mul_ps(s0, w01), d30);
+                        d31 = _mm_add_ps(_mm_mul_ps(s0, w11), d31);
                     }
                     if (M > 4)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src4 + offs - 1)), m);
-                        d40 = _mm256_fmadd_ps(s0, w00, d40);
-                        d41 = _mm256_fmadd_ps(s0, w10, d41);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src4 + offs - 0)), m);
-                        d40 = _mm256_fmadd_ps(s0, w01, d40);
-                        d41 = _mm256_fmadd_ps(s0, w11, d41);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 1)), m);
+                        d40 = _mm_add_ps(_mm_mul_ps(s0, w00), d40);
+                        d41 = _mm_add_ps(_mm_mul_ps(s0, w10), d41);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 0)), m);
+                        d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40);
+                        d41 = _mm_add_ps(_mm_mul_ps(s0, w11), d41);
                     }
                     weight0 += DF;
                     weight1 += DF;
@@ -252,59 +245,59 @@ namespace Simd
             {
                 if (zero)
                 {
-                    if (M > 0) d00 = _mm256_setzero_ps();
-                    if (M > 1) d10 = _mm256_setzero_ps();
-                    if (M > 2) d20 = _mm256_setzero_ps();
-                    if (M > 3) d30 = _mm256_setzero_ps();
-                    if (M > 4) d40 = _mm256_setzero_ps();
+                    if (M > 0) d00 = _mm_setzero_ps();
+                    if (M > 1) d10 = _mm_setzero_ps();
+                    if (M > 2) d20 = _mm_setzero_ps();
+                    if (M > 3) d30 = _mm_setzero_ps();
+                    if (M > 4) d40 = _mm_setzero_ps();
                 }
                 else
                 {
-                    if (M > 0) d00 = _mm256_loadu_ps(buf + 0 * dB + 0);
-                    if (M > 1) d10 = _mm256_loadu_ps(buf + 1 * dB + 0);
-                    if (M > 2) d20 = _mm256_loadu_ps(buf + 2 * dB + 0);
-                    if (M > 3) d30 = _mm256_loadu_ps(buf + 3 * dB + 0);
-                    if (M > 4) d40 = _mm256_loadu_ps(buf + 4 * dB + 0);
+                    if (M > 0) d00 = _mm_loadu_ps(buf + 0 * dB + 0);
+                    if (M > 1) d10 = _mm_loadu_ps(buf + 1 * dB + 0);
+                    if (M > 2) d20 = _mm_loadu_ps(buf + 2 * dB + 0);
+                    if (M > 3) d30 = _mm_loadu_ps(buf + 3 * dB + 0);
+                    if (M > 4) d40 = _mm_loadu_ps(buf + 4 * dB + 0);
                 }
                 for (size_t offs = 0; offs < srcC; offs += 2)
                 {
-                    w01 = _mm256_loadu_ps((float*)weight0);
-                    w00 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(w01), Base::Bf16::SHIFT));
-                    w01 = _mm256_and_ps(w01, m);
+                    w01 = _mm_loadu_ps((float*)weight0);
+                    w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
+                    w01 = _mm_and_ps(w01, m);
                     if (M > 0)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src0 + offs - 1)), m);
-                        d00 = _mm256_fmadd_ps(s0, w00, d00);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src0 + offs - 0)), m);
-                        d00 = _mm256_fmadd_ps(s0, w01, d00);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 1)), m);
+                        d00 = _mm_add_ps(_mm_mul_ps(s0, w00), d00);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 0)), m);
+                        d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00);
                     }
                     if (M > 1)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src1 + offs - 1)), m);
-                        d10 = _mm256_fmadd_ps(s0, w00, d10);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src1 + offs - 0)), m);
-                        d10 = _mm256_fmadd_ps(s0, w01, d10);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 1)), m);
+                        d10 = _mm_add_ps(_mm_mul_ps(s0, w00), d10);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 0)), m);
+                        d10 = _mm_add_ps(_mm_mul_ps(s0, w01), d10);
                     }
                     if (M > 2)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src2 + offs - 1)), m);
-                        d20 = _mm256_fmadd_ps(s0, w00, d20);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src2 + offs - 0)), m);
-                        d20 = _mm256_fmadd_ps(s0, w01, d20);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 1)), m);
+                        d20 = _mm_add_ps(_mm_mul_ps(s0, w00), d20);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 0)), m);
+                        d20 = _mm_add_ps(_mm_mul_ps(s0, w01), d20);
                     }
                     if (M > 3)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src3 + offs - 1)), m);
-                        d30 = _mm256_fmadd_ps(s0, w00, d30);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src3 + offs - 0)), m);
-                        d30 = _mm256_fmadd_ps(s0, w01, d30);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 1)), m);
+                        d30 = _mm_add_ps(_mm_mul_ps(s0, w00), d30);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 0)), m);
+                        d30 = _mm_add_ps(_mm_mul_ps(s0, w01), d30);
                     }
                     if (M > 4)
                     {
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src4 + offs - 1)), m);
-                        d40 = _mm256_fmadd_ps(s0, w00, d40);
-                        s0 = _mm256_and_ps(_mm256_set1_ps(*(float*)(src4 + offs - 0)), m);
-                        d40 = _mm256_fmadd_ps(s0, w01, d40);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 1)), m);
+                        d40 = _mm_add_ps(_mm_mul_ps(s0, w00), d40);
+                        s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 0)), m);
+                        d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40);
                     }
                     weight0 += DF;
                 }
@@ -328,7 +321,7 @@ namespace Simd
         }
 
         typedef void(*Convolution16bNhwcGemm_2xM_Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int zero, const uint16_t* weight, const __m256* bias, const __m256* params, float* buf, uint8_t* dst);
+            size_t srcC, size_t dstC, int zero, const uint16_t* weight, const __m128* bias, const __m128* params, float* buf, uint8_t* dst);
 
         template<Term16bType term, SimdConvolutionActivationType type> Convolution16bNhwcGemm_2xM_Ptr GetConvolution16bNhwcGemm_2xM(size_t M)
         {
@@ -354,22 +347,22 @@ namespace Simd
             Convolution16bNhwcGemm_2xM_Ptr convolution_2xN = GetConvolution16bNhwcGemm_2xM<term, type>(n);
             Convolution16bNhwcGemm_2xM_Ptr convolution_2xM = GetConvolution16bNhwcGemm_2xM<term, type>(m);
 
-            __m256 _params[2], _bias[2];
-            _params[0] = _mm256_set1_ps(params[0]);
+            __m128 _params[2], _bias[2];
+            _params[0] = _mm_set1_ps(params[0]);
             if (type == SimdConvolutionActivationRestrictRange ||
                 type == SimdConvolutionActivationHswish ||
                 type == SimdConvolutionActivationHardSigmoid)
-                _params[1] = _mm256_set1_ps(params[1]);
+                _params[1] = _mm_set1_ps(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
-                _bias[0] = _mm256_loadu_ps(bias + dc + 0);
-                _bias[1] = _mm256_loadu_ps(bias + dc + F);
+                _bias[0] = _mm_loadu_ps(bias + dc + 0);
+                _bias[1] = _mm_loadu_ps(bias + dc + F);
                 if (type == ::SimdConvolutionActivationPrelu)
                 {
-                    _params[0] = _mm256_loadu_ps(params + dc + 0);
-                    _params[1] = _mm256_loadu_ps(params + dc + F);
+                    _params[0] = _mm_loadu_ps(params + dc + 0);
+                    _params[1] = _mm_loadu_ps(params + dc + F);
                 }
                 const uint16_t* s = src;
                 float* b = buf + dc;
@@ -394,8 +387,8 @@ namespace Simd
                 convolutions[1] = Convolution16bNhwcGemm_2<Term16bLast32f, type>;
         }
 
-        SynetConvolution16bNhwcGemm::SynetConvolution16bNhwcGemm(const ConvParam & p)
-            : Sse41::SynetConvolution16bNhwcGemm(p)
+        SynetConvolution16bNhwcGemmV0::SynetConvolution16bNhwcGemmV0(const ConvParam & p)
+            : Base::SynetConvolution16bNhwcGemmV0(p)
         {
             SetAlgParam(F, F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_src16b)
