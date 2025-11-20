@@ -101,27 +101,27 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            //size_t D = DivHi(p.dstC, _alg.F);
-            //_weight.Resize(a.bufK * a.bufD, true);
-            //uint16_t* dst = _weight.data;
-            //for (size_t d = 0; d < D; d++)
-            //{
-            //    for (size_t k = 0; k < a.bufK; k += 2)
-            //    {
-            //        const float* src = weight + k * p.dstC + d * _alg.F;
-            //        for (size_t f = 0; f < _alg.F; ++f)
-            //        {
-            //            for (size_t i = 0; i < 2; ++i)
-            //            {
-            //                if (d * _alg.F + f < p.dstC && k + i < a.K)
-            //                    *(dst++) = Float32ToBFloat16(src[i * p.dstC]);
-            //                else
-            //                    *(dst++) = 0;
-            //            }
-            //            src++;
-            //        }
-            //    }
-            //}
+            size_t F = _alg.macroD, D = DivHi(p.dstC, F);
+            _weight.Resize(a.bufK * a.bufD, true);
+            uint16_t* dst = _weight.data;
+            for (size_t d = 0; d < D; d++)
+            {
+                for (size_t k = 0; k < a.bufK; k += 2)
+                {
+                    const float* src = weight + k * p.dstC + d * F;
+                    for (size_t f = 0; f < F; ++f)
+                    {
+                        for (size_t i = 0; i < 2; ++i)
+                        {
+                            if (d * F + f < p.dstC && k + i < a.K)
+                                *(dst++) = Float32ToBFloat16(src[i * p.dstC]);
+                            else
+                                *(dst++) = 0;
+                        }
+                        src++;
+                    }
+                }
+            }
         }
 
         void SynetConvolution16bNhwcGemmV1::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
