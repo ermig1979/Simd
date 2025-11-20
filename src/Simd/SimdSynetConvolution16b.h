@@ -178,13 +178,13 @@ namespace Simd
                 size_t batch, K, M;
                 size_t F, microD, microM, microK;
                 size_t macroD, macroH;
-                size_t bufD, bufM, bufK, elem, dB;
+                size_t bufD, bufM, bufK, elem;
             };
 
             typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst);
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, 
+                const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
