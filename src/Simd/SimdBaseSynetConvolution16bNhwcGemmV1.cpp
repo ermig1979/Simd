@@ -28,6 +28,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdAlignment.h"
+#include "Simd/SimdMemory.h"
 
 namespace Simd
 {
@@ -101,7 +102,7 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            size_t F = _alg.macroD, D = DivHi(p.dstC, F);
+            size_t F = _alg.microD, D = DivHi(p.dstC, F);
             _weight.Resize(a.bufK * a.bufD, true);
             uint16_t* dst = _weight.data;
             for (size_t d = 0; d < D; d++)
@@ -179,7 +180,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1;
+            return p.trans != 0 && p.group == 1 && Simd::Aligned(p.dstW * p.dstH, 32) && Simd::Aligned(p.dstC, 32) && 0;//&& p.srcC >= 256 && p.srcC <= 512;
         }
     }
 #endif
