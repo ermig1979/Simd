@@ -5348,35 +5348,59 @@ extern "C"
 
     /*! @ingroup shifting
 
-        \fn void * SimdShiftDetectorInitBuffers(size_t width, size_t height, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
+        \fn void * SimdShiftDetectorInitBuffers(size_t bkgWidth, size_t bkgHeight, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
 
-        Initializes internal buffers of ShiftDetector before using functions ::SimdShiftDetectorSetBackground.
+        Initializes internal buffers of shift detector.
 
         \note This function used in class Simd::ShiftDetector.
 
-        \param [in] width - a width of background image.
-        \param [in] height - a height of background image.
+        \param [in] bkgWidth - a width of background image.
+        \param [in] bkgHeight - a height of background image.
         \param [in] levelCount - the number of levels in the internal image pyramids used to find shift.
         \param [in] textureType - type of textures used to detect shift (see ::SimdShiftDetectorTextureType).
         \param [in] differenceType - type of correlation functions used to detect shift (see ::SimdShiftDetectorDifferenceType).
         \return a pointer to shift detector context. On error it returns NULL.
-                This pointer is used in functions ::SimdShiftDetectorSetBackground.
+                This pointer is used in functions ::SimdShiftDetectorSetBackground, ::SimdShiftDetectorEstimate.
                 It must be released with using of function ::SimdRelease.
     */
-    SIMD_API void * SimdShiftDetectorInitBuffers(size_t width, size_t height, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
+    SIMD_API void * SimdShiftDetectorInitBuffers(size_t bkgWidth, size_t bkgHeight, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
 
     /*! @ingroup shifting
-        \fn void SimdShiftDetectorSetBackground(const uint8_t* src, size_t stride, SimdBool makeCopy);
      
-        Sets a background image. Size of background image must be setted before in function ::SimdShiftDetectorInitBuffers.
+        \fn void SimdShiftDetectorSetBackground(void *context, const uint8_t* bkg, size_t bkgStride, SimdBool makeCopy);
+     
+        Sets a background image. Size of background image must be set before by function ::SimdShiftDetectorInitBuffers.
 
         \note This function used in class Simd::ShiftDetector.
 
-        \param [in] src - a pointer to pixels data of background image.
-        \param [in] stride - a row size of the background image.
+        \param [in] context - a shift detector context. It must be created by function ::SimdShiftDetectorInitBuffers and released by function ::SimdRelease.
+        \param [in] bkg - a pointer to pixels data of background image.
+        \param [in] bkgStride - a row size of the background image.
         \param [in] makeCopy - if true, copy of the background will be created.
     */
-    SIMD_API void SimdShiftDetectorSetBackground(const uint8_t* src, size_t stride, SimdBool makeCopy);
+    SIMD_API void SimdShiftDetectorSetBackground(void *context, const uint8_t* bkg, size_t bkgStride, SimdBool makeCopy);
+
+    /*! @ingroup shifting
+     
+        \fn SimdBool SimdShiftDetectorEstimate(void *context, const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight, size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double* hiddenAreaPenalty, ptrdiff_t regionAreaMin);
+        
+        Estimates shift of current image relative to background image. Size of background image must be set before by function ::SimdShiftDetectorInitBuffers.
+
+        \param [in] context - a shift detector context. It must be created by function ::SimdShiftDetectorInitBuffers and released by function ::SimdRelease.
+        \param [in] curr - a pointer to pixels data of current image.
+        \param [in] currStride - a row size of the current image.
+        \param [in] currWidth - a width of current image.
+        \param [in] currHeight - a height of current image.
+        \param [in] initShiftX - an initial shift X position to start search.
+        \param [in] initShiftY - an initial shift Y position to start search.
+        \param [in] maxShiftX - maximal possible shift alogn X axis.
+        \param [in] maxShiftY - maximal possible shift alogn Y axis.
+        \param [in] hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image. Can be NULL (no restriction).
+        \param [in] regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
+        \return a result of shift estimation (true or false). 
+    */
+    SIMD_API SimdBool SimdShiftDetectorEstimate(void* context, const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight,
+        size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double* hiddenAreaPenalty, ptrdiff_t regionAreaMin);
 
     /*! @ingroup sobel_filter
 

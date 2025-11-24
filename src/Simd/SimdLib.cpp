@@ -4172,15 +4172,22 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 }
 
-SIMD_API void* SimdShiftDetectorInitBuffers(size_t width, size_t height, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType)
+SIMD_API void* SimdShiftDetectorInitBuffers(size_t bkgWidth, size_t bkgHeight, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType)
 {
     SIMD_EMPTY();
     return NULL;
 }
 
-SIMD_API void SimdShiftDetectorSetBackground(const uint8_t* src, size_t stride, SimdBool makeCopy)
+SIMD_API void SimdShiftDetectorSetBackground(void* context, const uint8_t* bkg, size_t bkgStride, SimdBool makeCopy)
 {
     SIMD_EMPTY();
+}
+
+SIMD_API SimdBool SimdShiftDetectorEstimate(void* context, const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight,
+    size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double* hiddenAreaPenalty, ptrdiff_t regionAreaMin)
+{
+    SIMD_EMPTY();
+    return SimdFalse;
 }
 
 SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
