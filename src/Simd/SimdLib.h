@@ -5369,7 +5369,7 @@ extern "C"
      
         \fn void SimdShiftDetectorSetBackground(void *context, const uint8_t* bkg, size_t bkgStride, SimdBool makeCopy);
      
-        Sets a background image. Size of background image must be set before by function ::SimdShiftDetectorInitBuffers.
+        Sets a background image. Size of background image is set by function ::SimdShiftDetectorInitBuffers.
 
         \note This function used in class Simd::ShiftDetector.
 
@@ -5384,7 +5384,9 @@ extern "C"
      
         \fn SimdBool SimdShiftDetectorEstimate(void *context, const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight, size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double* hiddenAreaPenalty, ptrdiff_t regionAreaMin);
         
-        Estimates shift of current image relative to background image. Size of background image must be set before by function ::SimdShiftDetectorInitBuffers.
+        Estimates shift of current image relative to background image. Background image must be set before by function ::SimdShiftDetectorSetBackground.
+
+        \note This function used in class Simd::ShiftDetector.
 
         \param [in] context - a shift detector context. It must be created by function ::SimdShiftDetectorInitBuffers and released by function ::SimdRelease.
         \param [in] curr - a pointer to pixels data of current image.
@@ -5397,10 +5399,26 @@ extern "C"
         \param [in] maxShiftY - maximal possible shift alogn Y axis.
         \param [in] hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image. Can be NULL (no restriction).
         \param [in] regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
-        \return a result of shift estimation (true or false). 
+        \return a result of shift estimation (true or false). In positive case use function ::SimdShiftDetectorGetShift to get shift and other parameters. 
     */
     SIMD_API SimdBool SimdShiftDetectorEstimate(void* context, const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight,
         size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double* hiddenAreaPenalty, ptrdiff_t regionAreaMin);
+
+    /*! @ingroup shifting
+
+        \fn void SimdShiftDetectorGetShift(const void* context, size_t* shift, double * refinedShift, double * stability, double * correlation);
+
+        Gets shift and other parameters estimated before by function ::SimdShiftDetectorEstimate.
+
+        \note This function used in class Simd::ShiftDetector.
+
+        \param [in] context - a shift detector context. It must be created by function ::SimdShiftDetectorInitBuffers and released by function ::SimdRelease.
+        \param [out] shift - a pointer to array[2] to estimated integer shift of current image relative to background image. Can be NULL. 
+        \param [out] refinedShift - a pointer to array[2] to rifined shift (with sub-pixel accuracy) shift of current image relative to background image. Can be NULL.
+        \param [out] stability - a value which characterizes stability (reliability) of found shift. Can be NULL.
+        \param [out] correlation - a  best correlation of background and current image. Can be NULL.
+    */
+    SIMD_API void SimdShiftDetectorGetShift(const void* context, size_t* shift, double * refinedShift, double * stability, double * correlation);
 
     /*! @ingroup sobel_filter
 

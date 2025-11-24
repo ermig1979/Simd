@@ -77,6 +77,8 @@ Functions</h2></td></tr>
 <tr class="separator:ga71d9af73149f28f85f8aee0fc8f14e16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaf472bc7ab2dcbde2de5e81f99e24954"><td class="memItemLeft" align="right" valign="top">SIMD_API <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954">SimdShiftDetectorEstimate</a> (void *context, const uint8_t *curr, size_t currStride, size_t currWidth, size_t currHeight, size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double *hiddenAreaPenalty, ptrdiff_t regionAreaMin)</td></tr>
 <tr class="separator:gaaf472bc7ab2dcbde2de5e81f99e24954"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5f91241da7c7963574f3209badfb00e4"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shifting.html#ga5f91241da7c7963574f3209badfb00e4">SimdShiftDetectorGetShift</a> (const void *context, size_t *shift, double *refinedShift, double *stability, double *correlation)</td></tr>
+<tr class="separator:ga5f91241da7c7963574f3209badfb00e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabb85b3887315eda81ca5892a66f9e108"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gabb85b3887315eda81ca5892a66f9e108"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">ShiftBilinear</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bkg, const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; double &gt; &amp;shift, const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;crop, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gabb85b3887315eda81ca5892a66f9e108"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs shifting of input image with using bilinear interpolation.  <a href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">More...</a><br /></td></tr>
@@ -354,7 +356,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets a background image. Size of background image must be set before by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a>.</p>
+<p >Sets a background image. Size of background image is set by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a>.</p>
 <dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -447,7 +449,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Estimates shift of current image relative to background image. Size of background image must be set before by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a>.</p>
+<p >Estimates shift of current image relative to background image. Background image must be set before by function <a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16">SimdShiftDetectorSetBackground</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
@@ -464,7 +467,65 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of shift estimation (true or false). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a result of shift estimation (true or false). In positive case use function <a class="el" href="group__shifting.html#ga5f91241da7c7963574f3209badfb00e4">SimdShiftDetectorGetShift</a> to get shift and other parameters. </dd></dl>
+
+</div>
+</div>
+<a id="ga5f91241da7c7963574f3209badfb00e4" name="ga5f91241da7c7963574f3209badfb00e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5f91241da7c7963574f3209badfb00e4">&#9670;&#160;</a></span>SimdShiftDetectorGetShift()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdShiftDetectorGetShift </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>shift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>refinedShift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>stability</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>correlation</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Gets shift and other parameters estimated before by function <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954">SimdShiftDetectorEstimate</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">shift</td><td>- a pointer to array[2] to estimated integer shift of current image relative to background image. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">refinedShift</td><td>- a pointer to array[2] to rifined shift (with sub-pixel accuracy) shift of current image relative to background image. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">stability</td><td>- a value which characterizes stability (reliability) of found shift. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">correlation</td><td>- a best correlation of background and current image. Can be NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
