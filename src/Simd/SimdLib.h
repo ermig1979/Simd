@@ -494,7 +494,7 @@ typedef enum
 } SimdResizeMethodType;
 
 /*! @ingroup shifting
-    Describes types of texture which used to find correlation between background and current image in ShiftDetector.
+    Describes types of texture which used to find correlation between background and current image in function ::SimdShiftDetectorInitBuffers.
 */
 typedef enum
 {
@@ -505,7 +505,7 @@ typedef enum
 } SimdShiftDetectorTextureType;
 
 /*! @ingroup shifting
-    Describes types of function which used to find correlation between background and current image in ShiftDetector.
+    Describes types of function which used to find correlation between background and current image in function ::SimdShiftDetectorInitBuffers.
 */
 typedef enum 
 {
@@ -5345,6 +5345,25 @@ extern "C"
     SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
         const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
         size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
+
+    /*! @ingroup shifting
+
+        \fn void * SimdShiftDetectorInitBuffers(size_t width, size_t height, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
+
+        Initializes internal buffers of ShiftDetector before using.
+
+        \note This function used in class Simd::ShiftDetector.
+
+        \param [in] width - a width of background image.
+        \param [in] height - a height of background image.
+        \param [in] levelCount - the number of levels in the internal image pyramids used to find shift.
+        \param [in] textureType - type of textures used to detect shift (see ::SimdShiftDetectorTextureType).
+        \param [in] differenceType - type of correlation functions used to detect shift (see ::SimdShiftDetectorDifferenceType).
+        \return a pointer to shift detector context. On error it returns NULL.
+                This pointer is used in functions ::.
+                It must be released with using of function ::SimdRelease.
+    */
+    SIMD_API void * SimdShiftDetectorInitBuffers(size_t width, size_t height, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
 
     /*! @ingroup sobel_filter
 

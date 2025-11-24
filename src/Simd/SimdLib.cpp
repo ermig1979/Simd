@@ -4172,6 +4172,12 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 }
 
+SIMD_API void* SimdShiftDetectorInitBuffers(size_t width, size_t height, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType)
+{
+    SIMD_EMPTY();
+    return NULL;
+}
+
 SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
     SIMD_EMPTY();
