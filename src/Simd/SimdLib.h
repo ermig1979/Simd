@@ -493,6 +493,28 @@ typedef enum
     SimdResizeMethodAreaFast,
 } SimdResizeMethodType;
 
+/*! @ingroup shifting
+    Describes types of texture which used to find correlation between background and current image in ShiftDetector.
+*/
+typedef enum
+{
+    /*! Original grayscale image. */
+    SimdShiftDetectorTextureGray,
+    /*! Saturated sum of absolute gradients along X and Y axes. */
+    SimdShiftDetectorTextureGrad,
+} SimdShiftDetectorTextureType;
+
+/*! @ingroup shifting
+    Describes types of function which used to find correlation between background and current image in ShiftDetector.
+*/
+typedef enum 
+{
+    /*! Sum of absolute differences of points of two images. */
+    SimdShiftDetectorAbsDifference,
+    /*! Sum of squared differences of points of two images. */
+    SimdShiftDetectorSquaredDifference,
+} SimdShiftDetectorDifferenceType;
+
 /*! @ingroup synet_types
     Describes Synet calculation compatibility flags. This type used in functions ::SimdSynetAdd8i, ::SimdSynetScaleLayerForward, 
     ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i, ::SimdSynetScale8iInit,

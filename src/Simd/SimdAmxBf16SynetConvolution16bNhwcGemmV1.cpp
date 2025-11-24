@@ -362,7 +362,10 @@ namespace Simd
             {
                 _mm512_mask_storeu_epi16((uint16_t*)ptr, tail, (__m512i)_mm512_cvtne2ps_pbh(f1, f0));
                 if (flush)
-                    _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
+                {
+                    _m_prefetchw((char*)ptr);
+                    //_mm_prefetch((const char*)ptr, _MM_HINT_NTA);
+                }
             }
         }
 
@@ -640,7 +643,7 @@ namespace Simd
         {
             size_t n = 32, n1 = dstH * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * a.microD;
             size_t dD = p.dstC * a.elem, dS = a.bufK;
-            bool bigAlignedDst = Aligned(dst, A) && Aligned(dD, A) && dD * p.dstW * p.dstH > 4 * Base::AlgCacheL1();
+            bool bigAlignedDst = Aligned(dst, A) && Aligned(dD, A) && dD * p.dstW * p.dstH > 4 * Base::AlgCacheL1() && 0;
 
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -664,7 +667,7 @@ namespace Simd
                     if(bigAlignedDst)
                         body_2 = dc == 0 ? Convolution16bNhwcGemm_32x32<term, type, 0, 2> : Convolution16bNhwcGemm_32x32<term, type, 1, 2>;
                     else
-                        body_2 = dc == 0 ? Convolution16bNhwcGemm_32x32<term, type, 0, 1> : Convolution16bNhwcGemm_32x32<term, type, 1, 1>;
+                        body_2 = (dc == 0 && 0) ? Convolution16bNhwcGemm_32x32<term, type, 0, 1> : Convolution16bNhwcGemm_32x32<term, type, 1, 1>;
                     size_t dC = Simd::Min(DF, dstC - dc);
                     _bias[0] = _mm512_loadu_ps(bias + dc + 0);
                     _bias[1] = _mm512_loadu_ps(bias + dc + F);

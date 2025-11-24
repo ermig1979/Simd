@@ -139,6 +139,7 @@ namespace Simd
                 src += _stepS;
                 dst += _stepD;
             }
+            //std::cout << SimdVersion() << std::endl;
         }
 
         void SynetConvolution16bNhwcGemmV1::Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
