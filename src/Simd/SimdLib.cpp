@@ -4178,6 +4178,11 @@ SIMD_API void* SimdShiftDetectorInitBuffers(size_t width, size_t height, size_t 
     return NULL;
 }
 
+SIMD_API void SimdShiftDetectorSetBackground(const uint8_t* src, size_t stride, SimdBool makeCopy)
+{
+    SIMD_EMPTY();
+}
+
 SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
     SIMD_EMPTY();

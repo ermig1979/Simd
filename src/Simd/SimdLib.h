@@ -5350,7 +5350,7 @@ extern "C"
 
         \fn void * SimdShiftDetectorInitBuffers(size_t width, size_t height, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
 
-        Initializes internal buffers of ShiftDetector before using.
+        Initializes internal buffers of ShiftDetector before using functions ::SimdShiftDetectorSetBackground.
 
         \note This function used in class Simd::ShiftDetector.
 
@@ -5360,10 +5360,23 @@ extern "C"
         \param [in] textureType - type of textures used to detect shift (see ::SimdShiftDetectorTextureType).
         \param [in] differenceType - type of correlation functions used to detect shift (see ::SimdShiftDetectorDifferenceType).
         \return a pointer to shift detector context. On error it returns NULL.
-                This pointer is used in functions ::.
+                This pointer is used in functions ::SimdShiftDetectorSetBackground.
                 It must be released with using of function ::SimdRelease.
     */
     SIMD_API void * SimdShiftDetectorInitBuffers(size_t width, size_t height, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
+
+    /*! @ingroup shifting
+        \fn void SimdShiftDetectorSetBackground(const uint8_t* src, size_t stride, SimdBool makeCopy);
+     
+        Sets a background image. Size of background image must be setted before in function ::SimdShiftDetectorInitBuffers.
+
+        \note This function used in class Simd::ShiftDetector.
+
+        \param [in] src - a pointer to pixels data of background image.
+        \param [in] stride - a row size of the background image.
+        \param [in] makeCopy - if true, copy of the background will be created.
+    */
+    SIMD_API void SimdShiftDetectorSetBackground(const uint8_t* src, size_t stride, SimdBool makeCopy);
 
     /*! @ingroup sobel_filter
 
