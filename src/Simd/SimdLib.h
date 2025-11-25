@@ -5418,7 +5418,7 @@ extern "C"
         \param [out] stability - a value which characterizes stability (reliability) of found shift. Can be NULL.
         \param [out] correlation - a  best correlation of background and current image. Can be NULL.
     */
-    SIMD_API void SimdShiftDetectorGetShift(const void* context, size_t* shift, double * refinedShift, double * stability, double * correlation);
+    SIMD_API void SimdShiftDetectorGetShift(const void* context, ptrdiff_t* shift, double * refinedShift, double * stability, double * correlation);
 
     /*! @ingroup sobel_filter
 

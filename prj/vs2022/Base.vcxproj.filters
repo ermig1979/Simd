@@ -439,6 +439,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcGemmV1.cpp">
       <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseShiftDetector.cpp">
+      <Filter>Base\Transform</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -730,6 +733,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdShiftDetector.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

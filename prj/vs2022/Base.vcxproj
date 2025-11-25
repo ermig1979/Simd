@@ -76,6 +76,7 @@
     <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdShiftDetector.h" />
     <ClInclude Include="..\..\src\Simd\SimdShuffle.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseResizerNearest.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseShiftBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseShiftDetector.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseStatistic.cpp" />

@@ -70,6 +70,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdRecursiveBilateralFilter.h"
 #include "Simd/SimdResizer.h"
+#include "Simd/SimdShiftDetector.h"
 #include "Simd/SimdSynetAdd16b.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetConvolution16b.h"
@@ -4175,24 +4176,26 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
 SIMD_API void* SimdShiftDetectorInitBuffers(size_t bkgWidth, size_t bkgHeight, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType)
 {
     SIMD_EMPTY();
-    return NULL;
+    return new Base::ShiftDetector(bkgWidth, bkgHeight, levelCount, textureType, differenceType);
 }
 
 SIMD_API void SimdShiftDetectorSetBackground(void* context, const uint8_t* bkg, size_t bkgStride, SimdBool makeCopy)
 {
     SIMD_EMPTY();
+    ((Base::ShiftDetector*)context)->SetBackground(bkg, bkgStride, makeCopy);
 }
 
 SIMD_API SimdBool SimdShiftDetectorEstimate(void* context, const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight,
     size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double* hiddenAreaPenalty, ptrdiff_t regionAreaMin)
 {
     SIMD_EMPTY();
-    return SimdFalse;
+    return ((Base::ShiftDetector*)context)->Estimate(curr, currStride, currWidth, currHeight, initShiftX, initShiftY, maxShiftX, maxShiftY, hiddenAreaPenalty, regionAreaMin);
 }
 
-SIMD_API void SimdShiftDetectorGetShift(const void* context, size_t* shift, double* refinedShift, double* stability, double* correlation)
+SIMD_API void SimdShiftDetectorGetShift(const void* context, ptrdiff_t* shift, double* refinedShift, double* stability, double* correlation)
 {
     SIMD_EMPTY();
+    return ((Base::ShiftDetector*)context)->GetShift(shift, refinedShift, stability, correlation);
 }
 
 SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
