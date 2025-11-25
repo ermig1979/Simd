@@ -1135,6 +1135,15 @@ class Lib():
 	def ShiftDetectorEstimate(context : ctypes.c_void_p, curr : ctypes.c_void_p, currStride : int, currWidth : int, currHeight : int, initShiftX : int, initShiftY : int, maxShiftX : int, maxShiftY : int, hiddenAreaPenalty: float, regionAreaMin : int) -> ctypes.c_int32 :
 		hap = ctypes.c_double(hiddenAreaPenalty)
 		return Lib.__lib.SimdShiftDetectorEstimate(context, curr, currStride, currWidth, currHeight, initShiftX, initShiftY, maxShiftX, maxShiftY, ctypes.byref(hap), regionAreaMin)
+	
+    ## Gets shift estimated before by function Simd.Lib.ShiftDetectorEstimate.
+    # @param context - a shift detector context. It must be created by function Simd.Lib.ShiftDetectorInitBuffers and released by function Simd.Lib.Release.
+    # @return estimated shift value.
+	def ShiftDetectorGetShift(context : ctypes.c_void_p) -> tuple[int, int] :
+		buf = [0, 0]
+		shift = (ctypes.c_ssize_t * 2)(*buf)
+		Lib.__lib.SimdShiftDetectorGetShift(context, shift, None, None, None)
+		return shift[0], shift[1]
 		
 	## Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
     # @param src - a pointer to pixels data of input image.

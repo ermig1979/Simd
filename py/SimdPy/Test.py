@@ -148,24 +148,46 @@ def SynetSetInputTest(args) :
 ###################################################################################################
 
 def ImageShiftBilinearTest(args) :
-	background = LoadTestImage(args)
-	current = background.Region(100, 100, background.Width() - 200, background.Height() - 200)
-	
-	shiftX = 0
-	shiftY = 0
-	
-	print("ShiftDetector find shift: [{0}, {1}]. ".format(shiftX, shiftY), end="")
+    image = LoadTestImage(args)
+    background = image.Copy()
+    #Simd.Image(image.Format(), image.Width(), image.Height())
+    shifted = image.Copy()
+    Simd.ShiftBilinear(image, background, [40.5, 30.1], [0, 0, background.Width(), background.Height()], shifted)
+    shifted.Save("shifted.jpg", Simd.ImageFile.Jpeg, 85)
 
 	
 ###################################################################################################
 
 def ImageShiftDetectorTest(args) :
-	image = LoadTestImage(args)
-	background = image.Copy()
-	#Simd.Image(image.Format(), image.Width(), image.Height())
-	shifted = image.Copy()
-	Simd.ShiftBilinear(image, background, [40.5, 30.1], [0, 0, background.Width(), background.Height()], shifted)
-	shifted.Save("shifted.jpg", Simd.ImageFile.Jpeg, 85)
+    background = LoadTestImage(args).Converted(Simd.PixelFormat.Gray8)
+    current = background.Region(100, 100, background.Width() - 100, background.Height() - 100)
+    
+    shiftDetector = Simd.Lib.ShiftDetectorInitBuffers(background.Width(), background.Height(), 4, Simd.ShiftDetectorTexture.Grad, Simd.ShiftDetectorDifference.Abs)
+    
+    Simd.Lib.ShiftDetectorSetBackground(shiftDetector, background.Data(), background.Stride(), True)
+    
+    startX = 50
+    startY = 50
+    
+    shiftX = 0
+    shiftY = 0
+    found = False
+    
+    if Simd.Lib.ShiftDetectorEstimate(shiftDetector, current.Data(), current.Stride(), current.Width(), current.Height(), startX, startY, 100, 100, 0.0, 25) != 0 :
+        found = True
+        shiftX, shiftY = Simd.Lib.ShiftDetectorGetShift(shiftDetector)
+    
+    Simd.Lib.Release(shiftDetector)	
+    
+    
+    annotated = background.Copy()
+    Simd.ShiftBilinear(current, background, [-float(startX + shiftX), -float(startY + shiftY)], [0, 0, background.Width(), background.Height()], annotated)
+    #background.Save("background.jpg", Simd.ImageFile.Jpeg, 85)
+    #current.Save("current.jpg", Simd.ImageFile.Jpeg, 85)
+    annotated.Save("annotated_shift_detector_result.jpg", Simd.ImageFile.Jpeg, 85)
+
+    print("ShiftDetector: find: {0} shift: [{1}, {2}].".format(found, startX + shiftX, startY + shiftY), end="")
+
 
 ###################################################################################################
 
