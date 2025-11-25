@@ -183,6 +183,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:addd522c6d962766caaffb961dd1fd354"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#addd522c6d962766caaffb961dd1fd354">ResizerRun</a> (ctypes.c_void_p resizer, ctypes.c_void_p src, int srcStride, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:addd522c6d962766caaffb961dd1fd354"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs image resizing.  <a href="class_simd_1_1_lib.html#addd522c6d962766caaffb961dd1fd354">More...</a><br /></td></tr>
 <tr class="separator:addd522c6d962766caaffb961dd1fd354"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57fdda0f8e01cf921365ae7eb610bf99"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a57fdda0f8e01cf921365ae7eb610bf99">ShiftBilinear</a> (ctypes.c_void_p src, int srcStride, int width, int height, int channelCount, ctypes.c_void_p bkg, int bkgStride, float shiftX, float shiftY, int cropLeft, int cropTop, int cropRight, int cropBottom, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:a57fdda0f8e01cf921365ae7eb610bf99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs shifting of input image with using bilinear interpolation.  <a href="class_simd_1_1_lib.html#a57fdda0f8e01cf921365ae7eb610bf99">More...</a><br /></td></tr>
+<tr class="separator:a57fdda0f8e01cf921365ae7eb610bf99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">SynetSetInput</a> (ctypes.c_void_p src, int width, int height, int stride, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> srcFormat, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> dstFormat, isRgb=False)</td></tr>
 <tr class="memdesc:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">More...</a><br /></td></tr>
 <tr class="separator:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2419,6 +2422,134 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">srcStride</td><td>- a row size (in bytes) of the input image. </td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to pixels data of the resized output image. </td></tr>
     <tr><td class="paramname">dstStride</td><td>- a row size (in bytes) of the output image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a57fdda0f8e01cf921365ae7eb610bf99" name="a57fdda0f8e01cf921365ae7eb610bf99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57fdda0f8e01cf921365ae7eb610bf99">&#9670;&#160;</a></span>ShiftBilinear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ShiftBilinear </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>channelCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>bkg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bkgStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>shiftX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>shiftY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>cropLeft</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>cropTop</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>cropRight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>cropBottom</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs shifting of input image with using bilinear interpolation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of foreground input image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of foreground input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of foreground input image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of foreground input image. </td></tr>
+    <tr><td class="paramname">channelCount</td><td>- a channel number in foreground, background and output images. </td></tr>
+    <tr><td class="paramname">bkg</td><td>- a pointer to pixels data of background input image. </td></tr>
+    <tr><td class="paramname">bkgStride</td><td>- a row size of background input image in bytes. </td></tr>
+    <tr><td class="paramname">shiftX</td><td>- an image shift along X axis. </td></tr>
+    <tr><td class="paramname">shiftY</td><td>- an image shift along Y axis. </td></tr>
+    <tr><td class="paramname">cropLeft</td><td>- a crop left side. </td></tr>
+    <tr><td class="paramname">cropTop</td><td>- a crop top side. </td></tr>
+    <tr><td class="paramname">cropRight</td><td>- a crop right side. </td></tr>
+    <tr><td class="paramname">cropBottom</td><td>- a crop bottom side. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
   </table>
   </dd>
 </dl>

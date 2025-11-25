@@ -144,6 +144,16 @@ def SynetSetInputTest(args) :
 	input = Simd.Lib.Allocate(channels * height * width * 4, Simd.Lib.Alignment())
 	Simd.SynetSetInput(resized, lower, upper, input, channels, Simd.TensorFormat.Nhwc, True)
 	Simd.Lib.Free(input)
+	
+###################################################################################################
+
+def ImageShiftBilinearTest(args) :
+	image = LoadTestImage(args)
+	background = image.Copy()
+	#Simd.Image(image.Format(), image.Width(), image.Height())
+	shifted = image.Copy()
+	Simd.ShiftBilinear(image, background, 40.5, 30.1, 0, 0, background.Width(), background.Height(), shifted)
+	shifted.Save("shifted.jpg", Simd.ImageFile.Jpeg, 85)
 
 ###################################################################################################
 
@@ -155,6 +165,7 @@ def InitTestList(args) :
 	tests.append(ImageAbsGradientSaturatedSumTest)
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)
+	tests.append(ImageShiftBilinearTest)
 	tests.append(ImageFrameTest)
 	tests.append(ImageWarpAffineTest)
 	tests.append(ImageToNumpyArrayTest)

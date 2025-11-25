@@ -588,6 +588,10 @@ class Lib():
 		
 		Lib.__lib.SimdResizerRun.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdResizerRun.restype = None
+		
+
+		Lib.__lib.SimdShiftBilinear.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdShiftBilinear.restype = None
 
 		
 		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
@@ -1047,6 +1051,27 @@ class Lib():
     # @param dstStride - a row size (in bytes) of the output image.
 	def ResizerRun(resizer : ctypes.c_void_p, src : ctypes.c_void_p, srcStride : int, dst : ctypes.c_void_p, dstStride : int) :
 		Lib.__lib.SimdResizerRun(resizer, src, srcStride, dst, dstStride)
+	
+    ## Performs shifting of input image with using bilinear interpolation. 
+    # @param src - a pointer to pixels data of foreground input image.
+    # @param srcStride - a row size of foreground input image in bytes.
+    # @param width - a width of foreground input image.
+    # @param height - a height of foreground input image.
+    # @param channelCount - a channel number in foreground, background and output images.
+    # @param bkg - a pointer to pixels data of background input image.
+    # @param bkgStride - a row size of background input image in bytes.
+    # @param shiftX - an image shift along X axis.
+    # @param shiftY - an image shift along Y axis.
+    # @param cropLeft - a crop left side.
+    # @param cropTop - a crop top side.
+    # @param cropRight - a crop right side.
+    # @param cropBottom - a crop bottom side.
+    # @param dst - a pointer to pixels data of output 8-bit gray image.
+    # @param dstStride - a row size of output image in bytes.
+	def ShiftBilinear(src : ctypes.c_void_p, srcStride: int, width: int, height: int, channelCount: int, bkg : ctypes.c_void_p, bkgStride: int, shiftX: float, shiftY: float, cropLeft: int, cropTop: int, cropRight: int, cropBottom: int, dst : ctypes.c_void_p, dstStride: int) :
+		sx = ctypes.c_double(shiftX)
+		sy = ctypes.c_double(shiftY)
+		Lib.__lib.SimdShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride, ctypes.byref(sx), ctypes.byref(sy), cropLeft, cropTop, cropRight, cropBottom, dst, dstStride)
 		
 	## Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
     # @param src - a pointer to pixels data of input image.
@@ -1275,7 +1300,7 @@ class Image():
 	# @return pointer to image pixel data.	
 	def Data(self) -> ctypes.c_void_p :
 		return self.__data
-
+	
 	## Loads an image from file.
     # @param path - a path to input image file.
     # @param desiredFormat - a desired pixel format of output image. It can be Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, 
@@ -1829,6 +1854,24 @@ def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bil
 	dst = Image(src.Format(), width, height)
 	Simd.Resize(src, dst, method)
 	return dst
+
+##  @ingroup python
+# The function performs image bilinear shift.
+# @param src - a foreground input image.
+# @param bkg - a background input image.
+# @param shiftX - an image shift along X axis.
+# @param shiftY - an image shift along Y axis.
+# @param cropLeft - a crop left side.
+# @param cropTop - a crop top side.
+# @param cropRight - a crop right side.
+# @param cropBottom - a crop bottom side.
+# @param dst - a output image.
+def ShiftBilinear(src : Image, bkg : Image, shiftX : float, shiftY: float, cropLeft: int, cropTop: int, cropRight: int, cropBottom: int, dst : Image) :
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(bkg.Format(), bkg.Width(), bkg.Height())
+	if dst.Format() != src.Format() or dst.Format() != bkg.Format() :
+		raise Exception("Incompatible image pixel formats!")
+	Lib.ShiftBilinear(src.Data(), src.Stride(), src.Width(), src.Height(), src.Format().ChannelCount(), bkg.Data(), bkg.Stride(), shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst.Data(), dst.Stride())
 
 ##  @ingroup python
 # Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
