@@ -192,6 +192,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a824e87586ff37158ef2ff377c5cb3d34"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a824e87586ff37158ef2ff377c5cb3d34">ShiftDetectorSetBackground</a> (ctypes.c_void_p context, ctypes.c_void_p bkg, int bkgStride, bool makeCopy)</td></tr>
 <tr class="memdesc:a824e87586ff37158ef2ff377c5cb3d34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets background image in shift detector.  <a href="class_simd_1_1_lib.html#a824e87586ff37158ef2ff377c5cb3d34">More...</a><br /></td></tr>
 <tr class="separator:a824e87586ff37158ef2ff377c5cb3d34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab580b37b91433dd9f19184f913e77b32"><td class="memItemLeft" align="right" valign="top">ctypes.c_int32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ab580b37b91433dd9f19184f913e77b32">ShiftDetectorEstimate</a> (ctypes.c_void_p context, ctypes.c_void_p curr, int currStride, int currWidth, int currHeight, int initShiftX, int initShiftY, int maxShiftX, int maxShiftY, float hiddenAreaPenalty, int regionAreaMin)</td></tr>
+<tr class="memdesc:ab580b37b91433dd9f19184f913e77b32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Estimates shift of current image relative to background image.  <a href="class_simd_1_1_lib.html#ab580b37b91433dd9f19184f913e77b32">More...</a><br /></td></tr>
+<tr class="separator:ab580b37b91433dd9f19184f913e77b32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">SynetSetInput</a> (ctypes.c_void_p src, int width, int height, int stride, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> srcFormat, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> dstFormat, isRgb=False)</td></tr>
 <tr class="memdesc:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">More...</a><br /></td></tr>
 <tr class="separator:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2372,7 +2375,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to resize context. On error it returns NULL. This pointer is used in functions Simd.ResizerRun. It must be released with using of function Simd.Release. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to resize context. On error it returns NULL. This pointer is used in functions <a class="el" href="class_simd_1_1_lib.html#addd522c6d962766caaffb961dd1fd354" title="Performs image resizing.">Simd.Lib.ResizerRun</a>. It must be released with using of function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </dd></dl>
 
 </div>
 </div>
@@ -2423,7 +2426,7 @@ Public Member Functions</h2></td></tr>
 <p>Performs image resizing. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">resizer</td><td>- a resize context. It must be created by function Simd.ResizerInit and released by function Simd.Release. </td></tr>
+    <tr><td class="paramname">resizer</td><td>- a resize context. It must be created by function <a class="el" href="class_simd_1_1_lib.html#a1a350582f3c9daf359e34f1aec33ce95" title="Creates resize context.">Simd.Lib.ResizerInit</a> and released by function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </td></tr>
     <tr><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
     <tr><td class="paramname">srcStride</td><td>- a row size (in bytes) of the input image. </td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to pixels data of the resized output image. </td></tr>
@@ -2617,7 +2620,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to shift detector context. On error it returns NULL. This pointer is used in functions Simd.ShiftDetectorSetBackground. It must be released with using of function Simd.Release. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to shift detector context. On error it returns NULL. This pointer is used in functions <a class="el" href="class_simd_1_1_lib.html#a824e87586ff37158ef2ff377c5cb3d34" title="Sets background image in shift detector.">Simd.Lib.ShiftDetectorSetBackground</a>, <a class="el" href="class_simd_1_1_lib.html#ab580b37b91433dd9f19184f913e77b32" title="Estimates shift of current image relative to background image.">Simd.Lib.ShiftDetectorEstimate</a>. It must be released with using of function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </dd></dl>
 
 </div>
 </div>
@@ -2662,13 +2665,114 @@ Public Member Functions</h2></td></tr>
 <p>Sets background image in shift detector. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">context</td><td>- a shift detector context. It must be created by function Simd.ShiftDetectorInitBuffers and released by function Simd.Release. </td></tr>
+    <tr><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="class_simd_1_1_lib.html#a81446a8b8a7c3c30e0d30834c0255065" title="Initializes internal buffers of shift detector.">Simd.Lib.ShiftDetectorInitBuffers</a> and released by function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </td></tr>
     <tr><td class="paramname">bkg</td><td>- a pointer to pixels data of background image. </td></tr>
     <tr><td class="paramname">bkgStride</td><td>- a row size of the background image. </td></tr>
     <tr><td class="paramname">makeCopy</td><td>- if true, copy of the background will be created. </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ab580b37b91433dd9f19184f913e77b32" name="ab580b37b91433dd9f19184f913e77b32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab580b37b91433dd9f19184f913e77b32">&#9670;&#160;</a></span>ShiftDetectorEstimate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> ctypes.c_int32  ShiftDetectorEstimate </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>curr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>currStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>currWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>currHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>initShiftX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>initShiftY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>maxShiftX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>maxShiftY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>hiddenAreaPenalty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>regionAreaMin</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Estimates shift of current image relative to background image. </p>
+<p >Background image must be set before by function <a class="el" href="class_simd_1_1_lib.html#a824e87586ff37158ef2ff377c5cb3d34" title="Sets background image in shift detector.">Simd.Lib.ShiftDetectorSetBackground</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="class_simd_1_1_lib.html#a81446a8b8a7c3c30e0d30834c0255065" title="Initializes internal buffers of shift detector.">Simd.Lib.ShiftDetectorInitBuffers</a> and released by function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </td></tr>
+    <tr><td class="paramname">curr</td><td>- a pointer to pixels data of current image. </td></tr>
+    <tr><td class="paramname">currStride</td><td>- a row size of the current image. </td></tr>
+    <tr><td class="paramname">currWidth</td><td>- a width of current image. </td></tr>
+    <tr><td class="paramname">currHeight</td><td>- a height of current image. </td></tr>
+    <tr><td class="paramname">initShiftX</td><td>- an initial shift X position to start search. </td></tr>
+    <tr><td class="paramname">initShiftY</td><td>- an initial shift Y position to start search. </td></tr>
+    <tr><td class="paramname">maxShiftX</td><td>- maximal possible shift alogn X axis. </td></tr>
+    <tr><td class="paramname">maxShiftY</td><td>- maximal possible shift alogn Y axis. </td></tr>
+    <tr><td class="paramname">hiddenAreaPenalty</td><td>- a parameter used to restrict searching of the shift at the border of background image. </td></tr>
+    <tr><td class="paramname">regionAreaMin</td><td>- a parameter used to set minimal area of region use for shift estimation. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a result of shift estimation (true or false). In positive case use function Simd.Lib.ShiftDetectorGetShift to get shift and other parameters. </dd></dl>
 
 </div>
 </div>

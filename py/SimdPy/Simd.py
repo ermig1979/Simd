@@ -1067,12 +1067,12 @@ class Lib():
     # @param channels - a channel number of input and output image.
     # @param type - a type of input and output image channel.
     # @param method - a method used in order to resize image.
-    # @return a pointer to resize context. On error it returns NULL. This pointer is used in functions Simd.ResizerRun. It must be released with using of function Simd.Release.
+    # @return a pointer to resize context. On error it returns NULL. This pointer is used in functions Simd.Lib.ResizerRun. It must be released with using of function Simd.Lib.Release.
 	def ResizerInit(srcX : int, srcY : int, dstX : int, dstY : int, channels : int,  type : Simd.ResizeChannel, method : Simd.ResizeMethod) -> ctypes.c_void_p :
 		return Lib.__lib.SimdResizerInit(srcX, srcY, dstX, dstY, channels, type.value, method.value)
 	
     ## Performs image resizing.
-    # @param resizer - a resize context. It must be created by function Simd.ResizerInit and released by function Simd.Release.
+    # @param resizer - a resize context. It must be created by function Simd.Lib.ResizerInit and released by function Simd.Lib.Release.
     # @param src - a pointer to pixels data of the original input image.
     # @param srcStride - a row size (in bytes) of the input image.
     # @param dst - a pointer to pixels data of the resized output image.
@@ -1107,17 +1107,34 @@ class Lib():
     # @param levelCount - the number of levels in the internal image pyramids used to find shift.
     # @param textureType - type of textures used to detect shift (see Simd.ShiftDetectorTexture).
     # @param differenceType - type of correlation functions used to detect shift (see Simd.ShiftDetectorDifference).
-    # @return a pointer to shift detector context. On error it returns NULL. This pointer is used in functions Simd.ShiftDetectorSetBackground. It must be released with using of function Simd.Release.
+    # @return a pointer to shift detector context. On error it returns NULL. This pointer is used in functions Simd.Lib.ShiftDetectorSetBackground, Simd.Lib.ShiftDetectorEstimate. It must be released with using of function Simd.Lib.Release.
 	def ShiftDetectorInitBuffers(bkgWidth : int, bkgHeight : int, levelCount : int, textureType : ShiftDetectorTexture, differenceType : ShiftDetectorDifference) -> ctypes.c_void_p :
 		return Lib.__lib.SimdShiftDetectorInitBuffers(bkgWidth, bkgHeight, levelCount, textureType.value, differenceType.value)
 	
     ## Sets background image in shift detector. 
-    # @param context - a shift detector context. It must be created by function Simd.ShiftDetectorInitBuffers and released by function Simd.Release.
+    # @param context - a shift detector context. It must be created by function Simd.Lib.ShiftDetectorInitBuffers and released by function Simd.Lib.Release.
     # @param bkg - a pointer to pixels data of background image.
     # @param bkgStride - a row size of the background image.
     # @param makeCopy - if true, copy of the background will be created.
 	def ShiftDetectorSetBackground(context : ctypes.c_void_p, bkg : ctypes.c_void_p, bkgStride : int, makeCopy : bool) :
 		Lib.__lib.SimdShiftDetectorSetBackground(context, bkg, bkgStride, makeCopy)
+		
+    ## Estimates shift of current image relative to background image. Background image must be set before by function Simd.Lib.ShiftDetectorSetBackground. 
+    # @param context - a shift detector context. It must be created by function Simd.Lib.ShiftDetectorInitBuffers and released by function Simd.Lib.Release.
+    # @param curr - a pointer to pixels data of current image.
+    # @param currStride - a row size of the current image.
+    # @param currWidth - a width of current image.
+    # @param currHeight - a height of current image.
+    # @param initShiftX - an initial shift X position to start search.
+    # @param initShiftY - an initial shift Y position to start search.
+    # @param maxShiftX - maximal possible shift alogn X axis.
+    # @param maxShiftY - maximal possible shift alogn Y axis.
+    # @param hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
+    # @param regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
+    # @return a result of shift estimation (true or false). In positive case use function Simd.Lib.ShiftDetectorGetShift to get shift and other parameters.
+	def ShiftDetectorEstimate(context : ctypes.c_void_p, curr : ctypes.c_void_p, currStride : int, currWidth : int, currHeight : int, initShiftX : int, initShiftY : int, maxShiftX : int, maxShiftY : int, hiddenAreaPenalty: float, regionAreaMin : int) -> ctypes.c_int32 :
+		hap = ctypes.c_double(hiddenAreaPenalty)
+		return Lib.__lib.SimdShiftDetectorEstimate(context, curr, currStride, currWidth, currHeight, initShiftX, initShiftY, maxShiftX, maxShiftY, ctypes.byref(hap), regionAreaMin)
 		
 	## Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
     # @param src - a pointer to pixels data of input image.
