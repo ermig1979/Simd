@@ -213,7 +213,7 @@ namespace Test
 
             shiftDetector.Estimate(background.Region(region), region.Shifted(ss), ms * 2);
 
-            ShiftDetector::FPoint ds = shiftDetector.ProximateShift();
+            ShiftDetector::FPoint ds = shiftDetector.RefinedShift();
 
             if (Simd::SquaredDistance(ShiftDetector::FPoint(ss), ds) > 1.0)
             {

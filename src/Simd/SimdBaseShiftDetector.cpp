@@ -21,6 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#define SIMD_STATIC
 #include "Simd/SimdShiftDetector.h"
 
 #include "Simd/SimdLib.hpp"
