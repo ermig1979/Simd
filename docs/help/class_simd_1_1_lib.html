@@ -186,6 +186,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a57fdda0f8e01cf921365ae7eb610bf99"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a57fdda0f8e01cf921365ae7eb610bf99">ShiftBilinear</a> (ctypes.c_void_p src, int srcStride, int width, int height, int channelCount, ctypes.c_void_p bkg, int bkgStride, float shiftX, float shiftY, int cropLeft, int cropTop, int cropRight, int cropBottom, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:a57fdda0f8e01cf921365ae7eb610bf99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs shifting of input image with using bilinear interpolation.  <a href="class_simd_1_1_lib.html#a57fdda0f8e01cf921365ae7eb610bf99">More...</a><br /></td></tr>
 <tr class="separator:a57fdda0f8e01cf921365ae7eb610bf99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81446a8b8a7c3c30e0d30834c0255065"><td class="memItemLeft" align="right" valign="top">ctypes.c_void_p&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a81446a8b8a7c3c30e0d30834c0255065">ShiftDetectorInitBuffers</a> (int bkgWidth, int bkgHeight, int levelCount, <a class="el" href="class_simd_1_1_shift_detector_texture.html">ShiftDetectorTexture</a> textureType, <a class="el" href="class_simd_1_1_shift_detector_difference.html">ShiftDetectorDifference</a> differenceType)</td></tr>
+<tr class="memdesc:a81446a8b8a7c3c30e0d30834c0255065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes internal buffers of shift detector.  <a href="class_simd_1_1_lib.html#a81446a8b8a7c3c30e0d30834c0255065">More...</a><br /></td></tr>
+<tr class="separator:a81446a8b8a7c3c30e0d30834c0255065"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a824e87586ff37158ef2ff377c5cb3d34"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a824e87586ff37158ef2ff377c5cb3d34">ShiftDetectorSetBackground</a> (ctypes.c_void_p context, ctypes.c_void_p bkg, int bkgStride, bool makeCopy)</td></tr>
+<tr class="memdesc:a824e87586ff37158ef2ff377c5cb3d34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets background image in shift detector.  <a href="class_simd_1_1_lib.html#a824e87586ff37158ef2ff377c5cb3d34">More...</a><br /></td></tr>
+<tr class="separator:a824e87586ff37158ef2ff377c5cb3d34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">SynetSetInput</a> (ctypes.c_void_p src, int width, int height, int stride, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> srcFormat, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> dstFormat, isRgb=False)</td></tr>
 <tr class="memdesc:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">More...</a><br /></td></tr>
 <tr class="separator:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2366,7 +2372,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to resize context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__resizing.html#gaa38558511e560de8645e511740442e83" title="Performs image resizing.">SimdResizerRun</a>. It must be released with using of function Simd.Release. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to resize context. On error it returns NULL. This pointer is used in functions Simd.ResizerRun. It must be released with using of function Simd.Release. </dd></dl>
 
 </div>
 </div>
@@ -2550,6 +2556,116 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">cropBottom</td><td>- a crop bottom side. </td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
     <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a81446a8b8a7c3c30e0d30834c0255065" name="a81446a8b8a7c3c30e0d30834c0255065"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81446a8b8a7c3c30e0d30834c0255065">&#9670;&#160;</a></span>ShiftDetectorInitBuffers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> ctypes.c_void_p  ShiftDetectorInitBuffers </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bkgWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bkgHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>levelCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_shift_detector_texture.html">ShiftDetectorTexture</a>&#160;</td>
+          <td class="paramname"><em>textureType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_shift_detector_difference.html">ShiftDetectorDifference</a>&#160;</td>
+          <td class="paramname"><em>differenceType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initializes internal buffers of shift detector. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bkgWidth</td><td>- a width of background image. </td></tr>
+    <tr><td class="paramname">bkgHeight</td><td>- a height of background image. </td></tr>
+    <tr><td class="paramname">levelCount</td><td>- the number of levels in the internal image pyramids used to find shift. </td></tr>
+    <tr><td class="paramname">textureType</td><td>- type of textures used to detect shift (see <a class="el" href="class_simd_1_1_shift_detector_texture.html" title="Describes types of texture which used to find correlation between background and current image in Shi...">Simd.ShiftDetectorTexture</a>). </td></tr>
+    <tr><td class="paramname">differenceType</td><td>- type of correlation functions used to detect shift (see <a class="el" href="class_simd_1_1_shift_detector_difference.html" title="Describes types of function which used to find correlation between background and current image in Sh...">Simd.ShiftDetectorDifference</a>). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to shift detector context. On error it returns NULL. This pointer is used in functions Simd.ShiftDetectorSetBackground. It must be released with using of function Simd.Release. </dd></dl>
+
+</div>
+</div>
+<a id="a824e87586ff37158ef2ff377c5cb3d34" name="a824e87586ff37158ef2ff377c5cb3d34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a824e87586ff37158ef2ff377c5cb3d34">&#9670;&#160;</a></span>ShiftDetectorSetBackground()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ShiftDetectorSetBackground </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>bkg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bkgStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>makeCopy</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets background image in shift detector. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">context</td><td>- a shift detector context. It must be created by function Simd.ShiftDetectorInitBuffers and released by function Simd.Release. </td></tr>
+    <tr><td class="paramname">bkg</td><td>- a pointer to pixels data of background image. </td></tr>
+    <tr><td class="paramname">bkgStride</td><td>- a row size of the background image. </td></tr>
+    <tr><td class="paramname">makeCopy</td><td>- if true, copy of the background will be created. </td></tr>
   </table>
   </dd>
 </dl>

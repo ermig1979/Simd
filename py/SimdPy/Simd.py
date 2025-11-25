@@ -311,6 +311,22 @@ class ResizeMethod(enum.Enum) :
 	AreaFast = 8
 	
 ## @ingroup python
+# Describes types of texture which used to find correlation between background and current image in ShiftDetector.
+class ShiftDetectorTexture(enum.Enum) :
+    ## Original grayscale image.
+	Gray = 0
+    ## Saturated sum of absolute gradients along X and Y axes.
+	Grad = 1
+
+## @ingroup python
+# Describes types of function which used to find correlation between background and current image in ShiftDetector.
+class ShiftDetectorDifference(enum.Enum) :
+    ## Sum of absolute differences of points of two images.
+	Abs = 0
+    ## Sum of squared differences of points of two images.
+	Squared = 1
+	
+## @ingroup python
 # 4D-tensor format type.
 class TensorFormat(enum.Enum) :
 	## Unknown tensor format.
@@ -592,6 +608,18 @@ class Lib():
 
 		Lib.__lib.SimdShiftBilinear.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdShiftBilinear.restype = None
+		
+		Lib.__lib.SimdShiftDetectorInitBuffers.argtypes = [ ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.c_int32]
+		Lib.__lib.SimdShiftDetectorInitBuffers.restype = ctypes.c_void_p
+		
+		Lib.__lib.SimdShiftDetectorSetBackground.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32]
+		Lib.__lib.SimdShiftDetectorSetBackground.restype = None
+
+		Lib.__lib.SimdShiftDetectorEstimate.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_double), ctypes.c_size_t]
+		Lib.__lib.SimdShiftDetectorEstimate.restype = ctypes.c_int32
+		
+		Lib.__lib.SimdShiftDetectorGetShift.argtypes = [ ctypes.c_void_p, ctypes.POINTER(ctypes.c_ssize_t), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double)]
+		Lib.__lib.SimdShiftDetectorGetShift.restype = None
 
 		
 		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
@@ -1039,7 +1067,7 @@ class Lib():
     # @param channels - a channel number of input and output image.
     # @param type - a type of input and output image channel.
     # @param method - a method used in order to resize image.
-    # @return a pointer to resize context. On error it returns NULL. This pointer is used in functions ::SimdResizerRun. It must be released with using of function Simd.Release.
+    # @return a pointer to resize context. On error it returns NULL. This pointer is used in functions Simd.ResizerRun. It must be released with using of function Simd.Release.
 	def ResizerInit(srcX : int, srcY : int, dstX : int, dstY : int, channels : int,  type : Simd.ResizeChannel, method : Simd.ResizeMethod) -> ctypes.c_void_p :
 		return Lib.__lib.SimdResizerInit(srcX, srcY, dstX, dstY, channels, type.value, method.value)
 	
@@ -1072,6 +1100,24 @@ class Lib():
 		sx = ctypes.c_double(shiftX)
 		sy = ctypes.c_double(shiftY)
 		Lib.__lib.SimdShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride, ctypes.byref(sx), ctypes.byref(sy), cropLeft, cropTop, cropRight, cropBottom, dst, dstStride)
+		
+    ## Initializes internal buffers of shift detector. 
+    # @param bkgWidth - a width of background image.
+    # @param bkgHeight - a height of background image.
+    # @param levelCount - the number of levels in the internal image pyramids used to find shift.
+    # @param textureType - type of textures used to detect shift (see Simd.ShiftDetectorTexture).
+    # @param differenceType - type of correlation functions used to detect shift (see Simd.ShiftDetectorDifference).
+    # @return a pointer to shift detector context. On error it returns NULL. This pointer is used in functions Simd.ShiftDetectorSetBackground. It must be released with using of function Simd.Release.
+	def ShiftDetectorInitBuffers(bkgWidth : int, bkgHeight : int, levelCount : int, textureType : ShiftDetectorTexture, differenceType : ShiftDetectorDifference) -> ctypes.c_void_p :
+		return Lib.__lib.SimdShiftDetectorInitBuffers(bkgWidth, bkgHeight, levelCount, textureType.value, differenceType.value)
+	
+    ## Sets background image in shift detector. 
+    # @param context - a shift detector context. It must be created by function Simd.ShiftDetectorInitBuffers and released by function Simd.Release.
+    # @param bkg - a pointer to pixels data of background image.
+    # @param bkgStride - a row size of the background image.
+    # @param makeCopy - if true, copy of the background will be created.
+	def ShiftDetectorSetBackground(context : ctypes.c_void_p, bkg : ctypes.c_void_p, bkgStride : int, makeCopy : bool) :
+		Lib.__lib.SimdShiftDetectorSetBackground(context, bkg, bkgStride, makeCopy)
 		
 	## Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
     # @param src - a pointer to pixels data of input image.
@@ -1859,19 +1905,15 @@ def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bil
 # The function performs image bilinear shift.
 # @param src - a foreground input image.
 # @param bkg - a background input image.
-# @param shiftX - an image shift along X axis.
-# @param shiftY - an image shift along Y axis.
-# @param cropLeft - a crop left side.
-# @param cropTop - a crop top side.
-# @param cropRight - a crop right side.
-# @param cropBottom - a crop bottom side.
+# @param shift - an image shift [x, y].
+# @param crop - a crop rectangle [left, top, right, bottom].
 # @param dst - a output image.
-def ShiftBilinear(src : Image, bkg : Image, shiftX : float, shiftY: float, cropLeft: int, cropTop: int, cropRight: int, cropBottom: int, dst : Image) :
+def ShiftBilinear(src : Image, bkg : Image, shift : tuple[float, float], crop: tuple[int, int, int, int], dst : Image) :
 	if dst.Format() == Simd.PixelFormat.Empty :
 		dst.Recreate(bkg.Format(), bkg.Width(), bkg.Height())
 	if dst.Format() != src.Format() or dst.Format() != bkg.Format() :
 		raise Exception("Incompatible image pixel formats!")
-	Lib.ShiftBilinear(src.Data(), src.Stride(), src.Width(), src.Height(), src.Format().ChannelCount(), bkg.Data(), bkg.Stride(), shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst.Data(), dst.Stride())
+	Lib.ShiftBilinear(src.Data(), src.Stride(), src.Width(), src.Height(), src.Format().ChannelCount(), bkg.Data(), bkg.Stride(), shift[0], shift[1], crop[0], crop[1], crop[2], crop[3], dst.Data(), dst.Stride())
 
 ##  @ingroup python
 # Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.

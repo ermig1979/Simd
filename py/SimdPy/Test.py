@@ -148,11 +148,23 @@ def SynetSetInputTest(args) :
 ###################################################################################################
 
 def ImageShiftBilinearTest(args) :
+	background = LoadTestImage(args)
+	current = background.Region(100, 100, background.Width() - 200, background.Height() - 200)
+	
+	shiftX = 0
+	shiftY = 0
+	
+	print("ShiftDetector find shift: [{0}, {1}]. ".format(shiftX, shiftY), end="")
+
+	
+###################################################################################################
+
+def ImageShiftDetectorTest(args) :
 	image = LoadTestImage(args)
 	background = image.Copy()
 	#Simd.Image(image.Format(), image.Width(), image.Height())
 	shifted = image.Copy()
-	Simd.ShiftBilinear(image, background, 40.5, 30.1, 0, 0, background.Width(), background.Height(), shifted)
+	Simd.ShiftBilinear(image, background, [40.5, 30.1], [0, 0, background.Width(), background.Height()], shifted)
 	shifted.Save("shifted.jpg", Simd.ImageFile.Jpeg, 85)
 
 ###################################################################################################
@@ -166,6 +178,7 @@ def InitTestList(args) :
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)
 	tests.append(ImageShiftBilinearTest)
+	tests.append(ImageShiftDetectorTest)
 	tests.append(ImageFrameTest)
 	tests.append(ImageWarpAffineTest)
 	tests.append(ImageToNumpyArrayTest)
