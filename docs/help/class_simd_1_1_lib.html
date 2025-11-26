@@ -201,6 +201,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1ce89270cdff2833d420e537f6540587"><td class="memItemLeft" align="right" valign="top">[float, float]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a1ce89270cdff2833d420e537f6540587">ShiftDetectorGetRefinedShift</a> (ctypes.c_void_p context)</td></tr>
 <tr class="memdesc:a1ce89270cdff2833d420e537f6540587"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets refined shift estimated before by function <a class="el" href="class_simd_1_1_lib.html#ab580b37b91433dd9f19184f913e77b32" title="Estimates shift of current image relative to background image.">Simd.Lib.ShiftDetectorEstimate</a>.  <a href="class_simd_1_1_lib.html#a1ce89270cdff2833d420e537f6540587">More...</a><br /></td></tr>
 <tr class="separator:a1ce89270cdff2833d420e537f6540587"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaacbfb0a0b1c02f832b696d89cbe0b2b"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#aaacbfb0a0b1c02f832b696d89cbe0b2b">ShiftDetectorGetStability</a> (ctypes.c_void_p context)</td></tr>
+<tr class="memdesc:aaacbfb0a0b1c02f832b696d89cbe0b2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets stability estimated before by function <a class="el" href="class_simd_1_1_lib.html#ab580b37b91433dd9f19184f913e77b32" title="Estimates shift of current image relative to background image.">Simd.Lib.ShiftDetectorEstimate</a>.  <a href="class_simd_1_1_lib.html#aaacbfb0a0b1c02f832b696d89cbe0b2b">More...</a><br /></td></tr>
+<tr class="separator:aaacbfb0a0b1c02f832b696d89cbe0b2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">SynetSetInput</a> (ctypes.c_void_p src, int width, int height, int stride, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> srcFormat, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> dstFormat, isRgb=False)</td></tr>
 <tr class="memdesc:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">More...</a><br /></td></tr>
 <tr class="separator:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2778,7 +2781,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of shift estimation (true or false). In positive case use functions <a class="el" href="class_simd_1_1_lib.html#aaba4562ac98766e800e89d9fffed6716" title="Gets shift estimated before by function Simd.Lib.ShiftDetectorEstimate.">Simd.Lib.ShiftDetectorGetShift</a>, <a class="el" href="class_simd_1_1_lib.html#a1ce89270cdff2833d420e537f6540587" title="Gets refined shift estimated before by function Simd.Lib.ShiftDetectorEstimate.">Simd.Lib.ShiftDetectorGetRefinedShift</a> to get shift and other parameters. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a result of shift estimation (true or false). In positive case use functions <a class="el" href="class_simd_1_1_lib.html#aaba4562ac98766e800e89d9fffed6716" title="Gets shift estimated before by function Simd.Lib.ShiftDetectorEstimate.">Simd.Lib.ShiftDetectorGetShift</a>, <a class="el" href="class_simd_1_1_lib.html#a1ce89270cdff2833d420e537f6540587" title="Gets refined shift estimated before by function Simd.Lib.ShiftDetectorEstimate.">Simd.Lib.ShiftDetectorGetRefinedShift</a>, <a class="el" href="class_simd_1_1_lib.html#aaacbfb0a0b1c02f832b696d89cbe0b2b" title="Gets stability estimated before by function Simd.Lib.ShiftDetectorEstimate.">Simd.Lib.ShiftDetectorGetStability</a> to get shift and other parameters. </dd></dl>
 
 </div>
 </div>
@@ -2826,6 +2829,33 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets refined shift estimated before by function <a class="el" href="class_simd_1_1_lib.html#ab580b37b91433dd9f19184f913e77b32" title="Estimates shift of current image relative to background image.">Simd.Lib.ShiftDetectorEstimate</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="class_simd_1_1_lib.html#a81446a8b8a7c3c30e0d30834c0255065" title="Initializes internal buffers of shift detector.">Simd.Lib.ShiftDetectorInitBuffers</a> and released by function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>refined shift value. </dd></dl>
+
+</div>
+</div>
+<a id="aaacbfb0a0b1c02f832b696d89cbe0b2b" name="aaacbfb0a0b1c02f832b696d89cbe0b2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaacbfb0a0b1c02f832b696d89cbe0b2b">&#9670;&#160;</a></span>ShiftDetectorGetStability()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> float  ShiftDetectorGetStability </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>context</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets stability estimated before by function <a class="el" href="class_simd_1_1_lib.html#ab580b37b91433dd9f19184f913e77b32" title="Estimates shift of current image relative to background image.">Simd.Lib.ShiftDetectorEstimate</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="class_simd_1_1_lib.html#a81446a8b8a7c3c30e0d30834c0255065" title="Initializes internal buffers of shift detector.">Simd.Lib.ShiftDetectorInitBuffers</a> and released by function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </td></tr>

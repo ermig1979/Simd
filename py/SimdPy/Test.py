@@ -158,7 +158,7 @@ def ImageShiftBilinearTest(args) :
 	
 ###################################################################################################
 
-def ImageShiftDetectorTest(args) :
+def ImageShiftDetectorFunctionsTest(args) :
     background = LoadTestImage(args).Converted(Simd.PixelFormat.Gray8)
     current = background.Region(100, 100, background.Width() - 100, background.Height() - 100)
     
@@ -174,20 +174,22 @@ def ImageShiftDetectorTest(args) :
     shiftY = 0
     refinedX = 0.0
     refinedY = 0.0
+    stability = 0.0
     
     if Simd.Lib.ShiftDetectorEstimate(shiftDetector, current.Data(), current.Stride(), current.Width(), current.Height(), startX, startY, 100, 100, 0.0, 25) != 0 :
         found = True
         shiftX, shiftY = Simd.Lib.ShiftDetectorGetShift(shiftDetector)
         refinedX, refinedY = Simd.Lib.ShiftDetectorGetRefinedShift(shiftDetector)
-    
+        stability = Simd.Lib.ShiftDetectorGetStability(shiftDetector)
+		
     Simd.Lib.Release(shiftDetector)	
     
     
     annotated = background.Copy()
-    Simd.ShiftBilinear(current, background, [-float(startX + shiftX), -float(startY + shiftY)], [0, 0, background.Width(), background.Height()], annotated)
-    annotated.Save("annotated_shift_detector_result.jpg", Simd.ImageFile.Jpeg, 85)
+    Simd.ShiftBilinear(current, background, [-float(startX + refinedX), -float(startY + refinedY)], [0, 0, background.Width(), background.Height()], annotated)
+    annotated.Save("shift_detector_result.jpg", Simd.ImageFile.Jpeg, 85)
 
-    print("ShiftDetector: found: {0}, shift: [{1}, {2}], refined shift: [{3:.2f}, {4:.2f}]. ".format(found, startX + shiftX, startY + shiftY, startX + refinedX, startY + refinedY), end="")
+    print("ShiftDetector: found: {0}, shift: [{1}, {2}], refined shift: [{3:.2f}, {4:.2f}], stability: {5:.2f}. ".format(found, startX + shiftX, startY + shiftY, startX + refinedX, startY + refinedY, stability), end="")
 
 
 ###################################################################################################
@@ -201,7 +203,7 @@ def InitTestList(args) :
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)
 	tests.append(ImageShiftBilinearTest)
-	tests.append(ImageShiftDetectorTest)
+	tests.append(ImageShiftDetectorFunctionsTest)
 	tests.append(ImageFrameTest)
 	tests.append(ImageWarpAffineTest)
 	tests.append(ImageToNumpyArrayTest)
