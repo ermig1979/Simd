@@ -169,24 +169,25 @@ def ImageShiftDetectorTest(args) :
     startX = 50
     startY = 50
     
+    found = False
     shiftX = 0
     shiftY = 0
-    found = False
+    refinedX = 0.0
+    refinedY = 0.0
     
     if Simd.Lib.ShiftDetectorEstimate(shiftDetector, current.Data(), current.Stride(), current.Width(), current.Height(), startX, startY, 100, 100, 0.0, 25) != 0 :
         found = True
         shiftX, shiftY = Simd.Lib.ShiftDetectorGetShift(shiftDetector)
+        refinedX, refinedY = Simd.Lib.ShiftDetectorGetRefinedShift(shiftDetector)
     
     Simd.Lib.Release(shiftDetector)	
     
     
     annotated = background.Copy()
     Simd.ShiftBilinear(current, background, [-float(startX + shiftX), -float(startY + shiftY)], [0, 0, background.Width(), background.Height()], annotated)
-    #background.Save("background.jpg", Simd.ImageFile.Jpeg, 85)
-    #current.Save("current.jpg", Simd.ImageFile.Jpeg, 85)
     annotated.Save("annotated_shift_detector_result.jpg", Simd.ImageFile.Jpeg, 85)
 
-    print("ShiftDetector: find: {0} shift: [{1}, {2}].".format(found, startX + shiftX, startY + shiftY), end="")
+    print("ShiftDetector: found: {0}, shift: [{1}, {2}], refined shift: [{3:.2f}, {4:.2f}]. ".format(found, startX + shiftX, startY + shiftY, startX + refinedX, startY + refinedY), end="")
 
 
 ###################################################################################################

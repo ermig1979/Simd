@@ -1131,7 +1131,7 @@ class Lib():
     # @param maxShiftY - maximal possible shift alogn Y axis.
     # @param hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
     # @param regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
-    # @return a result of shift estimation (true or false). In positive case use function Simd.Lib.ShiftDetectorGetShift to get shift and other parameters.
+    # @return a result of shift estimation (true or false). In positive case use functions Simd.Lib.ShiftDetectorGetShift, Simd.Lib.ShiftDetectorGetRefinedShift to get shift and other parameters.
 	def ShiftDetectorEstimate(context : ctypes.c_void_p, curr : ctypes.c_void_p, currStride : int, currWidth : int, currHeight : int, initShiftX : int, initShiftY : int, maxShiftX : int, maxShiftY : int, hiddenAreaPenalty: float, regionAreaMin : int) -> ctypes.c_int32 :
 		hap = ctypes.c_double(hiddenAreaPenalty)
 		return Lib.__lib.SimdShiftDetectorEstimate(context, curr, currStride, currWidth, currHeight, initShiftX, initShiftY, maxShiftX, maxShiftY, ctypes.byref(hap), regionAreaMin)
@@ -1139,11 +1139,20 @@ class Lib():
     ## Gets shift estimated before by function Simd.Lib.ShiftDetectorEstimate.
     # @param context - a shift detector context. It must be created by function Simd.Lib.ShiftDetectorInitBuffers and released by function Simd.Lib.Release.
     # @return estimated shift value.
-	def ShiftDetectorGetShift(context : ctypes.c_void_p) -> tuple[int, int] :
+	def ShiftDetectorGetShift(context : ctypes.c_void_p) -> [int, int] :
 		buf = [0, 0]
 		shift = (ctypes.c_ssize_t * 2)(*buf)
 		Lib.__lib.SimdShiftDetectorGetShift(context, shift, None, None, None)
 		return shift[0], shift[1]
+
+	## Gets refined shift estimated before by function Simd.Lib.ShiftDetectorEstimate.
+    # @param context - a shift detector context. It must be created by function Simd.Lib.ShiftDetectorInitBuffers and released by function Simd.Lib.Release.
+    # @return refined shift value.
+	def ShiftDetectorGetRefinedShift(context : ctypes.c_void_p) -> [float, float] :
+		buf = [0.0, 0.0]
+		refinedShift = (ctypes.c_double * 2)(*buf)
+		Lib.__lib.SimdShiftDetectorGetShift(context, None, refinedShift, None, None)
+		return refinedShift[0], refinedShift[1]
 		
 	## Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
     # @param src - a pointer to pixels data of input image.
@@ -1934,7 +1943,7 @@ def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bil
 # @param shift - an image shift [x, y].
 # @param crop - a crop rectangle [left, top, right, bottom].
 # @param dst - a output image.
-def ShiftBilinear(src : Image, bkg : Image, shift : tuple[float, float], crop: tuple[int, int, int, int], dst : Image) :
+def ShiftBilinear(src : Image, bkg : Image, shift : [float, float], crop: [int, int, int, int], dst : Image) :
 	if dst.Format() == Simd.PixelFormat.Empty :
 		dst.Recreate(bkg.Format(), bkg.Width(), bkg.Height())
 	if dst.Format() != src.Format() or dst.Format() != bkg.Format() :
