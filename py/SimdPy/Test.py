@@ -158,7 +158,7 @@ def ImageShiftBilinearTest(args) :
 	
 ###################################################################################################
 
-def ImageShiftDetectorFunctionsTest(args) :
+def ShiftDetectorFunctionsTest(args) :
     background = LoadTestImage(args).Converted(Simd.PixelFormat.Gray8)
     current = background.Region(100, 100, background.Width() - 100, background.Height() - 100)
     
@@ -191,7 +191,35 @@ def ImageShiftDetectorFunctionsTest(args) :
     Simd.ShiftBilinear(current, background, [-float(startX + refinedX), -float(startY + refinedY)], [0, 0, background.Width(), background.Height()], annotated)
     annotated.Save("shift_detector_result.jpg", Simd.ImageFile.Jpeg, 85)
 
-    print("ShiftDetector: found: {0}, shift: [{1}, {2}], refined shift: [{3:.2f}, {4:.2f}], stability: {5:.2f}, correlation: {6:.2f}. ".format(found, startX + shiftX, startY + shiftY, startX + refinedX, startY + refinedY, stability, correlation), end="")
+    print("ShiftDetectorFunctions: found: {0}, shift: [{1}, {2}], refined: [{3:.2f}, {4:.2f}], stability: {5:.2f}, correlation: {6:.2f}. ".format(found, startX + shiftX, startY + shiftY, startX + refinedX, startY + refinedY, stability, correlation), end="")
+
+def ShiftingDetectorClassTest(args) :
+    background = LoadTestImage(args)
+    current = background.Region(100, 100, background.Width() - 100, background.Height() - 100)
+    
+    shiftingDetector = Simd.ShiftingDetector(background, 4, Simd.ShiftDetectorTexture.Gray, Simd.ShiftDetectorDifference.Abs)
+    
+    start = 50, 50
+    maxShift = 100, 100
+    
+    found = False
+    shift = 0, 0
+    refined = 0.0, 0.0
+    stability = 0.0
+    correlation = 0.0
+    
+    if shiftingDetector.Estimate(current, start, maxShift) :
+        found = True
+        shift = shiftingDetector.GetShift()
+        refined = shiftingDetector.GetRefinedShift()
+        stability = shiftingDetector.GetStability()
+        correlation = shiftingDetector.GetCorrelation()
+    
+    annotated = background.Copy()
+    Simd.ShiftBilinear(current, background, [-float(start[0] + refined[0]), -float(start[1] + refined[1])], [0, 0, background.Width(), background.Height()], annotated)
+    annotated.Save("shift_detector_result.jpg", Simd.ImageFile.Jpeg, 85)
+
+    print("ShiftingDetectorClass: found: {0}, shift: [{1}, {2}], refined: [{3:.2f}, {4:.2f}], stability: {5:.2f}, correlation: {6:.2f}. ".format(found, start[0] + shift[0], start[1] + shift[1], start[0] + refined[0], start[1] + refined[1], stability, correlation), end="")
 
 
 ###################################################################################################
@@ -205,7 +233,8 @@ def InitTestList(args) :
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)
 	tests.append(ImageShiftBilinearTest)
-	tests.append(ImageShiftDetectorFunctionsTest)
+	tests.append(ShiftDetectorFunctionsTest)
+	tests.append(ShiftingDetectorClassTest)
 	tests.append(ImageFrameTest)
 	tests.append(ImageWarpAffineTest)
 	tests.append(ImageToNumpyArrayTest)

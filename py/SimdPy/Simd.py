@@ -311,7 +311,7 @@ class ResizeMethod(enum.Enum) :
 	AreaFast = 8
 	
 ## @ingroup python
-# Describes types of texture which used to find correlation between background and current image in ShiftDetector.
+# Describes types of texture which used to find correlation between background and current image in function Simd.Lib.ShiftDetectorInitBuffers and in class Simd.ShiftingDetector.
 class ShiftDetectorTexture(enum.Enum) :
     ## Original grayscale image.
 	Gray = 0
@@ -319,7 +319,7 @@ class ShiftDetectorTexture(enum.Enum) :
 	Grad = 1
 
 ## @ingroup python
-# Describes types of function which used to find correlation between background and current image in ShiftDetector.
+# Describes types of function which used to find correlation between background and current image in function Simd.Lib.ShiftDetectorInitBuffers and in class Simd.ShiftingDetector.
 class ShiftDetectorDifference(enum.Enum) :
     ## Sum of absolute differences of points of two images.
 	Abs = 0
@@ -1125,8 +1125,8 @@ class Lib():
     # @param currStride - a row size of the current image.
     # @param currWidth - a width of current image.
     # @param currHeight - a height of current image.
-    # @param initShiftX - an initial shift X position to start search.
-    # @param initShiftY - an initial shift Y position to start search.
+    # @param initShiftX - an initial shift X position.
+    # @param initShiftY - an initial shift Y position.
     # @param maxShiftX - maximal possible shift alogn X axis.
     # @param maxShiftY - maximal possible shift alogn Y axis.
     # @param hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
@@ -1893,6 +1893,81 @@ class ImageFrame():
 		dst = ImageFrame(format, self.Width(), self.Height(), yuvType)
 		self.Convert(dst, alpha)
 		return dst
+
+###################################################################################################
+
+## @ingroup python
+# The ShiftingDetector class estimates shift between current and background images.
+class ShiftingDetector():
+	## Creates a new ShiftDetector.
+	# @param background - A background image.
+	# @param levelCount - the number of levels in the internal image pyramids used to find shift.
+	# @param textureType - type of textures used to detect shift (see Simd.ShiftDetectorTexture).
+	# @param differenceType - type of correlation functions used to detect shift (see Simd.ShiftDetectorDifference).
+	def __init__(self, background = Simd.Image(), levelCount = 4, textureType = Simd.ShiftDetectorTexture.Gray, differenceType = Simd.ShiftDetectorDifference.Abs) :
+		self.__context = ctypes.c_void_p(0)
+		self.__frameSize = [0, 0]
+		self.__levelCount = levelCount
+		self.__textureType = textureType
+		self.__differenceType = differenceType
+		if background.Format() != Simd.PixelFormat.Empty :
+			self.SetBackground(background, levelCount)
+	
+	## Releases shift detector context.
+	def __del__(self) :
+		if self.__context != 0 :
+			Simd.Lib.Release(self.__context)
+
+	## Sets background image in shift detector and recreates internal structures if it needs.
+	# @param background - A background image.
+	# @param levelCount - the number of levels in the internal image pyramids used to find shift.
+	def SetBackground(self, background = Simd.Image, levelCount = 4) :
+		if self.__frameSize[0] != background.Width() or self.__frameSize[1] != background.Height() or self.__levelCount != levelCount :
+			if self.__context != 0 :
+				Simd.Lib.Release(self.__context)
+			self.__frameSize[0] = background.Width()
+			self.__frameSize[1] = background.Height()
+			self.__levelCount = levelCount
+			self.__context = Simd.Lib.ShiftDetectorInitBuffers(self.__frameSize[0], self.__frameSize[1], self.__levelCount, self.__textureType, self.__differenceType)
+		if background.Format() == Simd.PixelFormat.Gray8 :
+			Simd.Lib.ShiftDetectorSetBackground(self.__context, background.Data(), background.Stride(), True)
+		else :
+			gray = background.Converted(Simd.PixelFormat.Gray8)
+			Simd.Lib.ShiftDetectorSetBackground(self.__context, gray.Data(), gray.Stride(), True)
+
+	##Estimates shift of current image relative to background image.
+	# @param current - A current image.
+    # @param initShift - an initial shift X and Y position.
+    # @param maxShift - maximal possible shift alogn X and Y axex.
+    # @param hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
+    # @param regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
+	def Estimate(self, current: Simd.Image, initShift: [int, int], maxShift: [int, int], hiddenAreaPenalty = 0.0, regionAreaMin = 25) -> bool:
+		if current.Format() == Simd.PixelFormat.Gray8 :
+			return Simd.Lib.ShiftDetectorEstimate(self.__context, current.Data(), current.Stride(), current.Width(), current.Height(), initShift[0], initShift[1], maxShift[0], maxShift[1], hiddenAreaPenalty, regionAreaMin) != 0
+		else :
+			gray = current.Converted(Simd.PixelFormat.Gray8)
+			return Simd.Lib.ShiftDetectorEstimate(self.__context, gray.Data(), gray.Stride(), gray.Width(), gray.Height(), initShift[0], initShift[1], maxShift[0], maxShift[1], hiddenAreaPenalty, regionAreaMin) != 0
+
+    ## Gets shift estimated before by function Simd.ShiftingDetector.Estimate.
+    # @return estimated shift value.
+	def GetShift(self) -> [int, int] :
+		return Simd.Lib.ShiftDetectorGetShift(self.__context)
+
+	## Gets refined shift estimated before by function Simd.ShiftingDetector.Estimate.
+    # @return refined shift value.
+	def GetRefinedShift(self) -> [float, float] :
+		return Simd.Lib.ShiftDetectorGetRefinedShift(self.__context)
+
+	## Gets stability of shift estimation estimated before by function Simd.ShiftingDetector.Estimate.
+    # @return stability of shift estimation.
+	def GetStability(self) -> float :
+		return Simd.Lib.ShiftDetectorGetStability(self.__context)
+
+	## Gets the best correlation between current image and background estimated before by function Simd.ShiftingDetector.Estimate.
+    # @return the best correlation between current image and background.
+	def GetCorrelation(self) -> float :
+		return Simd.Lib.ShiftDetectorGetCorrelation(self.__context)
+
 
 ###################################################################################################
 
