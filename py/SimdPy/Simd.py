@@ -1131,7 +1131,7 @@ class Lib():
     # @param maxShiftY - maximal possible shift alogn Y axis.
     # @param hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
     # @param regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
-    # @return a result of shift estimation (true or false). In positive case use functions Simd.Lib.ShiftDetectorGetShift, Simd.Lib.ShiftDetectorGetRefinedShift, Simd.Lib.ShiftDetectorGetStability to get shift and other parameters.
+    # @return a result of shift estimation (true or false). In positive case use functions Simd.Lib.ShiftDetectorGetShift, Simd.Lib.ShiftDetectorGetRefinedShift, Simd.Lib.ShiftDetectorGetStability, Simd.Lib.ShiftDetectorGetCorrelation to get shift and other parameters.
 	def ShiftDetectorEstimate(context : ctypes.c_void_p, curr : ctypes.c_void_p, currStride : int, currWidth : int, currHeight : int, initShiftX : int, initShiftY : int, maxShiftX : int, maxShiftY : int, hiddenAreaPenalty: float, regionAreaMin : int) -> ctypes.c_int32 :
 		hap = ctypes.c_double(hiddenAreaPenalty)
 		return Lib.__lib.SimdShiftDetectorEstimate(context, curr, currStride, currWidth, currHeight, initShiftX, initShiftY, maxShiftX, maxShiftY, ctypes.byref(hap), regionAreaMin)
@@ -1154,15 +1154,24 @@ class Lib():
 		Lib.__lib.SimdShiftDetectorGetShift(context, None, refinedShift, None, None)
 		return refinedShift[0], refinedShift[1]
 
-	## Gets stability estimated before by function Simd.Lib.ShiftDetectorEstimate.
+	## Gets stability of shift estimation estimated before by function Simd.Lib.ShiftDetectorEstimate.
     # @param context - a shift detector context. It must be created by function Simd.Lib.ShiftDetectorInitBuffers and released by function Simd.Lib.Release.
-    # @return refined shift value.
+    # @return stability of shift estimation.
 	def ShiftDetectorGetStability(context : ctypes.c_void_p) -> float :
 		buf = [0.0]
 		stability = (ctypes.c_double * 1)(*buf)
 		Lib.__lib.SimdShiftDetectorGetShift(context, None, None, stability, None)
 		return stability[0]
-		
+
+	## Gets the best correlation between current image and background estimated before by function Simd.Lib.ShiftDetectorEstimate.
+    # @param context - a shift detector context. It must be created by function Simd.Lib.ShiftDetectorInitBuffers and released by function Simd.Lib.Release.
+    # @return the best correlation between current image and background.
+	def ShiftDetectorGetCorrelation(context : ctypes.c_void_p) -> float :
+		buf = [0.0]
+		correlation = (ctypes.c_double * 1)(*buf)
+		Lib.__lib.SimdShiftDetectorGetShift(context, None, None, None, correlation)
+		return correlation[0]
+	
 	## Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
     # @param src - a pointer to pixels data of input image.
     # @param height - a height of input image.
