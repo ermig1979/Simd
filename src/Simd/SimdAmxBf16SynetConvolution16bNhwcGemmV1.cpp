@@ -434,7 +434,6 @@ namespace Simd
             _tile_zero(1);
             _tile_zero(2);
             _tile_zero(3);
-
             int srcC32 = (int)a.bufK - 32, sc = 0;
             if(stream)
                 _tile_stream_loadd(4, src0, strideS);
@@ -504,7 +503,6 @@ namespace Simd
             _tile_zero(1);
             _tile_zero(2);
             _tile_zero(3);
-
             int srcC32 = (int)a.bufK - 32, sc = 0;
             _tile_stream_loadd(4, src0, strideS);
             _tile_loadd(6, weight0 + sc * dW, strideW);
@@ -513,14 +511,19 @@ namespace Simd
                 __mmask32 tailD = TailMask32(dstC);
                 for (uint8_t* dst0 = dst1 - 32 * dD; dst0 < dst1; src1 += stepS, dst0 += prev * dD, buf0 += prev * dB)
                 {
+                    _tile_loadd(7, weight1 + sc * dW, strideW);
                     if (term == Term16bLast16b)
                     {
-                        for (size_t ds = 0; ds < prev; ++ds)
+                        for (size_t ds = 0; ds < prev / 2; ++ds)
                             Apply16b2<type, 1>(dst0 + ds * dD, buf0 + ds * dB, bias, params, tailD);
-                    }
-                    _tile_loadd(7, weight1 + sc * dW, strideW);
-                    _tile_stream_loadd(5, src1, strideS);
+                    }                    
                     _tile_dpbf16ps(0, 4, 6);
+                    _tile_stream_loadd(5, src1, strideS);
+                    if (term == Term16bLast16b)
+                    {
+                        for (size_t ds = prev / 2; ds < prev; ++ds)
+                            Apply16b2<type, 1>(dst0 + ds * dD, buf0 + ds * dB, bias, params, tailD);
+                    }                    
                     _tile_dpbf16ps(1, 4, 7);
                     src0 += stepS;
                     _tile_stream_loadd(4, src0, strideS);
@@ -533,8 +536,8 @@ namespace Simd
             for (; sc < srcC32; src1 += stepS)
             {
                 _tile_loadd(7, weight1 + sc * dW, strideW);
-                _tile_stream_loadd(5, src1, strideS);
                 _tile_dpbf16ps(0, 4, 6);
+                _tile_stream_loadd(5, src1, strideS);
                 _tile_dpbf16ps(1, 4, 7);
                 src0 += stepS;
                 _tile_stream_loadd(4, src0, strideS);
@@ -553,7 +556,6 @@ namespace Simd
             _tile_stored(2, buf1 + 16 * dB + 0, strideB);
             _tile_dpbf16ps(3, 5, 7);
             _tile_stored(3, buf1 + 16 * dB + F, strideB);
-            std::cout << " last " << last << " prev " << prev << " buf0 " << buf0 << " buf1 " << buf1 << std::endl;
             if (last)
             {
                 if (term == Term16bLast16b)
@@ -584,11 +586,11 @@ namespace Simd
 
             size_t ds = 0;
             Convolution16bNhwcGemm_32x32b<term, type, 0>(src0, p, a, dstS, dstC, weight0, bias, params, buf0, buf1, dst, dstS <= 32), ds += 32;
-                Swap(buf0, buf1);
             for (; ds < dstS; ds += 32)
             {
+                Swap(buf0, buf1);
                 //Convolution16bNhwcGemm_32x32b<term, type, 0>(src0 + ds * dS, p, a, dstS - ds, dstC, weight0, bias, params, buf0, buf1, dst + ds * dD, 1);
-                Convolution16bNhwcGemm_32x32b<term, type, prev>(src0 + ds * dS, p, a, dstS - ds, dstC, weight0, bias, params, buf0, buf1, dst + ds * dD, ds + 32 >= dstS ? 1 : 0);
+                Convolution16bNhwcGemm_32x32b<term, type, prev>(src0 + ds * dS, p, a, dstS - ds, dstC, weight0, bias, params, buf0, buf1, dst + ds * dD, ds + 32 >= dstS);
             }
 
             //if (last)
@@ -802,7 +804,14 @@ namespace Simd
                     if (dC > F)
                     {
                         for (; i < nn8; i += n * 8)
-                            Convolution16bNhwcGemm_N32x32b<term, type, 4>(s + i * dS, p, a, n * 8, dC, weight, _bias, _params, buf, d + i * dD);
+                        {
+                            if (dS > 512)
+                                Convolution16bNhwcGemm_N32x32b<term, type, 2>(s + i * dS, p, a, n * 8, dC, weight, _bias, _params, buf, d + i * dD);
+                            else if (dS > 256)
+                                Convolution16bNhwcGemm_N32x32b<term, type, 4>(s + i * dS, p, a, n * 8, dC, weight, _bias, _params, buf, d + i * dD);
+                            else
+                                Convolution16bNhwcGemm_N32x32b<term, type, 8>(s + i * dS, p, a, n * 8, dC, weight, _bias, _params, buf, d + i * dD);
+                        }
                         for (; i < nn; i += n)
                             body_2(s + i * dS, p, a, n, dC, weight, _bias, _params, buf, d + i * dD);
                         if (m)

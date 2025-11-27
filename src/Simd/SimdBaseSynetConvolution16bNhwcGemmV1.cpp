@@ -139,7 +139,6 @@ namespace Simd
                 src += _stepS;
                 dst += _stepD;
             }
-            //std::cout << SimdVersion() << std::endl;
         }
 
         void SynetConvolution16bNhwcGemmV1::Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
@@ -181,7 +180,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && Simd::Aligned(p.dstW * p.dstH, 32) && Simd::Aligned(p.dstC, 32) && p.srcC >= 256 && p.srcC <= 512 && 0;
+            return p.trans != 0 && p.group == 1 && Simd::Aligned(p.dstW * p.dstH, 32) && Simd::Aligned(p.dstC, 32) && p.srcC >= 256 && p.srcC <= 512 && 1;
         }
     }
 #endif
