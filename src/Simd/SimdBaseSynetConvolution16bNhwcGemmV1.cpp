@@ -87,7 +87,7 @@ namespace Simd
             size_t size = 0;
             if(_convert)
                 size += a.bufM * a.bufK * sizeof(uint16_t);
-            size += a.microD * a.microM * sizeof(float);
+            size += a.microD * a.microM * sizeof(float) * 2;
             return size;
         }
 
@@ -181,7 +181,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && Simd::Aligned(p.dstW * p.dstH, 32) && Simd::Aligned(p.dstC, 32) && 0;//&& p.srcC >= 256 && p.srcC <= 512;
+            return p.trans != 0 && p.group == 1 && Simd::Aligned(p.dstW * p.dstH, 32) && Simd::Aligned(p.dstC, 32) && p.srcC >= 256 && p.srcC <= 512 && 0;
         }
     }
 #endif

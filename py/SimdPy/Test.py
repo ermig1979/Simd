@@ -193,6 +193,8 @@ def ShiftDetectorFunctionsTest(args) :
 
     print("ShiftDetectorFunctions: found: {0}, shift: [{1}, {2}], refined: [{3:.2f}, {4:.2f}], stability: {5:.2f}, correlation: {6:.2f}. ".format(found, startX + shiftX, startY + shiftY, startX + refinedX, startY + refinedY, stability, correlation), end="")
 
+###################################################################################################
+
 def ShiftingDetectorClassTest(args) :
     background = LoadTestImage(args)
     current = background.Region(100, 100, background.Width() - 100, background.Height() - 100)
