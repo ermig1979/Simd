@@ -34,181 +34,57 @@ namespace Simd
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE) 
 	namespace Avx512bw
     {
-		template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x12(const float* src0, size_t srcC,
-			const float* weight, const __m512* bias, const __m512* params, float* dst0, float* dst1)
-		{
-			__m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1, s0, w0, w1;
-			d00 = bias[0], d01 = bias[1];
-			d10 = bias[0], d11 = bias[1];
-			d20 = bias[0], d21 = bias[1];
-			d30 = bias[0], d31 = bias[1];
-			d40 = bias[0], d41 = bias[1];
-			d50 = bias[0], d51 = bias[1];
-			d60 = bias[0], d61 = bias[1];
-			d70 = bias[0], d71 = bias[1];
-			d80 = bias[0], d81 = bias[1];
-			d90 = bias[0], d91 = bias[1];
-			da0 = bias[0], da1 = bias[1];
-			db0 = bias[0], db1 = bias[1];
-			const float* src1 = src0 + 1 * srcC;
-			const float* src2 = src0 + 2 * srcC;
-			const float* src3 = src0 + 3 * srcC;
-			const float* src4 = src0 + 4 * srcC;
-			const float* src5 = src0 + 5 * srcC;
-			for (size_t sc0 = 0, sc6 = 6 * srcC; sc0 < srcC; ++sc0, ++sc6)
-			{
-				w0 = _mm512_loadu_ps(weight + 0);
-				w1 = _mm512_loadu_ps(weight + F);
-				s0 = _mm512_set1_ps(src0[sc0]);
-				d00 = _mm512_fmadd_ps(s0, w0, d00);
-				d01 = _mm512_fmadd_ps(s0, w1, d01);
-				s0 = _mm512_set1_ps(src1[sc0]);
-				d10 = _mm512_fmadd_ps(s0, w0, d10);
-				d11 = _mm512_fmadd_ps(s0, w1, d11);
-				s0 = _mm512_set1_ps(src2[sc0]);
-				d20 = _mm512_fmadd_ps(s0, w0, d20);
-				d21 = _mm512_fmadd_ps(s0, w1, d21);
-				s0 = _mm512_set1_ps(src3[sc0]);
-				d30 = _mm512_fmadd_ps(s0, w0, d30);
-				d31 = _mm512_fmadd_ps(s0, w1, d31);
-				s0 = _mm512_set1_ps(src4[sc0]);
-				d40 = _mm512_fmadd_ps(s0, w0, d40);
-				d41 = _mm512_fmadd_ps(s0, w1, d41);
-				s0 = _mm512_set1_ps(src5[sc0]);
-				d50 = _mm512_fmadd_ps(s0, w0, d50);
-				d51 = _mm512_fmadd_ps(s0, w1, d51);
-				s0 = _mm512_set1_ps(src0[sc6]);
-				d60 = _mm512_fmadd_ps(s0, w0, d60);
-				d61 = _mm512_fmadd_ps(s0, w1, d61);
-				s0 = _mm512_set1_ps(src1[sc6]);
-				d70 = _mm512_fmadd_ps(s0, w0, d70);
-				d71 = _mm512_fmadd_ps(s0, w1, d71);
-				s0 = _mm512_set1_ps(src2[sc6]);
-				d80 = _mm512_fmadd_ps(s0, w0, d80);
-				d81 = _mm512_fmadd_ps(s0, w1, d81);
-				s0 = _mm512_set1_ps(src3[sc6]);
-				d90 = _mm512_fmadd_ps(s0, w0, d90);
-				d91 = _mm512_fmadd_ps(s0, w1, d91);
-				s0 = _mm512_set1_ps(src4[sc6]);
-				da0 = _mm512_fmadd_ps(s0, w0, da0);
-				da1 = _mm512_fmadd_ps(s0, w1, da1);
-				s0 = _mm512_set1_ps(src5[sc6]);
-				db0 = _mm512_fmadd_ps(s0, w0, db0);
-				db1 = _mm512_fmadd_ps(s0, w1, db1);
-				weight += DF;
-			}
-			_mm512_storeu_ps(dst0 + 0 * F, Activate<type>(d00, params, 0));
-			_mm512_storeu_ps(dst1 + 0 * F, Activate<type>(d01, params, 1));
-			_mm512_storeu_ps(dst0 + 1 * F, Activate<type>(d10, params, 0));
-			_mm512_storeu_ps(dst1 + 1 * F, Activate<type>(d11, params, 1));
-			_mm512_storeu_ps(dst0 + 2 * F, Activate<type>(d20, params, 0));
-			_mm512_storeu_ps(dst1 + 2 * F, Activate<type>(d21, params, 1));
-			_mm512_storeu_ps(dst0 + 3 * F, Activate<type>(d30, params, 0));
-			_mm512_storeu_ps(dst1 + 3 * F, Activate<type>(d31, params, 1));
-			_mm512_storeu_ps(dst0 + 4 * F, Activate<type>(d40, params, 0));
-			_mm512_storeu_ps(dst1 + 4 * F, Activate<type>(d41, params, 1));
-			_mm512_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
-			_mm512_storeu_ps(dst1 + 5 * F, Activate<type>(d51, params, 1));
-			_mm512_storeu_ps(dst0 + 6 * F, Activate<type>(d60, params, 0));
-			_mm512_storeu_ps(dst1 + 6 * F, Activate<type>(d61, params, 1));
-			_mm512_storeu_ps(dst0 + 7 * F, Activate<type>(d70, params, 0));
-			_mm512_storeu_ps(dst1 + 7 * F, Activate<type>(d71, params, 1));
-			_mm512_storeu_ps(dst0 + 8 * F, Activate<type>(d80, params, 0));
-			_mm512_storeu_ps(dst1 + 8 * F, Activate<type>(d81, params, 1));
-			_mm512_storeu_ps(dst0 + 9 * F, Activate<type>(d90, params, 0));
-			_mm512_storeu_ps(dst1 + 9 * F, Activate<type>(d91, params, 1));
-			_mm512_storeu_ps(dst0 + 10 * F, Activate<type>(da0, params, 0));
-			_mm512_storeu_ps(dst1 + 10 * F, Activate<type>(da1, params, 1));
-			_mm512_storeu_ps(dst0 + 11 * F, Activate<type>(db0, params, 0));
-			_mm512_storeu_ps(dst1 + 11 * F, Activate<type>(db1, params, 1));
-		}
-
-		template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x6(const float* src0, size_t srcC,
-			const float* weight, const __m512* bias, const __m512* params, float* dst0, float* dst1)
-		{
-			__m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
-			d00 = bias[0], d01 = bias[1];
-			d10 = bias[0], d11 = bias[1];
-			d20 = bias[0], d21 = bias[1];
-			d30 = bias[0], d31 = bias[1];
-			d40 = bias[0], d41 = bias[1];
-			d50 = bias[0], d51 = bias[1];
-			const float* src1 = src0 + 1 * srcC;
-			const float* src2 = src0 + 2 * srcC;
-			const float* src3 = src0 + 3 * srcC;
-			const float* src4 = src0 + 4 * srcC;
-			const float* src5 = src0 + 5 * srcC;
-			for (size_t sc = 0; sc < srcC; ++sc)
-			{
-				w0 = _mm512_loadu_ps(weight + 0);
-				w1 = _mm512_loadu_ps(weight + F);
-				s0 = _mm512_set1_ps(src0[sc]);
-				d00 = _mm512_fmadd_ps(s0, w0, d00);
-				d01 = _mm512_fmadd_ps(s0, w1, d01);
-				s0 = _mm512_set1_ps(src1[sc]);
-				d10 = _mm512_fmadd_ps(s0, w0, d10);
-				d11 = _mm512_fmadd_ps(s0, w1, d11);
-				s0 = _mm512_set1_ps(src2[sc]);
-				d20 = _mm512_fmadd_ps(s0, w0, d20);
-				d21 = _mm512_fmadd_ps(s0, w1, d21);
-				s0 = _mm512_set1_ps(src3[sc]);
-				d30 = _mm512_fmadd_ps(s0, w0, d30);
-				d31 = _mm512_fmadd_ps(s0, w1, d31);
-				s0 = _mm512_set1_ps(src4[sc]);
-				d40 = _mm512_fmadd_ps(s0, w0, d40);
-				d41 = _mm512_fmadd_ps(s0, w1, d41);
-				s0 = _mm512_set1_ps(src5[sc]);
-				d50 = _mm512_fmadd_ps(s0, w0, d50);
-				d51 = _mm512_fmadd_ps(s0, w1, d51);
-				weight += DF;
-			}
-			_mm512_storeu_ps(dst0 + 0 * F, Activate<type>(d00, params, 0));
-			_mm512_storeu_ps(dst1 + 0 * F, Activate<type>(d01, params, 1));
-			_mm512_storeu_ps(dst0 + 1 * F, Activate<type>(d10, params, 0));
-			_mm512_storeu_ps(dst1 + 1 * F, Activate<type>(d11, params, 1));
-			_mm512_storeu_ps(dst0 + 2 * F, Activate<type>(d20, params, 0));
-			_mm512_storeu_ps(dst1 + 2 * F, Activate<type>(d21, params, 1));
-			_mm512_storeu_ps(dst0 + 3 * F, Activate<type>(d30, params, 0));
-			_mm512_storeu_ps(dst1 + 3 * F, Activate<type>(d31, params, 1));
-			_mm512_storeu_ps(dst0 + 4 * F, Activate<type>(d40, params, 0));
-			_mm512_storeu_ps(dst1 + 4 * F, Activate<type>(d41, params, 1));
-			_mm512_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
-			_mm512_storeu_ps(dst1 + 5 * F, Activate<type>(d51, params, 1));
-		}
-
 		template<SimdConvolutionActivationType type, int M> SIMD_INLINE void InputConvolution1x1_2xM(const float* src0, size_t srcC,
 			const float* weight, const __m512* bias, const __m512* params, float* dst0, float* dst1)
 		{
-			__m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
-			if (M > 0) d00 = bias[0], d01 = bias[1];
-			if (M > 1) d10 = bias[0], d11 = bias[1];
-			if (M > 2) d20 = bias[0], d21 = bias[1];
-			if (M > 3) d30 = bias[0], d31 = bias[1];
-			if (M > 4) d40 = bias[0], d41 = bias[1];
-			if (M > 5) d50 = bias[0], d51 = bias[1];
+			__m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1, s0, s1, w0, w1;
+			if (M > 0x0) d00 = bias[0], d01 = bias[1];
+			if (M > 0x1) d10 = bias[0], d11 = bias[1];
+			if (M > 0x2) d20 = bias[0], d21 = bias[1];
+			if (M > 0x3) d30 = bias[0], d31 = bias[1];
+			if (M > 0x4) d40 = bias[0], d41 = bias[1];
+			if (M > 0x5) d50 = bias[0], d51 = bias[1];
+			if (M > 0x6) d60 = bias[0], d61 = bias[1];
+			if (M > 0x7) d70 = bias[0], d71 = bias[1];
+			if (M > 0x8) d80 = bias[0], d81 = bias[1];
+			if (M > 0x9) d90 = bias[0], d91 = bias[1];
+			if (M > 0xa) da0 = bias[0], da1 = bias[1];
+			if (M > 0xb) db0 = bias[0], db1 = bias[1];			
 			const float* src1 = src0 + 1 * srcC;
 			const float* src2 = src0 + 2 * srcC;
 			const float* src3 = src0 + 3 * srcC;
 			const float* src4 = src0 + 4 * srcC;
 			const float* src5 = src0 + 5 * srcC;
-			for (size_t sc = 0; sc < srcC; ++sc)
+			for (size_t offs0 = 0, offs6 = offs0 + 6 * srcC, end = srcC; offs0 < end; offs0 += 1, offs6 += 1)
 			{
 				w0 = _mm512_loadu_ps(weight + 0);
 				w1 = _mm512_loadu_ps(weight + F);
-				if (M > 0) s0 = _mm512_set1_ps(src0[sc]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
-				if (M > 1) s0 = _mm512_set1_ps(src1[sc]), d10 = _mm512_fmadd_ps(s0, w0, d10), d11 = _mm512_fmadd_ps(s0, w1, d11);
-				if (M > 2) s0 = _mm512_set1_ps(src2[sc]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
-				if (M > 3) s0 = _mm512_set1_ps(src3[sc]), d30 = _mm512_fmadd_ps(s0, w0, d30), d31 = _mm512_fmadd_ps(s0, w1, d31);
-				if (M > 4) s0 = _mm512_set1_ps(src4[sc]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
-				if (M > 5) s0 = _mm512_set1_ps(src5[sc]), d50 = _mm512_fmadd_ps(s0, w0, d50), d51 = _mm512_fmadd_ps(s0, w1, d51);
+				if (M > 0x0) s0 = _mm512_set1_ps(src0[offs0]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
+				if (M > 0x1) s1 = _mm512_set1_ps(src1[offs0]), d10 = _mm512_fmadd_ps(s1, w0, d10), d11 = _mm512_fmadd_ps(s1, w1, d11);
+				if (M > 0x2) s0 = _mm512_set1_ps(src2[offs0]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
+				if (M > 0x3) s1 = _mm512_set1_ps(src3[offs0]), d30 = _mm512_fmadd_ps(s1, w0, d30), d31 = _mm512_fmadd_ps(s1, w1, d31);
+				if (M > 0x4) s0 = _mm512_set1_ps(src4[offs0]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
+				if (M > 0x5) s1 = _mm512_set1_ps(src5[offs0]), d50 = _mm512_fmadd_ps(s1, w0, d50), d51 = _mm512_fmadd_ps(s1, w1, d51);
+				if (M > 0x6) s0 = _mm512_set1_ps(src0[offs6]), d60 = _mm512_fmadd_ps(s0, w0, d60), d61 = _mm512_fmadd_ps(s0, w1, d61);
+				if (M > 0x7) s1 = _mm512_set1_ps(src1[offs6]), d70 = _mm512_fmadd_ps(s1, w0, d70), d71 = _mm512_fmadd_ps(s1, w1, d71);
+				if (M > 0x8) s0 = _mm512_set1_ps(src2[offs6]), d80 = _mm512_fmadd_ps(s0, w0, d80), d81 = _mm512_fmadd_ps(s0, w1, d81);
+				if (M > 0x9) s1 = _mm512_set1_ps(src3[offs6]), d90 = _mm512_fmadd_ps(s1, w0, d90), d91 = _mm512_fmadd_ps(s1, w1, d91);
+				if (M > 0xa) s0 = _mm512_set1_ps(src4[offs6]), da0 = _mm512_fmadd_ps(s0, w0, da0), da1 = _mm512_fmadd_ps(s0, w1, da1);
+				if (M > 0xb) s1 = _mm512_set1_ps(src5[offs6]), db0 = _mm512_fmadd_ps(s1, w0, db0), db1 = _mm512_fmadd_ps(s1, w1, db1);
 				weight += DF;
 			}
-			if (M > 0) _mm512_storeu_ps(dst0 + 0 * F, Activate<type>(d00, params, 0)), _mm512_storeu_ps(dst1 + 0 * F, Activate<type>(d01, params, 1));
-			if (M > 1) _mm512_storeu_ps(dst0 + 1 * F, Activate<type>(d10, params, 0)), _mm512_storeu_ps(dst1 + 1 * F, Activate<type>(d11, params, 1));
-			if (M > 2) _mm512_storeu_ps(dst0 + 2 * F, Activate<type>(d20, params, 0)), _mm512_storeu_ps(dst1 + 2 * F, Activate<type>(d21, params, 1));
-			if (M > 3) _mm512_storeu_ps(dst0 + 3 * F, Activate<type>(d30, params, 0)), _mm512_storeu_ps(dst1 + 3 * F, Activate<type>(d31, params, 1));
-			if (M > 4) _mm512_storeu_ps(dst0 + 4 * F, Activate<type>(d40, params, 0)), _mm512_storeu_ps(dst1 + 4 * F, Activate<type>(d41, params, 1));
-			if (M > 5) _mm512_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0)), _mm512_storeu_ps(dst1 + 5 * F, Activate<type>(d51, params, 1));
+			if (M > 0x0) _mm512_storeu_ps(dst0 + 0x0 * F, Activate<type>(d00, params, 0)), _mm512_storeu_ps(dst1 + 0x0 * F, Activate<type>(d01, params, 1));
+			if (M > 0x1) _mm512_storeu_ps(dst0 + 0x1 * F, Activate<type>(d10, params, 0)), _mm512_storeu_ps(dst1 + 0x1 * F, Activate<type>(d11, params, 1));
+			if (M > 0x2) _mm512_storeu_ps(dst0 + 0x2 * F, Activate<type>(d20, params, 0)), _mm512_storeu_ps(dst1 + 0x2 * F, Activate<type>(d21, params, 1));
+			if (M > 0x3) _mm512_storeu_ps(dst0 + 0x3 * F, Activate<type>(d30, params, 0)), _mm512_storeu_ps(dst1 + 0x3 * F, Activate<type>(d31, params, 1));
+			if (M > 0x4) _mm512_storeu_ps(dst0 + 0x4 * F, Activate<type>(d40, params, 0)), _mm512_storeu_ps(dst1 + 0x4 * F, Activate<type>(d41, params, 1));
+			if (M > 0x5) _mm512_storeu_ps(dst0 + 0x5 * F, Activate<type>(d50, params, 0)), _mm512_storeu_ps(dst1 + 0x5 * F, Activate<type>(d51, params, 1));
+			if (M > 0x6) _mm512_storeu_ps(dst0 + 0x6 * F, Activate<type>(d60, params, 0)), _mm512_storeu_ps(dst1 + 0x6 * F, Activate<type>(d61, params, 1));
+			if (M > 0x7) _mm512_storeu_ps(dst0 + 0x7 * F, Activate<type>(d70, params, 0)), _mm512_storeu_ps(dst1 + 0x7 * F, Activate<type>(d71, params, 1));
+			if (M > 0x8) _mm512_storeu_ps(dst0 + 0x8 * F, Activate<type>(d80, params, 0)), _mm512_storeu_ps(dst1 + 0x8 * F, Activate<type>(d81, params, 1));
+			if (M > 0x9) _mm512_storeu_ps(dst0 + 0x9 * F, Activate<type>(d90, params, 0)), _mm512_storeu_ps(dst1 + 0x9 * F, Activate<type>(d91, params, 1));
+			if (M > 0xa) _mm512_storeu_ps(dst0 + 0xa * F, Activate<type>(da0, params, 0)), _mm512_storeu_ps(dst1 + 0xa * F, Activate<type>(da1, params, 1));
+			if (M > 0xb) _mm512_storeu_ps(dst0 + 0xb * F, Activate<type>(db0, params, 0)), _mm512_storeu_ps(dst1 + 0xb * F, Activate<type>(db1, params, 1));
 		}
 
 		typedef void(*InputConvolution1x1_2xM_Ptr)(const float* src0, size_t srcC, const float* weight, const __m512* bias, const __m512* params, float* dst0, float* dst1);
@@ -217,89 +93,73 @@ namespace Simd
 		{
 			switch (M)
 			{
-			case 0: return InputConvolution1x1_2xM<type, 0>;
-			case 1: return InputConvolution1x1_2xM<type, 1>;
-			case 2: return InputConvolution1x1_2xM<type, 2>;
-			case 3: return InputConvolution1x1_2xM<type, 3>;
-			case 4: return InputConvolution1x1_2xM<type, 4>;
-			case 5: return InputConvolution1x1_2xM<type, 5>;
+			case 0x1: return InputConvolution1x1_2xM<type, 0x1>;
+			case 0x2: return InputConvolution1x1_2xM<type, 0x2>;
+			case 0x3: return InputConvolution1x1_2xM<type, 0x3>;
+			case 0x4: return InputConvolution1x1_2xM<type, 0x4>;
+			case 0x5: return InputConvolution1x1_2xM<type, 0x5>;
+			case 0x6: return InputConvolution1x1_2xM<type, 0x6>;
+			case 0x7: return InputConvolution1x1_2xM<type, 0x7>;
+			case 0x8: return InputConvolution1x1_2xM<type, 0x8>;
+			case 0x9: return InputConvolution1x1_2xM<type, 0x9>;
+			case 0xa: return InputConvolution1x1_2xM<type, 0xa>;
+			case 0xb: return InputConvolution1x1_2xM<type, 0xb>;
+			case 0xc: return InputConvolution1x1_2xM<type, 0xc>;
 			}
 			assert(0);
 			return NULL;
 		}
 
-		template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_1x6(const float* src0, size_t srcC,
-			const float* weight, const __m512* bias, const __m512* params, float* dst0)
-		{
-			__m512 d00, d10, d20, d30, d40, d50, s0, w0;
-			d00 = bias[0];
-			d10 = bias[0];
-			d20 = bias[0];
-			d30 = bias[0];
-			d40 = bias[0];
-			d50 = bias[0];
-			const float* src1 = src0 + 1 * srcC;
-			const float* src2 = src0 + 2 * srcC;
-			const float* src3 = src0 + 3 * srcC;
-			const float* src4 = src0 + 4 * srcC;
-			const float* src5 = src0 + 5 * srcC;
-			for (size_t sc = 0; sc < srcC; ++sc)
-			{
-				w0 = _mm512_loadu_ps(weight + 0);
-				s0 = _mm512_set1_ps(src0[sc]);
-				d00 = _mm512_fmadd_ps(s0, w0, d00);
-				s0 = _mm512_set1_ps(src1[sc]);
-				d10 = _mm512_fmadd_ps(s0, w0, d10);
-				s0 = _mm512_set1_ps(src2[sc]);
-				d20 = _mm512_fmadd_ps(s0, w0, d20);
-				s0 = _mm512_set1_ps(src3[sc]);
-				d30 = _mm512_fmadd_ps(s0, w0, d30);
-				s0 = _mm512_set1_ps(src4[sc]);
-				d40 = _mm512_fmadd_ps(s0, w0, d40);
-				s0 = _mm512_set1_ps(src5[sc]);
-				d50 = _mm512_fmadd_ps(s0, w0, d50);
-				weight += DF;
-			}
-			_mm512_storeu_ps(dst0 + 0 * F, Activate<type>(d00, params, 0));
-			_mm512_storeu_ps(dst0 + 1 * F, Activate<type>(d10, params, 0));
-			_mm512_storeu_ps(dst0 + 2 * F, Activate<type>(d20, params, 0));
-			_mm512_storeu_ps(dst0 + 3 * F, Activate<type>(d30, params, 0));
-			_mm512_storeu_ps(dst0 + 4 * F, Activate<type>(d40, params, 0));
-			_mm512_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
-		}
-
 		template<SimdConvolutionActivationType type, int M> SIMD_INLINE void InputConvolution1x1_1xM(const float* src0, size_t srcC,
 			const float* weight, const __m512* bias, const __m512* params, float* dst0)
 		{
-			__m512 d00, d10, d20, d30, d40, d50, s0, w0;
-			if (M > 0) d00 = bias[0];
-			if (M > 1) d10 = bias[0];
-			if (M > 2) d20 = bias[0];
-			if (M > 3) d30 = bias[0];
-			if (M > 4) d40 = bias[0];
-			if (M > 5) d50 = bias[0];
+			__m512 d00, d10, d20, d30, d40, d50, d60, d70, d80, d90, da0, db0, s0, s1, w0;
+			if (M > 0x0) d00 = bias[0];
+			if (M > 0x1) d10 = bias[0];
+			if (M > 0x2) d20 = bias[0];
+			if (M > 0x3) d30 = bias[0];
+			if (M > 0x4) d40 = bias[0];
+			if (M > 0x5) d50 = bias[0];
+			if (M > 0x6) d60 = bias[0];
+			if (M > 0x7) d70 = bias[0];
+			if (M > 0x8) d80 = bias[0];
+			if (M > 0x9) d90 = bias[0];
+			if (M > 0xa) da0 = bias[0];
+			if (M > 0xb) db0 = bias[0];
 			const float* src1 = src0 + 1 * srcC;
 			const float* src2 = src0 + 2 * srcC;
 			const float* src3 = src0 + 3 * srcC;
 			const float* src4 = src0 + 4 * srcC;
 			const float* src5 = src0 + 5 * srcC;
-			for (size_t sc = 0; sc < srcC; ++sc)
+			for (size_t offs0 = 0, offs6 = offs0 + 6 * srcC, end = srcC; offs0 < end; offs0 += 1, offs6 += 1)
 			{
 				w0 = _mm512_loadu_ps(weight + 0);
-				if (M > 0) s0 = _mm512_set1_ps(src0[sc]), d00 = _mm512_fmadd_ps(s0, w0, d00);
-				if (M > 1) s0 = _mm512_set1_ps(src1[sc]), d10 = _mm512_fmadd_ps(s0, w0, d10);
-				if (M > 2) s0 = _mm512_set1_ps(src2[sc]), d20 = _mm512_fmadd_ps(s0, w0, d20);
-				if (M > 3) s0 = _mm512_set1_ps(src3[sc]), d30 = _mm512_fmadd_ps(s0, w0, d30);
-				if (M > 4) s0 = _mm512_set1_ps(src4[sc]), d40 = _mm512_fmadd_ps(s0, w0, d40);
-				if (M > 5) s0 = _mm512_set1_ps(src5[sc]), d50 = _mm512_fmadd_ps(s0, w0, d50);
+				if (M > 0x0) s0 = _mm512_set1_ps(src0[offs0]), d00 = _mm512_fmadd_ps(s0, w0, d00);
+				if (M > 0x1) s1 = _mm512_set1_ps(src1[offs0]), d10 = _mm512_fmadd_ps(s1, w0, d10);
+				if (M > 0x2) s0 = _mm512_set1_ps(src2[offs0]), d20 = _mm512_fmadd_ps(s0, w0, d20);
+				if (M > 0x3) s1 = _mm512_set1_ps(src3[offs0]), d30 = _mm512_fmadd_ps(s1, w0, d30);
+				if (M > 0x4) s0 = _mm512_set1_ps(src4[offs0]), d40 = _mm512_fmadd_ps(s0, w0, d40);
+				if (M > 0x5) s1 = _mm512_set1_ps(src5[offs0]), d50 = _mm512_fmadd_ps(s1, w0, d50);
+				if (M > 0x6) s0 = _mm512_set1_ps(src0[offs6]), d60 = _mm512_fmadd_ps(s0, w0, d60);
+				if (M > 0x7) s1 = _mm512_set1_ps(src1[offs6]), d70 = _mm512_fmadd_ps(s1, w0, d70);
+				if (M > 0x8) s0 = _mm512_set1_ps(src2[offs6]), d80 = _mm512_fmadd_ps(s0, w0, d80);
+				if (M > 0x9) s1 = _mm512_set1_ps(src3[offs6]), d90 = _mm512_fmadd_ps(s1, w0, d90);
+				if (M > 0xa) s0 = _mm512_set1_ps(src4[offs6]), da0 = _mm512_fmadd_ps(s0, w0, da0);
+				if (M > 0xb) s1 = _mm512_set1_ps(src5[offs6]), db0 = _mm512_fmadd_ps(s1, w0, db0);
 				weight += DF;
 			}
-			if (M > 0) _mm512_storeu_ps(dst0 + 0 * F, Activate<type>(d00, params, 0));
-			if (M > 1) _mm512_storeu_ps(dst0 + 1 * F, Activate<type>(d10, params, 0));
-			if (M > 2) _mm512_storeu_ps(dst0 + 2 * F, Activate<type>(d20, params, 0));
-			if (M > 3) _mm512_storeu_ps(dst0 + 3 * F, Activate<type>(d30, params, 0));
-			if (M > 4) _mm512_storeu_ps(dst0 + 4 * F, Activate<type>(d40, params, 0));
-			if (M > 5) _mm512_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
+			if (M > 0x0) _mm512_storeu_ps(dst0 + 0x0 * F, Activate<type>(d00, params, 0));
+			if (M > 0x1) _mm512_storeu_ps(dst0 + 0x1 * F, Activate<type>(d10, params, 0));
+			if (M > 0x2) _mm512_storeu_ps(dst0 + 0x2 * F, Activate<type>(d20, params, 0));
+			if (M > 0x3) _mm512_storeu_ps(dst0 + 0x3 * F, Activate<type>(d30, params, 0));
+			if (M > 0x4) _mm512_storeu_ps(dst0 + 0x4 * F, Activate<type>(d40, params, 0));
+			if (M > 0x5) _mm512_storeu_ps(dst0 + 0x5 * F, Activate<type>(d50, params, 0));
+			if (M > 0x6) _mm512_storeu_ps(dst0 + 0x6 * F, Activate<type>(d60, params, 0));
+			if (M > 0x7) _mm512_storeu_ps(dst0 + 0x7 * F, Activate<type>(d70, params, 0));
+			if (M > 0x8) _mm512_storeu_ps(dst0 + 0x8 * F, Activate<type>(d80, params, 0));
+			if (M > 0x9) _mm512_storeu_ps(dst0 + 0x9 * F, Activate<type>(d90, params, 0));
+			if (M > 0xa) _mm512_storeu_ps(dst0 + 0xa * F, Activate<type>(da0, params, 0));
+			if (M > 0xb) _mm512_storeu_ps(dst0 + 0xb * F, Activate<type>(db0, params, 0));
 		}
 
 		typedef void(*InputConvolution1x1_1xM_Ptr)(const float* src0, size_t srcC, const float* weight, const __m512* bias, const __m512* params, float* dst0);
@@ -308,12 +168,18 @@ namespace Simd
 		{
 			switch (M)
 			{
-			case 0: return InputConvolution1x1_1xM<type, 0>;
-			case 1: return InputConvolution1x1_1xM<type, 1>;
-			case 2: return InputConvolution1x1_1xM<type, 2>;
-			case 3: return InputConvolution1x1_1xM<type, 3>;
-			case 4: return InputConvolution1x1_1xM<type, 4>;
-			case 5: return InputConvolution1x1_1xM<type, 5>;
+			case 0x1: return InputConvolution1x1_1xM<type, 0x1>;
+			case 0x2: return InputConvolution1x1_1xM<type, 0x2>;
+			case 0x3: return InputConvolution1x1_1xM<type, 0x3>;
+			case 0x4: return InputConvolution1x1_1xM<type, 0x4>;
+			case 0x5: return InputConvolution1x1_1xM<type, 0x5>;
+			case 0x6: return InputConvolution1x1_1xM<type, 0x6>;
+			case 0x7: return InputConvolution1x1_1xM<type, 0x7>;
+			case 0x8: return InputConvolution1x1_1xM<type, 0x8>;
+			case 0x9: return InputConvolution1x1_1xM<type, 0x9>;
+			case 0xa: return InputConvolution1x1_1xM<type, 0xa>;
+			case 0xb: return InputConvolution1x1_1xM<type, 0xb>;
+			case 0xc: return InputConvolution1x1_1xM<type, 0xc>;
 			}
 			assert(0);
 			return NULL;
@@ -332,8 +198,7 @@ namespace Simd
 				type == SimdConvolutionActivationHardSigmoid)
 				_params[1] = _mm512_set1_ps(params[1]);
 			size_t yInt = Simd::Max(yBeg, yEnd & (~dstM)), nBeg = yBeg * dstW, nInt = yInt * dstW, nEnd = yEnd * dstW;
-			size_t nInt6 = AlignLoAny(nInt - nBeg, 6) + nBeg, nEnd6 = AlignLoAny(nEnd - nInt, 6) + nInt, nIntTail = nInt - nInt6, nEndTail = nEnd - nEnd6;
-			size_t nInt12 = AlignLoAny(nInt - nBeg, 12) + nBeg, nEnd12 = AlignLoAny(nEnd - nInt, 12) + nInt;
+			size_t nInt12 = AlignLoAny(nInt - nBeg, 12) + nBeg, nEnd12 = AlignLoAny(nEnd - nInt, 12) + nInt, nIntTail = nInt - nInt12, nEndTail = nEnd - nEnd12;
 			InputConvolution1x1_2xM_Ptr tailInt_2 = GetInputConvolution1x1_2xM<type>(nIntTail);
 			InputConvolution1x1_2xM_Ptr tailEnd_2 = GetInputConvolution1x1_2xM<type>(nEndTail);
 
@@ -356,15 +221,11 @@ namespace Simd
 				if (dstC - dc > F)
 				{
 					for (; dn < nInt12; dn += 12, pS += 12 * srcC, dst0 += 12 * F)
-						InputConvolution1x1_2x12<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
-					for (; dn < nInt6; dn += 6, pS += 6 * srcC, dst0 += 6 * F)
-						InputConvolution1x1_2x6<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
+						InputConvolution1x1_2xM<type, 12>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
 					if (nIntTail)
 						tailInt_2(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS), pS += nIntTail * srcC, dn += nIntTail;
 					for (; dn < nEnd12; dn += 12, pS += 12 * srcC, dst1 += 12 * F)
-						InputConvolution1x1_2x12<type>(pS, srcC, pW, _bias, _params, dst1, dst1 + dstS);
-					for (; dn < nEnd6; dn += 6, pS += 6 * srcC, dst1 += 6 * F)
-						InputConvolution1x1_2x6<type>(pS, srcC, pW, _bias, _params, dst1, dst1 + dstS);
+						InputConvolution1x1_2xM<type, 12>(pS, srcC, pW, _bias, _params, dst1, dst1 + dstS);
 					if (nEndTail)
 						tailEnd_2(pS, srcC, pW, _bias, _params, dst1, dst1 + dstS), pS += nEndTail * srcC, dn += nEndTail;
 				}
@@ -372,12 +233,12 @@ namespace Simd
 				{
 					InputConvolution1x1_1xM_Ptr tailInt_1 = GetInputConvolution1x1_1xM<type>(nIntTail);
 					InputConvolution1x1_1xM_Ptr tailEnd_1 = GetInputConvolution1x1_1xM<type>(nEndTail);
-					for (; dn < nInt6; dn += 6, pS += 6 * srcC, dst0 += 6 * F)
-						InputConvolution1x1_1x6<type>(pS, srcC, pW, _bias, _params, dst0);
+					for (; dn < nInt12; dn += 12, pS += 12 * srcC, dst0 += 12 * F)
+						InputConvolution1x1_1xM<type, 12>(pS, srcC, pW, _bias, _params, dst0);
 					if (nIntTail)
 						tailInt_1(pS, srcC, pW, _bias, _params, dst0), pS += nIntTail * srcC, dn += nIntTail;
-					for (; dn < nEnd6; dn += 6, pS += 6 * srcC, dst1 += 6 * F)
-						InputConvolution1x1_1x6<type>(pS, srcC, pW, _bias, _params, dst1);
+					for (; dn < nEnd12; dn += 12, pS += 12 * srcC, dst1 += 12 * F)
+						InputConvolution1x1_1xM<type, 12>(pS, srcC, pW, _bias, _params, dst1);
 					if (nEndTail)
 						tailEnd_1(pS, srcC, pW, _bias, _params, dst1), pS += nEndTail * srcC, dn += nEndTail;
 				}
