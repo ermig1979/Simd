@@ -180,8 +180,8 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && //Simd::Aligned(p.dstC, 32) && 
-                ((p.srcC >= 128 && p.dstT == SimdTensorData16b) || (p.srcC >= 256 && p.dstT == SimdTensorData32f)) && p.srcC <= 2048 && 1;
+            return p.trans != 0 && p.group == 1 && 1 &&
+                ((p.srcC >= 128 && p.dstT == SimdTensorData16b) || (p.srcC >= 256 && p.dstT == SimdTensorData32f)) && p.srcC < 400;
         }
     }
 #endif
