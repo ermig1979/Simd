@@ -274,12 +274,15 @@ namespace Test
 #if 0        
         result = result && SynetPoolingMax32fAutoTest(ParamP(101, 59, 99, Shp(2, 3, 1), Shp(3, 2, 1), Shp(0, 1, 1), Shp(0, 1, 0), f, c, e), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetPoolingMax32fAutoTest(ParamP(128, 19, 90, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(256, 9, 88, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(64, 21, 92, Shp(1, 3, 3), Shp(1, 1, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(128, 19, 90, Shp(2, 3, 3), Shp(2, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(256, 9, 88, Shp(4, 3, 3), Shp(4, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+#endif
+#if 1        
+        result = result && SynetPoolingMax32fAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
 #endif
             
         return result;

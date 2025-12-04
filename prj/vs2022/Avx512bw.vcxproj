@@ -128,7 +128,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPermute.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPoolingAverage32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPoolingMax32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPoolingMax8u.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConcat.cpp" />
