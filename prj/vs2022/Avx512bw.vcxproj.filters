@@ -472,6 +472,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPoolingMax32f.cpp">
       <Filter>Avx512bw\Synet\Pooling</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fDepthwise3x3.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fDepthwise7x7.cpp">
+      <Filter>Avx512bw\Synet\MergedConvolution</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">

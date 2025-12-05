@@ -266,6 +266,10 @@ namespace Simd
 
         void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
 
+        bool SetDepthwise3x3(const ConvParam& p, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
+
+        bool SetDepthwise7x7(const ConvParam& p, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
+
         void SetOutput(const ConvParam& p, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
 
         //-------------------------------------------------------------------------------------------------
