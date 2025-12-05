@@ -39,12 +39,33 @@
 <hr/>
 <h3 id="R157">January X, 2026 (version 6.2.157)</h3> 
 <h4>Algorithms</h4>
+<h5>New features</h5>
+<ul>
+ <li>Function Simd::Resize for Simd::Frame.</li>
+</ul>
 <h5>Improving</h5>
 <ul>
  <li>Base implementation, AMX-BF16 optimizations of class SynetConvolution16bNhwcGemmV1.</li>
  <li>AVX-512BW optimizations of function SynetPoolingMax32f (case of SynetPoolingMax32f2DNhwcSolid2x2).</li>
  <li>AVX-512BW optimizations of function SynetMergedConvolution32f (InputConvolution1x1).</li>
  <li>AVX-512BW optimizations of function SynetMergedConvolution32f (DepthwiseConvolution_k3p1d1s1w6).</li>
+</ul>
+
+<h4>Python wrapper</h4>
+<h5>New features</h5>
+<ul>
+ <li>Function Simd.ResizeFrame.</li>
+ <li>Function Simd.ResizedFrame.</li>
+ <li>Yuv444p member to Simd.FrameFormat enumeration.</li>
+</ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Error in method Simd.Frame.Convert.</li>
+</ul>
+<h5>Renaming</h5>
+<ul>
+ <li>Function Simd.Resize to Simd.ResizeImage.</li>
+ <li>Function Simd.Resized to Simd.ResizedImage.</li>
 </ul>
 
 <a href="#HOME">Home</a> 

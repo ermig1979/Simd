@@ -91,8 +91,10 @@ class FrameFormat(enum.Enum) :
 	Rgb24 = 6
 	## One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.
 	Rgba32 = 7
+    ## Three planes (8-bit full size Y, U, V planes) YUV444P pixel format.
+	Yuv444p = 8
 	## One plane 24-bit (3 8-bit channels) LAB (CIELAB) pixel format.
-	Lab24 = 8
+	Lab24 = 9
 	
 	## Gets number of planes for current frame format.
 	# @return number of planes.	
@@ -105,6 +107,7 @@ class FrameFormat(enum.Enum) :
 		elif self == Simd.FrameFormat.Gray8: return 1
 		elif self == Simd.FrameFormat.Rgb24: return 1
 		elif self == Simd.FrameFormat.Rgba32: return 1
+		elif self == Simd.FrameFormat.Yuv444p: return 3
 		elif self == Simd.FrameFormat.Lab24: return 1
 		else : return 0
 
@@ -1849,13 +1852,13 @@ class ImageFrame():
 				raise Exception("Not implemented conversion {0} to {1} !".format(sf, df))
 		elif sf == FrameFormat.Rgb24 :
 			if df == FrameFormat.Nv12 :
-				bgr = dp[0].Converted(PixelFormat.Bgr24)
+				bgr = sp[0].Converted(PixelFormat.Bgr24)
 				u = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
 				v = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
 				Lib.BgrToYuv420p(bgr.Data(), bgr.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), u.Data(), u.Stride(), v.Data(), v.Stride(), dy)
 				Lib.InterleaveUv(u.Data(), u.Stride(), v.Data(), v.Stride(), u.Width(), u.Height(), dp[1].Data(), dp[1].Stride())
 			elif df == FrameFormat.Yuv420p :
-				bgr = dp[0].Converted(PixelFormat.Bgr24)
+				bgr = sp[0].Converted(PixelFormat.Bgr24)
 				Lib.BgrToYuv420p(bgr.Data(), bgr.Stride(), self.Width(), self.Height(), dp[0].Data(), dp[0].Stride(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride(), dy)
 			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Gray8 or df == FrameFormat.Rgba32:
 				sp[0].Convert(dp[0], alpha)
@@ -2008,7 +2011,7 @@ def AbsGradientSaturatedSum(src : Image, dst : Image) -> Image :
 # @param src - an original input image.
 # @param dst - a resized output image.
 # @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
-def Resize(src : Image, dst : Image, method = Simd.ResizeMethod.Bilinear) :
+def ResizeImage(src : Image, dst : Image, method = Simd.ResizeMethod.Bilinear) :
 	if dst.Format() != src.Format() :
 		raise Exception("Incompatible image pixel formats!")
 	resizer = Lib.ResizerInit(src.Width(), src.Height(), dst.Width(), dst.Height(), src.Format().ChannelCount(), Simd.PixelFormatToResizeChannel(src.Format()), method)
@@ -2024,9 +2027,48 @@ def Resize(src : Image, dst : Image, method = Simd.ResizeMethod.Bilinear) :
 # @param height - a height of output image.
 # @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
 # @return - resized output image.
-def Resized(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bilinear) -> Image :
+def ResizedImage(src : Image, width :int, height: int, method = Simd.ResizeMethod.Bilinear) -> Image :
 	dst = Image(src.Format(), width, height)
-	Simd.Resize(src, dst, method)
+	Simd.ResizeImage(src, dst, method)
+	return dst
+
+##  @ingroup python
+# The function performs image frame resizing.
+# @param src - an original input image frame.
+# @param dst - a resized output image frame.
+# @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
+def ResizeFrame(src : ImageFrame, dst : ImageFrame, method = Simd.ResizeMethod.Bilinear) :
+	if dst.Format() != src.Format() :
+		raise Exception("Incompatible image frame formats!")
+	sp = src.Planes()
+	dp = dst.Planes()
+	mainResizer = Lib.ResizerInit(sp[0].Width(), sp[0].Height(), dp[0].Width(), dp[0].Height(), sp[0].Format().ChannelCount(), Simd.PixelFormatToResizeChannel(sp[0].Format()), method)
+	if mainResizer == ctypes.c_void_p(0) :
+		raise Exception("Can't create resizer context for frame plane 0!")
+	Lib.ResizerRun(mainResizer, sp[0].Data(), sp[0].Stride(), dp[0].Data(), dp[0].Stride())
+	if src.Format() == Simd.FrameFormat.Yuv444p:
+		Lib.ResizerRun(mainResizer, sp[1].Data(), sp[1].Stride(), dp[1].Data(), dp[1].Stride())
+		Lib.ResizerRun(mainResizer, sp[2].Data(), sp[2].Stride(), dp[2].Data(), dp[2].Stride())
+	Lib.Release(mainResizer)
+	if src.Format() == Simd.FrameFormat.Yuv420p or src.Format() == Simd.FrameFormat.Nv12:
+		halfResizer = Lib.ResizerInit(sp[1].Width(), sp[1].Height(), dp[1].Width(), dp[1].Height(), sp[1].Format().ChannelCount(), Simd.PixelFormatToResizeChannel(sp[1].Format()), method)
+		if halfResizer == ctypes.c_void_p(0) :
+			raise Exception("Can't create resizer context for frame plane 1!")
+		Lib.ResizerRun(halfResizer, sp[1].Data(), sp[1].Stride(), dp[1].Data(), dp[1].Stride())
+		if src.Format() == Simd.FrameFormat.Yuv420p:
+			Lib.ResizerRun(halfResizer, sp[2].Data(), sp[2].Stride(), dp[2].Data(), dp[2].Stride())
+		Lib.Release(halfResizer)
+
+##  @ingroup python
+# The function gets resized image frame.
+# @param src - an original input image frame.
+# @param width - a width of output image frame.
+# @param height - a height of output image frame.
+# @param method - a resizing method. By default it is equal to Simd.ResizeMethod.Bilinear.
+# @return - resized output image frame.
+def ResizedFrame(src : ImageFrame, width :int, height: int, method = Simd.ResizeMethod.Bilinear) -> ImageFrame :
+	dst = ImageFrame(src.Format(), width, height)
+	Simd.ResizeFrame(src, dst, method)
 	return dst
 
 ##  @ingroup python

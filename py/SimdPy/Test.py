@@ -86,6 +86,17 @@ def ImageFrameTest(args) :
 			#print(" Convert {0} to {1}.".format(formats[i], formats[j]))
 			frameJ = frameI.Converted(formats[j])
 			#frameJ.Save("converted_image_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
+
+###################################################################################################
+
+def ImageFrameResizeTest(args) :
+	image = LoadTestImage(args)
+	srcRgb = Simd.ImageFrame(Simd.FrameFormat.Rgb24, image.Width(), image.Height())
+	srcRgb.Planes()[0] = image.Copy()
+	srcYuv = srcRgb.Converted(Simd.FrameFormat.Yuv420p)
+	dstYuv = Simd.ResizedFrame(srcYuv, 400, 300, Simd.ResizeMethod.Area)
+	dstRgb = dstYuv.Converted(Simd.FrameFormat.Rgb24)
+	dstRgb.Planes()[0].Save("frame_resized.jpg", Simd.ImageFile.Jpeg, 85)
 	
 ###################################################################################################
 
@@ -109,7 +120,7 @@ def ConvertImageTest(args) :
 
 def ImageResizeTest(args) :
 	image = LoadTestImage(args)
-	resized = Simd.Resized(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.BilinearOpenCv)
+	resized = Simd.ResizedImage(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.BilinearOpenCv)
 	resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
 	
 ###################################################################################################
@@ -138,7 +149,7 @@ def SynetSetInputTest(args) :
 	height = 128
 	channels = 3
 	image = LoadTestImage(args)
-	resized = Simd.Resized(image, width, height, Simd.ResizeMethod.Area)
+	resized = Simd.ResizedImage(image, width, height, Simd.ResizeMethod.Area)
 	lower = [0.0, 0.0, 0.0]
 	upper = [1.0, 1.0, 1.0]
 	input = Simd.Lib.Allocate(channels * height * width * 4, Simd.Lib.Alignment())
@@ -238,6 +249,7 @@ def InitTestList(args) :
 	tests.append(ShiftDetectorFunctionsTest)
 	tests.append(ShiftingDetectorClassTest)
 	tests.append(ImageFrameTest)
+	tests.append(ImageFrameResizeTest)
 	tests.append(ImageWarpAffineTest)
 	tests.append(ImageToNumpyArrayTest)
 	tests.append(SynetSetInputTest) 
