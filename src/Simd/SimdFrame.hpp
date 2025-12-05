@@ -425,6 +425,33 @@ namespace Simd
     */
     template <template<class> class A> void Convert(const Frame<A> & src, Frame<A> & dst);
 
+    /*! @ingroup cpp_frame_functions
+
+        \fn void Resize(const Frame<A> & src, Frame<A> & dst, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
+
+        \short Performs resizing of frame.
+
+        All frames must have the same format.
+
+        \param [in] src - an original input frame.
+        \param [out] dst - a resized output frame.
+        \param [in] method - a resizing method. By default it is equal to ::SimdResizeMethodBilinear.
+    */
+    template<template<class> class A> SIMD_INLINE void Resize(const Frame<A>& src, Frame<A>& dst, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear);
+
+    /*! @ingroup cpp_frame_functions
+
+        \fn void Resize(const Frame<A> & src, Frame<A> & dst, const Point<ptrdiff_t> & size, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
+
+        \short Performs resizing of frame.
+
+        \param [in] src - an original input frame.
+        \param [out] dst - a resized output frame. The input frame can be the output.
+        \param [in] size - a size of output frame.
+        \param [in] method - a resizing method. By default it is equal to ::SimdResizeMethodBilinear.
+    */
+    template<template<class> class A> SIMD_INLINE void Resize(const Frame<A>& src, Frame<A>& dst, const Point<ptrdiff_t>& size, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear);
+
     //-------------------------------------------------------------------------------------------------
 
     // struct Frame implementation:
@@ -930,6 +957,7 @@ namespace Simd
             planes[i].Capture();
     }
 
+    //-------------------------------------------------------------------------------------------------
     // View utilities implementation:
 
     template <template<class> class A, template<class> class B> SIMD_INLINE bool EqualSize(const Frame<A> & a, const Frame<B> & b)
@@ -1363,6 +1391,67 @@ namespace Simd
 
         default:
             assert(0);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template<template<class> class A> SIMD_INLINE void Resize(const Frame<A>& src, Frame<A>& dst, SimdResizeMethodType method)
+    {
+        assert(src.format == dst.format && src.format != Frame<A>::None);
+
+        if (EqualSize(src, dst))
+        {
+            Copy(src, dst);
+        }
+        else
+        {
+            SimdResizeChannelType type = SimdResizeChannelByte;
+            void* mainResizer = SimdResizerInit(src.planes[0].width, src.planes[0].height, dst.planes[0].width, dst.planes[0].height, src.planes[0].ChannelCount(), type, method);
+            if (mainResizer)
+            {
+                SimdResizerRun(mainResizer, src.planes[0].data, src.planes[0].stride, dst.planes[0].data, dst.planes[0].stride);
+                if (src.format == Frame<A>::Yuv444p)
+                {
+                    SimdResizerRun(mainResizer, src.planes[1].data, src.planes[1].stride, dst.planes[1].data, dst.planes[1].stride);
+                    SimdResizerRun(mainResizer, src.planes[2].data, src.planes[2].stride, dst.planes[2].data, dst.planes[2].stride);
+                }
+                SimdRelease(mainResizer);
+            }
+            else
+                assert(0);
+            if (src.format == Frame<A>::Nv12 || src.format == Frame<A>::Yuv420p)
+            {
+                void* halfResizer = SimdResizerInit(src.planes[1].width, src.planes[1].height, dst.planes[1].width, dst.planes[1].height, src.planes[1].ChannelCount(), type, method);
+                if (halfResizer)
+                {
+                    SimdResizerRun(halfResizer, src.planes[1].data, src.planes[1].stride, dst.planes[1].data, dst.planes[1].stride);
+                    if (src.format == Frame<A>::Yuv420p)
+                        SimdResizerRun(halfResizer, src.planes[2].data, src.planes[2].stride, dst.planes[2].data, dst.planes[2].stride);
+                    SimdRelease(halfResizer);
+                }
+                else
+                    assert(0);
+            }
+        }
+    }
+
+    template<template<class> class A> SIMD_INLINE void Resize(const Frame<A>& src, Frame<A>& dst, const Point<ptrdiff_t>& size, SimdResizeMethodType method)
+    {
+        if (&src == &dst)
+        {
+            if (src.Size() != size)
+            {
+                Frame<A> tmp(size, src.format);
+                Resize(src, tmp, method);
+                dst.Swap(tmp);
+            }
+        }
+        else
+        {
+            if (dst.Size() != size)
+                dst.Recreate(size, src.format);
+            Resize(src, dst, method);
         }
     }
 }

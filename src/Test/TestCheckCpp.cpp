@@ -130,7 +130,7 @@ namespace Test
         v[15] = 0.0f;
     }
 
-    static void TestResize()
+    static void TestImageResize()
     {
         typedef Simd::View<Simd::Allocator> View;
         typedef Simd::Point<ptrdiff_t> Size;
@@ -138,6 +138,16 @@ namespace Test
         View src(128, 96, View::Bgr24), dst(40, 30, View::Bgr24);
         Simd::Resize(src, dst, SimdResizeMethodArea);
         Simd::Resize(dst, dst, Size(80, 60), SimdResizeMethodArea);
+    }
+
+    static void TestFrameResize()
+    {
+        typedef Simd::Frame<Simd::Allocator> Frame;
+        typedef Simd::Point<ptrdiff_t> Size;
+
+        Frame src(128, 96, Frame::Yuv420p), dst(40, 30, Frame::Yuv420p);
+        Simd::Resize(src, dst, SimdResizeMethodArea);
+        Simd::Resize(dst, dst, Size(80, 60), SimdResizeMethodBilinear);
     }
 
     static void TestViewVector()
@@ -201,7 +211,9 @@ namespace Test
 
         TestStdVector();
 
-        TestResize();
+        TestImageResize();
+
+        TestFrameResize();
 
         TestViewVector();
 

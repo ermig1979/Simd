@@ -64,6 +64,14 @@ Functions</h2></td></tr>
 <tr class="memitem:ga82d349058127188b7609fd4d3ceb72cd"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__frame__functions.html#ga82d349058127188b7609fd4d3ceb72cd">Convert</a> (const <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:ga82d349058127188b7609fd4d3ceb72cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts one frame to another frame.  <a href="group__cpp__frame__functions.html#ga82d349058127188b7609fd4d3ceb72cd">More...</a><br /></td></tr>
 <tr class="separator:ga82d349058127188b7609fd4d3ceb72cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga057db575d30506412ed3f2ebfbefc549"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga057db575d30506412ed3f2ebfbefc549"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__frame__functions.html#ga057db575d30506412ed3f2ebfbefc549">Resize</a> (const <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;dst, <a class="el" href="group__resizing.html#gabcaf67f1fd7327ca3f47c0d04b671b1a">::SimdResizeMethodType</a> method=<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">::SimdResizeMethodBilinear</a>)</td></tr>
+<tr class="memdesc:ga057db575d30506412ed3f2ebfbefc549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs resizing of frame.  <a href="group__cpp__frame__functions.html#ga057db575d30506412ed3f2ebfbefc549">More...</a><br /></td></tr>
+<tr class="separator:ga057db575d30506412ed3f2ebfbefc549"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae178726a51db1a523bf3f6942a2f7730"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:gae178726a51db1a523bf3f6942a2f7730"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__frame__functions.html#gae178726a51db1a523bf3f6942a2f7730">Resize</a> (const <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;dst, const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;size, <a class="el" href="group__resizing.html#gabcaf67f1fd7327ca3f47c0d04b671b1a">::SimdResizeMethodType</a> method=<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">::SimdResizeMethodBilinear</a>)</td></tr>
+<tr class="memdesc:gae178726a51db1a523bf3f6942a2f7730"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs resizing of frame.  <a href="group__cpp__frame__functions.html#gae178726a51db1a523bf3f6942a2f7730">More...</a><br /></td></tr>
+<tr class="separator:gae178726a51db1a523bf3f6942a2f7730"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Related functions for <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Simd::Frame</a> structure. </p>
@@ -212,6 +220,102 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input frame. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output frame. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga057db575d30506412ed3f2ebfbefc549" name="ga057db575d30506412ed3f2ebfbefc549"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga057db575d30506412ed3f2ebfbefc549">&#9670;&#160;</a></span>Resize() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Resize </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__resizing.html#gabcaf67f1fd7327ca3f47c0d04b671b1a">::SimdResizeMethodType</a>&#160;</td>
+          <td class="paramname"><em>method</em> = <code><a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">::SimdResizeMethodBilinear</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs resizing of frame. </p>
+<p >All frames must have the same format.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input frame. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a resized output frame. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">method</td><td>- a resizing method. By default it is equal to <a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">SimdResizeMethodBilinear</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gae178726a51db1a523bf3f6942a2f7730" name="gae178726a51db1a523bf3f6942a2f7730"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae178726a51db1a523bf3f6942a2f7730">&#9670;&#160;</a></span>Resize() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SIMD_INLINE void Resize </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__resizing.html#gabcaf67f1fd7327ca3f47c0d04b671b1a">::SimdResizeMethodType</a>&#160;</td>
+          <td class="paramname"><em>method</em> = <code><a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">::SimdResizeMethodBilinear</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs resizing of frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input frame. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a resized output frame. The input frame can be the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of output frame. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">method</td><td>- a resizing method. By default it is equal to <a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">SimdResizeMethodBilinear</a>. </td></tr>
   </table>
   </dd>
 </dl>
