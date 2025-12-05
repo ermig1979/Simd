@@ -106,7 +106,6 @@ namespace Simd
 			case 0xb: return InputConvolution1x1_2xM<type, 0xb>;
 			case 0xc: return InputConvolution1x1_2xM<type, 0xc>;
 			}
-			assert(0);
 			return NULL;
 		}
 
@@ -181,7 +180,6 @@ namespace Simd
 			case 0xb: return InputConvolution1x1_1xM<type, 0xb>;
 			case 0xc: return InputConvolution1x1_1xM<type, 0xc>;
 			}
-			assert(0);
 			return NULL;
 		}
 
