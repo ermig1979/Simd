@@ -76,8 +76,8 @@ def ImagePaintTest(args) :
 def ImageFrameTest(args) :
 	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32, Simd.FrameFormat.Lab24]
 	image = LoadTestImage(args)
-	frame = Simd.ImageFrame(Simd.FrameFormat.Rgb24, image.Width(), image.Height())
-	frame.Planes()[0] = image.Copy()
+	frame = Simd.ImageFrame(Simd.FrameFormat.Rgb24, 400, 300)
+	frame.Planes()[0] = Simd.ResizedImage(image, 400, 300)
 	for i in range(len(formats)) :
 		if formats[i] == Simd.FrameFormat.Lab24 :
 			continue
@@ -85,7 +85,7 @@ def ImageFrameTest(args) :
 		for j in range(len(formats)) :
 			#print(" Convert {0} to {1}.".format(formats[i], formats[j]))
 			frameJ = frameI.Converted(formats[j])
-			#frameJ.Save("converted_image_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
+			#frameJ.Planes()[0].Save("frame_converted_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
 
 ###################################################################################################
 
