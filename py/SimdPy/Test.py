@@ -85,7 +85,7 @@ def ImagePaintTest(args) :
 ###################################################################################################
 
 def ImageFrameConvertTest(args) :
-	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32, Simd.FrameFormat.Lab24]#, Simd.FrameFormat.Yuv444p]
+	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32, Simd.FrameFormat.Lab24, Simd.FrameFormat.Yuv444p]
 	frame = Simd.ResizedFrame(LoadTestImageFrame(args, Simd.FrameFormat.Rgb24), 400, 300)
 	for i in range(len(formats)) :
 		if formats[i] == Simd.FrameFormat.Lab24 :
@@ -97,6 +97,10 @@ def ImageFrameConvertTest(args) :
 			#print(" Convert {0} to {1}.".format(formats[i], formats[j]))
 			frameJ = frameI.Converted(formats[j])
 			frameJ.Save("frame_converted_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
+			if formats[j] == Simd.FrameFormat.Yuv444p and False:# or formats[j] == Simd.FrameFormat.Yuv420p:
+				frameJ.Planes()[0].Save("frame_converted_{0}_to_{1}_y.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
+				frameJ.Planes()[1].Save("frame_converted_{0}_to_{1}_u.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
+				frameJ.Planes()[2].Save("frame_converted_{0}_to_{1}_v.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
 
 ###################################################################################################
 
@@ -175,6 +179,12 @@ def ImageShiftBilinearTest(args) :
     Simd.ShiftBilinear(image, background, [40.5, 30.1], [0, 0, background.Width(), background.Height()], shifted)
     shifted.Save("shifted.jpg", Simd.ImageFile.Jpeg, 85)
 
+###################################################################################################
+
+def ReduceGray2x2Test(args) :
+	image = Simd.ResizedImage(LoadTestImage(args, Simd.PixelFormat.Gray8), 400, 300)
+	reduced = Simd.ReduceGray2x2(image, Simd.Image())
+	reduced.Save("ReduceGray2x2.jpg")
 	
 ###################################################################################################
 
@@ -261,6 +271,7 @@ def InitTestList(args) :
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)
 	tests.append(ImageShiftBilinearTest)
+	tests.append(ReduceGray2x2Test)
 	tests.append(ShiftDetectorFunctionsTest)
 	tests.append(ShiftingDetectorClassTest)
 	tests.append(ImageFrameConvertTest)
