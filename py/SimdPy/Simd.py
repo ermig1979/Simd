@@ -1680,6 +1680,12 @@ class ImageFrame():
 			self.__planes[0].Recreate(Simd.PixelFormat.Rgba32, width, height)
 			if self.__yuvType != YuvType.Unknown :
 				self.__yuvType = YuvType.Unknown
+		elif format == Simd.FrameFormat.Yuv444p :
+			self.__planes[0].Recreate(Simd.PixelFormat.Gray8, width, height)
+			self.__planes[1].Recreate(Simd.PixelFormat.Gray8, width, height)
+			self.__planes[2].Recreate(Simd.PixelFormat.Gray8, width, height)
+			if self.__yuvType != YuvType.Unknown :
+				self.__yuvType = YuvType.Bt601
 		elif format == Simd.FrameFormat.Lab24 :
 			self.__planes[0].Recreate(Simd.PixelFormat.Lab24, width, height)
 			if self.__yuvType != YuvType.Unknown :
@@ -1758,9 +1764,16 @@ class ImageFrame():
 		sp = self.Planes()
 		dp = dst.Planes()
 		if sf == FrameFormat.Nv12 :
-			if df == FrameFormat.Yuv420p :
+			if df == FrameFormat.Yuv420p or df == FrameFormat.Yuv444p:
 				sp[0].Copy(dp[0])
-				Lib.DeinterleaveUv(sp[1].Data(), sp[1].Stride(), sp[1].Width(), sp[1].Height(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride())
+				if df == FrameFormat.Yuv420p :
+					Lib.DeinterleaveUv(sp[1].Data(), sp[1].Stride(), sp[1].Width(), sp[1].Height(), dp[1].Data(), dp[1].Stride(), dp[2].Data(), dp[2].Stride())
+				else :
+					u = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
+					v = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
+					Lib.DeinterleaveUv(sp[1].Data(), sp[1].Stride(), sp[1].Width(), sp[1].Height(), u.Data(), u.Stride(), v.Data(), v.Stride())
+					Lib.StretchGray2x2(u.Data(), u.Stride(), u.Width(), u.Height(), dp[1].Data(), dp[1].Stride(), dp[1].Width(), dp[1].Height())
+					Lib.StretchGray2x2(v.Data(), v.Stride(), v.Width(), v.Height(), dp[2].Data(), dp[2].Stride(), dp[2].Width(), dp[2].Height())
 			elif df == FrameFormat.Bgra32 or df == FrameFormat.Bgr24 or df == FrameFormat.Rgb24 or df == FrameFormat.Rgba32 or df == FrameFormat.Lab24 :
 				u = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
 				v = Image(PixelFormat.Gray8, self.Width() // 2, self.Height() // 2)
