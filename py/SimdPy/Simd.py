@@ -1912,6 +1912,44 @@ class ImageFrame():
 			img = self.Planes()[0];
 			return Lib.ImageSaveToFile(img.Data(), img.Stride(), img.Width(), img.Height(), img.Format(), file, quality, path)
 
+	## Loads an image frame from file.
+    # @param path - a path to input image file.
+    # @param desiredFormat - a desired frame format of output image frame. It can be Simd.FrameFormat.Gray8, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Bgra32, 
+    #                 Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32 or Simd.FrameFormat.Empty (use frame format of input image file).
+    # @return result of the operation.
+	def Load(self, path : str, desiredFormat = Simd.FrameFormat.Empty) -> bool:
+		self.Clear()
+		if desiredFormat == Simd.FrameFormat.Empty :
+			desiredPixelFormat = Simd.PixelFormat.Empty
+		elif desiredFormat == Simd.FrameFormat.Gray8 :
+			desiredPixelFormat = Simd.PixelFormat.Gray8
+		elif desiredFormat == Simd.FrameFormat.Bgr24 :
+			desiredPixelFormat = Simd.PixelFormat.Bgr24
+		elif desiredFormat == Simd.FrameFormat.Bgra32 :
+			desiredPixelFormat = Simd.PixelFormat.Bgra32
+		elif desiredFormat == Simd.FrameFormat.Rgba32 :
+			desiredPixelFormat = Simd.PixelFormat.Rgba32
+		else :
+			desiredPixelFormat = Simd.PixelFormat.Rgb24
+		pls = self.Planes()
+		if self.Planes()[0].Load(path, desiredPixelFormat) :
+			fmt = self.Planes()[0].Format()
+			if fmt == Simd.PixelFormat.Gray8:
+				self.__format = Simd.FrameFormat.Gray8
+			elif fmt == Simd.PixelFormat.Bgr24:
+				self.__format = Simd.FrameFormat.Bgr24
+			elif fmt == Simd.PixelFormat.Bgra32:
+				self.__format = Simd.FrameFormat.Bgra32
+			elif fmt == Simd.PixelFormat.Rgb24:
+				self.__format = Simd.FrameFormat.Rgb24
+			elif fmt == Simd.PixelFormat.Rgba32:
+				self.__format = Simd.FrameFormat.Rgba32
+			self.__width = self.Planes()[0].Width()
+			self.__height = self.Planes()[0].Height()
+			return True
+		else:
+			return False
+
 ###################################################################################################
 
 ## @ingroup python

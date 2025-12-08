@@ -99,6 +99,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a08c8d645559c6582f4c14ec772e56caa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#a08c8d645559c6582f4c14ec772e56caa">Save</a> (self, str path, file=<a class="el" href="class_simd_1_1_image_file.html#a49e9acb48005930ddcd635c93765874f">Simd.ImageFile.Undefined</a>, quality=100)</td></tr>
 <tr class="memdesc:a08c8d645559c6582f4c14ec772e56caa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the image frame to file in given image file format.  <a href="class_simd_1_1_image_frame.html#a08c8d645559c6582f4c14ec772e56caa">More...</a><br /></td></tr>
 <tr class="separator:a08c8d645559c6582f4c14ec772e56caa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d018f553d4fda60eef55c5aa1ca76ae"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#a2d018f553d4fda60eef55c5aa1ca76ae">Load</a> (self, str path, desiredFormat=<a class="el" href="class_simd_1_1_frame_format.html#a059be79f78c5d38e42123c35e5f8528c">Simd.FrameFormat.Empty</a>)</td></tr>
+<tr class="memdesc:a2d018f553d4fda60eef55c5aa1ca76ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads an image frame from file.  <a href="class_simd_1_1_image_frame.html#a2d018f553d4fda60eef55c5aa1ca76ae">More...</a><br /></td></tr>
+<tr class="separator:a2d018f553d4fda60eef55c5aa1ca76ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >The <a class="el" href="class_simd_1_1_image_frame.html" title="The ImageFrame class provides storage and manipulation of frames (multiplanar images).">ImageFrame</a> class provides storage and manipulation of frames (multiplanar images). </p>
@@ -628,6 +631,50 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">path</td><td>- a path to output image file. </td></tr>
     <tr><td class="paramname">file</td><td>- a format of output image file. To auto choise format of output file set this parameter to <a class="el" href="class_simd_1_1_image_file.html#a49e9acb48005930ddcd635c93765874f" title="An undefined image file format (format auto choice).">Simd.ImageFile.Undefined</a>. </td></tr>
     <tr><td class="paramname">quality</td><td>- a parameter of compression quality (if file format supports it). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>result of the operation. </dd></dl>
+
+</div>
+</div>
+<a id="a2d018f553d4fda60eef55c5aa1ca76ae" name="a2d018f553d4fda60eef55c5aa1ca76ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d018f553d4fda60eef55c5aa1ca76ae">&#9670;&#160;</a></span>Load()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool Load </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>desiredFormat</em> = <code><a class="el" href="class_simd_1_1_frame_format.html#a059be79f78c5d38e42123c35e5f8528c">Simd.FrameFormat.Empty</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Loads an image frame from file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>- a path to input image file. </td></tr>
+    <tr><td class="paramname">desiredFormat</td><td>- a desired frame format of output image frame. It can be <a class="el" href="class_simd_1_1_frame_format.html#a50493d3c7232815237fa6dee16fc5b1b" title="One plane 8-bit gray pixel format.">Simd.FrameFormat.Gray8</a>, <a class="el" href="class_simd_1_1_frame_format.html#a0b1b1a17224566f43dd3427347bdb0dc" title="One plane 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.">Simd.FrameFormat.Bgr24</a>, <a class="el" href="class_simd_1_1_frame_format.html#ab1b15f83aaa223e4e6b2075aefe522be" title="One plane 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.">Simd.FrameFormat.Bgra32</a>, <a class="el" href="class_simd_1_1_frame_format.html#a86f519c808ef15faed67904830427970" title="One plane 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.">Simd.FrameFormat.Rgb24</a>, <a class="el" href="class_simd_1_1_frame_format.html#a90d499b9eff49bf15196e5af0e4ef264" title="One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.">Simd.FrameFormat.Rgba32</a> or <a class="el" href="class_simd_1_1_frame_format.html#a059be79f78c5d38e42123c35e5f8528c" title="An undefined pixel format.">Simd.FrameFormat.Empty</a> (use frame format of input image file). </td></tr>
   </table>
   </dd>
 </dl>

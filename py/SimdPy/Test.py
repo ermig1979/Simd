@@ -42,6 +42,17 @@ def LoadTestImage(args, fmt = Simd.PixelFormat.Rgb24) -> Simd.Image :
 
 ###################################################################################################
 
+def LoadTestImageFrame(args, fmt = Simd.FrameFormat.Rgb24) -> Simd.ImageFrame :
+	if not os.path.isdir(args.root):
+		raise Exception("Project root directory '{0}' is not exist!".format(args.root))
+	path = "{0}/data/image/city.jpg".format(args.root)
+	imageFrame = Simd.ImageFrame()
+	if not imageFrame.Load(path, fmt) :
+		raise Exception("Can't load image frame '{0}' in {1} format!".format(path, fmt))
+	return imageFrame
+
+###################################################################################################
+
 def PrintInfoTest(args) :
 	#print("Simd version: {0}.".format(Simd.Lib.Version()))
 	#print("CPU model: {0}.".format(Simd.Lib.CpuDesc(Simd.CpuDesc.Model)))
@@ -75,9 +86,7 @@ def ImagePaintTest(args) :
 
 def ImageFrameConvertTest(args) :
 	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32, Simd.FrameFormat.Lab24]
-	image = LoadTestImage(args)
-	frame = Simd.ImageFrame(Simd.FrameFormat.Rgb24, 400, 300)
-	frame.Planes()[0] = Simd.ResizedImage(image, 400, 300)
+	frame = Simd.ResizedFrame(LoadTestImageFrame(args, Simd.FrameFormat.Rgb24), 400, 300)
 	for i in range(len(formats)) :
 		if formats[i] == Simd.FrameFormat.Lab24 :
 			continue
@@ -92,9 +101,7 @@ def ImageFrameConvertTest(args) :
 ###################################################################################################
 
 def ImageFrameResizeTest(args) :
-	image = LoadTestImage(args)
-	srcRgb = Simd.ImageFrame(Simd.FrameFormat.Rgb24, image.Width(), image.Height())
-	srcRgb.Planes()[0] = image.Copy()
+	srcRgb = LoadTestImageFrame(args, Simd.FrameFormat.Rgb24)
 	srcYuv = srcRgb.Converted(Simd.FrameFormat.Yuv420p)
 	dstYuv = Simd.ResizedFrame(srcYuv, 400, 300, Simd.ResizeMethod.Area)
 	dstRgb = dstYuv.Converted(Simd.FrameFormat.Rgb24)
