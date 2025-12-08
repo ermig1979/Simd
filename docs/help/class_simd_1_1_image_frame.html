@@ -96,6 +96,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa16370f5c133aaea1b97d0d2f4bbff27"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#aa16370f5c133aaea1b97d0d2f4bbff27">Converted</a> (self, <a class="el" href="class_simd_1_1_frame_format.html">FrameFormat</a> format, alpha=255, yuvType=<a class="el" href="class_simd_1_1_yuv_type.html#af88d424125c9ab94ab8b125a61ca552c">YuvType.Unknown</a>)</td></tr>
 <tr class="memdesc:aa16370f5c133aaea1b97d0d2f4bbff27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets converted current image frame in given format.  <a href="class_simd_1_1_image_frame.html#aa16370f5c133aaea1b97d0d2f4bbff27">More...</a><br /></td></tr>
 <tr class="separator:aa16370f5c133aaea1b97d0d2f4bbff27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08c8d645559c6582f4c14ec772e56caa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image_frame.html#a08c8d645559c6582f4c14ec772e56caa">Save</a> (self, str path, file=<a class="el" href="class_simd_1_1_image_file.html#a49e9acb48005930ddcd635c93765874f">Simd.ImageFile.Undefined</a>, quality=100)</td></tr>
+<tr class="memdesc:a08c8d645559c6582f4c14ec772e56caa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the image frame to file in given image file format.  <a href="class_simd_1_1_image_frame.html#a08c8d645559c6582f4c14ec772e56caa">More...</a><br /></td></tr>
+<tr class="separator:a08c8d645559c6582f4c14ec772e56caa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >The <a class="el" href="class_simd_1_1_image_frame.html" title="The ImageFrame class provides storage and manipulation of frames (multiplanar images).">ImageFrame</a> class provides storage and manipulation of frames (multiplanar images). </p>
@@ -578,6 +581,57 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>- converted output image frame in given format. </dd></dl>
+
+</div>
+</div>
+<a id="a08c8d645559c6582f4c14ec772e56caa" name="a08c8d645559c6582f4c14ec772e56caa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08c8d645559c6582f4c14ec772e56caa">&#9670;&#160;</a></span>Save()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool Save </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>file</em> = <code><a class="el" href="class_simd_1_1_image_file.html#a49e9acb48005930ddcd635c93765874f">Simd.ImageFile.Undefined</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>quality</em> = <code>100</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Saves the image frame to file in given image file format. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>- a path to output image file. </td></tr>
+    <tr><td class="paramname">file</td><td>- a format of output image file. To auto choise format of output file set this parameter to <a class="el" href="class_simd_1_1_image_file.html#a49e9acb48005930ddcd635c93765874f" title="An undefined image file format (format auto choice).">Simd.ImageFile.Undefined</a>. </td></tr>
+    <tr><td class="paramname">quality</td><td>- a parameter of compression quality (if file format supports it). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>result of the operation. </dd></dl>
 
 </div>
 </div>

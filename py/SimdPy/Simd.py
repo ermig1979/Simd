@@ -1897,6 +1897,21 @@ class ImageFrame():
 		self.Convert(dst, alpha)
 		return dst
 
+	## Saves the image frame to file in given image file format.
+    # @param path - a path to output image file.
+    # @param file - a format of output image file. To auto choise format of output file set this parameter to Simd.ImageFile.Undefined.
+    # @param quality - a parameter of compression quality (if file format supports it).
+    # @return result of the operation.
+	def Save(self, path : str, file = Simd.ImageFile.Undefined, quality = 100) -> bool:
+		if self.Format() == Simd.FrameFormat.Empty or self.Format() == Simd.FrameFormat.Lab24 :
+			return False
+		elif self.Format() == Simd.FrameFormat.Nv12 or self.Format() == Simd.FrameFormat.Yuv420p or self.Format() == Simd.FrameFormat.Yuv444p :
+			rgb = self.Converted(Simd.FrameFormat.Rgb24).Planes()[0]
+			return Lib.ImageSaveToFile(rgb.Data(), rgb.Stride(), rgb.Width(), rgb.Height(), rgb.Format(), file, quality, path)
+		else :
+			img = self.Planes()[0];
+			return Lib.ImageSaveToFile(img.Data(), img.Stride(), img.Width(), img.Height(), img.Format(), file, quality, path)
+
 ###################################################################################################
 
 ## @ingroup python

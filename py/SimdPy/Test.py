@@ -73,7 +73,7 @@ def ImagePaintTest(args) :
 	
 ###################################################################################################
 
-def ImageFrameTest(args) :
+def ImageFrameConvertTest(args) :
 	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32, Simd.FrameFormat.Lab24]
 	image = LoadTestImage(args)
 	frame = Simd.ImageFrame(Simd.FrameFormat.Rgb24, 400, 300)
@@ -83,9 +83,11 @@ def ImageFrameTest(args) :
 			continue
 		frameI = frame.Converted(formats[i])
 		for j in range(len(formats)) :
+			if formats[i] == formats[j] :
+				continue
 			#print(" Convert {0} to {1}.".format(formats[i], formats[j]))
 			frameJ = frameI.Converted(formats[j])
-			#frameJ.Planes()[0].Save("frame_converted_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
+			frameJ.Save("frame_converted_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
 
 ###################################################################################################
 
@@ -248,7 +250,7 @@ def InitTestList(args) :
 	tests.append(ImageShiftBilinearTest)
 	tests.append(ShiftDetectorFunctionsTest)
 	tests.append(ShiftingDetectorClassTest)
-	tests.append(ImageFrameTest)
+	tests.append(ImageFrameConvertTest)
 	tests.append(ImageFrameResizeTest)
 	tests.append(ImageWarpAffineTest)
 	tests.append(ImageToNumpyArrayTest)
