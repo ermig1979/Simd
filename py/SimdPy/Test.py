@@ -85,7 +85,7 @@ def ImagePaintTest(args) :
 ###################################################################################################
 
 def ImageFrameConvertTest(args) :
-	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32, Simd.FrameFormat.Lab24]
+	formats = [Simd.FrameFormat.Nv12, Simd.FrameFormat.Yuv420p, Simd.FrameFormat.Bgra32, Simd.FrameFormat.Bgr24, Simd.FrameFormat.Gray8, Simd.FrameFormat.Rgb24, Simd.FrameFormat.Rgba32, Simd.FrameFormat.Lab24]#, Simd.FrameFormat.Yuv444p]
 	frame = Simd.ResizedFrame(LoadTestImageFrame(args, Simd.FrameFormat.Rgb24), 400, 300)
 	for i in range(len(formats)) :
 		if formats[i] == Simd.FrameFormat.Lab24 :
@@ -243,6 +243,12 @@ def ShiftingDetectorClassTest(args) :
 
     print("ShiftingDetectorClass: found: {0}, shift: [{1}, {2}], refined: [{3:.2f}, {4:.2f}], stability: {5:.2f}, correlation: {6:.2f}. ".format(found, start[0] + shift[0], start[1] + shift[1], start[0] + refined[0], start[1] + refined[1], stability, correlation), end="")
 
+###################################################################################################
+
+def StretchGray2x2Test(args) :
+	image = Simd.ResizedImage(LoadTestImage(args, Simd.PixelFormat.Gray8), 400, 300)
+	stretched = Simd.StretchGray2x2(image, Simd.Image())
+	stretched.Save("StretchGray2x2.jpg")
 
 ###################################################################################################
 
@@ -261,6 +267,7 @@ def InitTestList(args) :
 	tests.append(ImageFrameResizeTest)
 	tests.append(ImageWarpAffineTest)
 	tests.append(ImageToNumpyArrayTest)
+	tests.append(StretchGray2x2Test)
 	tests.append(SynetSetInputTest) 
 	
 	filtered = []

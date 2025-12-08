@@ -625,6 +625,10 @@ class Lib():
 		Lib.__lib.SimdShiftDetectorGetShift.restype = None
 
 		
+		Lib.__lib.SimdStretchGray2x2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t ]
+		Lib.__lib.SimdStretchGray2x2.restype = None
+
+		
 		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
 		Lib.__lib.SimdSynetSetInput.restype = None
 
@@ -1174,6 +1178,18 @@ class Lib():
 		correlation = (ctypes.c_double * 1)(*buf)
 		Lib.__lib.SimdShiftDetectorGetShift(context, None, None, None, correlation)
 		return correlation[0]
+
+	## Stretches input 8-bit gray image in two times.
+    # @param src - a pointer to pixels data of input 8-bit gray image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param srcWidth - a width of input image.
+    # @param srcHeight - a height of input image.
+    # @param dst - a pointer to pixels data of output 8-bit gray image.
+    # @param dstStride - a row size of output image in bytes.
+	# @param dstWidth - a width of output image.
+    # @param dstHeight - a height of output image.
+	def StretchGray2x2(src : ctypes.c_void_p, srcStride: int, srcWidth: int, srcHeight: int, dst : ctypes.c_void_p, dstStride: int, dstWidth: int, dstHeight: int) :
+		Lib.__lib.SimdStretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride)
 	
 	## Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
     # @param src - a pointer to pixels data of input image.
@@ -2137,6 +2153,21 @@ def ShiftBilinear(src : Image, bkg : Image, shift : [float, float], crop: [int, 
 	if dst.Format() != src.Format() or dst.Format() != bkg.Format() :
 		raise Exception("Incompatible image pixel formats!")
 	Lib.ShiftBilinear(src.Data(), src.Stride(), src.Width(), src.Height(), src.Format().ChannelCount(), bkg.Data(), bkg.Stride(), shift[0], shift[1], crop[0], crop[1], crop[2], crop[3], dst.Data(), dst.Stride())
+
+## @ingroup python
+# Stretches input 8-bit gray image in two times.
+# @param src - an input 8-bit gray image.
+# @param dst - a stretched output 8-bit gray imaget. Can be empty.
+# @return - output stretched 8-bit gray image.
+def StretchGray2x2(src : Image, dst : Image) -> Image :
+	if src.Format() != Simd.PixelFormat.Gray8 :
+		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Gray8!".format(src.Format()))
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(src.Format(), src.Width() * 2, src.Height() * 2)
+	elif dst.Width() != src.Width() * 2 or dst.Height() != src.Height() * 2 :
+		raise Exception("Wrong output image size: ({0}, {1}) != 2 * ({2}, {3})!".format(dst.Width(), dst.Height(), src.Width(), src.Height()))
+	Lib.StretchGray2x2(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), dst.Width(), dst.Height())
+	return dst
 
 ##  @ingroup python
 # Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.

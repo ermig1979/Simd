@@ -207,6 +207,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a331980cbaecdbc501c9b46f9720c9877"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a331980cbaecdbc501c9b46f9720c9877">ShiftDetectorGetCorrelation</a> (ctypes.c_void_p context)</td></tr>
 <tr class="memdesc:a331980cbaecdbc501c9b46f9720c9877"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the best correlation between current image and background estimated before by function <a class="el" href="class_simd_1_1_lib.html#ab580b37b91433dd9f19184f913e77b32" title="Estimates shift of current image relative to background image.">Simd.Lib.ShiftDetectorEstimate</a>.  <a href="class_simd_1_1_lib.html#a331980cbaecdbc501c9b46f9720c9877">More...</a><br /></td></tr>
 <tr class="separator:a331980cbaecdbc501c9b46f9720c9877"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3f9e55b9286db4511b39a53c6e56587"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ad3f9e55b9286db4511b39a53c6e56587">StretchGray2x2</a> (ctypes.c_void_p src, int srcStride, int srcWidth, int srcHeight, ctypes.c_void_p dst, int dstStride, int dstWidth, int dstHeight)</td></tr>
+<tr class="memdesc:ad3f9e55b9286db4511b39a53c6e56587"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stretches input 8-bit gray image in two times.  <a href="class_simd_1_1_lib.html#ad3f9e55b9286db4511b39a53c6e56587">More...</a><br /></td></tr>
+<tr class="separator:ad3f9e55b9286db4511b39a53c6e56587"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">SynetSetInput</a> (ctypes.c_void_p src, int width, int height, int stride, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> srcFormat, array.array('f') lower, array.array('f') upper, ctypes.c_void_p dst, int channels, <a class="el" href="class_simd_1_1_tensor_format.html">Simd.TensorFormat</a> dstFormat, isRgb=False)</td></tr>
 <tr class="memdesc:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="class_simd_1_1_lib.html#a2f8ccc1ac4ad623e2d9aa6776651ad6d">More...</a><br /></td></tr>
 <tr class="separator:a2f8ccc1ac4ad623e2d9aa6776651ad6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2893,6 +2896,85 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the best correlation between current image and background. </dd></dl>
+
+</div>
+</div>
+<a id="ad3f9e55b9286db4511b39a53c6e56587" name="ad3f9e55b9286db4511b39a53c6e56587"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3f9e55b9286db4511b39a53c6e56587">&#9670;&#160;</a></span>StretchGray2x2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def StretchGray2x2 </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstHeight</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Stretches input 8-bit gray image in two times. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">srcWidth</td><td>- a width of input image. </td></tr>
+    <tr><td class="paramname">srcHeight</td><td>- a height of input image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
