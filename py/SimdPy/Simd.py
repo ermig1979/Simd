@@ -566,6 +566,10 @@ class Lib():
 		Lib.__lib.SimdDeinterleaveUv.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdDeinterleaveUv.restype = None
 
+
+		Lib.__lib.SimdDrawLine.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdDrawLine.restype = None
+
 		
 		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdFillPixel.restype = None
@@ -979,6 +983,21 @@ class Lib():
     # @param vStride - a row size of the v image.
 	def DeinterleaveUv(src : ctypes.c_void_p, srcStride: int, width: int, height: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int) :
 		Lib.__lib.SimdDeinterleaveUv(src, srcStride, width, height, u, uStride, v, vStride)
+		
+    ## Draws line at the canvas image.
+    # @param canvas - a pointer to pixels data of canvas image.
+    # @param stride - a row size of canvas image in bytes.
+    # @param width - a width of canvas image.
+    # @param height - a height of canvas image.
+	# @param channels - a pixel size of canvas image.
+    # @param [in] x1 - X coordinate of the first point of the line.
+    # @param [in] y1 - Y coordinate of the first point of the line.
+    # @param [in] x2 - X coordinate of the second point of the line.
+    # @param [in] y2 - Y coordinate of the second point of the line.
+    # @param [in] color - a pointer to colors of the line.
+    # @param [in] lineWidth - a width of the line. By default it is equal to 1.
+	def DrawLine(canvas : ctypes.c_void_p, stride: int, width : int, height : int, channels : int, x1 : int, y1 : int, x2 : int, y2 : int, color : array.array('B'), lineWidth = 1) :
+		Lib.__lib.SimdDrawLine(canvas, stride, width, height, channels, x1, y1, x2, y2, (ctypes.c_uint8 * channels)(*color), lineWidth)
 		
     ## Copies an image.
     # @param src - a pointer to pixels data of input image.
@@ -1698,6 +1717,16 @@ class Image():
 		dst = Image(format, self.Width(), self.Height())
 		self.Convert(dst, alpha)
 		return dst
+
+	## Draws a line at the image.
+	# @param [in] x1 - X coordinate of the first point of the line.
+	# @param [in] y1 - Y coordinate of the first point of the line.
+	# @param [in] x2 - X coordinate of the second point of the line.
+	# @param [in] y2 - Y coordinate of the second point of the line.
+	# @param [in] color - a color of the line.
+	# @param [in] width - a width of the line. By default it is equal to 1.
+	def DrawLine(self, x1 : int, y1 : int, x2 : int, y2 : int, color : array.array('B'), width = 1) :
+		Lib.DrawLine(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format().PixelSize(), x1, y1, x2, y2, color, width)
 	
 	## Fills image by value of given pixel.
 	# @param pixel - an array of unsigned 8-bit integer with pixel channels. Its size is in range [1..4]. 
@@ -2215,7 +2244,6 @@ class ShiftingDetector():
     # @return the best correlation between current image and background.
 	def GetCorrelation(self) -> float :
 		return Simd.Lib.ShiftDetectorGetCorrelation(self.__context)
-
 
 ###################################################################################################
 

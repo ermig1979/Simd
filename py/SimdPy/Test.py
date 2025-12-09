@@ -120,6 +120,13 @@ def ImageAbsGradientSaturatedSumTest(args) :
 	
 ###################################################################################################
 
+def ImageDrawLineTest(args) :
+	canvas = LoadTestImage(args)
+	canvas.DrawLine(100, 100, 500, 600, [0, 255, 0], 5);
+	canvas.Save("DrawLine.jpg")
+	
+###################################################################################################
+
 def ConvertImageTest(args) :
 	formats = [Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32]
 	orig = LoadTestImage(args)
@@ -267,6 +274,7 @@ def InitTestList(args) :
 	tests.append(PrintInfoTest)
 	tests.append(GetSetParamsTest)
 	tests.append(ImagePaintTest)
+	tests.append(ImageDrawLineTest)
 	tests.append(ImageAbsGradientSaturatedSumTest)
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)

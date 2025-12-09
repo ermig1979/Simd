@@ -111,6 +111,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abe0f8052422a9ae8e345047cf8b3f507"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#abe0f8052422a9ae8e345047cf8b3f507">Converted</a> (self, <a class="el" href="class_simd_1_1_pixel_format.html">PixelFormat</a> format, alpha=255)</td></tr>
 <tr class="memdesc:abe0f8052422a9ae8e345047cf8b3f507"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets converted current image in given format.  <a href="class_simd_1_1_image.html#abe0f8052422a9ae8e345047cf8b3f507">More...</a><br /></td></tr>
 <tr class="separator:abe0f8052422a9ae8e345047cf8b3f507"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c295f93e89d91ac289a5f1176f86ca7"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#a4c295f93e89d91ac289a5f1176f86ca7">DrawLine</a> (self, int x1, int y1, int x2, int y2, array.array('B') color, width=1)</td></tr>
+<tr class="memdesc:a4c295f93e89d91ac289a5f1176f86ca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a line at the image.  <a href="class_simd_1_1_image.html#a4c295f93e89d91ac289a5f1176f86ca7">More...</a><br /></td></tr>
+<tr class="separator:a4c295f93e89d91ac289a5f1176f86ca7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e5c43add1928245417c2fe1612840d2"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#a1e5c43add1928245417c2fe1612840d2">Fill</a> (self, array.array('B') pixel)</td></tr>
 <tr class="memdesc:a1e5c43add1928245417c2fe1612840d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <a href="class_simd_1_1_image.html#a1e5c43add1928245417c2fe1612840d2">More...</a><br /></td></tr>
 <tr class="separator:a1e5c43add1928245417c2fe1612840d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -868,6 +871,77 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>- converted output image in given format. </dd></dl>
+
+</div>
+</div>
+<a id="a4c295f93e89d91ac289a5f1176f86ca7" name="a4c295f93e89d91ac289a5f1176f86ca7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c295f93e89d91ac289a5f1176f86ca7">&#9670;&#160;</a></span>DrawLine()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def DrawLine </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>x1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>y1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>x2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>y2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">array.array('B')&#160;</td>
+          <td class="paramname"><em>color</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>width</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Draws a line at the image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">x1</td><td>- X coordinate of the first point of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y1</td><td>- Y coordinate of the first point of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x2</td><td>- X coordinate of the second point of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y2</td><td>- Y coordinate of the second point of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the line. By default it is equal to 1. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

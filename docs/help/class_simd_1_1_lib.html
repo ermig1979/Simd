@@ -150,6 +150,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aab2c0c2d90261ac6a710d6ef440f6571"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#aab2c0c2d90261ac6a710d6ef440f6571">DeinterleaveUv</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride)</td></tr>
 <tr class="memdesc:aab2c0c2d90261ac6a710d6ef440f6571"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.  <a href="class_simd_1_1_lib.html#aab2c0c2d90261ac6a710d6ef440f6571">More...</a><br /></td></tr>
 <tr class="separator:aab2c0c2d90261ac6a710d6ef440f6571"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a238cedfbe78c4e5105133e5303ef026c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a238cedfbe78c4e5105133e5303ef026c">DrawLine</a> (ctypes.c_void_p canvas, int stride, int width, int height, int channels, int x1, int y1, int x2, int y2, array.array('B') color, lineWidth=1)</td></tr>
+<tr class="memdesc:a238cedfbe78c4e5105133e5303ef026c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws line at the canvas image.  <a href="class_simd_1_1_lib.html#a238cedfbe78c4e5105133e5303ef026c">More...</a><br /></td></tr>
+<tr class="separator:a238cedfbe78c4e5105133e5303ef026c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ad025ad583c0ed2d10d4018120a0ae0"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a0ad025ad583c0ed2d10d4018120a0ae0">Copy</a> (ctypes.c_void_p src, int srcStride, int width, int height, int pixelSize, ctypes.c_void_p dst, int dstStride)</td></tr>
 <tr class="memdesc:a0ad025ad583c0ed2d10d4018120a0ae0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies an image.  <a href="class_simd_1_1_lib.html#a0ad025ad583c0ed2d10d4018120a0ae0">More...</a><br /></td></tr>
 <tr class="separator:a0ad025ad583c0ed2d10d4018120a0ae0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1805,6 +1808,106 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">uStride</td><td>- a row size of the u image. </td></tr>
     <tr><td class="paramname">v</td><td>- a pointer to pixels data of output 8-bit image with V color plane. </td></tr>
     <tr><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a238cedfbe78c4e5105133e5303ef026c" name="a238cedfbe78c4e5105133e5303ef026c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a238cedfbe78c4e5105133e5303ef026c">&#9670;&#160;</a></span>DrawLine()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def DrawLine </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>canvas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>x1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>y1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>x2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>y2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">array.array('B')&#160;</td>
+          <td class="paramname"><em>color</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>lineWidth</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Draws line at the canvas image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">canvas</td><td>- a pointer to pixels data of canvas image. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">stride</td><td>- a row size of canvas image in bytes. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">width</td><td>- a width of canvas image. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">height</td><td>- a height of canvas image. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">channels</td><td>- a pixel size of canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x1</td><td>- X coordinate of the first point of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y1</td><td>- Y coordinate of the first point of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x2</td><td>- X coordinate of the second point of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y2</td><td>- Y coordinate of the second point of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to colors of the line. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a width of the line. By default it is equal to 1. </td></tr>
   </table>
   </dd>
 </dl>
