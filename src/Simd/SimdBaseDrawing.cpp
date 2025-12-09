@@ -56,6 +56,9 @@ namespace Simd
                     int xh = (x1 * y2 - y1 * x2 + h * (x2 - x1)) / (y2 - y1);
                     int yw = (y1 * x2 - x1 * y2 + w * (y2 - y1)) / (x2 - x1);
 
+                    if ((x0 < 0 && xh < 0) || (x0 > w && xh > w) || (y0 < 0 && yw < 0) || (y0 > h && yw > h))
+                        return;
+
                     if (x1 < 0)
                     {
                         x1 = 0;
@@ -66,6 +69,7 @@ namespace Simd
                         x2 = 0;
                         y2 = y0;
                     }
+
                     if (x1 > w)
                     {
                         x1 = w;
@@ -76,8 +80,6 @@ namespace Simd
                         x2 = w;
                         y2 = yw;
                     }
-                    if ((y1 < 0 && y2 < 0) || (y1 > h && y2 > h))
-                        return;
 
                     if (y1 < 0)
                     {
@@ -133,12 +135,18 @@ namespace Simd
                         if (inverse)
                         {
                             if (y <= w)
+                            {
+                                assert(y >= 0 && y <= w && x >= 0 && x <= h);
                                 CopyPixel<N>(color, canvas + x * stride + y * N);
+                            }
                         }
                         else
                         {
                             if (y <= h)
+                            {
+                                assert(y >= 0 && y <= h && x >= 0 && x <= w);
                                 CopyPixel<N>(color, canvas + y * stride + x * N);
+                            }
                         }
                     }
                 }
