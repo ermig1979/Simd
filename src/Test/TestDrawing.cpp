@@ -661,8 +661,8 @@ namespace Test
     {
         bool result = true;
 
-        f1.Update(width, height, View::PixelSize(format), lineWidth, N);
-        f2.Update(width, height, View::PixelSize(format), lineWidth, N);
+        f1.Update(width, height, (int)View::PixelSize(format), lineWidth, N);
+        f2.Update(width, height, (int)View::PixelSize(format), lineWidth, N);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " .");
 
@@ -671,9 +671,11 @@ namespace Test
         View colors(N, 1, format);
         FillRandom(colors);
         Ints points(N * 4);
-        int lo = -100, hi = std::max(width, height) + 100;
-        for (size_t i = 0; i < points.size(); ++i)
-            points[i] = lo + Random(hi - lo);
+        for (size_t i = 0; i < points.size(); i += 2)
+        {
+            points[i + 0] = Random(width + 200) - 100;
+            points[i + 1] = Random(height + 200) - 100;
+        }
 
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
@@ -686,7 +688,8 @@ namespace Test
 
         result = result && Compare(d1, d2, 0, true, 64);
 
-        d1.Save("draw_line.jpg");
+        if(format == View::Bgr24)
+            d1.Save("draw_line.jpg");
 
         return result;
     }
@@ -695,10 +698,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DrawLineAutoTest(W, H, View::Gray8, 3, 100, f1, f2);
-        result = result && DrawLineAutoTest(W, H, View::Uv16, 3, 100, f1, f2);
-        result = result && DrawLineAutoTest(W, H, View::Bgr24, 3, 100, f1, f2);
-        result = result && DrawLineAutoTest(W, H, View::Bgra32, 3, 100, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Gray8, 3, 1000, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Uv16, 3, 1000, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Bgr24, 3, 1000, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Bgra32, 3, 1000, f1, f2);
 
         return result;
     }
@@ -737,7 +740,7 @@ namespace Test
             Simd::DrawLine(image, x1, y1, x2, y2, uint8_t(i), Random(w) + 1);
         }
 
-        image.Save("lines.pgm");
+        image.Save("lines.jpg");
 
         return true;
     }

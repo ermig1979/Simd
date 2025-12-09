@@ -2997,7 +2997,7 @@ extern "C"
 
         \note This function has a C++ wrappers: Simd::DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1).
 
-        \param [in/out] canvas - a pointer to pixels data of canvas image.
+        \param [out] canvas - a pointer to pixels data of canvas image.
         \param [in] stride - a row size of canvas image.
         \param [in] width - a width of canvas image.
         \param [in] height - a height of canvas image.

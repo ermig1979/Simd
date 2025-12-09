@@ -29,10 +29,10 @@ namespace Simd
 {
     namespace Base
     {
-        template<size_t N> void DrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth)
+        template<int N> void DrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, int x1, int y1, int x2, int y2, const uint8_t* color, int lineWidth)
         {
-            ptrdiff_t w = width - 1;
-            ptrdiff_t h = height - 1;
+            int w = (int)width - 1;
+            int h = (int)height - 1;
 
             if (x1 < 0 || y1 < 0 || x1 > w || y1 > h || x2 < 0 || y2 < 0 || x2 > w || y2 > h)
             {
@@ -41,20 +41,20 @@ namespace Simd
 
                 if (y1 == y2)
                 {
-                    x1 = Simd::RestrictRange<ptrdiff_t>(x1, 0, w);
-                    x2 = Simd::RestrictRange<ptrdiff_t>(x2, 0, w);
+                    x1 = Simd::RestrictRange(x1, 0, w);
+                    x2 = Simd::RestrictRange(x2, 0, w);
                 }
                 else if (x1 == x2)
                 {
-                    y1 = Simd::RestrictRange<ptrdiff_t>(y1, 0, h);
-                    y2 = Simd::RestrictRange<ptrdiff_t>(y2, 0, h);
+                    y1 = Simd::RestrictRange(y1, 0, h);
+                    y2 = Simd::RestrictRange(y2, 0, h);
                 }
                 else
                 {
-                    ptrdiff_t x0 = (x1 * y2 - y1 * x2) / (y2 - y1);
-                    ptrdiff_t y0 = (y1 * x2 - x1 * y2) / (x2 - x1);
-                    ptrdiff_t xh = (x1 * y2 - y1 * x2 + h * (x2 - x1)) / (y2 - y1);
-                    ptrdiff_t yw = (y1 * x2 - x1 * y2 + w * (y2 - y1)) / (x2 - x1);
+                    int x0 = (x1 * y2 - y1 * x2) / (y2 - y1);
+                    int y0 = (y1 * x2 - x1 * y2) / (x2 - x1);
+                    int xh = (x1 * y2 - y1 * x2 + h * (x2 - x1)) / (y2 - y1);
+                    int yw = (y1 * x2 - x1 * y2 + w * (y2 - y1)) / (x2 - x1);
 
                     if (x1 < 0)
                     {
@@ -116,18 +116,18 @@ namespace Simd
                 Simd::Swap(y1, y2);
             }
 
-            const double dx = double(x2 - x1);
-            const double dy = (double)std::abs(y2 - y1);
+            const float dx = float(x2 - x1);
+            const float dy = (float)std::abs(y2 - y1);
 
-            double error = dx / 2.0f;
-            const ptrdiff_t yStep = (y1 < y2) ? 1 : -1;
-            ptrdiff_t y0 = y1 - lineWidth / 2;
+            float error = dx / 2.0f;
+            const int yStep = (y1 < y2) ? 1 : -1;
+            int y0 = y1 - lineWidth / 2;
 
-            for (ptrdiff_t x = x1; x <= x2; x++)
+            for (int x = x1; x <= x2; x++)
             {
-                for (size_t i = 0; i < lineWidth; ++i)
+                for (int i = 0; i < lineWidth; ++i)
                 {
-                    ptrdiff_t y = y0 + i;
+                    int y = y0 + i;
                     if (y >= 0)
                     {
                         if (inverse)
@@ -156,10 +156,10 @@ namespace Simd
         {
             switch (channels)
             {
-            case 1: DrawLine<1>(canvas, stride, width, height, x1, y1, x2, y2, color, lineWidth); break;
-            case 2: DrawLine<2>(canvas, stride, width, height, x1, y1, x2, y2, color, lineWidth); break;
-            case 3: DrawLine<3>(canvas, stride, width, height, x1, y1, x2, y2, color, lineWidth); break;
-            case 4: DrawLine<4>(canvas, stride, width, height, x1, y1, x2, y2, color, lineWidth); break;
+            case 1: DrawLine<1>(canvas, stride, width, height, (int)x1, (int)y1, (int)x2, (int)y2, color, (int)lineWidth); break;
+            case 2: DrawLine<2>(canvas, stride, width, height, (int)x1, (int)y1, (int)x2, (int)y2, color, (int)lineWidth); break;
+            case 3: DrawLine<3>(canvas, stride, width, height, (int)x1, (int)y1, (int)x2, (int)y2, color, (int)lineWidth); break;
+            case 4: DrawLine<4>(canvas, stride, width, height, (int)x1, (int)y1, (int)x2, (int)y2, color, (int)lineWidth); break;
             }
         }
     }

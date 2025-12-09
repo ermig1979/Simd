@@ -36,6 +36,8 @@ namespace Simd
 
         \short Draws a line at the image.
 
+        \note This function is a C++ wrapper for function ::SimdDrawLine.
+
         \param [out] canvas - a canvas (image where we draw line).
         \param [in] x1 - X coordinate of the first point of the line.
         \param [in] y1 - Y coordinate of the first point of the line.
@@ -48,126 +50,7 @@ namespace Simd
     {
         assert(canvas.PixelSize() == sizeof(Color));
 
-        const ptrdiff_t w = canvas.width - 1;
-        const ptrdiff_t h = canvas.height - 1;
-
-        if (x1 < 0 || y1 < 0 || x1 > w || y1 > h || x2 < 0 || y2 < 0 || x2 > w || y2 > h)
-        {
-            if ((x1 < 0 && x2 < 0) || (y1 < 0 && y2 < 0) || (x1 > w && x2 > w) || (y1 > h && y2 > h))
-                return;
-
-            if (y1 == y2)
-            {
-                x1 = std::min<ptrdiff_t>(std::max<ptrdiff_t>(x1, 0), w);
-                x2 = std::min<ptrdiff_t>(std::max<ptrdiff_t>(x2, 0), w);
-            }
-            else if (x1 == x2)
-            {
-                y1 = std::min<ptrdiff_t>(std::max<ptrdiff_t>(y1, 0), h);
-                y2 = std::min<ptrdiff_t>(std::max<ptrdiff_t>(y2, 0), h);
-            }
-            else
-            {
-                ptrdiff_t x0 = (x1*y2 - y1*x2) / (y2 - y1);
-                ptrdiff_t y0 = (y1*x2 - x1*y2) / (x2 - x1);
-                ptrdiff_t xh = (x1*y2 - y1*x2 + h*(x2 - x1)) / (y2 - y1);
-                ptrdiff_t yw = (y1*x2 - x1*y2 + w*(y2 - y1)) / (x2 - x1);
-
-                if (x1 < 0)
-                {
-                    x1 = 0;
-                    y1 = y0;
-                }
-                if (x2 < 0)
-                {
-                    x2 = 0;
-                    y2 = y0;
-                }
-                if (x1 > w)
-                {
-                    x1 = w;
-                    y1 = yw;
-                }
-                if (x2 > w)
-                {
-                    x2 = w;
-                    y2 = yw;
-                }
-                if ((y1 < 0 && y2 < 0) || (y1 > h && y2 > h))
-                    return;
-
-                if (y1 < 0)
-                {
-                    x1 = x0;
-                    y1 = 0;
-                }
-                if (y2 < 0)
-                {
-                    x2 = x0;
-                    y2 = 0;
-                }
-
-                if (y1 > h)
-                {
-                    x1 = xh;
-                    y1 = h;
-                }
-                if (y2 > h)
-                {
-                    x2 = xh;
-                    y2 = h;
-                }
-            }
-        }
-
-        const bool inverse = std::abs(y2 - y1) > std::abs(x2 - x1);
-        if (inverse)
-        {
-            std::swap(x1, y1);
-            std::swap(x2, y2);
-        }
-
-        if (x1 > x2)
-        {
-            std::swap(x1, x2);
-            std::swap(y1, y2);
-        }
-
-        const double dx = double(x2 - x1);
-        const double dy = (double)std::abs(y2 - y1);
-
-        double error = dx / 2.0f;
-        const ptrdiff_t ystep = (y1 < y2) ? 1 : -1;
-        ptrdiff_t y0 = y1 - width / 2;
-
-        for (ptrdiff_t x = x1; x <= x2; x++)
-        {
-            for (size_t i = 0; i < width; ++i)
-            {
-                ptrdiff_t y = y0 + i;
-                if (y >= 0)
-                {
-                    if (inverse)
-                    {
-                        if (y <= w)
-                            At<A, Color>(canvas, y, x) = color;
-                    }
-                    else
-                    {
-                        if (y <= h)
-                            At<A, Color>(canvas, x, y) = color;
-                    }
-                }
-
-            }
-
-            error -= dy;
-            if (error < 0)
-            {
-                y0 += ystep;
-                error += dx;
-            }
-        }
+        SimdDrawLine(canvas.data, canvas.stride, canvas.width, canvas.height, sizeof(Color), x1, y1, x2, y2, (const uint8_t*)&color, width);
     }
 
     /*! @ingroup cpp_drawing
