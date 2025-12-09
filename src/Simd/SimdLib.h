@@ -2989,6 +2989,28 @@ extern "C"
     SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup drawing
+
+        \fn void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
+
+        \short Draws a line at the image.
+
+        \note This function has a C++ wrappers: Simd::DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1).
+
+        \param [in/out] canvas - a pointer to pixels data of canvas image.
+        \param [in] stride - a row size of canvas image.
+        \param [in] width - a width of canvas image.
+        \param [in] height - a height of canvas image.
+        \param [in] channels - a number of channels for canvas image.
+        \param [in] x1 - X coordinate of the first point of the line.
+        \param [in] y1 - Y coordinate of the first point of the line.
+        \param [in] x2 - X coordinate of the second point of the line.
+        \param [in] y2 - Y coordinate of the second point of the line.
+        \param [in] color - a ponter to line color.
+        \param [in] lineWidth - a line width.
+    */
+    SIMD_API void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
+
     /*! @ingroup filling
 
         \fn void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);

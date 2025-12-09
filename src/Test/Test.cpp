@@ -183,7 +183,7 @@ namespace Test
     TEST_ADD_GROUP_A0(AlphaFilling);
     TEST_ADD_GROUP_A0(AlphaPremultiply);
     TEST_ADD_GROUP_A0(AlphaUnpremultiply);
-    TEST_ADD_GROUP_0S(DrawLine);
+    TEST_ADD_GROUP_AS(DrawLine);
     TEST_ADD_GROUP_0S(DrawRectangle);
     TEST_ADD_GROUP_0S(DrawFilledRectangle);
     TEST_ADD_GROUP_0S(DrawPolygon);

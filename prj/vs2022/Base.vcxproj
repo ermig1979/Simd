@@ -151,6 +151,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseDescrInt.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseDrawing.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat32.cpp" />

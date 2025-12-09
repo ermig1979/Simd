@@ -122,7 +122,7 @@ namespace Test
         return result;
     }
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -218,7 +218,7 @@ namespace Test
         return result;
     }
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -317,7 +317,7 @@ namespace Test
         return result;
     }
 
-    //---------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -411,7 +411,7 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -506,7 +506,7 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -626,9 +626,95 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncDL
+        {
+            typedef void(*FuncPtr)(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
+            FuncPtr func;
+            String desc;
+
+            FuncDL(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Call(View& canvas, const int * points, const uint8_t* colors, size_t width, int N) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                for(size_t i = 0; i < N; ++i, points += 4, colors += canvas.PixelSize())
+                    func(canvas.data, canvas.stride, canvas.width, canvas.height, canvas.PixelSize(), points[0], points[1], points[2], points[3], colors, width);
+            }
+
+            void Update(int h, int w, int c, int lw, int n)
+            {
+                std::stringstream ss;
+                ss << desc << "[" << h << "x" << w << "x" << c << "-" << lw << "-" << n << "]";
+                desc = ss.str();
+            }
+        };
+    }
+
+#define FUNC_DL(func) FuncDL(func, #func)
+
+    bool DrawLineAutoTest(int width, int height, View::Format format, int lineWidth, int N, FuncDL f1, FuncDL f2)
+    {
+        bool result = true;
+
+        f1.Update(width, height, View::PixelSize(format), lineWidth, N);
+        f2.Update(width, height, View::PixelSize(format), lineWidth, N);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " .");
+
+        View (width, height, format, NULL, TEST_ALIGN(width));
+
+        View colors(N, 1, format);
+        FillRandom(colors);
+        Ints points(N * 4);
+        int lo = -100, hi = std::max(width, height) + 100;
+        for (size_t i = 0; i < points.size(); ++i)
+            points[i] = lo + Random(hi - lo);
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+        Simd::Fill(d1, 0);
+        Simd::Fill(d2, 0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, points.data(), colors.data, lineWidth, N));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, points.data(), colors.data, lineWidth, N));
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        d1.Save("draw_line.jpg");
+
+        return result;
+    }
+
+    bool DrawLineAutoTest(const FuncDL& f1, const FuncDL& f2)
+    {
+        bool result = true;
+
+        result = result && DrawLineAutoTest(W, H, View::Gray8, 3, 100, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Uv16, 3, 100, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Bgr24, 3, 100, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Bgra32, 3, 100, f1, f2);
+
+        return result;
+    }
+
+    bool DrawLineAutoTest(const Options& options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && DrawLineAutoTest(FUNC_DL(Simd::Base::DrawLine), FUNC_DL(SimdDrawLine));
+
+        return result;
+    }
 }
 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 #include "Simd/SimdDrawing.hpp"
 

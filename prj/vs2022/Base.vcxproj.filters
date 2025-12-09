@@ -442,6 +442,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseShiftDetector.cpp">
       <Filter>Base\Transform</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseDrawing.cpp">
+      <Filter>Base\Image</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

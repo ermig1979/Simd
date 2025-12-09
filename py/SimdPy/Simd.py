@@ -1423,7 +1423,7 @@ class Lib():
     # @param alpha - a value of alpha channel. By default it is equal to 255.
     # @param yuvType - a type of input YUV image (see descriprion of Simd.YuvType).
 	def Yuv444pToRgba(y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, alpha = 255, yuvType = Simd.YuvType.Bt601) :
-		Lib.__lib.SimdYuv444pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, alpha, yuvType.value)
+		Lib.__lib.SimdYuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, alpha, yuvType.value)
 
 	
 ###################################################################################################

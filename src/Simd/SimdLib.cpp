@@ -2041,6 +2041,12 @@ SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask,
         Base::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
 }
 
+SIMD_API void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth)
+{
+    SIMD_EMPTY();
+    Base::DrawLine(canvas, stride, width, height, channels, x1, y1, x2, y2, color, lineWidth);
+}
+
 SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value)
 {
     SIMD_EMPTY();

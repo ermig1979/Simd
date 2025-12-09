@@ -238,6 +238,8 @@ namespace Simd
         void DetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
+        void DrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
+
         void Fill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
         void FillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
