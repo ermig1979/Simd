@@ -90,7 +90,7 @@ namespace Simd
     {
         assert(canvas.PixelSize() == sizeof(Color));
 
-        SimdDrawLRectangle(canvas.data, canvas.stride, canvas.width, canvas.height, sizeof(Color), left, top, right, bottom, (const uint8_t*)&color, width);
+        SimdDrawRectangle(canvas.data, canvas.stride, canvas.width, canvas.height, sizeof(Color), left, top, right, bottom, (const uint8_t*)&color, width);
     }
 
     /*! @ingroup cpp_drawing
@@ -110,7 +110,7 @@ namespace Simd
     {
         assert(canvas.PixelSize() == sizeof(Color));
 
-        SimdDrawLRectangle(canvas.data, canvas.stride, canvas.width, canvas.height, sizeof(Color), rect.left, rect.top, rect.right, rect.bottom, (const uint8_t*)&color, width);
+        SimdDrawRectangle(canvas.data, canvas.stride, canvas.width, canvas.height, sizeof(Color), rect.left, rect.top, rect.right, rect.bottom, (const uint8_t*)&color, width);
     }
 
     /*! @ingroup cpp_drawing
