@@ -154,7 +154,7 @@ namespace Simd
                 for (size_t yBeg = 0; yBeg < dstH;)
                 {
                     size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                    size_t bufOffs = (_convert == NULL) ? yBeg * (_convert ? AlignHi(p.dstW, a.F) : p.dstW) * a.bufK : 0;
+                    size_t bufOffs = (_convert == NULL || a.macroD < p.dstC) ? yBeg * (_convert ? AlignHi(p.dstW, a.F) : p.dstW) * a.bufK : 0;
                     size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
                     if (dc == 0 && _convert)
                     {
@@ -180,7 +180,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && 0 &&
+            return p.trans != 0 && p.group == 1 && 1 &&
                 ((p.srcC >= 128 && p.dstT == SimdTensorData16b) || (p.srcC >= 256 && p.dstT == SimdTensorData32f)) && p.srcC < 400;
         }
     }
