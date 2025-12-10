@@ -76,6 +76,8 @@ namespace Simd
 
         \short Draws a rectangle at the image.
 
+        \note This function is a C++ wrapper for function ::SimdDrawRectangle.
+
         \param [out] canvas - a canvas (image where we draw rectangle).
         \param [in] left - a left of the rectangle.
         \param [in] top - a top of the rectangl.
@@ -86,10 +88,9 @@ namespace Simd
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawRectangle(View<A>& canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color& color, size_t width = 1)
     {
-        DrawLine(canvas, left, top, right, top, color, width);
-        DrawLine(canvas, right, top, right, bottom, color, width);
-        DrawLine(canvas, right, bottom, left, bottom, color, width);
-        DrawLine(canvas, left, bottom, left, top, color, width);
+        assert(canvas.PixelSize() == sizeof(Color));
+
+        SimdDrawLRectangle(canvas.data, canvas.stride, canvas.width, canvas.height, sizeof(Color), left, top, right, bottom, (const uint8_t*)&color, width);
     }
 
     /*! @ingroup cpp_drawing
@@ -98,6 +99,8 @@ namespace Simd
 
         \short Draws a rectangle at the image.
 
+        \note This function is a C++ wrapper for function ::SimdDrawRectangle.
+
         \param [out] canvas - a canvas (image where we draw rectangle).
         \param [in] rect - a rectangle.
         \param [in] color - a color of the rectangle frame.
@@ -105,10 +108,9 @@ namespace Simd
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1)
     {
-        DrawLine(canvas, rect.left, rect.top, rect.right, rect.top, color, width);
-        DrawLine(canvas, rect.right, rect.top, rect.right, rect.bottom, color, width);
-        DrawLine(canvas, rect.right, rect.bottom, rect.left, rect.bottom, color, width);
-        DrawLine(canvas, rect.left, rect.bottom, rect.left, rect.top, color, width);
+        assert(canvas.PixelSize() == sizeof(Color));
+
+        SimdDrawLRectangle(canvas.data, canvas.stride, canvas.width, canvas.height, sizeof(Color), rect.left, rect.top, rect.right, rect.bottom, (const uint8_t*)&color, width);
     }
 
     /*! @ingroup cpp_drawing
@@ -116,6 +118,8 @@ namespace Simd
         \fn void DrawRectangle(View<A> & canvas, const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight, const Color & color, size_t width = 1)
 
         \short Draws a rectangle at the image.
+
+        \note This function is a C++ wrapper for function ::SimdDrawRectangle.
 
         \param [out] canvas - a canvas (image where we draw rectangle).
         \param [in] topLeft - a top-left corner of the rectangle.
