@@ -124,6 +124,13 @@ def ImageDrawLineTest(args) :
 	canvas = LoadTestImage(args)
 	canvas.DrawLine(100, 100, 500, 600, [0, 255, 0], 5);
 	canvas.Save("DrawLine.jpg")
+
+	###################################################################################################
+
+def ImageDrawRectangleTest(args) :
+	canvas = LoadTestImage(args)
+	canvas.DrawRectangle(100, 100, 500, 600, [0, 0, 255], 5);
+	canvas.Save("DrawRectangle.jpg")
 	
 ###################################################################################################
 
@@ -275,6 +282,7 @@ def InitTestList(args) :
 	tests.append(GetSetParamsTest)
 	tests.append(ImagePaintTest)
 	tests.append(ImageDrawLineTest)
+	tests.append(ImageDrawRectangleTest)
 	tests.append(ImageAbsGradientSaturatedSumTest)
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)

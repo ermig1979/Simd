@@ -570,6 +570,9 @@ class Lib():
 		Lib.__lib.SimdDrawLine.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdDrawLine.restype = None
 
+		Lib.__lib.SimdDrawRectangle.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdDrawRectangle.restype = None
+
 		
 		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdFillPixel.restype = None
@@ -990,14 +993,29 @@ class Lib():
     # @param width - a width of canvas image.
     # @param height - a height of canvas image.
 	# @param channels - a pixel size of canvas image.
-    # @param [in] x1 - X coordinate of the first point of the line.
-    # @param [in] y1 - Y coordinate of the first point of the line.
-    # @param [in] x2 - X coordinate of the second point of the line.
-    # @param [in] y2 - Y coordinate of the second point of the line.
-    # @param [in] color - a pointer to colors of the line.
-    # @param [in] lineWidth - a width of the line. By default it is equal to 1.
+    # @param x1 - X coordinate of the first point of the line.
+    # @param y1 - Y coordinate of the first point of the line.
+    # @param x2 - X coordinate of the second point of the line.
+    # @param y2 - Y coordinate of the second point of the line.
+    # @param color - a pointer to colors of the line.
+    # @param lineWidth - a width of the line. By default it is equal to 1.
 	def DrawLine(canvas : ctypes.c_void_p, stride: int, width : int, height : int, channels : int, x1 : int, y1 : int, x2 : int, y2 : int, color : array.array('B'), lineWidth = 1) :
 		Lib.__lib.SimdDrawLine(canvas, stride, width, height, channels, x1, y1, x2, y2, (ctypes.c_uint8 * channels)(*color), lineWidth)
+
+    ## Draws rectangle at the canvas image.
+    # @param canvas - a pointer to pixels data of canvas image.
+    # @param stride - a row size of canvas image in bytes.
+    # @param width - a width of canvas image.
+    # @param height - a height of canvas image.
+	# @param channels - a pixel size of canvas image.
+    # @param left - a left of the rectangle.
+    # @param top - a top of the rectangle.
+    # @param right - a right of the rectangle.
+    # @param bottom - a bottom of the rectangle.
+    # @param color - a pointer to colors of the line.
+    # @param lineWidth - a line width of rectangle. By default it is equal to 1.
+	def DrawRectangle(canvas : ctypes.c_void_p, stride: int, width : int, height : int, channels : int, left : int, top : int, right : int, bottom : int, color : array.array('B'), lineWidth = 1) :
+		Lib.__lib.SimdDrawRectangle(canvas, stride, width, height, channels, left, top, right, bottom, (ctypes.c_uint8 * channels)(*color), lineWidth)
 		
     ## Copies an image.
     # @param src - a pointer to pixels data of input image.
@@ -1727,7 +1745,17 @@ class Image():
 	# @param [in] width - a width of the line. By default it is equal to 1.
 	def DrawLine(self, x1 : int, y1 : int, x2 : int, y2 : int, color : array.array('B'), width = 1) :
 		Lib.DrawLine(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format().PixelSize(), x1, y1, x2, y2, color, width)
-	
+
+	## Draws a rectangle at the image.
+    # @param left - a left of the rectangle.
+    # @param top - a top of the rectangle.
+    # @param right - a right of the rectangle.
+    # @param bottom - a bottom of the rectangle.
+    # @param color - a pointer to colors of the line.
+    # @param width - a line width of rectangle. By default it is equal to 1.
+	def DrawRectangle(self, left : int, top : int, right : int, bottom : int, color : array.array('B'), width = 1) :
+		Lib.DrawRectangle(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format().PixelSize(), left, top, right, bottom, color, width)
+		
 	## Fills image by value of given pixel.
 	# @param pixel - an array of unsigned 8-bit integer with pixel channels. Its size is in range [1..4]. 
 	def Fill(self, pixel : array.array('B')) :
@@ -1749,7 +1777,6 @@ class Image():
 		for y in range(self.Height()) :
 			ctypes.memmove(dst.ctypes.data + size * y, self.Data() + y * self.Stride(), size)
 		return dst
-		
 		
 ###################################################################################################
 
