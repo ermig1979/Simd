@@ -170,5 +170,15 @@ namespace Simd
             case 4: DrawLine<4>(canvas, stride, width, height, (int)x1, (int)y1, (int)x2, (int)y2, color, (int)lineWidth); break;
             }
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        void DrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth)
+        {
+            DrawLine(canvas, stride, width, height, channels, left, top, right, top, color, lineWidth);
+            DrawLine(canvas, stride, width, height, channels, right, top, right, bottom, color, lineWidth);
+            DrawLine(canvas, stride, width, height, channels, right, bottom, left, bottom, color, lineWidth);
+            DrawLine(canvas, stride, width, height, channels, left, bottom, left, top, color, lineWidth);
+        }
     }
 }

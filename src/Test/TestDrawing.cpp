@@ -33,14 +33,14 @@ namespace Test
     {
         struct FuncAB
         {
-            typedef void(*FuncPtr)(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount,
-                const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride);
+            typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+                const uint8_t* alpha, size_t alphaStride, uint8_t* dst, size_t dstStride);
             FuncPtr func;
             String description;
 
-            FuncAB(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncAB(const FuncPtr& f, const String& d) : func(f), description(d) {}
 
-            void Call(const View & src, const View & alpha, const View & dstSrc, View & dstDst) const
+            void Call(const View& src, const View& alpha, const View& dstSrc, View& dstDst) const
             {
                 Simd::Copy(dstSrc, dstDst);
                 TEST_PERFORMANCE_TEST(description);
@@ -51,7 +51,7 @@ namespace Test
 
 #define FUNC_AB(func) FuncAB(func, #func)
 
-    bool AlphaBlendingAutoTest(View::Format format, int width, int height, const FuncAB & f1, const FuncAB & f2)
+    bool AlphaBlendingAutoTest(View::Format format, int width, int height, const FuncAB& f1, const FuncAB& f2)
     {
         bool result = true;
 
@@ -76,7 +76,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlendingAutoTest(const FuncAB & f1, const FuncAB & f2)
+    bool AlphaBlendingAutoTest(const FuncAB& f1, const FuncAB& f2)
     {
         bool result = true;
 
@@ -92,7 +92,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlendingAutoTest(const Options & options)
+    bool AlphaBlendingAutoTest(const Options& options)
     {
         bool result = true;
 
@@ -128,7 +128,7 @@ namespace Test
     {
         struct FuncAB2
         {
-            typedef void(*FuncPtr)(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride, 
+            typedef void(*FuncPtr)(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
                 const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
                 size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
             FuncPtr func;
@@ -193,7 +193,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlending2xAutoTest(const Options & options)
+    bool AlphaBlending2xAutoTest(const Options& options)
     {
         bool result = true;
 
@@ -231,7 +231,7 @@ namespace Test
 
             FuncABBY(const FuncPtr& f, const String& d) : func(f), description(d) {}
 
-            void Call(const View& bgra, View * y, View * u, View * v, int i, SimdYuvType yuvType) const
+            void Call(const View& bgra, View* y, View* u, View* v, int i, SimdYuvType yuvType) const
             {
                 Simd::Copy(y[0], y[i]);
                 Simd::Copy(u[0], u[i]);
@@ -286,7 +286,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlendingBgraToYuv420pAutoTest(const Options & options)
+    bool AlphaBlendingBgraToYuv420pAutoTest(const Options& options)
     {
         bool result = true;
 
@@ -381,7 +381,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlendingUniformAutoTest(const Options & options)
+    bool AlphaBlendingUniformAutoTest(const Options& options)
     {
         bool result = true;
 
@@ -417,14 +417,14 @@ namespace Test
     {
         struct FuncAF
         {
-            typedef void(*FuncPtr)(uint8_t * dst, size_t dstStride, size_t width, size_t height,
-                const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride);
+            typedef void(*FuncPtr)(uint8_t* dst, size_t dstStride, size_t width, size_t height,
+                const uint8_t* channel, size_t channelCount, const uint8_t* alpha, size_t alphaStride);
             FuncPtr func;
             String description;
 
-            FuncAF(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncAF(const FuncPtr& f, const String& d) : func(f), description(d) {}
 
-            void Call(const View & pixel, const View & alpha, const View & dstSrc, View & dstDst) const
+            void Call(const View& pixel, const View& alpha, const View& dstSrc, View& dstDst) const
             {
                 Simd::Copy(dstSrc, dstDst);
                 TEST_PERFORMANCE_TEST(description);
@@ -435,7 +435,7 @@ namespace Test
 
 #define FUNC_AF(func) FuncAF(func, #func)
 
-    bool AlphaFillingAutoTest(View::Format format, int width, int height, const FuncAF & f1, const FuncAF & f2)
+    bool AlphaFillingAutoTest(View::Format format, int width, int height, const FuncAF& f1, const FuncAF& f2)
     {
         bool result = true;
 
@@ -460,7 +460,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaFillingAutoTest(const FuncAF & f1, const FuncAF & f2)
+    bool AlphaFillingAutoTest(const FuncAF& f1, const FuncAF& f2)
     {
         bool result = true;
 
@@ -476,7 +476,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaFillingAutoTest(const Options & options)
+    bool AlphaFillingAutoTest(const Options& options)
     {
         bool result = true;
 
@@ -567,7 +567,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaPremultiplyAutoTest(const Options & options)
+    bool AlphaPremultiplyAutoTest(const Options& options)
     {
         bool result = true;
 
@@ -597,7 +597,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaUnpremultiplyAutoTest(const Options & options)
+    bool AlphaUnpremultiplyAutoTest(const Options& options)
     {
         bool result = true;
 
@@ -639,11 +639,11 @@ namespace Test
 
             FuncDL(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
-            void Call(View& canvas, const int * points, const uint8_t* colors, size_t width, int N) const
+            void Call(View& canvas, const int* points, const uint8_t* colors, const int *widths, int N) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                for(size_t i = 0; i < N; ++i, points += 4, colors += canvas.PixelSize())
-                    func(canvas.data, canvas.stride, canvas.width, canvas.height, canvas.PixelSize(), points[0], points[1], points[2], points[3], colors, width);
+                for (size_t i = 0; i < N; ++i, points += 4, colors += canvas.PixelSize())
+                    func(canvas.data, canvas.stride, canvas.width, canvas.height, canvas.PixelSize(), points[0], points[1], points[2], points[3], colors, widths[i]);
             }
 
             void Update(int h, int w, int c, int lw, int n)
@@ -657,24 +657,27 @@ namespace Test
 
 #define FUNC_DL(func) FuncDL(func, #func)
 
-    bool DrawLineAutoTest(int width, int height, View::Format format, int lineWidth, int N, FuncDL f1, FuncDL f2)
+    bool DrawLineAutoTest(int width, int height, View::Format format, int N, FuncDL f1, FuncDL f2)
     {
         bool result = true;
 
-        f1.Update(width, height, (int)View::PixelSize(format), lineWidth, N);
-        f2.Update(width, height, (int)View::PixelSize(format), lineWidth, N);
+        f1.Update(width, height, (int)View::PixelSize(format), 3, N);
+        f2.Update(width, height, (int)View::PixelSize(format), 3, N);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " .");
 
-        View (width, height, format, NULL, TEST_ALIGN(width));
+        View(width, height, format, NULL, TEST_ALIGN(width));
 
         View colors(N, 1, format);
         FillRandom(colors);
-        Ints points(N * 4);
-        for (size_t i = 0; i < points.size(); i += 2)
+        Ints points(N * 4), widths(N);
+        for (size_t i = 0; i < points.size(); i += 4)
         {
             points[i + 0] = Random(width + 200) - 100;
             points[i + 1] = Random(height + 200) - 100;
+            points[i + 2] = Random(width + 200) - 100;
+            points[i + 3] = Random(height + 200) - 100;
+            widths[i / 4] = 1 + Random(5);
         }
 
         View d1(width, height, format, NULL, TEST_ALIGN(width));
@@ -682,13 +685,13 @@ namespace Test
         Simd::Fill(d1, 0);
         Simd::Fill(d2, 0);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, points.data(), colors.data, lineWidth, N));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, points.data(), colors.data, widths.data(), N));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, points.data(), colors.data, lineWidth, N));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, points.data(), colors.data, widths.data(), N));
 
         result = result && Compare(d1, d2, 0, true, 64);
 
-        if(format == View::Bgr24)
+        if (format == View::Bgr24)
             d1.Save("draw_line.jpg");
 
         return result;
@@ -698,10 +701,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DrawLineAutoTest(W, H, View::Gray8, 3, 1000, f1, f2);
-        result = result && DrawLineAutoTest(W, H, View::Uv16, 3, 1000, f1, f2);
-        result = result && DrawLineAutoTest(W, H, View::Bgr24, 3, 1000, f1, f2);
-        result = result && DrawLineAutoTest(W, H, View::Bgra32, 3, 1000, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Gray8, 1000, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Uv16, 1000, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Bgr24, 1000, f1, f2);
+        result = result && DrawLineAutoTest(W, H, View::Bgra32, 1000, f1, f2);
 
         return result;
     }
@@ -712,6 +715,102 @@ namespace Test
 
         if (TestBase(options))
             result = result && DrawLineAutoTest(FUNC_DL(Simd::Base::DrawLine), FUNC_DL(SimdDrawLine));
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncDR
+        {
+            typedef void(*FuncPtr)(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
+            FuncPtr func;
+            String desc;
+
+            FuncDR(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Call(View& canvas, const int* points, const uint8_t* colors, const int* widths, int N) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                for (size_t i = 0; i < N; ++i, points += 4, colors += canvas.PixelSize())
+                    func(canvas.data, canvas.stride, canvas.width, canvas.height, canvas.PixelSize(), points[0], points[1], points[2], points[3], colors, widths[i]);
+            }
+
+            void Update(int h, int w, int c, int lw, int n)
+            {
+                std::stringstream ss;
+                ss << desc << "[" << h << "x" << w << "x" << c << "-" << lw << "-" << n << "]";
+                desc = ss.str();
+            }
+        };
+    }
+
+#define FUNC_DR(func) FuncDR(func, #func)
+
+    bool DrawRectangleAutoTest(int width, int height, View::Format format, int N, FuncDR f1, FuncDR f2)
+    {
+        bool result = true;
+
+        f1.Update(width, height, (int)View::PixelSize(format), 3, N);
+        f2.Update(width, height, (int)View::PixelSize(format), 3, N);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " .");
+
+        View(width, height, format, NULL, TEST_ALIGN(width));
+
+        View colors(N, 1, format);
+        FillRandom(colors);
+        Ints points(N * 4), widths(N);
+        for (size_t i = 0; i < points.size(); i += 4)
+        {
+            points[i + 0] = Random(width + 200) - 100;
+            points[i + 1] = Random(height + 200) - 100;
+            points[i + 2] = Random(height + 200) - 100;
+            points[i + 3] = Random(height + 200) - 100;
+            if (points[i + 0] > points[i + 2])
+                Simd::Swap(points[i + 0], points[i + 2]);
+            if (points[i + 1] > points[i + 3])
+                Simd::Swap(points[i + 1], points[i + 3]);
+            widths[i / 4] = 1 + Random(5);
+        }
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+        Simd::Fill(d1, 0);
+        Simd::Fill(d2, 0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, points.data(), colors.data, widths.data(), N));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, points.data(), colors.data, widths.data(), N));
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        if (format == View::Bgr24)
+            d1.Save("draw_rectangle.jpg");
+
+        return result;
+    }
+
+    bool DrawRectangleAutoTest(const FuncDR& f1, const FuncDR& f2)
+    {
+        bool result = true;
+
+        result = result && DrawRectangleAutoTest(W, H, View::Gray8, 500, f1, f2);
+        result = result && DrawRectangleAutoTest(W, H, View::Uv16, 500, f1, f2);
+        result = result && DrawRectangleAutoTest(W, H, View::Bgr24, 500, f1, f2);
+        result = result && DrawRectangleAutoTest(W, H, View::Bgra32, 500, f1, f2);
+
+        return result;
+    }
+
+    bool DrawRectangleAutoTest(const Options& options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && DrawRectangleAutoTest(FUNC_DR(Simd::Base::DrawRectangle), FUNC_DR(SimdDrawRectangle));
 
         return result;
     }

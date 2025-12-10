@@ -74,6 +74,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga23c105b8f21e71d15a8b98d3b9983622"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga23c105b8f21e71d15a8b98d3b9983622">SimdDrawLine</a> (uint8_t *canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t *color, size_t lineWidth)</td></tr>
 <tr class="memdesc:ga23c105b8f21e71d15a8b98d3b9983622"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a line at the image.  <a href="group__drawing.html#ga23c105b8f21e71d15a8b98d3b9983622">More...</a><br /></td></tr>
 <tr class="separator:ga23c105b8f21e71d15a8b98d3b9983622"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga08407175c780f51c2d45483b83f461fe"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga08407175c780f51c2d45483b83f461fe">SimdDrawRectangle</a> (uint8_t *canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t *color, size_t lineWidth)</td></tr>
+<tr class="memdesc:ga08407175c780f51c2d45483b83f461fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a rectangle at the image.  <a href="group__drawing.html#ga08407175c780f51c2d45483b83f461fe">More...</a><br /></td></tr>
+<tr class="separator:ga08407175c780f51c2d45483b83f461fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad15eb53b97ba36c679da57c9b31c673f"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad15eb53b97ba36c679da57c9b31c673f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f">AlphaBlending</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;alpha, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gad15eb53b97ba36c679da57c9b31c673f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs alpha blending operation.  <a href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f">More...</a><br /></td></tr>
@@ -836,6 +839,107 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">y2</td><td>- Y coordinate of the second point of the line. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a ponter to line color. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a line width. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga08407175c780f51c2d45483b83f461fe" name="ga08407175c780f51c2d45483b83f461fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga08407175c780f51c2d45483b83f461fe">&#9670;&#160;</a></span>SimdDrawRectangle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdDrawRectangle </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>canvas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ptrdiff_t&#160;</td>
+          <td class="paramname"><em>left</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ptrdiff_t&#160;</td>
+          <td class="paramname"><em>top</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ptrdiff_t&#160;</td>
+          <td class="paramname"><em>right</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ptrdiff_t&#160;</td>
+          <td class="paramname"><em>bottom</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>color</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>lineWidth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Draws a rectangle at the image. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf" title="Draws a rectangle at the image.">Simd::DrawRectangle</a>(View &amp; canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color &amp; color, size_t width = 1).</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a pointer to pixels data of canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels for canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left of the rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top of the rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right of the rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom of the rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a ponter to rectangle color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a line width of rectangle. </td></tr>
   </table>
   </dd>
 </dl>

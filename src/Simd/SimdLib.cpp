@@ -2047,6 +2047,12 @@ SIMD_API void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t 
     Base::DrawLine(canvas, stride, width, height, channels, x1, y1, x2, y2, color, lineWidth);
 }
 
+SIMD_API void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth)
+{
+    SIMD_EMPTY();
+    Base::DrawRectangle(canvas, stride, width, height, channels, left, top, right, bottom, color, lineWidth);
+}
+
 SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value)
 {
     SIMD_EMPTY();

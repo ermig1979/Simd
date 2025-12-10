@@ -3011,6 +3011,28 @@ extern "C"
     */
     SIMD_API void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
 
+    /*! @ingroup drawing
+
+        \fn void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
+
+        \short Draws a rectangle at the image.
+
+        \note This function has a C++ wrappers: Simd::DrawRectangle(View<A> & canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color & color, size_t width = 1).
+
+        \param [out] canvas - a pointer to pixels data of canvas image.
+        \param [in] stride - a row size of canvas image.
+        \param [in] width - a width of canvas image.
+        \param [in] height - a height of canvas image.
+        \param [in] channels - a number of channels for canvas image.
+        \param [in] left - a left of the rectangle.
+        \param [in] top - a top of the rectangle.
+        \param [in] right - a right of the rectangle.
+        \param [in] bottom - a bottom of the rectangle.
+        \param [in] color - a ponter to rectangle color.
+        \param [in] lineWidth - a line width of rectangle.
+    */
+    SIMD_API void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
+
     /*! @ingroup filling
 
         \fn void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
