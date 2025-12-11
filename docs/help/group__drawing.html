@@ -77,6 +77,21 @@ Functions</h2></td></tr>
 <tr class="memitem:ga08407175c780f51c2d45483b83f461fe"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga08407175c780f51c2d45483b83f461fe">SimdDrawRectangle</a> (uint8_t *canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t *color, size_t lineWidth)</td></tr>
 <tr class="memdesc:ga08407175c780f51c2d45483b83f461fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a rectangle at the image.  <a href="group__drawing.html#ga08407175c780f51c2d45483b83f461fe">More...</a><br /></td></tr>
 <tr class="separator:ga08407175c780f51c2d45483b83f461fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae6922d862b2d1b120d53ff38dcc6a943"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943">SimdFontInit</a> ()</td></tr>
+<tr class="memdesc:gae6922d862b2d1b120d53ff38dcc6a943"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates font context.  <a href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943">More...</a><br /></td></tr>
+<tr class="separator:gae6922d862b2d1b120d53ff38dcc6a943"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga59e83705ad52c565eff3f86b0c74fc35"><td class="memItemLeft" align="right" valign="top">SIMD_API <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35">SimdFontResize</a> (void *context, size_t height)</td></tr>
+<tr class="memdesc:ga59e83705ad52c565eff3f86b0c74fc35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets font height.  <a href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35">More...</a><br /></td></tr>
+<tr class="separator:ga59e83705ad52c565eff3f86b0c74fc35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabc9eefe0ef3c652aec698a9a52b10b80"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80">SimdFontHeight</a> (void *context)</td></tr>
+<tr class="memdesc:gabc9eefe0ef3c652aec698a9a52b10b80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets current font height.  <a href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80">More...</a><br /></td></tr>
+<tr class="separator:gabc9eefe0ef3c652aec698a9a52b10b80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga98c1a82133291d9803eca43e1dbe4f94"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga98c1a82133291d9803eca43e1dbe4f94">SimdFontMeasure</a> (void *context, const char *text, size_t *width, size_t *height)</td></tr>
+<tr class="memdesc:ga98c1a82133291d9803eca43e1dbe4f94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measures size of region which need to draw current text with using of given font.  <a href="group__drawing.html#ga98c1a82133291d9803eca43e1dbe4f94">More...</a><br /></td></tr>
+<tr class="separator:ga98c1a82133291d9803eca43e1dbe4f94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6e944a648a9cae7903642dde8246c8bc"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc">SimdFontDraw</a> (void *context, uint8_t *canvas, size_t stride, size_t width, size_t height, size_t channels, const char *text, size_t left, size_t top, const uint8_t *color)</td></tr>
+<tr class="memdesc:ga6e944a648a9cae7903642dde8246c8bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a text on canvas at current position with using of given font and color.  <a href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc">More...</a><br /></td></tr>
+<tr class="separator:ga6e944a648a9cae7903642dde8246c8bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad15eb53b97ba36c679da57c9b31c673f"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad15eb53b97ba36c679da57c9b31c673f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f">AlphaBlending</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;alpha, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gad15eb53b97ba36c679da57c9b31c673f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs alpha blending operation.  <a href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f">More...</a><br /></td></tr>
@@ -940,6 +955,235 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom of the rectangle. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a ponter to rectangle color. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a line width of rectangle. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gae6922d862b2d1b120d53ff38dcc6a943" name="gae6922d862b2d1b120d53ff38dcc6a943"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae6922d862b2d1b120d53ff38dcc6a943">&#9670;&#160;</a></span>SimdFontInit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * SimdFontInit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates font context. </p>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Sets font height.">SimdFontResize</a>, <a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80" title="Gets current font height.">SimdFontHeight</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </dd></dl>
+
+</div>
+</div>
+<a id="ga59e83705ad52c565eff3f86b0c74fc35" name="ga59e83705ad52c565eff3f86b0c74fc35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga59e83705ad52c565eff3f86b0c74fc35">&#9670;&#160;</a></span>SimdFontResize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> SimdFontResize </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets font height. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a new height of font. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>result of font resizing. </dd></dl>
+
+</div>
+</div>
+<a id="gabc9eefe0ef3c652aec698a9a52b10b80" name="gabc9eefe0ef3c652aec698a9a52b10b80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gabc9eefe0ef3c652aec698a9a52b10b80">&#9670;&#160;</a></span>SimdFontHeight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t SimdFontHeight </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>context</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets current font height. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the font height. </dd></dl>
+
+</div>
+</div>
+<a id="ga98c1a82133291d9803eca43e1dbe4f94" name="ga98c1a82133291d9803eca43e1dbe4f94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga98c1a82133291d9803eca43e1dbe4f94">&#9670;&#160;</a></span>SimdFontMeasure()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdFontMeasure </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>text</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Measures size of region which need to draw current text with using of given font. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a pointer to text. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">width</td><td>- a measured width of region need to draw this text. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">height</td><td>- a measured height of region need to draw this text. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga6e944a648a9cae7903642dde8246c8bc" name="ga6e944a648a9cae7903642dde8246c8bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6e944a648a9cae7903642dde8246c8bc">&#9670;&#160;</a></span>SimdFontDraw()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdFontDraw </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>canvas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>text</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>left</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>top</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>color</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Draws a text on canvas at current position with using of given font and color. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a pointer to pixels data of canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels for canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a pointer to text. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- an X coordinate of start position to draw text. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- an Y coordinate of start position to draw text. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a ponter to font color. </td></tr>
   </table>
   </dd>
 </dl>

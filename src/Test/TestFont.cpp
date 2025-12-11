@@ -31,7 +31,6 @@
 //#define TEST_GENERATE_FONT
 
 #if defined(_WIN32) && defined(TEST_GENERATE_FONT)
-using namespace std;
 #define NOMINMAX
 #include <windows.h>
 #include <gdiplus.h>
@@ -194,7 +193,7 @@ namespace Test
 
     bool generateFont = GenerateFont();
 }
-#endif //TEST_GENERATE_FONT
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -225,7 +224,7 @@ namespace Test
         font.Draw(image, text, View::BottomRight, Color(0, 0, 0));
         font.Draw(image, text, View::TopLeft, Color(0, 0, 0));
 
-        image.Save("texts.ppm");
+        image.Save("texts.jpg");
 
         return true;
     }

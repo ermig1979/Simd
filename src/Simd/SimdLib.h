@@ -3187,6 +3187,73 @@ extern "C"
     */
     SIMD_API void SimdFloat16ToFloat32(const uint16_t * src, size_t size, float * dst);
 
+    /*! @ingroup drawing
+
+        \fn void* SimdFontInit();
+
+        \short Creates font context.
+
+        \return a pointer to font context. On error it returns NULL.
+                This pointer is used in functions ::SimdFontResize, ::SimdFontHeight.
+                It must be released with using of function ::SimdRelease.
+    */
+    SIMD_API void* SimdFontInit();
+
+    /*! @ingroup drawing
+
+        \fn SimdBool SimdFontResize(void * context, size_t height);
+
+        \short Sets font height.
+
+        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
+        \param [in] height - a new height of font. 
+        \return result of font resizing.
+    */
+    SIMD_API SimdBool SimdFontResize(void * context, size_t height);
+
+    /*! @ingroup drawing
+
+        \fn size_t SimdFontHeight(void* context);
+
+        \short Gets current font height.
+
+        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
+        \return the font height.
+    */
+    SIMD_API size_t SimdFontHeight(void* context);
+
+    /*! @ingroup drawing
+
+        \fn void SimdFontMeasure(void* context, const char* text, size_t* width, size_t* height);
+
+        \short Measures size of region which need to draw current text with using of given font.
+
+        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
+        \param [in] text - a pointer to text.
+        \param [out] width - a measured width of region need to draw this text.
+        \param [out] height - a measured height of region need to draw this text.
+    */
+    SIMD_API void SimdFontMeasure(void* context, const char* text, size_t* width, size_t* height);
+
+    /*! @ingroup drawing
+
+        \fn void SimdFontDraw(void* context, uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t* color);
+
+        \short Draws a text on canvas at current position with using of given font and color.
+
+        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
+        \param [out] canvas - a pointer to pixels data of canvas image.
+        \param [in] stride - a row size of canvas image.
+        \param [in] width - a width of canvas image.
+        \param [in] height - a height of canvas image.
+        \param [in] channels - a number of channels for canvas image.
+        \param [in] text - a pointer to text.
+        \param [in] left - an X coordinate of start position to draw text.
+        \param [in] top - an Y coordinate of start position to draw text.
+        \param [in] color - a ponter to font color.
+    */
+    SIMD_API void SimdFontDraw(void* context, uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t* color);
+
     /*! @ingroup float16
 
         \fn void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);

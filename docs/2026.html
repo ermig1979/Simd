@@ -44,6 +44,11 @@
  <li>Function Simd::Resize for Simd::Frame.</li>
  <li>Base implementation of function DrawLine.</li>
  <li>Base implementation of function DrawRectangle.</li>
+ <li>Base implementation of function FontInit.</li>
+ <li>Base implementation of function FontResize.</li>
+ <li>Base implementation of function FontHeight.</li>
+ <li>Base implementation of function FontMeasure.</li>
+ <li>Base implementation of function FontDraw.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -53,6 +58,7 @@
  <li>AVX-512BW optimizations of function SynetMergedConvolution32f (DepthwiseConvolution_k3p1d1s1w6).</li>
  <li>Simd::DrawLine uses SimdDrawLine instead its own implementation.</li>
  <li>Simd::DrawRectangle uses SimdDrawRectangle instead its own implementation.</li>
+ <li>Simd::Font uses functions SimdFontInit, SimdFontResize, SimdFontHeight, SimdFontMeasure, SimdFontDraw instead of its own implementation.</li>
 </ul>
 
 <h4>Python wrapper</h4>

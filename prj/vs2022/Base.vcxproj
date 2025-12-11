@@ -46,6 +46,7 @@
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdFloat16.h" />
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />
+    <ClInclude Include="..\..\src\Simd\SimdFont.h" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
     <ClInclude Include="..\..\src\Simd\SimdGrayToY.h" />
@@ -155,6 +156,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat32.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseFont.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgr.cpp" />

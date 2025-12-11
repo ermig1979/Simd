@@ -64,6 +64,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdEmpty.h"
 #include "Simd/SimdTile.h"
 
+#include "Simd/SimdFont.h"
 #include "Simd/SimdDescrInt.h"
 #include "Simd/SimdGaussianBlur.h"
 #include "Simd/SimdImageLoad.h"
@@ -2408,6 +2409,36 @@ SIMD_API void SimdCosineDistance32f(const float * a, const float * b, size_t siz
     const static SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC4(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdCosineDistance32f(a, b, size, distance);
+}
+
+SIMD_API void* SimdFontInit()
+{
+    SIMD_EMPTY();
+    return new Base::Font();
+}
+
+SIMD_API SimdBool SimdFontResize(void* context, size_t height)
+{
+    SIMD_EMPTY();
+    return ((Base::Font*)context)->Resize(height);
+}
+
+SIMD_API size_t SimdFontHeight(void* context)
+{
+    SIMD_EMPTY();
+    return ((Base::Font*)context)->Height();
+}
+
+SIMD_API void SimdFontMeasure(void* context, const char* text, size_t* width, size_t* height)
+{
+    SIMD_EMPTY();
+    ((Base::Font*)context)->Measure(text, width, height);
+}
+
+SIMD_API void SimdFontDraw(void* context, uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t* color)
+{
+    SIMD_EMPTY();
+    ((Base::Font*)context)->Draw(canvas, stride, width, height, channels, text, left, top, color);
 }
 
 SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,

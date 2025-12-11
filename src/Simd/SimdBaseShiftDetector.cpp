@@ -39,7 +39,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        struct Differences
+        struct ShiftDetectorDifferences
         {
             void Init(const Point& neighborhood, const Point& origin = Point())
             {
@@ -207,26 +207,26 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        struct Level
+        struct ShiftDetectorLevel
         {
             Point neighborhood;
             Point maxShift;
             Rect buildRegion;
             Rect searchRegion;
-            Differences differences;
+            ShiftDetectorDifferences differences;
             View background;
             View current;
             Point shift;
         };
-        typedef std::vector<Level> Levels;
+        typedef std::vector<ShiftDetectorLevel> ShiftDetectorLevels;
 
         //-------------------------------------------------------------------------------------------------
 
-        struct Implementation
+        struct ShiftDetectorImpl
         {
             Pyramid _background;
             Pyramid _current;
-            Levels _levels;
+            ShiftDetectorLevels _levels;
             SimdShiftDetectorTextureType _textureType;
             SimdShiftDetectorDifferenceType _differenceType;
 
@@ -296,7 +296,7 @@ namespace Simd
                 return double(difference) / region.Area();
             }
 
-            void GetDifferences3x3(Level& level, const Point& shift)
+            void GetDifferences3x3(ShiftDetectorLevel& level, const Point& shift)
             {
                 Point size = level.current.Size();
                 Rect enlarged = level.searchRegion;
@@ -325,9 +325,9 @@ namespace Simd
                 }
             }
 
-            bool SearchLocalMin(Level& level, const Point& shift, double hiddenAreaPenalty)
+            bool SearchLocalMin(ShiftDetectorLevel& level, const Point& shift, double hiddenAreaPenalty)
             {
-                Differences& differences = level.differences;
+                ShiftDetectorDifferences& differences = level.differences;
                 differences.Init(level.neighborhood, shift);
                 Point minShift(shift);
                 Point stageShift(shift);
@@ -391,45 +391,45 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         ShiftDetector::ShiftDetector(size_t bkgWidth, size_t bkgHeight, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType)
-            :_implementation(NULL)
+            :_impl(NULL)
         {
-            _implementation = new Implementation();
-            _implementation->_textureType = textureType;
-            _implementation->_differenceType = differenceType;
-            _implementation->_background.Recreate(bkgWidth, bkgHeight, levelCount);
-            _implementation->_current.Recreate(bkgWidth, bkgHeight, levelCount);
+            _impl = new ShiftDetectorImpl();
+            _impl->_textureType = textureType;
+            _impl->_differenceType = differenceType;
+            _impl->_background.Recreate(bkgWidth, bkgHeight, levelCount);
+            _impl->_current.Recreate(bkgWidth, bkgHeight, levelCount);
         }
 
         ShiftDetector::~ShiftDetector()
         {
-            if (_implementation)
-                delete _implementation;
+            if (_impl)
+                delete _impl;
         }
 
         void ShiftDetector::SetBackground(const uint8_t* bkg, size_t bkgStride, SimdBool makeCopy)
         {
-            View background(_implementation->_background[0].width, _implementation->_background[0].height, bkgStride, View::Gray8, (uint8_t*)bkg);
-            if (_implementation->_textureType == SimdShiftDetectorTextureGray)
+            View background(_impl->_background[0].width, _impl->_background[0].height, bkgStride, View::Gray8, (uint8_t*)bkg);
+            if (_impl->_textureType == SimdShiftDetectorTextureGray)
             {
                 if (makeCopy)
                 {
-                    Simd::Copy(background, _implementation->_background[0]);
+                    Simd::Copy(background, _impl->_background[0]);
                 }
                 else
                 {
-                    _implementation->_background[0].Clear();
-                    _implementation->_background[0] = View(background.width, background.height, background.stride, background.format, background.data);
+                    _impl->_background[0].Clear();
+                    _impl->_background[0] = View(background.width, background.height, background.stride, background.format, background.data);
                 }
             }
-            else if (_implementation->_textureType == SimdShiftDetectorTextureGrad)
+            else if (_impl->_textureType == SimdShiftDetectorTextureGrad)
             {
-                Simd::AbsGradientSaturatedSum(background, _implementation->_background[0]);
+                Simd::AbsGradientSaturatedSum(background, _impl->_background[0]);
             }
             else
             {
                 assert(0);
             }
-            Simd::Build(_implementation->_background, ::SimdReduce2x2);
+            Simd::Build(_impl->_background, ::SimdReduce2x2);
         }
 
         SimdBool ShiftDetector::Estimate(const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight,
@@ -439,22 +439,22 @@ namespace Simd
             Rect region(initShiftX, initShiftY, initShiftX + currWidth, initShiftY + currHeight);
             Point maxShift(maxShiftX, maxShiftY);
 
-            if (_implementation->_current[0].width < current.width || _implementation->_current[0].height < current.height)
+            if (_impl->_current[0].width < current.width || _impl->_current[0].height < current.height)
                 return SimdFalse;
             if (region.Area() < regionAreaMin)
                 return SimdFalse;
 
-            _implementation->InitLevels(region, maxShift, regionAreaMin);
-            _implementation->SetCurrent(current, region);
+            _impl->InitLevels(region, maxShift, regionAreaMin);
+            _impl->SetCurrent(current, region);
 
             Point shift;
-            for (ptrdiff_t i = _implementation->_levels.size() - 1; i >= 0; i--)
+            for (ptrdiff_t i = _impl->_levels.size() - 1; i >= 0; i--)
             {
                 shift.x *= 2;
                 shift.y *= 2;
-                if (!_implementation->SearchLocalMin(_implementation->_levels[i], shift, *hiddenAreaPenalty))
+                if (!_impl->SearchLocalMin(_impl->_levels[i], shift, *hiddenAreaPenalty))
                     return SimdFalse;
-                shift = _implementation->_levels[i].shift;
+                shift = _impl->_levels[i].shift;
             }
             return SimdTrue;
         }
@@ -463,23 +463,23 @@ namespace Simd
         {
             if (shift)
             {
-                shift[0] = _implementation->_levels[0].shift.x;
-                shift[1] = _implementation->_levels[0].shift.y;
+                shift[0] = _impl->_levels[0].shift.x;
+                shift[1] = _impl->_levels[0].shift.y;
             }
             if (refinedShift)
             {
-                FPoint refinement = _implementation->_levels[0].differences.Refinement();
-                refinedShift[0] = _implementation->_levels[0].shift.x + refinement.x;
-                refinedShift[1] = _implementation->_levels[0].shift.y + refinement.y;
+                FPoint refinement = _impl->_levels[0].differences.Refinement();
+                refinedShift[0] = _impl->_levels[0].shift.x + refinement.x;
+                refinedShift[1] = _impl->_levels[0].shift.y + refinement.y;
             }
             if (stability)
             {
-                stability[0] = _implementation->_levels[0].differences.Stability();
+                stability[0] = _impl->_levels[0].differences.Stability();
             }
             if (correlation)
             {
-                double difference = _implementation->_levels[0].differences.At(_implementation->_levels[0].shift);
-                if (_implementation->_differenceType == SimdShiftDetectorAbsDifference)
+                double difference = _impl->_levels[0].differences.At(_impl->_levels[0].shift);
+                if (_impl->_differenceType == SimdShiftDetectorAbsDifference)
                     correlation[0] = 1.0 - difference / 255;
                 else
                     correlation[0] = 1.0 - ::sqrt(difference) / 255;

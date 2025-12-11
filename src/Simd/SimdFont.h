@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdShiftDetector_h__
-#define __SimdShiftDetector_h__
+#ifndef __SimdFont_h__
+#define __SimdFont_h__
 
 #include "Simd/SimdMemory.h"
 
@@ -30,23 +30,24 @@ namespace Simd
 {
     namespace Base
     {
-        struct ShiftDetectorImpl;
+        struct FontImpl;
 
-        struct ShiftDetector : public Deletable
+        struct Font : public Deletable
         {
-            ShiftDetector(size_t bkgWidth, size_t bkgHeight, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
+            Font();
 
-            virtual ~ShiftDetector();
+            virtual ~Font();
 
-            void SetBackground(const uint8_t* bkg, size_t bkgStride, SimdBool makeCopy);
+            SimdBool Resize(size_t height);
 
-            SimdBool Estimate(const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight,
-                size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double* hiddenAreaPenalty, ptrdiff_t regionAreaMin);
+            size_t Height() const;
 
-            void GetShift(ptrdiff_t* shift, double* refinedShift, double* stability, double* correlation);
+            void Measure(const char* text, size_t *width, size_t *height) const;
+
+            void Draw(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t * color) const;
 
         private:
-            ShiftDetectorImpl* _impl;
+            FontImpl* _impl;
         };
     }
 }

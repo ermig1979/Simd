@@ -445,6 +445,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseDrawing.cpp">
       <Filter>Base\Image</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseFont.cpp">
+      <Filter>Base\Image</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -739,6 +742,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdShiftDetector.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdFont.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
