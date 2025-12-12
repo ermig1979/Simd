@@ -1056,12 +1056,19 @@ class Lib():
 			raise Exception("Incompatible pixel size: {0} !".format(size))
 		Lib.__lib.SimdFillPixel(dst, stride, width, height, (ctypes.c_uint8 * size)(*pixel), size)	
 
-	## Creates Font context.
+	## Creates font context.
 	# @return a pointer to font context. On error it returns NULL.
     #         This pointer is used in functions Simd.Lib.FontResize, Simd.Lib.FontHeight, Simd.Lib.FontMeasure, Simd.Lib.FontDraw.
     #         It must be released with using of function Simd.Lib.Release. 
 	def FontInit() -> ctypes.c_void_p :
 		return Lib.__lib.SimdFontInit()
+
+	## Sets font height.
+    # @param context - a font context. It must be created by function Simd.Lib.FontInit and released by function Simd.Lib.Release.
+    # @param height - a desired font height.
+	# @return a result of the operation (True or False). 
+	def FontResize(context: ctypes.c_void_p, height: int) -> bool :
+		return Lib.__lib.SimdFontResize(context, height) != 0
 		
     ## Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.
     # @param src - a pointer to pixels data of input 8-bit gray.

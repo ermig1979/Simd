@@ -163,8 +163,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ac00ff54734904ddd7fabc0d654a8cb34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <a href="class_simd_1_1_lib.html#ac00ff54734904ddd7fabc0d654a8cb34">More...</a><br /></td></tr>
 <tr class="separator:ac00ff54734904ddd7fabc0d654a8cb34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3abf48e85d41d09b658ea991b00bd549"><td class="memItemLeft" align="right" valign="top">ctypes.c_void_p&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a3abf48e85d41d09b658ea991b00bd549">FontInit</a> ()</td></tr>
-<tr class="memdesc:a3abf48e85d41d09b658ea991b00bd549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates <a class="el" href="class_simd_1_1_font.html" title="The Font class provides text drawing.">Font</a> context.  <a href="class_simd_1_1_lib.html#a3abf48e85d41d09b658ea991b00bd549">More...</a><br /></td></tr>
+<tr class="memdesc:a3abf48e85d41d09b658ea991b00bd549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates font context.  <a href="class_simd_1_1_lib.html#a3abf48e85d41d09b658ea991b00bd549">More...</a><br /></td></tr>
 <tr class="separator:a3abf48e85d41d09b658ea991b00bd549"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4dbe9aa171d1b34020fd88997eed239"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac4dbe9aa171d1b34020fd88997eed239">FontResize</a> (ctypes.c_void_p context, int height)</td></tr>
+<tr class="memdesc:ac4dbe9aa171d1b34020fd88997eed239"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets font height.  <a href="class_simd_1_1_lib.html#ac4dbe9aa171d1b34020fd88997eed239">More...</a><br /></td></tr>
+<tr class="separator:ac4dbe9aa171d1b34020fd88997eed239"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ab8840a8f8b2ca861e8e18d8a5af74aca">GrayToBgra</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride, alpha=255)</td></tr>
 <tr class="memdesc:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.  <a href="class_simd_1_1_lib.html#ab8840a8f8b2ca861e8e18d8a5af74aca">More...</a><br /></td></tr>
 <tr class="separator:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2165,8 +2168,46 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Creates <a class="el" href="class_simd_1_1_font.html" title="The Font class provides text drawing.">Font</a> context. </p>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions Simd.Lib.FontResize, Simd.Lib.FontHeight, Simd.Lib.FontMeasure, Simd.Lib.FontDraw. It must be released with using of function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </dd></dl>
+<p>Creates font context. </p>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="class_simd_1_1_lib.html#ac4dbe9aa171d1b34020fd88997eed239" title="Sets font height.">Simd.Lib.FontResize</a>, Simd.Lib.FontHeight, Simd.Lib.FontMeasure, Simd.Lib.FontDraw. It must be released with using of function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </dd></dl>
+
+</div>
+</div>
+<a id="ac4dbe9aa171d1b34020fd88997eed239" name="ac4dbe9aa171d1b34020fd88997eed239"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4dbe9aa171d1b34020fd88997eed239">&#9670;&#160;</a></span>FontResize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool  FontResize </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets font height. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="class_simd_1_1_lib.html#a3abf48e85d41d09b658ea991b00bd549" title="Creates font context.">Simd.Lib.FontInit</a> and released by function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </td></tr>
+    <tr><td class="paramname">height</td><td>- a desired font height. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a result of the operation (True or False). </dd></dl>
 
 </div>
 </div>
