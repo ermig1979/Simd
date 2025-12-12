@@ -576,7 +576,23 @@ class Lib():
 		
 		Lib.__lib.SimdFillPixel.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdFillPixel.restype = None
-		
+
+
+		Lib.__lib.SimdFontInit.argtypes = [ ]
+		Lib.__lib.SimdFontInit.restype = ctypes.c_void_p
+
+		Lib.__lib.SimdFontResize.argtypes = [ ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdFontResize.restype = ctypes.c_int32
+
+		Lib.__lib.SimdFontHeight.argtypes = [ ctypes.c_void_p ]
+		Lib.__lib.SimdFontHeight.restype = ctypes.c_size_t
+
+		Lib.__lib.SimdFontMeasure.argtypes = [ ctypes.c_void_p, ctypes.c_char_p, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t) ]
+		Lib.__lib.SimdFontMeasure.restype = None
+
+		Lib.__lib.SimdFontDraw.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_char_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p ]
+		Lib.__lib.SimdFontDraw.restype = None
+
 		
 		Lib.__lib.SimdGrayToBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8 ]
 		Lib.__lib.SimdGrayToBgra.restype = None
@@ -973,6 +989,17 @@ class Lib():
 	def BgrToYuv444p(src : ctypes.c_void_p, srcStride: int, width: int, height: int, y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdBgrToYuv444pV2(src, srcStride, width, height, y, yStride, u, uStride, v, vStride, yuvType.value)
 		
+    ## Copies an image.
+    # @param src - a pointer to pixels data of input image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param pixelSize - a pixel size of input/output image.
+    # @param dst - a pointer to pixels data of output image.
+    # @param dstStride - a row size of output image in bytes.
+	def Copy(src : ctypes.c_void_p, srcStride: int, width: int, height: int, pixelSize: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdCopy(src, srcStride, width, height, pixelSize, dst, dstStride)
+		
     ## Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.
     # All images must have the same width and height.
     # This function used for NV12 to YUV420P conversion.
@@ -1016,17 +1043,6 @@ class Lib():
     # @param lineWidth - a line width of rectangle. By default it is equal to 1.
 	def DrawRectangle(canvas : ctypes.c_void_p, stride: int, width : int, height : int, channels : int, left : int, top : int, right : int, bottom : int, color : array.array('B'), lineWidth = 1) :
 		Lib.__lib.SimdDrawRectangle(canvas, stride, width, height, channels, left, top, right, bottom, (ctypes.c_uint8 * channels)(*color), lineWidth)
-		
-    ## Copies an image.
-    # @param src - a pointer to pixels data of input image.
-    # @param srcStride - a row size of input image in bytes.
-    # @param width - a width of input/output image.
-    # @param height - a height of input/output image.
-    # @param pixelSize - a pixel size of input/output image.
-    # @param dst - a pointer to pixels data of output image.
-    # @param dstStride - a row size of output image in bytes.
-	def Copy(src : ctypes.c_void_p, srcStride: int, width: int, height: int, pixelSize: int, dst : ctypes.c_void_p, dstStride: int) :
-		Lib.__lib.SimdCopy(src, srcStride, width, height, pixelSize, dst, dstStride)
 	
     ## Fills image by value of given pixel.
     # @param dst - a pointer to pixels data of output image.
@@ -1039,6 +1055,13 @@ class Lib():
 		if size < 1 or size > 4 :
 			raise Exception("Incompatible pixel size: {0} !".format(size))
 		Lib.__lib.SimdFillPixel(dst, stride, width, height, (ctypes.c_uint8 * size)(*pixel), size)	
+
+	## Creates Font context.
+	# @return a pointer to font context. On error it returns NULL.
+    #         This pointer is used in functions Simd.Lib.FontResize, Simd.Lib.FontHeight, Simd.Lib.FontMeasure, Simd.Lib.FontDraw.
+    #         It must be released with using of function Simd.Lib.Release. 
+	def FontInit() -> ctypes.c_void_p :
+		return Lib.__lib.SimdFontInit()
 		
     ## Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.
     # @param src - a pointer to pixels data of input 8-bit gray.
@@ -1322,13 +1345,13 @@ class Lib():
     # @param border - an array with color of border. The size of the array mast be equal to channels.
     #                 It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL.
     # @return a pointer to warp affine context. On error it returns NULL.
-    #         This pointer is used in functions Simd.WarpAffineRun.
-    #         It must be released with using of function Simd.Release. 
+    #         This pointer is used in functions Simd.Lib.WarpAffineRun.
+    #         It must be released with using of function Simd.Lib.Release. 
 	def WarpAffineInit(srcW : int, srcH : int, srcS : int, dstW : int, dstH : int, dstS : int, channels, mat: array.array('f'), flags : Simd.WarpAffineFlags, border: array.array('B')) -> ctypes.c_void_p :
 		return Lib.__lib.SimdWarpAffineInit(srcW, srcH, srcS, dstW, dstH, dstS, channels, (ctypes.c_float * len(mat))(*mat), flags.value, (ctypes.c_byte * len(border))(*border))
 	
     ## Performs warp affine for current image.
-    # @param context - a warp affine context. It must be created by function Simd.WarpAffineInit and released by function Simd.Release.
+    # @param context - a warp affine context. It must be created by function Simd.Lib.WarpAffineInit and released by function Simd.Lib.Release.
     # @param src - a pointer to pixels data of the original input image.
     # @param dst - a pointer to pixels data of the filtered output image.
 	def WarpAffineRun(context : ctypes.c_void_p, src : ctypes.c_void_p, dst : ctypes.c_void_p) :

@@ -147,6 +147,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1e9c8c6672ef63f8fe8d6297262b9b77"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a1e9c8c6672ef63f8fe8d6297262b9b77">BgrToYuv444p</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p y, int yStride, ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride, yuvType=<a class="el" href="class_simd_1_1_yuv_type.html#a26ef3db27e9bc1edf0d91e5c6cfa64e7">Simd.YuvType.Bt601</a>)</td></tr>
 <tr class="memdesc:a1e9c8c6672ef63f8fe8d6297262b9b77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to YUV444P.  <a href="class_simd_1_1_lib.html#a1e9c8c6672ef63f8fe8d6297262b9b77">More...</a><br /></td></tr>
 <tr class="separator:a1e9c8c6672ef63f8fe8d6297262b9b77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ad025ad583c0ed2d10d4018120a0ae0"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a0ad025ad583c0ed2d10d4018120a0ae0">Copy</a> (ctypes.c_void_p src, int srcStride, int width, int height, int pixelSize, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:a0ad025ad583c0ed2d10d4018120a0ae0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies an image.  <a href="class_simd_1_1_lib.html#a0ad025ad583c0ed2d10d4018120a0ae0">More...</a><br /></td></tr>
+<tr class="separator:a0ad025ad583c0ed2d10d4018120a0ae0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab2c0c2d90261ac6a710d6ef440f6571"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#aab2c0c2d90261ac6a710d6ef440f6571">DeinterleaveUv</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride)</td></tr>
 <tr class="memdesc:aab2c0c2d90261ac6a710d6ef440f6571"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.  <a href="class_simd_1_1_lib.html#aab2c0c2d90261ac6a710d6ef440f6571">More...</a><br /></td></tr>
 <tr class="separator:aab2c0c2d90261ac6a710d6ef440f6571"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -156,12 +159,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a11a4a403ec6010cb56fa64f5df644bd4"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a11a4a403ec6010cb56fa64f5df644bd4">DrawRectangle</a> (ctypes.c_void_p canvas, int stride, int width, int height, int channels, int left, int top, int right, int bottom, array.array('B') color, lineWidth=1)</td></tr>
 <tr class="memdesc:a11a4a403ec6010cb56fa64f5df644bd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws rectangle at the canvas image.  <a href="class_simd_1_1_lib.html#a11a4a403ec6010cb56fa64f5df644bd4">More...</a><br /></td></tr>
 <tr class="separator:a11a4a403ec6010cb56fa64f5df644bd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ad025ad583c0ed2d10d4018120a0ae0"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a0ad025ad583c0ed2d10d4018120a0ae0">Copy</a> (ctypes.c_void_p src, int srcStride, int width, int height, int pixelSize, ctypes.c_void_p dst, int dstStride)</td></tr>
-<tr class="memdesc:a0ad025ad583c0ed2d10d4018120a0ae0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies an image.  <a href="class_simd_1_1_lib.html#a0ad025ad583c0ed2d10d4018120a0ae0">More...</a><br /></td></tr>
-<tr class="separator:a0ad025ad583c0ed2d10d4018120a0ae0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac00ff54734904ddd7fabc0d654a8cb34"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac00ff54734904ddd7fabc0d654a8cb34">FillPixel</a> (ctypes.c_void_p dst, int stride, int width, int height, array.array('B') pixel)</td></tr>
 <tr class="memdesc:ac00ff54734904ddd7fabc0d654a8cb34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <a href="class_simd_1_1_lib.html#ac00ff54734904ddd7fabc0d654a8cb34">More...</a><br /></td></tr>
 <tr class="separator:ac00ff54734904ddd7fabc0d654a8cb34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3abf48e85d41d09b658ea991b00bd549"><td class="memItemLeft" align="right" valign="top">ctypes.c_void_p&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a3abf48e85d41d09b658ea991b00bd549">FontInit</a> ()</td></tr>
+<tr class="memdesc:a3abf48e85d41d09b658ea991b00bd549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates <a class="el" href="class_simd_1_1_font.html" title="The Font class provides text drawing.">Font</a> context.  <a href="class_simd_1_1_lib.html#a3abf48e85d41d09b658ea991b00bd549">More...</a><br /></td></tr>
+<tr class="separator:a3abf48e85d41d09b658ea991b00bd549"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ab8840a8f8b2ca861e8e18d8a5af74aca">GrayToBgra</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride, alpha=255)</td></tr>
 <tr class="memdesc:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.  <a href="class_simd_1_1_lib.html#ab8840a8f8b2ca861e8e18d8a5af74aca">More...</a><br /></td></tr>
 <tr class="separator:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1738,6 +1741,78 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a0ad025ad583c0ed2d10d4018120a0ae0" name="a0ad025ad583c0ed2d10d4018120a0ae0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ad025ad583c0ed2d10d4018120a0ae0">&#9670;&#160;</a></span>Copy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def Copy </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pixelSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copies an image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">pixelSize</td><td>- a pixel size of input/output image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="aab2c0c2d90261ac6a710d6ef440f6571" name="aab2c0c2d90261ac6a710d6ef440f6571"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aab2c0c2d90261ac6a710d6ef440f6571">&#9670;&#160;</a></span>DeinterleaveUv()</h2>
 
@@ -2017,78 +2092,6 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a0ad025ad583c0ed2d10d4018120a0ae0" name="a0ad025ad583c0ed2d10d4018120a0ae0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0ad025ad583c0ed2d10d4018120a0ae0">&#9670;&#160;</a></span>Copy()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">def Copy </td>
-          <td>(</td>
-          <td class="paramtype">ctypes.c_void_p&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>srcStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>pixelSize</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">ctypes.c_void_p&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>dstStride</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Copies an image. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input image. </td></tr>
-    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
-    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
-    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
-    <tr><td class="paramname">pixelSize</td><td>- a pixel size of input/output image. </td></tr>
-    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
-    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="ac00ff54734904ddd7fabc0d654a8cb34" name="ac00ff54734904ddd7fabc0d654a8cb34"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac00ff54734904ddd7fabc0d654a8cb34">&#9670;&#160;</a></span>FillPixel()</h2>
 
@@ -2144,6 +2147,26 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a3abf48e85d41d09b658ea991b00bd549" name="a3abf48e85d41d09b658ea991b00bd549"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3abf48e85d41d09b658ea991b00bd549">&#9670;&#160;</a></span>FontInit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> ctypes.c_void_p  FontInit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates <a class="el" href="class_simd_1_1_font.html" title="The Font class provides text drawing.">Font</a> context. </p>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions Simd.Lib.FontResize, Simd.Lib.FontHeight, Simd.Lib.FontMeasure, Simd.Lib.FontDraw. It must be released with using of function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </dd></dl>
 
 </div>
 </div>
@@ -3674,7 +3697,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to warp affine context. On error it returns NULL. This pointer is used in functions Simd.WarpAffineRun. It must be released with using of function Simd.Release. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to warp affine context. On error it returns NULL. This pointer is used in functions <a class="el" href="class_simd_1_1_lib.html#a146c37b89379b422bc1a048fb5c09913" title="Performs warp affine for current image.">Simd.Lib.WarpAffineRun</a>. It must be released with using of function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </dd></dl>
 
 </div>
 </div>
@@ -3713,7 +3736,7 @@ Public Member Functions</h2></td></tr>
 <p>Performs warp affine for current image. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">context</td><td>- a warp affine context. It must be created by function Simd.WarpAffineInit and released by function Simd.Release. </td></tr>
+    <tr><td class="paramname">context</td><td>- a warp affine context. It must be created by function <a class="el" href="class_simd_1_1_lib.html#a002986d558780814cb005d6abd85d371" title="Creates wrap affine context.">Simd.Lib.WarpAffineInit</a> and released by function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </td></tr>
     <tr><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to pixels data of the filtered output image. </td></tr>
   </table>
