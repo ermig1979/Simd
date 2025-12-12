@@ -1069,6 +1069,35 @@ class Lib():
 	# @return a result of the operation (True or False). 
 	def FontResize(context: ctypes.c_void_p, height: int) -> bool :
 		return Lib.__lib.SimdFontResize(context, height) != 0
+
+	## Gets current font height.
+    # @param context - a font context. It must be created by function Simd.Lib.FontInit and released by function Simd.Lib.Release.
+	# @return a height of the font. 
+	def FontHeight(context: ctypes.c_void_p) -> int :
+		return Lib.__lib.SimdFontHeight(context)
+
+	## Measures size of region which need to draw current text with using of given font.
+    # @param context - a font context. It must be created by function Simd.Lib.FontInit and released by function Simd.Lib.Release.
+	# @param text - a text which size need to measure.
+	# @return size of region which need to draw current text with using of given font. 
+	def FontMeasure(context: ctypes.c_void_p, text: str) -> [ int, int ] :
+		width, height = ctypes.c_size_t(0), ctypes.c_size_t(0)
+		Lib.__lib.SimdFontMeasure(context, str.encode('utf-8'), ctypes.byref(width), ctypes.byref(height))
+		return width, height
+
+	## Draws a text on canvas at current position with using of given font and color.
+    # @param context - a font context. It must be created by function Simd.Lib.FontInit and released by function Simd.Lib.Release.
+	# @param canvas - a pointer to pixels data of canvas image.
+    # @param stride - a row size of canvas image in bytes.
+    # @param width - a width of canvas image.
+    # @param height - a height of canvas image.
+	# @param channels - a pixel size of canvas image.
+	# @param text - a text which size need to measure.
+	# @param left - an X coordinate of start position to draw text.
+	# @param top - an Y coordinate of start position to draw text.
+	# @param color - a font color.
+	def FontDraw(context: ctypes.c_void_p, canvas : ctypes.c_void_p, stride: int, width : int, height : int, channels : int, text: str, left : int, top : int, color : array.array('B')):
+		Lib.__lib.SimdFontDraw(context, canvas, stride, width, height, channels, str.encode('utf-8'), left, top, (ctypes.c_uint8 * channels)(*color))
 		
     ## Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.
     # @param src - a pointer to pixels data of input 8-bit gray.
