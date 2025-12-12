@@ -174,6 +174,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac0e93effaa2174914f3d21f060d4e6ea"><td class="memItemLeft" align="right" valign="top">[int, int]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac0e93effaa2174914f3d21f060d4e6ea">FontMeasure</a> (ctypes.c_void_p context, str text)</td></tr>
 <tr class="memdesc:ac0e93effaa2174914f3d21f060d4e6ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measures size of region which need to draw current text with using of given font.  <a href="class_simd_1_1_lib.html#ac0e93effaa2174914f3d21f060d4e6ea">More...</a><br /></td></tr>
 <tr class="separator:ac0e93effaa2174914f3d21f060d4e6ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a457c5d70a59283e56534fcf06ed7b69c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a457c5d70a59283e56534fcf06ed7b69c">FontDraw</a> (ctypes.c_void_p context, ctypes.c_void_p canvas, int stride, int width, int height, int channels, str text, int left, int top, array.array('B') color)</td></tr>
+<tr class="memdesc:a457c5d70a59283e56534fcf06ed7b69c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a text on canvas at current position with using of given font and color.  <a href="class_simd_1_1_lib.html#a457c5d70a59283e56534fcf06ed7b69c">More...</a><br /></td></tr>
+<tr class="separator:a457c5d70a59283e56534fcf06ed7b69c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ab8840a8f8b2ca861e8e18d8a5af74aca">GrayToBgra</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride, alpha=255)</td></tr>
 <tr class="memdesc:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.  <a href="class_simd_1_1_lib.html#ab8840a8f8b2ca861e8e18d8a5af74aca">More...</a><br /></td></tr>
 <tr class="separator:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2175,7 +2178,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Creates font context. </p>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="class_simd_1_1_lib.html#ac4dbe9aa171d1b34020fd88997eed239" title="Sets font height.">Simd.Lib.FontResize</a>, <a class="el" href="class_simd_1_1_lib.html#a90f7275c79f4af7ff11b662a6500ec85" title="Gets current font height.">Simd.Lib.FontHeight</a>, <a class="el" href="class_simd_1_1_lib.html#ac0e93effaa2174914f3d21f060d4e6ea" title="Measures size of region which need to draw current text with using of given font.">Simd.Lib.FontMeasure</a>, Simd.Lib.FontDraw. It must be released with using of function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="class_simd_1_1_lib.html#ac4dbe9aa171d1b34020fd88997eed239" title="Sets font height.">Simd.Lib.FontResize</a>, <a class="el" href="class_simd_1_1_lib.html#a90f7275c79f4af7ff11b662a6500ec85" title="Gets current font height.">Simd.Lib.FontHeight</a>, <a class="el" href="class_simd_1_1_lib.html#ac0e93effaa2174914f3d21f060d4e6ea" title="Measures size of region which need to draw current text with using of given font.">Simd.Lib.FontMeasure</a>, <a class="el" href="class_simd_1_1_lib.html#a457c5d70a59283e56534fcf06ed7b69c" title="Draws a text on canvas at current position with using of given font and color.">Simd.Lib.FontDraw</a>. It must be released with using of function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </dd></dl>
 
 </div>
 </div>
@@ -2279,6 +2282,99 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>size of region which need to draw current text with using of given font. </dd></dl>
+
+</div>
+</div>
+<a id="a457c5d70a59283e56534fcf06ed7b69c" name="a457c5d70a59283e56534fcf06ed7b69c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a457c5d70a59283e56534fcf06ed7b69c">&#9670;&#160;</a></span>FontDraw()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def FontDraw </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>canvas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>text</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>left</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>top</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">array.array('B')&#160;</td>
+          <td class="paramname"><em>color</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Draws a text on canvas at current position with using of given font and color. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="class_simd_1_1_lib.html#a3abf48e85d41d09b658ea991b00bd549" title="Creates font context.">Simd.Lib.FontInit</a> and released by function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </td></tr>
+    <tr><td class="paramname">canvas</td><td>- a pointer to pixels data of canvas image. </td></tr>
+    <tr><td class="paramname">stride</td><td>- a row size of canvas image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of canvas image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of canvas image. </td></tr>
+    <tr><td class="paramname">channels</td><td>- a pixel size of canvas image. </td></tr>
+    <tr><td class="paramname">text</td><td>- a text which size need to measure. </td></tr>
+    <tr><td class="paramname">left</td><td>- an X coordinate of start position to draw text. </td></tr>
+    <tr><td class="paramname">top</td><td>- an Y coordinate of start position to draw text. </td></tr>
+    <tr><td class="paramname">color</td><td>- a font color. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

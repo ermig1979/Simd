@@ -125,13 +125,29 @@ def ImageDrawLineTest(args) :
 	canvas.DrawLine(100, 100, 500, 600, [0, 255, 0], 5);
 	canvas.Save("DrawLine.jpg")
 
-	###################################################################################################
+###################################################################################################
 
 def ImageDrawRectangleTest(args) :
 	canvas = LoadTestImage(args)
 	canvas.DrawRectangle(100, 100, 500, 600, [0, 0, 255], 5);
 	canvas.Save("DrawRectangle.jpg")
 	
+###################################################################################################
+
+def ImageDrawTextTest(args) :
+	canvas = Simd.ResizedImage(LoadTestImage(args), 400, 300)
+	font = Simd.TextFont()
+	font.Resize(36)
+	print("Font height: {0}. ".format(font.Height()), end="")
+	text = "Simd Library"
+	x, y = font.Measure(text)
+	print("Canvas: {0}x{1} in needed to draw '{2}'. ".format(x, y, text), end="")
+	font.Draw(canvas, text, [50, 100], [255, 0, 0])
+	font.Draw(canvas, text, Simd.Position.MiddleCenter, [0, 255, 0])
+	font.Draw(canvas, text, Simd.Position.BottomRight, [0, 0, 255], [255, 255, 0])
+	font.Draw(canvas, text, [50, 250], [0, 0, 0], [255, 255, 255])
+	canvas.Save("DrawText.jpg", Simd.ImageFile.Jpeg, 100)
+
 ###################################################################################################
 
 def ConvertImageTest(args) :
@@ -283,6 +299,7 @@ def InitTestList(args) :
 	tests.append(ImagePaintTest)
 	tests.append(ImageDrawLineTest)
 	tests.append(ImageDrawRectangleTest)
+	tests.append(ImageDrawTextTest)
 	tests.append(ImageAbsGradientSaturatedSumTest)
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)

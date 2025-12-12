@@ -1083,7 +1083,7 @@ class Lib():
 	def FontMeasure(context: ctypes.c_void_p, text: str) -> [ int, int ] :
 		width, height = ctypes.c_size_t(0), ctypes.c_size_t(0)
 		Lib.__lib.SimdFontMeasure(context, str.encode('utf-8'), ctypes.byref(width), ctypes.byref(height))
-		return width, height
+		return width.value, height.value
 
 	## Draws a text on canvas at current position with using of given font and color.
     # @param context - a font context. It must be created by function Simd.Lib.FontInit and released by function Simd.Lib.Release.
@@ -1097,7 +1097,7 @@ class Lib():
 	# @param top - an Y coordinate of start position to draw text.
 	# @param color - a font color.
 	def FontDraw(context: ctypes.c_void_p, canvas : ctypes.c_void_p, stride: int, width : int, height : int, channels : int, text: str, left : int, top : int, color : array.array('B')):
-		Lib.__lib.SimdFontDraw(context, canvas, stride, width, height, channels, str.encode('utf-8'), left, top, (ctypes.c_uint8 * channels)(*color))
+		Lib.__lib.SimdFontDraw(context, canvas, stride, width, height, channels, text.encode('utf-8'), left, top, (ctypes.c_uint8 * channels)(*color))
 		
     ## Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.
     # @param src - a pointer to pixels data of input 8-bit gray.
@@ -2330,6 +2330,69 @@ class ShiftingDetector():
     # @return the best correlation between current image and background.
 	def GetCorrelation(self) -> float :
 		return Simd.Lib.ShiftDetectorGetCorrelation(self.__context)
+
+###################################################################################################
+
+## @ingroup python
+# The TextFont class provides text drawing.
+class TextFont():
+	## Creates a new font.
+	# @param height - a height of created font. Ith default value is 16.
+	def __init__(self, height = 16) :
+		self.__valid = False
+		self.__context = Simd.Lib.FontInit()
+		if self.__context != ctypes.c_void_p(0) :
+			self.__valid = Simd.Lib.FontResize(self.__context, height)
+	
+	## Releases font context.
+	def __del__(self) :
+		if self.__context != 0 :
+			Simd.Lib.Release(self.__context)
+
+	## Sets new size (height) to font.
+	# @param height - a new font height.
+	# @return True if resize operation is OK.
+	def Resize(self, height : int) -> bool:
+		if self.__context != 0 :
+			self.__valid = Simd.Lib.FontResize(self.__context, height)
+		return self.__valid
+
+	## Gets current font height.
+	# @return height of the font.
+	def Height(self) -> int:
+		if self.__context != 0 and self.__valid:
+			return Simd.Lib.FontHeight(self.__context)
+		return 0
+
+	## Measures size of region which need to draw a text with using of current font.
+	# @param text - a text which size need to measure.
+	# @return size of region which need to draw current text with using of given font. 
+	def Measure(self, text: str) -> [int, int]:
+		if self.__context != 0 and self.__valid:
+			return Simd.Lib.FontMeasure(self.__context, text)
+		return [0, 0]
+
+	## Measures size of region which need to draw a text with using of current font.
+	# @param canvas - a canvas (image where we draw text).
+	# @param text - a text to draw.
+	# @param position - a start position to draw text (coordinates or Simd.Position).
+	# @param color - a foreground text color. 
+	# @param background - a background text color. By default it is equal to None.
+	def Draw(self, canvas : Image, text: str, position, color : array.array('B'), background = None):
+		if self.__context == 0 or self.__valid == False:
+			return
+		width, height = self.Measure(text)
+		if isinstance(position, Simd.Position):
+			region = canvas.RegionAt(width, height, position)
+			if background != None :
+				region.Fill(background)
+			Simd.Lib.FontDraw(self.__context, region.Data(), region.Stride(), region.Width(), region.Height(), region.Format().PixelSize(), text, 0, 0, color)
+		elif len(position) == 2 and all(type(item)==int for item in position):
+			left, top = position
+			region = canvas.Region(left, top, left + width, top + height)
+			if background != None :
+				region.Fill(background)
+			Simd.Lib.FontDraw(self.__context, canvas.Data(), canvas.Stride(), canvas.Width(), canvas.Height(), canvas.Format().PixelSize(), text, left, top, color)
 
 ###################################################################################################
 
