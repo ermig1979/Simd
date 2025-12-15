@@ -33,7 +33,7 @@
 
 namespace Simd
 {
-    template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name)
+    template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name, int prec = 3)
     {
         std::cout << name.c_str() << " = { ";
         for (size_t i = 0; i < size; i++)
@@ -43,9 +43,9 @@ namespace Simd
         std::cout << "} " << std::endl << std::flush;
     }
 
-    template<> SIMD_INLINE void Log<float>(const float * data, size_t size, const std::string & name)
+    template<> SIMD_INLINE void Log<float>(const float * data, size_t size, const std::string & name, int prec)
     {
-        std::cout << name.c_str() << " = { " << std::setprecision(3) << std::fixed;
+        std::cout << name.c_str() << " = { " << std::setprecision(prec) << std::fixed;
         for (size_t i = 0; i < size; i++)
         {
             std::cout << data[i] << " ";
@@ -53,7 +53,7 @@ namespace Simd
         std::cout << "} " << std::endl << std::flush;
     }
 
-    template<class T> SIMD_INLINE void Log(const Array<T> & array, const std::string & name)
+    template<class T> SIMD_INLINE void Log(const Array<T> & array, const std::string & name, int prec = 3)
     {
         Log<T>(array.data, array.size, name);
     }
