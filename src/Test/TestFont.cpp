@@ -222,7 +222,8 @@ namespace Test
 
         font.Resize(32);
         font.Draw(image, text, View::BottomRight, Color(0, 0, 0));
-        font.Draw(image, text, View::TopLeft, Color(0, 0, 0));
+        font.Resize(50);
+        font.Draw(image, text, View::TopLeft, Color(0, 0, 0), Color(255, 255, 255));
 
         image.Save("texts.jpg");
 

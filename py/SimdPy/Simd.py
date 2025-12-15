@@ -1082,7 +1082,7 @@ class Lib():
 	# @return size of region which need to draw current text with using of given font. 
 	def FontMeasure(context: ctypes.c_void_p, text: str) -> [ int, int ] :
 		width, height = ctypes.c_size_t(0), ctypes.c_size_t(0)
-		Lib.__lib.SimdFontMeasure(context, str.encode('utf-8'), ctypes.byref(width), ctypes.byref(height))
+		Lib.__lib.SimdFontMeasure(context, text.encode('utf-8'), ctypes.byref(width), ctypes.byref(height))
 		return width.value, height.value
 
 	## Draws a text on canvas at current position with using of given font and color.

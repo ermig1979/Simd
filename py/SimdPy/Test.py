@@ -139,7 +139,7 @@ def ImageDrawTextTest(args) :
 	font = Simd.TextFont()
 	font.Resize(36)
 	print("Font height: {0}. ".format(font.Height()), end="")
-	text = "Simd Library"
+	text = "First_string,\nSecond-line."
 	x, y = font.Measure(text)
 	print("Canvas: {0}x{1} in needed to draw '{2}'. ".format(x, y, text), end="")
 	font.Draw(canvas, text, [50, 100], [255, 0, 0])
