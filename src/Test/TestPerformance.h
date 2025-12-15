@@ -165,4 +165,4 @@ namespace Test
 #define TEST_ALIGN(size) \
     Test::PerformanceMeasurerStorage::s_storage.Align(size)
 
-#endif//__TestPerformance_h__
+#endif

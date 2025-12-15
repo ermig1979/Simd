@@ -545,6 +545,9 @@ namespace Test
 
     void PerformanceMeasurerStorage::Clear()
     {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        for (ThreadMap::iterator thread = _map.begin(); thread != _map.end(); ++thread)
+            thread->second.map.clear();
         _map.clear();
     }
 }

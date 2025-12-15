@@ -80,7 +80,7 @@ namespace Test
             ss << value << ", ";
             _ofs << ss.str();
             _size += ss.str().size();
-            if (_size > 100)
+            if (_size > 120)
             {
                 _ofs << std::endl;
                 _size = 0;
