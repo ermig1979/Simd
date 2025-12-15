@@ -1814,6 +1814,16 @@ class Image():
     # @param width - a line width of rectangle. By default it is equal to 1.
 	def DrawRectangle(self, left : int, top : int, right : int, bottom : int, color : array.array('B'), width = 1) :
 		Lib.DrawRectangle(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format().PixelSize(), left, top, right, bottom, color, width)
+
+	## Draws a filled rectangle at the image.
+    # @param left - a left of the rectangle.
+    # @param top - a top of the rectangle.
+    # @param right - a right of the rectangle.
+    # @param bottom - a bottom of the rectangle.
+    # @param color - a pointer to colors of the rectangle.
+	def DrawFilledRectangle(self, left : int, top : int, right : int, bottom : int, color : array.array('B')) :
+		region = self.Region(left, top, right, bottom)
+		region.Fill(color)
 		
 	## Fills image by value of given pixel.
 	# @param pixel - an array of unsigned 8-bit integer with pixel channels. Its size is in range [1..4]. 
@@ -2389,9 +2399,8 @@ class TextFont():
 			Simd.Lib.FontDraw(self.__context, region.Data(), region.Stride(), region.Width(), region.Height(), region.Format().PixelSize(), text, 0, 0, color)
 		elif len(position) == 2 and all(type(item)==int for item in position):
 			left, top = position
-			region = canvas.Region(left, top, left + width, top + height)
 			if background != None :
-				region.Fill(background)
+				canvas.DrawFilledRectangle(left, top, left + width, top + height, background)
 			Simd.Lib.FontDraw(self.__context, canvas.Data(), canvas.Stride(), canvas.Width(), canvas.Height(), canvas.Format().PixelSize(), text, left, top, color)
 
 ###################################################################################################
