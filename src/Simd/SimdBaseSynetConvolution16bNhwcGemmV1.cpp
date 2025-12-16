@@ -46,6 +46,7 @@ namespace Simd
         {
             std::stringstream desc;
             desc << Ext() << "::NhwcGemmV1";
+            desc << "-" << _alg.microM / 16 << "x" << _alg.microD / 16;
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
             return desc.str();
@@ -79,9 +80,6 @@ namespace Simd
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
-
-            std::cout << " a.microD " << a.microD << " a.microM " << a.microM << std::endl;
-            std::cout << " a.macroD " << a.macroD << " a.macroH " << a.macroH << std::endl;
         }
 
         size_t SynetConvolution16bNhwcGemmV1::ExternalBufferSize() const
@@ -107,7 +105,6 @@ namespace Simd
             const AlgParam& a = _alg;
             size_t F = _alg.microD, D = DivHi(p.dstC, F);
             _weight.Resize(a.bufK * a.bufD, true);
-            std::cout << " SetWeight F " << F << " D " << D << std::endl;
             uint16_t* dst = _weight.data;
             for (size_t d = 0; d < D; d++)
             {
@@ -184,8 +181,10 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && 0 &&
-                ((p.srcC >= 128 && p.dstT == SimdTensorData16b) || (p.srcC >= 256 && p.dstT == SimdTensorData32f)) && p.srcC < 400;
+            return p.trans != 0 && p.group == 1 && 1 &&
+                ((Aligned(p.dstC, 64) && Aligned(p.dstH * p.dstW, 16) && p.srcC >= 64 && p.dstT == SimdTensorData16b) ||
+                    (p.srcC >= 128 && p.dstT == SimdTensorData16b) || 
+                    (p.srcC >= 256 && p.dstT == SimdTensorData32f));//&& p.srcC < 400;
         }
     }
 #endif

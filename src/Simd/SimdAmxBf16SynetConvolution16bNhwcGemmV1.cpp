@@ -366,9 +366,6 @@ namespace Simd
         {
             __m512 f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + (start + 0) * F), bias[start + 0]), params, start + 0);
             __m512 f1 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + (start + 1) * F), bias[start + 1]), params, start + 1);
-            std::cout << " buf " << buf[ + (start + 0) * F] << " ";
-            SIMD_LOG(f0);
-            //SIMD_LOG(bias[start]);
             if (term == Term16bLast16b)
             {
                 _mm512_mask_storeu_epi16((uint16_t*)(ptr + start * DF), tail, (__m512i)_mm512_cvtne2ps_pbh(f1, f0));
@@ -544,11 +541,11 @@ namespace Simd
                 LoadW<6, order>(weight0 + 1 * DF, strideW);
                 _tile_dpbf16ps(0, 4, 5);
                 Apply2xN<term, type, apply, flush, 0>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params);
-                LoadW<7, order>(weight0 + 2 * DF, strideW);
                 _tile_dpbf16ps(1, 4, 6);
-                Apply2xN<term, type, apply, flush, 2>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
+                LoadW<7, order>(weight0 + 2 * DF, strideW);
                 LoadW<5, order>(weight0 + 3 * DF, strideW);
                 _tile_dpbf16ps(2, 4, 7);
+                Apply2xN<term, type, apply, flush, 2>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
                 _tile_dpbf16ps(3, 4, 5);
                 src0 += stepS;
                 weight0 += 32 * dW;
@@ -580,9 +577,6 @@ namespace Simd
             _tile_stored(2, buf1 + 2 * F, strideB);
             _tile_dpbf16ps(3, 4, 5);
             _tile_stored(3, buf1 + 3 * F, strideB);
-            std::cout << " strideB " << strideB << std::endl;
-            Simd::Log(buf1 + 0, 32, " buf1 + 0", 1);
-            Simd::Log(buf1 + 32, 32, " buf1 + 32", 1);
         }
 
         template<Term16bType term, SimdConvolutionActivationType type, int apply, int flush, int order> void Convolution16bNhwcGemm_Nx16x64(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
@@ -590,7 +584,6 @@ namespace Simd
         {
             int dB = (int)a.microD, dD = int(p.dstC * a.elem), dW = (int)a.microD, dS = (int)a.bufK;
             float* buf0 = buf, * buf1 = buf + 16 * dB;
-            std::cout << " buf1 - buf0 " << buf1 - buf0 << std::endl;
             size_t ds = 0;
             Convolution16bNhwcGemm_1x16x64<term, type, 0, 0, order>(src0, p, a, dstS, dstC, weight0, bias, params, buf0, buf1, dst, tailD), ds += 16;
             for (; ds < dstS; ds += 16)
@@ -875,13 +868,13 @@ namespace Simd
             size_t i = 0;
             for (; i < nn;)
             {
-                size_t dn = Simd::Min(n * 8, nn - i);
+                size_t dn = Simd::Min(n * 32, nn - i);
                 const uint16_t* s = src + i * dS;
                 const uint16_t* w = weight;
                 uint8_t* d = dst + i * dD;
                 for (size_t dc = 0; dc < dstC; dc += 4 * F)
                 {
-                    size_t dC = Simd::Min(DF, dstC - dc);
+                    size_t dC = Simd::Min(QF, dstC - dc);
                     __mmask32 tailD = term == Term16bLast16b ? TailMask32(dC - 2 * F) : (__mmask32)TailMask16(dC - 3 * F);
                     _bias[0] = _mm512_loadu_ps(bias + dc + 0 * F);
                     _bias[1] = _mm512_loadu_ps(bias + dc + 1 * F);
@@ -933,7 +926,7 @@ namespace Simd
 
         template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam& p, const AlgParam & a, Convolution& convolution)
         {
-            bool is16x64 = a.microD == 64 && Aligned(p.dstC, 64) && Aligned(p.dstH * p.dstW, 16) && a.bufK <= 512;
+            bool is16x64 = a.microD == 64;
             if (p.dstT == SimdTensorData16b)
             {
                 if(is16x64)
@@ -950,7 +943,7 @@ namespace Simd
         SynetConvolution16bNhwcGemmV1::SynetConvolution16bNhwcGemmV1(const ConvParam & p)
             : Base::SynetConvolution16bNhwcGemmV1(p)
         {
-            if(Aligned(p.dstC, 64) && Aligned(p.dstH * p.dstW, 16) && p.srcC <= 512)
+            if(Aligned(p.dstC, 64) && Aligned(p.dstH * p.dstW, 16) && p.srcC <= 256)
                 SetAlgParam(F, F * 4, F * 1, 32, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5), Base::AlgCacheL3());
             else
                 SetAlgParam(F, F * 2, F * 2, 32, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5), Base::AlgCacheL3());
