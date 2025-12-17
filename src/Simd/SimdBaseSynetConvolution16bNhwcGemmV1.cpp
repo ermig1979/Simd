@@ -182,7 +182,7 @@ namespace Simd
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
             return p.trans != 0 && p.group == 1 && 1 &&
-                ((Aligned(p.dstC, 64) && Aligned(p.dstH * p.dstW, 16) && p.srcC >= 64 && p.dstT == SimdTensorData16b) ||
+                ((Aligned(p.dstC, 64) && p.dstH * p.dstW >= 16 && p.srcC >= 64 && p.dstT == SimdTensorData16b) ||
                     (p.srcC >= 128 && p.dstT == SimdTensorData16b) || 
                     (p.srcC >= 256 && p.dstT == SimdTensorData32f)) && p.srcC <= 512;
         }
