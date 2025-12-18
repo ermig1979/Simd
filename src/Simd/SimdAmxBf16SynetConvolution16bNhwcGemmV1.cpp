@@ -988,17 +988,19 @@ namespace Simd
 
         template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam& p, const AlgParam & a, Convolution& convolution)
         {
-            bool is16x64 = a.microD == 64;
             if (p.dstT == SimdTensorData16b)
             {
-                if(is16x64)
+                if(a.type == 0)
                     SetMacro16x64<Term16bLast16b, type, 0, 0>(p, a, convolution);
                 else
                     SetMacro32x32<Term16bLast16b, type, 0, 0>(p, a, convolution);
             }
             else
             {
-                SetMacro32x32<Term16bLast32f, type, 0, 0>(p, a, convolution);
+                if (a.type == 0)
+                    SetMacro16x64<Term16bLast32f, type, 0, 0>(p, a, convolution);
+                else
+                    SetMacro32x32<Term16bLast32f, type, 0, 0>(p, a, convolution);
             }
         }
 

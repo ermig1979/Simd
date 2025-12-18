@@ -58,9 +58,12 @@ namespace Simd
         {
             const ConvParam& p = _param;
             AlgParam& a = _alg;
+            const int L1 = Base::AlgCacheL1(), L2 = int(Base::AlgCacheL2() * 0.5), L3 = Base::AlgCacheL3();
+            const int microK = 32, F = 16;
 
             a.M = p.dstW * p.dstH;
             a.K = p.srcC * p.kernelY * p.kernelX;
+            a.elem = _elemD;
             if (CanDir1x4(p))
             {
                 a.type = 0;
@@ -74,11 +77,8 @@ namespace Simd
                 a.microM = 32;
             }
 
-            int L1 = Base::AlgCacheL1(), L2 = int(Base::AlgCacheL2() * 0.5), L3 = Base::AlgCacheL3();
-
-            a.microK = 32;
             a.bufD = AlignHiAny(p.dstC, a.microD);
-            a.bufK = AlignHi(a.K, a.microK);
+            a.bufK = AlignHi(a.K, microK);
             a.batch = 1;
             size_t bufSize = a.M * a.bufK * 2;
             if (bufSize * 2 <= L2 && p.batch > 1)
@@ -89,8 +89,16 @@ namespace Simd
             }
             a.macroH = Simd::RestrictRange(L2 / a.bufK / p.dstW / 2, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.bufK / 2, a.microD), a.microD, a.bufD);
-            a.bufM = a.batch * p.dstH * AlignHi(p.dstW, 16);
-            a.elem = _elemD;
+            if (CanDir1x4(p))
+            {
+                if(a.macroH < p.dstH)
+                    a.macroH = 16;
+                a.bufM = AlignHi(a.macroH * p.dstW, F);
+            }
+            else
+            {
+                a.bufM = a.batch * p.dstH * AlignHi(p.dstW, F);
+            }
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
@@ -150,13 +158,43 @@ namespace Simd
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
                 uint16_t* buf = _convert ? bufB : (uint16_t*)src;
-                Forward(src, buf, bufS, dst);
+                if(a.type)
+                    ForwardInv(src, buf, bufS, dst);
+                else
+                    ForwardDir(src, buf, bufS, dst);
                 src += _stepS;
                 dst += _stepD;
             }
         }
 
-        void SynetConvolution16bNhwcGemmV1::Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
+        void SynetConvolution16bNhwcGemmV1::ForwardDir(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            size_t dstH = p.dstH * a.batch;
+            for (size_t yBeg = 0; yBeg < dstH;)
+            {
+                size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
+                size_t bufOffs = _convert == NULL ? yBeg * p.dstW * p.srcC : 0;
+                size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
+                if (_convert)
+                {
+                    if (a.batch > 1)
+                    {
+                        size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
+                        size_t dB = p.dstH * p.dstW * a.bufK;
+                        for (size_t b = 0; b < a.batch; ++b)
+                            _convert(src + b * dS, p, a, 0, p.dstH, buf + b * dB);
+                    }
+                    else
+                        _convert(src, p, a, yBeg, yEnd, buf + bufOffs);
+                }
+                _convolution(buf + bufOffs, p, a, p.dstC, yEnd - yBeg, _weight.data, _bias.data, _params.data, sum, dst + dstOffs);
+                yBeg = yEnd;
+            }
+        }
+
+        void SynetConvolution16bNhwcGemmV1::ForwardInv(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
@@ -200,7 +238,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
         {
-            return 1 && Aligned(p.dstC, 64) && p.dstH * p.dstW >= 16 && p.srcC >= 32 && p.dstT == SimdTensorData16b && p.srcC <= 288;
+            return 1 && Aligned(p.dstC, 64) && p.dstH * p.dstW >= 16 && p.srcC >= 32 && p.srcC <= 288;
         }
         
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2(const ConvParam& p)

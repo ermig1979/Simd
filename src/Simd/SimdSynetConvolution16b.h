@@ -177,7 +177,7 @@ namespace Simd
             {
                 int type;
                 size_t batch, K, M;
-                size_t microD, microM, microK;
+                size_t microD, microM;
                 size_t miniD, miniM;
                 size_t macroD, macroH;
                 size_t bufD, bufM, bufK, elem;
@@ -193,7 +193,8 @@ namespace Simd
             static bool CanInv2x2(const ConvParam& p);
             void SetAlgParam();
             virtual void SetWeight(const float* weight);
-            void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
+            void ForwardDir(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
+            void ForwardInv(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 
             AlgParam _alg;
             ConvertPtr _convert;
