@@ -175,8 +175,10 @@ namespace Simd
 
             struct AlgParam
             {
+                int type;
                 size_t batch, K, M;
-                size_t F, microD, microM, microK;
+                size_t microD, microM, microK;
+                size_t miniD, miniM;
                 size_t macroD, macroH;
                 size_t bufD, bufM, bufK, elem;
             };
@@ -187,7 +189,9 @@ namespace Simd
                 const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst);
 
         protected:
-            void SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
+            static bool CanDir1x4(const ConvParam& p);
+            static bool CanInv2x2(const ConvParam& p);
+            void SetAlgParam();
             virtual void SetWeight(const float* weight);
             void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 

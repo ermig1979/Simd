@@ -29,6 +29,7 @@
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdAlignment.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -46,23 +47,36 @@ namespace Simd
         {
             std::stringstream desc;
             desc << Ext() << "::NhwcGemmV1";
-            desc << "-" << _alg.microM / 16 << "x" << _alg.microD / 16;
+            desc << "-" << (_alg.type ? "i" : "d");
+            desc << _alg.microM / 16 << "x" << _alg.microD / 16;
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
             return desc.str();
         }
 
-        void SynetConvolution16bNhwcGemmV1::SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
+        void SynetConvolution16bNhwcGemmV1::SetAlgParam()
         {
             const ConvParam& p = _param;
             AlgParam& a = _alg;
 
             a.M = p.dstW * p.dstH;
             a.K = p.srcC * p.kernelY * p.kernelX;
-            a.F = F;
-            a.microD = microD;
-            a.microM = microM;
-            a.microK = microK;
+            if (CanDir1x4(p))
+            {
+                a.type = 0;
+                a.microD = 64;
+                a.microM = 16;
+            }
+            else
+            {
+                a.type = 1;
+                a.microD = 32;
+                a.microM = 32;
+            }
+
+            int L1 = Base::AlgCacheL1(), L2 = int(Base::AlgCacheL2() * 0.5), L3 = Base::AlgCacheL3();
+
+            a.microK = 32;
             a.bufD = AlignHiAny(p.dstC, a.microD);
             a.bufK = AlignHi(a.K, a.microK);
             a.batch = 1;
@@ -75,7 +89,7 @@ namespace Simd
             }
             a.macroH = Simd::RestrictRange(L2 / a.bufK / p.dstW / 2, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.bufK / 2, a.microD), a.microD, a.bufD);
-            a.bufM = a.batch * p.dstH * AlignHi(p.dstW, a.F);
+            a.bufM = a.batch * p.dstH * AlignHi(p.dstW, 16);
             a.elem = _elemD;
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
@@ -155,7 +169,7 @@ namespace Simd
                 for (size_t yBeg = 0; yBeg < dstH;)
                 {
                     size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                    size_t bufOffs = (_convert == NULL || a.macroD < p.dstC) ? yBeg * (_convert ? AlignHi(p.dstW, a.F) : p.dstW) * a.bufK : 0;
+                    size_t bufOffs = (_convert == NULL || a.macroD < p.dstC) ? yBeg * (_convert ? AlignHi(p.dstW, 16) : p.dstW) * a.bufK : 0;
                     size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
                     if (dc == 0 && _convert)
                     {
@@ -181,10 +195,17 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && 1 &&
-                ((Aligned(p.dstC, 64) && p.dstH * p.dstW >= 16 && p.srcC >= 64 && p.dstT == SimdTensorData16b) ||
-                    (p.srcC >= 128 && p.dstT == SimdTensorData16b) || 
-                    (p.srcC >= 256 && p.dstT == SimdTensorData32f)) && p.srcC <= 512;
+            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanInv2x2(p));
+        }
+
+        bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
+        {
+            return 1 && Aligned(p.dstC, 64) && p.dstH * p.dstW >= 16 && p.srcC >= 32 && p.dstT == SimdTensorData16b && p.srcC <= 288;
+        }
+        
+        bool SynetConvolution16bNhwcGemmV1::CanInv2x2(const ConvParam& p)
+        {
+            return 1 && ((p.srcC >= 128 && p.dstT == SimdTensorData16b) || (p.srcC >= 256 && p.dstT == SimdTensorData32f)) && p.srcC <= 512;
         }
     }
 #endif

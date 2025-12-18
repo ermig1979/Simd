@@ -982,10 +982,8 @@ namespace Simd
                 convolution = Convolution16bNhwcGemm_Macro16x64<term, type, 2, flush, order>;
             else if (a.bufK >= 128)
                 convolution = Convolution16bNhwcGemm_Macro16x64<term, type, 4, flush, order>;
-            else if (a.bufK >= 64)
-                convolution = Convolution16bNhwcGemm_Macro16x64<term, type, 8, flush, order>;
             else
-                convolution = NULL;
+                convolution = Convolution16bNhwcGemm_Macro16x64<term, type, 8, flush, order>;
         }
 
         template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam& p, const AlgParam & a, Convolution& convolution)
@@ -1007,10 +1005,7 @@ namespace Simd
         SynetConvolution16bNhwcGemmV1::SynetConvolution16bNhwcGemmV1(const ConvParam & p)
             : Base::SynetConvolution16bNhwcGemmV1(p)
         {
-            if(Aligned(p.dstC, 64) && p.dstH * p.dstW >= 16 && p.srcC <= 288 && 1)
-                SetAlgParam(F, F * 4, F * 1, 32, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5), Base::AlgCacheL3());
-            else
-                SetAlgParam(F, F * 2, F * 2, 32, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5), Base::AlgCacheL3());
+            SetAlgParam();
             AlgParam& a = _alg;            
             if (_src16b)
             {
