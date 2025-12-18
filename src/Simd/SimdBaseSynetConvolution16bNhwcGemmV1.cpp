@@ -238,7 +238,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
         {
-            return 1 && Aligned(AlignHi(p.dstC, 16), 64) && p.dstH * p.dstW >= 16 && p.srcC >= 32 && p.srcC <= 288;
+            return 1 && p.dstH * p.dstW >= 16 && p.srcC >= 32 && p.srcC <= 288;
         }
         
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2(const ConvParam& p)
