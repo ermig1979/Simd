@@ -515,6 +515,9 @@ namespace Simd
             SynetConvolution16bNhwcGemmV1(const ConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
+        private:
+            void SetMacro16x64d();
+            void SetMacro32x32i();
         };
 
         class SynetConvolution16bNhwcSpecV0 : public Avx512bw::SynetConvolution16bNhwcSpecV0
