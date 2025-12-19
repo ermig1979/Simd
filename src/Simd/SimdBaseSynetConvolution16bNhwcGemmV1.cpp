@@ -238,12 +238,13 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
         {
-            return 1 && p.dstH * p.dstW >= 16 && p.srcC >= 32 && p.srcC <= 288;
+            return 1 && p.dstH * p.dstW >= 16 && p.srcC >= 32 && p.srcC <= 128 && Is1x1(p);
         }
         
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2(const ConvParam& p)
         {
-            return 1 && ((p.srcC >= 128 && p.dstT == SimdTensorData16b) || (p.srcC >= 256 && p.dstT == SimdTensorData32f)) && p.srcC <= 512;
+            const size_t K = p.srcC * p.kernelX * p.kernelY;
+            return 1 && ((K >= 128 && p.dstT == SimdTensorData16b) || (K >= 128 && p.dstT == SimdTensorData32f)) && K <= 512;
         }
     }
 #endif
