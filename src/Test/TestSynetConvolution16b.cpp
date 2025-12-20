@@ -445,7 +445,7 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 56, 27, 27, 64, _1, _1, _1, _0, _0, 1, aRe, tT, f32, f32), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 56, 107, 107, 64, _1, _1, _1, _0, _0, 1, aRe, tT, f32, f32), c, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 32, 54, 54, 32, _1, _1, _1, _0, _0, 1, aRe, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 54, 54, 64, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 96, 54, 54, 96, _1, _1, _1, _0, _0, 1, aRe, tT, b16, b16), c, f1, f2);
@@ -462,6 +462,12 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 448, 54, 54, 448, _1, _1, _1, _0, _0, 1, aRr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 480, 54, 54, 480, _1, _1, _1, _0, _0, 1, aRr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 54, 54, 512, _1, _1, _1, _0, _0, 1, aRr, tT, b16, b16), c, f1, f2);
+#endif
+#if 1
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 32, 54, 54, 32, _3, _1, _2, _1, _1, 1, aRe, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 16, 54, 54, 64, _3, _1, _2, _1, _1, 1, aRe, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 8, 54, 54, 64, _3, _1, _2, _1, _1, 1, aRe, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 12, 54, 54, 64, _3, _1, _2, _1, _1, 1, aRe, tT, b16, b16), c, f1, f2);
 #endif
 #if 0
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 512, 512, 64, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
