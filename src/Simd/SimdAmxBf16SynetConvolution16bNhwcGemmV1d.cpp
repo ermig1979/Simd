@@ -34,7 +34,7 @@
 
 namespace Simd
 {
-#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
+#if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && !defined(SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE)
     namespace AmxBf16
 	{
 		typedef Base::SynetConvolution16bNhwcGemmV1::AlgParam AlgParam;

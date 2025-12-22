@@ -516,7 +516,9 @@ namespace Simd
 
             virtual String Ext() const { return "AmxBf16"; }
         private:
+#if !defined(SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE)
             void SetMacro16x64d();
+#endif
             void SetMacro32x32i();
         };
 

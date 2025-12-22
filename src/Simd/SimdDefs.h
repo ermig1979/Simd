@@ -121,6 +121,10 @@
 #define SIMD_AVX512_FLOOR_CEIL_ABSENT
 #endif
 
+#if defined(NDEBUG)
+#define SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE
+#endif
+
 #endif//defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
 #if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)

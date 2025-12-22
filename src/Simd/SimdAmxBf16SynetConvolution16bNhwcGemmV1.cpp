@@ -371,9 +371,11 @@ namespace Simd
                         _convert = Convert16bNhwcGemmD;
                 }
             }
+#if !defined(SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE)
             if (a.type == 0)
                 SetMacro16x64d();
             else
+#endif
                 SetMacro32x32i();
         }
     }
