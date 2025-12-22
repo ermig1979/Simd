@@ -463,7 +463,7 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 480, 54, 54, 480, _1, _1, _1, _0, _0, 1, aRr, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 54, 54, 512, _1, _1, _1, _0, _0, 1, aRr, tT, b16, b16), c, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 32, 54, 54, 32, _3, _1, _2, _1, _1, 1, aRe, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 16, 54, 54, 64, _3, _1, _2, _1, _1, 1, aRe, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 8, 54, 54, 64, _3, _1, _2, _1, _1, 1, aRe, tT, b16, b16), c, f1, f2);
@@ -495,9 +495,8 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 2304, 20, 20, 512, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 40, 40, 512, _3, _1, _2, _1, _1, 1, aId, tT, b16, b16), c, f1, f2);
 #endif
-#if 0
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 128, 128, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
-        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 32, 64, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
+#if 1
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 199, 1, 88, 71, _1, _1, _1, _0, _0, 1, aId, tT, f32, f32), c, f1, f2);
 #endif
 #else
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 16, 320, 320, 32, _2, _1, _1, _0, _1, 1, aId, tT, b16, f32), c, f1, f2);

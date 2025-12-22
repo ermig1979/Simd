@@ -245,7 +245,7 @@ namespace Simd
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2(const ConvParam& p)
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY;
-            return 0 && ((K >= 128 && p.dstT == SimdTensorData16b) || (K >= 128 && p.dstT == SimdTensorData32f)) && K <= 512;
+            return 1 && ((K >= 128 && p.dstT == SimdTensorData16b) || (K >= 128 && p.dstT == SimdTensorData32f)) && K <= 512;
         }
     }
 #endif

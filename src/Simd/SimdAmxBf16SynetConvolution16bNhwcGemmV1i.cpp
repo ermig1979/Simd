@@ -116,7 +116,7 @@ namespace Simd
             }
             else
             {
-                _mm512_storeu_ps((float*)(ptr + (start + 0) * A), f0);
+                _mm512_mask_storeu_ps((float*)(ptr + (start + 0) * A), (__mmask16)tail, f0);
                 if (flush == 1)
                     _mm_prefetch((const char*)(ptr + (start + 0) * A), _MM_HINT_NTA);
                 else if (flush == 2)
