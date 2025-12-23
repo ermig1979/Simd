@@ -380,7 +380,7 @@ namespace Simd
             Convolution16bNhwcGemmPtr tail_2, body_1, tail_1;
             if (nn)
             {
-                bool avoidSrcOverflow = !(a.bufK == p.srcC && p.Is1x1());
+                bool avoidSrcOverflow = (a.bufK == p.srcC && p.Is1x1());
                 if (avoidSrcOverflow)
                     m = AlignHi(m, 16); 
                 size_t nm = n1 - m;
