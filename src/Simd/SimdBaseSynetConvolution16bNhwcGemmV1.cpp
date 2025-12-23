@@ -69,12 +69,16 @@ namespace Simd
                 a.type = 0;
                 a.microD = 64;
                 a.microM = 16;
+                a.miniD = 64;
+                a.miniM = 256;
             }
             else
             {
                 a.type = 1;
                 a.microD = 32;
                 a.microM = 32;
+                a.miniD = 32;
+                a.miniM = 256;
             }
 
             a.bufD = AlignHiAny(p.dstC, a.microD);
@@ -88,7 +92,7 @@ namespace Simd
                         a.batch = batch;
             }
             a.macroH = Simd::RestrictRange(L2 / a.bufK / p.dstW / 2, size_t(1), p.dstH * a.batch);
-            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.bufK / 2, a.microD), a.microD, a.bufD);
+            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.bufK / 2, a.miniD), a.miniD, a.bufD);
             if (CanDir1x4(p))
             {
                 if(a.macroH < p.dstH)
@@ -125,7 +129,7 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            size_t F = _alg.microD, D = DivHi(p.dstC, F);
+            size_t F = _alg.miniD, D = DivHi(p.dstC, F);
             _weight.Resize(a.bufK * a.bufD, true);
             uint16_t* dst = _weight.data;
             for (size_t d = 0; d < D; d++)
