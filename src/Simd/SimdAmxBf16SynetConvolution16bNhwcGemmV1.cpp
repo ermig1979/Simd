@@ -372,11 +372,14 @@ namespace Simd
                 }
             }
 #if !defined(SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE)
-            if (a.type == 0)
+            if (CanDir1x4(p))
                 SetMacro16x64d();
             else
 #endif
+            if (CanInv2x2(p))
                 SetMacro32x32i();
+            else
+                SetMacro32x32i_old();
         }
     }
 #endif

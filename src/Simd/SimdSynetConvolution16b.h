@@ -175,7 +175,7 @@ namespace Simd
 
             struct AlgParam
             {
-                int type;
+                bool inv;
                 size_t batch, K, M;
                 size_t microD, microM;
                 size_t miniD, miniM;
@@ -191,6 +191,7 @@ namespace Simd
         protected:
             static bool CanDir1x4(const ConvParam& p);
             static bool CanInv2x2(const ConvParam& p);
+            static bool CanInv2x2_old(const ConvParam& p);
             void SetAlgParam();
             virtual void SetWeight(const float* weight);
             void ForwardDir(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
@@ -520,6 +521,7 @@ namespace Simd
             void SetMacro16x64d();
 #endif
             void SetMacro32x32i();
+            void SetMacro32x32i_old();
         };
 
         class SynetConvolution16bNhwcSpecV0 : public Avx512bw::SynetConvolution16bNhwcSpecV0

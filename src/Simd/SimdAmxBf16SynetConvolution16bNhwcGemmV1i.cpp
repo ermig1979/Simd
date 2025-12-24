@@ -484,7 +484,7 @@ namespace Simd
                 SetMacro32x32<Term16bLast32f, type, 0, 0>(p, a, convolution);
         }
 
-        void SynetConvolution16bNhwcGemmV1::SetMacro32x32i()
+        void SynetConvolution16bNhwcGemmV1::SetMacro32x32i_old()
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;

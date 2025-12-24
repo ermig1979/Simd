@@ -47,7 +47,7 @@ namespace Simd
         {
             std::stringstream desc;
             desc << Ext() << "::NhwcGemmV1";
-            desc << "-" << (_alg.type ? "i" : "d");
+            desc << "-" << (_alg.inv ? "i" : "d");
             desc << _alg.microM / 16 << "x" << _alg.microD / 16;
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
@@ -58,7 +58,7 @@ namespace Simd
         {
             const ConvParam& p = _param;
             AlgParam& a = _alg;
-            const int L1 = Base::AlgCacheL1(), L2 = int(Base::AlgCacheL2() * 0.5), L3 = Base::AlgCacheL3();
+            const int L1 = (int)Base::AlgCacheL1(), L2 = int(Base::AlgCacheL2() * 0.5), L3 = (int)Base::AlgCacheL3();
             const int microK = 32, F = 16;
 
             a.M = p.dstW * p.dstH;
@@ -66,15 +66,23 @@ namespace Simd
             a.elem = _elemD;
             if (CanDir1x4(p))
             {
-                a.type = 0;
+                a.inv = false;
                 a.microD = 64;
                 a.microM = 16;
                 a.miniD = 64;
                 a.miniM = 256;
             }
+            else if(CanInv2x2(p))
+            {
+                a.inv = false;
+                a.microD = 32;
+                a.microM = 32;
+                a.miniD = 64;
+                a.miniM = 256;
+            }
             else
             {
-                a.type = 1;
+                a.inv = true;
                 a.microD = 32;
                 a.microM = 32;
                 a.miniD = 32;
@@ -114,7 +122,7 @@ namespace Simd
             size_t size = 0;
             if(_convert)
                 size += a.bufM * a.bufK * sizeof(uint16_t);
-            size += a.microD * a.microM * sizeof(float) * 2;
+            size += a.miniD * a.microM * sizeof(float) * 2;
             return size;
         }
 
@@ -162,7 +170,7 @@ namespace Simd
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
                 uint16_t* buf = _convert ? bufB : (uint16_t*)src;
-                if(a.type)
+                if(a.inv)
                     ForwardInv(src, buf, bufS, dst);
                 else
                     ForwardDir(src, buf, bufS, dst);
@@ -237,7 +245,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanInv2x2(p));
+            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanInv2x2(p) || CanInv2x2_old(p));
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
@@ -251,6 +259,12 @@ namespace Simd
         }
         
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2(const ConvParam& p)
+        {
+            const size_t K = p.srcC * p.kernelX * p.kernelY;
+            return 1 && K >= 512 && K <= 1024 && Aligned(p.dstC, 64) && Aligned(p.dstH * p.dstW, 32);
+        }
+
+        bool SynetConvolution16bNhwcGemmV1::CanInv2x2_old(const ConvParam& p)
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY;
             return 1 && ((K >= 128 && p.dstT == SimdTensorData16b) || (K >= 128 && p.dstT == SimdTensorData32f)) && K <= 512;
