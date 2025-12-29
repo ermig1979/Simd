@@ -72,12 +72,12 @@ namespace Simd
                 a.miniD = 64;
                 a.miniM = 256;
             }
-            else if(CanInv2x2(p))
+            else if(CanDir2x2(p))
             {
                 a.inv = false;
                 a.microD = 32;
                 a.microM = 32;
-                a.miniD = 64;
+                a.miniD = 32;
                 a.miniM = 256;
             }
             else
@@ -245,7 +245,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanInv2x2(p) || CanInv2x2_old(p));
+            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanDir2x2(p) || CanInv2x2_old(p));
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
@@ -258,10 +258,10 @@ namespace Simd
 #endif        
         }
         
-        bool SynetConvolution16bNhwcGemmV1::CanInv2x2(const ConvParam& p)
+        bool SynetConvolution16bNhwcGemmV1::CanDir2x2(const ConvParam& p)
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY;
-            return 1 && K >= 512 && K <= 1024 && Aligned(p.dstC, 64) && Aligned(p.dstH * p.dstW, 32);
+            return 1 && K >= 256 && K <= 1024 && Aligned(p.dstC, 32) && Aligned(p.dstH * p.dstW, 32);
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2_old(const ConvParam& p)
