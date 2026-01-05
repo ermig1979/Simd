@@ -260,8 +260,8 @@ namespace Simd
         
         bool SynetConvolution16bNhwcGemmV1::CanDir2x2(const ConvParam& p)
         {
-            const size_t K = p.srcC * p.kernelX * p.kernelY;
-            return 1 && K >= 256 && K <= 1024 && Aligned(p.dstC, 32) && Aligned(p.dstH * p.dstW, 32);
+            const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.dstH * p.dstW, N = p.dstC;
+            return 1 && K >= 256 && K <= 1024 && (N - Aligned(N, 32) > 16) && Aligned(M, 32);
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2_old(const ConvParam& p)

@@ -231,6 +231,7 @@ namespace Simd
             size_t dstC32 = AlignLo(dstC, 32), dstCt = dstC - dstC32;
             __mmask32 tailD = term == Term16bLast16b ? TailMask32(dstCt) : (__mmask32)TailMask16(dstCt - AlignLo(dstCt - 1, 16));
             Convolution16bNhwcGemm_Nx32x32_Ptr mainConv = Convolution16bNhwcGemm_Nx32x32M<term, type, 2, apply, flush>;
+            Convolution16bNhwcGemm_Nx32x32_Ptr tailConv = Convolution16bNhwcGemm_Nx32x32M<term, type, 2, apply, flush>;
 
             __m512 _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -249,8 +250,8 @@ namespace Simd
                 size_t dc = 0;
                 for (; dc < dstC32; dc += DF, w += dW)
                     mainConv(s, p, a, dn, w, bias + dc, params + dc, _params, buf, d + dc * a.elem, __mmask32(-1));
-                //if (dc < dstC)
-                //    tailConv(s, p, a, dn, w, bias + dc, params + dc, _params, buf, d + dc * a.elem, tailD);
+                if (dc < dstC)
+                    tailConv(s, p, a, dn, w, bias + dc, params + dc, _params, buf, d + dc * a.elem, tailD);
                 i += dn;
             }
         }
