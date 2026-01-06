@@ -329,5 +329,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNhwcGemmV1d2x2.cpp">
       <Filter>AmxBf16\Synet\Convolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNhwcGemmV1i4x1.cpp">
+      <Filter>AmxBf16\Synet\Convolution</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

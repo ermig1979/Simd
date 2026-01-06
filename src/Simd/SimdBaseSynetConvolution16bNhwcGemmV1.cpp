@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,8 @@ namespace Simd
             desc << Ext() << "::NhwcGemmV1";
             desc << "-" << (_alg.inv ? "i" : "d");
             desc << _alg.microM / 16 << "x" << _alg.microD / 16;
+            if (!(CanDir1x4(_param) || CanDir2x2(_param)))
+                desc << "-old";
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
             return desc.str();
@@ -262,6 +264,12 @@ namespace Simd
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.dstH * p.dstW, N = p.dstC;
             return 1 && K >= 256 && K <= 1024 && M >= 64;
+        }
+
+        bool SynetConvolution16bNhwcGemmV1::CanInv4x1(const ConvParam& p)
+        {
+            const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.dstH * p.dstW, N = p.dstC;
+            return 1 && K >= 256 && K <= 1024 && M < 64;
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2_old(const ConvParam& p)
