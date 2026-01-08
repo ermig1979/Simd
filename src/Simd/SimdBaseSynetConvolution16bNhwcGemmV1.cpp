@@ -49,7 +49,7 @@ namespace Simd
             desc << Ext() << "::NhwcGemmV1";
             desc << "-" << (_alg.inv ? "i" : "d");
             desc << _alg.microM / 16 << "x" << _alg.microD / 16;
-            if (!(CanDir1x4(_param) || CanDir2x2(_param)))
+            if (!(CanDir1x4(_param) || CanDir2x2(_param) || CanInv4x1(_param)))
                 desc << "-old";
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
