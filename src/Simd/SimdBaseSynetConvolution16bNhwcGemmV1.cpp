@@ -82,6 +82,14 @@ namespace Simd
                 a.miniD = 32;
                 a.miniM = 256;
             }
+            else if (CanInv4x1(p))
+            {
+                a.inv = true;
+                a.microD = 16;
+                a.microM = 64;
+                a.miniD = 64;
+                a.miniM = 64;
+            }
             else
             {
                 a.inv = true;
@@ -247,7 +255,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanDir2x2(p) || CanInv2x2_old(p));
+            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanDir2x2(p) || CanInv4x1(p) || CanInv2x2_old(p));
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
