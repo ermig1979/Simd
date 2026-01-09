@@ -285,9 +285,9 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
 
             SetTileConfFull();
-            for (size_t dc = 0; dc < dstC; dc += QF)
+            for (size_t dc = 0; dc < dstC; dc += a.miniD)
             {
-                size_t dC = Simd::Min(QF, dstC - dc);
+                size_t dC = Simd::Min(a.miniD, dstC - dc);
                 __mmask16 tailD = TailMask16(dC - AlignLo(dC - 1, 16));
                 const uint16_t* s = src;
                 uint8_t* d = dst + dc * a.elem;
@@ -299,8 +299,8 @@ namespace Simd
                 if (l)
                     lConv(s + i * dS, p, a, (int)l, dC, weight, bias, params, _params, buf, d + i * dD, tailD), i += l;
                 weight += dW;
-                bias += QF;
-                params += QF;
+                bias += a.miniD;
+                params += a.miniD;
             }
         }
 
