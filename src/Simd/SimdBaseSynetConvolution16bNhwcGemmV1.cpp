@@ -49,6 +49,8 @@ namespace Simd
             desc << Ext() << "::NhwcGemmV1";
             desc << "-" << (_alg.inv ? "i" : "d");
             desc << _alg.microM / 16 << "x" << _alg.microD / 16;
+            if (_alg.reorder)
+                desc << "r";
             if (!(CanDir1x4(_param) || CanDir2x2(_param) || CanInv4x1(_param)))
                 desc << "-old";
             if (_alg.batch > 1)
@@ -68,7 +70,8 @@ namespace Simd
             a.elem = _elemD;
             if (CanDir1x4(p))
             {
-                a.inv = false;
+                a.inv = 0;
+                a.reorder = 0;
                 a.microD = 64;
                 a.microM = 16;
                 a.miniD = 64;
@@ -76,7 +79,8 @@ namespace Simd
             }
             else if(CanDir2x2(p))
             {
-                a.inv = false;
+                a.inv = 0;
+                a.reorder = 0;
                 a.microD = 32;
                 a.microM = 32;
                 a.miniD = 32;
@@ -84,15 +88,17 @@ namespace Simd
             }
             else if (CanInv4x1(p))
             {
-                a.inv = true;
+                a.inv = 1;
+                a.reorder = 0;
                 a.microD = 16;
                 a.microM = 64;
-                a.miniD = 64;
+                a.miniD = 128;
                 a.miniM = 64;
             }
             else
             {
-                a.inv = true;
+                a.inv = 1;
+                a.reorder = 0;
                 a.microD = 32;
                 a.microM = 32;
                 a.miniD = 32;

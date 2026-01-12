@@ -175,7 +175,7 @@ namespace Simd
 
             struct AlgParam
             {
-                bool inv;
+                int inv, reorder;
                 size_t batch, K, M;
                 size_t microD, microM;
                 size_t miniD, miniM;
