@@ -80,8 +80,8 @@ namespace Simd
         template<Term16bType term, SimdConvolutionActivationType type, int N, int apply, int flush> SIMD_INLINE void Convolution16bNhwcGemm_Nx16x1(const uint16_t* src, 
             const ConvParam& p, const AlgParam& a, int dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, float* buf1, uint8_t* dst)
         {
-            int dB = (int)a.miniD, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, dW = (int)a.miniD, strideW = dW * 4;
-            int stepS = 32, strideS = dS * 2;
+            int dB = (int)a.miniD, dD = int(p.dstC * a.elem), strideB = dB * 4, dW = (int)a.miniD, strideW = dW * 4;
+            int dS = (int)a.bufK, stepS = a.reorder ? 512 : 32, strideS = a.reorder ? 64 : dS * 2;
             int offs0 = N == 1 ? dstS - 1 * F : 0 * F, offs1 = N == 2 ? dstS - 1 * F : 1 * F;
             int offs2 = N == 3 ? dstS - 1 * F : 2 * F, offs3 = N == 4 ? dstS - 1 * F : 3 * F;
             int srcC64 = (int)(a.bufK - 32)&(~63), applyC64 = apply ? (16 * 32 / apply - 64) : 0, sc = 0;

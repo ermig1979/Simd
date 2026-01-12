@@ -92,8 +92,10 @@ namespace Simd
                 a.reorder = 0;
                 a.microD = 16;
                 a.microM = 64;
-                a.miniD = 128;
+                a.miniD = 64;
                 a.miniM = 64;
+                if (0 && p.batch == 1 && Aligned(a.M, F) && p.Is1x1())
+                    a.reorder = 1;
             }
             else
             {
