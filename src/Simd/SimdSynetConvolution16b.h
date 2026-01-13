@@ -192,6 +192,7 @@ namespace Simd
             static bool CanDir1x4(const ConvParam& p);
             static bool CanDir2x2(const ConvParam& p);
             static bool CanInv4x1(const ConvParam& p);
+            static bool CanInv2x2(const ConvParam& p);
             static bool CanInv2x2_old(const ConvParam& p);
             void SetAlgParam();
             virtual void SetWeight(const float* weight);
@@ -523,6 +524,7 @@ namespace Simd
 #endif
             void SetMacro32x32d();
             void SetMacro64x16i();
+            void SetMacro32x32i();
             void SetMacro32x32i_old();
         };
 
