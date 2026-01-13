@@ -105,7 +105,7 @@ namespace Simd
         {
             switch (_param.format)
             {
-            case SimdPixelFormatGray8: _convert = Neon::GrayToBgr; break;
+            case SimdPixelFormatGray8: _convert = NULL; break;
             case SimdPixelFormatRgb24: _convert = Neon::BgrToRgb; break;
             case SimdPixelFormatRgba32: _convert = Neon::BgraToRgba; break;
             default: break;

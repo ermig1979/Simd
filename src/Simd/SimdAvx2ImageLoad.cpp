@@ -133,7 +133,7 @@ namespace Simd
         {
             switch (_param.format)
             {
-            case SimdPixelFormatGray8: _toAny = (_bpp == 32 ? Avx2::BgraToGray : Avx2::BgrToGray); break;
+            case SimdPixelFormatGray8: _toAny = (_bpp == 32 ? Avx2::BgraToGray : (_bpp == 24 ? Avx2::BgrToGray : NULL)); break;
             case SimdPixelFormatBgr24: _toAny = (_bpp == 32 ? (ToAnyPtr)Avx2::BgraToBgr : NULL); break;
             case SimdPixelFormatRgb24: _toAny = (_bpp == 32 ? Avx2::BgraToRgb : Avx2::BgrToRgb); break;
             case SimdPixelFormatBgra32: _toBgra = (_bpp == 32 ? NULL : (ToBgraPtr)Avx2::BgrToBgra); break;
