@@ -279,19 +279,19 @@ namespace Simd
         bool SynetConvolution16bNhwcGemmV1::CanDir2x2(const ConvParam& p)
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.dstH * p.dstW, N = p.dstC;
-            return 1 && K >= 256 && K <= 1024 && M >= 64;
+            return 1 && K >= 256 && K <= 1024 && M >= 32;
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanInv4x1(const ConvParam& p)
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.dstH * p.dstW, N = p.dstC;
-            return 1 && K >= 256 && K <= 1024 && M <= 64;
+            return 0 && K >= 256 && K <= 1024 && M <= 64;
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2_old(const ConvParam& p)
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY;
-            return 1 && ((K >= 128 && p.dstT == SimdTensorData16b) || (K >= 128 && p.dstT == SimdTensorData32f)) && K <= 512;
+            return 0 && ((K >= 128 && p.dstT == SimdTensorData16b) || (K >= 128 && p.dstT == SimdTensorData32f)) && K <= 512;
         }
     }
 #endif

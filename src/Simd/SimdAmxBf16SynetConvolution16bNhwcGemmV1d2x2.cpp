@@ -176,6 +176,51 @@ namespace Simd
             if (M > 1) _tile_stored(3, buf1 + 16 * dB + F, strideB);
         }
 
+        template<Term16bType term, SimdConvolutionActivationType type, int M, int apply, int flush> SIMD_INLINE void Convolution16bNhwcGemm_1x16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+            size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, float* buf1, uint8_t* dst0, __mmask32 tailD)
+        {
+            int dB = (int)a.miniD, dD = int(p.dstC * a.elem), dS = (int)a.bufK, strideB = dB * 4, dW = (int)a.miniD, strideW = dW * 4;
+            int stepS = 32, strideS = dS * 2;
+            const uint16_t* weight1 = weight0 + 2 * F;
+
+            int srcC32 = (int)a.bufK - 32, applyC32 = apply ? (8 * 32 / apply - 32) : 0, sc = 0, ds = 0;
+
+            if (M > 0) _tile_zero(0);
+            if (M > 1) _tile_zero(1);
+
+            _tile_stream_loadd(4, src0, strideS);
+            if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
+            for (; sc < applyC32; )
+            {
+                if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 4, 6);
+                ApplyMxN<term, type, M, 2 * apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += 2 * apply;
+                if (M > 1) _tile_dpbf16ps(1, 4, 7);
+                ApplyMxN<term, type, M, 2 * apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += 2 * apply;
+                src0 += stepS;
+                _tile_stream_loadd(4, src0, strideS);
+                sc += 32;
+                if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
+            }
+            for (; sc < srcC32;)
+            {
+                if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 4, 6);
+                if (M > 1) _tile_dpbf16ps(1, 4, 7);
+                src0 += stepS;
+                _tile_stream_loadd(4, src0, strideS);
+                sc += 32;
+                if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
+            }
+            if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
+            if (M > 0) _tile_dpbf16ps(0, 4, 6);
+            ApplyMxN<term, type, M, 2 * apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += 2 * apply;
+            if (M > 0) _tile_stored(0, buf1 + 0, strideB);
+            if (M > 1) _tile_dpbf16ps(1, 4, 7);
+            ApplyMxN<term, type, M, 2 * apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += 2 * apply;
+            if (M > 1) _tile_stored(1, buf1 + F, strideB);
+        }
+
         template<Term16bType term, SimdConvolutionActivationType type, int M, int apply, int flush> void Convolution16bNhwcGemm_Nx32x32M(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const float* bias, const float* params, __m512* _params, float* buf, uint8_t* dst, __mmask32 tailD)
         {
@@ -195,9 +240,17 @@ namespace Simd
             Convolution16bNhwcGemm_1x32x32<term, type, M, 0, flush>(src0, p, a, dstS, weight0, _bias, _params, buf0, buf1, dst, tailD), cds += 32;
             for (; cds < dstS; pds = cds, cds += 32)
             {
-                cds = Simd::Min(dstS - 32, cds);
                 Swap(buf0, buf1);
-                Convolution16bNhwcGemm_1x32x32<term, type, M, apply, flush>(src0 + cds * dS, p, a, dstS, weight0, _bias, _params, buf0, buf1, dst + pds * dD, tailD);
+                if (cds + 16 >= dstS)
+                {
+                    cds = Simd::Min(dstS - 16, cds);
+                    Convolution16bNhwcGemm_1x16x32<term, type, M, apply, flush>(src0 + cds * dS, p, a, dstS, weight0, _bias, _params, buf0, buf1, dst + pds * dD, tailD);
+                }
+                else
+                {
+                    cds = Simd::Min(dstS - 32, cds);
+                    Convolution16bNhwcGemm_1x32x32<term, type, M, apply, flush>(src0 + cds * dS, p, a, dstS, weight0, _bias, _params, buf0, buf1, dst + pds * dD, tailD);
+                }
             }
             uint8_t* dst1 = dst + pds * dD;
             dstS -= pds;
