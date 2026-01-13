@@ -97,7 +97,7 @@ namespace Simd
         {
             switch (_param.format)
             {
-            case SimdPixelFormatGray8: _convert = Avx512bw::GrayToBgr; break;
+            case SimdPixelFormatGray8: _convert = NULL; break;
             case SimdPixelFormatRgb24: _convert = Avx512bw::BgrToRgb; break;
             case SimdPixelFormatRgba32: _convert = Avx512bw::BgraToRgba; break;
             default: break;

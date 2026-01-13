@@ -36,7 +36,7 @@ namespace Simd
         {
             switch (_param.format)
             {
-            case SimdPixelFormatGray8: _convert = Base::GrayToBgr; _pixel = 3; break;
+            case SimdPixelFormatGray8: _convert = NULL; _pixel = 1; break;
             case SimdPixelFormatBgr24: _pixel = 3; break;
             case SimdPixelFormatBgra32: _pixel = 4; break;
             case SimdPixelFormatRgb24: _convert = Base::BgrToRgb; _pixel = 3; break;
@@ -49,7 +49,16 @@ namespace Simd
 
         bool ImageBmpSaver::ToStream(const uint8_t* src, size_t stride)
         {
-            _stream.Reserve(14 + (_pixel == 4 ? 108 : 40) + _param.height * (_size + _pad));
+            size_t reserve = 14 + 40 + _param.height * (_size + _pad);
+            if(_pixel == 1)
+            {
+                reserve += 1024;
+            }
+            else if (_pixel == 4)
+            {
+                reserve += 68;
+            }
+            _stream.Reserve(reserve);
 
             WriteHeader();
 
@@ -85,7 +94,7 @@ namespace Simd
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
                 _stream.Write(data, sizeof(data));
             }
-            else
+            else if (_pixel == 3)
             {
                 uint32_t data[] = { 
                     uint32_t(14 + 40 + (_size + _pad) * _param.height),
@@ -93,6 +102,20 @@ namespace Simd
                     uint32_t(_param.width), uint32_t(_param.height), 
                     0x00180001, 0, 0, 0, 0, 0, 0 };
                 _stream.Write(data, sizeof(data));
+            }
+            else
+            {
+                uint32_t data[] = { 
+                    uint32_t(14 + 40 + 1024 + (_size + _pad) * _param.height),
+                    0, 14 + 40 + 1024, 40,
+                    uint32_t(_param.width), uint32_t(_param.height), 
+                    0x00080001, 0, 0, 0, 0, 0, 0 };
+                _stream.Write(data, sizeof(data));
+                for(int i = 0; i < 256; ++i)
+                {
+                    uint32_t color = i | (i << 8) | (i << 16);
+                    _stream.Write(&color, sizeof(color));
+                }
             }
         }
     }

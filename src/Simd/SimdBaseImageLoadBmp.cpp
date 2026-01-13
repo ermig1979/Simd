@@ -101,7 +101,7 @@ namespace Simd
             if (headerSize != 12)
             {
                 uint32_t compress;
-                if (!_stream.Read32u(compress) || !(compress == 0 || (compress == 3 && (_bpp == 16 || _bpp == 32))))
+                if (!_stream.Read32u(compress) || !(compress == 0 || (compress == 3 && (_bpp == 8 || _bpp == 16 || _bpp == 32))))
                     return false;
                 if (!_stream.Skip(20))
                     return false;
@@ -131,7 +131,18 @@ namespace Simd
                 }
                 if (compress == 0)
                 {
-                    if (_bpp == 16)
+                    if (_bpp == 8)
+                    {
+                        for (int i = 0; i < 256; ++i)
+                        {
+                            uint32_t color;
+                            if(!_stream.Read32u(color) || color != (i | (i << 8) | (i << 16)))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    else if (_bpp == 16)
                     {
                         _mr = 31u << 10;
                         _mg = 31u << 5;
@@ -155,9 +166,14 @@ namespace Simd
                 }
 
             }
-            if (_bpp <= 16)
+            if (_bpp < 8)
                 return false;  
-            if (_bpp == 24)
+            if (_bpp == 8)
+            {
+                _size = _width;
+                _pad = (int32_t)AlignHi(_size, 4) - _size;
+            }
+            else if (_bpp == 24)
             {
                 _size = _width * 3;
                 _pad = (int32_t)AlignHi(_size, 4) - _size;
@@ -171,8 +187,10 @@ namespace Simd
             {
                 if (_bpp == 32)
                     _param.format = SimdPixelFormatBgra32;
-                else
+                else if (_bpp == 24)
                     _param.format = SimdPixelFormatBgr24;
+                else if (_bpp == 8)
+                    _param.format = SimdPixelFormatGray8;
             }
             return true;
         }
@@ -181,7 +199,7 @@ namespace Simd
         {
             switch (_param.format)
             {
-            case SimdPixelFormatGray8: _toAny = (_bpp == 32 ? Base::BgraToGray : Base::BgrToGray); break;
+            case SimdPixelFormatGray8: _toAny = (_bpp == 32 ? Base::BgraToGray : (_bpp == 24 ? Base::BgrToGray : NULL)); break;
             case SimdPixelFormatBgr24: _toAny = (_bpp == 32 ? (ToAnyPtr)Base::BgraToBgr : NULL); break;
             case SimdPixelFormatRgb24: _toAny = (_bpp == 32 ? Base::BgraToRgb : Base::BgrToRgb); break;
             case SimdPixelFormatBgra32: _toBgra = (_bpp == 32 ? NULL : (ToBgraPtr)Base::BgrToBgra); break;

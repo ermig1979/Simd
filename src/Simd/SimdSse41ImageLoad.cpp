@@ -134,7 +134,7 @@ namespace Simd
         {
             switch (_param.format)
             {
-            case SimdPixelFormatGray8: _toAny = (_bpp == 32 ? Sse41::BgraToGray : Sse41::BgrToGray); break;
+            case SimdPixelFormatGray8: _toAny = (_bpp == 32 ? Sse41::BgraToGray : (_bpp == 24 ? Sse41::BgrToGray : NULL)); break;
             case SimdPixelFormatBgr24: _toAny = (_bpp == 32 ? (ToAnyPtr)Sse41::BgraToBgr : NULL); break;
             case SimdPixelFormatRgb24: _toAny = (_bpp == 32 ? Sse41::BgraToRgb : Sse41::BgrToRgb); break;
             case SimdPixelFormatBgra32: _toBgra = (_bpp == 32 ? NULL : (ToBgraPtr)Sse41::BgrToBgra); break;
