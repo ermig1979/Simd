@@ -128,52 +128,54 @@ namespace Simd
             if (N > 1) _tile_zero(2);
             if (N > 1) _tile_zero(3);
 
-        //    _tile_stream_loadd(4, src0, strideS);
-        //    if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
-        //    for (; sc < applyC32; src1 += stepS)
-        //    {
-        //        if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
-        //        if (M > 0) _tile_dpbf16ps(0, 4, 6);
-        //        ApplyMxN<term, type, M, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
-        //        _tile_stream_loadd(5, src1, strideS);
-        //        if (M > 1) _tile_dpbf16ps(1, 4, 7);
-        //        ApplyMxN<term, type, M, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
-        //        src0 += stepS;
-        //        _tile_stream_loadd(4, src0, strideS);
-        //        if (M > 0) _tile_dpbf16ps(2, 5, 6);
-        //        ApplyMxN<term, type, M, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
-        //        sc += 32;
-        //        if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
-        //        if (M > 1) _tile_dpbf16ps(3, 5, 7);
-        //        ApplyMxN<term, type, M, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
-        //    }
-        //    for (; sc < srcC32; src1 += stepS)
-        //    {
-        //        if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
-        //        if (M > 0) _tile_dpbf16ps(0, 4, 6);
-        //        _tile_stream_loadd(5, src1, strideS);
-        //        if (M > 1) _tile_dpbf16ps(1, 4, 7);
-        //        src0 += stepS;
-        //        _tile_stream_loadd(4, src0, strideS);
-        //        if (M > 0) _tile_dpbf16ps(2, 5, 6);
-        //        sc += 32;
-        //        if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
-        //        if (M > 1) _tile_dpbf16ps(3, 5, 7);
-        //    }
-        //    if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
-        //    _tile_stream_loadd(5, src1, strideS);
-        //    if (M > 0) _tile_dpbf16ps(0, 4, 6);
-        //    ApplyMxN<term, type, M, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
-        //    if (M > 0) _tile_stored(0, buf1 + 0, strideB);
-        //    if (M > 1) _tile_dpbf16ps(1, 4, 7);
-        //    ApplyMxN<term, type, M, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
-        //    if (M > 1) _tile_stored(1, buf1 + F, strideB);
-        //    if (M > 0) _tile_dpbf16ps(2, 5, 6);
-        //    ApplyMxN<term, type, M, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
-        //    if (M > 0) _tile_stored(2, buf1 + 16 * dB + 0, strideB);
-        //    if (M > 1) _tile_dpbf16ps(3, 5, 7);
-        //    ApplyMxN<term, type, M, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params, tailD), ds += apply;
-        //    if (M > 1) _tile_stored(3, buf1 + 16 * dB + F, strideB);
+            _tile_stream_loadd(6, weight0 + sc * dW, strideW);
+            if (N > 0) _tile_loadd(4, src0, strideS);
+            for (; sc < applyC32;)
+            {
+                _tile_stream_loadd(7, weight1 + sc * dW, strideW);
+                if (N > 0) _tile_dpbf16ps(0, 4, 6);
+                if (N > 0) ApplyMxN<term, type, 2, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params), ds += apply;
+                if (N > 1) _tile_loadd(5, src1, strideS);
+                if (N > 1) src1 += stepS;
+                if (N > 0) _tile_dpbf16ps(1, 4, 7);
+                if (N > 0) ApplyMxN<term, type, 2, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params), ds += apply;
+                if (N > 0) src0 += stepS;
+                if (N > 0) _tile_loadd(4, src0, strideS);
+                if (N > 1) _tile_dpbf16ps(2, 5, 6);
+                if (N > 1) ApplyMxN<term, type, 2, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params), ds += apply;
+                sc += 32;
+                _tile_stream_loadd(6, weight0 + sc * dW, strideW);
+                if (N > 1) _tile_dpbf16ps(3, 5, 7);
+                if (N > 1) ApplyMxN<term, type, 2, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params), ds += apply;
+            }
+            for (; sc < srcC32; src1 += stepS)
+            {
+                _tile_stream_loadd(7, weight1 + sc * dW, strideW);
+                if (N > 0) _tile_dpbf16ps(0, 4, 6);
+                if (N > 1) _tile_loadd(5, src1, strideS);
+                if (N > 1) src1 += stepS;
+                if (N > 0) _tile_dpbf16ps(1, 4, 7);
+                if (N > 0) src0 += stepS;
+                if (N > 0) _tile_loadd(4, src0, strideS);
+                if (N > 1) _tile_dpbf16ps(2, 5, 6);
+                sc += 32;
+                _tile_stream_loadd(6, weight0 + sc * dW, strideW);
+                if (N > 1) _tile_dpbf16ps(3, 5, 7);
+            }
+            _tile_stream_loadd(7, weight1 + sc * dW, strideW);
+            if (N > 0) _tile_dpbf16ps(0, 4, 6);
+            if (N > 0) ApplyMxN<term, type, 2, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params), ds += apply;
+            if (N > 1) _tile_loadd(5, src1, strideS);
+            if (N > 0) _tile_stored(0, buf1 + 0, strideB);
+            if (N > 0) _tile_dpbf16ps(1, 4, 7);
+            if (N > 0) ApplyMxN<term, type, 2, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params), ds += apply;
+            if (N > 0) _tile_stored(1, buf1 + F, strideB);
+            if (N > 1) _tile_dpbf16ps(2, 5, 6);
+            if (N > 1) ApplyMxN<term, type, 2, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params), ds += apply;
+            if (N > 1) _tile_stored(2, buf1 + 16 * dB + 0, strideB);
+            if (N > 1) _tile_dpbf16ps(3, 5, 7);
+            if (N > 1) ApplyMxN<term, type, 2, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params), ds += apply;
+            if (N > 1) _tile_stored(3, buf1 + 16 * dB + F, strideB);
         }
 
         //template<Term16bType term, SimdConvolutionActivationType type, int M, int apply, int flush> SIMD_INLINE void Convolution16bNhwcGemm_1x16x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
@@ -221,20 +223,20 @@ namespace Simd
         //    if (M > 1) _tile_stored(1, buf1 + F, strideB);
         //}
 
-        //template<Term16bType term, SimdConvolutionActivationType type, int M, int apply, int flush> void Convolution16bNhwcGemm_Nx32x32M(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
-        //    size_t dstS, const uint16_t* weight0, const float* bias, const float* params, __m512* _params, float* buf, uint8_t* dst, __mmask32 tailD)
-        //{
-        //    int dB = (int)a.miniD, dD = int(p.dstC * a.elem), dW = (int)a.miniD, dS = (int)a.bufK;
-        //    float* buf0 = buf, * buf1 = buf + 32 * dB;
+        template<Term16bType term, SimdConvolutionActivationType type, int N, int apply, int flush> void Convolution16bNhwcGemm_Nx32x32xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+            size_t dstS, const uint16_t* weight0, const float* bias, const float* params, __m512* _params, float* buf, uint8_t* dst, __mmask32 tailD)
+        {
+            int dB = (int)a.miniD, dD = int(p.dstC * a.elem), dW = (int)a.miniD, dS = (int)a.bufK;
+            float* buf0 = buf, * buf1 = buf + 32 * dB;
 
-        //    __m512 _bias[2];
-        //    if (M > 0) _bias[0] = _mm512_loadu_ps(bias + 0 * F);
-        //    if (M > 1) _bias[1] = _mm512_loadu_ps(bias + 1 * F);
-        //    if (type == SimdConvolutionActivationPrelu)
-        //    {
-        //        if (M > 0) _params[0] = _mm512_loadu_ps(params + 0 * F);
-        //        if (M > 1) _params[1] = _mm512_loadu_ps(params + 1 * F);
-        //    }
+            __m512 _bias[2];
+            _bias[0] = _mm512_loadu_ps(bias + 0 * F);
+            _bias[1] = _mm512_loadu_ps(bias + 1 * F);
+            if (type == SimdConvolutionActivationPrelu)
+            {
+                _params[0] = _mm512_loadu_ps(params + 0 * F);
+                _params[1] = _mm512_loadu_ps(params + 1 * F);
+            }
 
         //    size_t cds = 0, pds = 0;
         //    Convolution16bNhwcGemm_1x32x32<term, type, M, 0, flush>(src0, p, a, dstS, weight0, _bias, _params, buf0, buf1, dst, tailD), cds += 32;
@@ -265,7 +267,7 @@ namespace Simd
         //            ApplyMxN<term, type, M, 1, flush>(dst1 + ds * dD, dD, buf1 + ds * dB, dB, _bias, _params, tailD);
         //        }
         //    }
-        //}
+        }
 
         //------------------------------------------------------------------------------------------------
 
