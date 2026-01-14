@@ -111,7 +111,7 @@ namespace Simd
             if (N > 7) ApplyMx1<term, type, M, flush>(ptr + 7 * dP, buf + 7 * dB, bias, params, tail);
         }
 
-        ////------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------
 
         template<Term16bType term, SimdConvolutionActivationType type, int N, int apply, int flush> SIMD_INLINE void Convolution16bNhwcGemm_32x32x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             int dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, float* buf1, uint8_t* dst0)
@@ -128,6 +128,9 @@ namespace Simd
             if (N > 0) _tile_zero(1);
             if (N > 1) _tile_zero(2);
             if (N > 1) _tile_zero(3);
+
+            //std::cout << " N " << N << " apply " << apply << " applyC32 " << applyC32 << " offs0 " << offs0 << " offs1 " << offs1 << std::endl;
+            //std::cout << " dD " << dD << " dB " << dB << std::endl;
 
             _tile_stream_loadd(6, weight0 + sc * dW, strideW);
             if (N > 0) _tile_loadd(4, src0, strideS);
@@ -149,7 +152,7 @@ namespace Simd
                 if (N > 1) _tile_dpbf16ps(3, 5, 7);
                 if (N > 1) ApplyMxN<term, type, 2, apply, flush>(dst0 + ds * dD, dD, buf0 + ds * dB, dB, bias, params), ds += apply;
             }
-            for (; sc < srcC32; src1 += stepS)
+            for (; sc < srcC32;)
             {
                 _tile_stream_loadd(7, weight1 + sc * dW, strideW);
                 if (N > 0) _tile_dpbf16ps(0, 4, 6);
@@ -227,14 +230,14 @@ namespace Simd
         template<Term16bType term, SimdConvolutionActivationType type, int N, int apply, int flush> void Convolution16bNhwcGemm_Nx32x32xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             int dstS, size_t dstC, const uint16_t* weight0, const float* bias, const float* params, __m512* _params, float* buf, uint8_t* dst, __mmask32 tailD)
         {
-            int dB = (int)a.miniD, dD = int(p.dstC * a.elem), dW = (int)a.miniD, dS = (int)a.bufK;
+            int dB = (int)a.miniD, dD = int(p.dstC * a.elem), dW = (int)(a.miniD * a.bufK), dS = (int)a.bufK;
             float* buf0 = buf, * buf1 = buf + 32 * dB;
             int offs0 = N == 1 ? dstS - 1 * F : 0 * F, offs1 = N == 2 ? dstS - 1 * F : 1 * F;
 
             __m512 _bias[2];
-            Convolution16bNhwcGemm_32x32x1<term, type, N, 0, flush>(src0, p, a, dstS, weight0, _bias, _params, buf0, buf1, dst), weight0 += 64;
+            Convolution16bNhwcGemm_32x32x1<term, type, N, 0, flush>(src0, p, a, dstS, weight0, _bias, _params, buf0, buf1, dst), weight0 += dW;
             size_t dc = 32;
-            for (; dc < dstC; dc += 32, weight0 += 64, bias += 32, params += 32, dst += 32 * a.elem)
+            for (; dc < dstC; dc += 32, weight0 += dW, bias += 32, params += 32, dst += 32 * a.elem)
             {
                 Swap(buf0, buf1);
                 if (dc + 16 >= dstC)
@@ -256,7 +259,9 @@ namespace Simd
                     Convolution16bNhwcGemm_32x32x1<term, type, N, apply, flush>(src0, p, a, dstS, weight0, _bias, _params, buf0, buf1, dst);
                 }
             }
-            if (dc <= dstC + 16)
+            //std::cout << " dc " << dc << " dstC " << dstC << " dstS " << dstS << " offs0 " << offs0 << " offs1 " << offs1 << std::endl;
+            //std::cout << buf1[(offs1 + 0) * dB] << std::endl;
+            if (dc >= dstC + 16)
             {
                 _bias[0] = _mm512_loadu_ps(bias);
                 if (type == SimdConvolutionActivationPrelu)
@@ -287,7 +292,7 @@ namespace Simd
         template<Term16bType term, SimdConvolutionActivationType type, int apply, int flush> void Convolution16bNhwcGemm_MacroNx32(const uint16_t* src, const ConvParam& p, const AlgParam& a,
             size_t dstC, size_t dstH, const uint16_t* weight, const float* bias, const float* params, float* buf, uint8_t* dst)
         {
-            size_t dD = p.dstC * a.elem, dS = a.bufK, dW = a.bufK * a.miniD;
+            size_t dD = p.dstC * a.elem, dS = a.bufK, dStep = a.miniD * 8, dW = a.bufK * dStep;
             size_t n = 32, n1 = dstH * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             assert(n1 >= 16);
 
@@ -303,10 +308,11 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
 
             SetTileConfFull();
-            for (size_t dc = 0; dc < dstC; dc += a.miniD)
+            for (size_t dc = 0; dc < dstC; dc += dStep)
             {
-                size_t dC = Simd::Min(a.miniD, dstC - dc);
+                size_t dC = Simd::Min(dStep, dstC - dc);
                 __mmask32 tailD = term == Term16bLast16b ? TailMask32(dC) : (__mmask32)TailMask16(dC - AlignLo(dC - 1, 16));
+                //std::cout << " dC " << dC << " nn " << nn << " tailD " << std::hex << tailD << std::dec << std::endl;
                 const uint16_t* s = src;
                 uint8_t* d = dst + dc * a.elem;
                 size_t i = 0;
@@ -315,51 +321,51 @@ namespace Simd
                 if (m)
                     mConv(s + i * dS, p, a, (int)m, dC, weight, bias, params, _params, buf, d + i * dD, tailD), i += m;
                 weight += dW;
-                bias += a.miniD;
-                params += a.miniD;
+                bias += dStep;
+                params += dStep;
             }
         }
 
         //-------------------------------------------------------------------------------------------------
 
-        //template <Term16bType term, SimdConvolutionActivationType type, int flush> SIMD_INLINE void SetMacro32x32d(const ConvParam& p, const AlgParam& a, Convolution& convolution)
-        //{
-        //    if (a.bufK >= 256)
-        //        convolution = Convolution16bNhwcGemm_Macro32x32<term, type, 1, flush>;
-        //    else if (a.bufK >= 128)
-        //        convolution = Convolution16bNhwcGemm_Macro32x32<term, type, 2, flush>;
-        //    else
-        //        convolution = NULL;
-        //}
+        template <Term16bType term, SimdConvolutionActivationType type, int flush> SIMD_INLINE void SetMacro32x32i(const ConvParam& p, const AlgParam& a, Convolution& convolution)
+        {
+            if (a.bufK >= 256)
+                convolution = Convolution16bNhwcGemm_MacroNx32<term, type, 1, flush>;
+            else if (a.bufK >= 128)
+                convolution = Convolution16bNhwcGemm_MacroNx32<term, type, 2, flush>;
+            else
+                convolution = NULL;
+        }
 
-        //template <SimdConvolutionActivationType type> SIMD_INLINE void SetMacro32x32d(const ConvParam& p, const AlgParam& a, Convolution& convolution)
-        //{
-        //    if (p.dstT == SimdTensorData16b)
-        //        SetMacro32x32d<Term16bLast16b, type, 0>(p, a, convolution);
-        //    else
-        //        SetMacro32x32d<Term16bLast32f, type, 0>(p, a, convolution);
-        //}
+        template <SimdConvolutionActivationType type> SIMD_INLINE void SetMacro32x32i(const ConvParam& p, const AlgParam& a, Convolution& convolution)
+        {
+            if (p.dstT == SimdTensorData16b)
+                SetMacro32x32i<Term16bLast16b, type, 0>(p, a, convolution);
+            else
+                SetMacro32x32i<Term16bLast32f, type, 0>(p, a, convolution);
+        }
 
-        //void SynetConvolution16bNhwcGemmV1::SetMacro32x32d()
-        //{
-        //    const ConvParam& p = _param;
-        //    const AlgParam& a = _alg;
-        //    switch (p.activation)
-        //    {
-        //    case SimdConvolutionActivationIdentity: AmxBf16::SetMacro32x32d<SimdConvolutionActivationIdentity>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationRelu: AmxBf16::SetMacro32x32d<SimdConvolutionActivationRelu>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationLeakyRelu: AmxBf16::SetMacro32x32d<SimdConvolutionActivationLeakyRelu>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationRestrictRange: AmxBf16::SetMacro32x32d<SimdConvolutionActivationRestrictRange>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationPrelu: AmxBf16::SetMacro32x32d<SimdConvolutionActivationPrelu>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationElu: AmxBf16::SetMacro32x32d<SimdConvolutionActivationElu>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationHswish: AmxBf16::SetMacro32x32d<SimdConvolutionActivationHswish>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationMish: AmxBf16::SetMacro32x32d<SimdConvolutionActivationMish>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationHardSigmoid: AmxBf16::SetMacro32x32d<SimdConvolutionActivationHardSigmoid>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationSwish: AmxBf16::SetMacro32x32d<SimdConvolutionActivationSwish>(p, _alg, _convolution); break;
-        //    case SimdConvolutionActivationGelu: AmxBf16::SetMacro32x32d<SimdConvolutionActivationGelu>(p, _alg, _convolution); break;
-        //    default: assert(0);
-        //    }
-        //}
+        void SynetConvolution16bNhwcGemmV1::SetMacro32x32i()
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity: AmxBf16::SetMacro32x32i<SimdConvolutionActivationIdentity>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationRelu: AmxBf16::SetMacro32x32i<SimdConvolutionActivationRelu>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationLeakyRelu: AmxBf16::SetMacro32x32i<SimdConvolutionActivationLeakyRelu>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationRestrictRange: AmxBf16::SetMacro32x32i<SimdConvolutionActivationRestrictRange>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationPrelu: AmxBf16::SetMacro32x32i<SimdConvolutionActivationPrelu>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationElu: AmxBf16::SetMacro32x32i<SimdConvolutionActivationElu>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationHswish: AmxBf16::SetMacro32x32i<SimdConvolutionActivationHswish>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationMish: AmxBf16::SetMacro32x32i<SimdConvolutionActivationMish>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationHardSigmoid: AmxBf16::SetMacro32x32i<SimdConvolutionActivationHardSigmoid>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationSwish: AmxBf16::SetMacro32x32i<SimdConvolutionActivationSwish>(p, _alg, _convolution); break;
+            case SimdConvolutionActivationGelu: AmxBf16::SetMacro32x32i<SimdConvolutionActivationGelu>(p, _alg, _convolution); break;
+            default: assert(0);
+            }
+        }
     }
 #endif
 }
