@@ -378,6 +378,44 @@ namespace Simd
             }
         }
 
+        template<Term16bType term, SimdConvolutionActivationType type, int apply, int flush> void Convolution16bNhwcGemm_Macro64x32(const uint16_t* src, const ConvParam& p, const AlgParam& a,
+            size_t dstC, size_t dstH, const uint16_t* weight, const float* bias, const float* params, float* buf, uint8_t* dst)
+        {
+            size_t n = 256, n1 = dstH * p.dstW, nn = AlignLoAny(n1, n), dW = a.bufK * a.miniD * 2;
+            size_t dD = p.dstC * a.elem, dS = a.bufK;
+
+            size_t dstC64 = AlignLo(dstC, 64), dstCt = dstC - dstC64;
+            __mmask32 tailD = __mmask32(-1);// term == Term16bLast16b ? TailMask32(dstCt) : (__mmask32)TailMask16(dstCt - AlignLo(dstCt - 1, 16));
+            Convolution16bNhwcGemm_Nx32x32xM_Ptr mainConv = Convolution16bNhwcGemm_Nx32x64<term, type, 2, apply, flush>;
+            //Convolution16bNhwcGemm_Nx32x32_Ptr tailConv = dstCt > 16 ? Convolution16bNhwcGemm_Nx32x32M<term, type, 2, apply, flush> : Convolution16bNhwcGemm_Nx32x32M<term, type, 1, apply, flush>;
+
+            __m512 _params[4];
+            _params[0] = _mm512_set1_ps(params[0]);
+            _params[2] = _mm512_set1_ps(params[0]);
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
+            {
+                _params[1] = _mm512_set1_ps(params[1]);
+                _params[3] = _mm512_set1_ps(params[1]);
+            }
+
+            SetTileConfFull();
+            for (size_t i = 0; i < n1;)
+            {
+                size_t dn = (i == nn ? n1 - i : n);
+                const uint16_t* s = src + i * dS;
+                const uint16_t* w = weight;
+                uint8_t* d = dst + i * dD;
+                size_t dc = 0;
+                for (; dc < dstC64; dc += QF, w += dW)
+                    mainConv(s, p, a, dn, 64, w, bias + dc, params + dc, _params, buf, d + dc * a.elem, __mmask32(-1));
+                //if (dc < dstC)
+                //    tailConv(s, p, a, dn, w, bias + dc, params + dc, _params, buf, d + dc * a.elem, tailD);
+                i += dn;
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         template <Term16bType term, SimdConvolutionActivationType type, int flush> SIMD_INLINE void SetMacro32x32i(const ConvParam& p, const AlgParam& a, Convolution& convolution)
