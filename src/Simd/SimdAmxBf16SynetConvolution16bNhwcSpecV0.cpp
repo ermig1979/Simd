@@ -618,15 +618,36 @@ namespace Simd
 
         static void Convolution16bNhwcSpecV0_Inverse(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t nK, int zero, const uint16_t* weight, float* dst)
         {
-            size_t n1 = dstH * a.srcW - a.gapH, n = 32;
-            size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.K * DF;
+            size_t n1 = dstH * a.srcW - a.gapH, n = 32, n4 = n * 4;
+            size_t nn = AlignLoAny(n1, n), m = n1 - nn, nn4 = AlignLoAny(nn, n4), dW = a.K * DF;
             size_t dstCDF = AlignLo(dstC, DF), dC = dstC - dstCDF;
             size_t dD = a.macroD, dS = a.microC;
             Convolution16bNhwcSpecV0_InversePtr body = Convolution16bNhwcSpecV0_Direct32x32<0>;
             Convolution16bNhwcSpecV0_InversePtr tail = dC > 16 ? Convolution16bNhwcSpecV0_Inverse32x32<1> : Convolution16bNhwcSpecV0_Inverse32x16<1>;
 
             SetTileConfFull();
-            for (size_t i = 0; i < nn; i += n)
+            size_t i = 0;
+            for (; i < nn4; i += n4)
+            {
+                size_t dc = 0;
+                for (; dc < dstCDF; dc += DF)
+                {
+                    Convolution16bNhwcSpecV0_Direct32x32<1>(src + 0 * 32 * dS, p, a, offs, nK, zero, weight + a.K * dc, dst + dc + 0 * 32 * dD);
+                    body(src + 1 * 32 * dS, p, a, offs, nK, zero, weight + a.K * dc, dst + dc + 1 * 32 * dD);
+                    body(src + 2 * 32 * dS, p, a, offs, nK, zero, weight + a.K * dc, dst + dc + 2 * 32 * dD);
+                    body(src + 3 * 32 * dS, p, a, offs, nK, zero, weight + a.K * dc, dst + dc + 3 * 32 * dD);
+                }
+                if (dc < dstC)
+                {
+                    tail(src + 0 * 32 * dS, p, a, offs, nK, zero, weight + a.K * dc, dst + dc + 0 * 32 * dD);
+                    tail(src + 1 * 32 * dS, p, a, offs, nK, zero, weight + a.K * dc, dst + dc + 1 * 32 * dD);
+                    tail(src + 2 * 32 * dS, p, a, offs, nK, zero, weight + a.K * dc, dst + dc + 2 * 32 * dD);
+                    tail(src + 3 * 32 * dS, p, a, offs, nK, zero, weight + a.K * dc, dst + dc + 3 * 32 * dD);
+                }
+                src += n4 * dS;
+                dst += n4 * dD;
+            }
+            for (; i < nn; i += n)
             {
                 size_t dc = 0;
                 for (; dc < dstCDF; dc += DF)

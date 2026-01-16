@@ -290,6 +290,46 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class SynetConvolution16bNhwcSpecV2 : public SynetConvolution16b
+        {
+        public:
+            SynetConvolution16bNhwcSpecV2(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t F, microD, microS, microC;
+                size_t batch, srcC, srcH, srcW, dstC, K;
+                size_t padV, padH, padE, gapV, gapH, kA;
+                size_t macroD, macroH, macroC, numH, macroO;
+                size_t bufS, bufD, elem, inv;
+            };
+
+            typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst);
+
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, 
+                const int* srcOffs, size_t dstC, size_t dstH, const uint16_t* weight, float* sum, const float* bias, const float* params, const int* dstOffs, uint8_t* dst);
+
+        protected:
+            void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
+            virtual void SetWeight(const float* weight);
+
+            void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
+
+            AlgParam _alg;
+            Array32i _srcOffs, _dstOffs;
+            PreprocessPtr _preprocess;
+            ConvolutionPtr _convolution;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution16bNhwcDepthwise : public SynetConvolution16b
         {
         public:
