@@ -436,18 +436,21 @@ namespace Simd
             else
                 _tile_stream_loadd(7, weight1, strideW);
             _tile_loadd(5, src1 + offs[n1], strideS);
-            _tile_dpbf16ps(0, 4, 6);
-            _tile_dpbf16ps(1, 4, 7);
-            _tile_dpbf16ps(2, 5, 6);
-            _tile_dpbf16ps(3, 5, 7);
 
+            _tile_dpbf16ps(0, 4, 6);
             _tile_stored(0, dst0 + 0, strideD);
-            _tile_stored(1, dst0 + F, strideD);
-            _tile_stored(2, dst1 + 0, strideD);
-            _tile_stored(3, dst1 + F, strideD);
             TileMoveToMemory(dst0 + 0, dD);
+
+            _tile_dpbf16ps(1, 4, 7);
+            _tile_stored(1, dst0 + F, strideD);
             TileMoveToMemory(dst0 + F, dD);
+
+            _tile_dpbf16ps(2, 5, 6);
+            _tile_stored(2, dst1 + 0, strideD);
             TileMoveToMemory(dst1 + 0, dD);
+
+            _tile_dpbf16ps(3, 5, 7);
+            _tile_stored(3, dst1 + F, strideD);
             TileMoveToMemory(dst1 + F, dD);
         }
 
@@ -619,7 +622,7 @@ namespace Simd
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.K * DF;
             size_t dstCDF = AlignLo(dstC, DF), dC = dstC - dstCDF;
             size_t dD = a.macroD, dS = a.microC;
-            Convolution16bNhwcSpecV0_InversePtr body = Convolution16bNhwcSpecV0_Direct32x32<1>;
+            Convolution16bNhwcSpecV0_InversePtr body = Convolution16bNhwcSpecV0_Direct32x32<0>;
             Convolution16bNhwcSpecV0_InversePtr tail = dC > 16 ? Convolution16bNhwcSpecV0_Inverse32x32<1> : Convolution16bNhwcSpecV0_Inverse32x16<1>;
 
             SetTileConfFull();

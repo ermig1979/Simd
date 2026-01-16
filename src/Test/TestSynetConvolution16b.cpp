@@ -508,7 +508,7 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 4, 8, 2048, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 2, 8, 2048, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 1, 16, 512, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 2, 16, 512, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 3, 16, 512, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
@@ -521,7 +521,13 @@ namespace Test
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 31, 33, 512, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 28, 36, 512, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
 #endif
-
+#if 1
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 32, 128, 32, 32, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 64, 64, 32, 64, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 128, 16, 32, 128, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 256, 8, 32, 256, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+        result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 512, 4, 32, 512, _3, _1, _1, _1, _1, 1, aPr, tT, b16, b16), c, f1, f2);
+#endif
 #else
         result = result && SynetConvolution16bForwardAutoTest(eps, Param(1, 16, 320, 320, 32, _2, _1, _1, _0, _1, 1, aId, tT, b16, f32), c, f1, f2);
 #endif
