@@ -3219,6 +3219,48 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
+SIMD_API void SimdMidpointFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
+{
+    SIMD_EMPTY();
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && (width - 1)*channelCount >= Avx512bw::A)
+        Avx512bw::MidpointFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && (width - 1)*channelCount >= Avx2::A)
+        Avx2::MidpointFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
+        Neon::MidpointFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
+        Base::MidpointFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
+SIMD_API void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
+{
+    SIMD_EMPTY();
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && (width - 2)*channelCount >= Avx512bw::A)
+        Avx512bw::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && (width - 2)*channelCount >= Avx2::A)
+        Avx2::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && (width - 2)*channelCount >= Neon::A)
+        Neon::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
+        Base::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
 SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
 {
     SIMD_EMPTY();

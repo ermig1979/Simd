@@ -2621,6 +2621,46 @@ namespace Simd
         SimdMedianFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
+    /*! @ingroup midpoint_filter
+
+        \fn void MidpointFilterSquare3x3(const View<A>& src, View<A>& dst)
+
+        \short Performs midpoint filtration of input image (filter window is a square 3x3).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function is a C++ wrapper for function ::SimdMidpointFilterSquare3x3.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a filtered output image.
+    */
+   template<template<class> class A> SIMD_INLINE void MidpointFilterSquare3x3(const View<A>& src, View<A>& dst)
+   {
+       assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+       SimdMidpointFilterSquare3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+   }
+
+   /*! @ingroup midpoint_filter
+
+       \fn void MidpointFilterSquare5x5(const View<A>& src, View<A>& dst)
+
+       \short Performs midpoint filtration of input image (filter window is a square 5x5).
+
+       All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+       \note This function is a C++ wrapper for function ::SimdMidpointFilterSquare5x5.
+
+       \param [in] src - an original input image.
+       \param [out] dst - a filtered output image.
+   */
+   template<template<class> class A> SIMD_INLINE void MidpointFilterSquare5x5(const View<A>& src, View<A>& dst)
+   {
+       assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+       SimdMidpointFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+   }
+
     /*! @ingroup neural
 
         \fn void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
