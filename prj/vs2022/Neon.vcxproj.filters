@@ -127,6 +127,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp">
       <Filter>Neon\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonMidpointFilter.cpp">
+      <Filter>Neon\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonMeanFilter3x3.cpp">
       <Filter>Neon\Filter</Filter>
     </ClCompile>

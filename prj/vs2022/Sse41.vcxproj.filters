@@ -67,6 +67,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41MedianFilter.cpp">
       <Filter>Sse41\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41MidpointFilter.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Sobel.cpp">
       <Filter>Sse41\Filter</Filter>
     </ClCompile>

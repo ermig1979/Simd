@@ -82,6 +82,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilter.cpp">
       <Filter>Avx2\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MidpointFilter.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2Laplace.cpp">
       <Filter>Avx2\Filter</Filter>
     </ClCompile>

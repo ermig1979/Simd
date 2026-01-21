@@ -370,6 +370,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMedianFilter.cpp">
       <Filter>Avx512bw\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMidpointFilter.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwLbp.cpp">
       <Filter>Avx512bw\Filter</Filter>
     </ClCompile>
