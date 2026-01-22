@@ -246,6 +246,11 @@
 */
 
 /*! @ingroup filter
+    @defgroup midpoint_filter Midpoint Filters
+    \short Midpoint image filters.
+*/
+
+/*! @ingroup filter
     @defgroup recursive_bilateral_filter Recursive Bilateral Filters
     \short Recursive bilateral image filters.
 */
