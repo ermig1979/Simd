@@ -3232,6 +3232,11 @@ SIMD_API void SimdMidpointFilterSquare3x3(const uint8_t * src, size_t srcStride,
         Avx2::MidpointFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && (width - 2)*channelCount >= Sse41::A)
+        Sse41::MidpointFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
         Neon::MidpointFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
@@ -3251,6 +3256,11 @@ SIMD_API void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride,
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && (width - 2)*channelCount >= Avx2::A)
         Avx2::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && (width - 2)*channelCount >= Sse41::A)
+        Sse41::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

@@ -2,6 +2,7 @@
 * Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
+*               2026 TianWei Lin
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +45,7 @@ namespace Simd
                 max = MaxU8(max, a[i]);
                 min = MinU8(min, a[i]);
             }
-            a[0] = (max + min) / 2;
+            a[0] = (max + min ? max + min + 1 : max + min) / 2;
         }
 
         void MidpointFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -107,7 +108,7 @@ namespace Simd
                 max = MaxU8(max, a[i]);
                 min = MinU8(min, a[i]);
             }
-            a[0] = (max + min) / 2;
+            a[0] = (max + min ? max + min + 1 : max + min) / 2;
         }
 
         void MidpointFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,

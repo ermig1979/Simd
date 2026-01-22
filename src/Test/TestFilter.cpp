@@ -293,6 +293,66 @@ namespace Test
         return result;
     }
 
+    bool MidpointFilterSquare3x3AutoTest(const Options & options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MidpointFilterSquare3x3), FUNC_C(SimdMidpointFilterSquare3x3));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options) && W - 1 >= Simd::Sse41::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::MidpointFilterSquare3x3), FUNC_C(SimdMidpointFilterSquare3x3));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options) && W - 1 >= Simd::Avx2::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MidpointFilterSquare3x3), FUNC_C(SimdMidpointFilterSquare3x3));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options) && W - 1 >= Simd::Avx512bw::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MidpointFilterSquare3x3), FUNC_C(SimdMidpointFilterSquare3x3));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options) && W - 1 >= Simd::Neon::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MidpointFilterSquare3x3), FUNC_C(SimdMidpointFilterSquare3x3));
+#endif
+
+        return result;
+    }
+
+    bool MidpointFilterSquare5x5AutoTest(const Options & options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MidpointFilterSquare5x5), FUNC_C(SimdMidpointFilterSquare5x5));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options) && W - 2 >= Simd::Sse41::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::MidpointFilterSquare5x5), FUNC_C(SimdMidpointFilterSquare5x5));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options) && W - 2 >= Simd::Avx2::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MidpointFilterSquare5x5), FUNC_C(SimdMidpointFilterSquare5x5));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options) && W - 2 >= Simd::Avx512bw::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MidpointFilterSquare5x5), FUNC_C(SimdMidpointFilterSquare5x5));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options) && W - 2 >= Simd::Neon::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MidpointFilterSquare5x5), FUNC_C(SimdMidpointFilterSquare5x5));
+#endif
+
+        return result;
+    }
+
     bool GaussianBlur3x3AutoTest(const Options & options)
     {
         bool result = true;

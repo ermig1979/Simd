@@ -3,6 +3,7 @@
 *
 * Copyright (c) 2011-2021 Yermalayeu Ihar,
 *               2020-2020 Andrey Turkin.
+*               2026 TianWei Lin
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -205,8 +206,8 @@ namespace Simd
             {
                 max_0 = _mm512_max_epu8(max_0, a[i]);
                 min_0 = _mm512_min_epu8(min_0, a[i]);
-                max_1 = _mm512_max_epu8(max_0, a[i+5]);
-                min_1 = _mm512_min_epu8(min_0, a[i+5]);
+                max_1 = _mm512_max_epu8(max_1, a[i+5]);
+                min_1 = _mm512_min_epu8(min_1, a[i+5]);
             }
             a[0] = _mm512_avg_epu8(min_0, max_0);
             a[1] = _mm512_avg_epu8(min_1, max_1);
