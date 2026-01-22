@@ -225,6 +225,8 @@ namespace Test
     TEST_ADD_GROUP_A0(MedianFilterRhomb5x5);
     TEST_ADD_GROUP_A0(MedianFilterSquare3x3);
     TEST_ADD_GROUP_A0(MedianFilterSquare5x5);
+    TEST_ADD_GROUP_A0(MidpointFilterSquare3x3);
+    TEST_ADD_GROUP_A0(MidpointFilterSquare5x5);
     TEST_ADD_GROUP_A0(GaussianBlur3x3);
     TEST_ADD_GROUP_A0(AbsGradientSaturatedSum);
     TEST_ADD_GROUP_A0(LbpEstimate);

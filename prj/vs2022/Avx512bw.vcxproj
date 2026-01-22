@@ -63,6 +63,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwLbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMedianFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMidpointFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwOperation.cpp" />

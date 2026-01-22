@@ -4341,6 +4341,48 @@ extern "C"
     SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup midpoint_filter
+
+        \fn void SimdMidpointFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+
+        \short Performs midpoint filtration of input image (filter window is a square 3x3).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function has a C++ wrappers: Simd::MidpointFilterSquare3x3(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of original input image.
+        \param [in] srcStride - a row size of src image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] channelCount - a channel count.
+        \param [out] dst - a pointer to pixels data of filtered output image.
+        \param [in] dstStride - a row size of dst image.
+    */
+   SIMD_API void SimdMidpointFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+    size_t channelCount, uint8_t * dst, size_t dstStride);
+
+    /*! @ingroup midpoint_filter
+
+        \fn void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+
+        \short Performs midpoint filtration of input image (filter window is a square 5x5).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function has a C++ wrappers: Simd::MidpointFilterSquare5x5(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of original input image.
+        \param [in] srcStride - a row size of src image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] channelCount - a channel count.
+        \param [out] dst - a pointer to pixels data of filtered output image.
+        \param [in] dstStride - a row size of dst image.
+    */
+    SIMD_API void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+    size_t channelCount, uint8_t * dst, size_t dstStride);
+
     /*! @ingroup neural
 
         \fn void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);

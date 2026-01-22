@@ -298,6 +298,12 @@ namespace Simd
         void MedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
+        void MidpointFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            size_t channelCount, uint8_t * dst, size_t dstStride);
+
+        void MidpointFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            size_t channelCount, uint8_t * dst, size_t dstStride);
+
         void NeuralAdaptiveGradientUpdate(const float* delta, size_t size, size_t batch, const float* alpha, const float* epsilon, float* gradient, float* weight);
 
         void NeuralAddVector(const float* src, size_t size, float* dst);

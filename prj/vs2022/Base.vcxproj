@@ -181,6 +181,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseLbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseMedianFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseMidpointFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseNeural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBasePerformance.cpp" />
