@@ -217,6 +217,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcGemmV1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV1.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution32fDirectNchw.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution32fGemm.cpp" />

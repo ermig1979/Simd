@@ -307,14 +307,14 @@ namespace Simd
                 size_t F, microD, microS, microC;
                 size_t batch, srcC, srcH, srcW, dstC, K;
                 size_t padV, padH, padE, gapV, gapH, kA;
-                size_t macroD, macroH, macroC, numH, macroO;
+                size_t macroD, macroH, numH;
                 size_t bufS, bufD, elem, inv;
             };
 
             typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst);
 
             typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, 
-                const int* srcOffs, size_t dstC, size_t dstH, const uint16_t* weight, float* sum, const float* bias, const float* params, const int* dstOffs, uint8_t* dst);
+                const int* srcOffs, size_t dstC, size_t dstH, const uint16_t* weight, float* sum, const float* bias, const float* params, const int* dstMask, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
@@ -323,7 +323,7 @@ namespace Simd
             void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 
             AlgParam _alg;
-            Array32i _srcOffs, _dstOffs;
+            Array32i _srcOffs, _dstMask;
             PreprocessPtr _preprocess;
             ConvolutionPtr _convolution;
         };

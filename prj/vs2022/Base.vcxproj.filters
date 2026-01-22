@@ -451,6 +451,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseFont.cpp">
       <Filter>Base\Image</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV2.cpp">
+      <Filter>Base\Synet\Convolution</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
