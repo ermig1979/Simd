@@ -2517,7 +2517,7 @@ namespace Simd
 
     /*! @ingroup max_filter
 
-        \fn void MaxFilterSquare3x3(const View<A>& src, View<A>& dst)
+        \fn void MaxFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
 
         \short Performs max filtration of input image (filter window is a square 3x3).
 
@@ -2538,7 +2538,7 @@ namespace Simd
 
     /*! @ingroup max_filter
 
-        \fn void MaxFilterSquare5x5(const View<A>& src, View<A>& dst)
+        \fn void MaxFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
 
         \short Performs max filtration of input image (filter window is a square 5x5).
 
@@ -2559,7 +2559,7 @@ namespace Simd
 
     /*! @ingroup min_filter
 
-        \fn void MinFilterSquare3x3(const View<A>& src, View<A>& dst)
+        \fn void MinFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1t)
 
         \short Performs min filtration of input image (filter window is a square 3x3).
 
@@ -2580,7 +2580,7 @@ namespace Simd
 
     /*! @ingroup min_filter
 
-        \fn void MinFilterSquare5x5(const View<A>& src, View<A>& dst)
+        \fn void MinFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
 
         \short Performs min filtration of input image (filter window is a square 5x5).
 

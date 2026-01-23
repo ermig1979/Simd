@@ -4232,7 +4232,7 @@ extern "C"
 
     /*! @ingroup max_filter
 
-        \fn void SimdMaxFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+        \fn void SimdMaxFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
         \short Performs max filtration of input image (filter window is a square 3x3).
 
@@ -4254,7 +4254,7 @@ extern "C"
 
     /*! @ingroup max_filter
 
-        \fn void SimdMaxFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+        \fn void SimdMaxFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
         \short Performs max filtration of input image (filter window is a square 5x5).
 
@@ -4276,7 +4276,7 @@ extern "C"
 
     /*! @ingroup min_filter
 
-        \fn void SimdMinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+        \fn void SimdMinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
         \short Performs min filtration of input image (filter window is a square 3x3).
 
@@ -4298,7 +4298,7 @@ extern "C"
 
     /*! @ingroup min_filter
 
-        \fn void SimdMinFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+        \fn void SimdMinFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
         \short Performs min filtration of input image (filter window is a square 5x5).
 

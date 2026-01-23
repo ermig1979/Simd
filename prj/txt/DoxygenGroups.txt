@@ -251,6 +251,16 @@
 */
 
 /*! @ingroup filter
+    @defgroup max_filter Max Filters
+    \short Max image filters.
+*/
+
+/*! @ingroup filter
+    @defgroup min_filter Min Filters
+    \short Min image filters.
+*/
+
+/*! @ingroup filter
     @defgroup recursive_bilateral_filter Recursive Bilateral Filters
     \short Recursive bilateral image filters.
 */
