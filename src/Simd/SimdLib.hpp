@@ -2515,6 +2515,90 @@ namespace Simd
         SimdFree(buffer);
     }
 
+    /*! @ingroup max_filter
+
+        \fn void MaxFilterSquare3x3(const View<A>& src, View<A>& dst)
+
+        \short Performs max filtration of input image (filter window is a square 3x3).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function is a C++ wrapper for function ::SimdMaxFilterSquare3x3.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a filtered output image.
+        \param [in] threshold - threshold value.
+    */
+    template<template<class> class A> SIMD_INLINE void MaxFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
+    {
+        assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+        SimdMaxFilterSquare3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride, threshold);
+    }
+
+    /*! @ingroup max_filter
+
+        \fn void MaxFilterSquare5x5(const View<A>& src, View<A>& dst)
+
+        \short Performs max filtration of input image (filter window is a square 5x5).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function is a C++ wrapper for function ::SimdMaxFilterSquare5x5.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a filtered output image.
+        \param [in] threshold - threshold value.
+    */
+    template<template<class> class A> SIMD_INLINE void MaxFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
+    {
+        assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+        SimdMaxFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride, threshold);
+    }
+
+    /*! @ingroup min_filter
+
+        \fn void MinFilterSquare3x3(const View<A>& src, View<A>& dst)
+
+        \short Performs min filtration of input image (filter window is a square 3x3).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function is a C++ wrapper for function ::SimdMinFilterSquare3x3.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a filtered output image.
+        \param [in] threshold - threshold value.
+    */
+    template<template<class> class A> SIMD_INLINE void MinFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
+    {
+        assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+        SimdMinFilterSquare3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride, threshold);
+    }
+
+    /*! @ingroup min_filter
+
+        \fn void MinFilterSquare5x5(const View<A>& src, View<A>& dst)
+
+        \short Performs min filtration of input image (filter window is a square 5x5).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function is a C++ wrapper for function ::SimdMinFilterSquare5x5.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a filtered output image.
+        \param [in] threshold - threshold value.
+    */
+    template<template<class> class A> SIMD_INLINE void MinFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
+    {
+        assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+        SimdMinFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride, threshold);
+    }
+
     /*! @ingroup other_filter
 
         \fn void MeanFilter3x3(const View<A>& src, View<A>& dst)

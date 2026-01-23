@@ -61,6 +61,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwInterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwLaplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwLbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMaxFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMinFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMidpointFilter.cpp" />

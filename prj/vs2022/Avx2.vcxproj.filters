@@ -76,6 +76,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Int16ToGray.cpp">
       <Filter>Avx2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MaxFilter.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MinFilter.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2MeanFilter3x3.cpp">
       <Filter>Avx2\Filter</Filter>
     </ClCompile>

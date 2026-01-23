@@ -124,6 +124,12 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonNeuralConvolution.cpp">
       <Filter>Neon\Legacy</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonMaxFilter.cpp">
+      <Filter>Neon\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonMinFilter.cpp">
+      <Filter>Neon\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp">
       <Filter>Neon\Filter</Filter>
     </ClCompile>
