@@ -4230,6 +4230,94 @@ extern "C"
     */
     SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup max_filter
+
+        \fn void SimdMaxFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+
+        \short Performs max filtration of input image (filter window is a square 3x3).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function has a C++ wrappers: Simd::MaxFilterSquare3x3(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of original input image.
+        \param [in] srcStride - a row size of src image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] channelCount - a channel count.
+        \param [out] dst - a pointer to pixels data of filtered output image.
+        \param [in] dstStride - a row size of dst image.
+        \param [in] threshold - the threshold value.
+    */
+   SIMD_API void SimdMaxFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+    size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
+
+    /*! @ingroup max_filter
+
+        \fn void SimdMaxFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+
+        \short Performs max filtration of input image (filter window is a square 5x5).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function has a C++ wrappers: Simd::MaxFilterSquare5x5(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of original input image.
+        \param [in] srcStride - a row size of src image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] channelCount - a channel count.
+        \param [out] dst - a pointer to pixels data of filtered output image.
+        \param [in] dstStride - a row size of dst image.
+        \param [in] threshold - the threshold value.
+    */
+    SIMD_API void SimdMaxFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+    size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
+
+    /*! @ingroup min_filter
+
+        \fn void SimdMinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+
+        \short Performs min filtration of input image (filter window is a square 3x3).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function has a C++ wrappers: Simd::MinFilterSquare3x3(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of original input image.
+        \param [in] srcStride - a row size of src image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] channelCount - a channel count.
+        \param [out] dst - a pointer to pixels data of filtered output image.
+        \param [in] dstStride - a row size of dst image.
+        \param [in] threshold - the threshold value.
+    */
+   SIMD_API void SimdMinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+    size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
+
+    /*! @ingroup min_filter
+
+        \fn void SimdMinFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+
+        \short Performs min filtration of input image (filter window is a square 5x5).
+
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        \note This function has a C++ wrappers: Simd::MinFilterSquare5x5(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of original input image.
+        \param [in] srcStride - a row size of src image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] channelCount - a channel count.
+        \param [out] dst - a pointer to pixels data of filtered output image.
+        \param [in] dstStride - a row size of dst image.
+        \param [in] threshold - the threshold value.
+    */
+    SIMD_API void SimdMinFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+    size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
+
     /*! @ingroup other_filter
 
         \fn void SimdMeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);

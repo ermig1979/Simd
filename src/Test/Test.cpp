@@ -221,6 +221,10 @@ namespace Test
     TEST_ADD_GROUP_A0(Yuv420pSaveAsJpegToMemory);
     TEST_ADD_GROUP_AS(ImageLoadFromMemory);
 
+    TEST_ADD_GROUP_A0(MaxFilterSquare3x3);
+    TEST_ADD_GROUP_A0(MaxFilterSquare5x5);
+    TEST_ADD_GROUP_A0(MinFilterSquare3x3);
+    TEST_ADD_GROUP_A0(MinFilterSquare5x5);
     TEST_ADD_GROUP_A0(MeanFilter3x3);
     TEST_ADD_GROUP_A0(MedianFilterRhomb3x3);
     TEST_ADD_GROUP_A0(MedianFilterRhomb5x5);
@@ -239,7 +243,7 @@ namespace Test
     TEST_ADD_GROUP_A0(ContourMetrics);
     TEST_ADD_GROUP_A0(Laplace);
     TEST_ADD_GROUP_A0(LaplaceAbs);
-    TEST_ADD_GROUP_AS(GaussianBlur);
+   TEST_ADD_GROUP_AS(GaussianBlur);
     TEST_ADD_GROUP_A0(RecursiveBilateralFilter);
 
     TEST_ADD_GROUP_A0(Histogram);

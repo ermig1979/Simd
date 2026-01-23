@@ -3090,6 +3090,110 @@ SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t widt
         Base::LbpEstimate(src, srcStride, width, height, dst, dstStride);
 }
 
+SIMD_API void SimdMaxFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold)
+{
+    SIMD_EMPTY();
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && (width - 1)*channelCount >= Avx512bw::A)
+        Avx512bw::MaxFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && (width - 1)*channelCount >= Avx2::A)
+        Avx2::MaxFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && (width - 2)*channelCount >= Sse41::A)
+        Sse41::MaxFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
+        Neon::MaxFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+        Base::MaxFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+}
+
+SIMD_API void SimdMaxFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold)
+{
+    SIMD_EMPTY();
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && (width - 2)*channelCount >= Avx512bw::A)
+        Avx512bw::MaxFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && (width - 2)*channelCount >= Avx2::A)
+        Avx2::MaxFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && (width - 2)*channelCount >= Sse41::A)
+        Sse41::MaxFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && (width - 2)*channelCount >= Neon::A)
+        Neon::MaxFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+        Base::MaxFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+}
+
+SIMD_API void SimdMinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold)
+{
+    SIMD_EMPTY();
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && (width - 1)*channelCount >= Avx512bw::A)
+        Avx512bw::MinFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && (width - 1)*channelCount >= Avx2::A)
+        Avx2::MinFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && (width - 2)*channelCount >= Sse41::A)
+        Sse41::MinFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
+        Neon::MinFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+        Base::MinFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+}
+
+SIMD_API void SimdMinFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold)
+{
+    SIMD_EMPTY();
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && (width - 2)*channelCount >= Avx512bw::A)
+        Avx512bw::MinFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && (width - 2)*channelCount >= Avx2::A)
+        Avx2::MinFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && (width - 2)*channelCount >= Sse41::A)
+        Sse41::MinFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && (width - 2)*channelCount >= Neon::A)
+        Neon::MinFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
+        Base::MinFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+}
+
 SIMD_API void SimdMeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
 {
     SIMD_EMPTY();

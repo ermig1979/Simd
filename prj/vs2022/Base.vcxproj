@@ -179,6 +179,8 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseInterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseLaplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseLbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseMaxFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseMinFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseMidpointFilter.cpp" />

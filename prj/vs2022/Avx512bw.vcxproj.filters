@@ -364,6 +364,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp">
       <Filter>Avx512bw\Legacy</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMaxFilter.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMinFilter.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMeanFilter3x3.cpp">
       <Filter>Avx512bw\Filter</Filter>
     </ClCompile>

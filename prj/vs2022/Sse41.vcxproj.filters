@@ -61,6 +61,12 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur3x3.cpp">
       <Filter>Sse41\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41MaxFilter.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41MinFilter.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41MeanFilter3x3.cpp">
       <Filter>Sse41\Filter</Filter>
     </ClCompile>

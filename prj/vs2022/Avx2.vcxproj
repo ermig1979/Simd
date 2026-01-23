@@ -58,6 +58,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Interleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Lbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MaxFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MinFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2MeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2MidpointFilter.cpp" />

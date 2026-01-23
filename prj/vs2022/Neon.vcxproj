@@ -69,6 +69,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonInterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonLaplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonLbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonMaxFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonMinFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonMidpointFilter.cpp" />
