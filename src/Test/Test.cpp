@@ -243,7 +243,7 @@ namespace Test
     TEST_ADD_GROUP_A0(ContourMetrics);
     TEST_ADD_GROUP_A0(Laplace);
     TEST_ADD_GROUP_A0(LaplaceAbs);
-   TEST_ADD_GROUP_AS(GaussianBlur);
+    TEST_ADD_GROUP_AS(GaussianBlur);
     TEST_ADD_GROUP_A0(RecursiveBilateralFilter);
 
     TEST_ADD_GROUP_A0(Histogram);
