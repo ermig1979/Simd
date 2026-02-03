@@ -367,7 +367,7 @@ namespace Simd
             SetTileConfFull();
             for (size_t i = 0; i < n1;)
             {
-                size_t dn = (i == nn ? n1 - i : n);
+                size_t dn = (n1 - i >= n + 32 ? n : n1 - i);
                 const uint16_t* s = src + i * dS;
                 const uint16_t* w = weight;
                 uint8_t* d = dst + i * dD;
