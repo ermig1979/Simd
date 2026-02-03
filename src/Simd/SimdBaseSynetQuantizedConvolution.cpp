@@ -68,8 +68,7 @@ namespace Simd
 
         _srcScale = ioScale[0];
 
-        _srcZero.Resize(p.srcC, true);
-        memset(_srcZero.data, ioZero[0], p.srcC);
+        SetSrcZero(ioZero[0]);
 
         SetWeight(weight);
 
@@ -89,6 +88,13 @@ namespace Simd
         _dstZero = ioZero[2];
 
         SetOther();
+    }
+
+    void SynetQuantizedConvolution::SetSrcZero(uint8_t srcZero)
+    {
+        const ConvParam& p = _param;
+        _srcZero.Resize(p.srcC, true);
+        memset(_srcZero.data, srcZero, _srcZero.size);
     }
 
     void SynetQuantizedConvolution::SetBias(const int8_t* weight, const int32_t* bias)

@@ -82,6 +82,7 @@ namespace Simd
         }
 
     protected:
+        virtual void SetSrcZero(uint8_t srcZero);
         virtual void SetWeight(const int8_t* weight) = 0;
         virtual void SetBias(const int8_t* weight, const int32_t* bias);
         virtual void SetOther();
@@ -291,6 +292,7 @@ namespace Simd
 
         protected:
             void SetAlgParam(size_t F);
+            virtual void SetSrcZero(uint8_t srcZero);
             virtual void SetWeight(const int8_t* weight);
 
             AlgParam _alg;
@@ -325,6 +327,7 @@ namespace Simd
 
         protected:
             void SetAlgParam(size_t F);
+            virtual void SetSrcZero(uint8_t srcZero);
             virtual void SetWeight(const int8_t* weight);
 
             AlgParam _alg;

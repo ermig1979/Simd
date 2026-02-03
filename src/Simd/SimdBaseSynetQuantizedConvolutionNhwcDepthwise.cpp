@@ -221,12 +221,6 @@ namespace Simd
             buf8 = Buffer(buf8);
             int16_t* buf = Allocate<int16_t>(buf8, a.bufR * a.bufH);
             float dNorm = 1.0f / _dstScale;
-            if (_srcZero.size != a.bufR)
-            {
-                uint8_t zero = _srcZero[0];
-                _srcZero.Resize(a.bufR);
-                memset(_srcZero.data, zero, _srcZero.size);
-            }
             for (size_t b = 0; b < p.batch; b += 1)
             {
                 for (size_t yBeg = 0; yBeg < p.dstH;)
@@ -256,6 +250,13 @@ namespace Simd
             a.sizeW = a.stepW * a.bufC;
             a.stepH = 2 / p.strideY;
             a.reorderType = 1;// p.IsKernel(3) ? 1 : 0;
+        }
+
+        void SynetQuantizedConvolutionNhwcDepthwiseV2::SetSrcZero(uint8_t srcZero)
+        {
+            AlgParam& a = _alg;
+            _srcZero.Resize(a.bufR, true);
+            memset(_srcZero.data, srcZero, _srcZero.size);
         }
 
         void SynetQuantizedConvolutionNhwcDepthwiseV2::SetWeight(const int8_t* src)
@@ -357,12 +358,6 @@ namespace Simd
             buf8 = Buffer(buf8);
             uint8_t* buf = Allocate<uint8_t>(buf8, a.bufR * a.bufH * 2);
             float dNorm = 1.0f / _dstScale;
-            if (_srcZero.size != a.bufR)
-            {
-                uint8_t zero = _srcZero[0];
-                _srcZero.Resize(a.bufR);
-                memset(_srcZero.data, zero, _srcZero.size);
-            }
             for (size_t b = 0; b < p.batch; b += 1)
             {
                 for (size_t yBeg = 0; yBeg < p.dstH;)
@@ -392,6 +387,13 @@ namespace Simd
             a.sizeW = a.stepW * a.bufC;
             a.stepH = 2 / p.strideY;
             a.reorderType = 1;// p.IsKernel(3) ? 1 : 0;
+        }
+
+        void SynetQuantizedConvolutionNhwcDepthwiseV3::SetSrcZero(uint8_t srcZero)
+        {
+            AlgParam& a = _alg;
+            _srcZero.Resize(a.bufR, true);
+            memset(_srcZero.data, srcZero, _srcZero.size);
         }
 
         void SynetQuantizedConvolutionNhwcDepthwiseV3::SetWeight(const int8_t* src)
