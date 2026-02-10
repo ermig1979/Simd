@@ -97,6 +97,23 @@ namespace Simd
                 for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)
                     for (size_t offsX = offsY, endX = offsY + p.kernelX * dX; offsX < endX; offsX += dX, i++)
                         _srcOffs[i] = (int)offsX;
+
+            _dstMask.Resize(AlignHi((a.srcH * a.batch - a.gapV) * a.srcW - a.padH, a.F));
+            size_t i = 0;
+            for (size_t b = 0; b < a.batch; b++)
+            {
+                for (size_t y = 0; y < p.dstH; y++)
+                {
+                    for (size_t x = 0; x < p.dstW; x++, i++)
+                        _dstMask[i] = -1;
+                    for (size_t x = 0; x < a.gapH; x++, i++)
+                        _dstMask[i] = 0;
+                }
+                for (size_t y = 0, gapI = a.gapV * a.srcW; y < gapI && i < _dstMask.size; y++, i++)
+                    _dstMask[i] = 0;
+            }
+            for (; i < _dstMask.size; i++)
+                _dstMask[i] = 0;
         }
 
         size_t SynetConvolution16bNhwcSpecV2::ExternalBufferSize() const
