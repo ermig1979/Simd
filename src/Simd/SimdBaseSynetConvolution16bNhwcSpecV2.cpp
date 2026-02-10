@@ -47,96 +47,57 @@ namespace Simd
             desc << Ext() << "::NhwcSpecV2";
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
-            if (_alg.inv)
-                desc << "-i";
             return desc.str();
         }
 
-        //void SynetConvolution16bNhwcSpecV0::SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3)
-        //{
-        //    const ConvParam& p = _param;
-        //    AlgParam& a = _alg;
+        void SynetConvolution16bNhwcSpecV2::SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3)
+        {
+            const ConvParam& p = _param;
+            AlgParam& a = _alg;
 
-        //    a.F = F;
-        //    a.microD = microD;
-        //    a.microS = microS;
-        //    a.microC = microC;
-        //    a.srcC = AlignHi(p.srcC, a.microC);
-        //    a.padV = Simd::Max(p.padY, p.padH);
-        //    a.padH = Simd::Max(p.padX, p.padW);
-        //    a.srcH = p.srcH + a.padV;
-        //    a.srcW = p.srcW + a.padH;
-        //    a.gapV = a.srcH - p.dstH;
-        //    a.gapH = a.srcW - p.dstW;
-        //    a.dstC = AlignHi(p.dstC, a.F);
-        //    a.kA = p.kernelX * p.kernelY;
-        //    a.K = a.srcC * a.kA;
-        //    a.padE = a.srcW * a.padV + a.padH * Simd::Max<size_t>(1, a.padV) + a.microC;
+            a.F = F;
+            a.microD = microD;
+            a.microS = microS;
+            a.microC = microC;
+            a.srcC = AlignHi(p.srcC, a.microC);
+            a.padV = Simd::Max(p.padY, p.padH);
+            a.padH = Simd::Max(p.padX, p.padW);
+            a.srcH = p.srcH + a.padV;
+            a.srcW = p.srcW + a.padH;
+            a.gapV = a.srcH - p.dstH;
+            a.gapH = a.srcW - p.dstW;
+            a.dstC = AlignHi(p.dstC, a.F);
+            a.kA = p.kernelX * p.kernelY;
+            a.K = a.srcC * a.kA;
+            a.padE = a.srcW * a.padV + a.padH * Simd::Max<size_t>(1, a.padV) + a.microC;
+             
+            a.batch = 1;
+            size_t bufSize = a.srcC * a.srcH * a.srcW * 2;
+            if (bufSize * 2 <= L2 && p.batch > 1)
+            {
+                for (size_t batch = 1; batch <= p.batch; ++batch)
+                    if (p.batch % batch == 0 && batch * bufSize <= L2)
+                        a.batch = batch;
+            }
+            a.macroH = Simd::RestrictRange(L2 / a.srcC / a.srcW / 2, size_t(1), p.dstH * a.batch);
+            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.srcC / a.kA / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
 
-        //    if (InvertedOrder())
-        //    {
-        //        a.inv = 1;
-        //        a.macroC = Simd::RestrictRange<size_t>(AlignLo(L1 / a.microS / p.kernelY / 2, a.microC), a.microC, a.srcC);
-        //        a.batch = 1;
-        //        size_t bufSize = a.srcC * a.srcH * a.srcW * 2;
-        //        if (bufSize * 2 <= L3 && p.batch > 1)
-        //        {
-        //            for (size_t batch = 1; batch <= p.batch; ++batch)
-        //                if (p.batch % batch == 0 && batch * bufSize <= L3)
-        //                    a.batch = batch;
-        //        }
-        //        a.macroH = Simd::RestrictRange(L3 / a.macroC / a.srcW / 2, size_t(1), p.dstH * a.batch);
-        //        a.macroD = Simd::RestrictRange(AlignLo(L2 / a.macroC / a.kA / 2, a.microD), a.microD, AlignHi(p.dstC, a.microD));
+            a.numH = DivHi(p.dstH * a.batch, a.macroH);
+            a.bufD = (a.batch * a.srcH * a.srcW + a.numH * a.F) * a.macroD;            
 
-        //        a.bufD = ((a.macroH + a.batch - 1) * a.srcW + a.F) * AlignHiAny(a.dstC, a.macroD);
-        //    }
-        //    else
-        //    {
-        //        a.inv = 0;                
-        //        a.macroC = Simd::RestrictRange(AlignLo(L1 / a.microD / a.kA / 2, a.microC), a.microC, a.srcC);
-        //        a.batch = 1;
-        //        size_t bufSize = a.srcC * a.srcH * a.srcW * 2;
-        //        if (bufSize * 2 <= L2 && p.batch > 1)
-        //        {
-        //            for (size_t batch = 1; batch <= p.batch; ++batch)
-        //                if (p.batch % batch == 0 && batch * bufSize <= L2)
-        //                    a.batch = batch;
-        //        }
-        //        a.macroH = Simd::RestrictRange(L2 / a.macroC / a.srcW / 2, size_t(1), p.dstH * a.batch);
-        //        a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.kA / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
+            a.elem = _elemD;
+            a.bufS = (a.batch * a.srcH * a.srcW + a.padE) * a.srcC + a.microC * a.F;
 
-        //        a.numH = DivHi(p.dstH * a.batch, a.macroH);
-        //        a.bufD = (a.batch * a.srcH * a.srcW + a.numH * a.F) * a.macroD;            
-        //    }
-        //    a.macroO = DivHi(a.macroC, a.microC) * a.kA;
+            _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
+            _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
 
-        //    a.elem = _elemD;
-        //    a.bufS = (a.batch * a.srcH * a.srcW + a.padE) * a.srcC + a.microC * a.F;
-
-        //    _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
-        //    _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
-
-        //    int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = int(a.batch * a.srcH * a.srcW + a.padE) * dX;
-        //    _offset.Resize(DivHi(a.K, a.microC));
-        //    for (size_t c = 0, offsS = 0, i = 0; c < a.srcC; c += dX, offsS += dC)
-        //        for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)
-        //            for (size_t offsX = offsY, endX = offsY + p.kernelX * dX; offsX < endX; offsX += dX, i++)
-        //                _offset[i] = (int)offsX;
-        //}
-
-        //bool SynetConvolution16bNhwcSpecV0::InvertedOrder() const
-        //{
-        //    static int choise = 0;
-        //    const ConvParam& p = _param;
-        //    const AlgParam& a = _alg;
-        //    if (a.microS != 32)
-        //        return false;
-        //    if (!p.IsKernel(3))
-        //        return false;
-        //    //if (p.srcC <= 64 || p.dstC <= 64)
-        //    //    return false; 
-        //    return false;// (choise++) & 1;
-        //}
+            int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = int(a.batch * a.srcH * a.srcW + a.padE) * dX;
+            _srcOffs.Resize(DivHi(a.K, a.microC));
+            for (size_t c = 0, offsS = 0, i = 0; c < a.srcC; c += dX, offsS += dC)
+                for (size_t y = 0, offsY = offsS; y < p.kernelY; y += 1, offsY += dY)
+                    for (size_t offsX = offsY, endX = offsY + p.kernelX * dX; offsX < endX; offsX += dX, i++)
+                        _srcOffs[i] = (int)offsX;
+        }
 
         size_t SynetConvolution16bNhwcSpecV2::ExternalBufferSize() const
         {
