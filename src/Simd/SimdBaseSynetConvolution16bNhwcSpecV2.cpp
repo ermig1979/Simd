@@ -194,10 +194,7 @@ namespace Simd
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
                 const uint16_t* weight = _weight.data + mad * a.K;
-        //        for (size_t mac = 0, mao = 0; mac < a.srcC; mac += a.macroC, mao += a.macroO)
-        //        {
-        //            size_t macroC = Simd::Min(a.srcC, mac + a.macroC) - mac;
-        //            size_t nK = DivHi(macroC, a.microC) * a.kA;
+
         //            for (size_t dyBeg = 0, dyN = 0; dyBeg < dstH; dyN++)
         //            {
         //                size_t dyEnd = Simd::Min(dyBeg + a.macroH, dstH);
@@ -236,12 +233,11 @@ namespace Simd
         //                }
         //                dyBeg = dyEnd;
         //            }
-        //            weight += macroC * a.kA * a.F;
-        //        }
-        //        bias += macroD;
-        //        if (p.activation == ::SimdConvolutionActivationPrelu)
-        //            params += macroD;
-        //        dst += macroD * _elemD;
+
+                bias += macroD;
+                if (p.activation == ::SimdConvolutionActivationPrelu)
+                    params += macroD;
+                dst += macroD * _elemD;
             }
         }
 
