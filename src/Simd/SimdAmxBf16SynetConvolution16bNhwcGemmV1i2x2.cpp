@@ -122,7 +122,6 @@ namespace Simd
             const uint16_t* weight1 = weight0 + 2 * F;
 
             int srcC32 = (int)a.bufK - 32, applyC32 = apply ? (8 * 32 / apply - 32) : 0, sc = 0, ds = 0;
-            int offs0 = N == 1 ? dstS - 1 * F : 0 * F, offs1 = N == 2 ? dstS - 1 * F : 1 * F;
 
             if (N > 0) _tile_zero(0);
             if (N > 0) _tile_zero(1);
@@ -352,6 +351,9 @@ namespace Simd
             Convolution16bNhwcGemm_Nx32x32xM_Ptr mConv = m > 16 ? Convolution16bNhwcGemm_Nx32x32xM<term, type, 2, apply, flush> :
                 Convolution16bNhwcGemm_Nx32x32xM<term, type, 1, apply, flush>;
 
+            m = AlignHi(m, 16);
+            nn = n1 - m;
+
             __m512 _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
             if (type == SimdConvolutionActivationRestrictRange ||
@@ -371,7 +373,7 @@ namespace Simd
                 for (; i < nn; i += n)
                     nConv(s + i * dS, p, a, (int)n, dC, weight, bias, params, _params, buf, d + i * dD, tailD);
                 if (m)
-                    mConv(s + i * dS, p, a, (int)m, dC, weight, bias, params, _params, buf, d + i * dD, tailD), i += m;
+                    mConv(s + nn * dS, p, a, (int)m, dC, weight, bias, params, _params, buf, d + nn * dD, tailD);
                 weight += dW;
                 bias += dStep;
                 params += dStep;
