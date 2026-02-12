@@ -288,7 +288,7 @@ namespace Simd
         bool SynetConvolution16bNhwcGemmV1::CanDir2x2(const ConvParam& p)
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.dstH * p.dstW, N = p.dstC;
-            return 0 && K >= 128 && K <= 1024 && M >= 32;
+            return 1 && K >= 128 && K <= 1024 && M >= 32 && M * 2 > N;
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanInv4x1(const ConvParam& p)
@@ -300,7 +300,7 @@ namespace Simd
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2(const ConvParam& p)
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.dstH * p.dstW, N = p.dstC;
-            return 1 && K >= 128 && K <= 1024 /*&& M <= 64*/ && N >= 32;//&& Aligned(N, 32);
+            return 1 && K >= 128 && K <= 1024 && N >= 32 && M >= 16;
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanInv2x2_old(const ConvParam& p)
