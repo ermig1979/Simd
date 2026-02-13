@@ -199,19 +199,19 @@ namespace Simd
 
             _tile_dpbf16ps(0, 4, 6);
             _tile_stored(0, dst0 + 0, strideD);
-            TileMoveToMemory(dst0 + 0, dD);
+            //TileMoveToMemory(dst0 + 0, dD);
 
             _tile_dpbf16ps(1, 4, 7);
             _tile_stored(1, dst0 + F, strideD);
-            TileMoveToMemory(dst0 + F, dD);
+            //TileMoveToMemory(dst0 + F, dD);
 
             _tile_dpbf16ps(2, 5, 6);
             _tile_stored(2, dst1 + 0, strideD);
-            TileMoveToMemory(dst1 + 0, dD);
+            //TileMoveToMemory(dst1 + 0, dD);
 
             _tile_dpbf16ps(3, 5, 7);
             _tile_stored(3, dst1 + F, strideD);
-            TileMoveToMemory(dst1 + F, dD);
+            //TileMoveToMemory(dst1 + F, dD);
         }
 
         template<int stub> void Convolution16bNhwcSpecV0_Direct32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* dst0)
@@ -419,7 +419,9 @@ namespace Simd
                 else
                     _tile_stream_loadd(7, weight1, strideW);
                 _tile_dpbf16ps(0, 4, 6);
+                //PrefetchTile<_MM_HINT_T1>(weight0 + 512);
                 _tile_dpbf16ps(1, 4, 7);
+                //PrefetchTile<_MM_HINT_T1>(weight1 + 512);
                 o = offs[i + 1];
                 _tile_loadd(4, src0 + o, strideS);
                 _tile_dpbf16ps(2, 5, 6);
@@ -619,7 +621,7 @@ namespace Simd
         static void Convolution16bNhwcSpecV0_Inverse(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t nK, int zero, const uint16_t* weight, float* dst)
         {
             size_t n1 = dstH * a.srcW - a.gapH, n = 32, n4 = n * 4;
-            size_t nn = AlignLoAny(n1, n), m = n1 - nn, nn4 = AlignLoAny(nn, n4), dW = a.K * DF;
+            size_t nn = AlignLoAny(n1, n), m = n1 - nn, nn4 = AlignLoAny(nn, n4) * 0, dW = a.K * DF;
             size_t dstCDF = AlignLo(dstC, DF), dC = dstC - dstCDF;
             size_t dD = a.macroD, dS = a.microC;
             Convolution16bNhwcSpecV0_InversePtr body = Convolution16bNhwcSpecV0_Direct32x32<0>;
@@ -650,8 +652,16 @@ namespace Simd
             for (; i < nn; i += n)
             {
                 size_t dc = 0;
-                for (; dc < dstCDF; dc += DF)
-                    body(src, p, a, offs, nK, zero, weight + a.K * dc, dst + dc);
+                if (i == 0)
+                {
+                    for (; dc < dstCDF; dc += DF)
+                        Convolution16bNhwcSpecV0_Inverse32x32<1>(src, p, a, offs, nK, zero, weight + a.K * dc, dst + dc);
+                }
+                else
+                {
+                    for (; dc < dstCDF; dc += DF)
+                        Convolution16bNhwcSpecV0_Inverse32x32<0>(src, p, a, offs, nK, zero, weight + a.K * dc, dst + dc);
+                }
                 if (dc < dstC)
                     tail(src, p, a, offs, nK, zero, weight + a.K * dc, dst + dc);
                 src += n * dS;
