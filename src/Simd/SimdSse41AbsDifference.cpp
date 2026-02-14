@@ -49,7 +49,7 @@ namespace Simd
 				}
 				a += aStride;
 				b += bStride;
-				c += bStride;
+				c += cStride;
 			}
 		}
     }
