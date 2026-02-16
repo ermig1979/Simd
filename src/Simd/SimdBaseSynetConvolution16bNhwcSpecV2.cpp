@@ -87,7 +87,6 @@ namespace Simd
             a.numH = DivHi(p.dstH * a.batch, a.macroH);
             a.bufD = (a.batch * a.srcH * a.srcW + a.numH * a.F) * a.macroD;
 
-
             a.elem = _elemD;
             a.bufS = (a.batch * a.srcH * a.srcW + a.padE) * a.srcC + a.microC * a.F;
 
@@ -118,14 +117,45 @@ namespace Simd
             for (; i < _dstMask.size; i++)
                 _dstMask[i] = 0;
 
-            _macroO.Resize(DivHi(a.srcC, a.macroC));
-            for (size_t o = 0, c = 0; o < _macroO.size; o++, c += a.macroC)
+            _nK.Resize(DivHi(a.srcC, a.macroC));
+            for (size_t o = 0, c = 0; o < _nK.size; o++, c += a.macroC)
             {
                 size_t macroC = Simd::Min(a.srcC, c + a.macroC) - c;
-                _macroO[o] = DivHi(macroC, a.microC) * a.kA;
+                _nK[o] = DivHi(macroC, a.microC) * a.kA;
             }
-            if (_macroO.size > 1 && _macroO[_macroO.size - 1] < _macroO[_macroO.size - 2])
-                Simd::Swap(_macroO[_macroO.size - 1], _macroO[_macroO.size - 2]);
+            if (_nK.size > 1 && _nK[_nK.size - 1] < _nK[_nK.size - 2])
+                Simd::Swap(_nK[_nK.size - 1], _nK[_nK.size - 2]);
+
+            size_t n = DivHi(a.batch * p.dstH, a.macroH) + 1;
+            _bufOffs.Resize(n);
+            _sumOffs.Resize(n);
+            _dstOffs.Resize(n);
+            for (size_t i = 0; i < n; ++i)
+            {
+                size_t dy = i * a.macroH;
+                if (i == 0)
+                {
+                    _bufOffs[i] = 0;
+                    _sumOffs[i] = 0;
+                    _dstOffs[i] = 0;
+                }
+                else if (i == n - 1)
+                {
+                    _bufOffs[i] = a.batch * a.srcH * a.srcW + a.padE;
+                    _sumOffs[i] = (a.srcH * a.batch - a.gapV) * a.srcW - a.padH;
+                    _dstOffs[i] = a.batch * p.dstH * p.dstW;
+                }
+                else
+                {
+                    size_t sumOffs = dy * a.srcW - a.gapH;
+                    _sumOffs[i] = AlignLo(sumOffs, a.microS);
+                    _bufOffs[i] = dy * a.srcW + _sumOffs[i] - sumOffs;
+                    _dstOffs[i] = _dstOffs[i - 1];
+                    for (size_t j = _bufOffs[i - 1]; j < _bufOffs[i]; ++j)
+                        if (_dstMask[j])
+                            _dstOffs[i]++;
+                }
+            }
         }
 
         size_t SynetConvolution16bNhwcSpecV2::ExternalBufferSize() const
@@ -188,18 +218,59 @@ namespace Simd
             {
                 uint16_t* buf = bufS ? bufS : (uint16_t*)src;
                 float* sum = bufD ? bufD : (float*)dst;
-                Forward(src, buf, sum, dst);
+                if(a.batch == 1)
+                    ForwardSingle(src, buf, sum, dst);
+                else
+                    ForwardBatch(src, buf, sum, dst);
                 src += _stepS;
                 dst += _stepD;
             }
         }
 
-        void SynetConvolution16bNhwcSpecV2::Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
+        void SynetConvolution16bNhwcSpecV2::ForwardSingle(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
-            const int* offs = _srcOffs.data;
+            size_t dS = a.microC, dB = a.macroD, dD = p.dstC * _elemD;
+            size_t bufOffs = ((a.padV - p.padY) * a.srcW + (a.padH - p.padX)) * dS;
+            for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
+            {
+                size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
+                const uint16_t* weight = _weight.data + mad * a.K;
+                const int* srcOffs = _srcOffs.data;
+                for (size_t nk = 0; nk < _nK.size; ++nk)
+                {
+                    int zero = nk == 0 ? 1 : 0;
+                    size_t nK = _nK[nk];
+                    for (size_t dyBeg = 0, dyN = 0; dyBeg < p.dstH; dyN++)
+                    {
+                        size_t dyEnd = Simd::Min(dyBeg + a.macroH, p.dstH);
+                        size_t dstS = _sumOffs[dyN + 1] - _sumOffs[dyN];
+                        if (mad == 0 && zero)
+                            _preprocess(src, p, a, dyBeg, dyEnd, dyEnd == p.dstH ? 1 : 0, buf);
+                        if (nk == _nK.size - 1)
+                            _lastConv(buf + bufOffs + _bufOffs[dyN] * dS, p, a, srcOffs, macroD, dstS, nK, zero, weight,
+                                sum + _sumOffs[dyN] * dB, bias, params, _dstMask.data + _sumOffs[dyN], dst + _dstOffs[dyN] * dD);
+                        else
+                            _bodyConv(buf + bufOffs + _bufOffs[dyN] * dS, p, a, srcOffs, macroD, dstS, _nK[nk], zero, weight, sum + _sumOffs[dyN] * dB);
+                        dyBeg = dyEnd;
+                    }
+                    srcOffs += nK;
+                    weight += nK * a.microC * a.microD;
+                }
+                bias += macroD;
+                if (p.activation == ::SimdConvolutionActivationPrelu)
+                    params += macroD;
+                dst += macroD * _elemD;
+            }
+        }
+
+        void SynetConvolution16bNhwcSpecV2::ForwardBatch(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            const float* bias = _bias.data, * params = _params.data;
             const int* mask = _dstMask.data;
             size_t dstH = p.dstH * a.batch, dstHb = a.srcH * a.batch - a.gapV;
             size_t bufOffs = ((a.padV - p.padY) * a.srcW + (a.padH - p.padX)) * a.microC;
@@ -207,60 +278,35 @@ namespace Simd
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
                 const uint16_t* weight = _weight.data + mad * a.K;
-                for (size_t mao = 0; mao < _macroO.size; ++mao)
+                const int* srcOffs = _srcOffs.data;
+                for (size_t nk = 0; nk < _nK.size; ++nk)
                 {
-                    int zero = mao == 0 ? 1 : 0;
-                    //size_t macroC = (a.kA == 9 && a.microC == 32 && 0) ?
-                    //    (a.srcC - mac > a.macroC + a.microC ? a.macroC : a.srcC - mac) :
-                    //    (Simd::Min(a.srcC, mac + a.macroC) - mac);
-                    //size_t nK = DivHi(macroC, a.microC) * a.kA;
-                    //size_t macroO = DivHi(macroC, a.microC) * a.kA;
-                    for (size_t dyBeg = 0, dyN = 0; dyBeg < dstH; dyN++)
+                    int zero = nk == 0 ? 1 : 0;
+                    size_t nK = _nK[nk];
+                    if (mad == 0 && zero)
                     {
-                        size_t dyEnd = Simd::Min(dyBeg + a.macroH, dstH);
-                        if (mad == 0 && zero)
-                        {
-                            if (a.batch > 1)
-                            {
-                                size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
-                                size_t dB = a.srcH * a.srcW * a.microC;
-                                for (size_t b = 0; b < a.batch; ++b)
-                                    _preprocess(src + b * dS, p, a, 0, p.dstH, b == a.batch - 1 ? 1 : 0, buf + b * dB);
-                            }
-                            else
-                                _preprocess(src, p, a, dyBeg, dyEnd, dyEnd == dstH ? 1 : 0, buf);
-                        }
-                        if (a.batch > 1)
-                        {
-                            if (mao == _macroO.size - 1)
-                                _lastConv(buf + bufOffs, p, a, offs + mao, macroD, dstHb, _macroO[mao], zero, weight, sum, bias, params, mask, dst);
-                            else
-                                _bodyConv(buf + bufOffs, p, a, offs + mao, macroD, dstHb, _macroO[mao], zero, weight, sum);
-                        }
-                        else
-                        {
-                            if (mao == _macroO.size - 1)
-                                ;//_lastConv(buf + bufOffs + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
-                                //    _macroO[mao], zero, weight, sum + (dyBeg * a.srcW + dyN * a.F) * a.macroD);
-                            else
-                                _bodyConv(buf + bufOffs + dyBeg * a.srcW * a.microC, p, a, offs + mao, macroD, dyEnd - dyBeg,
-                                    _macroO[mao], zero, weight, sum + (dyBeg * a.srcW + dyN * a.F) * a.macroD);
-                        }
-                        //if (mac + macroC == a.srcC)
-                        //{
-                        //    if (a.batch > 1)
-                        //    {
-                        //        size_t dS = a.srcH * a.srcW * a.macroD;
-                        //        size_t dD = p.dstH * p.dstW * p.dstC * a.elem;
-                        //        for (size_t b = 0; b < a.batch; ++b)
-                        //            _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, params, dst + b * dD);
-                        //    }
-                        //    else
-                        //        _postprocess(sum + dyN * a.F * a.macroD, p, a, macroD, dyBeg, dyEnd, bias, params, dst);
-                        //}
-                        dyBeg = dyEnd;
+                        size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
+                        size_t dB = a.srcH * a.srcW * a.microC;
+                        for (size_t b = 0; b < a.batch; ++b)
+                            _preprocess(src + b * dS, p, a, 0, p.dstH, b == a.batch - 1 ? 1 : 0, buf + b * dB);
                     }
-                    weight += _macroO[mao] * a.microC * a.macroD;
+                    if (nk == _nK.size - 1)
+                        _lastConv(buf + bufOffs, p, a, srcOffs, macroD, dstHb, nK, zero, weight, sum, bias, params, mask, dst);
+                    else
+                        _bodyConv(buf + bufOffs, p, a, srcOffs, macroD, dstHb, nK, zero, weight, sum);
+
+                    //if (mac + macroC == a.srcC)
+                    //{
+                    //    if (a.batch > 1)
+                    //    {
+                    //        size_t dS = a.srcH * a.srcW * a.macroD;
+                    //        size_t dD = p.dstH * p.dstW * p.dstC * a.elem;
+                    //        for (size_t b = 0; b < a.batch; ++b)
+                    //            _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, params, dst + b * dD);
+                    //    }
+                    //}
+                    srcOffs += nK;
+                    weight += nK * a.microC * a.macroD;
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)

@@ -314,19 +314,20 @@ namespace Simd
             typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst);
 
             typedef void(*BodyConvPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* srcOffs, 
-                size_t dstC, size_t dstH, size_t nK, int zero, const uint16_t* weight, float* sum);
+                size_t dstC, size_t dstS, size_t nK, int zero, const uint16_t* weight, float* sum);
 
-            typedef void(*LastConvPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* srcOffs, size_t dstC, size_t dstH, size_t nK, int zero, 
+            typedef void(*LastConvPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* srcOffs, size_t dstC, size_t dstS, size_t nK, int zero, 
                 const uint16_t* weight, float* sum, const float* bias, const float* params, const int* dstMask, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
             virtual void SetWeight(const float* weight);
 
-            void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
+            void ForwardSingle(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
+            void ForwardBatch(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 
             AlgParam _alg;
-            Array32i _srcOffs, _dstMask, _macroO;
+            Array32i _srcOffs, _dstMask, _nK, _bufOffs, _sumOffs, _dstOffs;
             PreprocessPtr _preprocess;
             BodyConvPtr _bodyConv;
             LastConvPtr _lastConv;
