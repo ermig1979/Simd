@@ -88,7 +88,7 @@ namespace Simd
             a.bufD = (a.batch * a.srcH * a.srcW + a.numH * a.F) * a.macroD;
 
             a.elem = _elemD;
-            a.bufS = (a.batch * a.srcH * a.srcW + a.padE) * a.srcC + a.microC * a.F;
+            a.bufS = AlignHi(a.batch * a.srcH * a.srcW + a.padE, F) * a.srcC + a.microC * a.F;
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
@@ -229,6 +229,7 @@ namespace Simd
 
         void SynetConvolution16bNhwcSpecV2::ForwardSingle(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
         {
+            //std::cout << " ForwardSingle " << std::endl << std::flush;
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
@@ -248,12 +249,21 @@ namespace Simd
                         size_t dyEnd = Simd::Min(dyBeg + a.macroH, p.dstH);
                         size_t dstS = _sumOffs[dyN + 1] - _sumOffs[dyN];
                         if (mad == 0 && zero)
+                        {
+                            //std::cout << " _preprocess: " << std::endl << std::flush;
                             _preprocess(src, p, a, dyBeg, dyEnd, dyEnd == p.dstH ? 1 : 0, buf);
+                        }
                         if (nk == _nK.size - 1)
+                        {
+                            //std::cout << " _lastConv: " << std::endl << std::flush;
                             _lastConv(buf + bufOffs + _bufOffs[dyN] * dS, p, a, srcOffs, macroD, dstS, nK, zero, weight,
                                 sum + _sumOffs[dyN] * dB, bias, params, _dstMask.data + _sumOffs[dyN], dst + _dstOffs[dyN] * dD);
+                        }
                         else
+                        {
+                            //std::cout << " _bodyConv: " << std::endl << std::flush;
                             _bodyConv(buf + bufOffs + _bufOffs[dyN] * dS, p, a, srcOffs, macroD, dstS, _nK[nk], zero, weight, sum + _sumOffs[dyN] * dB);
+                        }
                         dyBeg = dyEnd;
                     }
                     srcOffs += nK;
@@ -317,7 +327,8 @@ namespace Simd
 
         bool SynetConvolution16bNhwcSpecV2::Preferable(const ConvParam& p)
         {
-            return 0 && p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) && p.dstC >= 4;
+            static int choise = 0;
+            return (choise++)&0 && p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) && p.dstC >= 4;
         }
     }
 #endif
