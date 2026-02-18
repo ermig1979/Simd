@@ -58,14 +58,14 @@ namespace Simd
 				}
 				a += aStride;
 				b += bStride;
-				c += bStride;
+				c += cStride;
 			}
 		}
 
 		void AbsDifference(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, uint8_t *c, size_t cStride,
 			size_t width, size_t height)
 		{
-			if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
+			if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(c) && Aligned(cStride))
 				AbsDifference<true>(a, aStride, b, bStride, c, cStride, width, height);
 			else
 				AbsDifference<false>(a, aStride, b, bStride, c, cStride, width, height);
