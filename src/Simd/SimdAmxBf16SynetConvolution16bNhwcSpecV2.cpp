@@ -628,7 +628,7 @@ namespace Simd
                 const uint16_t* s = src + i * dS;
                 const uint16_t* w = weight;
                 float* b = buf + i * dB;
-                uint8_t* d = dst + dstOffs[i/32] * dD;
+                uint8_t* d = dst + (dstOffs[i/32] - dstOffs[0]) * dD;
                 size_t dc = 0;
                 for (; dc < dstC32; dc += DF, w += dW)
                     mainConv(s, p, a, dn, offs, nK, zero, w, bias + dc, params + dc, _params, b + dc, mask + i, d + dc * a.elem, __mmask32(-1));

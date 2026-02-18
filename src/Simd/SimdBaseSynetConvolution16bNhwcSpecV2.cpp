@@ -132,19 +132,14 @@ namespace Simd
             _miDstOffs.Resize(DivHi(_dstMask.size, a.microS));
             for (size_t i = 0; i <= n; ++i)
             {
-                size_t dy = i * a.macroH;
-                if (i == 0)
-                {
-                    _maBufOffs[i] = 0;
-                    _maSumOffs[i] = 0;
-                }
-                else if (i == n)
+                if (i == n)
                     _maSumOffs[i] = int((a.srcH * a.batch - a.gapV) * a.srcW - a.padH);
                 else
                 {
-                    size_t sumOffs = dy * a.srcW - a.gapH;
+                    size_t dy = i * a.macroH;
+                    size_t sumOffs = Simd::Max<int>(dy * a.srcW - a.gapH, 0);
                     _maSumOffs[i] = int(AlignLo(sumOffs, a.microS));
-                    _maBufOffs[i] = int(dy * a.srcW + _maSumOffs[i] - sumOffs);
+                    _maBufOffs[i] = _maSumOffs[i];
                 }
             }
             _miDstOffs[0] = 0;
@@ -156,6 +151,7 @@ namespace Simd
                         _miDstOffs[i]++;
             }
             //std::cout << " a.batch " << a.batch << " a.macroH " << a.macroH << " a.macroD " << a.macroD << std::endl << std::flush;
+            //std::cout << " a.bufS " << a.bufS << " a.bufD " << a.bufD << std::endl << std::flush;
         }
 
         size_t SynetConvolution16bNhwcSpecV2::ExternalBufferSize() const
