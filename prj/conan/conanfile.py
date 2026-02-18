@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, load, collect_libs, replace_in_file
 from conan.tools.scm import Git
@@ -49,12 +50,12 @@ class SimdConan(ConanFile):
         return os.path.normpath(os.path.join(self.recipe_folder, "..", ".."))
 
     def set_version(self):
-        # In local flow, read from repo; in cache, read from exported file
         for base in [self._repo_root(), self.recipe_folder]:
             version_file = os.path.join(base, "prj", "txt", "UserVersion.txt")
             if os.path.exists(version_file):
                 self.version = load(self, version_file).strip()
                 return
+        raise ConanException("UserVersion.txt not found")
 
     def export(self):
         copy(self, "prj/txt/UserVersion.txt", src=self._repo_root(), dst=self.export_folder)
@@ -179,6 +180,8 @@ class SimdConan(ConanFile):
         )
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "simd")
+        self.cpp_info.set_property("cmake_target_name", "simd::simd")
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "dl"])

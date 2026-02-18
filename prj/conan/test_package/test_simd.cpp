@@ -34,6 +34,8 @@ static bool test_frame()
 
     Frame src(2, 2, Frame::Yuv420p);
     Frame dst(2, 2, Frame::Bgr24);
+    if (src.planes[0].data == nullptr || dst.planes[0].data == nullptr)
+        return false;
     Simd::Convert(src, dst);
     return true;
 }
@@ -44,8 +46,10 @@ static bool test_resize()
 
     View src(128, 96, View::Bgr24);
     View dst(40, 30, View::Bgr24);
+    if (src.data == nullptr || dst.data == nullptr)
+        return false;
     Simd::Resize(src, dst, SimdResizeMethodArea);
-    return dst.data != nullptr;
+    return true;
 }
 
 int main()
