@@ -83,6 +83,7 @@ namespace Simd
             }
             a.macroH = Simd::RestrictRange(L2 / a.macroC / a.srcW / 2, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.kA / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
+            a.macroD = Simd::Min<size_t>(a.macroD, a.microD * 4);
 
             a.bufD = AlignHi(a.batch * a.srcH * a.srcW, a.microS) * a.macroD;
 
@@ -154,6 +155,7 @@ namespace Simd
                     if (_dstMask[j])
                         _miDstOffs[i]++;
             }
+            //std::cout << " a.batch " << a.batch << " a.macroH " << a.macroH << " a.macroD " << a.macroD << std::endl << std::flush;
         }
 
         size_t SynetConvolution16bNhwcSpecV2::ExternalBufferSize() const
