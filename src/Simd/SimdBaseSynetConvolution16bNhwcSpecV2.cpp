@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -155,6 +155,9 @@ namespace Simd
                     if (_dstMask[j])
                         _miDstOffs[i]++;
             }
+
+            //std::cout << " a.batch " << a.batch << std::endl << std::flush;
+            //std::cout << " _dstMask.size " << _dstMask.size << std::endl << std::flush;
         }
 
         size_t SynetConvolution16bNhwcSpecV2::ExternalBufferSize() const
@@ -318,7 +321,7 @@ namespace Simd
         bool SynetConvolution16bNhwcSpecV2::Preferable(const ConvParam& p)
         {
             static int choise = 0;
-            return 1 && p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) && p.dstC >= 4
+            return 0 && p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) && p.dstC >= 4
                 ;// && (choise++) & 0;
         }
     }
