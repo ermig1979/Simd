@@ -70,7 +70,7 @@ namespace Simd
             a.dstC = AlignHi(p.dstC, a.microD);
             a.kA = p.kernelX * p.kernelY;
             a.K = a.srcC * a.kA;
-            a.padE = a.srcW * a.padV + a.padH * Simd::Max<size_t>(1, a.padV) + a.microC;
+            a.padE = a.srcW * a.padV + a.padH * Simd::Max<size_t>(1, a.padV);
 
             a.macroC = Simd::RestrictRange(AlignLo(L1 / a.microD / a.kA / 2, a.microC), a.microC, a.srcC);
             a.batch = 1;
@@ -84,11 +84,10 @@ namespace Simd
             a.macroH = Simd::RestrictRange(L2 / a.macroC / a.srcW / 2, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.kA / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
 
-            a.numH = DivHi(p.dstH * a.batch, a.macroH);
-            a.bufD = (a.batch * a.srcH * a.srcW + a.numH * a.F) * a.macroD;
+            a.bufD = AlignHi(a.batch * a.srcH * a.srcW, a.microS) * a.macroD;
 
             a.elem = _elemD;
-            a.bufS = AlignHi(a.batch * a.srcH * a.srcW + a.padE, F) * a.srcC + a.microC * a.F;
+            a.bufS = (a.batch * a.srcH * a.srcW + a.padE + a.microS) * a.srcC;
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
@@ -121,7 +120,7 @@ namespace Simd
             for (size_t o = 0, c = 0; o < _nK.size; o++, c += a.macroC)
             {
                 size_t macroC = Simd::Min(a.srcC, c + a.macroC) - c;
-                _nK[o] = DivHi(macroC, a.microC) * a.kA;
+                _nK[o] = int(DivHi(macroC, a.microC) * a.kA);
             }
             if (_nK.size > 1 && _nK[_nK.size - 1] < _nK[_nK.size - 2])
                 Simd::Swap(_nK[_nK.size - 1], _nK[_nK.size - 2]);
@@ -139,12 +138,12 @@ namespace Simd
                     _maSumOffs[i] = 0;
                 }
                 else if (i == n)
-                    _maSumOffs[i] = (a.srcH * a.batch - a.gapV) * a.srcW - a.padH;
+                    _maSumOffs[i] = int((a.srcH * a.batch - a.gapV) * a.srcW - a.padH);
                 else
                 {
                     size_t sumOffs = dy * a.srcW - a.gapH;
-                    _maSumOffs[i] = AlignLo(sumOffs, a.microS);
-                    _maBufOffs[i] = dy * a.srcW + _maSumOffs[i] - sumOffs;
+                    _maSumOffs[i] = int(AlignLo(sumOffs, a.microS));
+                    _maBufOffs[i] = int(dy * a.srcW + _maSumOffs[i] - sumOffs);
                 }
             }
             _miDstOffs[0] = 0;
@@ -155,9 +154,6 @@ namespace Simd
                     if (_dstMask[j])
                         _miDstOffs[i]++;
             }
-
-            //std::cout << " a.batch " << a.batch << std::endl << std::flush;
-            //std::cout << " _dstMask.size " << _dstMask.size << std::endl << std::flush;
         }
 
         size_t SynetConvolution16bNhwcSpecV2::ExternalBufferSize() const
@@ -256,7 +252,7 @@ namespace Simd
                             _lastConv(buf + bufOffs + _maBufOffs[dyN] * dS, p, a, srcOffs, macroD, dstS, nK, zero, weight,
                                 sum + _maSumOffs[dyN] * dB, bias, params, _dstMask.data + _maSumOffs[dyN], _miDstOffs.data + miIdx, dst + _miDstOffs[miIdx] * dD);
                         else
-                            _bodyConv(buf + bufOffs + _maBufOffs[dyN] * dS, p, a, srcOffs, macroD, dstS, _nK[nk], zero, weight, sum + _maSumOffs[dyN] * dB);
+                            _bodyConv(buf + bufOffs + _maBufOffs[dyN] * dS, p, a, srcOffs, macroD, dstS, nK, zero, weight, sum + _maSumOffs[dyN] * dB);
                         dyBeg = dyEnd;
                     }
                     srcOffs += nK;
@@ -275,7 +271,7 @@ namespace Simd
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
             const int* mask = _dstMask.data;
-            size_t dstH = p.dstH * a.batch, dstHb = a.srcH * a.batch - a.gapV;
+            size_t dstH = p.dstH * a.batch, dstS = _maSumOffs[1] - _maSumOffs[0];
             size_t bufOffs = ((a.padV - p.padY) * a.srcW + (a.padH - p.padX)) * a.microC;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
@@ -294,22 +290,11 @@ namespace Simd
                             _preprocess(src + b * dS, p, a, 0, p.dstH, b == a.batch - 1 ? 1 : 0, buf + b * dB);
                     }
                     if (nk == _nK.size - 1)
-                        _lastConv(buf + bufOffs, p, a, srcOffs, macroD, dstHb, nK, zero, weight, sum, bias, params, mask, _miDstOffs.data, dst);
+                        _lastConv(buf + bufOffs, p, a, srcOffs, macroD, dstS, nK, zero, weight, sum, bias, params, mask, _miDstOffs.data, dst);
                     else
-                        _bodyConv(buf + bufOffs, p, a, srcOffs, macroD, dstHb, nK, zero, weight, sum);
-
-                    //if (mac + macroC == a.srcC)
-                    //{
-                    //    if (a.batch > 1)
-                    //    {
-                    //        size_t dS = a.srcH * a.srcW * a.macroD;
-                    //        size_t dD = p.dstH * p.dstW * p.dstC * a.elem;
-                    //        for (size_t b = 0; b < a.batch; ++b)
-                    //            _postprocess(sum + b * dS, p, a, macroD, 0, p.dstH, bias, params, dst + b * dD);
-                    //    }
-                    //}
+                        _bodyConv(buf + bufOffs, p, a, srcOffs, macroD, dstS, nK, zero, weight, sum);
                     srcOffs += nK;
-                    weight += nK * a.microC * a.macroD;
+                    weight += nK * a.microC * a.microD;
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
@@ -321,7 +306,7 @@ namespace Simd
         bool SynetConvolution16bNhwcSpecV2::Preferable(const ConvParam& p)
         {
             static int choise = 0;
-            return 0 && p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) && p.dstC >= 4
+            return 1 && p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) && p.dstC >= 4
                 ;// && (choise++) & 0;
         }
     }
