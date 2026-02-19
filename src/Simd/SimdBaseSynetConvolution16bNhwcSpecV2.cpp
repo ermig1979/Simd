@@ -305,7 +305,7 @@ namespace Simd
         {
             static int choise = 0;
             return 1 && p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) && p.dstC >= 4
-                ;// && (choise++) & 0;
+                && p.srcC <= 128;// && (choise++) & 0;
         }
     }
 #endif

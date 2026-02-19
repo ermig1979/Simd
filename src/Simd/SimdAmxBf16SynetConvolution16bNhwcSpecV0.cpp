@@ -199,19 +199,19 @@ namespace Simd
 
             _tile_dpbf16ps(0, 4, 6);
             _tile_stored(0, dst0 + 0, strideD);
-            //TileMoveToMemory(dst0 + 0, dD);
+            TileMoveToMemory(dst0 + 0, dD);
 
             _tile_dpbf16ps(1, 4, 7);
             _tile_stored(1, dst0 + F, strideD);
-            //TileMoveToMemory(dst0 + F, dD);
+            TileMoveToMemory(dst0 + F, dD);
 
             _tile_dpbf16ps(2, 5, 6);
             _tile_stored(2, dst1 + 0, strideD);
-            //TileMoveToMemory(dst1 + 0, dD);
+            TileMoveToMemory(dst1 + 0, dD);
 
             _tile_dpbf16ps(3, 5, 7);
             _tile_stored(3, dst1 + F, strideD);
-            //TileMoveToMemory(dst1 + F, dD);
+            TileMoveToMemory(dst1 + F, dD);
         }
 
         template<int stub> void Convolution16bNhwcSpecV0_Direct32x16(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* dst0)
