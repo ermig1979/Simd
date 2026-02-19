@@ -72,7 +72,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_2x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_2x2V0(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float * buf, float* dst0, float *dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
@@ -130,7 +130,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_2x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_2x1V0(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
@@ -173,7 +173,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_1x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_1x2V0(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
@@ -219,7 +219,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_1x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_1x1V0(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, float* dst0, float* dst1)
         {
             size_t dD = p.dstC, sC = AlignHi(p.srcC, a.miK);
@@ -249,11 +249,11 @@ namespace Simd
             }
         }
 
-        typedef void (*InputConvolution1x1Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        typedef void (*InputConvolution1x1V0Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, float* dst0, float* dst1);
 
-        template<SimdConvolutionActivationType type> void InputConvolution1x1_2(const uint16_t* src, const ConvParam& p, const AlgParam& a, 
-            size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
+        template<SimdConvolutionActivationType type> void InputConvolution1x1_2V0(const uint16_t* src, const ConvParam& p, const AlgParam& a,
+            size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* buf, float* dst)
         {
             size_t dstM = a.bufH[1] - 1, dstS = a.bufH[1] * p.dstW * F, srcC = AlignHi(p.srcC, a.miK), y0 = a.bufH[0] ? yBeg : 0;
             __m512 _bias[2], _params[2];
@@ -262,17 +262,16 @@ namespace Simd
             size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, a.bufH[1])), n = 32;
             size_t i1 = (yInt - yBeg) * p.dstW, in = AlignLo(i1, n), i = i1 - in;
             size_t e1 = (yEnd - yInt) * p.dstW, en = AlignLo(e1, n), e = e1 - en;
-            SIMD_ALIGNED(64) float buf[1024];
 
             if (yInt == yBeg)
             {
                 if (en)
                 {
                     e = AlignHi(e, 16), en = e1 - e;
-                    InputConvolution1x1Ptr conv_2x2 = InputConvolution1x1_2x2<type, 0>;
-                    InputConvolution1x1Ptr conv_2x1 = InputConvolution1x1_2x1<type, 0>;
-                    InputConvolution1x1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2<type, 0> : InputConvolution1x1_1x2<type, 0>;
-                    InputConvolution1x1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1<type, 0> : InputConvolution1x1_1x1<type, 0>;
+                    InputConvolution1x1V0Ptr conv_2x2 = InputConvolution1x1_2x2V0<type, 0>;
+                    InputConvolution1x1V0Ptr conv_2x1 = InputConvolution1x1_2x1V0<type, 0>;
+                    InputConvolution1x1V0Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2V0<type, 0> : InputConvolution1x1_1x2V0<type, 0>;
+                    InputConvolution1x1V0Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1V0<type, 0> : InputConvolution1x1_1x1V0<type, 0>;
                     SetTileConfFull();
                     for (size_t dc = 0; dc < maC; dc += DF)
                     {
@@ -310,8 +309,8 @@ namespace Simd
                 }
                 else if(e1)
                 {
-                    InputConvolution1x1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2<type, 0> : InputConvolution1x1_1x2<type, 0>;
-                    InputConvolution1x1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1<type, 0> : InputConvolution1x1_1x1<type, 0>;
+                    InputConvolution1x1V0Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2V0<type, 0> : InputConvolution1x1_1x2V0<type, 0>;
+                    InputConvolution1x1V0Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1V0<type, 0> : InputConvolution1x1_1x1V0<type, 0>;
                     if (e > 16)
                         SetTileConf2x2(e, 32);
                     else
@@ -345,12 +344,12 @@ namespace Simd
             }
             else
             {
-                InputConvolution1x1Ptr conv_2x2 = InputConvolution1x1_2x2<type, 0>;
-                InputConvolution1x1Ptr conv_2x1 = InputConvolution1x1_2x1<type, 0>;
-                InputConvolution1x1Ptr conv_Ix2 = i > 16 ? InputConvolution1x1_2x2<type, 1> : InputConvolution1x1_1x2<type, 1>;
-                InputConvolution1x1Ptr conv_Ix1 = i > 16 ? InputConvolution1x1_2x1<type, 1> : InputConvolution1x1_1x1<type, 1>;
-                InputConvolution1x1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2<type, 1> : InputConvolution1x1_1x2<type, 1>;
-                InputConvolution1x1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1<type, 1> : InputConvolution1x1_1x1<type, 1>;
+                InputConvolution1x1V0Ptr conv_2x2 = InputConvolution1x1_2x2V0<type, 0>;
+                InputConvolution1x1V0Ptr conv_2x1 = InputConvolution1x1_2x1V0<type, 0>;
+                InputConvolution1x1V0Ptr conv_Ix2 = i > 16 ? InputConvolution1x1_2x2V0<type, 1> : InputConvolution1x1_1x2V0<type, 1>;
+                InputConvolution1x1V0Ptr conv_Ix1 = i > 16 ? InputConvolution1x1_2x1V0<type, 1> : InputConvolution1x1_1x1V0<type, 1>;
+                InputConvolution1x1V0Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2V0<type, 1> : InputConvolution1x1_1x2V0<type, 1>;
+                InputConvolution1x1V0Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1V0<type, 1> : InputConvolution1x1_1x1V0<type, 1>;
                 for (size_t dc = 0; dc < maC; dc += DF)
                 {
                     size_t dC = Simd::Min(DF, maC - dc);
@@ -415,29 +414,29 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> static void SetInput(const ConvParam& p, InputPtr& input)
+        template<SimdConvolutionActivationType type> static void SetInputV0(const ConvParam& p, InputPtr& input)
         {
             if (Is1x1(p))
-                input = InputConvolution1x1_2<type>;
+                input = InputConvolution1x1_2V0<type>;
             else
                 assert(0);
         }
 
-        void SetInput(const ConvParam& p, InputPtr& input)
+        void SetInputV0(const ConvParam& p, InputPtr& input)
         {
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: SetInput<SimdConvolutionActivationRestrictRange>(p, input); break;
-            case SimdConvolutionActivationRelu: SetInput<SimdConvolutionActivationRestrictRange>(p, input); break;
-            case SimdConvolutionActivationLeakyRelu: SetInput<SimdConvolutionActivationPrelu>(p, input); break;
-            case SimdConvolutionActivationRestrictRange: SetInput<SimdConvolutionActivationRestrictRange>(p, input); break;
-            case SimdConvolutionActivationPrelu: SetInput<SimdConvolutionActivationPrelu>(p, input); break;
-            case SimdConvolutionActivationElu: SetInput<SimdConvolutionActivationElu>(p, input); break;
-            case SimdConvolutionActivationHswish: SetInput<SimdConvolutionActivationHswish>(p, input); break;
-            case SimdConvolutionActivationMish: SetInput<SimdConvolutionActivationMish>(p, input); break;
-            case SimdConvolutionActivationHardSigmoid: SetInput<SimdConvolutionActivationHardSigmoid>(p, input); break;
-            case SimdConvolutionActivationSwish: SetInput<SimdConvolutionActivationSwish>(p, input); break;
-            case SimdConvolutionActivationGelu: SetInput<SimdConvolutionActivationGelu>(p, input); break;
+            case SimdConvolutionActivationIdentity: SetInputV0<SimdConvolutionActivationRestrictRange>(p, input); break;
+            case SimdConvolutionActivationRelu: SetInputV0<SimdConvolutionActivationRestrictRange>(p, input); break;
+            case SimdConvolutionActivationLeakyRelu: SetInputV0<SimdConvolutionActivationPrelu>(p, input); break;
+            case SimdConvolutionActivationRestrictRange: SetInputV0<SimdConvolutionActivationRestrictRange>(p, input); break;
+            case SimdConvolutionActivationPrelu: SetInputV0<SimdConvolutionActivationPrelu>(p, input); break;
+            case SimdConvolutionActivationElu: SetInputV0<SimdConvolutionActivationElu>(p, input); break;
+            case SimdConvolutionActivationHswish: SetInputV0<SimdConvolutionActivationHswish>(p, input); break;
+            case SimdConvolutionActivationMish: SetInputV0<SimdConvolutionActivationMish>(p, input); break;
+            case SimdConvolutionActivationHardSigmoid: SetInputV0<SimdConvolutionActivationHardSigmoid>(p, input); break;
+            case SimdConvolutionActivationSwish: SetInputV0<SimdConvolutionActivationSwish>(p, input); break;
+            case SimdConvolutionActivationGelu: SetInputV0<SimdConvolutionActivationGelu>(p, input); break;
             }
         }
     }

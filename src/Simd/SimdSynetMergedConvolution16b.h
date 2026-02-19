@@ -71,7 +71,9 @@ namespace Simd
 
             struct AlgParam
             {
-                size_t miC, maC, miK, yStep[3], yStart[3], bufH[3], dp[2], dw[3], elem[2];
+                size_t miC, maC, miK;
+                size_t yStep[3], yStart[3], bufH[3], dp[2], dw[3], elem[2];
+                size_t ver[2];
             };
 
             typedef void(*ConvertToBf16Ptr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
@@ -79,7 +81,7 @@ namespace Simd
             typedef void(*ConvertToFp32Ptr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, float* dst);
 
             typedef void(*InputConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-                const uint16_t* weight, const float* bias, const float* params, float* dst);
+                const uint16_t* weight, const float* bias, const float* params, float* sum, float* dst);
 
             typedef void(*DepthwiseConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const float* weight, const float* bias, const float* params, uint8_t* dst);
@@ -106,7 +108,7 @@ namespace Simd
             InputConvolutionPtr _input;
             DepthwiseConvolutionPtr _depthwise;
             OutputConvolutionPtr _output[2];
-            size_t _sizeS, _sizeD, _sizeB[4];
+            size_t _sizeS, _sizeD, _sizeB[5];
             AlgParam _alg;
             Array8u _buffer;
             Array16u _weightI, _weightO;
@@ -274,7 +276,8 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
     namespace AmxBf16
     {
-        void SetInput(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
+        void SetInputV0(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
+        void SetInputV1(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
 
         void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
         bool SetDepthwise3x3(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
@@ -289,21 +292,21 @@ namespace Simd
         {
         public:
             SynetMergedConvolution16bCdc(const MergConvParam& p);
-            virtual String Ext() const { return "AmxBf16"; }
+            virtual String Ext() const { return "AmxBf16-" + ToStr(_alg.ver[0]) + ToStr(_alg.ver[1]); }
         };
 
         class SynetMergedConvolution16bCd : public Avx512bw::SynetMergedConvolution16bCd
         {
         public:
             SynetMergedConvolution16bCd(const MergConvParam& p);
-            virtual String Ext() const { return "AmxBf16"; }
+            virtual String Ext() const { return "AmxBf16-" + ToStr(_alg.ver[0]); }
         };
 
         class SynetMergedConvolution16bDc : public Avx512bw::SynetMergedConvolution16bDc
         {
         public:
             SynetMergedConvolution16bDc(const MergConvParam& p);
-            virtual String Ext() const { return "AmxBf16"; }
+            virtual String Ext() const { return "AmxBf16-" + ToStr(_alg.ver[1]); }
         };
 
         //-------------------------------------------------------------------------------------------------

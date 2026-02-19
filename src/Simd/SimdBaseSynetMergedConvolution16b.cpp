@@ -75,7 +75,7 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void InputConvolutionBf16Fp32(const uint16_t* src, const ConvParam& p, const AlgParam& a, 
-            size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
+            size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* sum, float* dst)
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC, srcC2 = AlignLo(srcC, 2);
             size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
@@ -343,6 +343,7 @@ namespace Simd
             _sizeB[1] = _dw0 ? 0 : dw.srcH * dw.srcW * dw.srcC;
             _sizeB[2] = _dw0 || p.count == 3 ? dw.dstH * dw.dstW * dw.dstC : 0;
             _sizeB[3] = _dst16b && (end.group == 1 || p.add) ? end.dstH * end.dstW * end.dstC : 0;
+            _sizeB[4] = 0;
             _toBf16 = ConvertFp32ToBf16;
             _toFp32 = _src16b ? ConvertBf16ToFp32 : CopyFp32ToFp32;
             for (size_t i = 0; i < p.count; ++i)
@@ -367,7 +368,7 @@ namespace Simd
 
         size_t SynetMergedConvolution16b::ExternalBufferSize() const
         {
-            return (_sizeB[0] + _sizeB[2]) * 2 + (_sizeB[1] + _sizeB[3]) * 4 + SIMD_ALIGN * 2;
+            return (_sizeB[0] + _sizeB[2]) * 2 + (_sizeB[1] + _sizeB[3] + _sizeB[4]) * 4 + SIMD_ALIGN * 3;
         }
 
         size_t SynetMergedConvolution16b::InternalBufferSize() const
@@ -601,7 +602,7 @@ namespace Simd
                     if (!_src16b)
                         _toBf16(src, c0, a, 0, c0.srcH, buf0);
                     const uint16_t* src16b = _src16b ? (uint16_t*)src : buf0;
-                    _input(src16b, c0, a, 0, 0, c0.dstH, _weightI.data, _bias[0].data, _params[0].data, buf1);
+                    _input(src16b, c0, a, 0, 0, c0.dstH, _weightI.data, _bias[0].data, _params[0].data, NULL, buf1);
                     if (p.count > 2)
                     {
                         _depthwise((uint8_t*)buf1, c1, a, 0, 0, c1.dstH, _weightD.data, _bias[1].data, _params[1].data, (uint8_t*)buf2);
@@ -652,6 +653,8 @@ namespace Simd
             uint16_t* buf2 = Allocate<uint16_t>(buf, _sizeB[2]);
             SetGap(buf);
             float* buf3 = Allocate<float>(buf, _sizeB[3]);
+            SetGap(buf);
+            float* buf4 = Allocate<float>(buf, _sizeB[4]);
 
             for (size_t b = 0; b < c0.batch; ++b)
             {
@@ -667,7 +670,7 @@ namespace Simd
                             _toBf16(src, c0, a, yBeg0, yEnd0, buf0);
                         const uint16_t* src16b = _toBf16 ? buf0 : (uint16_t*)src;
                         _input(src16b, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0],
-                            _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
+                            _bias[0].data + c, _params[0].data + c * a.dp[0], buf4, buf1);
                         _depthwise((uint8_t*)buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
                             _bias[1].data + c, _params[1].data + c * a.dp[1], (uint8_t*)buf2);
                         float *buf3p = buf3 == NULL ? (float*)dst : buf3;
@@ -745,9 +748,15 @@ namespace Simd
             {
                 bool aligned = Aligned(c2.dstC, a.miC) && Aligned(c2.dstH * c2.dstW, a.miC) && Aligned((c2.dstH % a.yStep[2]) * c2.dstW, a.miC);
                 _sizeB[3] = _dst16b || !aligned ? AlignHi(c2.dstC, a.miC) * AlignHi(c2.dstH * c2.dstW + a.miC, a.miC) : 0;
+                _sizeB[4] = 2048;
             }
             else
+            {
                 _sizeB[3] = _dst16b && (count > 1 || p.add) ? _sizeD : 0;
+                _sizeB[4] = 0;
+            }
+            a.ver[0] = 0;
+            a.ver[1] = 0;
             ((ConvParam&)c1).dstT = SimdTensorData16b;
             ((ConvParam&)c2).srcT = SimdTensorData16b;
         }
@@ -770,6 +779,8 @@ namespace Simd
             uint16_t* buf0 = Allocate<uint16_t>(buf, _sizeB[0]);
             SetGap(buf);
             float* buf1 = Allocate<float>(buf, _sizeB[1]);
+            SetGap(buf);
+            float* buf4 = Allocate<float>(buf, _sizeB[4]);
 
             for (size_t b = 0; b < c0.batch; ++b)
             {
@@ -785,7 +796,7 @@ namespace Simd
                             _toBf16(src, c0, a, yBeg0, yEnd0, buf0);
                         const uint16_t* src16b = _toBf16 ? buf0 : (uint16_t*)src;
                         _input(src16b, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0],
-                            _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
+                            _bias[0].data + c, _params[0].data + c * a.dp[0], buf4, buf1);
                         _depthwise((uint8_t*)buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1],
                             _bias[1].data + c, _params[1].data + c * a.dp[1], dst + c * a.elem[1]);
                         yBeg2 = yEnd2;
@@ -850,6 +861,10 @@ namespace Simd
             a.bufH[2] = 0;
             _sizeB[2] = 0;
             _sizeB[3] = 0;
+            if (a.miK == 32)
+                _sizeB[4] = 2048;
+            else
+                _sizeB[4] = 0;
         }
 
         //-----------------------------------------------------------------------------------------
@@ -941,6 +956,7 @@ namespace Simd
             a.bufH[1] = 0;
             _sizeB[0] = 0;
             _sizeB[1] = 0;
+            _sizeB[4] = 0;
             if (a.miK == 32)
             {
                 bool aligned = Aligned(c1.dstC, a.miC) && Aligned(c1.dstH * c1.dstW, a.miC) && Aligned((c1.dstH % a.yStep[2]) * c1.dstW, a.miC);

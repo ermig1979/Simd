@@ -173,6 +173,7 @@ namespace Simd
             if (p.conv[2].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
+                _alg.ver[0] = 1;
                 if (!_src16b)
                     _toBf16 = ConvertFp32ToBf16;
                 else if (!Aligned(p.conv[0].srcC, Avx512bw::DF))
@@ -180,7 +181,12 @@ namespace Simd
                 else
                     _toBf16 = NULL;
                 if (_param.conv[0].Is1x1())
-                    SetInput(_param.conv[0], _input);
+                {
+                    if(_alg.ver[0] == 1)
+                        SetInputV1(_param.conv[0], _input);
+                    else
+                        SetInputV0(_param.conv[0], _input);
+                }
                 else
                     Avx512bw::SetInput(_param.conv[0], _input);
                 if (_src16b)
@@ -207,7 +213,12 @@ namespace Simd
                 else
                     _toBf16 = NULL;
                 if (_param.conv[0].Is1x1())
-                    SetInput(_param.conv[0], _input);
+                {
+                    if (_alg.ver[0] == 1)
+                        SetInputV1(_param.conv[0], _input);
+                    else
+                        SetInputV0(_param.conv[0], _input);
+                }
                 else
                     Avx512bw::SetInput(_param.conv[0], _input);
                 SetDepthwise(_param.conv[1], _depthwise);
