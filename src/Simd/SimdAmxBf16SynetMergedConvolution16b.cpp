@@ -173,6 +173,7 @@ namespace Simd
             if (p.conv[2].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
+                _alg.ver[0] = (_param.conv[0].Is1x1() && p.conv[0].srcC >= 64 && 1) ? 1 : 0;
                 if (!_src16b)
                     _toBf16 = ConvertFp32ToBf16;
                 else if (!Aligned(p.conv[0].srcC, Avx512bw::DF))
@@ -205,7 +206,7 @@ namespace Simd
             if (p.conv[1].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
-                _alg.ver[0] = 0;
+                _alg.ver[0] = (_param.conv[0].Is1x1() && p.conv[0].srcC >= 64 && 1) ? 1 : 0;
                 if (!_src16b)
                     _toBf16 = ConvertFp32ToBf16;
                 else if (!Aligned(p.conv[0].srcC, Avx512bw::DF))
