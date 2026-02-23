@@ -351,65 +351,59 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type, int flush> static SIMD_INLINE void Apply2x1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
-        {
-            __m512 f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + 0), bias[0]), params, 0);
-            _mm_prefetch((const char*)buf + 0, _MM_HINT_NTA);
-            __m512 f1 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + F), bias[1]), params, 1);
-            _mm_prefetch((const char*)buf + A, _MM_HINT_NTA);
-            if (term == Term16bLast16b)
-            {
-                _mm512_mask_storeu_epi16((uint16_t*)ptr, tail, (__m512i)_mm512_cvtne2ps_pbh(f1, f0));
-                if (flush == 1)
-                    _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
-                else if (flush == 2)
-                    _m_prefetchw((char*)ptr);
-            }
-            else
-            {
-                _mm512_storeu_ps((float*)ptr, f0);
-                if (flush == 1)
-                    _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
-                else if (flush == 2)
-                    _m_prefetchw((char*)ptr + 0);
-                _mm512_mask_storeu_ps((float*)(ptr + A), (__mmask16)tail, f1);
-                if (flush == 1)
-                    _mm_prefetch((const char*)(ptr + A), _MM_HINT_NTA);
-                else if (flush == 2)
-                    _m_prefetchw((char*)ptr + A);
-            }
-        }
-
-        template<Term16bType term, SimdConvolutionActivationType type, int flush> static SIMD_INLINE void Apply1x1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
-        {
-            __m512 f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf), bias[0]), params, 0);
-            _mm_prefetch((const char*)buf + 0, _MM_HINT_NTA);
-            if (term == Term16bLast16b)
-            {
-                _mm256_mask_storeu_epi16((uint16_t*)ptr, (__mmask16)tail, (__m256i)_mm512_cvtneps_pbh(f0));
-                if (flush == 1)
-                    _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
-                else if (flush == 2)
-                    _m_prefetchw((char*)ptr);
-            }
-            else
-            {
-                _mm512_mask_storeu_ps((float*)ptr, (__mmask16)tail, f0);
-                if (flush == 1)
-                    _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
-                else if (flush == 2)
-                    _m_prefetchw((char*)ptr);
-            }
-        }
-
         template<Term16bType term, SimdConvolutionActivationType type, int M, int flush> static SIMD_INLINE void ApplyMx1(
             uint8_t *& ptr, int dP, float* buf, const __m512* bias, const __m512* params, const int* mask, __mmask32 tail = __mmask32(-1))
         {
             uint32_t msk = mask[0];
-            switch (M)
+            tail = tail & msk;
+            if (M == 1)
             {
-            case 1: Apply1x1<term, type, flush>(ptr, buf, bias, params, tail & msk); break;
-            case 2: Apply2x1<term, type, flush>(ptr, buf, bias, params, tail & msk); break;
+                __m512 f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf), bias[0]), params, 0);
+                _mm_prefetch((const char*)buf + 0, _MM_HINT_NTA);
+                if (term == Term16bLast16b)
+                {
+                    _mm256_mask_storeu_epi16((uint16_t*)ptr, (__mmask16)tail, (__m256i)_mm512_cvtneps_pbh(f0));
+                    if (flush == 1)
+                        _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
+                    else if (flush == 2)
+                        _m_prefetchw((char*)ptr);
+                }
+                else
+                {
+                    _mm512_mask_storeu_ps((float*)ptr, (__mmask16)tail, f0);
+                    if (flush == 1)
+                        _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
+                    else if (flush == 2)
+                        _m_prefetchw((char*)ptr);
+                }
+            }
+            else if (M == 2)
+            {
+                __m512 f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + 0), bias[0]), params, 0);
+                _mm_prefetch((const char*)buf + 0, _MM_HINT_NTA);
+                __m512 f1 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + F), bias[1]), params, 1);
+                _mm_prefetch((const char*)buf + A, _MM_HINT_NTA);
+                if (term == Term16bLast16b)
+                {
+                    _mm512_mask_storeu_epi16((uint16_t*)ptr, tail, (__m512i)_mm512_cvtne2ps_pbh(f1, f0));
+                    if (flush == 1)
+                        _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
+                    else if (flush == 2)
+                        _m_prefetchw((char*)ptr);
+                }
+                else
+                {
+                    _mm512_mask_storeu_ps((float*)ptr, (__mmask16)msk, f0);
+                    if (flush == 1)
+                        _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
+                    else if (flush == 2)
+                        _m_prefetchw((char*)ptr + 0);
+                    _mm512_mask_storeu_ps((float*)(ptr + A), (__mmask16)tail, f1);
+                    if (flush == 1)
+                        _mm_prefetch((const char*)(ptr + A), _MM_HINT_NTA);
+                    else if (flush == 2)
+                        _m_prefetchw((char*)ptr + A);
+                }
             }
             ptr += dP & msk;
         }

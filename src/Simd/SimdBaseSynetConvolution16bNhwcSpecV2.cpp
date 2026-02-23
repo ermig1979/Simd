@@ -150,8 +150,6 @@ namespace Simd
                     if (_dstMask[j])
                         _miDstOffs[i]++;
             }
-            //std::cout << " a.batch " << a.batch << " a.macroH " << a.macroH << " a.macroD " << a.macroD << std::endl << std::flush;
-            //std::cout << " a.bufS " << a.bufS << " a.bufD " << a.bufD << std::endl << std::flush;
         }
 
         size_t SynetConvolution16bNhwcSpecV2::ExternalBufferSize() const
