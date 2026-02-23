@@ -439,11 +439,6 @@ namespace Simd
             {
                 if (en)
                 {
-                    e = AlignHi(e, 16), en = e1 - e;
-                    InputConvolution1x1V1Ptr conv_2x2 = InputConvolution1x1_2x2V1<type, 0>;
-                    InputConvolution1x1V1Ptr conv_2x1 = InputConvolution1x1_2x1V1<type, 0>;
-                    InputConvolution1x1V1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2V1<type, 0> : InputConvolution1x1_1x2V1<type, 0>;
-                    InputConvolution1x1V1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1V1<type, 0> : InputConvolution1x1_1x1V1<type, 0>;
                     SetTileConfFull();
                     for (size_t dc = 0; dc < maC; dc += DF)
                     {
@@ -459,26 +454,13 @@ namespace Simd
                         {
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
-                            size_t j = 0;
-#if 1 
-                            InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, en, weight, _bias, _params, buf, dst0, dst1);
-#else
-                            for (; j < en; j += n)
-                                conv_2x2(src0 + j * srcC, p, a, n, weight, _bias, _params, buf, dst0 + j * F, dst1 + j * F);
-#endif
-                            if (en < e1)
-                                conv_Ex2(src0 + en * srcC, p, a, e, weight, _bias, _params, buf, dst0 + en * F, dst1 + en * F);
+                            InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, e1, weight, _bias, _params, buf, dst0, dst1);
                         }
                         else
                         {
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F;
-                            size_t j = 0;
-                            //for (; j < en; j += n)
-                            //    conv_2x1(src0 + j * srcC, p, a, n, weight, _bias, _params, buf, dst0 + j * F, NULL);
-                            InputConvolution1x1_Nx32V1<type, 1, 1, apply>(src0, p, a, en, weight, _bias, _params, buf, dst0, NULL);
-                            if (en < e1)
-                                conv_Ex1(src0 + en * srcC, p, a, e, weight, _bias, _params, buf, dst0 + en * F, NULL);
+                            InputConvolution1x1_Nx32V1<type, 1, 1, apply>(src0, p, a, e1, weight, _bias, _params, buf, dst0, NULL);
                         }
                         dst += a.bufH[1] * p.dstW * DF;
                         weight += srcC * DF;
@@ -521,8 +503,6 @@ namespace Simd
             }
             else
             {
-                InputConvolution1x1V1Ptr conv_2x2 = InputConvolution1x1_2x2V1<type, 0>;
-                InputConvolution1x1V1Ptr conv_2x1 = InputConvolution1x1_2x1V1<type, 0>;
                 InputConvolution1x1V1Ptr conv_Ix2 = i > 16 ? InputConvolution1x1_2x2V1<type, 1> : InputConvolution1x1_1x2V1<type, 1>;
                 InputConvolution1x1V1Ptr conv_Ix1 = i > 16 ? InputConvolution1x1_2x1V1<type, 1> : InputConvolution1x1_1x1V1<type, 1>;
                 InputConvolution1x1V1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2V1<type, 1> : InputConvolution1x1_1x2V1<type, 1>;
@@ -544,14 +524,9 @@ namespace Simd
                             SetTileConfFull();
                             const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yBeg & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
-#if 1                            
-                            InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, in, weight, _bias, _params, buf, dst0, dst1);
-                            src0 += srcC * in, dst0 += F * in, dst1 += F * in;
-#else
-                            for (size_t j = 0; j < in; j += n, src0 += srcC * n, dst0 += F * n, dst1 += F * n)
-                                conv_2x2(src0, p, a, n, weight, _bias, _params, buf, dst0, dst1);
-#endif
-                            if (in < i1)
+                            if(in)
+                                InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, i1, weight, _bias, _params, buf, dst0, dst1);
+                            else if (i)
                                 conv_Ix2(src0, p, a, i, weight, _bias, _params, buf, dst0, dst1);
                         }
                         if (yEnd > yInt)
@@ -559,11 +534,9 @@ namespace Simd
                             SetTileConfFull();
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
-                            InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, en, weight, _bias, _params, buf, dst0, dst1);
-                            src0 += srcC * en, dst0 += F * en, dst1 += F * en;
-                            //for (size_t j = 0; j < en; j += n, src0 += srcC * n, dst0 += F * n, dst1 += F * n)
-                            //    conv_2x2(src0, p, a, n, weight, _bias, _params, buf, dst0, dst1);
-                            if (en < e1)
+                            if (in)
+                                InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, e1, weight, _bias, _params, buf, dst0, dst1);
+                            else if (e)
                                 conv_Ex2(src0, p, a, e, weight, _bias, _params, buf, dst0, dst1);
                         }
                     }
@@ -574,11 +547,9 @@ namespace Simd
                             SetTileConfFull();
                             const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yBeg & dstM) * p.dstW * F;
-                            InputConvolution1x1_Nx32V1<type, 1, 1, apply>(src0, p, a, in, weight, _bias, _params, buf, dst0, NULL);
-                            src0 += srcC * in, dst0 += F * in;
-                            //for (size_t j = 0; j < in; j += n, src0 += srcC * n, dst0 += F * n)
-                            //    conv_2x1(src0, p, a, n, weight, _bias, _params, buf, dst0, NULL);
-                            if (in < i1)
+                            if(in)
+                                InputConvolution1x1_Nx32V1<type, 1, 1, apply>(src0, p, a, i1, weight, _bias, _params, buf, dst0, NULL);
+                            else if (i)
                                 conv_Ix1(src0, p, a, i, weight, _bias, _params, buf, dst0, NULL);
                         }
                         if (yEnd > yInt)
@@ -586,11 +557,9 @@ namespace Simd
                             SetTileConfFull();
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F;
-                            InputConvolution1x1_Nx32V1<type, 1, 1, apply>(src0, p, a, en, weight, _bias, _params, buf, dst0, NULL);
-                            src0 += srcC * en, dst0 += F * en;
-                            //for (size_t j = 0; j < en; j += n, src0 += srcC * n, dst0 += F * n)
-                            //    conv_2x1(src0, p, a, n, weight, _bias, _params, buf, dst0, NULL);
-                            if (en < e1)
+                            if(en)
+                                InputConvolution1x1_Nx32V1<type, 1, 1, apply>(src0, p, a, e1, weight, _bias, _params, buf, dst0, NULL);
+                            else if (e)
                                 conv_Ex1(src0, p, a, e, weight, _bias, _params, buf, dst0, NULL);
                         }
                     }
