@@ -153,10 +153,28 @@ namespace Simd
             }
         }
 
+        void ResizerNearest::FillConst(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride)
+        {
+            size_t size = _param.PixelSize();
+            for (size_t dy = dyBeg; dy < dyEnd; dy++)
+            {
+                for (size_t dx = 0; dx < _param.dstW; dx += 1)
+                    memcpy(dst + dx * size, src, size);
+                dst += dstStride;
+            }
+        }
+
         void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             EstimateParams();
-            if (_blocks)
+            if (_param.srcH == 1 && _param.srcW == 1)
+            {
+                Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
+                {
+                    this->FillConst(src, srcStride, dstBeg, dstEnd, dst + dstBeg * dstStride, dstStride);
+                }, _threads, 1);
+            }
+            else if (_blocks)
             {
                 Simd::Parallel(0, _param.dstH, [&](size_t thread, size_t dstBeg, size_t dstEnd)
                 {
@@ -190,7 +208,8 @@ namespace Simd
             const size_t pixelSize = param.PixelSize();
             return 
                 (pixelSize == 4 || (pixelSize == 8 && param.dstW >= F)) ||
-                ((pixelSize & 1) == 0 && pixelSize < 8 && param.srcW < 8 * param.dstW);
+                ((pixelSize & 1) == 0 && pixelSize < 8 && param.srcW < 8 * param.dstW) ||
+                (pixelSize >= A && param.srcH == 1 && param.srcW == 1);
         }
     }
 #endif //SIMD_AVX512BW_ENABLE 
