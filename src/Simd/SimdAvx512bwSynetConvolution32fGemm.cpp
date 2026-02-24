@@ -608,7 +608,7 @@ namespace Simd
                 {
                     if (sx >= 0 && sx < ptrdiff_t(p.srcW) && dx < F)
                         _nose[kx] |= 1 << dx;
-                    if (sx < ptrdiff_t(p.srcW) && ptrdiff_t(dx) >= aligned)
+                    if (sx >= 0 && sx < ptrdiff_t(p.srcW) && ptrdiff_t(dx) >= aligned)
                         _tail[kx] |= 1 << (dx - aligned);
                     sx += p.strideX;
                 }
