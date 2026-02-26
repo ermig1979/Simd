@@ -73,12 +73,12 @@ namespace Simd
 
     SIMD_INLINE size_t BodyH(const SimdConvolutionParameters& p)
     {
-        return (p.padY + p.srcH - (p.kernelY - 1) * p.dilationY - 1) / p.strideY + 1;
+        return p.dstH - DivHi(p.padH, p.strideY); //(p.padY + p.srcH - (p.kernelY - 1) * p.dilationY - 1) / p.strideY + 1;
     }
 
     SIMD_INLINE size_t BodyW(const SimdConvolutionParameters& p)
     {
-        return (p.padX + p.srcW - (p.kernelX - 1) * p.dilationX - 1) / p.strideX + 1;
+        return p.dstW - DivHi(p.padW, p.strideX);//(p.padX + p.srcW - (p.kernelX - 1) * p.dilationX - 1) / p.strideX + 1;
     }
 
     SIMD_INLINE String ToStr(SimdConvolutionActivationType t)
