@@ -292,7 +292,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution16bCdc(const MergConvParam& p);
-            virtual String Ext() const { return "AmxBf16-" + ToStr(_alg.ver[0]) + ToStr(_alg.ver[1]); }
+            virtual String Ext() const { return _alg.miK == 32 ? ("AmxBf16-" + ToStr(_alg.ver[0]) + ToStr(_alg.ver[1])) : Avx512bw::SynetMergedConvolution16bCdc::Ext(); }
         };
 
         class SynetMergedConvolution16bCd : public Avx512bw::SynetMergedConvolution16bCd

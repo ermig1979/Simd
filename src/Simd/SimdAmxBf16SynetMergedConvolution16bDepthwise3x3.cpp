@@ -753,12 +753,11 @@ namespace Simd
                 depthwise = DepthwiseConvolution3x3_V2<T, term, type>;
                 return true;
             }            
-            else if (IsKernel(p, 3) && IsDilation(p, 1) && Aligned(p.dstC, F))
+            else if (IsKernel(p, 3) && IsDilation(p, 1) && Aligned(p.dstC, F) && p.srcW > 2 && p.srcH > 1)
             {
                 depthwise = DepthwiseConvolution3x3<T, term, type>;
                 return true;
             }
-           
             else
                 return false;
         }

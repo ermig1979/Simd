@@ -53,7 +53,8 @@
  <li>Error in SSE4.1, AVX2, AVX-512BW, NEON optimizations of function AbsDifference (wrong alignment checking).</li>
  <li>Error in AVX-512BW optimizations of class SynetConvolution32fGemmNN (case of extra large padding).</li>
  <li>Error in AVX-512BW optimizations of class ResizerNearest.</li>
-</ul>
+ <li>Error in AMX-BF16 optimizations of class SynetMergedConvolution16bCdc (batch > 1, small input size).</li>
+ </ul>
 
 <hr/>
 <h3 id="R158">February 3, 2026 (version 6.2.158)</h3> 
