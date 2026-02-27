@@ -40,36 +40,32 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply1(const float* src, float* dst, const __m512* bias, const __m512* params)
+        template<SimdConvolutionActivationType type, int flush, int M> static SIMD_INLINE void ApplyMx1(const float* src, float* dst0, float* dst1, const __m512* bias, const __m512* params)
         {
-            _mm512_storeu_ps(dst + 0x0 * F, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 0x0 * F), bias[index]), params, index));
-            _mm_prefetch((const char*)(dst + 0x0 * F), _MM_HINT_NTA);
+            if (M > 0)
+            {
+                _mm512_storeu_ps(dst0, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 0 * 512), bias[0]), params, 0));
+                if (flush) _mm_prefetch((const char*)dst0, _MM_HINT_NTA);
+            }
+            if (M > 1)
+            {
+                _mm512_storeu_ps(dst1, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 1 * 512), bias[1]), params, 1));
+                if (flush) _mm_prefetch((const char*)dst1, _MM_HINT_NTA);
+            }
         }
 
-        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply2(const float* src, float* dst, const __m512* bias, const __m512* params)
+        template<SimdConvolutionActivationType type, int flush, int M, int N> static SIMD_INLINE void ApplyMxN(const float* src, float* dst0, float* dst1, const __m512* bias, const __m512* params)
         {
-            Apply1<type, index>(src + 0 * F, dst + 0 * F, bias, params);
-            Apply1<type, index>(src + 1 * F, dst + 1 * F, bias, params);
-        }
-
-        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply4(const float* src, float* dst, const __m512* bias, const __m512* params)
-        {
-            Apply2<type, index>(src + 0 * F, dst + 0 * F, bias, params);
-            Apply2<type, index>(src + 2 * F, dst + 2 * F, bias, params);
-        }
-
-        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply8(const float* src, float* dst, const __m512* bias, const __m512* params)
-        {
-            Apply4<type, index>(src + 0 * F, dst + 0 * F, bias, params);
-            Apply4<type, index>(src + 4 * F, dst + 4 * F, bias, params);
-        }
-
-        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply16(const float* src, float* dst, const __m512* bias, const __m512* params)
-        {
-            Apply8<type, index>(src + 0 * F, dst + 0 * F, bias, params);
-            Apply8<type, index>(src + 8 * F, dst + 8 * F, bias, params);
-        }
-
+            if (N > 0) ApplyMx1<type, flush, M>(src + 0 * F, dst0 + 0 * F, dst1 + 0 * F, bias, params);
+            if (N > 1) ApplyMx1<type, flush, M>(src + 1 * F, dst0 + 1 * F, dst1 + 1 * F, bias, params);
+            if (N > 2) ApplyMx1<type, flush, M>(src + 2 * F, dst0 + 2 * F, dst1 + 2 * F, bias, params);
+            if (N > 3) ApplyMx1<type, flush, M>(src + 3 * F, dst0 + 3 * F, dst1 + 3 * F, bias, params);
+            if (N > 4) ApplyMx1<type, flush, M>(src + 4 * F, dst0 + 4 * F, dst1 + 4 * F, bias, params);
+            if (N > 5) ApplyMx1<type, flush, M>(src + 5 * F, dst0 + 5 * F, dst1 + 5 * F, bias, params);
+            if (N > 6) ApplyMx1<type, flush, M>(src + 6 * F, dst0 + 6 * F, dst1 + 6 * F, bias, params);
+            if (N > 7) ApplyMx1<type, flush, M>(src + 7 * F, dst0 + 7 * F, dst1 + 7 * F, bias, params);
+        }        
+        
         //-----------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_2x2V1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
@@ -108,25 +104,21 @@ namespace Simd
             _tile_dpbf16ps(2, 5, 6);
             _tile_dpbf16ps(3, 5, 7);
 
-            _tile_stored(0, dst0 + 0 * 256, strideD);
-            _tile_stored(1, dst1 + 0 * 256, strideD);
-            Apply16<type, 0>(dst0 + 0 * 256, dst0 + 0 * 256, bias, params);
-            Apply16<type, 1>(dst1 + 0 * 256, dst1 + 0 * 256, bias, params);
+            _tile_stored(0, buf + 0 * 256, strideD);
+            _tile_stored(1, buf + 2 * 256, strideD);
+            ApplyMxN<type, 1, 2, 8>(buf + 0 * 16, dst0 + 0 * 16, dst1 + 0 * 16, bias, params);
+            ApplyMxN<type, 1, 2, 8>(buf + 8 * 16, dst0 + 8 * 16, dst1 + 8 * 16, bias, params);
+            _tile_stored(2, buf + 1 * 256, strideD);
+            _tile_stored(3, buf + 3 * 256, strideD);
             if (dstS == 32)
             {
-                _tile_stored(2, dst0 + 1 * 256, strideD);
-                _tile_stored(3, dst1 + 1 * 256, strideD);
-                Apply16<type, 0>(dst0 + 1 * 256, dst0 + 1 * 256, bias, params);
-                Apply16<type, 1>(dst1 + 1 * 256, dst1 + 1 * 256, bias, params);
+                ApplyMxN<type, 1, 2, 8>(buf + 16 * 16, dst0 + 16 * 16, dst1 + 16 * 16, bias, params);
+                ApplyMxN<type, 1, 2, 8>(buf + 24 * 16, dst0 + 24 * 16, dst1 + 24 * 16, bias, params);
             }
             else
             {
-                _tile_stored(2, buf + 1 * 256, strideD);
-                _tile_stored(3, buf + 3 * 256, strideD);
                 for (size_t s = 16; s < dstS; ++s)
-                    Apply1<type, 0>(buf + 0 * 256 + s * F, dst0 + s * F, bias, params);
-                for (size_t s = 16; s < dstS; ++s)
-                    Apply1<type, 1>(buf + 2 * 256 + s * F, dst1 + s * F, bias, params);
+                    ApplyMxN<type, 1, 2, 1>(buf + s * 16, dst0 + s * 16, dst1 + s * 16, bias, params);
             }
         }
 
@@ -158,18 +150,19 @@ namespace Simd
             _tile_dpbf16ps(0, 4, 6);
             _tile_dpbf16ps(2, 5, 6);
 
-            _tile_stored(0, dst0 + 0 * 256, strideD);
-            Apply16<type, 0>(dst0 + 0 * 256, dst0 + 0 * 256, bias, params);
+            _tile_stored(0, buf + 0 * 256, strideD);
+            ApplyMxN<type, 1, 1, 8>(buf + 0 * 16, dst0 + 0 * 16, NULL, bias, params);
+            ApplyMxN<type, 1, 1, 8>(buf + 8 * 16, dst0 + 8 * 16, NULL, bias, params);
+            _tile_stored(2, buf + 1 * 256, strideD);
             if (dstS == 32)
             {
-                _tile_stored(2, dst0 + 1 * 256, strideD);
-                Apply16<type, 0>(dst0 + 1 * 256, dst0 + 1 * 256, bias, params);
+                ApplyMxN<type, 1, 1, 8>(buf + 16 * 16, dst0 + 16 * 16, NULL, bias, params);
+                ApplyMxN<type, 1, 1, 8>(buf + 24 * 16, dst0 + 24 * 16, NULL, bias, params);
             }
             else
             {
-                _tile_stored(2, buf + 1 * 256, strideD);
                 for (size_t s = 16; s < dstS; ++s)
-                    Apply1<type, 0>(buf + 0 * 256 + s * F, dst0 + s * F, bias, params);
+                    ApplyMxN<type, 1, 1, 1>(buf + s * 16, dst0 + s * 16, NULL, bias, params);
             }
         }
 
@@ -201,21 +194,17 @@ namespace Simd
             _tile_dpbf16ps(0, 4, 6);
             _tile_dpbf16ps(1, 4, 7);
 
+            _tile_stored(0, buf + 0 * 256, strideD);
+            _tile_stored(1, buf + 2 * 256, strideD);
             if (dstS == 16)
             {
-                _tile_stored(0, dst0 + 0 * 256, strideD);
-                _tile_stored(1, dst1 + 0 * 256, strideD);
-                Apply16<type, 0>(dst0 + 0 * 256, dst0 + 0 * 256, bias, params);
-                Apply16<type, 1>(dst1 + 0 * 256, dst1 + 0 * 256, bias, params);
+                ApplyMxN<type, 1, 2, 8>(buf + 0 * 16, dst0 + 0 * 16, dst1 + 0 * 16, bias, params);
+                ApplyMxN<type, 1, 2, 8>(buf + 8 * 16, dst0 + 8 * 16, dst1 + 8 * 16, bias, params);
             }
             else
             {
-                _tile_stored(0, buf + 0 * 256, strideD);
-                _tile_stored(1, buf + 2 * 256, strideD);
                 for (size_t s = 0; s < dstS; ++s)
-                    Apply1<type, 0>(buf + 0 * 256 + s * F, dst0 + s * F, bias, params);
-                for (size_t s = 0; s < dstS; ++s)
-                    Apply1<type, 1>(buf + 2 * 256 + s * F, dst1 + s * F, bias, params);
+                    ApplyMxN<type, 1, 2, 1>(buf + s * 16, dst0 + s * 16, dst1 + s * 16, bias, params);
             }
         }
 
@@ -236,49 +225,21 @@ namespace Simd
                 _tile_dpbf16ps(0, 4, 6);
             }
 
+            _tile_stored(0, buf + 0 * 256, strideD);
             if (dstS == 16)
             {
-                _tile_stored(0, dst0 + 0 * 256, strideD);
-                Apply16<type, 0>(dst0 + 0 * 256, dst0 + 0 * 256, bias, params);
+                ApplyMxN<type, 1, 1, 8>(buf + 0 * 16, dst0 + 0 * 16, NULL, bias, params);
+                ApplyMxN<type, 1, 1, 8>(buf + 8 * 16, dst0 + 8 * 16, NULL, bias, params);
             }
             else
             {
-                _tile_stored(0, buf + 0 * 256, strideD);
                 for (size_t s = 0; s < dstS; ++s)
-                    Apply1<type, 0>(buf + 0 * 256 + s * F, dst0 + s * F, bias, params);
+                    ApplyMxN<type, 1, 1, 1>(buf + s * 16, dst0 + s * 16, NULL, bias, params);
             }
         }
 
         typedef void (*InputConvolution1x1V1Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, float* dst0, float* dst1);
-
-        //-----------------------------------------------------------------------------------------
-
-        template<SimdConvolutionActivationType type, int flush, int M> static SIMD_INLINE void ApplyMx1(const float* src, float* dst0, float* dst1, const __m512* bias, const __m512* params)
-        {
-            if (M > 0)
-            {
-                _mm512_storeu_ps(dst0, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 0 * 512), bias[0]), params, 0));
-                if (flush) _mm_prefetch((const char*)dst0, _MM_HINT_NTA);
-            }
-            if (M > 1)
-            {
-                _mm512_storeu_ps(dst1, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 1 * 512), bias[1]), params, 1));
-                if (flush) _mm_prefetch((const char*)dst1, _MM_HINT_NTA);
-            }
-        }
-
-        template<SimdConvolutionActivationType type, int flush, int M, int N> static SIMD_INLINE void ApplyMxN(const float* src, float* dst0, float* dst1, const __m512* bias, const __m512* params)
-        {
-            if (N > 0) ApplyMx1<type, flush, M>(src + 0 * F, dst0 + 0 * F, dst1 + 0 * F, bias, params);
-            if (N > 1) ApplyMx1<type, flush, M>(src + 1 * F, dst0 + 1 * F, dst1 + 1 * F, bias, params);
-            if (N > 2) ApplyMx1<type, flush, M>(src + 2 * F, dst0 + 2 * F, dst1 + 2 * F, bias, params);
-            if (N > 3) ApplyMx1<type, flush, M>(src + 3 * F, dst0 + 3 * F, dst1 + 3 * F, bias, params);
-            if (N > 4) ApplyMx1<type, flush, M>(src + 4 * F, dst0 + 4 * F, dst1 + 4 * F, bias, params);
-            if (N > 5) ApplyMx1<type, flush, M>(src + 5 * F, dst0 + 5 * F, dst1 + 5 * F, bias, params);
-            if (N > 6) ApplyMx1<type, flush, M>(src + 6 * F, dst0 + 6 * F, dst1 + 6 * F, bias, params);
-            if (N > 7) ApplyMx1<type, flush, M>(src + 7 * F, dst0 + 7 * F, dst1 + 7 * F, bias, params);
-        }
 
         //-----------------------------------------------------------------------------------------
 
@@ -401,7 +362,6 @@ namespace Simd
                 if (cds + 16 >= dstS)
                 {
                     cds = Simd::Min(dstS - 16, cds);
-                    //InputConvolution1x1_16x32V1<type, flush, M, apply>(src0 + cds * dS, p, a, weight0, bias, params, buf0, buf1, dst0 + pds * F, dst1 + pds * F);
                     InputConvolution1x1_16x32V1<type, flush, M, apply>(src0 + cds * dS, p, a, weight0, bias, params, buf0, buf1, dst0 + pds * F, dst1 + pds * F);
                 }
                 else
@@ -534,7 +494,7 @@ namespace Simd
                             SetTileConfFull();
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
-                            if (in)
+                            if (en)
                                 InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, e1, weight, _bias, _params, buf, dst0, dst1);
                             else if (e)
                                 conv_Ex2(src0, p, a, e, weight, _bias, _params, buf, dst0, dst1);

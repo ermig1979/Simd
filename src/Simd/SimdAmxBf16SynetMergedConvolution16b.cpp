@@ -167,13 +167,22 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE size_t InputVerson(const ConvParam & p)
+        {
+            if (p.Is1x1() && p.srcC >= 64 && p.dstH * p.dstW >= 32 && 1)
+                return 1;
+            return 0;
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SynetMergedConvolution16bCdc::SynetMergedConvolution16bCdc(const MergConvParam& p)
             : Avx512bw::SynetMergedConvolution16bCdc(p)
         {
             if (p.conv[2].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
-                _alg.ver[0] = (_param.conv[0].Is1x1() && p.conv[0].srcC >= 64 && p.conv[0].dstH * p.conv[0].dstW >= 32 && 1) ? 1 : 0;
+                _alg.ver[0] = InputVerson(_param.conv[0]);
                 if (!_src16b)
                     _toBf16 = ConvertFp32ToBf16;
                 else if (!Aligned(p.conv[0].srcC, Avx512bw::DF))
@@ -206,7 +215,7 @@ namespace Simd
             if (p.conv[1].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
-                _alg.ver[0] = (_param.conv[0].Is1x1() && p.conv[0].srcC >= 64 && p.conv[0].dstH * p.conv[0].dstW >= 32 && 1) ? 1 : 0;
+                _alg.ver[0] = InputVerson(_param.conv[0]);
                 if (!_src16b)
                     _toBf16 = ConvertFp32ToBf16;
                 else if (!Aligned(p.conv[0].srcC, Avx512bw::DF))
