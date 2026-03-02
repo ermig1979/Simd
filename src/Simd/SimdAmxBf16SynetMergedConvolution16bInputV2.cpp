@@ -40,72 +40,43 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        //template<SimdConvolutionActivationType type, int flush, int start> static SIMD_INLINE void Apply2x1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
-        //{
-        //    __m512 f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + (start + 0) * F), bias[start + 0]), params, start + 0);
-        //    __m512 f1 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + (start + 1) * F), bias[start + 1]), params, start + 1);
-        //    if (term == Term16bLast16b)
-        //    {
-        //        _mm512_mask_storeu_epi16((uint16_t*)(ptr + start * DF), tail, (__m512i)_mm512_cvtne2ps_pbh(f1, f0));
-        //        if (flush == 1)
-        //            _mm_prefetch((const char*)(ptr + start * DF), _MM_HINT_NTA);
-        //        else if (flush == 2)
-        //            _m_prefetchw((char*)(ptr + start * DF));
-        //    }
-        //    else
-        //    {
-        //        _mm512_storeu_ps((float*)(ptr + (start + 0) * A), f0);
-        //        if (flush == 1)
-        //            _mm_prefetch((const char*)(ptr + (start + 0) * A), _MM_HINT_NTA);
-        //        else if (flush == 2)
-        //            _m_prefetchw((char*)(ptr + (start + 0) * A));
-        //        _mm512_mask_storeu_ps((float*)(ptr + (start + 1) * A), (__mmask16)tail, f1);
-        //        if (flush == 1)
-        //            _mm_prefetch((const char*)(ptr + (start + 1) * A), _MM_HINT_NTA);
-        //        else if (flush == 2)
-        //            _m_prefetchw((char*)(ptr + (start + 1) * A));
-        //    }
-        //}
+        template<SimdConvolutionActivationType type, int flush, int M> static SIMD_INLINE void ApplyMx1(const float* src, float* dst0, float* dst1, float* dst2, float* dst3, const __m512* bias, const __m512* params)
+        {
+            if (M > 0)
+            {
+                _mm512_storeu_ps(dst0, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 0 * 256), bias[0]), params, 0));
+                if (flush) _mm_prefetch((const char*)dst0, _MM_HINT_NTA);
+            }
+            if (M > 1)
+            {
+                _mm512_storeu_ps(dst1, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 1 * 256), bias[1]), params, 1));
+                if (flush) _mm_prefetch((const char*)dst1, _MM_HINT_NTA);
+            }
+            if (M > 2)
+            {
+                _mm512_storeu_ps(dst1, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 2 * 256), bias[2]), params, 2));
+                if (flush) _mm_prefetch((const char*)dst2, _MM_HINT_NTA);
+            }
+            if (M > 3)
+            {
+                _mm512_storeu_ps(dst1, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 3 * 256), bias[3]), params, 3));
+                if (flush) _mm_prefetch((const char*)dst3, _MM_HINT_NTA);
+            }
+        }
 
-        //template<SimdConvolutionActivationType type, int flush, int start> static SIMD_INLINE void Apply1x1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
-        //{
-        //    __m512 f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + (start + 0) * F), bias[start + 0]), params, start + 0);
-        //    if (term == Term16bLast16b)
-        //    {
-        //        _mm256_mask_storeu_epi16((uint16_t*)(ptr + start * DF), (__mmask16)tail, (__m256i)_mm512_cvtneps_pbh(f0));
-        //        if (flush == 1)
-        //            _mm_prefetch((const char*)(ptr + start * DF), _MM_HINT_NTA);
-        //        else if (flush == 2)
-        //            _m_prefetchw((char*)(ptr + start * DF));
-        //    }
-        //    else
-        //    {
-        //        _mm512_mask_storeu_ps((float*)(ptr + (start + 0) * A), tail, f0);
-        //        if (flush == 1)
-        //            _mm_prefetch((const char*)(ptr + (start + 0) * A), _MM_HINT_NTA);
-        //        else if (flush == 2)
-        //            _m_prefetchw((char*)(ptr + (start + 0) * A));
-        //    }
-        //}
+        template<SimdConvolutionActivationType type, int flush, int M, int N> static SIMD_INLINE void ApplyMxN(const float* src, float* dst0, float* dst1, float* dst2, float* dst3, const __m512* bias, const __m512* params)
+        {
+            if (N > 0) ApplyMx1<type, flush, M>(src + 0 * F, dst0 + 0 * F, dst1 + 0 * F, dst2 + 0 * F, dst3 + 0 * F, bias, params);
+            if (N > 1) ApplyMx1<type, flush, M>(src + 1 * F, dst0 + 1 * F, dst1 + 1 * F, dst2 + 1 * F, dst3 + 1 * F, bias, params);
+            if (N > 2) ApplyMx1<type, flush, M>(src + 2 * F, dst0 + 2 * F, dst1 + 2 * F, dst2 + 2 * F, dst3 + 2 * F, bias, params);
+            if (N > 3) ApplyMx1<type, flush, M>(src + 3 * F, dst0 + 3 * F, dst1 + 3 * F, dst2 + 3 * F, dst3 + 3 * F, bias, params);
+            if (N > 4) ApplyMx1<type, flush, M>(src + 4 * F, dst0 + 4 * F, dst1 + 4 * F, dst2 + 4 * F, dst3 + 4 * F, bias, params);
+            if (N > 5) ApplyMx1<type, flush, M>(src + 5 * F, dst0 + 5 * F, dst1 + 5 * F, dst2 + 5 * F, dst3 + 5 * F, bias, params);
+            if (N > 6) ApplyMx1<type, flush, M>(src + 6 * F, dst0 + 6 * F, dst1 + 6 * F, dst2 + 6 * F, dst3 + 6 * F, bias, params);
+            if (N > 7) ApplyMx1<type, flush, M>(src + 7 * F, dst0 + 7 * F, dst1 + 7 * F, dst2 + 7 * F, dst3 + 7 * F, bias, params);
+        }
 
-        //template<Term16bType term, SimdConvolutionActivationType type, int M, int flush> static SIMD_INLINE void ApplyMx1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
-        //{
-        //    switch (M)
-        //    {
-        //    case 1: Apply1x1<term, type, flush, 0>(ptr, buf, bias, params, tail); break;
-        //    case 2: Apply2x1<term, type, flush, 0>(ptr, buf, bias, params, tail); break;
-        //    case 3: Apply2x1<term, type, flush, 0>(ptr, buf, bias, params); Apply1x1<term, type, flush, 2>(ptr, buf, bias, params, tail); break;
-        //    case 4: Apply2x1<term, type, flush, 0>(ptr, buf, bias, params); Apply2x1<term, type, flush, 2>(ptr, buf, bias, params, tail); break;
-        //    }
-        //}
-
-        //template<Term16bType term, SimdConvolutionActivationType type, int M, int N, int flush> static SIMD_INLINE void ApplyMxN(uint8_t* ptr, int dP, float* buf, int dB, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
-        //{
-        //    if (N > 0) ApplyMx1<term, type, M, flush>(ptr + 0 * dP, buf + 0 * dB, bias, params, tail);
-        //    if (N > 1) ApplyMx1<term, type, M, flush>(ptr + 1 * dP, buf + 1 * dB, bias, params, tail);
-        //    if (N > 2) ApplyMx1<term, type, M, flush>(ptr + 2 * dP, buf + 2 * dB, bias, params, tail);
-        //    if (N > 3) ApplyMx1<term, type, M, flush>(ptr + 3 * dP, buf + 3 * dB, bias, params, tail);
-        //}
+        //-----------------------------------------------------------------------------------------
 
         //-----------------------------------------------------------------------------------------
 
@@ -123,7 +94,7 @@ namespace Simd
                 type == SimdConvolutionActivationHswish ||
                 type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm512_set1_ps(params[1]);
-            size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, a.bufH[1])), n = 32;
+            size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, a.bufH[1])), n = 16;
             size_t i1 = (yInt - yBeg) * p.dstW, in = AlignLo(i1, n), i = i1 - in;
             size_t e1 = (yEnd - yInt) * p.dstW, en = AlignLo(e1, n), e = e1 - en;
 
