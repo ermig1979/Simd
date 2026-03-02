@@ -574,12 +574,16 @@ typedef enum
     SimdSynetUnaryOperation32fLog,
     /*! Gets negative for every point of input tensor. */
     SimdSynetUnaryOperation32fNeg,
-    /*! Gets reciprocal for every point of input tensor. */
-    SimdSynetUnaryOperation32fNot,
     /*! Performs logical NOT operation for every point of input tensor. */
+    SimdSynetUnaryOperation32fNot,
+    /*! Gets reciprocal for every point of input tensor. */
     SimdSynetUnaryOperation32fRcp,
+    /*! Gets rounding for every point of input tensor. */
+    SimdSynetUnaryOperation32fRound,
     /*! Gets reverse square root for every point of input tensor. */
     SimdSynetUnaryOperation32fRsqrt,
+    /*! Gets sign function for every point of input tensor. */
+    SimdSynetUnaryOperation32fSign,
     /*! Gets sine function for every point of input tensor. */
     SimdSynetUnaryOperation32fSin,
     /*! Gets square root for every point of input tensor. */

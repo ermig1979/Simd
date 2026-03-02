@@ -92,9 +92,20 @@ namespace Simd
             return Rcp<false>(value);
         }
 
+        template<> SIMD_INLINE __m256 SynetUnaryOperation32f<SimdSynetUnaryOperation32fRound>(__m256 value)
+        {
+            return _mm256_cvtepi32_ps(_mm256_cvtps_epi32(value));
+        }
+
         template<> SIMD_INLINE __m256 SynetUnaryOperation32f<SimdSynetUnaryOperation32fRsqrt>(__m256 value)
         {
             return _mm256_rsqrt_ps(value);
+        }
+
+        template<> SIMD_INLINE __m256 SynetUnaryOperation32f<SimdSynetUnaryOperation32fSign>(__m256 value)
+        {
+            static const __m256 _0 = _mm256_set1_ps(0.0f), _p = _mm256_set1_ps(1.0f), _n = _mm256_set1_ps(-1.0f);
+            return _mm256_blendv_ps(_mm256_blendv_ps(_p, _0, _mm256_cmp_ps(value, _0, _CMP_EQ_OQ)), _n, _mm256_cmp_ps(value, _0, _CMP_LT_OQ));
         }
 
         template<> SIMD_INLINE __m256 SynetUnaryOperation32f<SimdSynetUnaryOperation32fSin>(__m256 value)
@@ -149,7 +160,9 @@ namespace Simd
             case SimdSynetUnaryOperation32fNeg: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNeg, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fNot: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNot, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fRcp: SynetUnaryOperation32f<SimdSynetUnaryOperation32fRcp, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fRound: SynetUnaryOperation32f<SimdSynetUnaryOperation32fRound, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fRsqrt: SynetUnaryOperation32f<SimdSynetUnaryOperation32fRsqrt, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fSign: SynetUnaryOperation32f<SimdSynetUnaryOperation32fSign, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fSin: SynetUnaryOperation32f<SimdSynetUnaryOperation32fSin, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fSqrt: SynetUnaryOperation32f<SimdSynetUnaryOperation32fSqrt, align>(src, size, dst); break;
             case SimdSynetUnaryOperation32fTanh: SynetUnaryOperation32f<SimdSynetUnaryOperation32fTanh, align>(src, size, dst); break;

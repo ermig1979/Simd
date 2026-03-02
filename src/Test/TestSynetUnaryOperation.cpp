@@ -58,8 +58,12 @@ namespace Test
             return "Not";
         case SimdSynetUnaryOperation32fRcp:
             return "Rcp";
+        case SimdSynetUnaryOperation32fRound:
+            return "Round";
         case SimdSynetUnaryOperation32fRsqrt:
             return "Rsqrt";
+        case SimdSynetUnaryOperation32fSign:
+            return "Sign";
         case SimdSynetUnaryOperation32fSin:
             return "Sin";
         case SimdSynetUnaryOperation32fSqrt:

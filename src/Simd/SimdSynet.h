@@ -288,9 +288,19 @@ namespace Simd
             return 1.0f / value;
         }
 
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fRound>(float value)
+        {
+            return ::round(value);
+        }
+
         template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fRsqrt>(float value)
         {
             return 1.0f / ::sqrt(value);
+        }
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fSign>(float value)
+        {
+            return value < 0.0f ? -1.0f : (value == 0.0f ? 0.0f : 1.0f);
         }
 
         template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fSin>(float value)

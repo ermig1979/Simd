@@ -98,10 +98,10 @@ namespace Simd
             size_t i1 = (yInt - yBeg) * p.dstW, in = AlignLo(i1, n), i = i1 - in;
             size_t e1 = (yEnd - yInt) * p.dstW, en = AlignLo(e1, n), e = e1 - en;
 
-            //if (yInt == yBeg)
-            //{
-            //    if (en)
-            //    {
+            if (yInt == yBeg)
+            {
+                if (en)
+                {
             //        SetTileConfFull();
             //        for (size_t dc = 0; dc < maC; dc += DF)
             //        {
@@ -128,9 +128,9 @@ namespace Simd
             //            dst += a.bufH[1] * p.dstW * DF;
             //            weight += srcC * DF;
             //        }
-            //    }
-            //    else if (e1)
-            //    {
+                }
+                else if (e1)
+                {
             //        InputConvolution1x1V1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2V1<type, 0> : InputConvolution1x1_1x2V1<type, 0>;
             //        InputConvolution1x1V1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1V1<type, 0> : InputConvolution1x1_1x1V1<type, 0>;
             //        if (e > 16)
@@ -162,10 +162,10 @@ namespace Simd
             //            dst += a.bufH[1] * p.dstW * DF;
             //            weight += srcC * DF;
             //        }
-            //    }
-            //}
-            //else
-            //{
+                }
+            }
+            else
+            {
             //    InputConvolution1x1V1Ptr conv_Ix2 = i > 16 ? InputConvolution1x1_2x2V1<type, 1> : InputConvolution1x1_1x2V1<type, 1>;
             //    InputConvolution1x1V1Ptr conv_Ix1 = i > 16 ? InputConvolution1x1_2x1V1<type, 1> : InputConvolution1x1_1x1V1<type, 1>;
             //    InputConvolution1x1V1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2V1<type, 1> : InputConvolution1x1_1x2V1<type, 1>;
@@ -229,7 +229,7 @@ namespace Simd
             //        dst += a.bufH[1] * p.dstW * DF;
             //        weight += srcC * DF;
             //    }
-            //}
+            }
         }
 
         //-----------------------------------------------------------------------------------------
