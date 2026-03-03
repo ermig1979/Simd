@@ -952,7 +952,7 @@ namespace Simd
                                 __m128 fx0 = _mm_sub_ps(_1, fx1);
                                 __m128 m0 = _mm_mul_ps(fx0, _mm_shuffle_ps(s0, s1, 0x88));
                                 __m128 m1 = _mm_mul_ps(fx1, _mm_shuffle_ps(s0, s1, 0xDD));
-                                _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                                _mm_storeu_ps(pb + dx, _mm_add_ps(m0, m1));
                             }
                         }
                         else if (cn == 2)
@@ -965,7 +965,7 @@ namespace Simd
                                 __m128 fx0 = _mm_sub_ps(_1, fx1);
                                 __m128 m0 = _mm_mul_ps(fx0, _mm_shuffle_ps(s0, s1, 0x44));
                                 __m128 m1 = _mm_mul_ps(fx1, _mm_shuffle_ps(s0, s1, 0xEE));
-                                _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                                _mm_storeu_ps(pb + dx, _mm_add_ps(m0, m1));
                             }
                         }
                         else if (cn == 3 && rs > 3)
