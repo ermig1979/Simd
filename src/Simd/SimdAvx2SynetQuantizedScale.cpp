@@ -91,7 +91,7 @@ namespace Simd
                     for (; c < channels32; c += 32)
                         QuantizedScale32(src + c, sBias, sNorm, scale + c, bias + c, dst + c, dNorm, dZero);
                     for (; c < channels8; c += 8)
-                        QuantizedScale8(src + c, sBias, sNorm, _mm256_load_ps(scale + c), _mm256_load_ps(bias + c), dst + c, dNorm, dZero);
+                        QuantizedScale8(src + c, sBias, sNorm, _mm256_loadu_ps(scale + c), _mm256_loadu_ps(bias + c), dst + c, dNorm, dZero);
                     for (; c < channels; ++c)
                         QuantizedScale1(src + c, sBias, sNorm, _mm256_castps128_ps256(_mm_load_ss(scale + c)), _mm256_castps128_ps256(_mm_load_ss(bias + c)), dst + c, dNorm, dZero);
                     src += channels;

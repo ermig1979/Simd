@@ -81,9 +81,9 @@ namespace Simd
                     for (; c < channels64; c += 64)
                         QuantizedScale64(src + c, sBias, sNorm, scale + c, bias + c, dst + c, dNorm, dZero);
                     for (; c < channels16; c += 16)
-                        QuantizedScale16(src + c, sBias, sNorm, _mm512_load_ps(scale + c), _mm512_load_ps(bias + c), dst + c, dNorm, dZero);
+                        QuantizedScale16(src + c, sBias, sNorm, _mm512_loadu_ps(scale + c), _mm512_loadu_ps(bias + c), dst + c, dNorm, dZero);
                     if(tail)
-                        QuantizedScale16(src + c, sBias, sNorm, _mm512_maskz_load_ps(tail, scale + c), _mm512_maskz_load_ps(tail, bias + c), dst + c, dNorm, dZero, tail);
+                        QuantizedScale16(src + c, sBias, sNorm, _mm512_maskz_loadu_ps(tail, scale + c), _mm512_maskz_loadu_ps(tail, bias + c), dst + c, dNorm, dZero, tail);
                     src += channels;
                     dst += channels;
                 }

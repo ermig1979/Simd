@@ -89,7 +89,7 @@ namespace Simd
                     for (; c < channels16; c += 16)
                         QuantizedScale16(src + c, sBias, sNorm, scale + c, bias + c, dst + c, dNorm, dZero);
                     for (; c < channels4; c += 4)
-                        QuantizedScale4(src + c, sBias, sNorm, _mm_load_ps(scale + c), _mm_load_ps(bias + c), dst + c, dNorm, dZero);
+                        QuantizedScale4(src + c, sBias, sNorm, _mm_loadu_ps(scale + c), _mm_loadu_ps(bias + c), dst + c, dNorm, dZero);
                     for (; c < channels; ++c)
                         QuantizedScale1(src + c, sBias, sNorm, _mm_load_ss(scale + c), _mm_load_ss(bias + c), dst + c, dNorm, dZero);
                     src += channels;
