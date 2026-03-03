@@ -85,7 +85,7 @@ namespace Simd
                     for (; c < channels16; c += 16)
                         QuantizedPrelu16(src + c, sBias, sNorm, slope + c, dst + c, dNorm, dZero);
                     for (; c < channels4; c += 4)
-                        QuantizedPrelu4(src + c, sBias, sNorm, _mm_load_ps(slope + c), dst + c, dNorm, dZero);
+                        QuantizedPrelu4(src + c, sBias, sNorm, _mm_loadu_ps(slope + c), dst + c, dNorm, dZero);
                     for (; c < channels; ++c)
                         QuantizedPrelu1(src + c, sBias, sNorm, _mm_load_ss(slope + c), dst + c, dNorm, dZero);
                     src += channels;

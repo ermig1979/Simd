@@ -77,9 +77,9 @@ namespace Simd
                     for (; c < channels64; c += 64)
                         QuantizedPrelu64(src + c, sBias, sNorm, slope + c, dst + c, dNorm, dZero);
                     for (; c < channels16; c += 16)
-                        QuantizedPrelu16(src + c, sBias, sNorm, _mm512_load_ps(slope + c), dst + c, dNorm, dZero);
+                        QuantizedPrelu16(src + c, sBias, sNorm, _mm512_loadu_ps(slope + c), dst + c, dNorm, dZero);
                     if(tail)
-                        QuantizedPrelu16(src + c, sBias, sNorm, _mm512_maskz_load_ps(tail, slope + c), dst + c, dNorm, dZero, tail);
+                        QuantizedPrelu16(src + c, sBias, sNorm, _mm512_maskz_loadu_ps(tail, slope + c), dst + c, dNorm, dZero, tail);
                     src += channels;
                     dst += channels;
                 }
