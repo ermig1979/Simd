@@ -41,11 +41,19 @@ namespace Simd
         ::FILE* file = ::fopen(path, "rb");
         if (file)
         {
-            ::fseek(file, 0, SEEK_END);
-            Array8u buffer(::ftell(file));
-            ::fseek(file, 0, SEEK_SET);
-            if (::fread(buffer.data, 1, buffer.size, file) == buffer.size)
-                data = loader(buffer.data, buffer.size, stride, width, height, format);
+            if (::fseek(file, 0, SEEK_END) == 0)
+            {
+                long size = ::ftell(file);
+                if (size > 0)
+                {
+                    Array8u buffer(size);
+                    if (buffer.data && ::fseek(file, 0, SEEK_SET) == 0)
+                    {
+                        if (::fread(buffer.data, 1, buffer.size, file) == buffer.size)
+                            data = loader(buffer.data, buffer.size, stride, width, height, format);
+                    }
+                }
+            }
             ::fclose(file);
         }
         return data;
