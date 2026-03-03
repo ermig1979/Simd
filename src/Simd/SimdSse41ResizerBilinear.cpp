@@ -1016,8 +1016,8 @@ namespace Simd
                     __m128 _fy1 = _mm_set1_ps(fy1);
                     for (; dx < rsF; dx += F)
                     {
-                        __m128 m0 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx), _fy0);
-                        __m128 m1 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx), _fy1);
+                        __m128 m0 = _mm_mul_ps(_mm_loadu_ps(pbx[0] + dx), _fy0);
+                        __m128 m1 = _mm_mul_ps(_mm_loadu_ps(pbx[1] + dx), _fy1);
                         _mm_storeu_ps(dst + dx, _mm_add_ps(m0, m1));
                     }
                     for (; dx < rs; dx++)
@@ -1273,18 +1273,18 @@ namespace Simd
                     __m128 _fy1 = _mm_set1_ps(fy1);
                     for (; dx < rsD; dx += DF)
                     {
-                        __m128 m00 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx + 0), _fy0);
-                        __m128 m10 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx + 0), _fy1);
+                        __m128 m00 = _mm_mul_ps(_mm_loadu_ps(pbx[0] + dx + 0), _fy0);
+                        __m128 m10 = _mm_mul_ps(_mm_loadu_ps(pbx[1] + dx + 0), _fy1);
                         __m128i d0 = Float32ToBFloat16(_mm_add_ps(m00, m10));
-                        __m128 m01 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx + F), _fy0);
-                        __m128 m11 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx + F), _fy1);
+                        __m128 m01 = _mm_mul_ps(_mm_loadu_ps(pbx[0] + dx + F), _fy0);
+                        __m128 m11 = _mm_mul_ps(_mm_loadu_ps(pbx[1] + dx + F), _fy1);
                         __m128i d1 = Float32ToBFloat16(_mm_add_ps(m01, m11));
                         _mm_storeu_si128((__m128i*)(dst + dx), _mm_packus_epi32(d0, d1));
                     }
                     for (; dx < rsF; dx += F)
                     {
-                        __m128 m0 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx), _fy0);
-                        __m128 m1 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx), _fy1);
+                        __m128 m0 = _mm_mul_ps(_mm_loadu_ps(pbx[0] + dx), _fy0);
+                        __m128 m1 = _mm_mul_ps(_mm_loadu_ps(pbx[1] + dx), _fy1);
                         __m128i d0 = Float32ToBFloat16(_mm_add_ps(m0, m1));
                         _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(d0, K_ZERO));
                     }
