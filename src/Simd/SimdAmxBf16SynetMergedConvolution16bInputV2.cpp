@@ -78,6 +78,103 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        template<SimdConvolutionActivationType type, int M, int cfg> void InputConvolution1x1_1x4V2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+            size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, float* dst0, float* dst1, float* dst2, float* dst3)
+        {
+            size_t sC = AlignHi(p.srcC, a.miK);
+            int strideS = (int)sC * 2, strideW = 64, strideB = 64, stepS = 32, stepW = 32 * 16;
+            const uint16_t* weight1 = weight0 + sC * 16, * weight2 = weight0 + sC * 32, * weight3 = weight0 + sC * 48;
+
+            if (cfg)
+                SetTileConf1x4(dstS);
+            if (M > 0) _tile_zero(0);
+            if (M > 1) _tile_zero(1);
+            if (M > 2) _tile_zero(2);
+            if (M > 3) _tile_zero(3);
+
+            int sC64 = (int)(sC - 32) & (~63), sc = 0, ow = 0;
+
+            if (M > 0) _tile_stream_loadd(4, src0, strideS);
+            if (M > 0) _tile_loadd(5, weight0, strideW);
+            for (; sc < sC64; sc += 64)
+            {
+                src0 += stepS;
+                if (M > 0) _tile_stream_loadd(6, src0, strideS);
+                if (M > 1) _tile_loadd(7, weight1 + ow, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 4, 5);
+                if (M > 2) _tile_loadd(5, weight2 + ow, strideW);
+                if (M > 1) _tile_dpbf16ps(1, 4, 7);
+                if (M > 3) _tile_loadd(7, weight3 + ow, strideW);
+                if (M > 2) _tile_dpbf16ps(2, 4, 5);
+                ow += stepW;
+                if (M > 0) _tile_loadd(5, weight0 + ow, strideW);
+                if (M > 3) _tile_dpbf16ps(3, 4, 7);
+
+                src0 += stepS;
+                if (M > 0) _tile_stream_loadd(4, src0, strideS);
+                if (M > 1) _tile_loadd(7, weight1 + ow, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 6, 5);
+                if (M > 2) _tile_loadd(5, weight2 + ow, strideW);
+                if (M > 1) _tile_dpbf16ps(1, 6, 7);
+                if (M > 3) _tile_loadd(7, weight3 + ow, strideW);
+                if (M > 2) _tile_dpbf16ps(2, 6, 5);
+                ow += stepW;
+                if (M > 0) _tile_loadd(5, weight0 + ow, strideW);
+                if (M > 3) _tile_dpbf16ps(3, 6, 7);
+            }
+            if (sC - sC64 == 64)
+            {
+                src0 += stepS;
+                if (M > 0) _tile_stream_loadd(6, src0, strideS);
+                if (M > 1) _tile_loadd(7, weight1 + ow, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 4, 5);
+                if (M > 2) _tile_loadd(5, weight2 + ow, strideW);
+                if (M > 1) _tile_dpbf16ps(1, 4, 7);
+                if (M > 3) _tile_loadd(7, weight3 + ow, strideW);
+                if (M > 2) _tile_dpbf16ps(2, 4, 5);
+                ow += stepW;
+                if (M > 0) _tile_loadd(5, weight0 + ow, strideW);
+                if (M > 3) _tile_dpbf16ps(3, 4, 7);
+
+                if (M > 1) _tile_loadd(7, weight1 + ow, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 6, 5);
+                if (M > 0) _tile_stored(0, buf + 0 * 256, strideB);
+                if (M > 2) _tile_loadd(5, weight2 + ow, strideW);
+                if (M > 1) _tile_dpbf16ps(1, 6, 7);
+                if (M > 1) _tile_stored(1, buf + 1 * 256, strideB);
+                if (M > 3) _tile_loadd(7, weight3 + ow, strideW);
+                if (M > 2) _tile_dpbf16ps(2, 6, 5);
+                if (M > 2) _tile_stored(2, buf + 2 * 256, strideB);
+                if (M > 3) _tile_dpbf16ps(3, 6, 7);
+                if (M > 3) _tile_stored(3, buf + 3 * 256, strideB);
+            }
+            else
+            {
+                if (M > 1) _tile_loadd(7, weight1 + ow, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 4, 5);
+                if (M > 0) _tile_stored(0, buf + 0 * 256, strideB);
+                if (M > 2) _tile_loadd(5, weight2 + ow, strideW);
+                if (M > 1) _tile_dpbf16ps(1, 4, 7);
+                if (M > 1) _tile_stored(1, buf + 1 * 256, strideB);
+                if (M > 3) _tile_loadd(7, weight3 + ow, strideW);
+                if (M > 2) _tile_dpbf16ps(2, 4, 5);
+                if (M > 2) _tile_stored(2, buf + 2 * 256, strideB);
+                if (M > 3) _tile_dpbf16ps(3, 4, 7);
+                if (M > 3) _tile_stored(3, buf + 3 * 256, strideB);
+            }
+
+            if (dstS == 16)
+            {
+                ApplyMxN<type, 1, M, 8>(buf + 0 * 16, dst0 + 0 * 16, dst1 + 0 * 16, dst2 + 0 * 16, dst3 + 0 * 16, bias, params);
+                ApplyMxN<type, 1, M, 8>(buf + 8 * 16, dst0 + 8 * 16, dst1 + 8 * 16, dst2 + 8 * 16, dst3 + 8 * 16, bias, params);
+            }
+            else
+            {
+                for (size_t s = 16; s < dstS; ++s)
+                    ApplyMxN<type, 1, M, 1>(buf + s * 16, dst0 + s * 16, dst1 + s * 16, dst2 + s * 16, dst3 + s * 16, bias, params);
+            }
+        }
+
         //-----------------------------------------------------------------------------------------
 
         //-----------------------------------------------------------------------------------------

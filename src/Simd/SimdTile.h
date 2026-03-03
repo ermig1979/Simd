@@ -215,6 +215,22 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void SetTileConf1x4(size_t rows)
+        {
+            if (TileConfChanged(rows, 64))
+            {
+                TileConf conf = TileConf(false);
+                uint8_t tailR = uint8_t(rows);
+                conf.rows[0] = tailR;
+                conf.rows[1] = tailR;
+                conf.rows[2] = tailR;
+                conf.rows[3] = tailR;
+                conf.rows[4] = tailR;
+                conf.rows[6] = tailR;
+                _tile_loadconfig(&conf);
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         template<class T> SIMD_INLINE void TileMoveToMemory(const T* ptr, size_t stride, size_t count = 16)
