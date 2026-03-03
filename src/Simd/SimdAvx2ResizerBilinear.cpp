@@ -131,7 +131,7 @@ namespace Simd
         template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<1>(const __m256i * alpha, __m256i * buffer)
         {
 #ifdef SIMD_MADDUBS_ERROR
-            __m256i _buffer = _mm256_or_si256(K_ZERO, _mm256u_load_si256(buffer));
+            __m256i _buffer = _mm256_or_si256(K_ZERO, _mm256_loadu_si256(buffer));
 #else
             __m256i _buffer = _mm256_loadu_si256(buffer);
 #endif

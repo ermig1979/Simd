@@ -133,15 +133,15 @@ namespace Simd
 
         template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<1>(const __m128i* alpha, __m128i* buffer)
         {
-            _mm_store_si128(buffer, _mm_maddubs_epi16(_mm_load_si128(buffer), _mm_load_si128(alpha)));
+            _mm_store_si128(buffer, _mm_maddubs_epi16(_mm_loadu_si128(buffer), _mm_loadu_si128(alpha)));
         }
 
         const __m128i K8_SHUFFLE_X2 = SIMD_MM_SETR_EPI8(0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF);
 
         SIMD_INLINE void ResizerByteBilinearInterpolateX2(const __m128i* alpha, __m128i* buffer)
         {
-            __m128i src = _mm_shuffle_epi8(_mm_load_si128(buffer), K8_SHUFFLE_X2);
-            _mm_store_si128(buffer, _mm_maddubs_epi16(src, _mm_load_si128(alpha)));
+            __m128i src = _mm_shuffle_epi8(_mm_loadu_si128(buffer), K8_SHUFFLE_X2);
+            _mm_store_si128(buffer, _mm_maddubs_epi16(src, _mm_loadu_si128(alpha)));
         }
 
         template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<2>(const __m128i* alpha, __m128i* buffer)
@@ -161,27 +161,27 @@ namespace Simd
         template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<3>(const __m128i* alpha, __m128i* buffer)
         {
             __m128i src[3], shuffled[3];
-            src[0] = _mm_load_si128(buffer + 0);
-            src[1] = _mm_load_si128(buffer + 1);
-            src[2] = _mm_load_si128(buffer + 2);
+            src[0] = _mm_loadu_si128(buffer + 0);
+            src[1] = _mm_loadu_si128(buffer + 1);
+            src[2] = _mm_loadu_si128(buffer + 2);
             shuffled[0] = _mm_shuffle_epi8(src[0], K8_SHUFFLE_X3_00);
             shuffled[0] = _mm_or_si128(shuffled[0], _mm_shuffle_epi8(src[1], K8_SHUFFLE_X3_01));
-            _mm_store_si128(buffer + 0, _mm_maddubs_epi16(shuffled[0], _mm_load_si128(alpha + 0)));
+            _mm_store_si128(buffer + 0, _mm_maddubs_epi16(shuffled[0], _mm_loadu_si128(alpha + 0)));
             shuffled[1] = _mm_shuffle_epi8(src[0], K8_SHUFFLE_X3_10);
             shuffled[1] = _mm_or_si128(shuffled[1], _mm_shuffle_epi8(src[1], K8_SHUFFLE_X3_11));
             shuffled[1] = _mm_or_si128(shuffled[1], _mm_shuffle_epi8(src[2], K8_SHUFFLE_X3_12));
-            _mm_store_si128(buffer + 1, _mm_maddubs_epi16(shuffled[1], _mm_load_si128(alpha + 1)));
+            _mm_store_si128(buffer + 1, _mm_maddubs_epi16(shuffled[1], _mm_loadu_si128(alpha + 1)));
             shuffled[2] = _mm_shuffle_epi8(src[1], K8_SHUFFLE_X3_21);
             shuffled[2] = _mm_or_si128(shuffled[2], _mm_shuffle_epi8(src[2], K8_SHUFFLE_X3_22));
-            _mm_store_si128(buffer + 2, _mm_maddubs_epi16(shuffled[2], _mm_load_si128(alpha + 2)));
+            _mm_store_si128(buffer + 2, _mm_maddubs_epi16(shuffled[2], _mm_loadu_si128(alpha + 2)));
         }
 
         const __m128i K8_SHUFFLE_X4 = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
 
         SIMD_INLINE void ResizerByteBilinearInterpolateX4(const __m128i* alpha, __m128i* buffer)
         {
-            __m128i src = _mm_shuffle_epi8(_mm_load_si128(buffer), K8_SHUFFLE_X4);
-            _mm_store_si128(buffer, _mm_maddubs_epi16(src, _mm_load_si128(alpha)));
+            __m128i src = _mm_shuffle_epi8(_mm_loadu_si128(buffer), K8_SHUFFLE_X4);
+            _mm_store_si128(buffer, _mm_maddubs_epi16(src, _mm_loadu_si128(alpha)));
         }
 
         template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<4>(const __m128i* alpha, __m128i* buffer)
