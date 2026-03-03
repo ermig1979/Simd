@@ -234,11 +234,11 @@ namespace Simd
         bool LoadStringXml(const std::string & xml, Tag tag = UNDEFINED_OBJECT_TAG)
         {
             // Copy the received string to a non const char pointer.
-            char * xmlTmp = new char[xml.size() + 1];
-            std::copy(xml.begin(), xml.end(), xmlTmp);
-            xmlTmp[xml.size()] = '\0';
+            std::vector<char> buf(xml.size() + 1);
+            std::copy(xml.begin(), xml.end(), buf.data());
+            buf[xml.size()] = '\0';
 
-            Handle handle = ::SimdDetectionLoadStringXml(xmlTmp);
+            Handle handle = ::SimdDetectionLoadStringXml(buf.data());
             if (handle)
             {
                 Data data;
