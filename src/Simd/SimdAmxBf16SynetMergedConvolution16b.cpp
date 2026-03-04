@@ -169,6 +169,8 @@ namespace Simd
 
         SIMD_INLINE size_t InputVerson(const ConvParam & p)
         {
+            if (p.Is1x1() && p.srcC < 64 && p.dstH * p.dstW >= 16 && 0)
+                return 2;
             if (p.Is1x1() && p.srcC >= 64 && p.dstH * p.dstW >= 32 && 1)
                 return 1;
             return 0;
@@ -191,10 +193,12 @@ namespace Simd
                     _toBf16 = NULL;
                 if (_param.conv[0].Is1x1())
                 {
-                    if(_alg.ver[0] == 1)
-                        SetInputV1(_param.conv[0], _input);
-                    else
-                        SetInputV0(_param.conv[0], _input);
+                    switch (_alg.ver[0])
+                    {
+                    case 0: SetInputV0(_param.conv[0], _input); break;
+                    case 1: SetInputV1(_param.conv[0], _input); break;
+                    case 2: SetInputV2(_param.conv[0], _input); break;
+                    }
                 }
                 else
                     Avx512bw::SetInput(_param.conv[0], _input);
@@ -224,10 +228,12 @@ namespace Simd
                     _toBf16 = NULL;
                 if (_param.conv[0].Is1x1())
                 {
-                    if (_alg.ver[0] == 1)
-                        SetInputV1(_param.conv[0], _input);
-                    else
-                        SetInputV0(_param.conv[0], _input);
+                    switch (_alg.ver[0])
+                    {
+                    case 0: SetInputV0(_param.conv[0], _input); break;
+                    case 1: SetInputV1(_param.conv[0], _input); break;
+                    case 2: SetInputV2(_param.conv[0], _input); break;
+                    }
                 }
                 else
                     Avx512bw::SetInput(_param.conv[0], _input);

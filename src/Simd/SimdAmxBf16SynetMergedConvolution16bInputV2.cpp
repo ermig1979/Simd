@@ -54,12 +54,12 @@ namespace Simd
             }
             if (M > 2)
             {
-                _mm512_storeu_ps(dst1, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 2 * 256), bias[2]), params, 2));
+                _mm512_storeu_ps(dst2, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 2 * 256), bias[2]), params, 2));
                 if (flush) _mm_prefetch((const char*)dst2, _MM_HINT_NTA);
             }
             if (M > 3)
             {
-                _mm512_storeu_ps(dst1, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 3 * 256), bias[3]), params, 3));
+                _mm512_storeu_ps(dst3, Activate<type>(_mm512_add_ps(_mm512_loadu_ps(src + 3 * 256), bias[3]), params, 3));
                 if (flush) _mm_prefetch((const char*)dst3, _MM_HINT_NTA);
             }
         }
@@ -337,10 +337,6 @@ namespace Simd
                 if (M > 2) _params[2] = _mm512_loadu_ps(params + 2 * F);
                 if (M > 3) _params[3] = _mm512_loadu_ps(params + 3 * F);
             }
-            if (M > 0) _tile_zero(0);
-            if (M > 1) _tile_zero(1);
-            if (M > 2) _tile_zero(2);
-            if (M > 3) _tile_zero(3);
 
             size_t cds = 0, pds = 0;
             InputConvolution1x1_1xMV2<type, flush, M, 0>(src0, p, a, weight0, _bias, _params, buf0, buf1, dst0, dst1, dst2, dst3), cds += 16;
@@ -358,13 +354,13 @@ namespace Simd
             {
                 if (dstS == 16)
                 {
-                    ApplyMxN<type, flush, M, 8>(buf + 0 * 16, dst0 + 0 * 16, dst1 + 0 * 16, dst2 + 0 * 16, dst3 + 0 * 16, _bias, _params);
-                    ApplyMxN<type, flush, M, 8>(buf + 8 * 16, dst0 + 8 * 16, dst1 + 8 * 16, dst2 + 8 * 16, dst3 + 8 * 16, _bias, _params);
+                    ApplyMxN<type, flush, M, 8>(buf1 + 0 * 16, dst0 + 0 * 16, dst1 + 0 * 16, dst2 + 0 * 16, dst3 + 0 * 16, _bias, _params);
+                    ApplyMxN<type, flush, M, 8>(buf1 + 8 * 16, dst0 + 8 * 16, dst1 + 8 * 16, dst2 + 8 * 16, dst3 + 8 * 16, _bias, _params);
                 }
                 else
                 {
-                    for (size_t s = 16; s < dstS; ++s)
-                        ApplyMxN<type, flush, M, 1>(buf + s * 16, dst0 + s * 16, dst1 + s * 16, dst2 + s * 16, dst3 + s * 16, _bias, _params);
+                    for (size_t s = 0; s < dstS; ++s)
+                        ApplyMxN<type, flush, M, 1>(buf1 + s * 16, dst0 + s * 16, dst1 + s * 16, dst2 + s * 16, dst3 + s * 16, _bias, _params);
                 }
             }
         }
@@ -403,7 +399,7 @@ namespace Simd
                             InputConvolution1x1_NxMV2<type, flush, 2, apply>(src0, p, a, e1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, NULL, NULL);
                         else
                             InputConvolution1x1_NxMV2<type, flush, 1, apply>(src0, p, a, e1, weight, bias + dc, params + dc, _params, buf, dst0, NULL, NULL, NULL);
-                        dst0 += dD;
+                        dst += dD;
                         weight += dW;
                     }
                 }
@@ -423,16 +419,18 @@ namespace Simd
                             InputConvolution1x1_1xMV2<type, flush, 2, 0>(src0, p, a, e, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, NULL, NULL);
                         else
                             InputConvolution1x1_1xMV2<type, flush, 1, 0>(src0, p, a, e, weight, bias + dc, params + dc, _params, buf, dst0, NULL, NULL, NULL);
-                        dst0 += dD;
+                        dst += dD;
                         weight += dW;
                     }
                 }
             }
             else
             {
+                //std::cout << " yInt != yBeg " << std::endl;
                 for (size_t dc = 0; dc < maC; dc += QF)
                 {
                     size_t dC = Simd::Min(QF, maC - dc);
+                    //std::cout << "  dC " << dC << std::endl;
                     if (dC > 3 * F)
                     {
                         if (yInt > yBeg)
@@ -441,7 +439,7 @@ namespace Simd
                             const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yBeg & dstM) * p.dstW * F;
                             if (in)
-                                ;// InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, i1, weight, _bias, _params, buf, dst0, dst1);
+                                InputConvolution1x1_NxMV2<type, flush, 4, apply>(src0, p, a, i1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, dst0 + 3 * dstS);
                             else if (i)
                                 InputConvolution1x1_1xMV2<type, flush, 4, 1>(src0, p, a, i, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, dst0 + 3 * dstS);
                         }
@@ -450,8 +448,8 @@ namespace Simd
                             SetTileConfFull();
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F;
-                            if (in)
-                                ;// InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, e1, weight, _bias, _params, buf, dst0, dst1);
+                            if (en)
+                                InputConvolution1x1_NxMV2<type, flush, 4, apply>(src0, p, a, e1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, dst0 + 3 * dstS);
                             else if (e)
                                 InputConvolution1x1_1xMV2<type, flush, 4, 1>(src0, p, a, e, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, dst0 + 3 * dstS);
                         }
@@ -464,7 +462,7 @@ namespace Simd
                             const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yBeg & dstM) * p.dstW * F;
                             if (in)
-                                ;// InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, i1, weight, _bias, _params, buf, dst0, dst1);
+                                InputConvolution1x1_1xMV2<type, flush, 3, 0>(src0, p, a, i1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
                             else if (i)
                                 InputConvolution1x1_1xMV2<type, flush, 3, 1>(src0, p, a, i, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
                         }
@@ -473,8 +471,8 @@ namespace Simd
                             SetTileConfFull();
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F;
-                            if (in)
-                                ;// InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, e1, weight, _bias, _params, buf, dst0, dst1);
+                            if (en)
+                                InputConvolution1x1_1xMV2<type, flush, 3, 0>(src0, p, a, e1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
                             else if (e)
                                 InputConvolution1x1_1xMV2<type, flush, 3, 1>(src0, p, a, e, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
                         }
@@ -487,7 +485,7 @@ namespace Simd
                             const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yBeg & dstM) * p.dstW * F;
                             if (in)
-                                ;// InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, i1, weight, _bias, _params, buf, dst0, dst1);
+                                InputConvolution1x1_NxMV2<type, flush, 2, apply>(src0, p, a, i1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, NULL, NULL);
                             else if (i)
                                 InputConvolution1x1_1xMV2<type, flush, 2, 1>(src0, p, a, i, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, NULL, NULL);
                         }
@@ -496,8 +494,8 @@ namespace Simd
                             SetTileConfFull();
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F;
-                            if (in)
-                                ;// InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, e1, weight, _bias, _params, buf, dst0, dst1);
+                            if (en)
+                                InputConvolution1x1_NxMV2<type, flush, 2, apply>(src0, p, a, e1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, NULL, NULL);
                             else if (e)
                                 InputConvolution1x1_1xMV2<type, flush, 2, 1>(src0, p, a, e, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, NULL, NULL);
                         }
@@ -510,7 +508,7 @@ namespace Simd
                             const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yBeg & dstM) * p.dstW * F;
                             if (in)
-                                ;// InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, i1, weight, _bias, _params, buf, dst0, dst1);
+                                InputConvolution1x1_NxMV2<type, flush, 1, apply>(src0, p, a, i1, weight, bias + dc, params + dc, _params, buf, dst0, NULL, NULL, NULL);
                             else if (i)
                                 InputConvolution1x1_1xMV2<type, flush, 1, 1>(src0, p, a, i, weight, bias + dc, params + dc, _params, buf, dst0, NULL, NULL, NULL);
                         }
@@ -519,14 +517,14 @@ namespace Simd
                             SetTileConfFull();
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F;
-                            if (in)
-                                ;// InputConvolution1x1_Nx32V1<type, 1, 2, apply>(src0, p, a, e1, weight, _bias, _params, buf, dst0, dst1);
+                            if (en)
+                                InputConvolution1x1_NxMV2<type, flush, 1, apply>(src0, p, a, e1, weight, bias + dc, params + dc, _params, buf, dst0, NULL, NULL, NULL);
                             else if (e)
                                 InputConvolution1x1_1xMV2<type, flush, 1, 1>(src0, p, a, e, weight, bias + dc, params + dc, _params, buf, dst0, NULL, NULL, NULL);
                         }
                     }
-                    dst += a.bufH[1] * p.dstW * QF;
-                    weight += srcC * QF;
+                    dst += dD;
+                    weight += dW;
                 }
             }
         }
