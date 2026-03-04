@@ -169,7 +169,7 @@ namespace Simd
 
         SIMD_INLINE size_t InputVerson(const ConvParam & p)
         {
-            if (p.Is1x1() && p.srcC < 64 && p.dstH * p.dstW >= 16 && 1)
+            if (p.Is1x1() && p.srcC < 64 && p.dstH * p.dstW >= 16 && 0)
                 return 2;
             if (p.Is1x1() && p.srcC >= 64 && p.dstH * p.dstW >= 32 && 1)
                 return 1;

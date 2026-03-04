@@ -243,11 +243,11 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, int flush, int M, int apply> void InputConvolution1x1_32x32V1(const uint16_t* src0, const ConvParam& p, 
+        template<SimdConvolutionActivationType type, int flush, int M, int apply> SIMD_INLINE void InputConvolution1x1_32x32V1(const uint16_t* src0, const ConvParam& p,
             const AlgParam& a, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, float* buf1, float* dst0, float* dst1)
         {
             size_t sC = AlignHi(p.srcC, a.miK);
-            int strideS = (int)sC * 2, strideW = 64, strideB = 64, stepS = 32, dW =16;
+            int strideS = (int)sC * 2, strideW = 64, strideB = 64, stepS = 32, dW = 16;
             const uint16_t* src1 = src0 + sC * 16, * weight1 = weight0 + sC * 16;
             int sC32 = (int)sC - 32, aC32 = apply ? (8 * 32 / apply - 32) : 0, sc = 0, ds = 0;
 
@@ -304,7 +304,7 @@ namespace Simd
             if (M > 1) _tile_stored(3, buf1 + 3 * 256, strideB);
         }
 
-        template<SimdConvolutionActivationType type, int flush, int M, int apply> void InputConvolution1x1_16x32V1(const uint16_t* src0, const ConvParam& p, 
+        template<SimdConvolutionActivationType type, int flush, int M, int apply> SIMD_INLINE void InputConvolution1x1_16x32V1(const uint16_t* src0, const ConvParam& p,
             const AlgParam& a, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, float* buf1, float* dst0, float* dst1)
         {
             size_t sC = AlignHi(p.srcC, a.miK);
@@ -321,11 +321,13 @@ namespace Simd
             {
                 if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
                 if (M > 0) _tile_dpbf16ps(0, 4, 6);
-                ApplyMxN<type, flush, M, 2 * apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += 2 * apply * F;
+                ApplyMxN<type, flush, M, apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += apply * F;
+                ApplyMxN<type, flush, M, apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += apply * F;
                 sc += 32;
                 if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
                 if (M > 1) _tile_dpbf16ps(1, 4, 7);
-                ApplyMxN<type, flush, M, 2 * apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += 2 * apply * F;
+                ApplyMxN<type, flush, M, apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += apply * F;
+                ApplyMxN<type, flush, M, apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += apply * F;
                 src0 += stepS;
                 _tile_stream_loadd(4, src0, strideS);
             }
@@ -341,10 +343,12 @@ namespace Simd
             }
             if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
             if (M > 0) _tile_dpbf16ps(0, 4, 6);
-            ApplyMxN<type, flush, M, 2 * apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += 2 * apply * F;
+            ApplyMxN<type, flush, M, apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += apply * F;
+            ApplyMxN<type, flush, M, apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += apply * F;
             if (M > 0) _tile_stored(0, buf1 + 0 * 256, strideB);
             if (M > 1) _tile_dpbf16ps(1, 4, 7);
-            ApplyMxN<type, flush, M, 2 * apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += 2 * apply * F;
+            ApplyMxN<type, flush, M, apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += apply * F;
+            ApplyMxN<type, flush, M, apply>(buf0 + ds, dst0 + ds, dst1 + ds, bias, params), ds += apply * F;
             if (M > 1) _tile_stored(1, buf1 + 2 * 256, strideB);
         }
 
@@ -542,7 +546,7 @@ namespace Simd
                 else if (p.srcC >= 64)
                     input = InputConvolution1x1_2V1<type, 4>;
                 else
-                    assert(0);
+                    input = InputConvolution1x1_2V1<type, 8>;
             }
             else
                 assert(0);

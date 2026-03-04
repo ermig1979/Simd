@@ -78,7 +78,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, int flush, int M, int cfg> void InputConvolution1x1_1xMV2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int flush, int M, int cfg> SIMD_INLINE void InputConvolution1x1_1xMV2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const float* bias, const float* params, __m512* _params, float* buf, float* dst0, float* dst1, float* dst2, float* dst3)
         {
             size_t sC = AlignHi(p.srcC, a.miK);
@@ -189,7 +189,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, int flush, int M, int apply> void InputConvolution1x1_1xMV2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<SimdConvolutionActivationType type, int flush, int M, int apply> SIMD_INLINE void InputConvolution1x1_1xMV2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, float* buf1, float* dst0, float* dst1, float* dst2, float* dst3)
         {
             size_t sC = AlignHi(p.srcC, a.miK);
