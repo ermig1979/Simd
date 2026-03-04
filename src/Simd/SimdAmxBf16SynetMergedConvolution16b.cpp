@@ -167,12 +167,17 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE size_t InputVerson(const ConvParam & p)
+        SIMD_INLINE size_t InputVersion(const ConvParam & p)
         {
             if (p.Is1x1() && p.srcC < 64 && p.dstH * p.dstW >= 16 && 0)
                 return 2;
             if (p.Is1x1() && p.srcC >= 64 && p.dstH * p.dstW >= 32 && 1)
                 return 1;
+            return 0;
+        }
+
+        SIMD_INLINE size_t OutputVersion(const ConvParam& p)
+        {
             return 0;
         }
 
@@ -184,7 +189,8 @@ namespace Simd
             if (p.conv[2].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
-                _alg.ver[0] = InputVerson(_param.conv[0]);
+                _alg.ver[0] = InputVersion(_param.conv[0]);
+                _alg.ver[1] = OutputVersion(_param.conv[2]);
                 if (!_src16b)
                     _toBf16 = ConvertFp32ToBf16;
                 else if (!Aligned(p.conv[0].srcC, Avx512bw::DF))
@@ -207,7 +213,10 @@ namespace Simd
                 else
                     _toFp32 = CopyFp32ToFp32;
                 SetDepthwise(_param.conv[1], _depthwise);
-                SetOutput(_param.conv[2], _output);
+                switch (_alg.ver[1])
+                {
+                case 0: SetOutputV0(_param.conv[2], _output); break;
+                }
             }
         }
 
@@ -219,7 +228,7 @@ namespace Simd
             if (p.conv[1].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
-                _alg.ver[0] = InputVerson(_param.conv[0]);
+                _alg.ver[0] = InputVersion(_param.conv[0]);
                 if (!_src16b)
                     _toBf16 = ConvertFp32ToBf16;
                 else if (!Aligned(p.conv[0].srcC, Avx512bw::DF))
@@ -249,8 +258,12 @@ namespace Simd
             if (p.conv[0].dstC > HF && p.conv[1].dstC > HF)
             {
                 SetSize(Avx512bw::F, Avx512bw::DF);
+                _alg.ver[1] = OutputVersion(_param.conv[1]);
                 SetDepthwise(_param.conv[0], _depthwise);
-                SetOutput(_param.conv[1], _output);
+                switch (_alg.ver[1])
+                {
+                case 0: SetOutputV0(_param.conv[1], _output); break;
+                }
             }
         }
 

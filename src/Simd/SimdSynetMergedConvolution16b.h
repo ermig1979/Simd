@@ -81,13 +81,13 @@ namespace Simd
             typedef void(*ConvertToFp32Ptr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, float* dst);
 
             typedef void(*InputConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-                const uint16_t* weight, const float* bias, const float* params, float* sum, float* dst);
+                const uint16_t* weight, const float* bias, const float* params, float* buf, float* dst);
 
             typedef void(*DepthwiseConvolutionPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const float* weight, const float* bias, const float* params, uint8_t* dst);
 
             typedef void(*OutputConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-                int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, uint8_t* dst);
+                int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, float* buf, uint8_t* dst);
 
         protected:
             void SetInputWeight(const float* src, const ConvParam& p);
@@ -285,7 +285,7 @@ namespace Simd
         bool SetDepthwise5x5(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
         bool SetDepthwise7x7(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution16b::OutputConvolutionPtr* output);
+        void SetOutputV0(const ConvParam& p, Base::SynetMergedConvolution16b::OutputConvolutionPtr* output);
 
         //-------------------------------------------------------------------------------------------------
 

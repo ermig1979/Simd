@@ -39,7 +39,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type, int cfg> void OutputConvolution_2x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<Term16bType term, SimdConvolutionActivationType type, int cfg> void OutputConvolution_2x2V0(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, uint8_t * dst)
         {
             int dS = (int)a.maC, dB = (int)AlignHi(p.dstC, F), dD = int(p.dstC * a.elem[1]);
@@ -101,7 +101,7 @@ namespace Simd
             }
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type, int cfg> void OutputConvolution_2x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<Term16bType term, SimdConvolutionActivationType type, int cfg> void OutputConvolution_2x1V0(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, uint8_t* dst)
         {
             int dS = (int)a.maC, dB = (int)AlignHi(p.dstC, F), dD = int(p.dstC * a.elem[1]);
@@ -151,7 +151,7 @@ namespace Simd
             }
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type, int cfg> void OutputConvolution_1x2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<Term16bType term, SimdConvolutionActivationType type, int cfg> void OutputConvolution_1x2V0(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, uint8_t* dst)
         {
             int dS = (int)a.maC, dB = (int)AlignHi(p.dstC, F), dD = int(p.dstC * a.elem[1]);
@@ -199,7 +199,7 @@ namespace Simd
             }
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type, int cfg> void OutputConvolution_1x1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        template<Term16bType term, SimdConvolutionActivationType type, int cfg> void OutputConvolution_1x1V0(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, uint8_t* dst)
         {
             int dS = (int)a.maC, dB = (int)AlignHi(p.dstC, F), dD = int(p.dstC * a.elem[1]);
@@ -236,11 +236,11 @@ namespace Simd
             }
         }
 
-        typedef void (*OutputConvolutionPtr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
+        typedef void (*OutputConvolutionV0Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, uint8_t* dst);
 
-        template<Term16bType term, SimdConvolutionActivationType type> void OutputConvolution1x1_2(const uint16_t* src, const ConvParam& p, const AlgParam& a,
-            size_t maC, size_t yBeg, size_t yEnd, int zero, const uint16_t* weight, const float* bias, const float* params, float* buf, uint8_t* dst)
+        template<Term16bType term, SimdConvolutionActivationType type> void OutputConvolution1x1_2V0(const uint16_t* src, const ConvParam& p, const AlgParam& a,
+            size_t maC, size_t yBeg, size_t yEnd, int zero, const uint16_t* weight, const float* bias, const float* params, float* buf, float*, uint8_t* dst)
         {
             size_t n = 32, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             size_t dW = AlignHi(maC, a.miK) * DF, dS = a.maC, dB = AlignHi(p.dstC, F), dD = p.dstC * a.elem[1];
@@ -251,10 +251,10 @@ namespace Simd
             _params[1] = _mm512_set1_ps(params[1]);
             if (nn)
             {
-                OutputConvolutionPtr body_2 = OutputConvolution_2x2<term, type, 0>;
-                OutputConvolutionPtr tail_2 = m > 16 ? OutputConvolution_2x2<term, type, 0> : OutputConvolution_1x2<term, type, 0>;
-                OutputConvolutionPtr body_1 = OutputConvolution_2x1<term, type, 0>;
-                OutputConvolutionPtr tail_1 = m > 16 ? OutputConvolution_2x1<term, type, 0> : OutputConvolution_1x1<term, type, 0>;
+                OutputConvolutionV0Ptr body_2 = OutputConvolution_2x2V0<term, type, 0>;
+                OutputConvolutionV0Ptr tail_2 = m > 16 ? OutputConvolution_2x2V0<term, type, 0> : OutputConvolution_1x2V0<term, type, 0>;
+                OutputConvolutionV0Ptr body_1 = OutputConvolution_2x1V0<term, type, 0>;
+                OutputConvolutionV0Ptr tail_1 = m > 16 ? OutputConvolution_2x1V0<term, type, 0> : OutputConvolution_1x1V0<term, type, 0>;
                 SetTileConfFull();
                 for (size_t dc = 0; dc < p.dstC; dc += DF)
                 {
@@ -289,8 +289,8 @@ namespace Simd
             }
             else
             {
-                OutputConvolutionPtr tail_2 = m > 16 ? OutputConvolution_2x2<term, type, 0> : OutputConvolution_1x2<term, type, 0>;
-                OutputConvolutionPtr tail_1 = m > 16 ? OutputConvolution_2x1<term, type, 0> : OutputConvolution_1x1<term, type, 0>;
+                OutputConvolutionV0Ptr tail_2 = m > 16 ? OutputConvolution_2x2V0<term, type, 0> : OutputConvolution_1x2V0<term, type, 0>;
+                OutputConvolutionV0Ptr tail_1 = m > 16 ? OutputConvolution_2x1V0<term, type, 0> : OutputConvolution_1x1V0<term, type, 0>;
                 if (m > 16)
                     SetTileConf2x2(m, 32);
                 else
@@ -320,30 +320,30 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> static void SetOutput(const ConvParam& p, OutputPtr* output)
+        template<SimdConvolutionActivationType type> static void SetOutputV0(const ConvParam& p, OutputPtr* output)
         {
             if (p.dstT == SimdTensorData16b)
-                output[0] = OutputConvolution1x1_2<Term16bLast16b, type>;
+                output[0] = OutputConvolution1x1_2V0<Term16bLast16b, type>;
             else
-                output[0] = OutputConvolution1x1_2<Term16bLast32f, type>;
-            output[1] = OutputConvolution1x1_2<Term16bInterim, SimdConvolutionActivationIdentity>;
+                output[0] = OutputConvolution1x1_2V0<Term16bLast32f, type>;
+            output[1] = OutputConvolution1x1_2V0<Term16bInterim, SimdConvolutionActivationIdentity>;
         }
 
-        void SetOutput(const ConvParam& p, OutputPtr* output)
+        void SetOutputV0(const ConvParam& p, OutputPtr* output)
         {
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: SetOutput<SimdConvolutionActivationRestrictRange>(p, output); break;
-            case SimdConvolutionActivationRelu: SetOutput<SimdConvolutionActivationRestrictRange>(p, output); break;
-            case SimdConvolutionActivationLeakyRelu: SetOutput<SimdConvolutionActivationPrelu>(p, output); break;
-            case SimdConvolutionActivationRestrictRange: SetOutput<SimdConvolutionActivationRestrictRange>(p, output); break;
-            case SimdConvolutionActivationPrelu: SetOutput<SimdConvolutionActivationPrelu>(p, output); break;
-            case SimdConvolutionActivationElu: SetOutput<SimdConvolutionActivationElu>(p, output); break;
-            case SimdConvolutionActivationHswish: SetOutput<SimdConvolutionActivationHswish>(p, output); break;
-            case SimdConvolutionActivationMish: SetOutput<SimdConvolutionActivationMish>(p, output); break;
-            case SimdConvolutionActivationHardSigmoid: SetOutput<SimdConvolutionActivationHardSigmoid>(p, output); break;
-            case SimdConvolutionActivationSwish: SetOutput<SimdConvolutionActivationSwish>(p, output); break;
-            case SimdConvolutionActivationGelu: SetOutput<SimdConvolutionActivationGelu>(p, output); break;
+            case SimdConvolutionActivationIdentity: SetOutputV0<SimdConvolutionActivationRestrictRange>(p, output); break;
+            case SimdConvolutionActivationRelu: SetOutputV0<SimdConvolutionActivationRestrictRange>(p, output); break;
+            case SimdConvolutionActivationLeakyRelu: SetOutputV0<SimdConvolutionActivationPrelu>(p, output); break;
+            case SimdConvolutionActivationRestrictRange: SetOutputV0<SimdConvolutionActivationRestrictRange>(p, output); break;
+            case SimdConvolutionActivationPrelu: SetOutputV0<SimdConvolutionActivationPrelu>(p, output); break;
+            case SimdConvolutionActivationElu: SetOutputV0<SimdConvolutionActivationElu>(p, output); break;
+            case SimdConvolutionActivationHswish: SetOutputV0<SimdConvolutionActivationHswish>(p, output); break;
+            case SimdConvolutionActivationMish: SetOutputV0<SimdConvolutionActivationMish>(p, output); break;
+            case SimdConvolutionActivationHardSigmoid: SetOutputV0<SimdConvolutionActivationHardSigmoid>(p, output); break;
+            case SimdConvolutionActivationSwish: SetOutputV0<SimdConvolutionActivationSwish>(p, output); break;
+            case SimdConvolutionActivationGelu: SetOutputV0<SimdConvolutionActivationGelu>(p, output); break;
             }
         }
     }

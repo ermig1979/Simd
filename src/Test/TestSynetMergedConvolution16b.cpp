@@ -107,7 +107,7 @@ namespace Test
             p.bias[i] = bias[i].Data();
 
             params[i].Reshape(Shp(Simd::Max<size_t>(2, dc)));
-            FillRandom(params[i].Data(), params[i].Size(), 0.0, 2.0f);
+            FillRandom(params[i].Data(), params[i].Size(), 0.0, 1.0f);
             if (p.conv[i].activation == ::SimdConvolutionActivationHswish)
             {
                 params[i].Data()[0] = 3.0f;
@@ -306,11 +306,14 @@ namespace Test
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 512, 12, 4), Cnv(aSw, 1, 1, 512), Cnv(aSw, 3, 1), b16, f32), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 512, 4, 12), Cnv(aSw, 1, 1, 512), Cnv(aSw, 3, 1), b16, b16), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 32, 64, 64), Cnv(aPr, 1, 1, 64), Cnv(aPr, 3, 1), b16, b16), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 32, 32, 32), Cnv(aPr, 1, 1, 32), Cnv(aPr, 3, 1), b16, b16), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 32, 32), Cnv(aPr, 1, 1, 64), Cnv(aPr, 3, 1), b16, b16), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 128, 32, 32), Cnv(aPr, 1, 1, 128), Cnv(aPr, 3, 1), b16, b16), f1, f2);
+#endif
+#if 1
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 128, 32, 32), Cnv(aPr, 1, 1, 256), Cnv(aPr, 3, 1), Cnv(aPr, 1, 1, 128), f, b16, b16), f1, f2);
 #endif
 #if 0
         for (size_t i = 250; i < 260; i += 1)
