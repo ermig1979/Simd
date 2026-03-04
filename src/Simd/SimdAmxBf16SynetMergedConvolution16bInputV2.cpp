@@ -182,7 +182,7 @@ namespace Simd
             }
             else
             {
-                for (size_t s = 16; s < dstS; ++s)
+                for (size_t s = 0; s < dstS; ++s)
                     ApplyMxN<type, flush, M, 1>(buf + s * 16, dst0 + s * 16, dst1 + s * 16, dst2 + s * 16, dst3 + s * 16, _bias, _params);
             }
         }
@@ -426,11 +426,9 @@ namespace Simd
             }
             else
             {
-                //std::cout << " yInt != yBeg " << std::endl;
                 for (size_t dc = 0; dc < maC; dc += QF)
                 {
                     size_t dC = Simd::Min(QF, maC - dc);
-                    //std::cout << "  dC " << dC << std::endl;
                     if (dC > 3 * F)
                     {
                         if (yInt > yBeg)
@@ -462,7 +460,7 @@ namespace Simd
                             const uint16_t* src0 = src + (yBeg - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yBeg & dstM) * p.dstW * F;
                             if (in)
-                                InputConvolution1x1_1xMV2<type, flush, 3, 0>(src0, p, a, i1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
+                                InputConvolution1x1_NxMV2<type, flush, 3, apply>(src0, p, a, i1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
                             else if (i)
                                 InputConvolution1x1_1xMV2<type, flush, 3, 1>(src0, p, a, i, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
                         }
@@ -472,7 +470,7 @@ namespace Simd
                             const uint16_t* src0 = src + (yInt - y0) * p.srcW * srcC;
                             float* dst0 = dst + (yInt & dstM) * p.dstW * F;
                             if (en)
-                                InputConvolution1x1_1xMV2<type, flush, 3, 0>(src0, p, a, e1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
+                                InputConvolution1x1_NxMV2<type, flush, 3, apply>(src0, p, a, e1, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
                             else if (e)
                                 InputConvolution1x1_1xMV2<type, flush, 3, 1>(src0, p, a, e, weight, bias + dc, params + dc, _params, buf, dst0, dst0 + 1 * dstS, dst0 + 2 * dstS, NULL);
                         }
