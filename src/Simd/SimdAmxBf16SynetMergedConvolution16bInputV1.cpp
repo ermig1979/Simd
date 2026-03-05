@@ -539,11 +539,11 @@ namespace Simd
         {
             if (Is1x1(p))
             {
-                if (p.srcC >= 256)
+                if (p.srcC > 224)
                     input = InputConvolution1x1_2V1<type, 1>;
-                else if (p.srcC >= 128)
+                else if (p.srcC > 96)
                     input = InputConvolution1x1_2V1<type, 2>;
-                else if (p.srcC >= 64)
+                else if (p.srcC > 32)
                     input = InputConvolution1x1_2V1<type, 4>;
                 else
                     input = InputConvolution1x1_2V1<type, 8>;

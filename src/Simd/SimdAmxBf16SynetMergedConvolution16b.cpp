@@ -171,7 +171,7 @@ namespace Simd
         {
             if (p.Is1x1() && p.srcC < 64 && p.dstH * p.dstW >= 16 && 0)
                 return 2;
-            if (p.Is1x1() && p.srcC >= 64 && p.dstH * p.dstW >= 32 && 1)
+            if (p.Is1x1() /* && p.srcC >= 64  && p.dstH * p.dstW >= 32*/ && 1)
                 return 1;
             return 0;
         }
