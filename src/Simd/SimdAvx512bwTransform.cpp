@@ -542,7 +542,7 @@ namespace Simd
             for (; row < height4; row += 4)
             {
                 size_t col = 0;
-                for (; col < width16; col += 8)
+                for (; col < width16; col += 16)
                     Avx512bw::TransformImageTranspose_4x4x16(src + col * 4 + 3 * srcStride, -srcStride, dst + col * dstStride - 12, dstStride);
                 for (; col < width8; col += 8)
                     Avx2::TransformImageTranspose_4x4x8(src + col * 4 + 3 * srcStride, -srcStride, dst + col * dstStride - 12, dstStride);
