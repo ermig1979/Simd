@@ -544,6 +544,7 @@ namespace Simd
 
         void SetInputV2(const ConvParam& p, InputPtr& input)
         {
+#if 0
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: SetInputV2<SimdConvolutionActivationRestrictRange>(p, input); break;
@@ -558,6 +559,10 @@ namespace Simd
             case SimdConvolutionActivationSwish: SetInputV2<SimdConvolutionActivationSwish>(p, input); break;
             case SimdConvolutionActivationGelu: SetInputV2<SimdConvolutionActivationGelu>(p, input); break;
             }
+#else
+            input = NULL;
+            assert(0);
+#endif
         }
     }
 #endif

@@ -38,7 +38,7 @@ namespace Simd
         using AlgParam = Base::SynetMergedConvolution16b::AlgParam;
         using InputPtr = Base::SynetMergedConvolution16b::InputConvolutionPtr;
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type, int flush, int M> static SIMD_INLINE void ApplyMx1(const float* src, float* dst0, float* dst1, const __m512* bias, const __m512* params)
         {
@@ -66,7 +66,7 @@ namespace Simd
             if (N > 7) ApplyMx1<type, flush, M>(src + 7 * F, dst0 + 7 * F, dst1 + 7 * F, bias, params);
         }        
         
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_2x2V1(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf, float* dst0, float* dst1)
@@ -386,7 +386,7 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type, int apply> void InputConvolution1x1_2V1(const uint16_t* src, const ConvParam& p, const AlgParam& a,
             size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* buf, float* dst)

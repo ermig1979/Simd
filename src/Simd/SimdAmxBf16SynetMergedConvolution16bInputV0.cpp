@@ -38,7 +38,7 @@ namespace Simd
         using AlgParam = Base::SynetMergedConvolution16b::AlgParam;
         using InputPtr = Base::SynetMergedConvolution16b::InputConvolutionPtr;
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply1(const float* src, float* dst, const __m512* bias, const __m512* params)
         {
@@ -70,7 +70,7 @@ namespace Simd
             Apply8<type, index>(src + 8 * F, dst + 8 * F, bias, params);
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type, int cfg> void InputConvolution1x1_2x2V0(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t dstS, const uint16_t* weight0, const __m512* bias, const __m512* params, float * buf, float* dst0, float *dst1)
@@ -412,7 +412,7 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type> static void SetInputV0(const ConvParam& p, InputPtr& input)
         {
@@ -424,6 +424,7 @@ namespace Simd
 
         void SetInputV0(const ConvParam& p, InputPtr& input)
         {
+#if 0
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: SetInputV0<SimdConvolutionActivationRestrictRange>(p, input); break;
@@ -438,6 +439,10 @@ namespace Simd
             case SimdConvolutionActivationSwish: SetInputV0<SimdConvolutionActivationSwish>(p, input); break;
             case SimdConvolutionActivationGelu: SetInputV0<SimdConvolutionActivationGelu>(p, input); break;
             }
+#else
+            input = NULL;
+            assert(0);
+#endif
         }
     }
 #endif
