@@ -39,7 +39,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type, int M, int flush> static SIMD_INLINE void ApplyMx1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
+        template<Term16bType term, SimdConvolutionActivationType type, int flush, int M> static SIMD_INLINE void ApplyMx1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
         {
             __m512 f0, f1;
             if (M > 0) f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + 0), bias[0]), params, 0);
@@ -75,17 +75,97 @@ namespace Simd
             }
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type, int M, int N, int flush> static SIMD_INLINE void ApplyMxN(uint8_t* ptr, int dP, float* buf, int dB, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
+        template<Term16bType term, SimdConvolutionActivationType type, int flush, int M, int N> static SIMD_INLINE void ApplyMxN(uint8_t* ptr, int dP, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
         {
-            if (N > 0) ApplyMx1<term, type, M, flush>(ptr + 0 * dP, buf + 0 * dB, bias, params, tail);
-            if (N > 1) ApplyMx1<term, type, M, flush>(ptr + 1 * dP, buf + 1 * dB, bias, params, tail);
-            if (N > 2) ApplyMx1<term, type, M, flush>(ptr + 2 * dP, buf + 2 * dB, bias, params, tail);
-            if (N > 3) ApplyMx1<term, type, M, flush>(ptr + 3 * dP, buf + 3 * dB, bias, params, tail);
-            if (N > 4) ApplyMx1<term, type, M, flush>(ptr + 4 * dP, buf + 4 * dB, bias, params, tail);
-            if (N > 5) ApplyMx1<term, type, M, flush>(ptr + 5 * dP, buf + 5 * dB, bias, params, tail);
-            if (N > 6) ApplyMx1<term, type, M, flush>(ptr + 6 * dP, buf + 6 * dB, bias, params, tail);
-            if (N > 7) ApplyMx1<term, type, M, flush>(ptr + 7 * dP, buf + 7 * dB, bias, params, tail);
+            if (N > 0) ApplyMx1<term, type, flush, M>(ptr + 0 * dP, buf + 0 * DF, bias, params, tail);
+            if (N > 1) ApplyMx1<term, type, flush, M>(ptr + 1 * dP, buf + 1 * DF, bias, params, tail);
+            if (N > 2) ApplyMx1<term, type, flush, M>(ptr + 2 * dP, buf + 2 * DF, bias, params, tail);
+            if (N > 3) ApplyMx1<term, type, flush, M>(ptr + 3 * dP, buf + 3 * DF, bias, params, tail);
+            if (N > 4) ApplyMx1<term, type, flush, M>(ptr + 4 * dP, buf + 4 * DF, bias, params, tail);
+            if (N > 5) ApplyMx1<term, type, flush, M>(ptr + 5 * dP, buf + 5 * DF, bias, params, tail);
+            if (N > 6) ApplyMx1<term, type, flush, M>(ptr + 6 * dP, buf + 6 * DF, bias, params, tail);
+            if (N > 7) ApplyMx1<term, type, flush, M>(ptr + 7 * dP, buf + 7 * DF, bias, params, tail);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<Term16bType term, SimdConvolutionActivationType type, int flush, int M, int apply> SIMD_INLINE void Convolution16bNhwcGemm_1xMx32(
+            const uint16_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, int zero, const uint16_t* weight0, 
+            const __m512* bias, const __m512* params, float *buf0, float* buf1, float* buf2, uint8_t* dst0, __mmask32 tailD)
+        {
+            int dD = int(p.dstC * a.elem[1]), dS = (int)a.maC, strideB = 128, dW = 16, strideW = 64;
+            int stepS = 32, strideS = dS * 2;
+            const uint16_t *src1 = src0 + 16 * dS;
+            const uint16_t *weight1 = weight0 + AlignHi(srcC, a.miK) * F;
+
+            if (zero)
+            {
+                if (M > 0) _tile_zero(0);
+                if (M > 1) _tile_zero(1);
+                if (M > 0) _tile_zero(2);
+                if (M > 1) _tile_zero(3);
+            }
+            else
+            {
+                int dB = (int)AlignHi(p.dstC, F), strideB = dB * 4;
+                if (M > 0) _tile_stream_loadd(0, buf0 + 0, strideB);
+                if (M > 1) _tile_stream_loadd(1, buf0 + F, strideB);
+                buf0 += 16 * dB;
+                if (M > 0) _tile_stream_loadd(2, buf0 + 0, strideB);
+                if (M > 1) _tile_stream_loadd(3, buf0 + F, strideB);
+            }
+
+            int sC32 = (int)srcC - 32, aC32 = apply ? (8 * 32 / apply - 32) : 0, sc = 0, ds = 0;
+
+            _tile_stream_loadd(4, src0, strideS);
+            if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
+            for (; sc < aC32; src1 += stepS)
+            {
+                if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 4, 6);
+                ApplyMxN<term, type, flush, M, apply>(dst0 + ds * dD, dD, buf1 + ds * DF, bias, params, tailD), ds += apply;
+                _tile_stream_loadd(5, src1, strideS);
+                if (M > 1) _tile_dpbf16ps(1, 4, 7);
+                ApplyMxN<term, type, flush, M, apply>(dst0 + ds * dD, dD, buf1 + ds * DF, bias, params, tailD), ds += apply;
+                src0 += stepS;
+                _tile_stream_loadd(4, src0, strideS);
+                if (M > 0) _tile_dpbf16ps(2, 5, 6);
+                ApplyMxN<term, type, flush, M, apply>(dst0 + ds * dD, dD, buf1 + ds * DF, bias, params, tailD), ds += apply;
+                sc += 32;
+                if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
+                if (M > 1) _tile_dpbf16ps(3, 5, 7);
+                ApplyMxN<term, type, flush, M, apply>(dst0 + ds * dD, dD, buf1 + ds * DF, bias, params, tailD), ds += apply;
+            }
+            for (; sc < sC32; src1 += stepS)
+            {
+                if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 4, 6);
+                _tile_stream_loadd(5, src1, strideS);
+                if (M > 1) _tile_dpbf16ps(1, 4, 7);
+                src0 += stepS;
+                _tile_stream_loadd(4, src0, strideS);
+                if (M > 0) _tile_dpbf16ps(2, 5, 6);
+                sc += 32;
+                if (M > 0) _tile_loadd(6, weight0 + sc * dW, strideW);
+                if (M > 1) _tile_dpbf16ps(3, 5, 7);
+            }
+            if (M > 1) _tile_loadd(7, weight1 + sc * dW, strideW);
+            _tile_stream_loadd(5, src1, strideS);
+            if (M > 0) _tile_dpbf16ps(0, 4, 6);
+            ApplyMxN<term, type, flush, M, apply>(dst0 + ds * dD, dD, buf1 + ds * DF, bias, params, tailD), ds += apply;
+            if (M > 0) _tile_stored(0, buf2 + 0, strideB);
+            if (M > 1) _tile_dpbf16ps(1, 4, 7);
+            ApplyMxN<term, type, flush, M, apply>(dst0 + ds * dD, dD, buf1 + ds * DF, bias, params, tailD), ds += apply;
+            if (M > 1) _tile_stored(1, buf2 + F, strideB);
+            buf2 += 16 * DF;
+            if (M > 0) _tile_dpbf16ps(2, 5, 6);
+            ApplyMxN<term, type, flush, M, apply>(dst0 + ds * dD, dD, buf1 + ds * DF, bias, params, tailD), ds += apply;
+            if (M > 0) _tile_stored(2, buf2 + 0, strideB);
+            if (M > 1) _tile_dpbf16ps(3, 5, 7);
+            ApplyMxN<term, type, flush, M, apply>(dst0 + ds * dD, dD, buf1 + ds * DF, bias, params, tailD), ds += apply;
+            if (M > 1) _tile_stored(3, buf2 + F, strideB);
+        }
+
 
         //-------------------------------------------------------------------------------------------------
 
