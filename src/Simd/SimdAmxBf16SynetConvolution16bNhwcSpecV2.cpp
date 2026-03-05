@@ -155,6 +155,119 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<int N> SIMD_INLINE void ToMemory(const float* ptr)
+        {
+            if (N > 0x0) _mm_prefetch((const char*)(ptr + 0x0 * F), _MM_HINT_NTA);
+            if (N > 0x1) _mm_prefetch((const char*)(ptr + 0x1 * F), _MM_HINT_NTA);
+            if (N > 0x2) _mm_prefetch((const char*)(ptr + 0x2 * F), _MM_HINT_NTA);
+            if (N > 0x3) _mm_prefetch((const char*)(ptr + 0x3 * F), _MM_HINT_NTA);
+            if (N > 0x4) _mm_prefetch((const char*)(ptr + 0x4 * F), _MM_HINT_NTA);
+            if (N > 0x5) _mm_prefetch((const char*)(ptr + 0x5 * F), _MM_HINT_NTA);
+            if (N > 0x6) _mm_prefetch((const char*)(ptr + 0x6 * F), _MM_HINT_NTA);
+            if (N > 0x7) _mm_prefetch((const char*)(ptr + 0x7 * F), _MM_HINT_NTA);
+        }
+
+        template<int N> SIMD_INLINE void ToL2(const uint16_t* ptr)
+        {
+            if (N > 0x0) _mm_prefetch((const char*)(ptr + 0x0 * DF), _MM_HINT_T1);
+            if (N > 0x1) _mm_prefetch((const char*)(ptr + 0x1 * DF), _MM_HINT_T1);
+            if (N > 0x2) _mm_prefetch((const char*)(ptr + 0x2 * DF), _MM_HINT_T1);
+            if (N > 0x3) _mm_prefetch((const char*)(ptr + 0x3 * DF), _MM_HINT_T1);
+            if (N > 0x4) _mm_prefetch((const char*)(ptr + 0x4 * DF), _MM_HINT_T1);
+            if (N > 0x5) _mm_prefetch((const char*)(ptr + 0x5 * DF), _MM_HINT_T1);
+            if (N > 0x6) _mm_prefetch((const char*)(ptr + 0x6 * DF), _MM_HINT_T1);
+            if (N > 0x7) _mm_prefetch((const char*)(ptr + 0x7 * DF), _MM_HINT_T1);
+        }
+
+        template<int M, int tomem, int tol2> SIMD_INLINE void Convolution16bNhwcSpecV2Body_1x32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* buf2, const uint16_t* weight1)
+        {
+            int dB = (int)a.macroD, dS = (int)a.microC, strideS = dS * 2, dW = (int)a.microD * 32, strideW = (int)a.microD * 4, strideB = dB * 4;
+            const uint16_t* src1 = src0 + 16 * dS;
+            float* buf0 = buf2 - 32 * dB;
+            float* buf3 = buf2 + 16 * dB;
+
+            if (zero)
+            {
+                if (M > 0) _tile_zero(0);
+                if (M > 1) _tile_zero(1);
+                if (M > 0) _tile_zero(2);
+                if (M > 1) _tile_zero(3);
+            }
+            else
+            {
+                if (M > 0) _tile_stream_loadd(0, buf2 + 0, strideB);
+                if (M > 1) _tile_stream_loadd(1, buf2 + F, strideB);
+                if (M > 0) _tile_stream_loadd(2, buf3 + 0, strideB);
+                if (M > 1) _tile_stream_loadd(3, buf3 + F, strideB);
+            }
+
+            int n1 = (int)nK - 1, i = 0, o = offs[0], nm = tomem ? (16 / tomem - 1) : 0, ds = 0;
+            _tile_stream_loadd(4, src0 + o, strideS);
+            if (M > 0) _tile_loadd(6, weight0, strideW);
+            for (; i < nm; ++i)
+            {
+                if (M > 1) _tile_loadd(7, weight0 + 32, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 4, 6);
+                ToL2<tol2>(weight1), weight1 += tol2 * DF;
+                ToMemory<tomem>(buf0), buf0 += tomem * F;
+                _tile_stream_loadd(5, src1 + o, strideS);
+                if (M > 1) _tile_dpbf16ps(1, 4, 7);
+                ToMemory<tomem>(buf0), buf0 += tomem * F;
+                ToL2<tol2>(weight1), weight1 += tol2 * DF;
+                o = offs[i + 1];
+                _tile_stream_loadd(4, src0 + o, strideS);
+                if (M > 0) _tile_dpbf16ps(2, 5, 6);
+                ToMemory<tomem>(buf0), buf0 += tomem * F;
+                ToL2<tol2>(weight1), weight1 += tol2 * DF;
+                weight0 += dW;
+                if (M > 0) _tile_loadd(6, weight0, strideW);
+                if (M > 1) _tile_dpbf16ps(3, 5, 7);
+                ToMemory<tomem>(buf0), buf0 += tomem * F;
+                ToL2<tol2>(weight1), weight1 += tol2 * DF;
+            }
+            for (; i < n1; ++i)
+            {
+                if (M > 1) _tile_loadd(7, weight0 + 32, strideW);
+                if (M > 0) _tile_dpbf16ps(0, 4, 6);
+                _tile_stream_loadd(5, src1 + o, strideS);
+                if (M > 1) _tile_dpbf16ps(1, 4, 7);
+                o = offs[i + 1];
+                _tile_stream_loadd(4, src0 + o, strideS);
+                if (M > 0) _tile_dpbf16ps(2, 5, 6);
+                weight0 += dW;
+                if (M > 0) _tile_loadd(6, weight0, strideW);
+                if (M > 1) _tile_dpbf16ps(3, 5, 7);
+            }
+            if (M > 1) _tile_loadd(7, weight0 + 32, strideW);
+            _tile_stream_loadd(5, src1 + offs[n1], strideS);
+
+            if (M > 0) _tile_dpbf16ps(0, 4, 6);
+            ToMemory<tomem>(buf0), buf0 += tomem * F;
+            if (M > 0) _tile_stored(0, buf2 + 0, strideB);
+
+            if (M > 1) _tile_dpbf16ps(1, 4, 7);
+            if( tomem == 0)
+                TileMoveToMemory(buf2 + 0, dB);
+            ToMemory<tomem>(buf0), buf0 += tomem * F;
+            if (M > 1) _tile_stored(1, buf2 + F, strideB);
+
+            if (M > 0) _tile_dpbf16ps(2, 5, 6);
+            if (tomem == 0)
+                TileMoveToMemory(buf2 + F, dB);
+            ToMemory<tomem>(buf0), buf0 += tomem * F;
+            if (M > 0) _tile_stored(2, buf3 + 0, strideB);
+
+            if (M > 1) _tile_dpbf16ps(3, 5, 7);
+            if (tomem == 0)
+                TileMoveToMemory(buf3 + 0, dB);
+            ToMemory<tomem>(buf0), buf0 += tomem * F;
+            if (M > 1) _tile_stored(3, buf3 + F, strideB);
+            if (tomem == 0)
+                TileMoveToMemory(buf3 + F, dB);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void Convolution16bNhwcSpecV2Body32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* buf0)
         {
             int dB = (int)a.macroD, dS = (int)a.microC, strideS = dS * 2, dW = (int)a.microD * 32, strideW = (int)a.microD * 4, strideB = dB * 4;
@@ -330,9 +443,11 @@ namespace Simd
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
                 size_t i = 0;
+                //const uint16_t* weightToL2 = weight + dW;
                 if (dC > F)
                 {
-                    for (; i < nn; i += n)
+                    for (; i < nn; i += n)//, weightToL2 += DF * nK * 4)
+                        //Convolution16bNhwcSpecV2Body_1x32x32<2, 0, 1>(src + i * dS, p, a, offs, nK, zero, weight, buf + i * dB, weightToL2);
                         Convolution16bNhwcSpecV2Body32x32(src + i * dS, p, a, offs, nK, zero, weight, buf + i * dB);
                     if (m)
                         Convolution16bNhwcSpecV2Body16x32(src + i * dS, p, a, offs, nK, zero, weight, buf + i * dB);
