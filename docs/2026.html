@@ -43,6 +43,7 @@
 <ul>
  <li>AMX-BF16 optimizations of class SynetMergedConvolution16bCdc.</li>
  <li>AMX-BF16 optimizations of class SynetMergedConvolution16bCd.</li>
+ <li>AMX-BF16 optimizations of class SynetMergedConvolution16bDc.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -55,6 +56,8 @@
  <li>Error in SSE4.1 optimizations of class ResizerFloatBilinear (possible aligned write to unaligned memory).</li>
  <li>Memory leak in function Simd::Detection::LoadStringXml.</li>
  <li>Possible crash in function Simd::ImageLoadFromFile.</li>
+ <li>Possible crash in function Simd::Base64Decode.</li>
+ <li>Possible crash in AVX-512BW optimization of function TransformImageRotate270.</li>
 </ul>
 
 <h3 id="R159">March 3, 2026 (version 6.2.159)</h3> 

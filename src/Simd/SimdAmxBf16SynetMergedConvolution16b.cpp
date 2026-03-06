@@ -178,7 +178,7 @@ namespace Simd
 
         SIMD_INLINE size_t OutputVersion(const ConvParam& p)
         {
-            return 0;
+            return 1;
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -216,7 +216,7 @@ namespace Simd
                 switch (_alg.ver[1])
                 {
                 case 0: SetOutputV0(_param.conv[2], _output); break;
-                case 1: SetOutputV1(_param.conv[2], _output); break;
+                case 1: SetOutputV1(_param.conv[2], _alg, _output); break;
                 }
             }
         }
@@ -264,7 +264,7 @@ namespace Simd
                 switch (_alg.ver[1])
                 {
                 case 0: SetOutputV0(_param.conv[1], _output); break;
-                case 1: SetOutputV1(_param.conv[1], _output); break;
+                case 1: SetOutputV1(_param.conv[1], _alg, _output); break;
                 }
             }
         }
