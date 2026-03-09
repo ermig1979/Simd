@@ -81,7 +81,7 @@ namespace Test
 
             c.Reshape(sC);
 
-            void* context = ::SimdSynetInnerProduct32fInit(p.M, p.K, p.N, p.transB, SimdTrue, SimdTrue, SimdConvolutionActivationIdentity);
+            void* context = ::SimdSynetInnerProduct32fInit(p.M, p.N, p.K, p.transB, SimdTrue, SimdTrue, SimdConvolutionActivationIdentity);
             if (context == NULL)
                 return false;
 
