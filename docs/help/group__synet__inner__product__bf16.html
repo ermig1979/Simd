@@ -293,7 +293,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 inner product context. It must be created by function <a class="el" href="group__synet__inner__product__bf16.html#gac25569090fbcb038a6542c850cea7589" title="Initilizes BF16 inner product (matrix mutiplication) algorithm.">SimdSynetInnerProduct16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to A matrix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>- a pointer to B matrix. Can be NULL if B is constant matrix. In that case you have to set B in function SimdSynetInnerProduct16bSetParams. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>- a pointer to B matrix. Can be NULL if B is constant matrix. In that case you have to set B (weight) in function SimdSynetInnerProduct16bSetParams. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external buffer. The size of the external temporary buffer is determined by function <a class="el" href="group__synet__inner__product__bf16.html#ga2068a3866a4d83fce8b8b3c64a38bf85" title="Gets size in bytes of external buffer used in BF16 inner product algorithm.">SimdSynetInnerProduct16bExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">C</td><td>- a pointer to output matrix. </td></tr>
   </table>

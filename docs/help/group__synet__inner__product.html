@@ -50,18 +50,21 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gaf9a58f41fccb87d07faa4f3d352d99db"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gaf9a58f41fccb87d07faa4f3d352d99db">SimdSynetInnerProduct32fInit</a> (size_t batch, size_t input, size_t output, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> transpose, <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> activation)</td></tr>
-<tr class="memdesc:gaf9a58f41fccb87d07faa4f3d352d99db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes FP32 inner product algorithm.  <a href="group__synet__inner__product.html#gaf9a58f41fccb87d07faa4f3d352d99db">More...</a><br /></td></tr>
-<tr class="separator:gaf9a58f41fccb87d07faa4f3d352d99db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac76853987f78ee8ecf43291888a0b9f1"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gac76853987f78ee8ecf43291888a0b9f1">SimdSynetInnerProduct32fInit</a> (size_t M, size_t N, size_t K, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> transB, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> constB, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> bias, <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> activation)</td></tr>
+<tr class="memdesc:gac76853987f78ee8ecf43291888a0b9f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes FP32 inner product algorithm.  <a href="group__synet__inner__product.html#gac76853987f78ee8ecf43291888a0b9f1">More...</a><br /></td></tr>
+<tr class="separator:gac76853987f78ee8ecf43291888a0b9f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaac5aae215c0d9e365585b950c60b5542"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gaac5aae215c0d9e365585b950c60b5542">SimdSynetInnerProduct32fInternalBufferSize</a> (const void *context)</td></tr>
 <tr class="memdesc:gaac5aae215c0d9e365585b950c60b5542"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of internal buffer used inside FP32 inner product algorithm.  <a href="group__synet__inner__product.html#gaac5aae215c0d9e365585b950c60b5542">More...</a><br /></td></tr>
 <tr class="separator:gaac5aae215c0d9e365585b950c60b5542"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0402e7e1393ac674c6b4546abfb4ff21"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#ga0402e7e1393ac674c6b4546abfb4ff21">SimdSynetInnerProduct32fExternalBufferSize</a> (const void *context)</td></tr>
+<tr class="memdesc:ga0402e7e1393ac674c6b4546abfb4ff21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of external buffer used in FP32 inner product algorithm.  <a href="group__synet__inner__product.html#ga0402e7e1393ac674c6b4546abfb4ff21">More...</a><br /></td></tr>
+<tr class="separator:ga0402e7e1393ac674c6b4546abfb4ff21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae5e021aa481477506995d361d03b46dd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gae5e021aa481477506995d361d03b46dd">SimdSynetInnerProduct32fSetParams</a> (void *context, const float *weight, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *internal, const float *bias, const float *params)</td></tr>
 <tr class="memdesc:gae5e021aa481477506995d361d03b46dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, beases and parameters of activation function required for FP32 inner product algorithm.  <a href="group__synet__inner__product.html#gae5e021aa481477506995d361d03b46dd">More...</a><br /></td></tr>
 <tr class="separator:gae5e021aa481477506995d361d03b46dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gabc4c729cd36497215df54b9d3bb0f552"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gabc4c729cd36497215df54b9d3bb0f552">SimdSynetInnerProduct32fForward</a> (void *context, const float *src, float *dst)</td></tr>
-<tr class="memdesc:gabc4c729cd36497215df54b9d3bb0f552"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of FP32 inner product algorithm.  <a href="group__synet__inner__product.html#gabc4c729cd36497215df54b9d3bb0f552">More...</a><br /></td></tr>
-<tr class="separator:gabc4c729cd36497215df54b9d3bb0f552"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac8b3ddda7d17004426743db647e875d1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gac8b3ddda7d17004426743db647e875d1">SimdSynetInnerProduct32fForward</a> (void *context, const float *A, const float *B, float *buf, float *C)</td></tr>
+<tr class="memdesc:gac8b3ddda7d17004426743db647e875d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of FP32 inner product algorithm.  <a href="group__synet__inner__product.html#gac8b3ddda7d17004426743db647e875d1">More...</a><br /></td></tr>
+<tr class="separator:gac8b3ddda7d17004426743db647e875d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadd304757589cbb35f82bdd83011f76bd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gadd304757589cbb35f82bdd83011f76bd">SimdSynetInnerProductLayerForward</a> (const float *src, const float *weight, const float *bias, size_t count, size_t size, float *dst)</td></tr>
 <tr class="memdesc:gadd304757589cbb35f82bdd83011f76bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of InnerProductLayer.  <a href="group__synet__inner__product.html#gadd304757589cbb35f82bdd83011f76bd">More...</a><br /></td></tr>
 <tr class="separator:gadd304757589cbb35f82bdd83011f76bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -72,8 +75,8 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions to acceleratе InnerProductLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="gaf9a58f41fccb87d07faa4f3d352d99db" name="gaf9a58f41fccb87d07faa4f3d352d99db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaf9a58f41fccb87d07faa4f3d352d99db">&#9670;&#160;</a></span>SimdSynetInnerProduct32fInit()</h2>
+<a id="gac76853987f78ee8ecf43291888a0b9f1" name="gac76853987f78ee8ecf43291888a0b9f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac76853987f78ee8ecf43291888a0b9f1">&#9670;&#160;</a></span>SimdSynetInnerProduct32fInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -82,25 +85,37 @@ Functions</h2></td></tr>
           <td class="memname">void * SimdSynetInnerProduct32fInit </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>batch</em>, </td>
+          <td class="paramname"><em>M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
+          <td class="paramname"><em>N</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>output</em>, </td>
+          <td class="paramname"><em>K</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
-          <td class="paramname"><em>transpose</em>, </td>
+          <td class="paramname"><em>transB</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>constB</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>bias</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -119,15 +134,17 @@ Functions</h2></td></tr>
 <p>Initilizes FP32 inner product algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>- a input vector size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>- a output vector size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">transpose</td><td>- a flag of transposing of weight matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">M</td><td>- a height of A and height of C matrices. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- a width of B and width of C matrices. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">K</td><td>- a width of A and height of B matrices. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">transB</td><td>- a transpose matrix B before multiplication. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">constB</td><td>- a matrix B is constant. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a flag to add bias to output matrix C. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">activation</td><td>- an activation function type used after inner product. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to FP32 inner product context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__inner__product.html#gaac5aae215c0d9e365585b950c60b5542" title="Gets size of internal buffer used inside FP32 inner product algorithm.">SimdSynetInnerProduct32fInternalBufferSize</a>, :SimdSynetInnerProduct32fSetParams and <a class="el" href="group__synet__inner__product.html#gabc4c729cd36497215df54b9d3bb0f552" title="Performs forward propagation of FP32 inner product algorithm.">SimdSynetInnerProduct32fForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to FP32 inner product context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__inner__product.html#gaac5aae215c0d9e365585b950c60b5542" title="Gets size of internal buffer used inside FP32 inner product algorithm.">SimdSynetInnerProduct32fInternalBufferSize</a>, <a class="el" href="group__synet__inner__product.html#ga0402e7e1393ac674c6b4546abfb4ff21" title="Gets size of external buffer used in FP32 inner product algorithm.">SimdSynetInnerProduct32fExternalBufferSize</a>, <a class="el" href="group__synet__inner__product.html#gae5e021aa481477506995d361d03b46dd" title="Sets weights, beases and parameters of activation function required for FP32 inner product algorithm.">SimdSynetInnerProduct32fSetParams</a> and <a class="el" href="group__synet__inner__product.html#gac8b3ddda7d17004426743db647e875d1" title="Performs forward propagation of FP32 inner product algorithm.">SimdSynetInnerProduct32fForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -150,7 +167,34 @@ Functions</h2></td></tr>
 <p>Gets size of internal buffer used inside FP32 inner product algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 inner product context. It must be created by function <a class="el" href="group__synet__inner__product.html#gaf9a58f41fccb87d07faa4f3d352d99db" title="Initilizes FP32 inner product algorithm.">SimdSynetInnerProduct32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 inner product context. It must be created by function <a class="el" href="group__synet__inner__product.html#gac76853987f78ee8ecf43291888a0b9f1" title="Initilizes FP32 inner product algorithm.">SimdSynetInnerProduct32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>size of internal buffer used inside FP32 inner product algorithm. </dd></dl>
+
+</div>
+</div>
+<a id="ga0402e7e1393ac674c6b4546abfb4ff21" name="ga0402e7e1393ac674c6b4546abfb4ff21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0402e7e1393ac674c6b4546abfb4ff21">&#9670;&#160;</a></span>SimdSynetInnerProduct32fExternalBufferSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t SimdSynetInnerProduct32fExternalBufferSize </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>context</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets size of external buffer used in FP32 inner product algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 inner product context. It must be created by function <a class="el" href="group__synet__inner__product.html#gac76853987f78ee8ecf43291888a0b9f1" title="Initilizes FP32 inner product algorithm.">SimdSynetInnerProduct32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -205,7 +249,7 @@ Functions</h2></td></tr>
 <p>Sets weights, beases and parameters of activation function required for FP32 inner product algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to FP32 inner product context. It must be created by function <a class="el" href="group__synet__inner__product.html#gaf9a58f41fccb87d07faa4f3d352d99db" title="Initilizes FP32 inner product algorithm.">SimdSynetInnerProduct32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to FP32 inner product context. It must be created by function <a class="el" href="group__synet__inner__product.html#gac76853987f78ee8ecf43291888a0b9f1" title="Initilizes FP32 inner product algorithm.">SimdSynetInnerProduct32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to inner product weights. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a flag signalized that weight is stored in the internal buffer. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to bias. Can be NULL. </td></tr>
@@ -216,8 +260,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gabc4c729cd36497215df54b9d3bb0f552" name="gabc4c729cd36497215df54b9d3bb0f552"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gabc4c729cd36497215df54b9d3bb0f552">&#9670;&#160;</a></span>SimdSynetInnerProduct32fForward()</h2>
+<a id="gac8b3ddda7d17004426743db647e875d1" name="gac8b3ddda7d17004426743db647e875d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac8b3ddda7d17004426743db647e875d1">&#9670;&#160;</a></span>SimdSynetInnerProduct32fForward()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -232,13 +276,25 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>B</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>C</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -251,9 +307,11 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of FP32 inner product algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 inner product context. It must be created by function <a class="el" href="group__synet__inner__product.html#gaf9a58f41fccb87d07faa4f3d352d99db" title="Initilizes FP32 inner product algorithm.">SimdSynetInnerProduct32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 inner product context. It must be created by function <a class="el" href="group__synet__inner__product.html#gac76853987f78ee8ecf43291888a0b9f1" title="Initilizes FP32 inner product algorithm.">SimdSynetInnerProduct32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to A matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>- a pointer to B matrix. Can be NULL if B is constant matrix. In that case you have to set B (weight) in function SimdSynetInnerProduct16bSetParams. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external buffer. The size of the external temporary buffer is determined by function <a class="el" href="group__synet__inner__product__bf16.html#ga2068a3866a4d83fce8b8b3c64a38bf85" title="Gets size in bytes of external buffer used in BF16 inner product algorithm.">SimdSynetInnerProduct16bExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">C</td><td>- a pointer to output matrix. </td></tr>
   </table>
   </dd>
 </dl>

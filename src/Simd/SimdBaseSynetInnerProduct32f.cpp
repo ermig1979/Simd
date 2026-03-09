@@ -62,21 +62,21 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
 
         SynetInnerProduct32fGemm::SynetInnerProduct32fGemm(const InnerProductParam32f & p)
             : SynetInnerProduct32f(p)
             , _0(0.0f)
             , _1(1.0f)
         {
-            _M = _param.batch;
-            _N = _param.output;
-            _K = _param.input;
+            _M = _param.M;
+            _N = _param.N;
+            _K = _param.K;
             _ldS = _K;
             _ldD = _N;
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
             _prod = NULL;
-            if (_param.transpose)
+            if (_param.transB)
             {
                 _gemm = Base::Gemm32fNT;
                 _ldW = _K;
@@ -93,7 +93,7 @@ namespace Simd
         String SynetInnerProduct32fGemm::Desc() const 
         { 
             return Ext() + "::Gemm" + (_prod ? "Prod" : 
-                String("N") + (_cbWeight.size ? "Ncb" : (_param.transpose == SimdTrue ? "T" : "N")));
+                String("N") + (_cbWeight.size ? "Ncb" : (_param.transB == SimdTrue ? "T" : "N")));
         }
 
         void SynetInnerProduct32fGemm::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
@@ -102,7 +102,7 @@ namespace Simd
             if (_cbWeight.data)
             {
                 Array32f buffer;
-                if (_param.transpose)
+                if (_param.transB)
                 {
                     buffer.Resize(_N * _K);
                     for (size_t k = 0; k < _K; ++k)
@@ -116,27 +116,27 @@ namespace Simd
             }
         }
 
-        void SynetInnerProduct32fGemm::Forward(const float * src, float * dst)
+        void SynetInnerProduct32fGemm::Forward(const float* A, const float* B, float* buf, float* C)
         {
             if (_prod)
-                _prod(src, _weight, _bias, _N, _K, dst);
+                _prod(A, _weight, _bias, _N, _K, C);
             else
             {
                 if (_cbWeight.data)
-                    _cbRun(_M, _N, _K, src, _cbWeight.data, dst, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                    _cbRun(_M, _N, _K, A, _cbWeight.data, C, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
                 else
-                    _gemm(_M, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
-                _biasAndActivation(_bias, _N, _M, _param.activation, _params, SimdTrue, dst);
+                    _gemm(_M, _N, _K, &_1, A, _ldS, _param.constB ? _weight : B, _ldW, &_0, C, _ldD);
+                _biasAndActivation(_bias, _N, _M, _param.activation, _params, SimdTrue, C);
             }
         }
 
-        //---------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
 
         SynetInnerProduct32fProd::SynetInnerProduct32fProd(const InnerProductParam32f& p)
             : SynetInnerProduct32f(p)
         {
-            _N = _param.output;
-            _K = _param.input;
+            _N = _param.N;
+            _K = _param.K;
         }
 
         void SynetInnerProduct32fProd::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
@@ -146,21 +146,20 @@ namespace Simd
             if (internal)
                 *internal = SimdTrue;
             if (bias)
-                memcpy(_rBias.data, bias, _param.output * sizeof(float));
+                memcpy(_rBias.data, bias, _param.N * sizeof(float));
         }
 
-        void SynetInnerProduct32fProd::Forward(const float* src, float* dst)
+        void SynetInnerProduct32fProd::Forward(const float* A, const float* B, float* buf, float* C)
         {
-            _prod(src, _rWeight.data, _rBias.data, _K, _N, dst);
+            _prod(A, _rWeight.data, _rBias.data, _K, _N, C);
         }
 
         bool SynetInnerProduct32fProd::Preferable(const InnerProductParam32f& p)
         {
             return
-                p.activation == SimdConvolutionActivationIdentity &&
-                p.batch == 1 &&
-                p.output >= 4 &&
-                Base::AlgCacheL3() > p.input * p.output * sizeof(float);
+                p.activation == SimdConvolutionActivationIdentity && p.constB &&
+                p.M == 1 && p.N >= 4 &&
+                Base::AlgCacheL3() > p.K * p.N * sizeof(float);
         }
 
         void SynetInnerProduct32fProd::SetSize(size_t F)
@@ -172,7 +171,7 @@ namespace Simd
 
         void SynetInnerProduct32fProd::ReorderWeight(const float* src, float* dst)
         {
-            if (_param.transpose)
+            if (_param.transB)
             {
                 for (size_t n = 0; n < _N; n += _F)
                 {
@@ -208,11 +207,11 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
 
-        void * SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
+        void * SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation)
         {
-            InnerProductParam32f param(batch, input, output, transpose, activation);
+            InnerProductParam32f param(M, N, K, transB, constB, bias, activation);
             if (!param.Valid())
                 return NULL;
             return new SynetInnerProduct32fGemm(param);

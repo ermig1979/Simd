@@ -38,7 +38,7 @@ namespace Simd
             : Base::SynetInnerProduct32fGemm(p)
         {
             _biasAndActivation = Sse41::ConvolutionBiasAndActivation;
-            if (_param.transpose)
+            if (_param.transB)
             {
                 _gemm = Sse41::Gemm32fNT;
                 if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
@@ -50,7 +50,7 @@ namespace Simd
             {
                 _gemm = Sse41::Gemm32fNN;
             }
-            if (_param.output > Sse41::F && _prod == NULL)
+            if (_param.N > Sse41::F && _prod == NULL)
             {
                 _cbRun = Sse41::Gemm32fNNcbRun;
                 _cbPack = Sse41::Gemm32fNNcbReorderB;
@@ -207,7 +207,7 @@ namespace Simd
         SynetInnerProduct32fProd::SynetInnerProduct32fProd(const InnerProductParam32f& p)
             : Base::SynetInnerProduct32fProd(p)
         {
-            if (_param.output > 1)
+            if (_param.N > 1)
             {
                 SetSize(F);
                 _prod = InnerProductKxKNr;
@@ -216,9 +216,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
+        void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation)
         {
-            InnerProductParam32f param(batch, input, output, transpose, activation);
+            InnerProductParam32f param(M, N, K, transB, constB, bias, activation);
             if (!param.Valid())
                 return NULL;
             if (SynetInnerProduct32fProd::Preferable(param))

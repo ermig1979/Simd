@@ -5605,14 +5605,14 @@ assert(0);
 #endif
 }
 
-SIMD_API void* SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
+SIMD_API void* SimdSynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetInnerProduct32fInitPtr) (size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+    typedef void* (*SimdSynetInnerProduct32fInitPtr) (size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC4(SynetInnerProduct32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
-    return simdSynetInnerProduct32fInit(batch, input, output, transpose, activation);
+    return simdSynetInnerProduct32fInit(M, N, K, transB, constB, bias, activation);
 #else
     assert(0);
     return 0;
@@ -5630,6 +5630,17 @@ SIMD_API size_t SimdSynetInnerProduct32fInternalBufferSize(const void* context)
 #endif
 }
 
+SIMD_API size_t SimdSynetInnerProduct32fExternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return ((SynetInnerProduct32f*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
 SIMD_API void SimdSynetInnerProduct32fSetParams(void* context, const float* weight, SimdBool* internal, const float* bias, const float* params)
 {
     SIMD_EMPTY();
@@ -5640,13 +5651,13 @@ SIMD_API void SimdSynetInnerProduct32fSetParams(void* context, const float* weig
 #endif
 }
 
-SIMD_API void SimdSynetInnerProduct32fForward(void* context, const float* src, float* dst)
+SIMD_API void SimdSynetInnerProduct32fForward(void* context, const float* A, const float* B, float* buf, float* C)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     SynetInnerProduct32f* c = (SynetInnerProduct32f*)context;
     SIMD_PERF_EXT(c);
-    c->Forward(src, dst);
+    c->Forward(A, B, buf, C);
 #else
     assert(0);
 #endif

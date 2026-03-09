@@ -38,9 +38,9 @@ namespace Simd
             : Avx2::SynetInnerProduct32fGemm(p)
         {
             _biasAndActivation = Avx512bw::ConvolutionBiasAndActivation;
-            if (_param.transpose)
+            if (_param.transB)
             {
-                if (_param.input > Avx2::F)
+                if (_param.K > Avx2::F)
                 {
                     _gemm = Avx512bw::Gemm32fNT;
                     if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
@@ -51,10 +51,10 @@ namespace Simd
             }
             else
             {
-                if (_param.output > Avx2::F)
+                if (_param.N > Avx2::F)
                     _gemm = Avx512bw::Gemm32fNN;
             }
-            if (_param.output > Avx2::F && _prod == NULL)
+            if (_param.N > Avx2::F && _prod == NULL)
             {
                 _cbRun = Avx512bw::Gemm32fNNcbRun;
                 _cbPack = Avx512bw::Gemm32fNNcbReorderB;
@@ -376,7 +376,7 @@ namespace Simd
         SynetInnerProduct32fProd::SynetInnerProduct32fProd(const InnerProductParam32f& p)
             : Avx2::SynetInnerProduct32fProd(p)
         {
-            if (_param.output > Avx2::F)
+            if (_param.N > Avx2::F)
             {
                 SetSize(Avx512bw::F);
                 _prod = InnerProductKxKNr;
@@ -385,9 +385,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
+        void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation)
         {
-            InnerProductParam32f param(batch, input, output, transpose, activation);
+            InnerProductParam32f param(M, N, K, transB, constB, bias, activation);
             if (!param.Valid())
                 return NULL;
             if (SynetInnerProduct32fProd::Preferable(param))

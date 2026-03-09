@@ -38,10 +38,10 @@ namespace Simd
             : Base::SynetInnerProduct32fGemm(p)
         {
             _biasAndActivation = Neon::ConvolutionBiasAndActivation;
-            if (_param.transpose)
+            if (_param.transB)
             {
                 _gemm = Neon::Gemm32fNT;
-                if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
+                if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity && _param.constB)
                     _prod = Neon::SynetInnerProductLayerForward;
                 else
                     _prod = NULL;
@@ -50,7 +50,7 @@ namespace Simd
             {
                 _gemm = Neon::Gemm32fNN;
             }
-            if (_param.output > Neon::F && _prod == NULL)
+            if (_param.N > Neon::F && _prod == NULL && _param.constB)
             {
                 _cbRun = Neon::Gemm32fNNcbRun;
                 _cbPack = Neon::Gemm32fNNcbReorderB;
@@ -58,7 +58,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         void InnerProductKxKNr1x1(size_t K, const float* src, const float* weight0, const float* bias, float* dst, size_t tail)
         {
@@ -207,18 +207,18 @@ namespace Simd
         SynetInnerProduct32fProd::SynetInnerProduct32fProd(const InnerProductParam32f& p)
             : Base::SynetInnerProduct32fProd(p)
         {
-            if (_param.output > 1)
+            if (_param.N > 1)
             {
                 SetSize(Neon::F);
                 _prod = InnerProductKxKNr;
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
-        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
+        void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation)
         {
-            InnerProductParam32f param(batch, input, output, transpose, activation);
+            InnerProductParam32f param(M, N, K, transB, constB, bias, activation);
             if (!param.Valid())
                 return NULL;
             if (SynetInnerProduct32fProd::Preferable(param) && 0)
@@ -227,5 +227,5 @@ namespace Simd
                 return new SynetInnerProduct32fGemm(param);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }

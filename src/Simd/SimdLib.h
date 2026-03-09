@@ -7070,19 +7070,22 @@ extern "C"
 
     /*! @ingroup synet_inner_product
 
-        \fn void * SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+        \fn void * SimdSynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
         \short Initilizes FP32 inner product algorithm.
 
-        \param [in] batch - a batch size.
-        \param [in] input - a input vector size.
-        \param [in] output - a output vector size.
-        \param [in] transpose - a flag of transposing of weight matrix.
+        \param [in] M - a height of A and height of C matrices.
+        \param [in] N - a width of B and width of C matrices.
+        \param [in] K - a width of A and height of B matrices.
+        \param [in] transB - a transpose matrix B before multiplication.
+        \param [in] constB - a matrix B is constant.
+        \param [in] bias - a flag to add bias to output matrix C.
         \param [in] activation - an activation function type used after inner product.
         \return a pointer to FP32 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions ::SimdSynetInnerProduct32fInternalBufferSize, :SimdSynetInnerProduct32fSetParams and ::SimdSynetInnerProduct32fForward.
+            This pointer is used in functions ::SimdSynetInnerProduct32fInternalBufferSize, ::SimdSynetInnerProduct32fExternalBufferSize, 
+            ::SimdSynetInnerProduct32fSetParams and ::SimdSynetInnerProduct32fForward.
     */
-    SIMD_API void* SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+    SIMD_API void* SimdSynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
     /*! @ingroup synet_inner_product
 
@@ -7094,6 +7097,17 @@ extern "C"
         \return size of internal buffer used inside FP32 inner product algorithm.
     */
     SIMD_API size_t SimdSynetInnerProduct32fInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_inner_product
+
+        \fn size_t SimdSynetInnerProduct32fExternalBufferSize(const void * context);
+
+        \short Gets size of external buffer used in FP32 inner product algorithm.
+
+        \param [in] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside FP32 inner product algorithm.
+    */
+    SIMD_API size_t SimdSynetInnerProduct32fExternalBufferSize(const void* context);
 
     /*! @ingroup synet_inner_product
 
@@ -7111,15 +7125,19 @@ extern "C"
 
     /*! @ingroup synet_inner_product
 
-        \fn void SimdSynetInnerProduct32fForward(void* context, const float* src, float* dst);
+        \fn void SimdSynetInnerProduct32fForward(void* context, const float* A, const float* B, float *buf, float* C);
 
         \short Performs forward propagation of FP32 inner product algorithm.
 
-        \param [in] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] dst - a pointer to output tensor.
+        \param [in] context - a pointer to FP32 inner product context. 
+            It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
+        \param [in] A - a pointer to A matrix.
+        \param [in] B - a pointer to B matrix. Can be NULL if B is constant matrix. In that case you have to set B (weight) in function SimdSynetInnerProduct16bSetParams.
+        \param [out] buf - a pointer to external buffer. The size of the external temporary buffer is determined by function ::SimdSynetInnerProduct16bExternalBufferSize.
+            Can be NULL (it causes usage of internal buffer).
+        \param [out] C - a pointer to output matrix.
     */
-    SIMD_API void SimdSynetInnerProduct32fForward(void* context, const float* src, float* dst);
+    SIMD_API void SimdSynetInnerProduct32fForward(void* context, const float* A, const float* B, float *buf, float* C);
 
     /*! @ingroup synet_inner_product
 
@@ -7231,10 +7249,13 @@ extern "C"
 
         \short Performs forward propagation of BF16 inner product algorithm.
 
-        \param [in] context - a pointer to BF16 inner product context. It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
+        \param [in] context - a pointer to BF16 inner product context. 
+            It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
         \param [in] A - a pointer to A matrix.
-        \param [in] B - a pointer to B matrix. Can be NULL if B is constant matrix. In that case you have to set B in function SimdSynetInnerProduct16bSetParams.
-        \param [out] buf - a pointer to external buffer. The size of the external temporary buffer is determined by function ::SimdSynetInnerProduct16bExternalBufferSize. 
+        \param [in] B - a pointer to B matrix. Can be NULL if B is constant matrix. 
+            In that case you have to set B (weight) in function SimdSynetInnerProduct16bSetParams.
+        \param [out] buf - a pointer to external buffer. 
+            The size of the external temporary buffer is determined by function ::SimdSynetInnerProduct16bExternalBufferSize. 
             Can be NULL (it causes usage of internal buffer).
         \param [out] C - a pointer to output matrix.
     */

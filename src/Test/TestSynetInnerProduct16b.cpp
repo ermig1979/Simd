@@ -134,9 +134,9 @@ namespace Test
 
         if(1)
         {
-            void* context3 = SimdSynetInnerProduct32fInit(p.M, p.K, p.N, p.transB, SimdConvolutionActivationIdentity);
+            void* context3 = SimdSynetInnerProduct32fInit(p.M, p.N, p.K, p.transB, SimdTrue, SimdTrue, SimdConvolutionActivationIdentity);
             ::SimdSynetInnerProduct32fSetParams(context3, Bf.Data(), NULL, p.bias ? bias.Data() : NULL, NULL);
-            ::SimdSynetInnerProduct32fForward(context3, Af.Data(), C3f.Data());
+            ::SimdSynetInnerProduct32fForward(context3, Af.Data(), NULL, NULL, C3f.Data());
             ::SimdRelease(context3);
 
             float e = EPS * GetRange(C3f.Data(), C3f.Size()) * 3.0f;

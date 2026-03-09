@@ -38,22 +38,22 @@ namespace Test
     {
         struct FuncIP32F
         {
-            typedef void* (*FuncPtr)(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+            typedef void* (*FuncPtr)(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
             FuncPtr func;
             String desc;
 
             FuncIP32F(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
-            void Update(size_t b, size_t i, size_t o, SimdBool t, SimdConvolutionActivationType a)
+            void Update(const Simd::InnerProductParam32f& p)
             {
-                desc = desc + "[" + ToString(b) + "-" + ToString(i) + "-" + ToString(o) + "-" + ToString((int)t) + "]";
+                desc = desc + "[" + p.Info() + "]";
             }
 
-            void Call(void* context, const Tensor32f& src, Tensor32f& dst) const
+            void Call(void* context, const Tensor32f& A, const Tensor32f& B, Tensor32f& buf, Tensor32f& C) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                ::SimdSynetInnerProduct32fForward(context, src.Data(), dst.Data());
+                ::SimdSynetInnerProduct32fForward(context, A.Data(), B.Data(), buf.Data(), C.Data());
             }
         };
     }
@@ -61,33 +61,29 @@ namespace Test
 #define FUNC_IP32F(function) \
     FuncIP32F(function, std::string(#function))
 
-    bool SynetInnerProduct32fForwardAutoTest(float eps, size_t b, size_t i, size_t o, SimdBool t, SimdConvolutionActivationType a, FuncIP32F f1, FuncIP32F f2)
+    bool SynetInnerProduct32fForwardAutoTest(float eps, Simd::InnerProductParam32f p, FuncIP32F f1, FuncIP32F f2)
     {
         bool result = true;
 
-        f1.Update(b, i, o, t, a);
-        f2.Update(b, i, o, t, a);
+        f1.Update(p);
+        f2.Update(p);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
 
-        Tensor32f src({ b, i });
-        FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
+        Shape sA = Shp(p.M, p.K), sB = p.transB ? Shp(p.N, p.K) : Shp(p.K, p.N), sC = Shp(p.M, p.N);
+        Tensor32f A(sA), B(sB), C1(sC), C2(sC), bias(Shp(p.N)), params(Shp(std::max<size_t>(p.N, 2)));
 
-        Tensor32f weight({ t ? o : i, t ? i : o });
-        FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
-
-        Tensor32f bias({ o });
+        FillRandom(A.Data(), A.Size(), -1.0, 1.0f);
+        FillRandom(B.Data(), B.Size(), -1.0, 1.0f);
         FillRandom(bias.Data(), bias.Size(), -1.0, 1.0f);
+        FillRandom(params.Data(), params.Size(), 0.0f, 1.0f);
 
-        Tensor32f params({ std::max<size_t>(o, 2) });
-        FillRandom(params.Data(), params.Size(), 0.0f, 2.0f);
-
-        if (a == ::SimdConvolutionActivationHswish)
+        if (p.activation == ::SimdConvolutionActivationHswish)
         {
             params.Data()[0] = 3.0f;
             params.Data()[1] = 1.0f / 6.0f;
         }
-        else if (a == ::SimdConvolutionActivationMish)
+        else if (p.activation == ::SimdConvolutionActivationMish)
             params.Data()[0] = 20.0f;
         else
         {
@@ -95,30 +91,29 @@ namespace Test
             params.Data()[1] = 1.1f;
         }
 
+        ::SimdFill32f(C1.Data(), C1.Size(), params.Data() + 0);
+        ::SimdFill32f(C2.Data(), C2.Size(), params.Data() + 1);
+
+        void* context1 = f1.func(p.M, p.N, p.K, p.transB, p.constB, p.bias, p.activation);
+        void* context2 = f2.func(p.M, p.N, p.K, p.transB, p.constB, p.bias, p.activation);
+
+        ::SimdSynetInnerProduct32fSetParams(context1, B.Data(), NULL, bias.Data(), params.Data());
+        ::SimdSynetInnerProduct32fSetParams(context2, B.Data(), NULL, bias.Data(), params.Data());
+
         Tensor32f buf;
-
-        Tensor32f dst1({ b, o });
-        Tensor32f dst2({ b, o });
-
-        ::SimdFill32f(dst1.Data(), dst1.Size(), params.Data() + 0);
-        ::SimdFill32f(dst2.Data(), dst2.Size(), params.Data() + 1);
-
-        void* context1 = f1.func(b, i, o, t, a);
-        void* context2 = f2.func(b, i, o, t, a);
-
-        ::SimdSynetInnerProduct32fSetParams(context1, weight.Data(), NULL, bias.Data(), params.Data());
-        ::SimdSynetInnerProduct32fSetParams(context2, weight.Data(), NULL, bias.Data(), params.Data());
+        buf.Extend(Shp(SimdSynetInnerProduct32fExternalBufferSize(context1)));
+        buf.Extend(Shp(SimdSynetInnerProduct32fExternalBufferSize(context2)));
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, A, B, buf, C1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, A, B, buf, C2));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
-        result = result && Compare(dst1, dst2, eps, true, 64, DifferenceBoth);
+        result = result && Compare(C1, C2, eps, true, 64, DifferenceBoth);
 
         return result;
     }
@@ -128,63 +123,26 @@ namespace Test
         bool result = true;
 
         SimdBool t = SimdTrue, f = SimdFalse;
-        SimdConvolutionActivationType a = SimdConvolutionActivationIdentity;
+        using Param = Simd::InnerProductParam32f;
+        const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu,
+            aLr = SimdConvolutionActivationLeakyRelu, aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu,
+            aEl = SimdConvolutionActivationElu, aHs = SimdConvolutionActivationHswish, aMi = SimdConvolutionActivationMish,
+            aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
 #if defined(NDEBUG)
-#if 0
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 96, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 192, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 96, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 192, f, a, f1, f2);
-#endif
-#if 0
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 192, 96, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 192, 192, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 96, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 192, f, a, f1, f2);
-#endif
-#if 0        
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 96, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 192, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 96, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 192, t, a, f1, f2);
-#endif
-#if 0
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 192, 96, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 192, 192, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 96, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 192, t, a, f1, f2);
-#endif
 #if 1
-        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 49, 32, 49, t, a, f1, f2);
-        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 49, 49, 32, t, a, f1, f2);
-        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 49, 32, 49, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 128, 128, 128, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 8192, 512, f, a, f1, f2);
-#endif
-#if 0
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 1024, 4096, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 256, 1024, f, a, f1, f2);       
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 4096, 254, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 1024, 4096, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 256, 1024, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 4096, 254, t, a, f1, f2);
-        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, f, a, f1, f2);
-        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 256, 1024, f, a, f1, f2);
-        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 254, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 1024, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 1024, f, a, f1, f2);
-#endif
-#if 0
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 100352, 512, f, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 25088, 2048, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(128, 128, 128, f, t, t, aId), f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(128, 133, 144, f, t, t, aRe), f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(128, 133, 144, f, f, t, aRe), f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 8192, f, t, t, aId), f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 8192, f, t, t, aRr), f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 128, f, t, t, aId), f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 128, f, t, t, aRr), f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 128, t, t, t, aId), f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 128, t, t, t, aRr), f1, f2);
 #endif
 #else
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 49, 49, 32, f, a, f1, f2);
-        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, t, a, f1, f2);
-        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 1024, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(49, 32, 49, f, t, t, aId), f1, f2);
 #endif
 
         return result;

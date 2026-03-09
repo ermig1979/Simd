@@ -81,13 +81,13 @@ namespace Test
 
             c.Reshape(sC);
 
-            void* context = ::SimdSynetInnerProduct32fInit(p.M, p.K, p.N, p.transB, SimdConvolutionActivationIdentity);
+            void* context = ::SimdSynetInnerProduct32fInit(p.M, p.K, p.N, p.transB, SimdTrue, SimdTrue, SimdConvolutionActivationIdentity);
             if (context == NULL)
                 return false;
 
             ::SimdSynetInnerProduct32fSetParams(context, b.Data(), NULL, bias.Data(), NULL);
 
-            ::SimdSynetInnerProduct32fForward(context, a.Data(), c.Data());
+            ::SimdSynetInnerProduct32fForward(context, a.Data(), NULL, NULL, c.Data());
 
             ::SimdRelease(context);
 

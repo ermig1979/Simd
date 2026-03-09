@@ -26,46 +26,45 @@
 
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPerformance.h"
+#include "Simd/SimdSynetConvParam.h"
 #include "Simd/SimdGemm.h"
 
 namespace Simd
 {
     struct InnerProductParam32f
     {
-        size_t batch;
-        size_t input;
-        size_t output;
-        SimdBool transpose;
+        size_t M, N, K;
+        SimdBool transB, constB, bias;
         SimdConvolutionActivationType activation;
 
-        InnerProductParam32f(size_t b, size_t i, size_t o, SimdBool t, SimdConvolutionActivationType a)
+        InnerProductParam32f(size_t m, size_t n, size_t k, SimdBool t, SimdBool c, SimdBool b, SimdConvolutionActivationType a)
+            : M(m), N(n), K(k)
+            , transB(t), constB(c), bias(b)
+            , activation(a)
         {
-            batch = b;
-            input = i;
-            output = o;
-            transpose = t;
-            activation = a;
         }
 
         bool Valid()
         {
-            return 
-                activation == SimdConvolutionActivationIdentity;
+            //if (M == 1 && constB)
+            //    return activation == SimdConvolutionActivationIdentity;
+            return true;
         }
 
-#ifdef SIMD_PERFORMANCE_STATISTIC
-        String Info() const
+        String Info(bool detail = true) const
         {
             std::stringstream ss;
-            ss << batch << "x" << input << "x" << output << "-" << transpose;
+            ss << M << "x" << N << "x" << K << "-";
+            ss << (transB ? "t" : "n") << (constB ? "1" : "2") << (bias ? "b" : "o");
+            if (detail)
+                ss << "-" << ToStr(activation);
             return ss.str();
         }
 
         int64_t Flop() const
         {
-            return int64_t(batch) * input * output * 2;
+            return int64_t(M) * N * K * 2;
         }
-#endif
     };
 
     class SynetInnerProduct32f : public Deletable
@@ -92,6 +91,11 @@ namespace Simd
             return 0;
         }
 
+        virtual size_t ExternalBufferSize() const
+        {
+            return 0;
+        }
+
         virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
         {
             _weight = weight;
@@ -101,7 +105,7 @@ namespace Simd
             _params = params;
         }
 
-        virtual void Forward(const float * src, float * dst) = 0;
+        virtual void Forward(const float * A, const float * B, float * buf, float * C) = 0;
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer* Perf(const char* func);
@@ -125,7 +129,7 @@ namespace Simd
             virtual String Desc() const;
             virtual size_t InternalBufferSize() const { return _cbWeight.size; }
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
-            virtual void Forward(const float * src, float * dst);
+            virtual void Forward(const float* A, const float* B, float* buf, float* C);
 
         protected:
             typedef void(*GemmPtr)(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
@@ -152,7 +156,7 @@ namespace Simd
             virtual String Desc() const { return Ext() + "::Prod"; }
             virtual size_t InternalBufferSize() const { return _rWeight.size + _rBias.size; }
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
-            virtual void Forward(const float* src, float* dst);
+            virtual void Forward(const float* A, const float* B, float* buf, float* C);
 
             static bool Preferable(const InnerProductParam32f& p);
 
@@ -167,7 +171,7 @@ namespace Simd
             void ReorderWeight(const float* src, float* dst);
         };
 
-        void * SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+        void * SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -189,7 +193,7 @@ namespace Simd
             virtual String Ext() const { return "Sse41"; }
         };
 
-        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+        void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif//SIMD_SSE41_ENABLE
 
@@ -212,7 +216,7 @@ namespace Simd
             virtual String Ext() const { return "Avx2"; }
         };
 
-        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+        void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif//SIMD_AVX2_ENABLE
 
@@ -235,7 +239,7 @@ namespace Simd
             virtual String Ext() const { return "Avx512bw"; }
         };
 
-        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+        void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
@@ -259,9 +263,9 @@ namespace Simd
             virtual String Ext() const { return "Neon"; }
         };
 
-        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+        void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
-#endif//SIMD_NEON_ENABLE
+#endif
 }
 
-#endif//__SimdSynetInnerProduct32f_h__
+#endif
