@@ -50,7 +50,7 @@ namespace Simd
             {
                 _gemm = Sse41::Gemm32fNN;
             }
-            if (_param.N > Sse41::F && _prod == NULL)
+            if (_param.N > Sse41::F && _prod == NULL && _param.constB)
             {
                 _cbRun = Sse41::Gemm32fNNcbRun;
                 _cbPack = Sse41::Gemm32fNNcbReorderB;

@@ -97,8 +97,8 @@ namespace Test
         void* context1 = f1.func(p.M, p.N, p.K, p.transB, p.constB, p.bias, p.activation);
         void* context2 = f2.func(p.M, p.N, p.K, p.transB, p.constB, p.bias, p.activation);
 
-        ::SimdSynetInnerProduct32fSetParams(context1, B.Data(), NULL, bias.Data(), params.Data());
-        ::SimdSynetInnerProduct32fSetParams(context2, B.Data(), NULL, bias.Data(), params.Data());
+        ::SimdSynetInnerProduct32fSetParams(context1, p.constB ? B.Data() : NULL, NULL, p.bias ? bias.Data() : NULL, params.Data());
+        ::SimdSynetInnerProduct32fSetParams(context2, p.constB ? B.Data() : NULL, NULL, p.bias ? bias.Data() : NULL, params.Data());
 
         Tensor32f buf;
         buf.Extend(Shp(SimdSynetInnerProduct32fExternalBufferSize(context1)));

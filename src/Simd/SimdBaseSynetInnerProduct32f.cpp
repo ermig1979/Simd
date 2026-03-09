@@ -99,7 +99,7 @@ namespace Simd
         void SynetInnerProduct32fGemm::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
         {
             Simd::SynetInnerProduct32f::SetParams(weight, internal, bias, params);
-            if (_cbWeight.data)
+            if (_cbWeight.data && _param.constB)
             {
                 Array32f buffer;
                 if (_param.transB)

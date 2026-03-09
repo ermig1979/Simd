@@ -54,7 +54,7 @@ namespace Simd
                 if (_param.N > Avx2::F)
                     _gemm = Avx512bw::Gemm32fNN;
             }
-            if (_param.N > Avx2::F && _prod == NULL)
+            if (_param.N > Avx2::F && _prod == NULL && _param.constB)
             {
                 _cbRun = Avx512bw::Gemm32fNNcbRun;
                 _cbPack = Avx512bw::Gemm32fNNcbReorderB;
