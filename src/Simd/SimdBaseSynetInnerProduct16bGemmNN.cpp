@@ -22,9 +22,9 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetInnerProduct16b.h"
-#include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdBFloat16.h"
+#include "Simd/SimdAlignment.h"
 
 namespace Simd
 {
@@ -137,6 +137,7 @@ namespace Simd
             _sizeA = (p.typeA == SimdTensorData32f || p.K != a.aK) ? a.aM * a.aK : 0;
             _sizeB = p.constB ? 0 : a.macroK * a.macroN;
             _sizeC = (p.typeC == SimdTensorData16b || a.aM != p.M || a.aN != p.N) ? a.macroN * a.aM : 0;
+            _sizeS = a.microK == 32 ? 2048 : 0;
 
             a.bK = p.constB ? a.aK : a.macroK;
             a.cN = _sizeC ? a.macroN : p.N;
@@ -144,7 +145,7 @@ namespace Simd
             _bias.Resize(a.aN, true);
         }
 
-        void SynetInnerProduct16bGemmNN::SetParams(const float* weight, const float* bias)
+        void SynetInnerProduct16bGemmNN::SetParams(const float* weight, const float* bias, const float* params)
         {
             const InnerProductParam16b& p = _param;
             const AlgParam& a = _alg;
@@ -154,8 +155,8 @@ namespace Simd
                 _weight.Resize(a.aK * a.aN, true);
                 _prepB((uint8_t*)weight, p, a, p.N, p.K, _weight.data);
             }
-            if (p.bias && bias)
-                memcpy(_bias.data, bias, p.N * 4);
+            SynetInnerProduct16b::SetBias(bias, Alignment());
+            SynetInnerProduct16b::SetParams(params, Alignment());
         }
 
         void SynetInnerProduct16bGemmNN::Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C)
@@ -166,6 +167,8 @@ namespace Simd
             uint16_t* bufA = _prepA ? Allocate<uint16_t>(buf, _sizeA) : (uint16_t*)A;
             uint16_t* bufB = p.constB ? _weight.data : Allocate<uint16_t>(buf, _sizeB);
             float* bufC = _sizeC ? Allocate<float>(buf, _sizeC) : (float*)C;
+            float* bufS = _sizeS ? Allocate<float>(buf, _sizeS) : NULL;
+            const float* bias = _bias.data, *params = _params.data;
             for (size_t j = 0; j < p.N; j += a.macroN)
             {
                 size_t macroN = Simd::Min(p.N, j + a.macroN) - j;
@@ -183,9 +186,12 @@ namespace Simd
                         if (i == 0 && _prepB && !p.constB)
                             _prepB(B + (p.transB ? j * p.K + k : k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
                         _gemm(bufA + offsA + k, p, a, macroM, macroN, macroK, (int)k, bufB + offsB, bufC + offsC, 
-                            k + macroK == p.K && (_sizeC || p.bias), _bias.data + j, C + (i * p.N + j) * a.eC);
+                            k + macroK == p.K && (_sizeC || p.bias), bias, params, bufS, C + (i * p.N + j) * a.eC);
                     }
                 }
+                bias += macroN;
+                if (p.activation == ::SimdConvolutionActivationPrelu)
+                    params += macroN;
             }
         }
     }

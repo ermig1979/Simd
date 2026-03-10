@@ -7168,11 +7168,11 @@ extern "C"
 
     /*! @ingroup synet_inner_product_bf16
 
-        \fn void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+        \fn void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
         \short Initilizes BF16 inner product (matrix mutiplication) algorithm.
 
-        Algorithm's details (transpA = false, bias = true):
+        Algorithm's details (transpA = false, bias = true, activation = SimdConvolutionActivationIdentity):
         \verbatim
         for(i = 0; i < M; ++i)
             for(j = 0; j < N; ++j)
@@ -7192,11 +7192,12 @@ extern "C"
         \param [in] transB - a transpose matrix B before multiplication.
         \param [in] constB - a matrix B is constant.
         \param [in] bias - a flag to add bias to output matrix C.
+        \param [in] activation - an activation function type used after inner product.
         \return a pointer to BF32 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetInnerProduct16bInternalBufferSize, ::SimdSynetInnerProduct16bExternalBufferSize, 
             ::SimdSynetInnerProduct16bInfo, ::SimdSynetInnerProduct16bSetParams and ::SimdSynetInnerProduct16bForward.
     */
-    SIMD_API void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+    SIMD_API void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
     /*! @ingroup synet_inner_product_bf16
 
@@ -7240,8 +7241,9 @@ extern "C"
         \param [in, out] context - a pointer to BF16 inner product context. It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to B matrix. Can be NULL.
         \param [in] bias - a pointer to bias. Can be NULL.
+        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
     */
-    SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, const float* bias);
+    SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, const float* bias, const float* params);
 
     /*! @ingroup synet_inner_product_bf16
 

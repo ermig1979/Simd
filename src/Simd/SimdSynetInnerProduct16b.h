@@ -35,13 +35,15 @@ namespace Simd
         size_t M, N, K;
         SimdTensorDataType typeA, typeB, typeC;
         SimdBool transB, constB, bias;
+        SimdConvolutionActivationType activation;
 
         InnerProductParam16b(size_t m, size_t n, size_t k,
             SimdTensorDataType ta, SimdTensorDataType tb, SimdTensorDataType tc,
-            SimdBool t, SimdBool c, SimdBool b)
+            SimdBool t, SimdBool c, SimdBool b, SimdConvolutionActivationType a)
             : M(m), N(n), K(k)
             , typeA(ta), typeB(tb), typeC(tc)
             , transB(t), constB(c), bias(b)
+            , activation(a)
         {
         }
 
@@ -53,12 +55,14 @@ namespace Simd
                 (typeC == SimdTensorData32f || typeC == SimdTensorData16b);
         }
 
-        String Info() const
+        String Info(bool detail = true) const
         {
             std::stringstream ss;
             ss << M << "x" << N << "x" << K << "-";
             ss << ToChar(typeA) << ToChar(typeB) << ToChar(typeC) << "-";
             ss << (transB ? "t" : "n") << (constB ? "1" : "2") << (bias ? "b" : "o");
+            if (detail)
+                ss << "-" << ToStr(activation);
             return ss.str();
         }
 
@@ -73,45 +77,24 @@ namespace Simd
     class SynetInnerProduct16b : public Deletable
     {
     public:
-        SynetInnerProduct16b(const InnerProductParam16b& p)
-            : _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-            , _perf(NULL)
-#endif
-            , _sizeA(0)
-            , _sizeB(0)
-            , _sizeC(0)
-        {
-        }
+        SynetInnerProduct16b(const InnerProductParam16b& p);
 
         const InnerProductParam16b& Param() const
         {
             return _param;
         }
 
-        virtual size_t InternalBufferSize() const
-        {
-            return _buffer.RawSize() + _weight.RawSize() + _bias.RawSize();
-        }
-
-        virtual size_t ExternalBufferSize() const
-        {
-            return _sizeA * 2 + _sizeB * 2 + _sizeC * 4;
-        }
+        virtual size_t InternalBufferSize() const;
+        virtual size_t ExternalBufferSize() const;
 
         virtual String Ext() const = 0;
         virtual String Desc() const = 0;
 
-        virtual void SetParams(const float* weight, const float* bias) = 0;
+        virtual void SetParams(const float* weight, const float* bias, const float* params) = 0;
         virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C) = 0;
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* Perf(const char* func)
-        {
-            if (_perf == NULL)
-                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-            return _perf;
-        }
+        Base::PerformanceMeasurer* Perf(const char* func);
 #endif
 
         const char* Info() const
@@ -127,20 +110,14 @@ namespace Simd
 #endif
         Array8u _buffer;
         Array16u _weight;
-        Array32f _bias;
+        Array32f _bias, _params;
         mutable String _info;
-        size_t _sizeA, _sizeB, _sizeC;
+        size_t _sizeA, _sizeB, _sizeC, _sizeS;
 
-        uint8_t* Buffer(uint8_t* buffer)
-        {
-            if (buffer)
-                return buffer;
-            else
-            {
-                _buffer.Resize(ExternalBufferSize());
-                return _buffer.data;
-            }
-        }
+        uint8_t* Buffer(uint8_t* buffer);
+
+        void SetBias(const float* bias, size_t align);
+        void SetParams(const float* params, size_t align);
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -153,7 +130,7 @@ namespace Simd
             SynetInnerProduct16bRef(const InnerProductParam16b& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
-            virtual void SetParams(const float* weight, const float* bias);
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
             virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
         protected:
@@ -166,7 +143,7 @@ namespace Simd
             SynetInnerProduct16bGemmNN(const InnerProductParam16b& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
-            virtual void SetParams(const float* weight, const float* bias);
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
             virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
             static bool Preferable(const InnerProductParam16b& p);
@@ -179,7 +156,8 @@ namespace Simd
             };
 
             typedef void(*PrepPtr)(const uint8_t* src, const InnerProductParam16b& p, const AlgParam& a, size_t size, size_t K, uint16_t* dst);
-            typedef void(*GemmPtr)(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C, int post, const float* bias, uint8_t* dst);
+            typedef void(*GemmPtr)(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, 
+                const uint16_t* B, float* C, int post, const float* bias, const float* params, float * sum, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
@@ -191,7 +169,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -207,7 +185,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
@@ -224,7 +202,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
@@ -245,7 +223,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
@@ -262,7 +240,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 }

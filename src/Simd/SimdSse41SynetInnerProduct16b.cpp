@@ -28,14 +28,14 @@ namespace Simd
 #if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)      
     namespace Sse41
     {
-        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias)
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation)
         {
-            InnerProductParam16b param(M, N, K, typeA, typeB, typeC, transB, constB, bias);
+            InnerProductParam16b param(M, N, K, typeA, typeB, typeC, transB, constB, bias, activation);
             if (!param.Valid())
                 return NULL;
             if (Base::SynetInnerProduct16bGemmNN::Preferable(param))
                 return new Sse41::SynetInnerProduct16bGemmNN(param);
-            return Base::SynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
+            return Base::SynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias, activation);
         }
     }
 #endif

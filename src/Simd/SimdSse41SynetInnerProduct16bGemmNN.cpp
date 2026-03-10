@@ -328,8 +328,8 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term16bType term, int M> void InnerProduct16bGemmNN_2xM(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a,
-            size_t N, size_t K, int update, const uint16_t* B0, float* C, const __m128* bias, uint8_t* dst)
+        template<Term16bType term, SimdConvolutionActivationType type, int M> void InnerProduct16bGemmNN_2xM(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a,
+            size_t N, size_t K, int update, const uint16_t* B0, float* C, const __m128* bias, const __m128* params, uint8_t* dst)
         {
             __m128 c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, a0, b00, b01, b10, b11, m = _mm_castsi128_ps(Bf16::MASK);
             size_t dC = a.cN, dA = a.aK, dD = p.N * a.eC;
@@ -414,20 +414,20 @@ namespace Simd
                 }
                 if (N == DF)
                 {
-                    if (M > 0) Save2<term>(dst, C, c00, c01, bias), C += dC, dst += dD;
-                    if (M > 1) Save2<term>(dst, C, c10, c11, bias), C += dC, dst += dD;
-                    if (M > 2) Save2<term>(dst, C, c20, c21, bias), C += dC, dst += dD;
-                    if (M > 3) Save2<term>(dst, C, c30, c31, bias), C += dC, dst += dD;
-                    if (M > 4) Save2<term>(dst, C, c40, c41, bias), C += dC, dst += dD;
+                    if (M > 0) Save2<term, type>(dst, C, c00, c01, bias, params), C += dC, dst += dD;
+                    if (M > 1) Save2<term, type>(dst, C, c10, c11, bias, params), C += dC, dst += dD;
+                    if (M > 2) Save2<term, type>(dst, C, c20, c21, bias, params), C += dC, dst += dD;
+                    if (M > 3) Save2<term, type>(dst, C, c30, c31, bias, params), C += dC, dst += dD;
+                    if (M > 4) Save2<term, type>(dst, C, c40, c41, bias, params), C += dC, dst += dD;
                 }
                 else
                 {
                     size_t tail = N - F;
-                    if (M > 0) Save2<term>(dst, C, c00, c01, bias, tail), C += dC, dst += dD;
-                    if (M > 1) Save2<term>(dst, C, c10, c11, bias, tail), C += dC, dst += dD;
-                    if (M > 2) Save2<term>(dst, C, c20, c21, bias, tail), C += dC, dst += dD;
-                    if (M > 3) Save2<term>(dst, C, c30, c31, bias, tail), C += dC, dst += dD;
-                    if (M > 4) Save2<term>(dst, C, c40, c41, bias, tail), C += dC, dst += dD;
+                    if (M > 0) Save2<term, type>(dst, C, c00, c01, bias, params, tail), C += dC, dst += dD;
+                    if (M > 1) Save2<term, type>(dst, C, c10, c11, bias, params, tail), C += dC, dst += dD;
+                    if (M > 2) Save2<term, type>(dst, C, c20, c21, bias, params, tail), C += dC, dst += dD;
+                    if (M > 3) Save2<term, type>(dst, C, c30, c31, bias, params, tail), C += dC, dst += dD;
+                    if (M > 4) Save2<term, type>(dst, C, c40, c41, bias, params, tail), C += dC, dst += dD;
                 }
             }
             else
@@ -492,61 +492,72 @@ namespace Simd
                 }
                 if (N == F)
                 {
-                    if (M > 0) Save1<term>(dst, C, c00, bias), C += dC, dst += dD;
-                    if (M > 1) Save1<term>(dst, C, c10, bias), C += dC, dst += dD;
-                    if (M > 2) Save1<term>(dst, C, c20, bias), C += dC, dst += dD;
-                    if (M > 3) Save1<term>(dst, C, c30, bias), C += dC, dst += dD;
-                    if (M > 4) Save1<term>(dst, C, c40, bias), C += dC, dst += dD;
+                    if (M > 0) Save1<term, type>(dst, C, c00, bias, params), C += dC, dst += dD;
+                    if (M > 1) Save1<term, type>(dst, C, c10, bias, params), C += dC, dst += dD;
+                    if (M > 2) Save1<term, type>(dst, C, c20, bias, params), C += dC, dst += dD;
+                    if (M > 3) Save1<term, type>(dst, C, c30, bias, params), C += dC, dst += dD;
+                    if (M > 4) Save1<term, type>(dst, C, c40, bias, params), C += dC, dst += dD;
                 }
                 else
                 {
                     size_t tail = N;
-                    if (M > 0) Save1<term>(dst, C, c00, bias, tail), C += dC, dst += dD;
-                    if (M > 1) Save1<term>(dst, C, c10, bias, tail), C += dC, dst += dD;
-                    if (M > 2) Save1<term>(dst, C, c20, bias, tail), C += dC, dst += dD;
-                    if (M > 3) Save1<term>(dst, C, c30, bias, tail), C += dC, dst += dD;
-                    if (M > 4) Save1<term>(dst, C, c40, bias, tail), C += dC, dst += dD;
+                    if (M > 0) Save1<term, type>(dst, C, c00, bias, params, tail), C += dC, dst += dD;
+                    if (M > 1) Save1<term, type>(dst, C, c10, bias, params, tail), C += dC, dst += dD;
+                    if (M > 2) Save1<term, type>(dst, C, c20, bias, params, tail), C += dC, dst += dD;
+                    if (M > 3) Save1<term, type>(dst, C, c30, bias, params, tail), C += dC, dst += dD;
+                    if (M > 4) Save1<term, type>(dst, C, c40, bias, params, tail), C += dC, dst += dD;
                 }
             }
         }
 
-        typedef void(*GemmNN_2xM_Ptr)(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, int update, const uint16_t* B0, float* C, const __m128* bias, uint8_t* dst);
+        typedef void(*GemmNN_2xM_Ptr)(const uint16_t* A0, const InnerProductParam16b& p, const AlgParam& a, size_t N, size_t K, int update, const uint16_t* B0, float* C, const __m128* bias, const __m128* params, uint8_t* dst);
 
-        template<Term16bType term> GemmNN_2xM_Ptr GetGemmNN_2xM(size_t M)
+        template<Term16bType term, SimdConvolutionActivationType type> GemmNN_2xM_Ptr GetGemmNN_2xM(size_t M)
         {
             switch (M)
             {
             case 0: return NULL;
-            case 1: return InnerProduct16bGemmNN_2xM<term, 1>;
-            case 2: return InnerProduct16bGemmNN_2xM<term, 2>;
-            case 3: return InnerProduct16bGemmNN_2xM<term, 3>;
-            case 4: return InnerProduct16bGemmNN_2xM<term, 4>;
-            case 5: return InnerProduct16bGemmNN_2xM<term, 5>;
+            case 1: return InnerProduct16bGemmNN_2xM<term, type, 1>;
+            case 2: return InnerProduct16bGemmNN_2xM<term, type, 2>;
+            case 3: return InnerProduct16bGemmNN_2xM<term, type, 3>;
+            case 4: return InnerProduct16bGemmNN_2xM<term, type, 4>;
+            case 5: return InnerProduct16bGemmNN_2xM<term, type, 5>;
             }
             assert(0);
             return NULL;
         }
 
-        template<Term16bType term> void InnerProduct16bGemmNN_Gemm2(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a,
-            size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C, int post, const float* bias, uint8_t* dst)
+        template<Term16bType term, SimdConvolutionActivationType type> void InnerProduct16bGemmNN_Gemm2(const uint16_t* A, const InnerProductParam16b& p, const AlgParam& a,
+            size_t M, size_t N, size_t K, int update, const uint16_t* B, float* C, int post, const float* bias, const float* params, float* sum, uint8_t* dst)
         {
             size_t m1 = M, m = 5;
             size_t mm = AlignLoAny(m1, m), t = m1 - mm;
             size_t dA = a.aK, dB = a.bK * DF, dC = a.cN, dD = p.N * a.eC;
-            GemmNN_2xM_Ptr gemm_2xM = post ? GetGemmNN_2xM<term>(m) : GetGemmNN_2xM<Term16bInterim>(m);
-            GemmNN_2xM_Ptr gemm_2xT = post ? GetGemmNN_2xM<term>(t) : GetGemmNN_2xM<Term16bInterim>(t);
+            GemmNN_2xM_Ptr gemm_2xM = post ? GetGemmNN_2xM<term, type>(m) : GetGemmNN_2xM<Term16bInterim, type>(m);
+            GemmNN_2xM_Ptr gemm_2xT = post ? GetGemmNN_2xM<term, type>(t) : GetGemmNN_2xM<Term16bInterim, type>(t);
 
-            __m128 _bias[2];
+            __m128 _params[2], _bias[2];
+            _params[0] = _mm_set1_ps(params[0]);
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
+                _params[1] = _mm_set1_ps(params[1]);
             for (size_t j = 0; j < N; j += DF)
             {
                 size_t dN = Simd::Min(DF, N - j);
                 _bias[0] = _mm_loadu_ps(bias + j + 0);
                 _bias[1] = _mm_loadu_ps(bias + j + F);
+                if (type == ::SimdConvolutionActivationPrelu)
+                {
+                    _params[0] = _mm_loadu_ps(params + j + 0);
+                    _params[1] = _mm_loadu_ps(params + j + F);
+                }
+
                 size_t i = 0;
                 for (; i < mm; i += m)
-                    gemm_2xM(A + i * dA, p, a, dN, K, update, B, C + i * dC, _bias, dst + i * dD);
+                    gemm_2xM(A + i * dA, p, a, dN, K, update, B, C + i * dC, _bias, _params, dst + i * dD);
                 for (; i < m1; i += t)
-                    gemm_2xT(A + i * dA, p, a, dN, K, update, B, C + i * dC, _bias, dst + i * dD);
+                    gemm_2xT(A + i * dA, p, a, dN, K, update, B, C + i * dC, _bias, _params, dst + i * dD);
                 B += dB;
                 C += dN;
                 dst += DF * a.eC;
@@ -554,6 +565,14 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
+
+        template <SimdConvolutionActivationType type> SIMD_INLINE void SetGemm(const InnerProductParam16b& p, GemmPtr& gemm)
+        {
+            if (p.typeC == SimdTensorData16b)
+                gemm = InnerProduct16bGemmNN_Gemm2<Term16bLast16b, type>;
+            else
+                gemm = InnerProduct16bGemmNN_Gemm2<Term16bLast32f, type>;
+        }
 
         SynetInnerProduct16bGemmNN::SynetInnerProduct16bGemmNN(const InnerProductParam16b& p)
             : Base::SynetInnerProduct16bGemmNN(p)
@@ -580,10 +599,21 @@ namespace Simd
                 else
                     _prepB = InnerProduct16bGemmNN_ReorderBn;
             }
-            if (p.typeC == SimdTensorData16b)
-                _gemm = InnerProduct16bGemmNN_Gemm2<Term16bLast16b>;
-            else
-                _gemm = InnerProduct16bGemmNN_Gemm2<Term16bLast32f>;
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity: SetGemm<SimdConvolutionActivationRestrictRange>(p, _gemm); break;
+            case SimdConvolutionActivationRelu: SetGemm<SimdConvolutionActivationRestrictRange>(p, _gemm); break;
+            case SimdConvolutionActivationLeakyRelu: SetGemm<SimdConvolutionActivationPrelu>(p, _gemm); break;
+            case SimdConvolutionActivationRestrictRange: SetGemm<SimdConvolutionActivationRestrictRange>(p, _gemm); break;
+            case SimdConvolutionActivationPrelu: SetGemm<SimdConvolutionActivationPrelu>(p, _gemm); break;
+            case SimdConvolutionActivationElu: SetGemm<SimdConvolutionActivationElu>(p, _gemm); break;
+            case SimdConvolutionActivationHswish: SetGemm<SimdConvolutionActivationHswish>(p, _gemm); break;
+            case SimdConvolutionActivationMish: SetGemm<SimdConvolutionActivationMish>(p, _gemm); break;
+            case SimdConvolutionActivationHardSigmoid: SetGemm<SimdConvolutionActivationHardSigmoid>(p, _gemm); break;
+            case SimdConvolutionActivationSwish: SetGemm<SimdConvolutionActivationSwish>(p, _gemm); break;
+            case SimdConvolutionActivationGelu: SetGemm<SimdConvolutionActivationGelu>(p, _gemm); break;
+            default: assert(0);
+            }
         }
     }
 #endif

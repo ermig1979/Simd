@@ -28,14 +28,14 @@ namespace Simd
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))   
     namespace AmxBf16
     {
-        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias)
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation)
         {
-            InnerProductParam16b param(M, N, K, typeA, typeB, typeC, transB, constB, bias);
+            InnerProductParam16b param(M, N, K, typeA, typeB, typeC, transB, constB, bias, activation);
             if (!param.Valid())
                 return NULL;
             if (Base::SynetInnerProduct16bGemmNN::Preferable(param))
                 return new AmxBf16::SynetInnerProduct16bGemmNN(param);
-            return Avx512bw::SynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
+            return Avx512bw::SynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias, activation);
         }
     }
 #endif
