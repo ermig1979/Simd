@@ -699,7 +699,7 @@ namespace Simd
 
         void SynetMergedConvolution16bCdc::SetSize(size_t miC, size_t miK)
         {
-            const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
+            const size_t L1 = Base::AlgCacheL1(), L2 = size_t(Base::AlgCacheL2() * 0.5), L3 = Base::AlgCacheL3();
             const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
@@ -719,7 +719,7 @@ namespace Simd
             }
             size_t count = size / (L3 / 2) + 1;
             a.maC = AlignHi(AlignHi(c0.dstC / count, 2 * a.miC), a.miK);
-            for (size_t yStep = c1.dstH; yStep >= 1; yStep--)
+            for (size_t yStep = c1.dstH; yStep >= 1;)
             {
                 a.yStep[2] = Simd::Max<size_t>(1, yStep);
                 a.yStart[2] = a.yStep[2];
@@ -738,6 +738,8 @@ namespace Simd
                 _sizeB[2] = a.bufH[2] * p.conv[1].dstW * a.maC;
                 if (_sizeB[0] * 2 + _sizeB[1] * 4 + _sizeB[2] * 2 <= L2)
                     break;
+                if (!SetPartOf(c1.dstH, yStep))
+                    yStep--;
             }
             a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
@@ -816,7 +818,7 @@ namespace Simd
 
         void SynetMergedConvolution16bCd::SetSize(size_t miC, size_t miK)
         {
-            const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
+            const size_t L1 = Base::AlgCacheL1(), L2 = size_t(Base::AlgCacheL2() * 0.5), L3 = Base::AlgCacheL3();
             const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
@@ -835,7 +837,7 @@ namespace Simd
             }
             size_t count = size / (L3 / 2) + 1;
             a.maC = AlignHiAny(c0.dstC / count, 2 * a.miC);
-            for (size_t yStep = c1.dstH; yStep >= 1; yStep--)
+            for (size_t yStep = c1.dstH; yStep >= 1;)
             {
                 a.yStep[2] = Simd::Max<size_t>(1, yStep);
                 a.yStart[2] = a.yStep[2];
@@ -852,6 +854,8 @@ namespace Simd
                 _sizeB[1] = a.bufH[1] * p.conv[1].srcW * a.maC;
                 if (_sizeB[0] * 2 + _sizeB[1] * 4 <= L2)
                     break;
+                if (!SetPartOf(c1.dstH, yStep))
+                    yStep--;
             }
             a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
@@ -921,7 +925,7 @@ namespace Simd
 
         void SynetMergedConvolution16bDc::SetSize(size_t miC, size_t miK)
         {
-            const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
+            const size_t L1 = Base::AlgCacheL1(), L2 = size_t(Base::AlgCacheL2() * 0.5), L3 = Base::AlgCacheL3();
             const MergConvParam& p = _param;
             const ConvParam& c0 = p.conv[0];
             const ConvParam& c1 = p.conv[1];
@@ -940,7 +944,7 @@ namespace Simd
             }
             size_t count = size / (L3 / 2) + 1;
             a.maC = AlignHi(AlignHi(c0.dstC / count, 2 * a.miC), a.miK);
-            for (size_t yStep = c0.dstH; yStep >= 1; yStep--)
+            for (size_t yStep = c0.dstH; yStep >= 1;)
             {
                 a.yStep[2] = Simd::Max<size_t>(1, yStep);
                 a.yStart[2] = a.yStep[2];
@@ -952,6 +956,8 @@ namespace Simd
                 _sizeB[2] = a.bufH[2] * p.conv[1].srcW * a.maC;
                 if (_sizeB[2] * 2 <= L2)
                     break;
+                if (!SetPartOf(c0.dstH, yStep))
+                    yStep--;
             }
             a.bufH[0] = 0;
             a.bufH[1] = 0;
