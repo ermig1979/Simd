@@ -222,16 +222,11 @@ namespace Test
     {
         bool result = true;
         const SimdBool t = SimdTrue, f = SimdFalse;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationHswish, a1 = ::SimdConvolutionActivationIdentity, a2 = ::SimdConvolutionActivationPrelu;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationHswish;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationMish, a1 = ::SimdConvolutionActivationMish, a2 = ::SimdConvolutionActivationMish;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationHardSigmoid, a1 = ::SimdConvolutionActivationHardSigmoid, a2 = ::SimdConvolutionActivationHardSigmoid;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationSwish, a1 = ::SimdConvolutionActivationSwish, a2 = ::SimdConvolutionActivationSwish;
+        const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu,
+            aLr = SimdConvolutionActivationLeakyRelu, aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu,
+            aEl = SimdConvolutionActivationElu, aHs = SimdConvolutionActivationHswish, aMi = SimdConvolutionActivationMish,
+            aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
         const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationIdentity, a1 = ::SimdConvolutionActivationIdentity, a2 = ::SimdConvolutionActivationIdentity;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationPrelu, a2 = ::SimdConvolutionActivationPrelu;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRestrictRange, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationRestrictRange;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationIdentity, a1 = ::SimdConvolutionActivationIdentity, a2 = ::SimdConvolutionActivationIdentity;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationGelu, a1 = ::SimdConvolutionActivationGelu, a2 = ::SimdConvolutionActivationGelu;
 #if defined(NDEBUG)
 #if 0
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 384, 389), Cnv(a0, 3, 2, 32), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 16), f), f1, f2);
@@ -315,10 +310,13 @@ namespace Test
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 152, 32, 32), Cnv(a0, 7, 1), Cnv(a1, 1, 1, 608)), f1, f2);
 #endif
 #if 1
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1280, 32, 32), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 256), f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 128, 128), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 2), Cnv(aLr, 1, 1, 24), f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 1), Cnv(aLr, 1, 1, 24), f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aId, 3, 1), Cnv(aLr, 1, 1, 24)), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 1)), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 555, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 1555)), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 128, 128), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 1), Cnv(aLr, 1, 1, 24), f), f1, f2);
 #endif
         return result;
     }

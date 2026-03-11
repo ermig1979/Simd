@@ -329,6 +329,21 @@ namespace Simd
         {
             return int32_t(value) | (int32_t(value) << 8) | (int32_t(value) << 16) | (int32_t(value) << 24);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE bool SetPartOf(size_t original, size_t& current)
+        {
+            for (size_t div = 1, max = (size_t)ceil(sqrt(double(original))); div <= max && div < original; div++)
+            {
+                if (current == DivHi(original, div))
+                {
+                    current = DivHi(original, div + 1);
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
 #ifdef SIMD_SSE41_ENABLE

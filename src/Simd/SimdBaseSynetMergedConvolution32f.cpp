@@ -278,7 +278,7 @@ namespace Simd
                 size += p.conv[i].kernelY*p.conv[i].kernelX *p.conv[i].srcC * p.conv[i].dstC / p.conv[i].group;
             size_t count = size * sizeof(float) / (L3/2) + 1;
             _maC = AlignHiAny(p.conv[0].dstC / count, 2 * _miC);
-            for (size_t yStep = p.conv[1].dstH; yStep >= 1; yStep--)
+            for (size_t yStep = p.conv[1].dstH; yStep >= 1;)
             {
                 _yStep[1] = Simd::Max<size_t>(1, yStep);
                 for (_bufH[1] = 1; _bufH[1] < _yStep[1]; _bufH[1] *= 2);
@@ -288,6 +288,8 @@ namespace Simd
                 _sizeB[1] = _bufH[1] * p.conv[1].dstW * _maC;
                 if ((_sizeB[0] + _sizeB[1]) * sizeof(float) <= L2)
                     break;
+                if (!SetPartOf(p.conv[1].dstH, yStep))
+                    yStep--;
             }
             for (size_t i = 0; i < 3; ++i)
             {
@@ -428,7 +430,7 @@ namespace Simd
                 size += p.conv[i].kernelY * p.conv[i].kernelX * p.conv[i].srcC * p.conv[i].dstC / p.conv[i].group;
             size_t count = size * sizeof(float) / (L3 / 2) + 1;
             _maC = AlignHiAny(p.conv[0].dstC / count, 2 * _miC);
-            for (size_t yStep = p.conv[1].dstH; yStep >= 1; yStep--)
+            for (size_t yStep = p.conv[1].dstH; yStep >= 1;)
             {
                 _yStep[1] = Simd::Max<size_t>(1, yStep);
                 _yStep[0] = _yStep[1] * p.conv[1].strideY;
@@ -436,6 +438,8 @@ namespace Simd
                 _sizeB[0] = _bufH[0] * p.conv[0].dstW * _maC;
                 if (_sizeB[0] * sizeof(float) <= L2)
                     break;
+                if (!SetPartOf(p.conv[1].dstH, yStep))
+                    yStep--;
             }
             _sizeB[1] = 0;
             _bufH[1] = 0;
@@ -543,13 +547,15 @@ namespace Simd
                 size += p.conv[i].kernelY * p.conv[i].kernelX * p.conv[i].srcC * p.conv[i].dstC / p.conv[i].group;
             size_t count = size * sizeof(float) / (L3 / 2) + 1;
             _maC = AlignHiAny(p.conv[0].dstC / count, 2 * _miC);
-            for (size_t yStep = p.conv[0].dstH; yStep >= 1; yStep--)
+            for (size_t yStep = p.conv[0].dstH; yStep >= 1;)
             {
                 _yStep[0] = Simd::Max<size_t>(1, yStep);
                 for (_bufH[0] = 1; _bufH[0] < _yStep[0]; _bufH[0] *= 2);
                 _sizeB[0] = _bufH[0] * p.conv[0].dstW * _maC;
                 if (_sizeB[0]* sizeof(float) <= L2)
                     break;
+                if (!SetPartOf(p.conv[0].dstH, yStep))
+                    yStep--;
             }
             _bufH[1] = _bufH[0];
             _bufH[0] = 0;

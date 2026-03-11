@@ -37,7 +37,7 @@ namespace Simd
         SynetMergedConvolution32fCdc::SynetMergedConvolution32fCdc(const MergConvParam& p)
             : Avx2::SynetMergedConvolution32fCdc(p)
         {
-            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F);
+            SetSize(Base::AlgCacheL1(), size_t(Base::AlgCacheL2()*0.7), Base::AlgCacheL3(), F);
             SetInput(p.conv[0], _convolution + 0);
             SetDepthwise(p.conv[1], _convolution + 1);
             SetOutput(p.conv[2], _convolution + 2);
@@ -48,7 +48,7 @@ namespace Simd
         SynetMergedConvolution32fCd::SynetMergedConvolution32fCd(const MergConvParam& p)
             : Avx2::SynetMergedConvolution32fCd(p)
         {
-            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F);
+            SetSize(Base::AlgCacheL1(), size_t(Base::AlgCacheL2() * 0.7), Base::AlgCacheL3(), F);
             SetInput(_param.conv[0], _convolution + 0);
             SetDepthwise(_param.conv[1], _convolution + 1);
         }
@@ -58,7 +58,7 @@ namespace Simd
         SynetMergedConvolution32fDc::SynetMergedConvolution32fDc(const MergConvParam& p)
             : Avx2::SynetMergedConvolution32fDc(p)
         {
-            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F);
+            SetSize(Base::AlgCacheL1(), size_t(Base::AlgCacheL2() * 0.7), Base::AlgCacheL3(), F);
             SetDepthwise(p.conv[0], _convolution + 0);
             SetOutput(p.conv[1], _convolution + 1);
         }
