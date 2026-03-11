@@ -338,8 +338,14 @@ namespace Simd
             {
                 if (current == DivHi(original, div))
                 {
-                    current = DivHi(original, div + 1);
-                    return true;
+                    size_t next = DivHi(original, div + 1);
+                    if (next < current)
+                    {
+                        current = next;
+                        return true;
+                    }
+                    else
+                        return false;
                 }
             }
             return false;

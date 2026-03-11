@@ -336,7 +336,8 @@ namespace Test
         //    Param::SetDst(p.conv + 1); Param::SetDst(p.conv + 2);
         //    result = result && SynetMergedConvolution16bForwardAutoTest(eps, p, f1, f2);
         //}
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 96, 15, 24), Cnv(aRe, 1, 1, 576), Cnv(aRe, 3, 1), Cnv(aRe, 1, 1, 96), f, b16, b16), f1, f2);
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 33, 33), Cnv(aPr, 3, 1), Cnv(aPr, 1, 1, 63), b16, b16), f1, f2);
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 33, 33), Cnv(aPr, 3, 1), Cnv(aPr, 1, 1, 47), b16, b16), f1, f2);
 #endif
         return result;
     }
