@@ -1692,7 +1692,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a)
     {
-        assert(bgra.format == View<A>::Bgr32);
+        assert(bgra.format == View<A>::Bgra32);
         assert(b.format == View<A>::None || (EqualSize(bgra, b) && b.format == View<A>::Gray8));
         assert(g.format == View<A>::None || (EqualSize(bgra, g) && g.format == View<A>::Gray8));
         assert(r.format == View<A>::None || (EqualSize(bgra, r) && r.format == View<A>::Gray8));
@@ -1719,9 +1719,9 @@ namespace Simd
     template<template<class> class A> SIMD_INLINE void DeinterleaveRgb(const View<A>& rgb, View<A>& r, View<A>& g, View<A>& b)
     {
         assert(rgb.format == View<A>::Rgb24);
-        assert(r.format == View<A>::Empty || (EqualSize(rgb, r) && r.format == View<A>::Gray8));
-        assert(g.format == View<A>::Empty || (EqualSize(rgb, g) && g.format == View<A>::Gray8));
-        assert(b.format == View<A>::Empty || (EqualSize(rgb, b) && b.format == View<A>::Gray8));
+        assert(r.format == View<A>::None || (EqualSize(rgb, r) && r.format == View<A>::Gray8));
+        assert(g.format == View<A>::None || (EqualSize(rgb, g) && g.format == View<A>::Gray8));
+        assert(b.format == View<A>::None || (EqualSize(rgb, b) && b.format == View<A>::Gray8));
 
         SimdDeinterleaveBgr(rgb.data, rgb.stride, rgb.width, rgb.height, r.data, r.stride, g.data, g.stride, b.data, b.stride);
     }
@@ -1745,10 +1745,10 @@ namespace Simd
     template<template<class> class A> SIMD_INLINE void DeinterleaveRgba(const View<A>& rgba, View<A>& r, View<A>& g, View<A>& b, View<A>& a)
     {
         assert(rgba.format == View<A>::Rgba32);
-        assert(r.format == View<A>::Empty || (EqualSize(rgba, r) && r.format == View<A>::Gray8));
-        assert(g.format == View<A>::Empty || (EqualSize(rgba, g) && g.format == View<A>::Gray8));
-        assert(b.format == View<A>::Empty || (EqualSize(rgba, b) && b.format == View<A>::Gray8));
-        assert(a.format == View<A>::Empty || (EqualSize(rgba, a) && a.format == View<A>::Gray8));
+        assert(r.format == View<A>::None || (EqualSize(rgba, r) && r.format == View<A>::Gray8));
+        assert(g.format == View<A>::None || (EqualSize(rgba, g) && g.format == View<A>::Gray8));
+        assert(b.format == View<A>::None || (EqualSize(rgba, b) && b.format == View<A>::Gray8));
+        assert(a.format == View<A>::None || (EqualSize(rgba, a) && a.format == View<A>::Gray8));
 
         SimdDeinterleaveBgra(rgba.data, rgba.stride, rgba.width, rgba.height, r.data, r.stride, g.data, g.stride, b.data, b.stride, a.data, a.stride);
     }
@@ -3783,8 +3783,8 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void GetObjectMoments(const View<A> & src, const View<A> & mask, uint8_t index, uint64_t & n, uint64_t & s, uint64_t & sx, uint64_t & sy, uint64_t & sxx, uint64_t & sxy, uint64_t & syy)
     {
-        assert(src.format == View<A>::Empty || src.format == View<A>::Gray8);
-        assert(mask.format == View<A>::Empty || mask.format == View<A>::Gray8);
+        assert(src.format == View<A>::None || src.format == View<A>::Gray8);
+        assert(mask.format == View<A>::None || mask.format == View<A>::Gray8);
         assert(src.format == View<A>::Gray8 || mask.format == View<A>::Gray8);
         assert(src.format == mask.format ? EqualSize(src, mask) : true);
 
