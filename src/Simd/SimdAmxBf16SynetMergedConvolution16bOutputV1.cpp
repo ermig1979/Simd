@@ -24,6 +24,7 @@
 #include "Simd/SimdSynetMergedConvolution16b.h"
 #include "Simd/SimdSynetConvolution16bCommon.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdSynetApply16b.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdCpu.h"
@@ -36,56 +37,6 @@ namespace Simd
     {
         using AlgParam = Base::SynetMergedConvolution16b::AlgParam;
         using OutputPtr = Base::SynetMergedConvolution16b::OutputConvolutionPtr;
-
-        //-------------------------------------------------------------------------------------------------
-
-        template<Term16bType term, SimdConvolutionActivationType type, int flush, int M> static SIMD_INLINE void ApplyMx1(uint8_t* ptr, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
-        {
-            __m512 f0, f1;
-            if (M > 0) f0 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + 0), bias[0]), params, 0);
-            if (M > 1) f1 = Activate<type>(_mm512_add_ps(_mm512_loadu_ps(buf + F), bias[1]), params, 1);
-            if (term == Term16bLast16b)
-            {
-                if (M > 1)
-                {
-                    _mm512_mask_storeu_epi16((uint16_t*)ptr, tail, (__m512i)_mm512_cvtne2ps_pbh(f1, f0));
-                    if (flush) _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
-                }
-                else
-                {
-                    _mm256_mask_storeu_epi16((uint16_t*)ptr, (__mmask16)tail, (__m256i)_mm512_cvtneps_pbh(f0));
-                    if (flush) _mm_prefetch((const char*)ptr, _MM_HINT_NTA);
-                }
-            }
-            else if (term == Term16bLast32f)
-            {
-                if (M > 1)
-                {
-                    _mm512_storeu_ps((float*)(ptr + 0), f0);
-                    if (flush) _mm_prefetch((const char*)(ptr + 0), _MM_HINT_NTA);
-                    _mm512_mask_storeu_ps((float*)(ptr + A), (__mmask16)tail, f1);
-                    if (flush) _mm_prefetch((const char*)(ptr + A), _MM_HINT_NTA);
-                }
-                else
-                if (M > 0)
-                {
-                    _mm512_mask_storeu_ps((float*)(ptr + 0), (__mmask16)tail, f0);
-                    if (flush) _mm_prefetch((const char*)(ptr + 0), _MM_HINT_NTA);
-                }
-            }
-        }
-
-        template<Term16bType term, SimdConvolutionActivationType type, int flush, int M, int N> static SIMD_INLINE void ApplyMxN(uint8_t* ptr, int dP, float* buf, const __m512* bias, const __m512* params, __mmask32 tail = __mmask32(-1))
-        {
-            if (N > 0) ApplyMx1<term, type, flush, M>(ptr + 0 * dP, buf + 0 * DF, bias, params, tail);
-            if (N > 1) ApplyMx1<term, type, flush, M>(ptr + 1 * dP, buf + 1 * DF, bias, params, tail);
-            if (N > 2) ApplyMx1<term, type, flush, M>(ptr + 2 * dP, buf + 2 * DF, bias, params, tail);
-            if (N > 3) ApplyMx1<term, type, flush, M>(ptr + 3 * dP, buf + 3 * DF, bias, params, tail);
-            if (N > 4) ApplyMx1<term, type, flush, M>(ptr + 4 * dP, buf + 4 * DF, bias, params, tail);
-            if (N > 5) ApplyMx1<term, type, flush, M>(ptr + 5 * dP, buf + 5 * DF, bias, params, tail);
-            if (N > 6) ApplyMx1<term, type, flush, M>(ptr + 6 * dP, buf + 6 * DF, bias, params, tail);
-            if (N > 7) ApplyMx1<term, type, flush, M>(ptr + 7 * dP, buf + 7 * DF, bias, params, tail);
-        }
 
         //-------------------------------------------------------------------------------------------------
 
@@ -236,34 +187,36 @@ namespace Simd
             {
                 for (size_t cds = 0; cds < dstS; cds += 32)
                 {
+                    size_t ods = cds;
                     if (cds + 16 >= dstS)
                     {
                         cds = Simd::Min(dstS - 16, cds);
-                        OutputConvolution_1xMx16<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, NULL, buf0 + cds * dB, NULL, tailD);
+                        OutputConvolution_1xMx16<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + ods * dB, NULL, buf0 + cds * dB, NULL, tailD);
                     }
                     else
                     {
                         cds = Simd::Min(dstS - 32, cds);
-                        OutputConvolution_1xMx32<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, NULL, buf0 + cds * dB, NULL, tailD);
+                        OutputConvolution_1xMx32<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + ods * dB, NULL, buf0 + cds * dB, NULL, tailD);
                     }
                 }
             }  
             else
             {
                 size_t cds = 0, pds = 0;
-                OutputConvolution_1xMx32<term, type, flush, M, 0>(src0, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, buf1, buf2, dst, tailD), cds += 32;
+                OutputConvolution_1xMx32<term, type, flush, M, 0>(src0, p, a, srcC, zero, weight0, bias, params, buf0, buf1, buf2, dst, tailD), cds += 32;
                 for (; cds < dstS; pds = cds, cds += 32)
                 {
                     Swap(buf1, buf2);
+                    size_t ods = cds;
                     if (cds + 16 >= dstS)
                     {
                         cds = Simd::Min(dstS - 16, cds);
-                        OutputConvolution_1xMx16<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
+                        OutputConvolution_1xMx16<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + ods * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                     else
                     {
                         cds = Simd::Min(dstS - 32, cds);
-                        OutputConvolution_1xMx32<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
+                        OutputConvolution_1xMx32<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + ods * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                 }
                 uint8_t* dst1 = dst + pds * dD;

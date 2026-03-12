@@ -166,6 +166,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetApply16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="AmxBf16">
