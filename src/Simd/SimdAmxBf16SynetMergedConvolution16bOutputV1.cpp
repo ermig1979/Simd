@@ -187,16 +187,15 @@ namespace Simd
             {
                 for (size_t cds = 0; cds < dstS; cds += 32)
                 {
-                    size_t ods = cds;
                     if (cds + 16 >= dstS)
                     {
                         cds = Simd::Min(dstS - 16, cds);
-                        OutputConvolution_1xMx16<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + ods * dB, NULL, buf0 + cds * dB, NULL, tailD);
+                        OutputConvolution_1xMx16<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, NULL, buf0 + cds * dB, NULL, tailD);
                     }
                     else
                     {
                         cds = Simd::Min(dstS - 32, cds);
-                        OutputConvolution_1xMx32<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + ods * dB, NULL, buf0 + cds * dB, NULL, tailD);
+                        OutputConvolution_1xMx32<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, NULL, buf0 + cds * dB, NULL, tailD);
                     }
                 }
             }  
@@ -207,16 +206,15 @@ namespace Simd
                 for (; cds < dstS; pds = cds, cds += 32)
                 {
                     Swap(buf1, buf2);
-                    size_t ods = cds;
                     if (cds + 16 >= dstS)
                     {
                         cds = Simd::Min(dstS - 16, cds);
-                        OutputConvolution_1xMx16<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + ods * dB, buf1, buf2, dst + pds * dD, tailD);
+                        OutputConvolution_1xMx16<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                     else
                     {
                         cds = Simd::Min(dstS - 32, cds);
-                        OutputConvolution_1xMx32<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + ods * dB, buf1, buf2, dst + pds * dD, tailD);
+                        OutputConvolution_1xMx32<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                 }
                 uint8_t* dst1 = dst + pds * dD;
