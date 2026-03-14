@@ -294,6 +294,11 @@ SIMD_API void SimdAbsDifference(const uint8_t *a, size_t aStride, const uint8_t 
         Neon::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width >= Hvx::A)
+        Hvx::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
+    else
+#endif
         Base::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
 }
 
@@ -319,6 +324,11 @@ SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width >= Hvx::A)
+        Hvx::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
         Base::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
@@ -429,6 +439,11 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
         Neon::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width >= Hvx::A)
+        Hvx::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
         Base::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
 }
 
@@ -455,6 +470,11 @@ SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
+    else
+#endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width >= Hvx::A)
+        Hvx::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     else
 #endif
         Base::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
@@ -1309,6 +1329,11 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
         Neon::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
 #endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width >= Hvx::A)
+        Hvx::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+    else
+#endif
         Base::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
 }
 
@@ -1366,6 +1391,11 @@ SIMD_API void SimdBgrToRgb(const uint8_t *bgr, size_t width, size_t height, size
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
+    else
+#endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width >= Hvx::A)
+        Hvx::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
     else
 #endif
         Base::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
@@ -2126,6 +2156,11 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
         Neon::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
 #endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width >= Hvx::F)
+        Hvx::FillBgra(dst, stride, width, height, blue, green, red, alpha);
+    else
+#endif
         Base::FillBgra(dst, stride, width, height, blue, green, red, alpha);
 }
 
@@ -2150,6 +2185,11 @@ SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t h
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::FillPixel(dst, stride, width, height, pixel, pixelSize);
+    else
+#endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width >= Hvx::A)
+        Hvx::FillPixel(dst, stride, width, height, pixel, pixelSize);
     else
 #endif
         Base::FillPixel(dst, stride, width, height, pixel, pixelSize);
@@ -3860,6 +3900,11 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
         Neon::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width*channelCount >= Hvx::A)
+        Hvx::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+    else
+#endif
         Base::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 }
 
@@ -4736,6 +4781,11 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::GetStatistic(src, stride, width, height, min, max, average);
+    else
+#endif
+#ifdef SIMD_HVX_ENABLE
+    if (Hvx::Enable && width >= Hvx::A)
+        Hvx::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
         Base::GetStatistic(src, stride, width, height, min, max, average);
