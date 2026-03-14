@@ -313,6 +313,21 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_HVX_ENABLE
+    namespace Hvx
+    {
+        SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(HVX_Vector))
+        {
+            return Simd::Aligned(size, align);
+        }
+
+        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(HVX_Vector))
+        {
+            return Simd::Aligned(ptr, align);
+        }
+    }
+#endif
 }
 
 #endif

@@ -85,6 +85,15 @@ namespace Simd
         const bool Enable = GetEnable();
     }
 #endif
+
+#ifdef SIMD_HVX_ENABLE
+    namespace Hvx
+    {
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
+    }
+#endif
 }
 
 #define SIMD_BASE_FUNC(func) Simd::Base::func
@@ -120,9 +129,15 @@ namespace Simd
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-#define SIMD_NEON_FUNC(func) Simd::Neon::Enable ? Simd::Neon::func : 
+#define SIMD_NEON_FUNC(func) Simd::Neon::Enable ? Simd::Neon::func :
 #else
 #define SIMD_NEON_FUNC(func)
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+#define SIMD_HVX_FUNC(func) Simd::Hvx::Enable ? Simd::Hvx::func :
+#else
+#define SIMD_HVX_FUNC(func)
 #endif
 
 #define SIMD_FUNC0(func) SIMD_BASE_FUNC(func)

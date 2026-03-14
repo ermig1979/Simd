@@ -751,5 +751,27 @@ namespace Simd
         }
     }
 #endif//SIMD_NEON_ENABLE
+
+#ifdef SIMD_HVX_ENABLE
+    namespace Hvx
+    {
+        template <bool align> SIMD_INLINE void Store(uint8_t * p, HVX_Vector a);
+
+        template <> SIMD_INLINE void Store<false>(uint8_t * p, HVX_Vector a)
+        {
+            *((HVX_UVector*)p) = a;
+        }
+
+        template <> SIMD_INLINE void Store<true>(uint8_t * p, HVX_Vector a)
+        {
+            *((HVX_Vector*)p) = a;
+        }
+
+        template <bool align> SIMD_INLINE void Store(void * p, HVX_Vector a)
+        {
+            Store<align>((uint8_t*)p, a);
+        }
+    }
+#endif//SIMD_HVX_ENABLE
 }
 #endif//__SimdStore_h__
