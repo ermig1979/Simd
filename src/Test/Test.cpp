@@ -638,12 +638,12 @@ namespace Test
             }
 #elif defined(__linux__)
             Ints types;
-            std::vector<__sighandler_t> prevs;
+            std::vector<sighandler_t> prevs;
             for (int i = 0; i <= SIGSYS; ++i)
             {
                 if (i == SIGCHLD)
                     continue;
-                __sighandler_t prev = signal(i, (__sighandler_t)PrintErrorMessage);
+                sighandler_t prev = signal(i, (sighandler_t)PrintErrorMessage);
                 if (prev == SIG_IGN)
                     signal(i, prev);
                 else
