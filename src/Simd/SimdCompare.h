@@ -451,5 +451,42 @@ namespace Simd
         }
     }
 #endif// SIMD_NEON_ENABLE
+
+#ifdef SIMD_HVX_ENABLE
+    namespace Hvx
+    {
+        template<SimdCompareType compareType> SIMD_INLINE HVX_VectorPred Compare8u(const HVX_Vector & a, const HVX_Vector & b);
+
+        template<> SIMD_INLINE HVX_VectorPred Compare8u<SimdCompareEqual>(const HVX_Vector & a, const HVX_Vector & b)
+        {
+            return Q6_Q_vcmp_eq_VbVb(a, b);
+        }
+
+        template<> SIMD_INLINE HVX_VectorPred Compare8u<SimdCompareNotEqual>(const HVX_Vector & a, const HVX_Vector & b)
+        {
+            return Q6_Q_not_Q(Q6_Q_vcmp_eq_VbVb(a, b));
+        }
+
+        template<> SIMD_INLINE HVX_VectorPred Compare8u<SimdCompareGreater>(const HVX_Vector & a, const HVX_Vector & b)
+        {
+            return Q6_Q_vcmp_gt_VubVub(a, b);
+        }
+
+        template<> SIMD_INLINE HVX_VectorPred Compare8u<SimdCompareGreaterOrEqual>(const HVX_Vector & a, const HVX_Vector & b)
+        {
+            return Q6_Q_not_Q(Q6_Q_vcmp_gt_VubVub(b, a));
+        }
+
+        template<> SIMD_INLINE HVX_VectorPred Compare8u<SimdCompareLesser>(const HVX_Vector & a, const HVX_Vector & b)
+        {
+            return Q6_Q_vcmp_gt_VubVub(b, a);
+        }
+
+        template<> SIMD_INLINE HVX_VectorPred Compare8u<SimdCompareLesserOrEqual>(const HVX_Vector & a, const HVX_Vector & b)
+        {
+            return Q6_Q_not_Q(Q6_Q_vcmp_gt_VubVub(a, b));
+        }
+    }
+#endif// SIMD_HVX_ENABLE
 }
 #endif//__SimdCompare_h__
