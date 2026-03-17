@@ -436,6 +436,11 @@
 */
 
 /*! @ingroup synet
+    @defgroup synet_gather_elements GatherElements algorithm
+    \short Functions to acceleratе GatherElements algorithm in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+*/
+
+/*! @ingroup synet
     @defgroup synet_grid_sample GridSampleLayer functions
     \short Functions to acceleratе GridSampleLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */

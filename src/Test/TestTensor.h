@@ -35,8 +35,12 @@ namespace Test
     template<class T> SimdTensorDataType DataType();
 
     template<> SIMD_INLINE SimdTensorDataType DataType<float>() { return SimdTensorData32f; };
-    template<> SIMD_INLINE SimdTensorDataType DataType<uint16_t>() { return SimdTensorData16f; };
+    template<> SIMD_INLINE SimdTensorDataType DataType<uint16_t>() { return SimdTensorData16b; };
+    template<> SIMD_INLINE SimdTensorDataType DataType<int16_t>() { return SimdTensorData16f; };
     template<> SIMD_INLINE SimdTensorDataType DataType<uint8_t>() { return SimdTensorData8u; };
+    template<> SIMD_INLINE SimdTensorDataType DataType<int8_t>() { return SimdTensorData8i; };
+    template<> SIMD_INLINE SimdTensorDataType DataType<int32_t>() { return SimdTensorData32i; };
+    template<> SIMD_INLINE SimdTensorDataType DataType<int64_t>() { return SimdTensorData64i; };
 
     //-------------------------------------------------------------------------------------------------
 

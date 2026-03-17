@@ -460,6 +460,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV2.cpp">
       <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetGatherElements.cpp">
+      <Filter>Base\Synet\Other</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -757,6 +760,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdFont.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetGatherElements.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

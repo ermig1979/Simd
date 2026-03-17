@@ -6954,6 +6954,68 @@ extern "C"
     */
     SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
 
+    /*! @ingroup synet_gather_elements
+
+        \fn void* SimdSynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount);
+
+        Algorithm's details:
+        \verbatim
+        for (o = 0; o < srcOuter; ++o)
+            for (c = 0; c < idxCount; ++c)
+                for (i = 0; i < srcInner; ++i)
+                    ic = idx[o, c, i];
+                    if (ic < 0)
+                        ic += srcCount;
+                    dst[o, c, i] = src[o, ic, i];
+        \endverbatim
+
+        \param [in] dataType - a type of input and output tensor.
+        \param [in] indexType - a type of index tensor. It can be INT32 or INT64.
+        \param [in] indexConst - a flag of constant index. If this flag is True then you can set index once.
+        \param [in] srcOuter - an outer size of input and output tensor.
+        \param [in] srcCount - an input tensor gather dimension.
+        \param [in] srcInner - an inner size of input and output tensor.
+        \param [in] idxCount - an index and output tensor gather dimension.
+        \return a pointer to gather elements context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions :: SimdSynetGatherElementsSetIndex, ::SimdSynetGatherElementsInternalBufferSize, and ::SimdSynetGatherElementsForward.
+    */
+    SIMD_API void* SimdSynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount);
+
+    /*! @ingroup synet_gather_elements
+
+        \fn void SimdSynetGatherElementsSetIndex(const void* context, const uint8_t* idx);
+
+        \short Sets constant gather elements indexes.
+
+        \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
+        \param [in] idx - a pointer to tensor with indexes. It can be INT32 or INT64.
+    */
+    SIMD_API void SimdSynetGatherElementsSetIndex(const void* context, const uint8_t* idx);
+
+    /*! @ingroup synet_gather_elements
+
+        \fn size_t SimdSynetGatherElementsInternalBufferSize(const void* context);
+
+        \short Gets size of internal buffer in bytes used inside gather elements algorithm.
+
+        \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
+        \return size of internal buffer in bytes used inside gather elements algorithm.
+    */
+    SIMD_API size_t SimdSynetGatherElementsInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_gather_elements
+
+        \fn void SimdSynetGatherElementsForward(void* context, const uint8_t* src, const uint8_t* idx, uint8_t* dst);
+
+        \short Performs forward propagation of gather elements algorithm.
+
+        \param [in] context - a pointer to gather elements algorithm. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor. Its size = srcOuter * srcCount * srcInner.
+        \param [in] idx - a pointer to index tensor. Its size = srcOuter * idxCount * srcInner. It can be NULL if indexes is setted before by function SimdSynetGridSample2dInternalSetIndex.
+        \param [out] dst - a pointer to output tensor. Its size = srcOuter * idxCount * srcInner.
+    */
+    SIMD_API void SimdSynetGatherElementsForward(void* context, const uint8_t* src, const uint8_t* idx, uint8_t* dst);
+
     /*! @ingroup synet_activation
 
         \fn void SimdSynetGelu32f(const float* src, size_t size, float* dst);

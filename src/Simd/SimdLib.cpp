@@ -79,6 +79,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetConvolution8i.h"
 #include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetDeconvolution16b.h"
+#include "Simd/SimdSynetGatherElements.h"
 #include "Simd/SimdSynetGridSample.h"
 #include "Simd/SimdSynetInnerProduct32f.h"
 #include "Simd/SimdSynetInnerProduct16b.h"
@@ -5524,6 +5525,51 @@ SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alph
     const static SimdSynetElu32fPtr simdSynetElu32f = SIMD_FUNC4(SynetElu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetElu32f(src, size, alpha, dst);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void* SimdSynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void*(*SimdSynetGatherElementsInitPtr) (SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount);
+    const static SimdSynetGatherElementsInitPtr simdSynetGatherElementsInit = SIMD_FUNC0(SynetGatherElementsInit);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+
+    return simdSynetGatherElementsInit(dataType, indexType, indexConst, srcOuter, srcCount, srcInner, idxCount);
+#else
+    assert(0);
+    return NULL;
+#endif
+}
+
+SIMD_API void SimdSynetGatherElementsSetIndex(const void* context, const uint8_t* idx)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    ((Base::SynetGatherElements*)context)->SetIndex(idx);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API size_t SimdSynetGatherElementsInternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return ((Base::SynetGatherElements*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetGatherElementsForward(void* context, const uint8_t* src, const uint8_t* idx, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return ((Base::SynetGatherElements*)context)->Forward(src, idx, dst);
 #else
     assert(0);
 #endif
