@@ -854,7 +854,7 @@ namespace Test
         std::cout << "    -ts=1         to print statistics of time of tests execution." << std::endl << std::endl;
         std::cout << "    -cc=1         to check c++ API." << std::endl << std::endl;
         std::cout << "    -de=2         a flags of SIMD extensions which testing are disabled." << std::endl;
-        std::cout << "                  Base - 1, 2 - SSE4.1/NEON, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16." << std::endl << std::endl;
+        std::cout << "                  Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16." << std::endl << std::endl;
         std::cout << "    -wu=100       a time to warm up CPU before testing (in milliseconds)." << std::endl << std::endl;
         std::cout << "    -pt=1         a boolean flag to pin threads to cpu cores." << std::endl << std::endl;
         return 0;

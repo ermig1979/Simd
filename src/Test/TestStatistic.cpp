@@ -112,6 +112,11 @@ namespace Test
             result = result && GetStatisticAutoTest(FUNC1(Simd::Neon::GetStatistic), FUNC1(SimdGetStatistic));
 #endif
 
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Hvx::GetStatistic), FUNC1(SimdGetStatistic));
+#endif
+
         return result;
     }
 
@@ -421,6 +426,11 @@ namespace Test
             result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif
 
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && GetSumsAutoTest(FUNC3(Simd::Hvx::GetRowSums), FUNC3(SimdGetRowSums), true);
+#endif
+
         return result;
     }
 
@@ -448,7 +458,12 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetColSums), FUNC3(SimdGetColSums), false);
-#endif 
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && GetSumsAutoTest(FUNC3(Simd::Hvx::GetColSums), FUNC3(SimdGetColSums), false);
+#endif
 
         return result;
     }
@@ -480,6 +495,11 @@ namespace Test
             result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif
 
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && GetSumsAutoTest(FUNC3(Simd::Hvx::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+#endif
+
         return result;
     }
 
@@ -508,6 +528,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && GetSumsAutoTest(FUNC3(Simd::Hvx::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif
 
         return result;
@@ -595,6 +620,11 @@ namespace Test
             result = result && SumAutoTest(FUNC4(Simd::Neon::ValueSum), FUNC4(SimdValueSum));
 #endif
 
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && SumAutoTest(FUNC4(Simd::Hvx::ValueSum), FUNC4(SimdValueSum));
+#endif
+
         return result;
     }
 
@@ -623,6 +653,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SumAutoTest(FUNC4(Simd::Neon::SquareSum), FUNC4(SimdSquareSum));
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && SumAutoTest(FUNC4(Simd::Hvx::SquareSum), FUNC4(SimdSquareSum));
 #endif
 
         return result;
@@ -800,6 +835,11 @@ namespace Test
             result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Neon::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
 #endif
 
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Hvx::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+#endif
+
         return result;
     }
 
@@ -897,6 +937,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Neon::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
 #endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Hvx::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
+#endif
 #endif
 
         return result;
@@ -984,6 +1029,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && CorrelationSumAutoTest(FUNC5(Simd::Neon::CorrelationSum), FUNC5(SimdCorrelationSum));
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && CorrelationSumAutoTest(FUNC5(Simd::Hvx::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif
 
         return result;
