@@ -132,6 +132,44 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
 
+  build_and_test_hexagon_cross:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
+    env:
+      HEXAGON_TOOLCHAIN: ${{github.workspace}}/clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl/x86_64-linux-gnu
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install Hexagon toolchain
+      run: |
+        wget -q https://artifacts.codelinaro.org/artifactory/codelinaro-toolchain-for-hexagon/22.1.0_/clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl.tar.zst
+        tar --zstd -xf clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl.tar.zst
+
+    - name: Configure CMake
+      run: >
+        cmake ./prj/cmake -B ${{github.workspace}}/build
+        -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+        -DSIMD_TOOLCHAIN="${{env.HEXAGON_TOOLCHAIN}}/bin/hexagon-linux-musl-clang"
+        -DSIMD_TARGET="hexagon"
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: >
+        ${{env.HEXAGON_TOOLCHAIN}}/bin/qemu-hexagon
+        -L ${{env.HEXAGON_TOOLCHAIN}}/target/hexagon-unknown-linux-musl
+        ./Test "-r=.." -m=a -tt=1 "-ot=log_${{matrix.build_type}}.txt" -ts=10
+
   build_and_test_mingw:
     runs-on: windows-latest
 
