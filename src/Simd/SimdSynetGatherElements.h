@@ -26,35 +26,29 @@
 
 #include "Simd/SimdArray.h"
 
+#include <vector>
+
 namespace Simd
 {
-    struct GatherElementsParam
-    {
-        SimdTensorDataType dataType, indexType;
-        SimdBool indexConst;
-        size_t srcOuter, srcCount, srcInner, idxCount;
-
-        GatherElementsParam(SimdTensorDataType dt, SimdTensorDataType it, SimdBool iC, size_t so, size_t sc, size_t si, size_t ic)
-            : dataType(dt)
-            , indexType(it)
-            , indexConst(iC)
-            , srcOuter(so)
-            , srcCount(sc)
-            , srcInner(si)
-            , idxCount(ic)
-        {
-        }
-
-        bool Valid() const
-        {
-            return true;
-        }
-    };
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        typedef std::vector<size_t> Shape;
+
+        struct GatherElementsParam
+        {
+            SimdTensorDataType dataType, indexType;
+            SimdBool indexConst;
+            Shape outer;
+            size_t indexUsers, srcCount, inner, idxCount;
+
+            GatherElementsParam(SimdTensorDataType dt, SimdTensorDataType it, SimdBool iC, size_t iu,
+                const size_t* o, size_t os, size_t sc, size_t i, size_t ic);
+
+            bool Valid() const;
+        };    
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetGatherElements : public Simd::Deletable
         {
         public:
@@ -64,17 +58,20 @@ namespace Simd
             virtual void SetIndex(const uint8_t* idx);
             virtual void Forward(const uint8_t* src, const uint8_t* idx, uint8_t* dst);
 
-            typedef void(*GatherElementsPtr)(const uint8_t* src8, size_t srcOuter, size_t srcCount, size_t srcInner, const uint8_t* idx8, size_t idxCount, uint8_t* dst8);
+            typedef void(*GatherElementsPtr)(const uint8_t* src8, size_t batch, size_t outer, size_t srcCount, size_t inner, const uint8_t* idx8, size_t idxCount, uint8_t* dst8);
 
         protected:
             GatherElementsParam _param;
-            Array32i _idx32i;
+            Array8u _index;
+            SimdTensorDataType _indexType;
+            size_t _batch, _outer;
+            int _check;
             GatherElementsPtr _gatherElements;
         };
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount);
+        void* SynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t indexUsers, const size_t* outer, size_t outerSize, size_t srcCount, size_t inner, size_t idxCount);
     }
 
 #ifdef SIMD_SSE41_ENABLE    

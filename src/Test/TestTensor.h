@@ -475,8 +475,8 @@ namespace Test
     {
         if (order == a.Count())
         {
-            int _a = *a.Data(index);
-            int _b = *b.Data(index);
+            int _a = int(*a.Data(index));
+            int _b = int(*b.Data(index));
             int difference = Simd::Abs(_a - _b);
             bool error = difference > differenceMax;
             if (error)

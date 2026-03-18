@@ -5530,14 +5530,14 @@ SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alph
 #endif
 }
 
-SIMD_API void* SimdSynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount)
+SIMD_API void* SimdSynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t indexUsers, const size_t* outer, size_t outerSize, size_t srcCount, size_t inner, size_t idxCount)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void*(*SimdSynetGatherElementsInitPtr) (SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount);
+    typedef void*(*SimdSynetGatherElementsInitPtr) (SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t indexUsers, const size_t* outer, size_t outerSize, size_t srcCount, size_t inner, size_t idxCount);
     const static SimdSynetGatherElementsInitPtr simdSynetGatherElementsInit = SIMD_FUNC0(SynetGatherElementsInit);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
-    return simdSynetGatherElementsInit(dataType, indexType, indexConst, srcOuter, srcCount, srcInner, idxCount);
+    return simdSynetGatherElementsInit(dataType, indexType, indexConst, indexUsers, outer, outerSize, srcCount, inner, idxCount);
 #else
     assert(0);
     return NULL;

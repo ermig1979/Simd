@@ -29,60 +29,92 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        template <class D, class I, int check> void GatherElements(const uint8_t* src8, size_t srcOuter, size_t srcCount, size_t srcInner, const uint8_t* idx8, size_t idxCount, uint8_t* dst8)
+        GatherElementsParam::GatherElementsParam(SimdTensorDataType dt, SimdTensorDataType it, SimdBool iC, size_t iu, const size_t* o, size_t os, size_t sc, size_t i, size_t ic)
+            : dataType(dt)
+            , indexType(it)
+            , indexConst(iC)
+            , indexUsers(iu)
+            , outer(o, o + os)
+            , srcCount(sc)
+            , inner(i)
+            , idxCount(ic)
+        {
+        }
+
+        bool GatherElementsParam::Valid() const
+        {
+            if (dataType != SimdTensorData32f && dataType != SimdTensorData16b && dataType != SimdTensorData8u)
+                return false;
+            if (indexType != SimdTensorData64i && indexType != SimdTensorData32i)
+                return false;
+            return true;
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+
+        template <class D, class I, int check> void GatherElements(const uint8_t* src8, size_t batch, size_t outer, size_t srcCount, size_t inner, const uint8_t* idx8, size_t idxCount, uint8_t* dst8)
         {
             const D* src = (const D*)src8;
             const I* idx = (I*)idx8;
             D* dst = (D*)dst8;
-            if (srcInner == 1)
+            if (inner == 1)
             {
-                for (size_t o = 0; o < srcOuter; ++o)
+                for (size_t b = 0; b < batch; ++b)
                 {
-                    for (size_t c = 0; c < idxCount; ++c)
+                    const I* pi = idx;
+                    for (size_t o = 0; o < outer; ++o)
                     {
-                        I ic = idx[c];
-                        if (check)
+                        for (size_t c = 0; c < idxCount; ++c)
                         {
-                            if (ic < 0)
-                                ic += I(srcCount);
+                            I ic = pi[c];
+                            if (check)
+                            {
+                                if (ic < 0)
+                                    ic += I(srcCount);
+                            }
+                            dst[c] = src[ic];
                         }
-                        dst[c] = src[ic];
+                        src += srcCount;
+                        pi += idxCount;
+                        dst += idxCount;
                     }
-                    src += srcCount;
-                    idx += idxCount;
-                    dst += idxCount;
                 }
             }
             else
             {
-                for (size_t o = 0; o < srcOuter; ++o)
+                for (size_t b = 0; b < batch; ++b)
                 {
-                    for (size_t c = 0; c < idxCount; ++c)
+                    const I* pi = idx;
+                    for (size_t o = 0; o < outer; ++o)
                     {
-                        for (size_t i = 0; i < srcInner; ++i)
+                        for (size_t c = 0; c < idxCount; ++c)
                         {
-                            I ii = idx[i];
-                            if (check)
+                            for (size_t i = 0; i < inner; ++i)
                             {
-                                if (ii < 0)
-                                    ii += I(srcCount);
+                                I ii = pi[i];
+                                if (check)
+                                {
+                                    if (ii < 0)
+                                        ii += I(srcCount);
+                                }
+                                dst[i] = src[ii * inner + i];
                             }
-                            dst[i] = src[ii * srcInner + i];
+                            pi += inner;
+                            dst += inner;
                         }
-                        idx += srcInner;
-                        dst += srcInner;
+                        src += srcCount * inner;
                     }
-                    src += srcCount * srcInner;
                 }
             }
         }
 
-        template <class D, class I> SynetGatherElements::GatherElementsPtr GetGatherElements(SimdBool c)
+        template <class D, class I> SynetGatherElements::GatherElementsPtr GetGatherElements(int c)
         {
-            return c ? GatherElements<D, I, 0> : GatherElements<D, I, 1>;
+            return c ? GatherElements<D, I, 1> : GatherElements<D, I, 0>;
         }
 
-        template <class D> SynetGatherElements::GatherElementsPtr GetGatherElements(SimdTensorDataType i, SimdBool c)
+        template <class D> SynetGatherElements::GatherElementsPtr GetGatherElements(SimdTensorDataType i, int c)
         {
             switch (i)
             {
@@ -93,7 +125,7 @@ namespace Simd
             }
         }
 
-        SynetGatherElements::GatherElementsPtr GetGatherElements(SimdTensorDataType d, SimdTensorDataType i, SimdBool c)
+        SynetGatherElements::GatherElementsPtr GetGatherElements(SimdTensorDataType d, SimdTensorDataType i, int c)
         {
             switch (d)
             {
@@ -111,58 +143,94 @@ namespace Simd
             : _param(p)
             , _gatherElements(NULL)
         {
-            _gatherElements = GetGatherElements(p.dataType, p.indexType, p.indexConst);
+            _check = 1;
+            _gatherElements = GetGatherElements(p.dataType, p.indexType, SimdTrue);
+            _batch = 1, _outer = 1; 
+            for (size_t i = 0; i < p.outer.size(); ++i)
+                _outer *= p.outer[i];
         }
 
         size_t SynetGatherElements::InternalBufferSize() const
         {
-            return _idx32i.RawSize();
+            return _index.RawSize();
         }
 
-        void SynetGatherElements::SetIndex(const uint8_t* idx)
+        void SynetGatherElements::SetIndex(const uint8_t* idx8)
         {
             const GatherElementsParam& p = _param;
+            if (p.indexConst == SimdFalse)
+                return;
+            size_t elem = 1;
             if (p.indexType == SimdTensorData32i)
             {
-                _idx32i.Resize(p.srcOuter * p.idxCount * p.srcInner);
-                for (size_t i = 0; i < _idx32i.size; ++i)
+                const int32_t* idx = (const int32_t*)idx8;
+                _check = 0;
+                for (size_t i = 0, n = _batch * _outer * p.idxCount * p.inner; i < n; ++i)
                 {
-                    int32_t val = ((int32_t*)idx)[i];
-                    if (val < 0)
-                        val += int32_t(p.srcCount);
-                    _idx32i[i] = val;
+                    if (idx[i] < 0)
+                    {
+                        _check = 1;
+                        break;
+                    }
                 }
+                _gatherElements = GetGatherElements(p.dataType, p.indexType, _check);
+                elem = sizeof(int32_t);
             }
             else if (p.indexType == SimdTensorData64i)
             {
-                _idx32i.Resize(p.srcOuter * p.idxCount * p.srcInner);
-                for (size_t i = 0; i < _idx32i.size; ++i)
+                const int64_t* idx = (const int64_t*)idx8;
+                _check = 0;
+                for (size_t i = 0, n = _batch * _outer * p.idxCount * p.inner; i < n; ++i)
                 {
-                    int32_t val = int32_t(((int64_t*)idx)[i]);
-                    if (val < 0)
-                        val += int32_t(p.srcCount);
-                    _idx32i[i] = val;
+                    if (idx[i] < 0)
+                    {
+                        _check = 1;
+                        break;
+                    }
                 }
+                _gatherElements = GetGatherElements(p.dataType, p.indexType, _check);
+                elem = sizeof(int64_t);
+            }
+            _batch = 1, _outer = 1;
+            for (size_t i = 0; i < p.outer.size(); ++i)
+                _outer *= p.outer[i];
+            for (size_t i = 0; i < p.outer.size(); ++i)
+            {
+                if (p.outer[i] == 1)
+                    continue;
+                size_t batch = 1;
+                for (size_t j = 0; j <= i; ++j)
+                    batch *= p.outer[j];
+                size_t size = p.idxCount * p.inner * elem;
+                for (size_t j = i + 1; j < p.outer.size(); ++j)
+                    size *= p.outer[j];
+                bool equal = true;
+                for (size_t b = 1; b < batch && equal; b++)
+                    equal = memcmp(idx8, idx8 + b * size, size) == 0;
+                if (equal)
+                {
+                    _batch *= p.outer[i];
+                    _outer /= p.outer[i];
+                }
+                else
+                    break;
             }
         }
        
         void SynetGatherElements::Forward(const uint8_t* src, const uint8_t* idx, uint8_t* dst)
         {
             const GatherElementsParam& p = _param;
-            if (p.indexConst)
-            {
-                if(_idx32i.data) 
-                    _gatherElements(src, p.srcOuter, p.srcCount, p.srcInner, (const uint8_t * )_idx32i.data, p.idxCount, dst);
-            }
+            if (_index.size)
+                _gatherElements(src, _batch, _outer, p.srcCount, p.inner, _index.data, p.idxCount, dst);
             else
-                _gatherElements(src, p.srcOuter, p.srcCount, p.srcInner, idx, p.idxCount, dst);
+                _gatherElements(src, _batch, _outer, p.srcCount, p.inner, idx, p.idxCount, dst);
         }
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount)
+        void* SynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t indexUsers, const size_t* outer, size_t outerSize, size_t srcCount, size_t inner, size_t idxCount)
         {
-            GatherElementsParam param(dataType, indexType, indexConst, srcOuter, srcCount, srcInner, idxCount);
+            GatherElementsParam param(dataType, indexType, indexConst, indexUsers, outer, outerSize, srcCount, inner, idxCount);
             if (!param.Valid())
                 return NULL;
             return new SynetGatherElements(param);

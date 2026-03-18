@@ -39,19 +39,19 @@ namespace Test
     {
         struct FuncGE
         {
-            typedef void*(*FuncPtr)(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount);
+            typedef void*(*FuncPtr)(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t indexUsers, const size_t* outer, size_t outerSize, size_t srcCount, size_t inner, size_t idxCount);
 
             FuncPtr func;
             String desc;
 
             FuncGE(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(SimdTensorDataType dt, SimdTensorDataType it, SimdBool iC, size_t so, size_t sc, size_t si, size_t ic)
+            void Update(SimdTensorDataType dt, SimdTensorDataType it, SimdBool iC, SimdBool iN, size_t b, size_t o, size_t sc, size_t i, size_t ic)
             {
                 std::stringstream ss;
                 ss << desc << "[";
-                ss << ToString(dt) << "-" << ToString(it) << "-" << iC << "-";
-                ss << so << "x" << sc << "x" << si << "-" << ic;
+                ss << ToString(dt) << "-" << ToString(it) << "-" << iC << iN << "-";
+                ss << b << "x" << o << "x" << sc << "x" << i << "-" << ic;
                 ss << "]";
                 desc = ss.str();
             }
@@ -66,24 +66,23 @@ namespace Test
 
 #define FUNC_GE(function) FuncGE(function, #function)
 
-    template<class T> void Fill(Tensor<T>& tensor, int lo, int hi)
+    template<class T> void Fill(T * data, size_t batch, size_t size, int lo, int hi)
     {
-        const Shape& shape = tensor.Shape();
-        for (size_t o = 0; o < shape[0]; ++o)
-            for (size_t c = 0; c < shape[1]; ++c)
-                for (size_t i = 0; i < shape[2]; ++i)
-                    tensor.Data(Shp(o, c, i))[0] = T(lo + Random(hi - lo));
+        for (size_t i = 0; i < size; ++i)
+            data[i] = T(lo + Random(hi - lo));
+        for (size_t b = 1; b < batch; b++)
+            memcpy(data + b * size, data, size * sizeof(T));
     }
 
-    template<class D, class I> bool SynetGatherElementsAutoTest(SimdBool indexConst, size_t srcOuter, size_t srcCount, size_t srcInner, size_t idxCount, FuncGE f1, FuncGE f2)
+    template<class D, class I> bool SynetGatherElementsAutoTest(SimdBool indexConst, SimdBool indexNeg, size_t indexUsers, size_t batch, size_t outer, size_t srcCount, size_t inner, size_t idxCount, FuncGE f1, FuncGE f2)
     {
         bool result = true;
 
-        Shape srcShape = Shp(srcOuter, srcCount, srcInner);
-        Shape idxShape = Shp(srcOuter, idxCount, srcInner);
+        Shape srcShape = Shp(batch, outer, srcCount, inner);
+        Shape idxShape = Shp(batch, outer, idxCount, inner);
 
-        f1.Update(DataType<D>(), DataType<I>(), indexConst, srcOuter, srcCount, srcInner, idxCount);
-        f2.Update(DataType<D>(), DataType<I>(), indexConst, srcOuter, srcCount, srcInner, idxCount);
+        f1.Update(DataType<D>(), DataType<I>(), indexConst, indexNeg, batch, outer, srcCount, inner, idxCount);
+        f2.Update(DataType<D>(), DataType<I>(), indexConst, indexNeg, batch, outer, srcCount, inner, idxCount);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " .");
 
@@ -92,13 +91,13 @@ namespace Test
         Tensor<D> dst1(idxShape);
         Tensor<D> dst2(idxShape);
 
-        Fill(src, 0, 255);
-        Fill(idx, -(int)srcCount, (int)srcCount);
+        Fill(src.Data(), 1, src.Size(), 0, 255);
+        Fill(idx.Data(), batch, outer * idxCount * inner, indexNeg ? -(int)srcCount : 0, (int)srcCount);
         memset(dst1.Data(), 1, dst1.Size() * sizeof(D));
         memset(dst2.Data(), 2, dst2.Size() * sizeof(D));
 
-        void* context1 = f1.func(DataType<D>(), DataType<I>(), indexConst, srcOuter, srcCount, srcInner, idxCount);
-        void* context2 = f2.func(DataType<D>(), DataType<I>(), indexConst, srcOuter, srcCount, srcInner, idxCount);
+        void* context1 = f1.func(DataType<D>(), DataType<I>(), indexConst, indexUsers, srcShape.data(), 2, srcCount, inner, idxCount);
+        void* context2 = f2.func(DataType<D>(), DataType<I>(), indexConst, indexUsers, srcShape.data(), 2, srcCount, inner, idxCount);
 
         if (indexConst)
         {
@@ -108,9 +107,9 @@ namespace Test
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, (uint8_t*)src.Data(), indexConst ? NULL : (uint8_t*)idx.Data(), (uint8_t*)dst1.Data()));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, (uint8_t*)src.Data(), (uint8_t*)idx.Data(), (uint8_t*)dst1.Data()));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, (uint8_t*)src.Data(), indexConst ? NULL : (uint8_t*)idx.Data(), (uint8_t*)dst2.Data()));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, (uint8_t*)src.Data(), (uint8_t*)idx.Data(), (uint8_t*)dst2.Data()));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
@@ -129,16 +128,17 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetGatherElementsAutoTest<float, int64_t>(f, 16 * 196, 49, 1, 196, f1, f2);
-        result = result && SynetGatherElementsAutoTest<uint16_t, int64_t>(f, 16 * 196, 49, 1, 196, f1, f2);
-        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(f, 16 * 196, 49, 1, 196, f1, f2);
-        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(t, 16 * 196, 49, 1, 196, f1, f2);
+        result = result && SynetGatherElementsAutoTest<float, int64_t>(f, t, 28, 16, 196, 49, 1, 196, f1, f2);
+        result = result && SynetGatherElementsAutoTest<float, int32_t>(f, t, 28, 16, 196, 49, 1, 196, f1, f2);
+        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(f, t, 28, 16, 196, 49, 1, 196, f1, f2);
+        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(f, f, 28, 16, 196, 49, 1, 196, f1, f2);
+        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(t, t, 28, 16, 196, 49, 1, 196, f1, f2);
+        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(t, f, 28, 16, 196, 49, 1, 196, f1, f2);
+        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(t, f, 28, 1, 16 * 196, 49, 1, 196, f1, f2);
 #endif
 #else
-        result = result && SynetGatherElementsAutoTest<float, int64_t>(f, 16 * 196, 49, 1, 196, f1, f2);
-        result = result && SynetGatherElementsAutoTest<float, int32_t>(f, 16 * 196, 49, 1, 196, f1, f2);
-        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(f, 16 * 196, 49, 1, 196, f1, f2);
-        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(t, 16 * 196, 49, 1, 196, f1, f2);
+        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(t, f, 28, 16, 196, 49, 1, 196, f1, f2);
+        result = result && SynetGatherElementsAutoTest<uint16_t, int32_t>(t, f, 28, 1, 16 * 196, 49, 1, 196, f1, f2);
 #endif
 
         return result;
