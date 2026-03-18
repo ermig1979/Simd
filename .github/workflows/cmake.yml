@@ -148,6 +148,9 @@ jobs:
     - name: Host properties
       run: lscpu
 
+    - name: Install host dependencies
+      run: sudo apt-get install -y libc++1 libc++abi1
+
     - name: Install Hexagon toolchain
       run: |
         wget -q https://artifacts.codelinaro.org/artifactory/codelinaro-toolchain-for-hexagon/22.1.0_/clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl.tar.zst
