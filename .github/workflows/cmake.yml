@@ -149,7 +149,7 @@ jobs:
       run: lscpu
 
     - name: Install host dependencies
-      run: sudo apt-get install -y libc++1 libc++abi1
+      run: sudo apt-get update && sudo apt-get install -y libc++1 libc++abi1 liburing2 libglib2.0-0t64
 
     - name: Install Hexagon toolchain
       run: |
