@@ -112,9 +112,6 @@ namespace Simd
             memset(sums, 0, sizeof(uint32_t) * height);
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                    L2Prefetch(src + stride, stride, width, 1);
-
                 HVX_Vector rowSumH = Q6_V_vsplat_R(0);
                 HVX_Vector rowSumH2 = Q6_V_vsplat_R(0);
 
@@ -174,9 +171,6 @@ namespace Simd
 
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                    L2Prefetch(src + stride, stride, width, 1);
-
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
                     const HVX_Vector _src = Load<align>(src + col);
@@ -214,9 +208,6 @@ namespace Simd
             height--;
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                    L2Prefetch(src1 + stride, stride, width, 1);
-
                 HVX_Vector rowSum32 = Q6_V_vsplat_R(0);
 
                 for (size_t col = 0; col < alignedWidth; col += A)
@@ -262,9 +253,6 @@ namespace Simd
 
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                    L2Prefetch(src + stride, stride, width + 1, 1);
-
                 for (size_t col = 0; col < alignedLoWidth; col += A)
                 {
                     const HVX_Vector _src0 = Load<align>(src + col + 0);
@@ -301,9 +289,6 @@ namespace Simd
             uint64_t fullSum = 0;
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                    L2Prefetch(src + stride, stride, width, 1);
-
                 HVX_Vector rowSum32 = Q6_V_vsplat_R(0);
 
                 for (size_t col = 0; col < alignedWidth; col += A)
@@ -340,9 +325,6 @@ namespace Simd
             uint64_t fullSum = 0;
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                    L2Prefetch(src + stride, stride, width, 1);
-
                 HVX_Vector rowSum32 = Q6_V_vsplat_R(0);
 
                 for (size_t col = 0; col < alignedWidth; col += A)
@@ -387,9 +369,6 @@ namespace Simd
             uint64_t fullValueSum = 0, fullSquareSum = 0;
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                    L2Prefetch(src + stride, stride, width, 1);
-
                 HVX_Vector rowValueSum32 = Q6_V_vsplat_R(0);
                 HVX_Vector rowSquareSum32 = Q6_V_vsplat_R(0);
 
@@ -455,12 +434,6 @@ namespace Simd
             uint64_t fullSum = 0;
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                {
-                    L2Prefetch(a + aStride, aStride, width, 1);
-                    L2Prefetch(b + bStride, bStride, width, 1);
-                }
-
                 HVX_Vector rowSum32 = Q6_V_vsplat_R(0);
 
                 for (size_t col = 0; col < alignedWidth; col += A)

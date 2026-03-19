@@ -1019,15 +1019,6 @@ namespace Simd
             return Load<align>((const uint8_t*)p);
         }
 
-        // L2 prefetch following qhl_hvx pattern.
-        // Fetches 'height' rows of 'width' bytes each, separated by 'stride'.
-        SIMD_INLINE void L2Prefetch(const void* p, uint32_t stride,
-            uint32_t width, uint32_t height)
-        {
-            uint64_t control = HEXAGON_V64_CREATE_H(0, stride, width, height);
-            Q6_l2fetch_AP((void*)p, control);
-        }
-
         // Horizontal reduction: extract scalar min from HVX_Vector of uint8.
         // Uses vlalign+vmin pattern from qhblas_hvx_b_vector_self_min_ab.
         SIMD_INLINE uint8_t HorizontalMinU8(HVX_Vector v)
