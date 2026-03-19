@@ -58,11 +58,6 @@ namespace Simd
             size_t alignedSize = AlignLo(size, A);
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                {
-                    L2Prefetch(a + aStride, aStride, size, 1);
-                    L2Prefetch(b + bStride, bStride, size, 1);
-                }
                 for (size_t offset = 0; offset < alignedSize; offset += A)
                 {
                     const HVX_Vector a_ = Load<align>(a + offset);

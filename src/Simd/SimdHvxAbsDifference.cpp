@@ -21,11 +21,6 @@ namespace Simd
             size_t bodyWidth = AlignLo(width, A);
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                {
-                    L2Prefetch(a + aStride, aStride, width, 1);
-                    L2Prefetch(b + bStride, bStride, width, 1);
-                }
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
                     const HVX_Vector a_ = Load<align>(a + col);

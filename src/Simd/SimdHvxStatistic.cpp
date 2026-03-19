@@ -27,9 +27,6 @@ namespace Simd
 
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                    L2Prefetch(src + stride, stride, width, 1);
-
                 HVX_Vector rowSumH = Q6_V_vsplat_R(0);
                 HVX_Vector rowSumH2 = Q6_V_vsplat_R(0);
 

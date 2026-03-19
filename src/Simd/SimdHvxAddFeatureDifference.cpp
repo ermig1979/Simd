@@ -64,14 +64,6 @@ namespace Simd
 
             for (size_t row = 0; row < height; ++row)
             {
-                if (row + 1 < height)
-                {
-                    L2Prefetch(value + valueStride, valueStride, width, 1);
-                    L2Prefetch(lo + loStride, loStride, width, 1);
-                    L2Prefetch(hi + hiStride, hiStride, width, 1);
-                    L2Prefetch(difference + differenceStride, differenceStride, width, 1);
-                }
-
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
                     const HVX_Vector _value = Load<align>(value + col);

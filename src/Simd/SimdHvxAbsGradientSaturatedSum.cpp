@@ -26,9 +26,6 @@ namespace Simd
             dst += dstStride;
             for (size_t row = 2; row < height; ++row)
             {
-                if (row + 1 < height)
-                    L2Prefetch(src + srcStride, srcStride, width, 1);
-
                 for (size_t col = 0; col < alignedWidth; col += A)
                     Store<align>(dst + col, AbsGradientSaturatedSum<align>(src + col, srcStride));
                 if (width != alignedWidth)
