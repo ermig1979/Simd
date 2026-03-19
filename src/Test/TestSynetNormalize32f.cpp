@@ -292,6 +292,5 @@ namespace Test
 
         return result;
     }
-
 #endif
 }

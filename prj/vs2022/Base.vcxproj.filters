@@ -385,9 +385,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConversion.cpp">
       <Filter>Base\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetNormalize.cpp">
-      <Filter>Base\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetPermute.cpp">
       <Filter>Base\Synet\Other</Filter>
     </ClCompile>
@@ -462,6 +459,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetGatherElements.cpp">
       <Filter>Base\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetNormalize16b.cpp">
+      <Filter>Base\Synet\Normalize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetNormalize32f.cpp">
+      <Filter>Base\Synet\Normalize</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -829,6 +832,9 @@
     </Filter>
     <Filter Include="Base\Synet\GridSample">
       <UniqueIdentifier>{fc294630-777b-483d-b45a-475792480ec3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base\Synet\Normalize">
+      <UniqueIdentifier>{bf9837b2-f448-4cc4-bada-d0ff75e6da4e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

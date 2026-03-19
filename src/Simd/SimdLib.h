@@ -7807,6 +7807,52 @@ extern "C"
     SIMD_API void SimdSynetNormalizeLayerForwardV4(const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
 
+    /*! @ingroup synet_normalize
+
+        \fn void SimdSynetNormalizeLayerForward16bV2(const uint16_t* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, uint16_t* dst);
+
+        \short Performs forward propagation of NormalizeLayer (Version 2) for BF16.
+
+        Algorithm's details:
+        \verbatim
+        for(b = 0; b < batch; ++b)
+            for(s = 0; s < spatial; ++s)
+            {
+                for c = 0; c < channels; ++c)
+                    buf[c] = Bf16ToFp32(src[b, s, c]);
+
+                sum = 0;
+                for c = 0; c < channels; ++c)
+                    sum += buf[b, s, c];
+                mean = sum / channels;
+                for (c = 0; c < channels; ++c)
+                    buf[b, s, c] = buf[b, s, c] - mean;
+
+                sqsum = 0;
+                for (c = 0; c < channels; ++c)
+                    sqsum += Square(buf[b, s, c]);
+                norm = 1 / Sqrt(sqsum / channels + eps);
+                for (c = 0; c < channels; ++c)
+                    dst[b, s, c] = Fp32ToBf16(buf[b, s, c] * norm * scale[c] + shift[c]);
+            }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input BF16 tensor.
+        \param [in] batch - a batch size of input and output tensor.
+        \param [in] channels - a number of channels in input and output tensor.
+        \param [in] spatial - a spatial size (height*width) of input and output tensor.
+        \param [in] scale - an array with scale parameters. The size of the array is equal to channels.
+        \param [in] shift - an array with shift parameters. The size of the array is equal to channels.
+        \param [in] eps - a pointer to epsilon parameter. It is used to prevent division by zero.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
+        \param [out] buf - a pointer to external temporary buffer. The size of the buffer must be equal to spatial. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output BF16 tensor.
+    */
+    SIMD_API void SimdSynetNormalizeLayerForward16bV2(const uint16_t* src, size_t batch, size_t channels, size_t spatial,
+        const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, uint16_t* dst);
+
     /*! @ingroup synet_permute
 
         \fn void* SimdSynetPermuteInit(const size_t * shape, const size_t* order, size_t count, SimdTensorDataType type);

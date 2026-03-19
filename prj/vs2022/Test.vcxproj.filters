@@ -268,9 +268,6 @@
     <ClCompile Include="..\..\src\Test\TestSynetGridSample.cpp">
       <Filter>Test\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetNormalize.cpp">
-      <Filter>Test\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetPermute.cpp">
       <Filter>Test\Synet\Other</Filter>
     </ClCompile>
@@ -288,6 +285,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetGatherElements.cpp">
       <Filter>Test\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetNormalize16b.cpp">
+      <Filter>Test\Synet\Normalize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetNormalize32f.cpp">
+      <Filter>Test\Synet\Normalize</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -400,6 +403,9 @@
     </Filter>
     <Filter Include="Test\Synet\Other">
       <UniqueIdentifier>{11a212bb-9bd8-47bd-ad41-ccdde5c25c10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Synet\Normalize">
+      <UniqueIdentifier>{5027f37e-3061-4ab5-aa0a-79e863f0fed0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
