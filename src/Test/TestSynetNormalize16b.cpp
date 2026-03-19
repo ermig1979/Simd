@@ -109,6 +109,7 @@ namespace Test
 
         for (int f = 0; f < 1; f++)
         {
+            result = result && SynetNormalizeLayerForward16bV2AutoTest(1, 512, 196, formats[f], 1, f1, f2);
             result = result && SynetNormalizeLayerForward16bV2AutoTest(1, C, W, formats[f], 1, f1, f2);
             result = result && SynetNormalizeLayerForward16bV2AutoTest(8, C, W, formats[f], 1, f1, f2);
             result = result && SynetNormalizeLayerForward16bV2AutoTest(7, C - O, W + O, formats[f], 0, f1, f2);
@@ -128,6 +129,11 @@ namespace Test
         if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetNormalizeLayerForward16bV2AutoTest(FUNC_SNLF16B2(Simd::Sse41::SynetNormalizeLayerForward16bV2), FUNC_SNLF16B2(SimdSynetNormalizeLayerForward16bV2));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && SynetNormalizeLayerForward16bV2AutoTest(FUNC_SNLF16B2(Simd::Avx2::SynetNormalizeLayerForward16bV2), FUNC_SNLF16B2(SimdSynetNormalizeLayerForward16bV2));
+#endif
 
         return result;
     }

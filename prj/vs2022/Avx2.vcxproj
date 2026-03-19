@@ -129,7 +129,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8iDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8iInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8iOutput.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedActivation.cpp" />

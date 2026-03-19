@@ -394,9 +394,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetGridSample2d32fBlZ.cpp">
       <Filter>Avx2\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize.cpp">
-      <Filter>Avx2\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPermute.cpp">
       <Filter>Avx2\Synet\Other</Filter>
     </ClCompile>
@@ -469,6 +466,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcDepthwiseV2.cpp">
       <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize16b.cpp">
+      <Filter>Avx2\Synet\Normalize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize32f.cpp">
+      <Filter>Avx2\Synet\Normalize</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">
@@ -530,6 +533,9 @@
     </Filter>
     <Filter Include="Avx2\Transform">
       <UniqueIdentifier>{03870f81-3415-432d-8124-db5502f137e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\Normalize">
+      <UniqueIdentifier>{73ef30bd-9802-44ff-a136-fe77b4e92c11}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
