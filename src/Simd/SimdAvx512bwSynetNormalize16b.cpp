@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2026 Yermalayeu Ihar.
+* Copyright (c) 2011-2023 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -25,55 +25,58 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdExtract.h"
-#include "Simd/SimdAvx2.h"
+#include "Simd/SimdAvx512bw.h"
 
 namespace Simd
 {
-#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Avx2
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx512bw
     {
-        void NormalizeNhwc16bV2(const uint16_t* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, float eps, float * buf, uint16_t* dst)
+        void NormalizeNhwc16bV2(const uint16_t* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, float eps, float* buf, uint16_t* dst)
         {
             float k = 1.0f / float(channels);
             size_t channelsF = AlignLo(channels, F), c;
+            __mmask16 channelsM = TailMask16(channels - channelsF);
             Array32f _buf;
             if (buf == NULL)
             {
                 _buf.Resize(channels);
                 buf = _buf.data;
-            }            
+            }
             for (size_t b = 0; b < batch; ++b)
             {
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     BFloat16ToFloat32(src, channels, buf);
 
-                    __m256 _sum = _mm256_setzero_ps();
+                    __m512 _sum = _mm512_setzero_ps();
                     for (c = 0; c < channelsF; c += F)
-                        _sum = _mm256_add_ps(_mm256_loadu_ps(buf + c), _sum);
-                    float sum = ExtractSum(_sum);
-                    for (; c < channels; ++c)
-                        sum += buf[c];
-                    __m256 mean = _mm256_set1_ps(sum * k);
+                        _sum = _mm512_add_ps(_mm512_loadu_ps(buf + c), _sum);
+                    if(c < channels)
+                        _sum = _mm512_add_ps(_mm512_maskz_loadu_ps(channelsM, buf + c), _sum);
+                    __m512 mean = _mm512_set1_ps(ExtractSum(_sum) * k);
                     for (c = 0; c < channelsF; c += F)
-                        _mm256_storeu_ps(buf + c, _mm256_sub_ps(_mm256_loadu_ps(buf + c), mean));
-                    for (; c < channels; ++c)
-                        _mm_store_ss(buf + c, _mm_sub_ss(_mm_load_ss(buf + c), _mm256_castps256_ps128(mean)));
+                        _mm512_storeu_ps(buf + c, _mm512_sub_ps(_mm512_loadu_ps(buf + c), mean));
+                    if(c < channels)
+                        _mm512_mask_storeu_ps(buf + c, channelsM, _mm512_sub_ps(_mm512_maskz_loadu_ps(channelsM, buf + c), mean));
 
-                    __m256 _sqsum = _mm256_setzero_ps();
+                    __m512 _sqsum = _mm512_setzero_ps();
                     for (c = 0; c < channelsF; c += F)
                     {
-                        __m256 _buf = _mm256_loadu_ps(buf + c);
-                        _sqsum = _mm256_fmadd_ps(_buf, _buf, _sqsum);
+                        __m512 _buf = _mm512_loadu_ps(buf + c);
+                        _sqsum = _mm512_fmadd_ps(_buf, _buf, _sqsum);
                     }
-                    float sqsum = ExtractSum(_sqsum);
-                    for (; c < channels; ++c)
-                        sqsum += Simd::Square(buf[c]);
-                    __m256 norm = _mm256_set1_ps(1.0f / ::sqrt(sqsum * k + eps));
+                    if(c < channels)
+                    {
+                        __m512 _buf = _mm512_maskz_loadu_ps(channelsM, buf + c);
+                        _sqsum = _mm512_fmadd_ps(_buf, _buf, _sqsum);
+                    }
+                    __m512 norm = _mm512_set1_ps(1.0f / ::sqrt(ExtractSum(_sqsum) * k + eps));
                     for (c = 0; c < channelsF; c += F)
-                        _mm256_storeu_ps(buf + c, _mm256_fmadd_ps(_mm256_mul_ps(_mm256_loadu_ps(buf + c), norm), _mm256_loadu_ps(scale + c), _mm256_loadu_ps(shift + c)));
-                    for (; c < channels; ++c)
-                        _mm_store_ss(buf + c, _mm_fmadd_ss(_mm_mul_ss(_mm_load_ss(buf + c), _mm256_castps256_ps128(norm)), _mm_load_ss(scale + c), _mm_load_ss(shift + c)));
+                        _mm512_storeu_ps(buf + c, _mm512_fmadd_ps(_mm512_mul_ps(_mm512_loadu_ps(buf + c), norm), _mm512_loadu_ps(scale + c), _mm512_loadu_ps(shift + c)));
+                    if(c < channels)
+                        _mm512_mask_storeu_ps(buf + c, channelsM, _mm512_fmadd_ps(_mm512_mul_ps(_mm512_maskz_loadu_ps(channelsM, buf + c), norm), 
+                            _mm512_maskz_loadu_ps(channelsM, scale + c), _mm512_maskz_loadu_ps(channelsM, shift + c)));
 
                     Float32ToBFloat16(buf, channels, dst);
 

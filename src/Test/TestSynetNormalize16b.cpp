@@ -135,6 +135,11 @@ namespace Test
             result = result && SynetNormalizeLayerForward16bV2AutoTest(FUNC_SNLF16B2(Simd::Avx2::SynetNormalizeLayerForward16bV2), FUNC_SNLF16B2(SimdSynetNormalizeLayerForward16bV2));
 #endif
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetNormalizeLayerForward16bV2AutoTest(FUNC_SNLF16B2(Simd::Avx512bw::SynetNormalizeLayerForward16bV2), FUNC_SNLF16B2(SimdSynetNormalizeLayerForward16bV2));
+#endif 
+
         return result;
     }
 

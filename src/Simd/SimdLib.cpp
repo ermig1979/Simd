@@ -6104,7 +6104,7 @@ SIMD_API void SimdSynetNormalizeLayerForward16bV2(const uint16_t* src, size_t ba
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForward16bV2Ptr) (const uint16_t* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, uint16_t* dst);
-    const static SimdSynetNormalizeLayerForward16bV2Ptr simdSynetNormalizeLayerForward16bV2 = SIMD_FUNC2(SynetNormalizeLayerForward16bV2, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_AVX512BW_FUNC , SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForward16bV2Ptr simdSynetNormalizeLayerForward16bV2 = SIMD_FUNC3(SynetNormalizeLayerForward16bV2, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForward16bV2(src, batch, channels, spatial, scale, shift, eps, format, buf, dst);
 #else

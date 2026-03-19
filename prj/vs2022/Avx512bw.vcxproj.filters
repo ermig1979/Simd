@@ -175,9 +175,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConversion.cpp">
       <Filter>Avx512bw\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetNormalize.cpp">
-      <Filter>Avx512bw\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPermute.cpp">
       <Filter>Avx512bw\Synet\Other</Filter>
     </ClCompile>
@@ -487,6 +484,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution32fDepthwise7x7.cpp">
       <Filter>Avx512bw\Synet\MergedConvolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetNormalize16b.cpp">
+      <Filter>Avx512bw\Synet\Normalize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetNormalize32f.cpp">
+      <Filter>Avx512bw\Synet\Normalize</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">
@@ -551,6 +554,9 @@
     </Filter>
     <Filter Include="Avx512bw\Synet\Pooling">
       <UniqueIdentifier>{44d20a83-98ae-47f3-8164-79e02571f0cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet\Normalize">
+      <UniqueIdentifier>{a74a6fb6-e553-4c09-913f-333c6e598ff9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

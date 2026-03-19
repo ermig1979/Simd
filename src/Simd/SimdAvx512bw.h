@@ -522,6 +522,9 @@ namespace Simd
         void SynetNormalizeLayerForwardV4(const float* src, size_t batch, size_t channels, size_t spatial,
             const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
 
+        void SynetNormalizeLayerForward16bV2(const uint16_t* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, uint16_t* dst);
+
         void SynetPoolingAverage(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
 
