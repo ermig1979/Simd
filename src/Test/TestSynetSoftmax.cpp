@@ -36,14 +36,14 @@ namespace Test
 #if defined(SIMD_SYNET_ENABLE)
     namespace
     {
-        struct FuncSM
+        struct FuncSm32f
         {
             typedef void(*FuncPtr)(const float * src, size_t outer, size_t count, size_t inner, float * dst);
 
             FuncPtr func;
             String desc;
 
-            FuncSM(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+            FuncSm32f(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
             void Update(size_t outer, size_t count, size_t inner)
             {
@@ -58,9 +58,9 @@ namespace Test
         };
     }
 
-#define FUNC_SM(function) FuncSM(function, #function)
+#define FUNC_SM32F(function) FuncSm32f(function, #function)
 
-    bool SynetSoftmaxLayerForwardAutoTest(size_t outer, size_t count, size_t inner, FuncSM f1, FuncSM f2)
+    bool SynetSoftmax32fAutoTest(size_t outer, size_t count, size_t inner, FuncSm32f f1, FuncSm32f f2)
     {
         bool result = true;
 
@@ -86,47 +86,151 @@ namespace Test
         return result;
     }
 
-    bool SynetSoftmaxLayerForwardAutoTest(const FuncSM & f1, const FuncSM & f2)
+    bool SynetSoftmax32fAutoTest(const FuncSm32f& f1, const FuncSm32f& f2)
     {
         bool result = true;
 
-        result = result && SynetSoftmaxLayerForwardAutoTest(392, 49, 1, f1, f2);
-        result = result && SynetSoftmaxLayerForwardAutoTest(21825, 2, 1, f1, f2);
-        result = result && SynetSoftmaxLayerForwardAutoTest(50, 10, 100, f1, f2);
-        result = result && SynetSoftmaxLayerForwardAutoTest(13666, 3, 1, f1, f2);
-        result = result && SynetSoftmaxLayerForwardAutoTest(749, 49, 1, f1, f2);
+        result = result && SynetSoftmax32fAutoTest(392, 49, 1, f1, f2);
+        result = result && SynetSoftmax32fAutoTest(21825, 2, 1, f1, f2);
+        result = result && SynetSoftmax32fAutoTest(50, 10, 100, f1, f2);
+        result = result && SynetSoftmax32fAutoTest(13666, 3, 1, f1, f2);
+        result = result && SynetSoftmax32fAutoTest(749, 49, 1, f1, f2);
 
         return result;
     }
 
-    bool SynetSoftmaxLayerForwardAutoTest(const Options & options)
+    bool SynetSoftmax32fAutoTest(const Options & options)
     {
         bool result = true;
 
         if (TestBase(options))
-            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Base::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
+            result = result && SynetSoftmax32fAutoTest(FUNC_SM32F(Simd::Base::SynetSoftmax32f), FUNC_SM32F(SimdSynetSoftmax32f));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Sse41::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
+            result = result && SynetSoftmax32fAutoTest(FUNC_SM32F(Simd::Sse41::SynetSoftmax32f), FUNC_SM32F(SimdSynetSoftmax32f));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Avx2::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
+            result = result && SynetSoftmax32fAutoTest(FUNC_SM32F(Simd::Avx2::SynetSoftmax32f), FUNC_SM32F(SimdSynetSoftmax32f));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Avx512bw::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
+            result = result && SynetSoftmax32fAutoTest(FUNC_SM32F(Simd::Avx512bw::SynetSoftmax32f), FUNC_SM32F(SimdSynetSoftmax32f));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Neon::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
+            result = result && SynetSoftmax32fAutoTest(FUNC_SM32F(Simd::Neon::SynetSoftmax32f), FUNC_SM32F(SimdSynetSoftmax32f));
 #endif 
 
         return result;
     }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncSm16b
+        {
+            typedef void(*FuncPtr)(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncSm16b(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(size_t outer, size_t count, size_t inner)
+            {
+                desc = desc + "[" + ToString(outer) + "-" + ToString(count) + "-" + ToString(inner) + "]";
+            }
+
+            void Call(const Tensor16u& src, Tensor16u& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), src.Axis(0), src.Axis(1), src.Axis(2), dst.Data());
+            }
+        };
+    }
+
+#define FUNC_SM16B(function) FuncSm16b(function, #function)
+
+    bool SynetSoftmax16bAutoTest(size_t outer, size_t count, size_t inner, FuncSm16b f1, FuncSm16b f2)
+    {
+        bool result = true;
+
+        f1.Update(outer, count, inner);
+        f2.Update(outer, count, inner);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
+
+        SimdTensorFormatType format = SimdTensorFormatNchw;
+        Shape shape = ToShape(outer, count, inner, format);
+
+        Tensor32f src32f(shape, format);
+        Tensor16u src16b(shape, format);
+        FillRandom(src32f.Data(), src32f.Size(), -10.0, 10.0);
+        SimdFloat32ToBFloat16(src32f.Data(), src32f.Size(), src16b.Data());
+
+        Tensor32f dst32f1(shape, format);
+        Tensor32f dst32f2(shape, format);
+        Tensor16u dst16b1(shape, format);
+        Tensor16u dst16b2(shape, format);
+
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src16b, dst16b1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src16b, dst16b2));
+
+        SimdBFloat16ToFloat32(dst16b1.Data(), dst16b1.Size(), dst32f1.Data());
+        SimdBFloat16ToFloat32(dst16b2.Data(), dst16b2.Size(), dst32f2.Data());
+
+        result = result && Compare(dst32f1, dst32f2, EPS * 8.0f, true, 32, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetSoftmax16bAutoTest(const FuncSm16b& f1, const FuncSm16b& f2)
+    {
+        bool result = true;
+
+        result = result && SynetSoftmax16bAutoTest(392, 49, 1, f1, f2);
+        result = result && SynetSoftmax16bAutoTest(21825, 2, 1, f1, f2);
+        result = result && SynetSoftmax16bAutoTest(50, 10, 100, f1, f2);
+        result = result && SynetSoftmax16bAutoTest(13666, 3, 1, f1, f2);
+        result = result && SynetSoftmax16bAutoTest(749, 49, 1, f1, f2);
+
+        return result;
+    }
+
+    bool SynetSoftmax16bAutoTest(const Options& options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Base::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable && TestSse41(options))
+//            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Sse41::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable && TestAvx2(options))
+//            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Avx2::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
+//#endif
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+//            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Avx512bw::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
+//#endif
+
+        return result;
+    }
+
 #endif
 }

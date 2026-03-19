@@ -527,7 +527,7 @@ namespace Simd
 
         void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
         
-        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);
+        void SynetSoftmax32f(const float * src, size_t outer, size_t size, size_t inner, float * dst);
 
         void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
 

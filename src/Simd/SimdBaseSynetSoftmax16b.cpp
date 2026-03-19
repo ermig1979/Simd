@@ -32,7 +32,7 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+        void SynetSoftmax16b(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst)
         {
             if (inner == 1)
             {
@@ -40,12 +40,14 @@ namespace Simd
                 {
                     for (size_t o = 0; o < outer; ++o)
                     {
-                        float max = Simd::Max(src[0], src[1]);
-                        float exp0 = ::exp(src[0] - max);
-                        float exp1 = ::exp(src[1] - max);
+                        float src0 = BFloat16ToFloat32(src[0]);
+                        float src1 = BFloat16ToFloat32(src[1]);
+                        float max = Simd::Max(src0, src1);
+                        float exp0 = ::exp(src0 - max);
+                        float exp1 = ::exp(src1 - max);
                         float sum = exp0 + exp1;
-                        dst[0] = exp0 / sum;
-                        dst[1] = exp1 / sum;
+                        dst[0] = Float32ToBFloat16(exp0 / sum);
+                        dst[1] = Float32ToBFloat16(exp1 / sum);
                         src += 2;
                         dst += 2;
                     }
@@ -54,34 +56,41 @@ namespace Simd
                 {
                     for (size_t o = 0; o < outer; ++o)
                     {
-                        float max = Simd::Max(Simd::Max(src[0], src[1]), src[2]);
-                        float exp0 = ::exp(src[0] - max);
-                        float exp1 = ::exp(src[1] - max);
-                        float exp2 = ::exp(src[2] - max);
+                        float src0 = BFloat16ToFloat32(src[0]);
+                        float src1 = BFloat16ToFloat32(src[1]);
+                        float src2 = BFloat16ToFloat32(src[2]);
+                        float max = Simd::Max(Simd::Max(src0, src1), src2);
+                        float exp0 = ::exp(src0 - max);
+                        float exp1 = ::exp(src1 - max);
+                        float exp2 = ::exp(src2 - max);
                         float sum = exp0 + exp1 + exp2;
-                        dst[0] = exp0 / sum;
-                        dst[1] = exp1 / sum;
-                        dst[2] = exp2 / sum;
+                        dst[0] = Float32ToBFloat16(exp0 / sum);
+                        dst[1] = Float32ToBFloat16(exp1 / sum);
+                        dst[2] = Float32ToBFloat16(exp2 / sum);
                         src += 3;
                         dst += 3;
                     }
                 }
                 else
                 {
+                    Array32f buf(count);
                     for (size_t o = 0; o < outer; ++o)
                     {
-                        float max = src[0];
+                        for (size_t c = 0; c < count; ++c)
+                            buf[c] = BFloat16ToFloat32(src[c]);
+
+                        float max = buf[0];
                         for (size_t c = 1; c < count; ++c)
-                            max = Simd::Max(max, src[c]);
+                            max = Simd::Max(max, buf[c]);
                         float sum = 0;
                         for (size_t c = 0; c < count; ++c)
                         {
-                            dst[c] = ::exp(src[c] - max);
-                            sum += dst[c];                            
+                            buf[c] = ::exp(buf[c] - max);
+                            sum += buf[c];
                         }
                         float k = 1.0f / sum;
                         for (size_t c = 0; c < count; ++c)
-                            dst[c] *= k;
+                            dst[c] = Float32ToBFloat16(buf[c] * k);
                         src += count;
                         dst += count;
                     }
@@ -89,45 +98,45 @@ namespace Simd
             }
             else
             {
-                Array32f tmp(inner * 2);
-                const float * s;
-                float * max = tmp.data, *sum = tmp.data + inner, *d;
+                Array32f _buf(inner * (count + 2));
+                float* max = _buf.data, * sum = _buf.data + inner, *buf = sum + inner, *b;
                 for (size_t o = 0; o < outer; ++o)
                 {
+                    for (size_t i = 0, n = count * inner; i < n; ++i)
+                        buf[i] = BFloat16ToFloat32(src[i]);
+
                     for (size_t i = 0; i < inner; ++i)
-                        max[i] = src[i];
-                    s = src + inner;
+                        max[i] = buf[i];
+                    b = buf + inner;
                     for (size_t c = 1; c < count; ++c)
                     {
                         for (size_t i = 0; i < inner; ++i)
-                            max[i] = Simd::Max(max[i], s[i]);
-                        s += inner;
+                            max[i] = Simd::Max(max[i], b[i]);
+                        b += inner;
                     }
 
-                    s = src;
-                    d = dst;
+                    b = buf;
                     for (size_t i = 0; i < inner; ++i)
                         sum[i] = 0;
                     for (size_t c = 0; c < count; ++c)
                     {
                         for (size_t i = 0; i < inner; ++i)
                         {
-                            d[i] = ::exp(s[i] - max[i]);
-                            sum[i] += d[i];
+                            b[i] = ::exp(b[i] - max[i]);
+                            sum[i] += b[i];
                         }
-                        s += inner;
-                        d += inner;
+                        b += inner;
                     }
 
-                    d = dst;
+                    b = buf;
                     for (size_t c = 0; c < count; ++c)
                     {
                         for (size_t i = 0; i < inner; ++i)
-                            d[i] /= sum[i];
-                        d += inner;
+                            dst[i] = b[i] / sum[i];
+                        b += inner;
+                        dst += inner;
                     }
                     src += count * inner;
-                    dst += count * inner;
                 }
             }
         }

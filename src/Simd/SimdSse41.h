@@ -483,7 +483,7 @@ namespace Simd
 
         void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type);
 
-        void SynetSoftmaxLayerForward(const float* src, size_t outer, size_t size, size_t inner, float* dst);
+        void SynetSoftmax32f(const float* src, size_t outer, size_t size, size_t inner, float* dst);
 
         void SynetSoftmaxLayerForwardX1(const float* src, size_t outer, size_t count, float* dst);
 

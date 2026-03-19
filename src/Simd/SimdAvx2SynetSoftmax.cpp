@@ -276,7 +276,7 @@ namespace Simd
             }
         }
 
-        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+        void SynetSoftmax32f(const float * src, size_t outer, size_t count, size_t inner, float * dst)
         {
             if (inner == 1)
             {

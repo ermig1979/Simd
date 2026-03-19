@@ -47,6 +47,7 @@
  <li>Parameter 'params' to function SimdSynetInnerProduct16bSetParams.</li>
  <li>Base implementation of class SynetGatherElements.</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW optimizations of function SynetNormalizeLayerForward16bV2.</li>
+ <li>Base implementation of function SynetSoftmax16b.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -75,12 +76,17 @@
  <li>Compiler error in assert conditions in function Simd::DeinterleaveRgba.</li>
  <li>Compiler error in assert conditions in function Simd::GetObjectMoments.</li>
 </ul>
+<h5>Renaming</h5>
+<ul>
+ <li>Function SynetSoftmaxLayerForward to SynetSoftmax32f.</li>
+</ul>
 
 <h4>Test framework</h4>
 <h5>New features</h5>
 <ul>
  <li>Tests for verifying functionality of class SynetGatherElements.</li>
  <li>Tests for verifying functionality of function SynetNormalizeLayerForward16bV2.</li>
+ <li>Tests for verifying functionality of function SynetSoftmax16b.</li>
 </ul>
 
 <h3 id="R159">March 3, 2026 (version 6.2.159)</h3> 

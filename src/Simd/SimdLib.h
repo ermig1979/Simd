@@ -8661,19 +8661,35 @@ extern "C"
 
     /*! @ingroup synet_other
 
-        \fn void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst);
+        \fn void SimdSynetSoftmax32f(const float * src, size_t outer, size_t count, size_t inner, float * dst);
 
-        \short This function is used for forward propagation of SoftmaxLayer.
+        \short This function is used for FP32 forward propagation of SoftmaxLayer.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to outer*count*inner.
+        \param [in] src - a pointer to the input FP32 array. The size of the array must be equal to outer*count*inner.
         \param [in] outer - an outer size of input and output arrays.
         \param [in] count - a size of softmax dimmension.
         \param [in] inner - an inner size of input and output arrays.
-        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to outer*count*inner.
+        \param [out] dst - a pointer to the output FP32 array. The size of the array must be equal to outer*count*inner.
     */
-    SIMD_API void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst);
+    SIMD_API void SimdSynetSoftmax32f(const float * src, size_t outer, size_t count, size_t inner, float * dst);
+
+    /*! @ingroup synet_other
+
+        \fn void SimdSynetSoftmax16b(const uint16_t * src, size_t outer, size_t count, size_t inner, uint16_t * dst);
+
+        \short This function is used for BF16 forward propagation of SoftmaxLayer.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input BF16 array. The size of the array must be equal to outer*count*inner.
+        \param [in] outer - an outer size of input and output arrays.
+        \param [in] count - a size of softmax dimmension.
+        \param [in] inner - an inner size of input and output arrays.
+        \param [out] dst - a pointer to the output BF16 array. The size of the array must be equal to outer*count*inner.
+    */
+    SIMD_API void SimdSynetSoftmax16b(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst);
 
     /*! @ingroup synet_activation
 

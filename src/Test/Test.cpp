@@ -436,7 +436,8 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetScale8iForward);
     TEST_ADD_GROUP_A0(SynetScale16b);
 
-    TEST_ADD_GROUP_A0(SynetSoftmaxLayerForward);
+    TEST_ADD_GROUP_A0(SynetSoftmax32f);
+    TEST_ADD_GROUP_A0(SynetSoftmax16b);
 
     TEST_ADD_GROUP_A0(SynetUnaryOperation32f);
 #endif

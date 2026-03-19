@@ -6690,14 +6690,27 @@ SIMD_API void SimdSynetSigmoid32f(const float* src, size_t size, const float* sl
 #endif
 }
 
-SIMD_API void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+SIMD_API void SimdSynetSoftmax32f(const float * src, size_t outer, size_t count, size_t inner, float * dst)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void(*SimdSynetSoftmaxLayerForwardPtr) (const float * src, size_t outer, size_t count, size_t inner, float * dst);
-    const static SimdSynetSoftmaxLayerForwardPtr simdSynetSoftmaxLayerForward = SIMD_FUNC4(SynetSoftmaxLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    typedef void(*SimdSynetSoftmax32fPtr) (const float * src, size_t outer, size_t count, size_t inner, float * dst);
+    const static SimdSynetSoftmax32fPtr simdSynetSoftmax32f = SIMD_FUNC4(SynetSoftmax32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
-    simdSynetSoftmaxLayerForward(src, outer, count, inner, dst);
+    simdSynetSoftmax32f(src, outer, count, inner, dst);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetSoftmax16b(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetSoftmax16bPtr) (const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst);
+    const static SimdSynetSoftmax16bPtr simdSynetSoftmax16b = SIMD_FUNC0(SynetSoftmax16b);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetSoftmax16b(src, outer, count, inner, dst);
 #else
     assert(0);
 #endif
