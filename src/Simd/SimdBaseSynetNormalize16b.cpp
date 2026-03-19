@@ -62,7 +62,7 @@ namespace Simd
 
                         float sqsum = 0;
                         for (size_t c = 0; c < channels; ++c)
-                            sqsum += Square(buf[c]);
+                            sqsum += Simd::Square(buf[c]);
                         float norm = 1.0f / ::sqrt(sqsum * k + e);
                         for (size_t c = 0; c < channels; ++c)
                             dst[c] = Float32ToBFloat16(buf[c] * norm * scale[c] + shift[c]);

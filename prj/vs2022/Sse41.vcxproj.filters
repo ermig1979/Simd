@@ -466,9 +466,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample2d32fBlZ.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetNormalize.cpp">
-      <Filter>Sse41\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPermute.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
@@ -489,6 +486,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcDepthwiseV2.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetNormalize16b.cpp">
+      <Filter>Sse41\Synet\Normalize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetNormalize32f.cpp">
+      <Filter>Sse41\Synet\Normalize</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -551,6 +554,9 @@
     </Filter>
     <Filter Include="Sse41\Synet\Other">
       <UniqueIdentifier>{7521bba2-dca9-4177-8ab8-03223a7b4c08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\Normalize">
+      <UniqueIdentifier>{1e361225-f424-4df8-8665-aa6ec1d864ee}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

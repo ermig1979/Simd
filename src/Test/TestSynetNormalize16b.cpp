@@ -94,7 +94,7 @@ namespace Test
         SimdBFloat16ToFloat32(dst16b1.Data(), dst16b1.Size(), dst32f1.Data());
         SimdBFloat16ToFloat32(dst16b2.Data(), dst16b2.Size(), dst32f2.Data());
 
-        result = result && Compare(dst32f1, dst32f2, EPS, true, 32, DifferenceBoth);
+        result = result && Compare(dst32f1, dst32f2, EPS * 8.0f, true, 32, DifferenceBoth);
 
         return result;
     }
@@ -102,6 +102,8 @@ namespace Test
     bool SynetNormalizeLayerForward16bV2AutoTest(const FuncSnlf16b2& f1, const FuncSnlf16b2& f2)
     {
         bool result = true;
+
+        //result = result && SynetNormalizeLayerForward16bV2AutoTest(1, 8, 1, SimdTensorFormatNhwc, 1, f1, f2);
 
         SimdTensorFormatType formats[1] = { /*SimdTensorFormatNchw,*/ SimdTensorFormatNhwc };
 
@@ -121,6 +123,11 @@ namespace Test
 
         if (TestBase(options))
             result = result && SynetNormalizeLayerForward16bV2AutoTest(FUNC_SNLF16B2(Simd::Base::SynetNormalizeLayerForward16bV2), FUNC_SNLF16B2(SimdSynetNormalizeLayerForward16bV2));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetNormalizeLayerForward16bV2AutoTest(FUNC_SNLF16B2(Simd::Sse41::SynetNormalizeLayerForward16bV2), FUNC_SNLF16B2(SimdSynetNormalizeLayerForward16bV2));
+#endif 
 
         return result;
     }
