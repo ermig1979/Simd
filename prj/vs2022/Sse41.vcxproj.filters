@@ -478,9 +478,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale16b.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetSoftmax.cpp">
-      <Filter>Sse41\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetUnaryOperation.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
@@ -492,6 +489,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetNormalize32f.cpp">
       <Filter>Sse41\Synet\Normalize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetSoftmax16b.cpp">
+      <Filter>Sse41\Synet\Softmax</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetSoftmax32f.cpp">
+      <Filter>Sse41\Synet\Softmax</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -557,6 +560,9 @@
     </Filter>
     <Filter Include="Sse41\Synet\Normalize">
       <UniqueIdentifier>{1e361225-f424-4df8-8665-aa6ec1d864ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\Softmax">
+      <UniqueIdentifier>{ed08cb07-9bc1-4386-a759-c6398c2116ee}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -867,6 +873,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMax.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

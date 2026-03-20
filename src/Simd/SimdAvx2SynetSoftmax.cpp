@@ -285,7 +285,7 @@ namespace Simd
                 else if (count == 3)
                     SynetSoftmaxLayerForward31(src, outer, dst);
                 else if(count < 8)
-                    Sse41::SynetSoftmaxLayerForwardX1(src, outer, count, dst);
+                    Sse41::SynetSoftmax32fX1(src, outer, count, dst);
                 else
                     SynetSoftmaxLayerForwardX1(src, outer, count, dst);
             }

@@ -95,6 +95,7 @@ namespace Test
         result = result && SynetSoftmax32fAutoTest(50, 10, 100, f1, f2);
         result = result && SynetSoftmax32fAutoTest(13666, 3, 1, f1, f2);
         result = result && SynetSoftmax32fAutoTest(749, 49, 1, f1, f2);
+        result = result && SynetSoftmax32fAutoTest(16 * 196, 196, 1, f1, f2);
 
         return result;
     }
@@ -203,6 +204,7 @@ namespace Test
         result = result && SynetSoftmax16bAutoTest(50, 10, 100, f1, f2);
         result = result && SynetSoftmax16bAutoTest(13666, 3, 1, f1, f2);
         result = result && SynetSoftmax16bAutoTest(749, 49, 1, f1, f2);
+        result = result && SynetSoftmax16bAutoTest(16 * 196, 196, 1, f1, f2);
 
         return result;
     }
@@ -214,11 +216,11 @@ namespace Test
         if (TestBase(options))
             result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Base::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41(options))
-//            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Sse41::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Sse41::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2(options))
 //            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Avx2::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));

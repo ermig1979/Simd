@@ -485,7 +485,9 @@ namespace Simd
 
         void SynetSoftmax32f(const float* src, size_t outer, size_t size, size_t inner, float* dst);
 
-        void SynetSoftmaxLayerForwardX1(const float* src, size_t outer, size_t count, float* dst);
+        void SynetSoftmax32fX1(const float* src, size_t outer, size_t count, float* dst);
+
+        void SynetSoftmax16b(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst);
 
         void SynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 

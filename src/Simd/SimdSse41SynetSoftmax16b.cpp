@@ -31,48 +31,50 @@
 #include "Simd/SimdExp.h"
 #include "Simd/SimdGather.h"
 #include "Simd/SimdPow.h"
+#include "Simd/SimdBFloat16.h"
+#include "Simd/SimdMax.h"
 
 namespace Simd
 {
 #if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Sse41
     {
-        void SynetSoftmaxLayerForward21(const float* src, size_t outer, float* dst)
+        void SynetSoftmax16b21(const uint16_t* src, size_t outer, uint16_t* dst)
         {
             Exp exp;
             size_t aligned = Simd::AlignLo(outer, F);
             size_t o = 0;
             for (; o < aligned; o += F)
             {
-                __m128 s0 = _mm_loadu_ps(src + 0);
-                __m128 s1 = _mm_loadu_ps(src + F);
-                __m128 ss0 = _mm_shuffle_ps(s0, s1, 0x88);
-                __m128 ss1 = _mm_shuffle_ps(s0, s1, 0xDD);
+                __m128i s01 = _mm_loadu_si128((__m128i*)src);
+                __m128 ss0 = BFloat16ToFloat32Even(s01);
+                __m128 ss1 = BFloat16ToFloat32Odd(s01);
                 __m128 max = _mm_max_ps(ss0, ss1);
                 __m128 exp0 = exp.Exponent(_mm_sub_ps(ss0, max));
                 __m128 exp1 = exp.Exponent(_mm_sub_ps(ss1, max));
                 __m128 sum = _mm_add_ps(exp0, exp1);
                 __m128 d0 = _mm_div_ps(exp0, sum);
                 __m128 d1 = _mm_div_ps(exp1, sum);
-                _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(d0, d1));
-                _mm_storeu_ps(dst + F, _mm_unpackhi_ps(d0, d1));
+                _mm_storeu_si128((__m128i*)dst, Float32ToBFloat16Interlived(d0, d1));
                 src += DF;
                 dst += DF;
             }
             for (; o < outer; ++o)
             {
-                float max = Simd::Max(src[0], src[1]);
-                float exp0 = ::exp(src[0] - max);
-                float exp1 = ::exp(src[1] - max);
+                float src0 = Base::BFloat16ToFloat32(src[0]);
+                float src1 = Base::BFloat16ToFloat32(src[1]);
+                float max = Simd::Max(src0, src1);
+                float exp0 = ::exp(src0 - max);
+                float exp1 = ::exp(src1 - max);
                 float sum = exp0 + exp1;
-                dst[0] = exp0 / sum;
-                dst[1] = exp1 / sum;
+                dst[0] = Base::Float32ToBFloat16(exp0 / sum);
+                dst[1] = Base::Float32ToBFloat16(exp1 / sum);
                 src += 2;
                 dst += 2;
             }
         }
 
-        SIMD_INLINE void SynetSoftmaxLayerForward31(const Exp& exp, __m128 buf[3])
+        SIMD_INLINE void SynetSoftmax16b31(const Exp& exp, __m128 buf[3])
         {
             __m128 max = _mm_max_ps(buf[0], _mm_max_ps(buf[1], buf[2]));
             buf[0] = exp.Exponent(_mm_sub_ps(buf[0], max));
@@ -84,7 +86,7 @@ namespace Simd
             buf[2] = _mm_div_ps(buf[2], sum);
         }
 
-        void SynetSoftmaxLayerForward31(const float* src, size_t outer, float* dst)
+        void SynetSoftmax16b31(const float* src, size_t outer, float* dst)
         {
             Exp exp;
             __m128 buf[3];
@@ -94,7 +96,7 @@ namespace Simd
                 buf[0] = Gather<3>(src + 0);
                 buf[1] = Gather<3>(src + 1);
                 buf[2] = Gather<3>(src + 2);
-                SynetSoftmaxLayerForward31(exp, buf);
+                SynetSoftmax16b31(exp, buf);
                 Scater<3>(dst + 0, buf[0]);
                 Scater<3>(dst + 1, buf[1]);
                 Scater<3>(dst + 2, buf[2]);
@@ -107,7 +109,7 @@ namespace Simd
                 buf[0] = Gather<3>(src + 0, tail);
                 buf[1] = Gather<3>(src + 1, tail);
                 buf[2] = Gather<3>(src + 2, tail);
-                SynetSoftmaxLayerForward31(exp, buf);
+                SynetSoftmax16b31(exp, buf);
                 Scater<3>(dst + 0, buf[0], tail);
                 Scater<3>(dst + 1, buf[1], tail);
                 Scater<3>(dst + 2, buf[2], tail);
@@ -154,7 +156,7 @@ namespace Simd
             _mm_storeu_ps(dst + 3 * count, _mm_unpackhi_ps(b2, b3));
         }
 
-        void SynetSoftmaxLayerForwardX1(const float* src, size_t outer, size_t count, float* dst)
+        void SynetSoftmax16bX1(const float* src, size_t outer, size_t count, float* dst)
         {
             size_t o = 0, c = 0, outerF = AlignLo(outer, F), countF = AlignLo(count, F);
             Array32f buf(AlignHi(count, F) * F);
@@ -206,72 +208,75 @@ namespace Simd
             }
         }
 
-        void SynetSoftmax32f(const float* src, size_t outer, size_t count, size_t inner, float* dst)
+        void SynetSoftmax16b(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst)
         {
             if (inner == 1)
             {
                 if (count == 2)
-                    SynetSoftmaxLayerForward21(src, outer, dst);
-                else if (count == 3)
-                    SynetSoftmaxLayerForward31(src, outer, dst);
+                    SynetSoftmax16b21(src, outer, dst);
+            //    else if (count == 3)
+            //        SynetSoftma16b31(src, outer, dst);
+            //    else
+            //        SynetSoftmax16bX1(src, outer, count, dst);
                 else
-                    SynetSoftmaxLayerForwardX1(src, outer, count, dst);
+                    Base::SynetSoftmax16b(src, outer, count, inner, dst);
             }
             else
             {
-                Exp exp;
-                size_t aligned = Simd::AlignLo(inner, F);
-                Array32f tmp(inner * 2);
-                const float* s;
-                float* max = tmp.data, * sum = tmp.data + inner, * d;
-                for (size_t o = 0; o < outer; ++o)
-                {
-                    memcpy(max, src, inner * sizeof(float));
-                    s = src + inner;
-                    for (size_t c = 1; c < count; ++c)
-                    {
-                        size_t i = 0;
-                        for (; i < aligned; i += F)
-                            _mm_storeu_ps(max + i, _mm_max_ps(_mm_loadu_ps(s + i), _mm_loadu_ps(max + i)));
-                        for (; i < inner; ++i)
-                            max[i] = Simd::Max(max[i], s[i]);
-                        s += inner;
-                    }
+                Base::SynetSoftmax16b(src, outer, count, inner, dst);
+            //    Exp exp;
+            //    size_t aligned = Simd::AlignLo(inner, F);
+            //    Array32f tmp(inner * 2);
+            //    const float* s;
+            //    float* max = tmp.data, * sum = tmp.data + inner, * d;
+            //    for (size_t o = 0; o < outer; ++o)
+            //    {
+            //        memcpy(max, src, inner * sizeof(float));
+            //        s = src + inner;
+            //        for (size_t c = 1; c < count; ++c)
+            //        {
+            //            size_t i = 0;
+            //            for (; i < aligned; i += F)
+            //                _mm_storeu_ps(max + i, _mm_max_ps(_mm_loadu_ps(s + i), _mm_loadu_ps(max + i)));
+            //            for (; i < inner; ++i)
+            //                max[i] = Simd::Max(max[i], s[i]);
+            //            s += inner;
+            //        }
 
-                    s = src;
-                    d = dst;
-                    memset(sum, 0, inner * sizeof(float));
-                    for (size_t c = 0; c < count; ++c)
-                    {
-                        size_t i = 0;
-                        for (; i < aligned; i += F)
-                        {
-                            __m128 _d = exp.Exponent(_mm_sub_ps(_mm_loadu_ps(s + i), _mm_loadu_ps(max + i)));
-                            _mm_storeu_ps(d + i, _d);
-                            _mm_storeu_ps(sum + i, _mm_add_ps(_d, _mm_loadu_ps(sum + i)));
-                        }
-                        for (; i < inner; ++i)
-                        {
-                            d[i] = ::exp(s[i] - max[i]);
-                            sum[i] += d[i];
-                        }
-                        s += inner;
-                        d += inner;
-                    }
+            //        s = src;
+            //        d = dst;
+            //        memset(sum, 0, inner * sizeof(float));
+            //        for (size_t c = 0; c < count; ++c)
+            //        {
+            //            size_t i = 0;
+            //            for (; i < aligned; i += F)
+            //            {
+            //                __m128 _d = exp.Exponent(_mm_sub_ps(_mm_loadu_ps(s + i), _mm_loadu_ps(max + i)));
+            //                _mm_storeu_ps(d + i, _d);
+            //                _mm_storeu_ps(sum + i, _mm_add_ps(_d, _mm_loadu_ps(sum + i)));
+            //            }
+            //            for (; i < inner; ++i)
+            //            {
+            //                d[i] = ::exp(s[i] - max[i]);
+            //                sum[i] += d[i];
+            //            }
+            //            s += inner;
+            //            d += inner;
+            //        }
 
-                    d = dst;
-                    for (size_t c = 0; c < count; ++c)
-                    {
-                        size_t i = 0;
-                        for (; i < aligned; i += F)
-                            _mm_storeu_ps(d + i, _mm_div_ps(_mm_loadu_ps(d + i), _mm_loadu_ps(sum + i)));
-                        for (; i < inner; ++i)
-                            d[i] /= sum[i];
-                        d += inner;
-                    }
-                    src += count * inner;
-                    dst += count * inner;
-                }
+            //        d = dst;
+            //        for (size_t c = 0; c < count; ++c)
+            //        {
+            //            size_t i = 0;
+            //            for (; i < aligned; i += F)
+            //                _mm_storeu_ps(d + i, _mm_div_ps(_mm_loadu_ps(d + i), _mm_loadu_ps(sum + i)));
+            //            for (; i < inner; ++i)
+            //                d[i] /= sum[i];
+            //            d += inner;
+            //        }
+            //        src += count * inner;
+            //        dst += count * inner;
+            //    }
             }
         }
     }
