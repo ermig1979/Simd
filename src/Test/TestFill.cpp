@@ -260,7 +260,12 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::F)
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Neon::FillBgra), FUNC_BGRA(SimdFillBgra));
-#endif 
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::F)
+            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Hvx::FillBgra), FUNC_BGRA(SimdFillBgra));
+#endif
 
         return result;
     }
@@ -438,7 +443,12 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && FillPixelAutoTest(FUNC_FP(Simd::Neon::FillPixel), FUNC_FP(SimdFillPixel));
-#endif 
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
+            result = result && FillPixelAutoTest(FUNC_FP(Simd::Hvx::FillPixel), FUNC_FP(SimdFillPixel));
+#endif
 
         return result;
     }

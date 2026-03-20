@@ -191,7 +191,12 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Neon::HistogramMasked), FUNC_HM(SimdHistogramMasked));
-#endif 
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
+            result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Hvx::HistogramMasked), FUNC_HM(SimdHistogramMasked));
+#endif
 
         return result;
     }
@@ -255,7 +260,12 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && AbsSecondDerivativeHistogramAutoTest(Simd::Neon::A, FUNC_ASDH(Simd::Neon::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
-#endif 
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options))
+            result = result && AbsSecondDerivativeHistogramAutoTest(Simd::Hvx::A, FUNC_ASDH(Simd::Hvx::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+#endif
 
         return result;
     }
@@ -427,7 +437,12 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Neon::HistogramConditional), FUNC_HC(SimdHistogramConditional));
-#endif 
+#endif
+
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
+            result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Hvx::HistogramConditional), FUNC_HC(SimdHistogramConditional));
+#endif
 
         return result;
     }

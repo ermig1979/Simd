@@ -362,6 +362,11 @@ namespace Test
     {
         return (options.disabledExtensions & 0x000000002) == 0;
     }
+
+    SIMD_INLINE bool TestHvx(const Options& options)
+    {
+        return (options.disabledExtensions & 0x000000002) == 0;
+    }
 }
 
 #endif

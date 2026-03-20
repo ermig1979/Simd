@@ -113,6 +113,11 @@ namespace Test
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Neon::AbsDifference), FUNC1(SimdAbsDifference), 1);
 #endif
 
+#ifdef SIMD_HVX_ENABLE
+		if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
+			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Hvx::AbsDifference), FUNC1(SimdAbsDifference), 1);
+#endif
+
 		return result;
 	}
 }
