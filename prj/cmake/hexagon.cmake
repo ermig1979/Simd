@@ -14,9 +14,15 @@ set_source_files_properties(${SIMD_LIB_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_C
 add_library(Simd ${SIMD_LIB_TYPE} ${SIMD_LIB_SRC} ${SIMD_BASE_SRC} ${SIMD_HVX_SRC})
 
 if(SIMD_TEST)
+	# Work around QEMU Hexagon emulation bug: test code compiled at -O2 or
+	# higher triggers misemulation of certain instruction sequences (the
+	# stack-coloring pass at -O2 produces code that QEMU handles incorrectly).
+	# The library itself remains at full optimization; only test harness code
+	# is affected.  Cap test files at -O1 until the QEMU fix is available.
+	string(REGEX REPLACE "-O[23s]" "-O1" TEST_CXX_FLAGS "${COMMON_CXX_FLAGS}")
 	file(GLOB_RECURSE TEST_SRC_C ${SIMD_ROOT}/src/Test/*.c)
 	file(GLOB_RECURSE TEST_SRC_CPP ${SIMD_ROOT}/src/Test/*.cpp)
-	set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_HVX_FLAG} -D_GLIBCXX_USE_NANOSLEEP")
+	set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${TEST_CXX_FLAGS} ${CXX_HVX_FLAG} -D_GLIBCXX_USE_NANOSLEEP")
 	add_executable(Test ${TEST_SRC_C} ${TEST_SRC_CPP})
 	target_link_libraries(Test Simd -lpthread -lstdc++ -lm)
 	if(SIMD_OPENCV)
