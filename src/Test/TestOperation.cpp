@@ -204,7 +204,7 @@ namespace Test
 #endif
 
 #ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options))
+        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Hvx::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif
 
