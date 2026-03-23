@@ -74,6 +74,8 @@ namespace Simd
             }
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void SynetSoftmax16b31Load(const uint16_t* src, __m128 buf[3])
         {
             static const __m128i SFL00 = SIMD_MM_SETR_EPI8(-1, -1, 0x0, 0x1, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, -1, -1);
@@ -164,12 +166,14 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void LoadTansp4x4(const float* src, size_t count, float* dst, __m128& max)
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void LoadTansp4x4(const uint16_t* src, size_t count, float* dst, __m128& max)
         {
-            __m128 a0 = _mm_loadu_ps(src + 0 * count);
-            __m128 a1 = _mm_loadu_ps(src + 1 * count);
-            __m128 a2 = _mm_loadu_ps(src + 2 * count);
-            __m128 a3 = _mm_loadu_ps(src + 3 * count);
+            __m128 a0 = BFloat16ToFloat32<0>(_mm_loadl_epi64((__m128i*)(src + 0 * count)));
+            __m128 a1 = BFloat16ToFloat32<0>(_mm_loadl_epi64((__m128i*)(src + 1 * count)));
+            __m128 a2 = BFloat16ToFloat32<0>(_mm_loadl_epi64((__m128i*)(src + 2 * count)));
+            __m128 a3 = BFloat16ToFloat32<0>(_mm_loadl_epi64((__m128i*)(src + 3 * count)));
             __m128 b0 = _mm_unpacklo_ps(a0, a2);
             __m128 b1 = _mm_unpacklo_ps(a1, a3);
             __m128 b2 = _mm_unpackhi_ps(a0, a2);
@@ -188,7 +192,7 @@ namespace Simd
             _mm_storeu_ps(dst + 3 * F, a3);
         }
 
-        SIMD_INLINE void StoreTansp4x4(const float* src, __m128 k, float* dst, size_t count)
+        SIMD_INLINE void StoreTansp4x4(const float* src, __m128 k, uint16_t* dst, size_t count)
         {
             __m128 a0 = _mm_mul_ps(_mm_loadu_ps(src + 0 * F), k);
             __m128 a1 = _mm_mul_ps(_mm_loadu_ps(src + 1 * F), k);
@@ -198,13 +202,15 @@ namespace Simd
             __m128 b1 = _mm_unpacklo_ps(a1, a3);
             __m128 b2 = _mm_unpackhi_ps(a0, a2);
             __m128 b3 = _mm_unpackhi_ps(a1, a3);
-            _mm_storeu_ps(dst + 0 * count, _mm_unpacklo_ps(b0, b1));
-            _mm_storeu_ps(dst + 1 * count, _mm_unpackhi_ps(b0, b1));
-            _mm_storeu_ps(dst + 2 * count, _mm_unpacklo_ps(b2, b3));
-            _mm_storeu_ps(dst + 3 * count, _mm_unpackhi_ps(b2, b3));
+            __m128i d01 = Float32ToBFloat16(_mm_unpacklo_ps(b0, b1), _mm_unpackhi_ps(b0, b1));
+            StoreHalf<0>((__m128i*)(dst + 0 * count), d01);
+            StoreHalf<1>((__m128i*)(dst + 1 * count), d01);
+            __m128i d23 = Float32ToBFloat16(_mm_unpacklo_ps(b2, b3), _mm_unpackhi_ps(b2, b3));
+            StoreHalf<0>((__m128i*)(dst + 2 * count), d23);
+            StoreHalf<1>((__m128i*)(dst + 3 * count), d23);
         }
 
-        void SynetSoftmax16bX1(const float* src, size_t outer, size_t count, float* dst)
+        void SynetSoftmax16bX1(const uint16_t* src, size_t outer, size_t count, uint16_t* dst)
         {
             size_t o = 0, c = 0, outerF = AlignLo(outer, F), countF = AlignLo(count, F);
             Array32f buf(AlignHi(count, F) * F);
@@ -239,18 +245,21 @@ namespace Simd
             }
             for (; o < outer; ++o)
             {
-                float max = src[0];
+                for (size_t c = 0; c < count; ++c)
+                    buf[c] = Base::BFloat16ToFloat32(src[c]);
+
+                float max = buf[0];
                 for (size_t c = 1; c < count; ++c)
-                    max = Simd::Max(max, src[c]);
+                    max = Simd::Max(max, buf[c]);
                 float sum = 0;
                 for (size_t c = 0; c < count; ++c)
                 {
-                    dst[c] = ::exp(src[c] - max);
-                    sum += dst[c];
+                    buf[c] = ::exp(buf[c] - max);
+                    sum += buf[c];
                 }
                 float k = 1.0f / sum;
                 for (size_t c = 0; c < count; ++c)
-                    dst[c] *= k;
+                    dst[c] = Base::Float32ToBFloat16(buf[c] * k);
                 src += count;
                 dst += count;
             }
@@ -264,10 +273,8 @@ namespace Simd
                     SynetSoftmax16b21(src, outer, dst);
                 else if (count == 3)
                     SynetSoftmax16b31(src, outer, dst);
-            //    else
-            //        SynetSoftmax16bX1(src, outer, count, dst);
                 else
-                    Base::SynetSoftmax16b(src, outer, count, inner, dst);
+                    SynetSoftmax16bX1(src, outer, count, dst);
             }
             else
             {
