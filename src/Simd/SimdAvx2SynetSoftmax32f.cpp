@@ -38,7 +38,7 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx2
     {
-        void SynetSoftmaxLayerForward21(const float* src, size_t outer, float* dst)
+        void SynetSoftmax32f21(const float* src, size_t outer, float* dst)
         {
             Avx2::Exp exp;
             size_t aligned = Simd::AlignLo(outer, F);
@@ -73,7 +73,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void SynetSoftmaxLayerForward31(const Avx2::Exp& exp, __m256 buf[3])
+        SIMD_INLINE void SynetSoftmax32f31(const Avx2::Exp& exp, __m256 buf[3])
         {
             __m256 max = _mm256_max_ps(buf[0], _mm256_max_ps(buf[1], buf[2]));
             buf[0] = exp.Exponent(_mm256_sub_ps(buf[0], max));
@@ -85,7 +85,7 @@ namespace Simd
             buf[2] = _mm256_div_ps(buf[2], sum);
         }
 
-        void SynetSoftmaxLayerForward31(const float* src, size_t outer, float* dst)
+        void SynetSoftmax32f31(const float* src, size_t outer, float* dst)
         {
             Avx2::Exp exp;
             __m256 buf[3];
@@ -95,7 +95,7 @@ namespace Simd
                 buf[0] = Avx2::Gather<3>(src + 0);
                 buf[1] = Avx2::Gather<3>(src + 1);
                 buf[2] = Avx2::Gather<3>(src + 2);
-                SynetSoftmaxLayerForward31(exp, buf);
+                SynetSoftmax32f31(exp, buf);
                 Scater<3>(dst + 0, buf[0]);
                 Scater<3>(dst + 1, buf[1]);
                 Scater<3>(dst + 2, buf[2]);
@@ -108,7 +108,7 @@ namespace Simd
                 buf[0] = Gather<3>(src + 0, tail);
                 buf[1] = Gather<3>(src + 1, tail);
                 buf[2] = Gather<3>(src + 2, tail);
-                SynetSoftmaxLayerForward31(exp, buf);
+                SynetSoftmax32f31(exp, buf);
                 Scater<3>(dst + 0, buf[0], tail);
                 Scater<3>(dst + 1, buf[1], tail);
                 Scater<3>(dst + 2, buf[2], tail);
@@ -224,7 +224,7 @@ namespace Simd
             _mm256_storeu_ps(dst + 7 * count, b7);
         }
 
-        void SynetSoftmaxLayerForwardX1(const float* src, size_t outer, size_t count, float* dst)
+        void SynetSoftmax32fX1(const float* src, size_t outer, size_t count, float* dst)
         {
             size_t o = 0, c = 0, outerF = AlignLo(outer, F), countF = AlignLo(count, F);
             Array32f buf(AlignHi(count, F) * F);
@@ -281,13 +281,13 @@ namespace Simd
             if (inner == 1)
             {
                 if (count == 2)
-                    SynetSoftmaxLayerForward21(src, outer, dst);
+                    SynetSoftmax32f21(src, outer, dst);
                 else if (count == 3)
-                    SynetSoftmaxLayerForward31(src, outer, dst);
+                    SynetSoftmax32f31(src, outer, dst);
                 else if(count < 8)
                     Sse41::SynetSoftmax32fX1(src, outer, count, dst);
                 else
-                    SynetSoftmaxLayerForwardX1(src, outer, count, dst);
+                    SynetSoftmax32fX1(src, outer, count, dst);
             }
             else
             {

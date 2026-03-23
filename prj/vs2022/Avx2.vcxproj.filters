@@ -406,9 +406,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale16b.cpp">
       <Filter>Avx2\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetSoftmax.cpp">
-      <Filter>Avx2\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetUnaryOperation.cpp">
       <Filter>Avx2\Synet\Other</Filter>
     </ClCompile>
@@ -471,6 +468,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetNormalize32f.cpp">
       <Filter>Avx2\Synet\Normalize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetSoftmax16b.cpp">
+      <Filter>Avx2\Synet\Softmax</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetSoftmax32f.cpp">
+      <Filter>Avx2\Synet\Softmax</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -536,6 +539,9 @@
     </Filter>
     <Filter Include="Avx2\Synet\Normalize">
       <UniqueIdentifier>{73ef30bd-9802-44ff-a136-fe77b4e92c11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\Softmax">
+      <UniqueIdentifier>{86bdc095-1674-4e46-b8a5-8da827051b9a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
