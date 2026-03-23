@@ -199,10 +199,10 @@ namespace Test
     {
         bool result = true;
 
+        result = result && SynetSoftmax16bAutoTest(13666, 3, 1, f1, f2);
         result = result && SynetSoftmax16bAutoTest(392, 49, 1, f1, f2);
         result = result && SynetSoftmax16bAutoTest(21825, 2, 1, f1, f2);
         result = result && SynetSoftmax16bAutoTest(50, 10, 100, f1, f2);
-        result = result && SynetSoftmax16bAutoTest(13666, 3, 1, f1, f2);
         result = result && SynetSoftmax16bAutoTest(749, 49, 1, f1, f2);
         result = result && SynetSoftmax16bAutoTest(16 * 196, 196, 1, f1, f2);
 
