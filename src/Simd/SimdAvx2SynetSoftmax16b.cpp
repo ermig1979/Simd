@@ -40,40 +40,42 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx2
     {
-        //void SynetSoftmax16b21(const uint16_t* src, size_t outer, uint16_t* dst)
-        //{
-        //    Avx2::Exp exp;
-        //    size_t aligned = Simd::AlignLo(outer, F);
-        //    size_t o = 0;
-        //    for (; o < aligned; o += F)
-        //    {
-        //        __m256 s0 = _mm256_loadu_ps(src + 0);
-        //        __m256 s1 = _mm256_loadu_ps(src + F);
-        //        __m256 ss0 = _mm256_shuffle_ps(s0, s1, 0x88);
-        //        __m256 ss1 = _mm256_shuffle_ps(s0, s1, 0xDD);
-        //        __m256 max = _mm256_max_ps(ss0, ss1);
-        //        __m256 exp0 = exp.Exponent(_mm256_sub_ps(ss0, max));
-        //        __m256 exp1 = exp.Exponent(_mm256_sub_ps(ss1, max));
-        //        __m256 sum = _mm256_add_ps(exp0, exp1);
-        //        __m256 d0 = _mm256_div_ps(exp0, sum);
-        //        __m256 d1 = _mm256_div_ps(exp1, sum);
-        //        _mm256_storeu_ps(dst + 0, _mm256_unpacklo_ps(d0, d1));
-        //        _mm256_storeu_ps(dst + F, _mm256_unpackhi_ps(d0, d1));
-        //        src += DF;
-        //        dst += DF;
-        //    }
-        //    for (; o < outer; ++o)
-        //    {
-        //        float max = Simd::Max(src[0], src[1]);
-        //        float exp0 = ::exp(src[0] - max);
-        //        float exp1 = ::exp(src[1] - max);
-        //        float sum = exp0 + exp1;
-        //        dst[0] = exp0 / sum;
-        //        dst[1] = exp1 / sum;
-        //        src += 2;
-        //        dst += 2;
-        //    }
-        //}
+        void SynetSoftmax16b21(const uint16_t* src, size_t outer, uint16_t* dst)
+        {
+            Avx2::Exp exp;
+            size_t outerF = Simd::AlignLo(outer, F);
+            size_t o = 0;
+            for (; o < outerF; o += F)
+            {
+                __m256i s01 = _mm256_loadu_si256((__m256i*)src);
+                __m256 ss0 = BFloat16ToFloat32Even(s01);
+                __m256 ss1 = BFloat16ToFloat32Odd(s01);
+                __m256 max = _mm256_max_ps(ss0, ss1);
+                __m256 exp0 = exp.Exponent(_mm256_sub_ps(ss0, max));
+                __m256 exp1 = exp.Exponent(_mm256_sub_ps(ss1, max));
+                __m256 sum = _mm256_add_ps(exp0, exp1);
+                __m256 d0 = _mm256_div_ps(exp0, sum);
+                __m256 d1 = _mm256_div_ps(exp1, sum);
+                _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16Interlived(d0, d1));
+                src += DF;
+                dst += DF;
+            }
+            for (; o < outer; ++o)
+            {
+                float src0 = Base::BFloat16ToFloat32(src[0]);
+                float src1 = Base::BFloat16ToFloat32(src[1]);
+                float max = Simd::Max(src0, src1);
+                float exp0 = ::exp(src0 - max);
+                float exp1 = ::exp(src1 - max);
+                float sum = exp0 + exp1;
+                dst[0] = Base::Float32ToBFloat16(exp0 / sum);
+                dst[1] = Base::Float32ToBFloat16(exp1 / sum);
+                src += 2;
+                dst += 2;
+            }
+        }
+
+        //--------------------------------------------------------------------------------------------------
 
         //SIMD_INLINE void SynetSoftmax16b31(const Avx2::Exp& exp, __m256 buf[3])
         //{
@@ -282,15 +284,16 @@ namespace Simd
         {
             if (inner == 1)
             {
-                //if (count == 2)
-                //    SynetSoftmax16b21(src, outer, dst);
+                if (count == 2)
+                    SynetSoftmax16b21(src, outer, dst);
                 //else if (count == 3)
                 //    SynetSoftmax16b31(src, outer, dst);
                 //else if(count < 8)
                 //    Sse41::SynetSoftmax16bX1(src, outer, count, dst);
                 //else
                 //    SynetSoftmax16bX1(src, outer, count, dst);
-                Sse41::SynetSoftmax16b(src, outer, count, inner, dst);
+                else
+                    Sse41::SynetSoftmax16b(src, outer, count, inner, dst);
             }
             else
             {
