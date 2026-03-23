@@ -132,7 +132,7 @@ namespace Simd
                     for (size_t c = 0; c < count; ++c)
                     {
                         for (size_t i = 0; i < inner; ++i)
-                            dst[i] = b[i] / sum[i];
+                            dst[i] = Float32ToBFloat16(b[i] / sum[i]);
                         b += inner;
                         dst += inner;
                     }

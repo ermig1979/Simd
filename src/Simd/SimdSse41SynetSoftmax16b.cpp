@@ -278,60 +278,58 @@ namespace Simd
             }
             else
             {
-                Base::SynetSoftmax16b(src, outer, count, inner, dst);
-            //    Exp exp;
-            //    size_t aligned = Simd::AlignLo(inner, F);
-            //    Array32f tmp(inner * 2);
-            //    const float* s;
-            //    float* max = tmp.data, * sum = tmp.data + inner, * d;
-            //    for (size_t o = 0; o < outer; ++o)
-            //    {
-            //        memcpy(max, src, inner * sizeof(float));
-            //        s = src + inner;
-            //        for (size_t c = 1; c < count; ++c)
-            //        {
-            //            size_t i = 0;
-            //            for (; i < aligned; i += F)
-            //                _mm_storeu_ps(max + i, _mm_max_ps(_mm_loadu_ps(s + i), _mm_loadu_ps(max + i)));
-            //            for (; i < inner; ++i)
-            //                max[i] = Simd::Max(max[i], s[i]);
-            //            s += inner;
-            //        }
+                Exp exp;
+                size_t innerF = Simd::AlignLo(inner, F);
+                Array32f _buf(inner * (count + 2));
+                float* max = _buf.data, * sum = _buf.data + inner, * buf = sum + inner, * b;
+                for (size_t o = 0; o < outer; ++o)
+                {
+                    BFloat16ToFloat32(src, count * inner, buf);
+                    memcpy(max, buf, inner * sizeof(float));
+                    b = buf + inner;
+                    for (size_t c = 1; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < innerF; i += F)
+                            _mm_storeu_ps(max + i, _mm_max_ps(_mm_loadu_ps(b + i), _mm_loadu_ps(max + i)));
+                        for (; i < inner; ++i)
+                            max[i] = Simd::Max(max[i], b[i]);
+                        b += inner;
+                    }
 
-            //        s = src;
-            //        d = dst;
-            //        memset(sum, 0, inner * sizeof(float));
-            //        for (size_t c = 0; c < count; ++c)
-            //        {
-            //            size_t i = 0;
-            //            for (; i < aligned; i += F)
-            //            {
-            //                __m128 _d = exp.Exponent(_mm_sub_ps(_mm_loadu_ps(s + i), _mm_loadu_ps(max + i)));
-            //                _mm_storeu_ps(d + i, _d);
-            //                _mm_storeu_ps(sum + i, _mm_add_ps(_d, _mm_loadu_ps(sum + i)));
-            //            }
-            //            for (; i < inner; ++i)
-            //            {
-            //                d[i] = ::exp(s[i] - max[i]);
-            //                sum[i] += d[i];
-            //            }
-            //            s += inner;
-            //            d += inner;
-            //        }
+                    b = buf;
+                    memset(sum, 0, inner * sizeof(float));
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < innerF; i += F)
+                        {
+                            __m128 _d = exp.Exponent(_mm_sub_ps(_mm_loadu_ps(b + i), _mm_loadu_ps(max + i)));
+                            _mm_storeu_ps(b + i, _d);
+                            _mm_storeu_ps(sum + i, _mm_add_ps(_d, _mm_loadu_ps(sum + i)));
+                        }
+                        for (; i < inner; ++i)
+                        {
+                            b[i] = ::exp(b[i] - max[i]);
+                            sum[i] += b[i];
+                        }
+                        b += inner;
+                    }
 
-            //        d = dst;
-            //        for (size_t c = 0; c < count; ++c)
-            //        {
-            //            size_t i = 0;
-            //            for (; i < aligned; i += F)
-            //                _mm_storeu_ps(d + i, _mm_div_ps(_mm_loadu_ps(d + i), _mm_loadu_ps(sum + i)));
-            //            for (; i < inner; ++i)
-            //                d[i] /= sum[i];
-            //            d += inner;
-            //        }
-            //        src += count * inner;
-            //        dst += count * inner;
-            //    }
+                    b = buf;
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < innerF; i += F)
+                            _mm_storel_epi64((__m128i*)(dst + i), _mm_packus_epi32(Float32ToBFloat16(
+                                _mm_div_ps(_mm_loadu_ps(b + i), _mm_loadu_ps(sum + i))), K_ZERO));
+                        for (; i < inner; ++i)
+                            dst[i] = Base::Float32ToBFloat16(b[i] / sum[i]);
+                        b += inner;
+                        dst += inner;
+                    }
+                    src += count * inner;
+                }
             }
         }
     }
