@@ -265,6 +265,12 @@ namespace Simd
         {
             return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(Float32ToBFloat16(lo), Float32ToBFloat16(hi)));
         }
+
+        SIMD_INLINE __m256i PackFloat32ToBFloat16(__m512 f32)
+        {
+            __m512i b16 = Float32ToBFloat16(f32);
+            return _mm512_castsi512_si256(_mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(b16, b16)));
+        }
         
         SIMD_INLINE void Float32ToBFloat16(const float* src, uint16_t* dst, __mmask32 loadMask, __mmask32 saveMask = __mmask32(-1))
         {

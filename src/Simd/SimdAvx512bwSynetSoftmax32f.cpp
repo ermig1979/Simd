@@ -39,7 +39,7 @@ namespace Simd
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)     
     namespace Avx512bw
     {
-        void SynetSoftmaxLayerForward21(const float* src, size_t outer, float* dst)
+        void SynetSoftmax32f21(const float* src, size_t outer, float* dst)
         {
             Exp exp;
             size_t aligned = Simd::AlignLo(outer, F), tail = outer - aligned;
@@ -79,7 +79,9 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void SynetSoftmaxLayerForward31(const Exp& exp, __m512 buf[3])
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void SynetSoftmax32f31(const Exp& exp, __m512 buf[3])
         {
             __m512 max = _mm512_max_ps(buf[0], _mm512_max_ps(buf[1], buf[2]));
             buf[0] = exp.Exponent(_mm512_sub_ps(buf[0], max));
@@ -91,7 +93,7 @@ namespace Simd
             buf[2] = _mm512_div_ps(buf[2], sum);
         }
 
-        void SynetSoftmaxLayerForward31(const float* src, size_t outer, float* dst)
+        void SynetSoftmax32f31(const float* src, size_t outer, float* dst)
         {
             static const __m512i idx = _mm512_setr_epi32(0x00, 0x03, 0x06, 0x09, 0x0C, 0x0F, 0x12, 0x15, 0x18, 0x1B, 0x1E, 0x21, 0x24, 0x27, 0x2A, 0x2D);
             Exp exp;
@@ -102,7 +104,7 @@ namespace Simd
                 buf[0] = _mm512_i32gather_ps(idx, src + 0, 4);
                 buf[1] = _mm512_i32gather_ps(idx, src + 1, 4);
                 buf[2] = _mm512_i32gather_ps(idx, src + 2, 4);
-                SynetSoftmaxLayerForward31(exp, buf);
+                SynetSoftmax32f31(exp, buf);
                 _mm512_i32scatter_ps(dst + 0, idx, buf[0], 4);
                 _mm512_i32scatter_ps(dst + 1, idx, buf[1], 4);
                 _mm512_i32scatter_ps(dst + 2, idx, buf[2], 4);
@@ -115,12 +117,14 @@ namespace Simd
                 buf[0] = _mm512_mask_i32gather_ps(_mm512_setzero_ps(), mask, idx, src + 0, 4);
                 buf[1] = _mm512_mask_i32gather_ps(_mm512_setzero_ps(), mask, idx, src + 1, 4);
                 buf[2] = _mm512_mask_i32gather_ps(_mm512_setzero_ps(), mask, idx, src + 2, 4);
-                SynetSoftmaxLayerForward31(exp, buf);
+                SynetSoftmax32f31(exp, buf);
                 _mm512_mask_i32scatter_ps(dst + 0, mask, idx, buf[0], 4);
                 _mm512_mask_i32scatter_ps(dst + 1, mask, idx, buf[1], 4);
                 _mm512_mask_i32scatter_ps(dst + 2, mask, idx, buf[2], 4);
             }
         }
+
+        //--------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void LoadTansp16x16(const float* src, size_t srcStride, size_t cols, float* dst, __m512& max)
         {
@@ -448,7 +452,7 @@ namespace Simd
                 _mm512_mask_storeu_ps(dst + r * dstStride, dstMask, a[r]);
         }
 
-        void SynetSoftmaxLayerForwardX1(const float* src, size_t outer, size_t count, float* dst)
+        void SynetSoftmax32fX1(const float* src, size_t outer, size_t count, float* dst)
         {
             size_t o = 0, c = 0, outerF = AlignLo(outer, F), countF = AlignLo(count, F);
             Array32f buf(AlignHi(count, F) * F);
@@ -498,16 +502,18 @@ namespace Simd
             }
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         void SynetSoftmax32f(const float* src, size_t outer, size_t count, size_t inner, float* dst)
         {
             if (inner == 1)
             {
                 if (count == 2)
-                    SynetSoftmaxLayerForward21(src, outer, dst);
+                    SynetSoftmax32f21(src, outer, dst);
                 else if (count == 3)
-                    SynetSoftmaxLayerForward31(src, outer, dst);
+                    SynetSoftmax32f31(src, outer, dst);
                 else
-                    SynetSoftmaxLayerForwardX1(src, outer, count, dst);
+                    SynetSoftmax32fX1(src, outer, count, dst);
             }
             else
             {

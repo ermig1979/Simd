@@ -190,7 +190,7 @@ namespace Test
         SimdBFloat16ToFloat32(dst16b1.Data(), dst16b1.Size(), dst32f1.Data());
         SimdBFloat16ToFloat32(dst16b2.Data(), dst16b2.Size(), dst32f2.Data());
 
-        result = result && Compare(dst32f1, dst32f2, EPS * 8.0f, true, 32, DifferenceBoth);
+        result = result && Compare(dst32f1, dst32f2, EPS * 8.0f, true, 64, DifferenceBoth);
 
         return result;
     }
@@ -226,10 +226,10 @@ namespace Test
             result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Avx2::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
 #endif
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-//            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Avx512bw::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Avx512bw::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
+#endif
 
         return result;
     }
