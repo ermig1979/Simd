@@ -194,166 +194,169 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        //SIMD_INLINE void LoadTansp8x8(const uint16_t* src, size_t count, float* dst, __m256& max)
-        //{
-        //    __m256 a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7;
+        SIMD_INLINE void LoadTansp8x8(const uint16_t* src, size_t count, float* dst, __m256& max)
+        {
+            __m256 a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7;
 
-        //    a0 = _mm256_loadu_ps(src + 0 * count);
-        //    a1 = _mm256_loadu_ps(src + 1 * count);
-        //    a2 = _mm256_loadu_ps(src + 2 * count);
-        //    a3 = _mm256_loadu_ps(src + 3 * count);
-        //    a4 = _mm256_loadu_ps(src + 4 * count);
-        //    a5 = _mm256_loadu_ps(src + 5 * count);
-        //    a6 = _mm256_loadu_ps(src + 6 * count);
-        //    a7 = _mm256_loadu_ps(src + 7 * count);
+            a0 = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + 0 * count)));
+            a1 = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + 1 * count)));
+            a2 = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + 2 * count)));
+            a3 = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + 3 * count)));
+            a4 = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + 4 * count)));
+            a5 = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + 5 * count)));
+            a6 = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + 6 * count)));
+            a7 = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + 7 * count)));
 
-        //    b0 = _mm256_unpacklo_ps(a0, a2);
-        //    b1 = _mm256_unpacklo_ps(a1, a3);
-        //    b2 = _mm256_unpackhi_ps(a0, a2);
-        //    b3 = _mm256_unpackhi_ps(a1, a3);
-        //    b4 = _mm256_unpacklo_ps(a4, a6);
-        //    b5 = _mm256_unpacklo_ps(a5, a7);
-        //    b6 = _mm256_unpackhi_ps(a4, a6);
-        //    b7 = _mm256_unpackhi_ps(a5, a7);
+            b0 = _mm256_unpacklo_ps(a0, a2);
+            b1 = _mm256_unpacklo_ps(a1, a3);
+            b2 = _mm256_unpackhi_ps(a0, a2);
+            b3 = _mm256_unpackhi_ps(a1, a3);
+            b4 = _mm256_unpacklo_ps(a4, a6);
+            b5 = _mm256_unpacklo_ps(a5, a7);
+            b6 = _mm256_unpackhi_ps(a4, a6);
+            b7 = _mm256_unpackhi_ps(a5, a7);
 
-        //    a0 = _mm256_unpacklo_ps(b0, b1);
-        //    a1 = _mm256_unpackhi_ps(b0, b1);
-        //    a2 = _mm256_unpacklo_ps(b2, b3);
-        //    a3 = _mm256_unpackhi_ps(b2, b3);
-        //    a4 = _mm256_unpacklo_ps(b4, b5);
-        //    a5 = _mm256_unpackhi_ps(b4, b5);
-        //    a6 = _mm256_unpacklo_ps(b6, b7);
-        //    a7 = _mm256_unpackhi_ps(b6, b7);
+            a0 = _mm256_unpacklo_ps(b0, b1);
+            a1 = _mm256_unpackhi_ps(b0, b1);
+            a2 = _mm256_unpacklo_ps(b2, b3);
+            a3 = _mm256_unpackhi_ps(b2, b3);
+            a4 = _mm256_unpacklo_ps(b4, b5);
+            a5 = _mm256_unpackhi_ps(b4, b5);
+            a6 = _mm256_unpacklo_ps(b6, b7);
+            a7 = _mm256_unpackhi_ps(b6, b7);
 
-        //    b0 = _mm256_permute2f128_ps(a0, a4, 0x20);
-        //    b1 = _mm256_permute2f128_ps(a1, a5, 0x20);
-        //    b2 = _mm256_permute2f128_ps(a2, a6, 0x20);
-        //    b3 = _mm256_permute2f128_ps(a3, a7, 0x20);
-        //    b4 = _mm256_permute2f128_ps(a0, a4, 0x31);
-        //    b5 = _mm256_permute2f128_ps(a1, a5, 0x31);
-        //    b6 = _mm256_permute2f128_ps(a2, a6, 0x31);
-        //    b7 = _mm256_permute2f128_ps(a3, a7, 0x31);
+            b0 = _mm256_permute2f128_ps(a0, a4, 0x20);
+            b1 = _mm256_permute2f128_ps(a1, a5, 0x20);
+            b2 = _mm256_permute2f128_ps(a2, a6, 0x20);
+            b3 = _mm256_permute2f128_ps(a3, a7, 0x20);
+            b4 = _mm256_permute2f128_ps(a0, a4, 0x31);
+            b5 = _mm256_permute2f128_ps(a1, a5, 0x31);
+            b6 = _mm256_permute2f128_ps(a2, a6, 0x31);
+            b7 = _mm256_permute2f128_ps(a3, a7, 0x31);
 
-        //    max = _mm256_max_ps(max, b0);
-        //    max = _mm256_max_ps(max, b1);
-        //    max = _mm256_max_ps(max, b2);
-        //    max = _mm256_max_ps(max, b3);
-        //    max = _mm256_max_ps(max, b4);
-        //    max = _mm256_max_ps(max, b5);
-        //    max = _mm256_max_ps(max, b6);
-        //    max = _mm256_max_ps(max, b7);
+            max = _mm256_max_ps(max, b0);
+            max = _mm256_max_ps(max, b1);
+            max = _mm256_max_ps(max, b2);
+            max = _mm256_max_ps(max, b3);
+            max = _mm256_max_ps(max, b4);
+            max = _mm256_max_ps(max, b5);
+            max = _mm256_max_ps(max, b6);
+            max = _mm256_max_ps(max, b7);
 
-        //    _mm256_storeu_ps(dst + 0 * F, b0);
-        //    _mm256_storeu_ps(dst + 1 * F, b1);
-        //    _mm256_storeu_ps(dst + 2 * F, b2);
-        //    _mm256_storeu_ps(dst + 3 * F, b3);
-        //    _mm256_storeu_ps(dst + 4 * F, b4);
-        //    _mm256_storeu_ps(dst + 5 * F, b5);
-        //    _mm256_storeu_ps(dst + 6 * F, b6);
-        //    _mm256_storeu_ps(dst + 7 * F, b7);
-        //}
+            _mm256_storeu_ps(dst + 0 * F, b0);
+            _mm256_storeu_ps(dst + 1 * F, b1);
+            _mm256_storeu_ps(dst + 2 * F, b2);
+            _mm256_storeu_ps(dst + 3 * F, b3);
+            _mm256_storeu_ps(dst + 4 * F, b4);
+            _mm256_storeu_ps(dst + 5 * F, b5);
+            _mm256_storeu_ps(dst + 6 * F, b6);
+            _mm256_storeu_ps(dst + 7 * F, b7);
+        }
 
-        //SIMD_INLINE void StoreTansp8x8(const float* src, __m256 k, uint16_t* dst, size_t count)
-        //{
-        //    __m256 a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7;
+        SIMD_INLINE void StoreTansp8x8(const float* src, __m256 k, uint16_t* dst, size_t count)
+        {
+            __m256 a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7;
 
-        //    a0 = _mm256_mul_ps(_mm256_loadu_ps(src + 0 * F), k);
-        //    a1 = _mm256_mul_ps(_mm256_loadu_ps(src + 1 * F), k);
-        //    a2 = _mm256_mul_ps(_mm256_loadu_ps(src + 2 * F), k);
-        //    a3 = _mm256_mul_ps(_mm256_loadu_ps(src + 3 * F), k);
-        //    a4 = _mm256_mul_ps(_mm256_loadu_ps(src + 4 * F), k);
-        //    a5 = _mm256_mul_ps(_mm256_loadu_ps(src + 5 * F), k);
-        //    a6 = _mm256_mul_ps(_mm256_loadu_ps(src + 6 * F), k);
-        //    a7 = _mm256_mul_ps(_mm256_loadu_ps(src + 7 * F), k);
+            a0 = _mm256_mul_ps(_mm256_loadu_ps(src + 0 * F), k);
+            a1 = _mm256_mul_ps(_mm256_loadu_ps(src + 1 * F), k);
+            a2 = _mm256_mul_ps(_mm256_loadu_ps(src + 2 * F), k);
+            a3 = _mm256_mul_ps(_mm256_loadu_ps(src + 3 * F), k);
+            a4 = _mm256_mul_ps(_mm256_loadu_ps(src + 4 * F), k);
+            a5 = _mm256_mul_ps(_mm256_loadu_ps(src + 5 * F), k);
+            a6 = _mm256_mul_ps(_mm256_loadu_ps(src + 6 * F), k);
+            a7 = _mm256_mul_ps(_mm256_loadu_ps(src + 7 * F), k);
 
-        //    b0 = _mm256_unpacklo_ps(a0, a2);
-        //    b1 = _mm256_unpacklo_ps(a1, a3);
-        //    b2 = _mm256_unpackhi_ps(a0, a2);
-        //    b3 = _mm256_unpackhi_ps(a1, a3);
-        //    b4 = _mm256_unpacklo_ps(a4, a6);
-        //    b5 = _mm256_unpacklo_ps(a5, a7);
-        //    b6 = _mm256_unpackhi_ps(a4, a6);
-        //    b7 = _mm256_unpackhi_ps(a5, a7);
+            b0 = _mm256_unpacklo_ps(a0, a2);
+            b1 = _mm256_unpacklo_ps(a1, a3);
+            b2 = _mm256_unpackhi_ps(a0, a2);
+            b3 = _mm256_unpackhi_ps(a1, a3);
+            b4 = _mm256_unpacklo_ps(a4, a6);
+            b5 = _mm256_unpacklo_ps(a5, a7);
+            b6 = _mm256_unpackhi_ps(a4, a6);
+            b7 = _mm256_unpackhi_ps(a5, a7);
 
-        //    a0 = _mm256_unpacklo_ps(b0, b1);
-        //    a1 = _mm256_unpackhi_ps(b0, b1);
-        //    a2 = _mm256_unpacklo_ps(b2, b3);
-        //    a3 = _mm256_unpackhi_ps(b2, b3);
-        //    a4 = _mm256_unpacklo_ps(b4, b5);
-        //    a5 = _mm256_unpackhi_ps(b4, b5);
-        //    a6 = _mm256_unpacklo_ps(b6, b7);
-        //    a7 = _mm256_unpackhi_ps(b6, b7);
+            a0 = _mm256_unpacklo_ps(b0, b1);
+            a1 = _mm256_unpackhi_ps(b0, b1);
+            a2 = _mm256_unpacklo_ps(b2, b3);
+            a3 = _mm256_unpackhi_ps(b2, b3);
+            a4 = _mm256_unpacklo_ps(b4, b5);
+            a5 = _mm256_unpackhi_ps(b4, b5);
+            a6 = _mm256_unpacklo_ps(b6, b7);
+            a7 = _mm256_unpackhi_ps(b6, b7);
 
-        //    b0 = _mm256_permute2f128_ps(a0, a4, 0x20);
-        //    b1 = _mm256_permute2f128_ps(a1, a5, 0x20);
-        //    b2 = _mm256_permute2f128_ps(a2, a6, 0x20);
-        //    b3 = _mm256_permute2f128_ps(a3, a7, 0x20);
-        //    b4 = _mm256_permute2f128_ps(a0, a4, 0x31);
-        //    b5 = _mm256_permute2f128_ps(a1, a5, 0x31);
-        //    b6 = _mm256_permute2f128_ps(a2, a6, 0x31);
-        //    b7 = _mm256_permute2f128_ps(a3, a7, 0x31);
+            b0 = _mm256_permute2f128_ps(a0, a4, 0x20);
+            b1 = _mm256_permute2f128_ps(a1, a5, 0x20);
+            b2 = _mm256_permute2f128_ps(a2, a6, 0x20);
+            b3 = _mm256_permute2f128_ps(a3, a7, 0x20);
+            b4 = _mm256_permute2f128_ps(a0, a4, 0x31);
+            b5 = _mm256_permute2f128_ps(a1, a5, 0x31);
+            b6 = _mm256_permute2f128_ps(a2, a6, 0x31);
+            b7 = _mm256_permute2f128_ps(a3, a7, 0x31);
 
-        //    _mm256_storeu_ps(dst + 0 * count, b0);
-        //    _mm256_storeu_ps(dst + 1 * count, b1);
-        //    _mm256_storeu_ps(dst + 2 * count, b2);
-        //    _mm256_storeu_ps(dst + 3 * count, b3);
-        //    _mm256_storeu_ps(dst + 4 * count, b4);
-        //    _mm256_storeu_ps(dst + 5 * count, b5);
-        //    _mm256_storeu_ps(dst + 6 * count, b6);
-        //    _mm256_storeu_ps(dst + 7 * count, b7);
-        //}
+            _mm_storeu_si128((__m128i*)(dst + 0 * count), PackFloat32ToBFloat16(b0));
+            _mm_storeu_si128((__m128i*)(dst + 1 * count), PackFloat32ToBFloat16(b1));
+            _mm_storeu_si128((__m128i*)(dst + 2 * count), PackFloat32ToBFloat16(b2));
+            _mm_storeu_si128((__m128i*)(dst + 3 * count), PackFloat32ToBFloat16(b3));
+            _mm_storeu_si128((__m128i*)(dst + 4 * count), PackFloat32ToBFloat16(b4));
+            _mm_storeu_si128((__m128i*)(dst + 5 * count), PackFloat32ToBFloat16(b5));
+            _mm_storeu_si128((__m128i*)(dst + 6 * count), PackFloat32ToBFloat16(b6));
+            _mm_storeu_si128((__m128i*)(dst + 7 * count), PackFloat32ToBFloat16(b7));
+        }
 
-        //void SynetSoftmax16bX1(const uint16_t* src, size_t outer, size_t count, uint16_t* dst)
-        //{
-        //    size_t o = 0, c = 0, outerF = AlignLo(outer, F), countF = AlignLo(count, F);
-        //    Array32f buf(AlignHi(count, F) * F);
-        //    Exp exp;
-        //    for (; o < outerF; o += F)
-        //    {
-        //        __m256 _max = _mm256_set1_ps(-FLT_MAX);
-        //        for (c = 0; c < countF; c += F)
-        //            LoadTansp8x8(src + c, count, buf.data + c * F, _max);
-        //        if (c < count)
-        //        {
-        //            c = count - F;
-        //            LoadTansp8x8(src + c, count, buf.data + c * F, _max);
-        //        }
-        //        __m256 _sum = _mm256_setzero_ps();
-        //        for (size_t c = 0; c < count; ++c)
-        //        {
-        //            __m256 _exp = exp.Exponent(_mm256_sub_ps(_mm256_loadu_ps(buf.data + c * F), _max));
-        //            _sum = _mm256_add_ps(_sum, _exp);
-        //            _mm256_storeu_ps(buf.data + c * F, _exp);
-        //        }
-        //        __m256 _k = _mm256_div_ps(_mm256_set1_ps(1.0f), _sum);
-        //        for (c = 0; c < countF; c += F)
-        //            StoreTansp8x8(buf.data + c * F, _k, dst + c, count);
-        //        if (c < count)
-        //        {
-        //            c = count - F;
-        //            StoreTansp8x8(buf.data + c * F, _k, dst + c, count);
-        //        }
-        //        src += count * F;
-        //        dst += count * F;
-        //    }
-        //    for (; o < outer; ++o)
-        //    {
-        //        float max = src[0];
-        //        for (size_t c = 1; c < count; ++c)
-        //            max = Simd::Max(max, src[c]);
-        //        float sum = 0;
-        //        for (size_t c = 0; c < count; ++c)
-        //        {
-        //            dst[c] = ::exp(src[c] - max);
-        //            sum += dst[c];
-        //        }
-        //        float k = 1.0f / sum;
-        //        for (size_t c = 0; c < count; ++c)
-        //            dst[c] *= k;
-        //        src += count;
-        //        dst += count;
-        //    }
-        //}
+        void SynetSoftmax16bX1(const uint16_t* src, size_t outer, size_t count, uint16_t* dst)
+        {
+            size_t o = 0, c = 0, outerF = AlignLo(outer, F), countF = AlignLo(count, F);
+            Array32f buf(AlignHi(count, F) * F);
+            Exp exp;
+            for (; o < outerF; o += F)
+            {
+                __m256 _max = _mm256_set1_ps(-FLT_MAX);
+                for (c = 0; c < countF; c += F)
+                    LoadTansp8x8(src + c, count, buf.data + c * F, _max);
+                if (c < count)
+                {
+                    c = count - F;
+                    LoadTansp8x8(src + c, count, buf.data + c * F, _max);
+                }
+                __m256 _sum = _mm256_setzero_ps();
+                for (size_t c = 0; c < count; ++c)
+                {
+                    __m256 _exp = exp.Exponent(_mm256_sub_ps(_mm256_loadu_ps(buf.data + c * F), _max));
+                    _sum = _mm256_add_ps(_sum, _exp);
+                    _mm256_storeu_ps(buf.data + c * F, _exp);
+                }
+                __m256 _k = _mm256_div_ps(_mm256_set1_ps(1.0f), _sum);
+                for (c = 0; c < countF; c += F)
+                    StoreTansp8x8(buf.data + c * F, _k, dst + c, count);
+                if (c < count)
+                {
+                    c = count - F;
+                    StoreTansp8x8(buf.data + c * F, _k, dst + c, count);
+                }
+                src += count * F;
+                dst += count * F;
+            }
+            for (; o < outer; ++o)
+            {
+                for (size_t c = 0; c < count; ++c)
+                    buf[c] = Base::BFloat16ToFloat32(src[c]);
+
+                float max = buf[0];
+                for (size_t c = 1; c < count; ++c)
+                    max = Simd::Max(max, buf[c]);
+                float sum = 0;
+                for (size_t c = 0; c < count; ++c)
+                {
+                    buf[c] = ::exp(buf[c] - max);
+                    sum += buf[c];
+                }
+                float k = 1.0f / sum;
+                for (size_t c = 0; c < count; ++c)
+                    dst[c] = Base::Float32ToBFloat16(buf[c] * k);
+                src += count;
+                dst += count;
+            }
+        }
 
         void SynetSoftmax16b(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst)
         {
@@ -363,12 +366,10 @@ namespace Simd
                     SynetSoftmax16b21(src, outer, dst);
                 else if (count == 3)
                     SynetSoftmax16b31(src, outer, dst);
-                //else if(count < 8)
-                //    Sse41::SynetSoftmax16bX1(src, outer, count, dst);
-                //else
-                //    SynetSoftmax16bX1(src, outer, count, dst);
+                else if(count < 8)
+                    Sse41::SynetSoftmax16bX1(src, outer, count, dst);
                 else
-                    Sse41::SynetSoftmax16b(src, outer, count, inner, dst);
+                    SynetSoftmax16bX1(src, outer, count, dst);
             }
             else
             {
