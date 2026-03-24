@@ -176,9 +176,20 @@ namespace Simd
             return _mm256_castsi256_ps(UnpackU16<part>(K_ZERO, value));
         }
 
+        SIMD_INLINE __m256 BFloat16ToFloat32(__m128i value)
+        {
+            return _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_cvtepu16_epi32(value), Base::Bf16::SHIFT));
+        }
+
         SIMD_INLINE __m256i Float32ToBFloat16(__m256 lo, __m256 hi)
         {
             return _mm256_permute4x64_epi64(_mm256_packus_epi32(Float32ToBFloat16(lo), Float32ToBFloat16(hi)), 0xD8);
+        }
+
+        SIMD_INLINE __m128i PackFloat32ToBFloat16(__m256 f32)
+        {
+            __m256i b16 = Float32ToBFloat16(f32);
+            return _mm256_castsi256_si128(_mm256_permute4x64_epi64(_mm256_packus_epi32(b16, b16), 0xD8));
         }
 
         SIMD_INLINE __m256 BFloat16ToFloat32Even(__m256i value)
