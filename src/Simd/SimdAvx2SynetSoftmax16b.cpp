@@ -77,47 +77,115 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        //SIMD_INLINE void SynetSoftmax16b31(const Avx2::Exp& exp, __m256 buf[3])
-        //{
-        //    __m256 max = _mm256_max_ps(buf[0], _mm256_max_ps(buf[1], buf[2]));
-        //    buf[0] = exp.Exponent(_mm256_sub_ps(buf[0], max));
-        //    buf[1] = exp.Exponent(_mm256_sub_ps(buf[1], max));
-        //    buf[2] = exp.Exponent(_mm256_sub_ps(buf[2], max));
-        //    __m256 sum = _mm256_add_ps(buf[0], _mm256_add_ps(buf[1], buf[2]));
-        //    buf[0] = _mm256_div_ps(buf[0], sum);
-        //    buf[1] = _mm256_div_ps(buf[1], sum);
-        //    buf[2] = _mm256_div_ps(buf[2], sum);
-        //}
+        SIMD_INLINE void SynetSoftmax16b31Load(const uint16_t* src, __m256 buf[3])
+        {
+            static const __m256i SFL00 = SIMD_MM256_SETR_EPI8(
+                -1, -1, 0x0, 0x1, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, -1, -1,
+                -1, -1, 0x8, 0x9, -1, -1, 0xE, 0xF, -1, -1, -1, -1, -1, -1, -1, -1);
+            static const __m256i SFL01 = SIMD_MM256_SETR_EPI8(
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x2, 0x3,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x4, 0x5, -1, -1, 0xA, 0xB);
+            static const __m256i SFL10 = SIMD_MM256_SETR_EPI8(
+                -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xE, 0xF, -1, -1, -1, -1,
+                -1, -1, 0xA, 0xB, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+            static const __m256i SFL11 = SIMD_MM256_SETR_EPI8(
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x4, 0x5,
+                -1, -1, -1, -1, -1, -1, 0x0, 0x1, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD);
+            static const __m256i SFL20 = SIMD_MM256_SETR_EPI8(
+                -1, -1, 0x4, 0x5, -1, -1, 0xA, 0xB, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+            static const __m256i SFL21 = SIMD_MM256_SETR_EPI8(
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x1, -1, -1, 0x6, 0x7,
+                -1, -1, -1, -1, -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xE, 0xF);
+            __m256i s01 = _mm256_loadu_si256((__m256i*)(src + 0));
+            __m256i s12 = _mm256_loadu_si256((__m256i*)(src + 8));
+            buf[0] = _mm256_castsi256_ps(_mm256_or_si256(_mm256_shuffle_epi8(s01, SFL00), _mm256_shuffle_epi8(s12, SFL01)));
+            buf[1] = _mm256_castsi256_ps(_mm256_or_si256(_mm256_shuffle_epi8(s01, SFL10), _mm256_shuffle_epi8(s12, SFL11)));
+            buf[2] = _mm256_castsi256_ps(_mm256_or_si256(_mm256_shuffle_epi8(s01, SFL20), _mm256_shuffle_epi8(s12, SFL21)));
+        }
 
-        //void SynetSoftmax16b31(const uint16_t* src, size_t outer, uint16_t* dst)
-        //{
-        //    Avx2::Exp exp;
-        //    __m256 buf[3];
-        //    size_t aligned = Simd::AlignLo(outer, F);
-        //    for (size_t o = 0; o < aligned; o += F)
-        //    {
-        //        buf[0] = Avx2::Gather<3>(src + 0);
-        //        buf[1] = Avx2::Gather<3>(src + 1);
-        //        buf[2] = Avx2::Gather<3>(src + 2);
-        //        SynetSoftmax16b31(exp, buf);
-        //        Scater<3>(dst + 0, buf[0]);
-        //        Scater<3>(dst + 1, buf[1]);
-        //        Scater<3>(dst + 2, buf[2]);
-        //        src += 3 * F;
-        //        dst += 3 * F;
-        //    }
-        //    if (aligned < outer)
-        //    {
-        //        size_t tail = outer - aligned;
-        //        buf[0] = Gather<3>(src + 0, tail);
-        //        buf[1] = Gather<3>(src + 1, tail);
-        //        buf[2] = Gather<3>(src + 2, tail);
-        //        SynetSoftmax16b31(exp, buf);
-        //        Scater<3>(dst + 0, buf[0], tail);
-        //        Scater<3>(dst + 1, buf[1], tail);
-        //        Scater<3>(dst + 2, buf[2], tail);
-        //    }
-        //}
+        SIMD_INLINE void SynetSoftmax16b31(const Avx2::Exp& exp, __m256 buf[3])
+        {
+            __m256 max = _mm256_max_ps(buf[0], _mm256_max_ps(buf[1], buf[2]));
+            buf[0] = exp.Exponent(_mm256_sub_ps(buf[0], max));
+            buf[1] = exp.Exponent(_mm256_sub_ps(buf[1], max));
+            buf[2] = exp.Exponent(_mm256_sub_ps(buf[2], max));
+            __m256 sum = _mm256_add_ps(buf[0], _mm256_add_ps(buf[1], buf[2]));
+            buf[0] = _mm256_div_ps(buf[0], sum);
+            buf[1] = _mm256_div_ps(buf[1], sum);
+            buf[2] = _mm256_div_ps(buf[2], sum);
+        }
+
+        SIMD_INLINE void SynetSoftmax16b31Load(const uint16_t* src, size_t size, __m256 dst[3])
+        {
+            SIMD_ALIGNED(32) uint16_t buf[A];
+            for (size_t i = 0; i < size; i += 1)
+            {
+                buf[0 * 8 + i] = src[i * 3 + 0];
+                buf[1 * 8 + i] = src[i * 3 + 1];
+                buf[2 * 8 + i] = src[i * 3 + 2];
+            }
+            __m128i b01 = _mm_loadu_si128((__m128i*)buf);
+            dst[0] = BFloat16ToFloat32(_mm256_cvtepu16_epi32(_mm_loadu_si128((__m128i*)buf + 0)));
+            dst[1] = BFloat16ToFloat32(_mm256_cvtepu16_epi32(_mm_loadu_si128((__m128i*)buf + 1)));
+            dst[2] = BFloat16ToFloat32(_mm256_cvtepu16_epi32(_mm_loadu_si128((__m128i*)buf + 2)));
+        }
+
+        SIMD_INLINE void SynetSoftmax16b31Save(const __m256 src[3], uint16_t* dst)
+        {
+            //__m256i s0213 = _mm256_packus_epi32(Float32ToBFloat16(src[0]), Float32ToBFloat16(src[1]));
+            //__m256i s2435 = _mm256_packus_epi32(Float32ToBFloat16(src[1]), Float32ToBFloat16(src[2]));
+            ////    Float32ToBFloat16(src[0], src[1]);
+            ////__m256i s12 = Float32ToBFloat16(src[1], src[2]);
+            //static const __m256i SFL00 = SIMD_MM256_SETR_EPI8(
+            //    0x0, 0x1, 0x8, 0x9, -1, -1, 0x2, 0x3, 0xA, 0xB, -1, -1, 0x4, 0x5, 0xC, 0xD,
+            //    0x0, 0x1, 0x8, 0x9, -1, -1, 0x2, 0x3, 0xA, 0xB, -1, -1, 0x4, 0x5, 0xC, 0xD);
+            //static const __m256i SFL01 = SIMD_MM256_SETR_EPI8(
+            //    -1, -1, -1, -1, 0x8, 0x9, -1, -1, -1, -1, 0xA, 0xB, -1, -1, -1, -1,
+            //    -1, -1, -1, -1, 0x8, 0x9, -1, -1, -1, -1, 0xA, 0xB, -1, -1, -1, -1);
+            //static const __m128i SFL10 = SIMD_MM_SETR_EPI8(-1, -1, 0x6, 0x7, 0xE, 0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+            //static const __m128i SFL11 = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, 0x8, 0x9, -1, -1, -1, -1, 0xA, 0xB, -1, -1, -1, -1);
+            //_mm256_storeu_si256((__m256i*)dst, _mm256_or_si256(_mm256_shuffle_epi8(s01, SFL00), _mm256_shuffle_epi8(s12, SFL01)));
+            //_mm_storeu_si128((__m128i*)dst + 2, _mm_or_si128(
+            //    _mm_shuffle_epi8(_mm256_castsi256_si128(s01), SFL10), _mm_shuffle_epi8(_mm256_castsi256_si128(s12), SFL11)));
+        }
+
+        SIMD_INLINE void SynetSoftmax16b31Save(const __m256 src[3], size_t size, uint16_t* dst)
+        {
+            SIMD_ALIGNED(16) uint16_t buf[A];
+            _mm256_storeu_si256((__m256i*)buf + 0, Float32ToBFloat16(src[0], src[1]));
+            _mm256_storeu_si256((__m256i*)buf + 1, Float32ToBFloat16(src[2], src[2]));
+            for (size_t i = 0; i < size; i += 1)
+            {
+                dst[i * 3 + 0] = buf[0 * 8 + i];
+                dst[i * 3 + 1] = buf[1 * 8 + i];
+                dst[i * 3 + 2] = buf[2 * 8 + i];
+            }
+        }
+
+        void SynetSoftmax16b31(const uint16_t* src, size_t outer, uint16_t* dst)
+        {
+            Avx2::Exp exp;
+            __m256 buf[3];
+            size_t aligned = Simd::AlignLo(outer, F);
+            for (size_t o = 0; o < aligned; o += F)
+            {
+                SynetSoftmax16b31Load(src,  buf);
+                SynetSoftmax16b31(exp, buf);
+                SynetSoftmax16b31Save(buf, F, dst);
+                src += 3 * F;
+                dst += 3 * F;
+            }
+            if (aligned < outer)
+            {
+                size_t tail = outer - aligned;
+                SynetSoftmax16b31Load(src, tail, buf);
+                SynetSoftmax16b31(exp, buf);
+                SynetSoftmax16b31Save(buf, tail, dst);
+            }
+        }
+
+        //--------------------------------------------------------------------------------------------------
 
         //SIMD_INLINE void LoadTansp8x8(const uint16_t* src, size_t count, float* dst, __m256& max)
         //{
@@ -286,8 +354,8 @@ namespace Simd
             {
                 if (count == 2)
                     SynetSoftmax16b21(src, outer, dst);
-                //else if (count == 3)
-                //    SynetSoftmax16b31(src, outer, dst);
+                else if (count == 3)
+                    SynetSoftmax16b31(src, outer, dst);
                 //else if(count < 8)
                 //    Sse41::SynetSoftmax16bX1(src, outer, count, dst);
                 //else
