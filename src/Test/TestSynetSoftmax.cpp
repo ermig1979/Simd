@@ -226,10 +226,10 @@ namespace Test
             result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Avx2::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
 #endif
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-//            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Avx512bw::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetSoftmax16bAutoTest(FUNC_SM16B(Simd::Avx512bw::SynetSoftmax16b), FUNC_SM16B(SimdSynetSoftmax16b));
+#endif
 
         return result;
     }

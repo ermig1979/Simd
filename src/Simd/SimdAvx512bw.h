@@ -565,6 +565,8 @@ namespace Simd
 
         void SynetSoftmax32f(const float* src, size_t outer, size_t size, size_t inner, float* dst);
 
+        void SynetSoftmax16b(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst);
+
         void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
 
         void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst);

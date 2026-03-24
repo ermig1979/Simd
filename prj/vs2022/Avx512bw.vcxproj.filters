@@ -184,9 +184,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale16b.cpp">
       <Filter>Avx512bw\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetSoftmax.cpp">
-      <Filter>Avx512bw\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetUnaryOperation.cpp">
       <Filter>Avx512bw\Synet\Other</Filter>
     </ClCompile>
@@ -490,6 +487,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetNormalize32f.cpp">
       <Filter>Avx512bw\Synet\Normalize</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetSoftmax16b.cpp">
+      <Filter>Avx512bw\Synet\Softmax</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetSoftmax32f.cpp">
+      <Filter>Avx512bw\Synet\Softmax</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">
@@ -557,6 +560,9 @@
     </Filter>
     <Filter Include="Avx512bw\Synet\Normalize">
       <UniqueIdentifier>{a74a6fb6-e553-4c09-913f-333c6e598ff9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet\Softmax">
+      <UniqueIdentifier>{eb184359-5485-40d0-b6ce-63af403c7c62}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
