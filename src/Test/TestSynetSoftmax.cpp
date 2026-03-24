@@ -190,7 +190,7 @@ namespace Test
         SimdBFloat16ToFloat32(dst16b1.Data(), dst16b1.Size(), dst32f1.Data());
         SimdBFloat16ToFloat32(dst16b2.Data(), dst16b2.Size(), dst32f2.Data());
 
-        result = result && Compare(dst32f1, dst32f2, EPS * 8.0f, true, 32, DifferenceBoth);
+        result = result && Compare(dst32f1, dst32f2, EPS * 8.0f, true, 64, DifferenceBoth);
 
         return result;
     }

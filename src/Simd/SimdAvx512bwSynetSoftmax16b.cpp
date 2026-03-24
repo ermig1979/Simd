@@ -76,48 +76,79 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        //SIMD_INLINE void SynetSoftmax32f31(const Exp& exp, __m512 buf[3])
-        //{
-        //    __m512 max = _mm512_max_ps(buf[0], _mm512_max_ps(buf[1], buf[2]));
-        //    buf[0] = exp.Exponent(_mm512_sub_ps(buf[0], max));
-        //    buf[1] = exp.Exponent(_mm512_sub_ps(buf[1], max));
-        //    buf[2] = exp.Exponent(_mm512_sub_ps(buf[2], max));
-        //    __m512 sum = _mm512_add_ps(buf[0], _mm512_add_ps(buf[1], buf[2]));
-        //    buf[0] = _mm512_div_ps(buf[0], sum);
-        //    buf[1] = _mm512_div_ps(buf[1], sum);
-        //    buf[2] = _mm512_div_ps(buf[2], sum);
-        //}
+        SIMD_INLINE void SynetSoftmax16b31To32f(const __m512i src[2], __m512 dst[3])
+        {
+            static const __m512i IDX0 = SIMD_MM512_SETR_EPI16(
+                0x30, 0x00, 0x30, 0x03, 0x30, 0x06, 0x30, 0x09, 0x30, 0x0C, 0x30, 0x0F, 0x30, 0x12, 0x30, 0x15,
+                0x30, 0x18, 0x30, 0x1B, 0x30, 0x1E, 0x30, 0x21, 0x30, 0x24, 0x30, 0x27, 0x30, 0x2A, 0x30, 0x2D);
+            static const __m512i IDX1 = SIMD_MM512_SETR_EPI16(
+                0x30, 0x01, 0x30, 0x04, 0x30, 0x07, 0x30, 0x0A, 0x30, 0x0D, 0x30, 0x10, 0x30, 0x13, 0x30, 0x16,
+                0x30, 0x19, 0x30, 0x1C, 0x30, 0x1F, 0x30, 0x22, 0x30, 0x25, 0x30, 0x28, 0x30, 0x2B, 0x30, 0x2E);
+            static const __m512i IDX2 = SIMD_MM512_SETR_EPI16(
+                0x30, 0x02, 0x30, 0x05, 0x30, 0x08, 0x30, 0x0B, 0x30, 0x0E, 0x30, 0x11, 0x30, 0x14, 0x30, 0x17,
+                0x30, 0x1A, 0x30, 0x1D, 0x30, 0x20, 0x30, 0x23, 0x30, 0x26, 0x30, 0x29, 0x30, 0x2C, 0x30, 0x2F);
+            dst[0] = _mm512_castsi512_ps(_mm512_permutex2var_epi16(src[0], IDX0, src[1]));
+            dst[1] = _mm512_castsi512_ps(_mm512_permutex2var_epi16(src[0], IDX1, src[1]));
+            dst[2] = _mm512_castsi512_ps(_mm512_permutex2var_epi16(src[0], IDX2, src[1]));
+        }
 
-        //void SynetSoftmax32f31(const float* src, size_t outer, float* dst)
-        //{
-        //    static const __m512i idx = _mm512_setr_epi32(0x00, 0x03, 0x06, 0x09, 0x0C, 0x0F, 0x12, 0x15, 0x18, 0x1B, 0x1E, 0x21, 0x24, 0x27, 0x2A, 0x2D);
-        //    Exp exp;
-        //    __m512 buf[3];
-        //    size_t aligned = Simd::AlignLo(outer, F), tail = outer - aligned;
-        //    for (size_t o = 0; o < aligned; o += F)
-        //    {
-        //        buf[0] = _mm512_i32gather_ps(idx, src + 0, 4);
-        //        buf[1] = _mm512_i32gather_ps(idx, src + 1, 4);
-        //        buf[2] = _mm512_i32gather_ps(idx, src + 2, 4);
-        //        SynetSoftmax32f31(exp, buf);
-        //        _mm512_i32scatter_ps(dst + 0, idx, buf[0], 4);
-        //        _mm512_i32scatter_ps(dst + 1, idx, buf[1], 4);
-        //        _mm512_i32scatter_ps(dst + 2, idx, buf[2], 4);
-        //        src += 3 * F;
-        //        dst += 3 * F;
-        //    }
-        //    if (tail)
-        //    {
-        //        __mmask16 mask = TailMask16(tail);
-        //        buf[0] = _mm512_mask_i32gather_ps(_mm512_setzero_ps(), mask, idx, src + 0, 4);
-        //        buf[1] = _mm512_mask_i32gather_ps(_mm512_setzero_ps(), mask, idx, src + 1, 4);
-        //        buf[2] = _mm512_mask_i32gather_ps(_mm512_setzero_ps(), mask, idx, src + 2, 4);
-        //        SynetSoftmax32f31(exp, buf);
-        //        _mm512_mask_i32scatter_ps(dst + 0, mask, idx, buf[0], 4);
-        //        _mm512_mask_i32scatter_ps(dst + 1, mask, idx, buf[1], 4);
-        //        _mm512_mask_i32scatter_ps(dst + 2, mask, idx, buf[2], 4);
-        //    }
-        //}
+        SIMD_INLINE void SynetSoftmax16b31To16b(const __m512 src[3], __m512i dst[2])
+        {
+            __m512i s01 = Float32ToBFloat16Interlived(src[0], src[1]);
+            __m512i s2 = Float32ToBFloat16(src[2]);
+            static const __m512i IDX0 = SIMD_MM512_SETR_EPI16(
+                0x00, 0x01, 0x20, 0x02, 0x03, 0x22, 0x04, 0x05, 0x24, 0x06, 0x07, 0x26, 0x08, 0x09, 0x28, 0x0A,
+                0x0B, 0x2A, 0x0C, 0x0D, 0x2C, 0x0E, 0x0F, 0x2E, 0x10, 0x11, 0x30, 0x12, 0x13, 0x32, 0x14, 0x15);
+            static const __m512i IDX1 = SIMD_MM512_SETR_EPI16(
+                0x34, 0x16, 0x17, 0x36, 0x18, 0x19, 0x38, 0x1A, 0x1B, 0x3A, 0x1C, 0x1D, 0x3C, 0x1E, 0x1F, 0x3E,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+            dst[0] = _mm512_permutex2var_epi16(s01, IDX0, s2);
+            dst[1] = _mm512_permutex2var_epi16(s01, IDX1, s2);
+        }
+
+        SIMD_INLINE void SynetSoftmax16b31(const Exp& exp, __m512 buf[3])
+        {
+            __m512 max = _mm512_max_ps(buf[0], _mm512_max_ps(buf[1], buf[2]));
+            buf[0] = exp.Exponent(_mm512_sub_ps(buf[0], max));
+            buf[1] = exp.Exponent(_mm512_sub_ps(buf[1], max));
+            buf[2] = exp.Exponent(_mm512_sub_ps(buf[2], max));
+            __m512 sum = _mm512_add_ps(buf[0], _mm512_add_ps(buf[1], buf[2]));
+            buf[0] = _mm512_div_ps(buf[0], sum);
+            buf[1] = _mm512_div_ps(buf[1], sum);
+            buf[2] = _mm512_div_ps(buf[2], sum);
+        }
+
+        void SynetSoftmax16b31(const uint16_t* src, size_t outer, uint16_t* dst)
+        {
+            Exp exp;
+            __m512i b16b[2];
+            __m512 b32f[3];
+            size_t outerF = Simd::AlignLo(outer, F), tail = outer - outerF;
+            for (size_t o = 0; o < outerF; o += F)
+            {
+                b16b[0] = Load(src, src + F, __mmask16(-1));
+                b16b[1] = _mm512_castsi256_si512(_mm256_loadu_si256((__m256i*)src + 2));
+                SynetSoftmax16b31To32f(b16b, b32f);
+                SynetSoftmax16b31(exp, b32f);
+                SynetSoftmax16b31To16b(b32f, b16b);
+                _mm512_storeu_si512((__m512i*)dst, b16b[0]);
+                _mm256_storeu_si256((__m256i*)dst + 2, _mm512_castsi512_si256(b16b[1]));
+                src += 3 * F;
+                dst += 3 * F;
+            }
+            if (tail)
+            {
+                __mmask32 mask01 = TailMask32(tail * 3);
+                __mmask16 mask2 = TailMask16(tail * 3 - DF);
+                b16b[0] = _mm512_maskz_loadu_epi16(mask01, src);
+                b16b[1] = _mm512_castsi256_si512(_mm256_maskz_loadu_epi16(mask2, src + DF));
+                SynetSoftmax16b31To32f(b16b, b32f);
+                SynetSoftmax16b31(exp, b32f);
+                SynetSoftmax16b31To16b(b32f, b16b);
+                _mm512_mask_storeu_epi16(dst, mask01, b16b[0]);
+                _mm256_mask_storeu_epi16(dst + DF, mask2, _mm512_castsi512_si256(b16b[1]));
+            }
+        }
 
         //--------------------------------------------------------------------------------------------------
 
@@ -506,8 +537,7 @@ namespace Simd
                 if (count == 2)
                     SynetSoftmax16b21(src, outer, dst);
                 else if (count == 3)
-                    Avx2::SynetSoftmax16b(src, outer, count, inner, dst);
-                //    SynetSoftmax16b31(src, outer, dst);
+                    SynetSoftmax16b31(src, outer, dst);
                 else
                     SynetSoftmax16bX1(src, outer, count, dst);
             }
