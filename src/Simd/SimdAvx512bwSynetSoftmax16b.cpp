@@ -514,62 +514,62 @@ namespace Simd
             }
             else
             {
-            //    Exp exp;
-            //    size_t aligned = Simd::AlignLo(inner, F);
-            //    __mmask16 tail = TailMask16(inner - aligned);
-            //    Array32f tmp(inner * 2);
-            //    const float* s;
-            //    float* max = tmp.data, * sum = tmp.data + inner, * d;
-            //    for (size_t o = 0; o < outer; ++o)
-            //    {
-            //        memcpy(max, src, inner * sizeof(float));
-            //        s = src + inner;
-            //        for (size_t c = 1; c < count; ++c)
-            //        {
-            //            size_t i = 0;
-            //            for (; i < aligned; i += F)
-            //                _mm512_storeu_ps(max + i, _mm512_max_ps(_mm512_loadu_ps(s + i), _mm512_loadu_ps(max + i)));
-            //            if (i < inner)
-            //                _mm512_mask_storeu_ps(max + i, tail, _mm512_max_ps(_mm512_maskz_loadu_ps(tail, s + i), _mm512_maskz_loadu_ps(tail, max + i)));
-            //            s += inner;
-            //        }
+                Exp exp;
+                size_t innerF = Simd::AlignLo(inner, F), innerDF = Simd::AlignLo(inner, DF);
+                Array32f _buf(inner * (count + 2));
+                float* max = _buf.data, * sum = _buf.data + inner, * buf = sum + inner, * b;
+                __mmask16 tail = TailMask16(inner - innerF);
+                for (size_t o = 0; o < outer; ++o)
+                {
+                    BFloat16ToFloat32(src, count * inner, buf);
+                    memcpy(max, buf, inner * sizeof(float));
+                    b = buf + inner;
+                    for (size_t c = 1; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < innerF; i += F)
+                            _mm512_storeu_ps(max + i, _mm512_max_ps(_mm512_loadu_ps(b + i), _mm512_loadu_ps(max + i)));
+                        if (i < inner)
+                            _mm512_mask_storeu_ps(max + i, tail, _mm512_max_ps(_mm512_maskz_loadu_ps(tail, b + i), _mm512_maskz_loadu_ps(tail, max + i)));
+                        b += inner;
+                    }
 
-            //        s = src;
-            //        d = dst;
-            //        memset(sum, 0, inner * sizeof(float));
-            //        for (size_t c = 0; c < count; ++c)
-            //        {
-            //            size_t i = 0;
-            //            for (; i < aligned; i += F)
-            //            {
-            //                __m512 _d = exp.Exponent(_mm512_sub_ps(_mm512_loadu_ps(s + i), _mm512_loadu_ps(max + i)));
-            //                _mm512_storeu_ps(d + i, _d);
-            //                _mm512_storeu_ps(sum + i, _mm512_add_ps(_d, _mm512_loadu_ps(sum + i)));
-            //            }
-            //            if (i < inner)
-            //            {
-            //                __m512 _d = exp.Exponent(_mm512_sub_ps(_mm512_maskz_loadu_ps(tail, s + i), _mm512_maskz_loadu_ps(tail, max + i)));
-            //                _mm512_mask_storeu_ps(d + i, tail, _d);
-            //                _mm512_mask_storeu_ps(sum + i, tail, _mm512_add_ps(_d, _mm512_maskz_loadu_ps(tail, sum + i)));
-            //            }
-            //            s += inner;
-            //            d += inner;
-            //        }
+                    b = buf;
+                    memset(sum, 0, inner * sizeof(float));
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < innerF; i += F)
+                        {
+                            __m512 _d = exp.Exponent(_mm512_sub_ps(_mm512_loadu_ps(b + i), _mm512_loadu_ps(max + i)));
+                            _mm512_storeu_ps(b + i, _d);
+                            _mm512_storeu_ps(sum + i, _mm512_add_ps(_d, _mm512_loadu_ps(sum + i)));
+                        }
+                        if (i < inner)
+                        {
+                            __m512 _d = exp.Exponent(_mm512_sub_ps(_mm512_maskz_loadu_ps(tail, b + i), _mm512_maskz_loadu_ps(tail, max + i)));
+                            _mm512_mask_storeu_ps(b + i, tail, _d);
+                            _mm512_mask_storeu_ps(sum + i, tail, _mm512_add_ps(_d, _mm512_maskz_loadu_ps(tail, sum + i)));
+                        }
+                        b += inner;
+                    }
 
-            //        d = dst;
-            //        for (size_t c = 0; c < count; ++c)
-            //        {
-            //            size_t i = 0;
-            //            for (; i < aligned; i += F)
-            //                _mm512_storeu_ps(d + i, _mm512_div_ps(_mm512_loadu_ps(d + i), _mm512_loadu_ps(sum + i)));
-            //            if (i < inner)
-            //                _mm512_mask_storeu_ps(d + i, tail, _mm512_div_ps(_mm512_maskz_loadu_ps(tail, d + i), _mm512_maskz_loadu_ps(tail, sum + i)));
-            //            d += inner;
-            //        }
-            //        src += count * inner;
-            //        dst += count * inner;
-            //    }
-                Avx2::SynetSoftmax16b(src, outer, count, inner, dst);
+                    b = buf;
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < innerDF; i += DF)
+                            _mm512_storeu_epi16(dst + i, Float32ToBFloat16(
+                                _mm512_div_ps(_mm512_loadu_ps(b + i + 0), _mm512_loadu_ps(sum + i + 0)), _mm512_div_ps(_mm512_loadu_ps(b + i + F), _mm512_loadu_ps(sum + i + F))));
+                        for (; i < innerF; i += F)
+                            _mm256_storeu_epi16(dst + i, PackFloat32ToBFloat16(_mm512_div_ps(_mm512_loadu_ps(b + i), _mm512_loadu_ps(sum + i))));
+                        if (i < inner)
+                            _mm256_mask_storeu_epi16(dst + i, tail, PackFloat32ToBFloat16(_mm512_div_ps(_mm512_maskz_loadu_ps(tail, b + i), _mm512_maskz_loadu_ps(tail, sum + i))));
+                        b += inner;
+                        dst += inner;
+                    }
+                    src += count * inner;
+                }
             }
         }
     }
