@@ -591,7 +591,7 @@ namespace Simd
                             _mm512_storeu_si512((__m512i*)(dst + i), Float32ToBFloat16(
                                 _mm512_div_ps(_mm512_loadu_ps(b + i + 0), _mm512_loadu_ps(sum + i + 0)), _mm512_div_ps(_mm512_loadu_ps(b + i + F), _mm512_loadu_ps(sum + i + F))));
                         for (; i < innerF; i += F)
-                            _mm256_storeu_epi16((__m256i*)(dst + i), PackFloat32ToBFloat16(_mm512_div_ps(_mm512_loadu_ps(b + i), _mm512_loadu_ps(sum + i))));
+                            _mm256_storeu_si256((__m256i*)(dst + i), PackFloat32ToBFloat16(_mm512_div_ps(_mm512_loadu_ps(b + i), _mm512_loadu_ps(sum + i))));
                         if (i < inner)
                             _mm256_mask_storeu_epi16(dst + i, tail, PackFloat32ToBFloat16(_mm512_div_ps(_mm512_maskz_loadu_ps(tail, b + i), _mm512_maskz_loadu_ps(tail, sum + i))));
                         b += inner;
