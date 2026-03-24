@@ -133,21 +133,28 @@ namespace Simd
 
         SIMD_INLINE void SynetSoftmax16b31Save(const __m256 src[3], uint16_t* dst)
         {
-            //__m256i s0213 = _mm256_packus_epi32(Float32ToBFloat16(src[0]), Float32ToBFloat16(src[1]));
-            //__m256i s2435 = _mm256_packus_epi32(Float32ToBFloat16(src[1]), Float32ToBFloat16(src[2]));
-            ////    Float32ToBFloat16(src[0], src[1]);
-            ////__m256i s12 = Float32ToBFloat16(src[1], src[2]);
-            //static const __m256i SFL00 = SIMD_MM256_SETR_EPI8(
-            //    0x0, 0x1, 0x8, 0x9, -1, -1, 0x2, 0x3, 0xA, 0xB, -1, -1, 0x4, 0x5, 0xC, 0xD,
-            //    0x0, 0x1, 0x8, 0x9, -1, -1, 0x2, 0x3, 0xA, 0xB, -1, -1, 0x4, 0x5, 0xC, 0xD);
-            //static const __m256i SFL01 = SIMD_MM256_SETR_EPI8(
-            //    -1, -1, -1, -1, 0x8, 0x9, -1, -1, -1, -1, 0xA, 0xB, -1, -1, -1, -1,
-            //    -1, -1, -1, -1, 0x8, 0x9, -1, -1, -1, -1, 0xA, 0xB, -1, -1, -1, -1);
-            //static const __m128i SFL10 = SIMD_MM_SETR_EPI8(-1, -1, 0x6, 0x7, 0xE, 0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-            //static const __m128i SFL11 = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, 0x8, 0x9, -1, -1, -1, -1, 0xA, 0xB, -1, -1, -1, -1);
-            //_mm256_storeu_si256((__m256i*)dst, _mm256_or_si256(_mm256_shuffle_epi8(s01, SFL00), _mm256_shuffle_epi8(s12, SFL01)));
-            //_mm_storeu_si128((__m128i*)dst + 2, _mm_or_si128(
-            //    _mm_shuffle_epi8(_mm256_castsi256_si128(s01), SFL10), _mm_shuffle_epi8(_mm256_castsi256_si128(s12), SFL11)));
+            __m256i s01 = Float32ToBFloat16Interlived(src[0], src[1]);
+            __m256i s2 = Float32ToBFloat16(src[2]);
+
+            static const __m256i SFL020 = SIMD_MM256_SETR_EPI8(
+                0x0, 0x1, 0x2, 0x3, -1, -1, 0x4, 0x5, 0x6, 0x7, -1, -1, 0x8, 0x9, 0xA, 0xB,
+                0x6, 0x7, -1, -1, 0x8, 0x9, 0xA, 0xB, -1, -1, 0xC, 0xD, 0xE, 0xF, -1, -1);
+            static const __m256i SFL021 = SIMD_MM256_SETR_EPI8(
+                -1, -1, -1, -1, 0x0, 0x1, -1, -1, -1, -1, 0x4, 0x5, -1, -1, -1, -1,
+                -1, -1, 0x4, 0x5, -1, -1, -1, -1, 0x8, 0x9, -1, -1, -1, -1, 0xC, 0xD);
+            __m256i d02 = _mm256_or_si256(_mm256_shuffle_epi8(s01, SFL020), _mm256_shuffle_epi8(s2, SFL021));
+
+            static const __m256i SFL10 = SIMD_MM256_SETR_EPI8(
+                -1, -1, 0xC, 0xD, 0xE, 0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x1, 0x2, 0x3, -1, -1, 0x4, 0x5);
+            static const __m256i SFL11 = SIMD_MM256_SETR_EPI8(
+                0x8, 0x9, -1, -1, -1, -1, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x1, -1, -1);
+            __m256i d1 = _mm256_or_si256(_mm256_shuffle_epi8(s01, SFL10), _mm256_shuffle_epi8(s2, SFL11));
+
+            _mm_storeu_si128((__m128i*)dst + 0, _mm256_extractf128_si256(d02, 0));
+            _mm_storeu_si128((__m128i*)dst + 1, _mm_or_si128(_mm256_extractf128_si256(d1, 0), _mm256_extractf128_si256(d1, 1)));
+            _mm_storeu_si128((__m128i*)dst + 2, _mm256_extractf128_si256(d02, 1));
         }
 
         SIMD_INLINE void SynetSoftmax16b31Save(const __m256 src[3], size_t size, uint16_t* dst)
@@ -172,7 +179,7 @@ namespace Simd
             {
                 SynetSoftmax16b31Load(src,  buf);
                 SynetSoftmax16b31(exp, buf);
-                SynetSoftmax16b31Save(buf, F, dst);
+                SynetSoftmax16b31Save(buf, dst);
                 src += 3 * F;
                 dst += 3 * F;
             }

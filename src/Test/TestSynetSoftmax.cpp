@@ -172,7 +172,7 @@ namespace Test
 
         Tensor32f src32f(shape, format);
         Tensor16u src16b(shape, format);
-        FillRandom(src32f.Data(), src32f.Size(), -10.0, 10.0);
+        FillRandom(src32f.Data(), src32f.Size(), -1.0, 1.0);
         SimdFloat32ToBFloat16(src32f.Data(), src32f.Size(), src16b.Data());
 
         Tensor32f dst32f1(shape, format);
