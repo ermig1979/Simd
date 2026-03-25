@@ -29,6 +29,7 @@ class SimdConan(ConanFile):
         "runtime": [True, False],
         "perf": [True, False],
         "python": [True, False],
+        "opencv": [True, False],
     }
     default_options = {
         "shared": False,
@@ -41,6 +42,7 @@ class SimdConan(ConanFile):
         "runtime": True,
         "perf": False,
         "python": False,
+        "opencv": False,
     }
 
     def _is_x86(self):
@@ -81,6 +83,13 @@ class SimdConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def requirements(self):
+        if self.options.opencv:
+            self.requires("opencv/4.12.0", headers=True, libs=False, transitive_headers=True)
+
+    def package_id(self):
+        del self.info.options.opencv
+
     def layout(self):
         cmake_layout(self, src_folder=".")
 
@@ -113,6 +122,11 @@ class SimdConan(ConanFile):
                 tc.variables["SIMD_AVX512"] = bool(self.options.avx512)
                 tc.variables["SIMD_AVX512VNNI"] = bool(self.options.avx512vnni)
                 tc.variables["SIMD_AMXBF16"] = bool(self.options.amxbf16)
+            compiler_executables = self.conf.get("tools.build:compiler_executables", default={})
+            if compiler_executables.get("cpp"):
+                tc.cache_variables["CMAKE_CXX_COMPILER"] = compiler_executables["cpp"]
+            if compiler_executables.get("c"):
+                tc.cache_variables["CMAKE_C_COMPILER"] = compiler_executables["c"]
             tc.generate()
 
     def _win_static_option(self):
@@ -185,3 +199,5 @@ class SimdConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "dl"])
+        if self.options.opencv:
+            self.cpp_info.requires = ["opencv::opencv"]
