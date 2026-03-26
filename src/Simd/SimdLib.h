@@ -4143,7 +4143,7 @@ extern "C"
 
         \short Calculates Laplace's filter.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -4170,7 +4170,7 @@ extern "C"
 
         \short Calculates absolute value of Laplace's filter.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -4197,7 +4197,7 @@ extern "C"
 
         \short Calculates sum of absolute value of Laplace's filter.
 
-        Input image must has 8-bit gray format.
+        Input image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -5025,8 +5025,8 @@ extern "C"
         \param [in] padY - a pad to the y-coordinate of the input image.
         \param [in] strideX - a x-stride of the convolution.
         \param [in] strideY - a y-stride of the convolution.
-        \param [in] dilationX - a x-stride of the convolution.
-        \param [in] dilationY - a y-stride of the convolution.
+        \param [in] dilationX - a x-dilation of the convolution.
+        \param [in] dilationY - a y-dilation of the convolution.
         \param [in, out] buffer - a pointer to the external temporal buffer used by the algorithm. Can be NULL (the algorithm uses internal buffer).
         \param [in, out] size - a pointer to the size of the external temporal buffer. If the size is too small it will contain required value. Required size is approximately equal to `dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float)`. Can be NULL.
         \param [in, out] dst - a pointer to the output multichannel 32-bit float image. Total size of the output image is equal to `dstWidth*dstHeight*dstDepth`.
@@ -5174,7 +5174,7 @@ extern "C"
         \param [in] dstWidth - a width of the output image.
         \param [in] dstHeight - a height of the output image.
         \param [in] dstStride - a row size of the output image.
-        \param [in] channelCount - a nmber of channels for input and output images.
+        \param [in] channelCount - a number of channels for input and output images.
     */
     SIMD_API void SimdReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
@@ -5285,7 +5285,7 @@ extern "C"
             compensation ? 128 : 0) / 256;
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::ReduceGray5x5(const Viewc<A>& src, View<A>& dst, bool compensation).
+        \note This function has a C++ wrappers: Simd::ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -5476,7 +5476,7 @@ extern "C"
 
         \short Changes certain index in mask.
 
-        Mask must has 8-bit gray pixel format.
+        Mask must have 8-bit gray pixel format.
 
         For every point:
         \verbatim
@@ -5501,14 +5501,14 @@ extern "C"
 
         \short Fill single holes in mask.
 
-        Mask must has 8-bit gray pixel format.
+        Mask must have 8-bit gray pixel format.
 
         \note This function has a C++ wrappers: Simd::SegmentationFillSingleHoles(View<A> & mask, uint8_t index).
 
         \param [in, out] mask - a pointer to pixels data of 8-bit gray mask image.
         \param [in] stride - a row size of the mask image.
-        \param [in] width - an mask width.
-        \param [in] height - an mask height.
+        \param [in] width - a mask width.
+        \param [in] height - a mask height.
         \param [in] index - a mask index.
     */
     SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
@@ -5547,14 +5547,14 @@ extern "C"
 
         \short Finds actual region of mask index location.
 
-        Mask must has 8-bit gray pixel format.
+        Mask must have 8-bit gray pixel format.
 
         \note This function has a C++ wrappers: Simd::SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect).
 
         \param [in] mask - a pointer to pixels data of 8-bit gray mask image.
         \param [in] stride - a row size of the mask image.
-        \param [in] width - an mask width.
-        \param [in] height - an mask height.
+        \param [in] width - a mask width.
+        \param [in] height - a mask height.
         \param [in] index - a mask index.
         \param [in, out] left - a pointer to left side.
         \param [in, out] top - a pointer to top side.
@@ -5643,8 +5643,8 @@ extern "C"
         \param [in] currHeight - a height of current image.
         \param [in] initShiftX - an initial shift X position to start search.
         \param [in] initShiftY - an initial shift Y position to start search.
-        \param [in] maxShiftX - maximal possible shift alogn X axis.
-        \param [in] maxShiftY - maximal possible shift alogn Y axis.
+        \param [in] maxShiftX - maximal possible shift along X axis.
+        \param [in] maxShiftY - maximal possible shift along Y axis.
         \param [in] hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image. Can be NULL (no restriction).
         \param [in] regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
         \return a result of shift estimation (true or false). In positive case use function ::SimdShiftDetectorGetShift to get shift and other parameters. 
@@ -5662,9 +5662,9 @@ extern "C"
 
         \param [in] context - a shift detector context. It must be created by function ::SimdShiftDetectorInitBuffers and released by function ::SimdRelease.
         \param [out] shift - a pointer to array[2] to estimated integer shift of current image relative to background image. Can be NULL. 
-        \param [out] refinedShift - a pointer to array[2] to rifined shift (with sub-pixel accuracy) shift of current image relative to background image. Can be NULL.
+        \param [out] refinedShift - a pointer to array[2] to refined shift (with sub-pixel accuracy) shift of current image relative to background image. Can be NULL.
         \param [out] stability - a value which characterizes stability (reliability) of found shift. Can be NULL.
-        \param [out] correlation - a  best correlation of background and current image. Can be NULL.
+        \param [out] correlation - a best correlation of background and current image. Can be NULL.
     */
     SIMD_API void SimdShiftDetectorGetShift(const void* context, ptrdiff_t* shift, double * refinedShift, double * stability, double * correlation);
 
@@ -5674,7 +5674,7 @@ extern "C"
 
         \short Calculates Sobel's filter along x axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \n dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
@@ -5696,7 +5696,7 @@ extern "C"
 
         \short Calculates absolute value of Sobel's filter along x axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -5720,7 +5720,7 @@ extern "C"
 
         \short Calculates sum of absolute value of Sobel's filter along x axis.
 
-        Input image must has 8-bit gray format.
+        Input image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -5743,7 +5743,7 @@ extern "C"
 
         \short Calculates Sobel's filter along y axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -5767,7 +5767,7 @@ extern "C"
 
         \short Calculates absolute value of Sobel's filter along y axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -5791,7 +5791,7 @@ extern "C"
 
         \short Calculates sum of absolute value of Sobel's filter along y axis.
 
-        Input image must has 8-bit gray format.
+        Input image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -5814,7 +5814,7 @@ extern "C"
 
         \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
         This function is used for contour extraction.
 
         For every point:
@@ -5841,7 +5841,7 @@ extern "C"
 
         \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
         This function is used for contour extraction.
 
         For every point:
@@ -5872,7 +5872,7 @@ extern "C"
 
         \short Extract contour anchors from contour metrics.
 
-        All images must have the same width and height. Input image must has 16-bit integer format, output image must has 8-bit gray format.
+        All images must have the same width and height. Input image must have 16-bit integer format, output image must have 8-bit gray format.
         Input image with metrics can be estimated by using ::SimdContourMetrics or ::SimdContourMetricsMasked functions.
         This function is used for contour extraction.
 
@@ -6007,7 +6007,7 @@ extern "C"
 
         \short Finds minimal, maximal and average pixel values for given image.
 
-        The image must has 8-bit gray format.
+        The image must have 8-bit gray format.
 
         \note This function has a C++ wrappers: Simd::GetStatistic(const View<A>& src, uint8_t & min, uint8_t & max, uint8_t & average).
 
@@ -6028,7 +6028,7 @@ extern "C"
 
         \short Calculate statistical characteristics (moments) of pixels with given index.
 
-        The image must has 8-bit gray format.
+        The image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -6066,7 +6066,7 @@ extern "C"
 
         \short Calculate statistical characteristics (moments) of given object.
 
-        The images must has 8-bit gray format and equal size. One of them can be empty.
+        The images must have 8-bit gray format and equal size. One of them can be empty.
 
         For every point:
         \verbatim
@@ -6277,7 +6277,7 @@ extern "C"
         \param [in] stride - a row size of the image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channels - an image channels count. It my be equal to 1, 2, 3 or 4.
+        \param [in] channels - an image channels count. It may be equal to 1, 2, 3 or 4.
         \param [out] valueSums - the pointer to output buffer with value sums. Size of the buffer must be at least channels count.
         \param [out] squareSums - the pointer to output buffer with square sums. Size of the buffer must be at least channels count.
     */
@@ -6332,7 +6332,7 @@ extern "C"
 
         \fn void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
 
-        \short Initilizes add algorithm.
+        \short Initializes add algorithm.
 
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
@@ -6375,7 +6375,7 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is eqial to channels.
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is equal to channels.
         \param [in] channels - a number of channels in the image tensor.
         \param [in] spatial - a spatial size of image tensor.
         \param [in, out] dst - a pointer to cumulative 32-bit image tensor. The size of the array is equal to channels * spatial.
@@ -6492,7 +6492,7 @@ extern "C"
 
         \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
 
-        \short Initilizes FP32 convolution algorithm.
+        \short Initializes FP32 convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
@@ -6543,7 +6543,7 @@ extern "C"
 
         \param [in, out] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to convolution weights.
-        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
         \param [in] bias - a pointer to bias. Can be NULL.
         \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
     */
@@ -6566,7 +6566,7 @@ extern "C"
 
         \fn void * SimdSynetConvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initilizes BF16 convolution algorithm.
+        \short Initializes BF16 convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
@@ -6640,7 +6640,7 @@ extern "C"
 
         \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initilizes INT8 convolution algorithm.
+        \short Initializes INT8 convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
@@ -6715,7 +6715,7 @@ extern "C"
 
         \fn void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initilizes FP32 deconvolution algorithm.
+        \short Initializes FP32 deconvolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to deconvolution parameters.
@@ -6763,11 +6763,11 @@ extern "C"
 
         \fn void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-        \short Sets weights, beases and parameters of activation function required for FP32 deconvolution algorithm.
+        \short Sets weights, biases and parameters of activation function required for FP32 deconvolution algorithm.
 
         \param [in, out] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to deconvolution weights.
-        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
         \param [in] bias - a pointer to bias. Can be NULL.
         \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
     */
@@ -6790,7 +6790,7 @@ extern "C"
 
     \fn void * SimdSynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-    \short Initilizes BF16 deconvolution algorithm.
+    \short Initializes BF16 deconvolution algorithm.
 
     \param [in] batch - a batch size.
     \param [in] conv - a pointer to deconvolution parameters.
@@ -6924,7 +6924,7 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to poitres to the input 32-bit float arrays. 
+        \param [in] src - a pointer to pointers to the input 32-bit float arrays. 
         \param [in] weight - a pointer to the 32-bit float array with sum coefficients. It is need only for ::SimdSynetEltwiseOperationSum operation type otherwise it can be NULL.
         \param [in] count - a count of input arrays. Must be at least 2.
         \param [in] size - a size of the input and output arrays.
@@ -7046,7 +7046,7 @@ extern "C"
 
         \fn void* SimdSynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW, SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
 
-        \short Initilizes <a href="https://github.com/onnx/onnx/blob/main/docs/Operators.md#GridSample">grid sample</a> 2D algorithm.
+        \short Initializes <a href="https://github.com/onnx/onnx/blob/main/docs/Operators.md#GridSample">grid sample</a> 2D algorithm.
 
         \param [in] batch - a batch size.
         \param [in] channels - a number of channels in the input and output tensors.
@@ -7140,7 +7140,7 @@ extern "C"
 
         \fn void * SimdSynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
-        \short Initilizes FP32 inner product algorithm.
+        \short Initializes FP32 inner product algorithm.
 
         \param [in] M - a height of A and height of C matrices.
         \param [in] N - a width of B and width of C matrices.
@@ -7181,11 +7181,11 @@ extern "C"
 
         \fn void SimdSynetInnerProduct32fSetParams(void* context, const float* weight, SimdBool* internal, const float* bias, const float* params);
 
-        \short Sets weights, beases and parameters of activation function required for FP32 inner product algorithm.
+        \short Sets weights, biases and parameters of activation function required for FP32 inner product algorithm.
 
         \param [in, out] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to inner product weights.
-        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
         \param [in] bias - a pointer to bias. Can be NULL.
         \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
     */
@@ -7238,7 +7238,7 @@ extern "C"
 
         \fn void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
-        \short Initilizes BF16 inner product (matrix mutiplication) algorithm.
+        \short Initializes BF16 inner product (matrix multiplication) algorithm.
 
         Algorithm's details (transpA = false, bias = true, activation = SimdConvolutionActivationIdentity):
         \verbatim
@@ -7261,7 +7261,7 @@ extern "C"
         \param [in] constB - a matrix B is constant.
         \param [in] bias - a flag to add bias to output matrix C.
         \param [in] activation - an activation function type used after inner product.
-        \return a pointer to BF32 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+        \return a pointer to BF16 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetInnerProduct16bInternalBufferSize, ::SimdSynetInnerProduct16bExternalBufferSize, 
             ::SimdSynetInnerProduct16bInfo, ::SimdSynetInnerProduct16bSetParams and ::SimdSynetInnerProduct16bForward.
     */
@@ -7304,7 +7304,7 @@ extern "C"
 
         \fn void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, SimdBool* internal, const float* bias);
 
-        \short Sets weights and beases required for BF16 inner product algorithm.
+        \short Sets weights and biases required for BF16 inner product algorithm.
 
         \param [in, out] context - a pointer to BF16 inner product context. It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to B matrix. Can be NULL.
@@ -7399,12 +7399,12 @@ extern "C"
 
         \fn void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
-        \short Initilizes FP32 merged convolution algorithm.
+        \short Initializes FP32 merged convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signilizes if we need to add source to output value.
+        \param [in] add - a flag that signalizes if we need to add source to output value.
         \return a pointer to FP32 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution32fExternalBufferSize, ::SimdSynetMergedConvolution32fInternalBufferSize, 
             ::SimdSynetMergedConvolution32fInfo, ::SimdSynetMergedConvolution32fSetParams and ::SimdSynetMergedConvolution32fForward.
@@ -7448,11 +7448,11 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
-        \short Sets weights, beases and parameters of activation function required for FP32 merged convolution algorithm.
+        \short Sets weights, biases and parameters of activation function required for FP32 merged convolution algorithm.
 
         \param [in, out] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a pointer to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [out] internal - a pointer to the array of flags signalizing that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
     */
@@ -7475,12 +7475,12 @@ extern "C"
 
         \fn void * SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
 
-        \short Initilizes BF16 merged convolution algorithm.
+        \short Initializes BF16 merged convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signilizes if we need to add source to output value.
+        \param [in] add - a flag that signalizes if we need to add source to output value.
         \return a pointer to BF16 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution16bExternalBufferSize, ::SimdSynetMergedConvolution16bInternalBufferSize, 
             ::SimdSynetMergedConvolution16bInfo, ::SimdSynetMergedConvolution16bSetParams and ::SimdSynetMergedConvolution16bForward.
@@ -7603,7 +7603,7 @@ extern "C"
 
         \param [in, out] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a pointer to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [out] internal - a pointer to the array of flags signalizing that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]), interim(min - stats[2], max - stats[3]) and output(min - stats[4], max - stats[5]) tensors.
@@ -8246,7 +8246,7 @@ extern "C"
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signilizes if we need to add source to output value.
+        \param [in] add - a flag that signalizes if we need to add source to output value.
         \return a pointer to Quantized merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetQuantizedMergedConvolutionExternalBufferSize, ::SimdSynetQuantizedMergedConvolutionInternalBufferSize,
             ::SimdSynetQuantizedMergedConvolutionInfo, ::SimdSynetQuantizedMergedConvolutionSetParams and ::SimdSynetQuantizedMergedConvolutionForward.
