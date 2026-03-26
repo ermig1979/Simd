@@ -673,5 +673,21 @@ namespace Simd
         const int32x4_t K32_YUV_TO_BGR_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::YUV_TO_BGR_ROUND_TERM);
     }
 #endif
+
+#ifdef SIMD_HVX_ENABLE
+    namespace Hvx
+    {
+        const size_t A = 128;
+        const size_t DA = 2 * A;
+        const size_t QA = 4 * A;
+        const size_t OA = 8 * A;
+        const size_t HA = A / 2;
+
+        const size_t F = A / sizeof(float);
+        const size_t DF = 2 * F;
+        const size_t QF = 4 * F;
+        const size_t HF = F / 2;
+    }
+#endif
 }
 #endif

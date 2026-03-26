@@ -8,7 +8,7 @@ object detection and classification, neural network.
 
 The algorithms are optimized with using of different SIMD CPU extensions. 
 In particular the library supports following CPU extensions: 
-SSE, AVX, AVX-512 and AMX for x86/x64, NEON for ARM.
+SSE, AVX, AVX-512 and AMX for x86/x64, NEON for ARM, HVX for Hexagon.
 
 The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. 
 The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, 
@@ -62,7 +62,7 @@ Files of CMake build systems are placed in the directory:
 
 `simd/prj/cmake/`
 	
-The library can be built for x86/x64, ARM(32/64) platforms using the G++ or Clang compilers.
+The library can be built for x86/x64, ARM(32/64), and Hexagon platforms using the G++ or Clang compilers.
 Using the native compiler (g++) for the current platform is simple:
 
 	mkdir build
@@ -83,6 +83,13 @@ And for ARM (64 bit):
 	mkdir build
 	cd build
 	cmake ../prj/cmake -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DSIMD_TARGET="aarch64" -DCMAKE_BUILD_TYPE="Release"
+	make
+
+And for Hexagon with HVX (cross-compilation using the Hexagon Clang toolchain):
+
+	mkdir build
+	cd build
+	cmake ../prj/cmake -DSIMD_TOOLCHAIN="/your_toolchain/bin/hexagon-linux-musl-clang" -DSIMD_TARGET="hexagon" -DCMAKE_BUILD_TYPE="Release"
 	make
 
 As result the library and the test application will be built in the current directory.
@@ -199,7 +206,7 @@ Also you can use parameters:
 * `-tr=2` a number of test execution repeats.
 * `-ts=1` to print statistics of time of tests execution.
 * `-cc=1` to check c++ API.
-* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16.
+* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16.
 * `-wu=100` a time to warm up CPU before testing (in milliseconds).
 * `-pt=1` a boolean flag to pin threads to cpu cores.
 

@@ -998,5 +998,51 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_HVX_ENABLE
+    namespace Hvx
+    {
+        template <bool align> SIMD_INLINE HVX_Vector Load(const uint8_t * p);
+
+        template <> SIMD_INLINE HVX_Vector Load<false>(const uint8_t * p)
+        {
+            return *((HVX_UVector*)p);
+        }
+
+        template <> SIMD_INLINE HVX_Vector Load<true>(const uint8_t * p)
+        {
+            return *((HVX_Vector*)p);
+        }
+
+        template <bool align> SIMD_INLINE HVX_Vector Load(const void * p)
+        {
+            return Load<align>((const uint8_t*)p);
+        }
+
+        // Horizontal reduction: extract scalar min from HVX_Vector of uint8.
+        // Uses vlalign+vmin pattern from qhblas_hvx_b_vector_self_min_ab.
+        SIMD_INLINE uint8_t HorizontalMinU8(HVX_Vector v)
+        {
+            HVX_Vector pad = Q6_V_vsplat_R(0xFFFFFFFF);
+            for (int32_t i = 64; i >= 1; i >>= 1)
+                v = Q6_Vub_vmin_VubVub(v, Q6_V_vlalign_VVR(v, pad, i));
+            SIMD_ALIGNED(128) uint8_t buf[128];
+            *((HVX_Vector*)buf) = v;
+            return buf[127];
+        }
+
+        // Horizontal reduction: extract scalar max from HVX_Vector of uint8.
+        // Uses vlalign+vmax pattern from qhblas_hvx_b_vector_self_max_ab.
+        SIMD_INLINE uint8_t HorizontalMaxU8(HVX_Vector v)
+        {
+            HVX_Vector pad = Q6_V_vsplat_R(0x00000000);
+            for (int32_t i = 64; i >= 1; i >>= 1)
+                v = Q6_Vub_vmax_VubVub(v, Q6_V_vlalign_VVR(v, pad, i));
+            SIMD_ALIGNED(128) uint8_t buf[128];
+            *((HVX_Vector*)buf) = v;
+            return buf[127];
+        }
+    }
+#endif
 }
 #endif

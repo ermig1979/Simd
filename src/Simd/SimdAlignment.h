@@ -55,6 +55,11 @@ namespace Simd
             return sizeof(uint8x16_t);
         else
 #endif
+#ifdef SIMD_HVX_ENABLE
+        if (Hvx::Enable)
+            return sizeof(HVX_Vector);
+        else
+#endif
             return sizeof(void *);
     }
 

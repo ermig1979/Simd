@@ -647,6 +647,11 @@ namespace
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Neon::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif
 
+#ifdef SIMD_HVX_ENABLE
+        if (Simd::Hvx::Enable && TestHvx(options) && W - 1 >= Simd::Hvx::A)
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Hvx::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+#endif
+
         return result;
     }
 
