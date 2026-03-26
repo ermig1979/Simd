@@ -525,7 +525,7 @@ namespace Simd
             double SegmentationCreateThreshold; /*!< \brief Threshold of segmentation to create motion region. It is restricted by range [0, 1]. By default it is equal to 0.5. */
             double SegmentationExpandCoefficient; /*!< \brief Segmentation coefficient of area expansion of motion region. It is restricted by range [0, 1]. By default it is equal to 0.75. */
 
-            double StabilityRegionAreaMax; /*!< \brief Defines maximal total area of motion regions othervise sabotage event is generated. It is restricted by range [0, 1]. By default it is equal to 0.5. */
+            double StabilityRegionAreaMax; /*!< \brief Defines maximal total area of motion regions otherwise sabotage event is generated. It is restricted by range [0, 1]. By default it is equal to 0.5. */
 
             int TrackingTrajectoryMax; /*!< \brief Maximal length of object trajectory. By default it is equal to 1024. */
             double TrackingRemoveTime; /*!< \brief A time (in seconds) to remove absent object. By default it is equal to 1 second. */
