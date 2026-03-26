@@ -171,7 +171,7 @@ jobs:
       run: >
         ${{env.HEXAGON_TOOLCHAIN}}/bin/qemu-hexagon -cpu any
         -L ${{env.HEXAGON_TOOLCHAIN}}/target/hexagon-unknown-linux-musl
-        ./Test "-r=.." -m=a -tt=1 "-ot=log_${{matrix.build_type}}.txt" -ts=10
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=10
         -fe=WarpAffine -fe=RecursiveBilateral
 
   build_and_test_mingw:
