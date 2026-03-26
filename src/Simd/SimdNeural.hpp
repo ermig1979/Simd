@@ -625,7 +625,7 @@ namespace Simd
 
         /*! @ingroup cpp_neural
 
-            \short ConfolutionLayer class.
+            \short ConvolutionalLayer class.
 
             Convolutional layer in neural network.
         */
@@ -633,7 +633,7 @@ namespace Simd
         {
         public:
             /*!
-                \short Creates new ConfolutionLayer class.
+                \short Creates new ConvolutionalLayer class.
 
                 \param [in] f - a type of activation function used in this layer.
                 \param [in] srcSize - a size (width and height) of input image.
@@ -1279,7 +1279,7 @@ namespace Simd
 
         /*! @ingroup cpp_neural
 
-            \short DroputLayer class.
+            \short DropoutLayer class.
 
             Dropout layer in neural network.
         */
@@ -1646,7 +1646,7 @@ namespace Simd
             /*!
                 \short Sets thread number.
                 
-                \note Call this function if you want to call method Predict from dirrerent thread.
+                \note Call this function if you want to call method Predict from different thread.
 
                 \param [in] number - a number of threads.
                 \param [in] train - a train process boolean flag. By default it is equal to False.
@@ -1778,7 +1778,7 @@ namespace Simd
                 \short Saves the weights of neural network into external buffer.
 
                 \param [out] data - a pointer to the external buffer.
-                \param [in, out] size - a pointer to the size of external buffer. Returns requred buffer size. 
+                \param [in, out] size - a pointer to the size of external buffer. Returns required buffer size. 
                 \param [in] train - a boolean flag (True - if we need to save temporary training data, False - otherwise). By default it is equal to False.
                 \return a result of saving.
             */

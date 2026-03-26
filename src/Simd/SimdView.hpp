@@ -73,7 +73,7 @@ namespace Simd
         /*!
             \enum Format
             Describes pixel format types of an image view.
-            \note This type is corresponds to C type ::SimdPixelFormatType.
+            \note This type corresponds to C type ::SimdPixelFormatType.
         */
         enum Format
         {
@@ -153,7 +153,7 @@ namespace Simd
         /*!
             Creates a new View structure on the base of the image view.
 
-            \note This constructor is not create new image view! It only creates a reference to the same image. If you want to create a copy then must use method Simd::View::Clone.
+            \note This constructor does not create a new image view! It only creates a reference to the same image. If you want to create a copy then must use method Simd::View::Clone.
 
             \param [in] view - an original image view.
         */
@@ -397,9 +397,9 @@ namespace Simd
         size_t DataSize() const;
 
         /*!
-            Gets area in pixels of of current View structure.
+            Gets area in pixels of current View structure.
 
-            \return - a area of current View in pixels.
+            \return - an area of current View in pixels.
         */
         size_t Area() const;
 
@@ -527,7 +527,7 @@ namespace Simd
 #endif
 
         /*!
-            Swaps content of two (this and other) View  structures.
+            Swaps content of two (this and other) View structures.
 
             \param [in] other - an other image view.
         */
