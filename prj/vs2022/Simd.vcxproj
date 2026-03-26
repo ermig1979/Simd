@@ -36,6 +36,7 @@
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdContour.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdConvert.h" />
     <ClInclude Include="..\..\src\Simd\SimdCopy.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
@@ -48,10 +49,12 @@
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />
+    <ClInclude Include="..\..\src\Simd\SimdFont.h" />
     <ClInclude Include="..\..\src\Simd\SimdFont.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdFrame.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdHvx.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageMatcher.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
@@ -78,6 +81,7 @@
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdShift.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdShiftDetector.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
@@ -102,6 +106,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTile.h" />
@@ -127,6 +132,9 @@
     </ProjectReference>
     <ProjectReference Include="Base.vcxproj">
       <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Hvx.vcxproj">
+      <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f30}</Project>
     </ProjectReference>
     <ProjectReference Include="Neon.vcxproj">
       <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f3d}</Project>

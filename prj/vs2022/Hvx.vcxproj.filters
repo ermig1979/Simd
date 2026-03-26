@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Hvx">
+      <UniqueIdentifier>{2b66fc16-f340-4fba-a34e-5d6a5c0292cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{4bc0614f-b5ac-4833-a797-41206e4cef16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hvx\Filter">
+      <UniqueIdentifier>{a789b04e-8709-4ff3-b0ad-0755c34e3e51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hvx\Statistics">
+      <UniqueIdentifier>{7ec4a7f6-646f-419a-ab1a-2c4884c2afa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hvx\Motion">
+      <UniqueIdentifier>{8a1793bb-86ec-446b-bad3-e8da6273d0db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hvx\Image">
+      <UniqueIdentifier>{aa88ff92-741c-48c6-8130-664c0699379b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hvx\System">
+      <UniqueIdentifier>{f9f7be39-55c3-442a-9580-a8817a4f9099}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hvx\Math">
+      <UniqueIdentifier>{1dd51d17-e95a-4a05-b58a-507196b5dcff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hvx\Convert">
+      <UniqueIdentifier>{72ad8cca-c173-4442-a92f-ac11b64df988}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdHvx.h">
+      <Filter>Hvx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConst.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdInit.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLib.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLog.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMath.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdHvxAbsDifference.cpp">
+      <Filter>Hvx\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxAbsDifferenceSum.cpp">
+      <Filter>Hvx\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxAbsGradientSaturatedSum.cpp">
+      <Filter>Hvx\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxHistogram.cpp">
+      <Filter>Hvx\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxStatistic.cpp">
+      <Filter>Hvx\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxAddFeatureDifference.cpp">
+      <Filter>Hvx\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxFill.cpp">
+      <Filter>Hvx\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxCpu.cpp">
+      <Filter>Hvx\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxOperationBinary8u.cpp">
+      <Filter>Hvx\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxBgrToGray.cpp">
+      <Filter>Hvx\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdHvxBgrToRgb.cpp">
+      <Filter>Hvx\Convert</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
