@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{271C2D02-B19D-4193-8D83-CC0F06E75F30}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Hvx</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdHvxAbsDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxAbsDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxAbsGradientSaturatedSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxAddFeatureDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxBgrToRgb.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxCpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxFill.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxHistogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxOperationBinary8u.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHvxStatistic.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdHvx.h" />
+    <ClInclude Include="..\..\src\Simd\SimdInit.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLib.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLog.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
