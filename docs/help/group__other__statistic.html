@@ -162,7 +162,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Calculates sum of absolute value of Laplace's filter. </p>
-<p >Input image must has 8-bit gray format.</p>
+<p >Input image must have 8-bit gray format.</p>
 <p >For every point: </p><pre class="fragment">sum += abs(
     - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
     - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
@@ -238,7 +238,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Finds minimal, maximal and average pixel values for given image. </p>
-<p >The image must has 8-bit gray format.</p>
+<p >The image must have 8-bit gray format.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::GetStatistic(const View&lt;A&gt;&amp; src, uint8_t &amp; min, uint8_t &amp; max, uint8_t &amp; average).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -336,7 +336,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Calculate statistical characteristics (moments) of pixels with given index. </p>
-<p >The image must has 8-bit gray format.</p>
+<p >The image must have 8-bit gray format.</p>
 <p >For every point: </p><pre class="fragment">if(mask[X, Y] == index)
 {
     area += 1.
@@ -465,7 +465,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Calculate statistical characteristics (moments) of given object. </p>
-<p >The images must has 8-bit gray format and equal size. One of them can be empty.</p>
+<p >The images must have 8-bit gray format and equal size. One of them can be empty.</p>
 <p >For every point: </p><pre class="fragment">if(mask[X, Y] == index || mask == 0)
 {
     S = src ? src[X, Y] : 1;
@@ -761,7 +761,7 @@ for(y = 0; y &lt; height; y++)
     <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- an image channels count. It my be equal to 1, 2, 3 or 4. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- an image channels count. It may be equal to 1, 2, 3 or 4. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">valueSums</td><td>- the pointer to output buffer with value sums. Size of the buffer must be at least channels count. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">squareSums</td><td>- the pointer to output buffer with square sums. Size of the buffer must be at least channels count. </td></tr>
   </table>
@@ -872,7 +872,7 @@ for(y = 0; y &lt; height; y++)
 </div><div class="memdoc">
 
 <p>Calculates sum of absolute value of Laplace's filter. </p>
-<p >Input image must has 8-bit gray format.</p>
+<p >Input image must have 8-bit gray format.</p>
 <p >For every point: </p><pre class="fragment">sum += abs(
     - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
     - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
@@ -927,7 +927,7 @@ for(y = 0; y &lt; height; y++)
 </div><div class="memdoc">
 
 <p>Finds minimal, maximal and average pixel values for given image. </p>
-<p >The image must has 8-bit gray format.</p>
+<p >The image must have 8-bit gray format.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__statistic.html#gae3cc03355b04ce2c3227142c63f28dc1" title="Finds minimal, maximal and average pixel values for given image.">SimdGetStatistic</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1004,7 +1004,7 @@ for(y = 0; y &lt; height; y++)
 </div><div class="memdoc">
 
 <p>Calculate statistical characteristics (moments) of pixels with given index. </p>
-<p >The image must has 8-bit gray format.</p>
+<p >The image must have 8-bit gray format.</p>
 <p >For every point: </p><pre class="fragment">if(mask[X, Y] == index)
 {
     area += 1.
@@ -1106,7 +1106,7 @@ for(y = 0; y &lt; height; y++)
 </div><div class="memdoc">
 
 <p>Calculate statistical characteristics (moments) of given object. </p>
-<p >The images must has 8-bit gray format and equal size. One of them can be empty.</p>
+<p >The images must have 8-bit gray format and equal size. One of them can be empty.</p>
 <p >For every point: </p><pre class="fragment">if(mask[X, Y] == index || mask == 0)
 {
     S = src ? src[X, Y] : 1;
@@ -1124,7 +1124,7 @@ for(y = 0; y &lt; height; y++)
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a mask image. Can be empty. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- an object index. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">n</td><td>- a reference to unsigned 64-bit integer value with found are of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">n</td><td>- a reference to unsigned 64-bit integer value with found area of given object. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">s</td><td>- a reference to unsigned 64-bit integer value with sum of image values of given object. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sx</td><td>- a reference to unsigned 64-bit integer value with found first-order moment x of given object. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sy</td><td>- a reference to unsigned 64-bit integer value with found first-order moment y of given object. </td></tr>

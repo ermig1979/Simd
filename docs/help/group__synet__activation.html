@@ -45,7 +45,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Functions to acceleratе activation functions in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  
+<p>Functions to accelerate activation functions in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -74,7 +74,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:gae7400d99345610568d552934f9f05f17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates ReLU (rectified linear unit) function for 16-bit brain-float array.  <a href="group__synet__activation.html#gae7400d99345610568d552934f9f05f17">More...</a><br /></td></tr>
 <tr class="separator:gae7400d99345610568d552934f9f05f17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga480e0dbc40eb04ebd599b574e9432d32"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga480e0dbc40eb04ebd599b574e9432d32">SimdSynetRestrictRange32f</a> (const float *src, size_t size, const float *lower, const float *upper, float *dst)</td></tr>
-<tr class="memdesc:ga480e0dbc40eb04ebd599b574e9432d32"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used in order to restrict range for given 320bit float array.  <a href="group__synet__activation.html#ga480e0dbc40eb04ebd599b574e9432d32">More...</a><br /></td></tr>
+<tr class="memdesc:ga480e0dbc40eb04ebd599b574e9432d32"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used in order to restrict range for given 32-bit float array.  <a href="group__synet__activation.html#ga480e0dbc40eb04ebd599b574e9432d32">More...</a><br /></td></tr>
 <tr class="separator:ga480e0dbc40eb04ebd599b574e9432d32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7c3b2e316df7f6820b1e7067e74924e8"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga7c3b2e316df7f6820b1e7067e74924e8">SimdSynetSigmoid32f</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
 <tr class="memdesc:ga7c3b2e316df7f6820b1e7067e74924e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SigmoidLayer.  <a href="group__synet__activation.html#ga7c3b2e316df7f6820b1e7067e74924e8">More...</a><br /></td></tr>
@@ -90,7 +90,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga41c6d86b05a8533de31f028d9b1bf70e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p >Functions to acceleratе activation functions in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
+<p >Functions to accelerate activation functions in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="gaee4f654aee53a18b5506e71f6790f39f" name="gaee4f654aee53a18b5506e71f6790f39f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaee4f654aee53a18b5506e71f6790f39f">&#9670;&#160;</a></span>SimdSynetElu32f()</h2>
@@ -534,7 +534,7 @@ Functions</h2></td></tr>
 
 <p>Calculates ReLU (rectified linear unit) function for 16-bit brain-float array. </p>
 <p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] =  src[i] &gt; 0 ? src[i] : (slope*src[i];
+    dst[i] =  src[i] &gt; 0 ? src[i] : slope*src[i];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -592,7 +592,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used in order to restrict range for given 320bit float array. </p>
+<p>This function is used in order to restrict range for given 32-bit float array. </p>
 <p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
     dst[i] = Min(Max(lower, src[i]), upper);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>

@@ -57,7 +57,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga615ed4d1996638c45b1a0aff4d3ee50a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates Gaussian blur filter context.  <a href="group__gaussian__filter.html#ga615ed4d1996638c45b1a0aff4d3ee50a">More...</a><br /></td></tr>
 <tr class="separator:ga615ed4d1996638c45b1a0aff4d3ee50a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3d8cfda122c2fa1a340e90f8226051b6"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gaussian__filter.html#ga3d8cfda122c2fa1a340e90f8226051b6">SimdGaussianBlurRun</a> (const void *filter, const uint8_t *src, size_t srcStride, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga3d8cfda122c2fa1a340e90f8226051b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs image Gaussian bluring.  <a href="group__gaussian__filter.html#ga3d8cfda122c2fa1a340e90f8226051b6">More...</a><br /></td></tr>
+<tr class="memdesc:ga3d8cfda122c2fa1a340e90f8226051b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs image Gaussian blurring.  <a href="group__gaussian__filter.html#ga3d8cfda122c2fa1a340e90f8226051b6">More...</a><br /></td></tr>
 <tr class="separator:ga3d8cfda122c2fa1a340e90f8226051b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -208,7 +208,7 @@ for (x = -half; x &lt;= half; ++x)
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to filter context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__gaussian__filter.html#ga3d8cfda122c2fa1a340e90f8226051b6" title="Performs image Gaussian bluring.">SimdGaussianBlurRun</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to filter context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__gaussian__filter.html#ga3d8cfda122c2fa1a340e90f8226051b6" title="Performs image Gaussian blurring.">SimdGaussianBlurRun</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -256,7 +256,7 @@ for (x = -half; x &lt;= half; ++x)
       </table>
 </div><div class="memdoc">
 
-<p>Performs image Gaussian bluring. </p>
+<p>Performs image Gaussian blurring. </p>
 <p >Bluring algorithm for every point: </p><pre class="fragment">sum = 0;
 for(x = -half; x &lt;= half; ++x)
 {

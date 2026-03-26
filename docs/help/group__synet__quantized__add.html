@@ -51,7 +51,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga5fcc723e03d0ab761231434e7158f9b3"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3">SimdSynetQuantizedAddInit</a> (const size_t *aShape, size_t aCount, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> aType, const float *aScale, int32_t aZero, const size_t *bShape, size_t bCount, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> bType, const float *bScale, int32_t bZero, <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> actType, const float *actParams, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> dstType, const float *dstScale, int32_t dstZero)</td></tr>
-<tr class="memdesc:ga5fcc723e03d0ab761231434e7158f9b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes quantized addition algorithm.  <a href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3">More...</a><br /></td></tr>
+<tr class="memdesc:ga5fcc723e03d0ab761231434e7158f9b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes quantized addition algorithm.  <a href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3">More...</a><br /></td></tr>
 <tr class="separator:ga5fcc723e03d0ab761231434e7158f9b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4ac762cb4d76eacf764bbed5eb65887c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__add.html#ga4ac762cb4d76eacf764bbed5eb65887c">SimdSynetQuantizedAddForward</a> (void *context, const uint8_t *a, const uint8_t *b, uint8_t *dst)</td></tr>
 <tr class="memdesc:ga4ac762cb4d76eacf764bbed5eb65887c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of quantized addition algorithm.  <a href="group__synet__quantized__add.html#ga4ac762cb4d76eacf764bbed5eb65887c">More...</a><br /></td></tr>
@@ -164,7 +164,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initilizes quantized addition algorithm. </p>
+<p>Initializes quantized addition algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">aShape</td><td>- a pointer to shape of input A tensor. </td></tr>
@@ -230,7 +230,7 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of quantized addition algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized addition context. It must be created by function <a class="el" href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3" title="Initilizes quantized addition algorithm.">SimdSynetQuantizedAddInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized addition context. It must be created by function <a class="el" href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3" title="Initializes quantized addition algorithm.">SimdSynetQuantizedAddInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to input A tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to input B tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>

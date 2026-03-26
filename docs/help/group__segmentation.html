@@ -133,7 +133,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Changes certain index in mask. </p>
-<p >Mask must has 8-bit gray pixel format.</p>
+<p >Mask must have 8-bit gray pixel format.</p>
 <p >For every point: </p><pre class="fragment">if(mask[i] == oldIndex)
     mask[i] = newIndex;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SegmentationChangeIndex(View&lt;A&gt; &amp; mask, uint8_t oldIndex, uint8_t newIndex).</dd></dl>
@@ -196,14 +196,14 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Fill single holes in mask. </p>
-<p >Mask must has 8-bit gray pixel format.</p>
+<p >Mask must have 8-bit gray pixel format.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SegmentationFillSingleHoles(View&lt;A&gt; &amp; mask, uint8_t index).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit gray mask image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an mask width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an mask height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a mask width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a mask height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index. </td></tr>
   </table>
   </dd>
@@ -389,14 +389,14 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Finds actual region of mask index location. </p>
-<p >Mask must has 8-bit gray pixel format.</p>
+<p >Mask must have 8-bit gray pixel format.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SegmentationShrinkRegion(const View&lt;A&gt; &amp; mask, uint8_t index, Rectangle&lt;ptrdiff_t&gt; &amp; rect).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit gray mask image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an mask width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an mask height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a mask width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a mask height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">left</td><td>- a pointer to left side. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">top</td><td>- a pointer to top side. </td></tr>
@@ -441,7 +441,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Changes certain index in mask. </p>
-<p >Mask must has 8-bit gray pixel format.</p>
+<p >Mask must have 8-bit gray pixel format.</p>
 <p >For every point: </p><pre class="fragment">if(mask[i] == oldIndex)
     mask[i] = newIndex;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#ga622e496998470cc8d7da272d86a8c23e" title="Changes certain index in mask.">SimdSegmentationChangeIndex</a>.</dd></dl>
@@ -483,7 +483,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Fill single holes in mask. </p>
-<p >Mask must has 8-bit gray pixel format.</p>
+<p >Mask must have 8-bit gray pixel format.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#ga24252c0dbe49d52328068f4153075949" title="Fill single holes in mask.">SimdSegmentationFillSingleHoles</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -602,7 +602,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Finds actual region of mask index location. </p>
-<p >Mask must has 8-bit gray pixel format.</p>
+<p >Mask must have 8-bit gray pixel format.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#gab41f620c691a231cdd33c21a807944ad" title="Finds actual region of mask index location.">SimdSegmentationShrinkRegion</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

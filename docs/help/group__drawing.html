@@ -428,7 +428,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">uStride</td><td>- a row size of U-component. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">v</td><td>- a pointer to pixels data of V-component of background YUV420P image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of V-component. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of output YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of output YUV image (see description of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). </td></tr>
   </table>
   </dd>
 </dl>
@@ -509,7 +509,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count for foreground and background images (1 &lt;= channelCount &lt;= 4). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a pvalue of alpha. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a value of alpha. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of background image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the background image. </td></tr>
   </table>
@@ -671,8 +671,8 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of output premultiplyed image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output premultiplyed image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of output premultiplied image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output premultiplied image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">argb</td><td>- a boolean flag describing image format (BGRA32, RGBA32 - SimdFalse; ARGB32 - SimdTrue). </td></tr>
   </table>
   </dd>
@@ -750,8 +750,8 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of output unpremultiplyed image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output unpremultiplyed image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of output unpremultiplied image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output unpremultiplied image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">argb</td><td>- a boolean flag describing image format (BGRA32, RGBA32 - SimdFalse; ARGB32 - SimdTrue). </td></tr>
   </table>
   </dd>
@@ -852,7 +852,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">y1</td><td>- Y coordinate of the first point of the line. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">x2</td><td>- X coordinate of the second point of the line. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">y2</td><td>- Y coordinate of the second point of the line. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a ponter to line color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to line color. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a line width. </td></tr>
   </table>
   </dd>
@@ -953,7 +953,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top of the rectangle. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right of the rectangle. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom of the rectangle. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a ponter to rectangle color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to rectangle color. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a line width of rectangle. </td></tr>
   </table>
   </dd>
@@ -1183,7 +1183,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a pointer to text. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- an X coordinate of start position to draw text. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- an Y coordinate of start position to draw text. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a ponter to font color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to font color. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1354,7 +1354,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
     <tr><td class="paramdir">[in,out]</td><td class="paramname">y</td><td>- Y-component of background YUV420P image. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">u</td><td>- U-component of background YUV420P image. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">v</td><td>- V-component of background YUV420P image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of output YUV image (see descriprion of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). By default it is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of output YUV image (see description of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). By default it is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1494,7 +1494,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output premultiplyed image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output premultiplied image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1538,7 +1538,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output unpremultiplyed image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output unpremultiplied image. </td></tr>
   </table>
   </dd>
 </dl>

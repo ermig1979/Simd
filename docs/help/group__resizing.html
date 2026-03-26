@@ -297,7 +297,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstWidth</td><td>- a width of the output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstHeight</td><td>- a height of the output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a nmber of channels for input and output images. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a number of channels for input and output images. </td></tr>
   </table>
   </dd>
 </dl>
@@ -639,7 +639,7 @@ Functions</h2></td></tr>
     4*(src[2*x-2, 2*y+1] + 4*src[2*x-1, 2*y+1] + 6*src[2*x, 2*y+1] + 4*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
        src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] +
     compensation ? 128 : 0) / 256;
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::ReduceGray5x5(const Viewc&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst, bool compensation).</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::ReduceGray5x5(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst, bool compensation).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
