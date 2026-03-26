@@ -53,7 +53,7 @@ namespace Simd
         {
             /*! An undefined pixel format. */
             None = 0,
-            /*! Two planes (8-bit full size Y plane, 16-bit interlived half size UV plane) NV12 pixel format. */
+            /*! Two planes (8-bit full size Y plane, 16-bit interleaved half size UV plane) NV12 pixel format. */
             Nv12,
             /*! Three planes (8-bit full size Y plane, 8-bit half size U plane, 8-bit half size V plane) YUV420P pixel format. */
             Yuv420p,
@@ -91,7 +91,7 @@ namespace Simd
         /*!
             Creates a new Frame structure on the base of the other frame.
 
-            \note This constructor is not create new frame! It only creates a reference to the same frame. If you want to create a copy then must use method Simd::Frame::Clone.
+            \note This constructor does not create a new frame! It only creates a reference to the same frame. If you want to create a copy then must use method Simd::Frame::Clone.
 
             \param [in] frame - an original frame.
         */
@@ -109,7 +109,7 @@ namespace Simd
         /*!
             Creates a new one plane Frame structure on the base of the image view.
 
-            \note This constructor is not create new image frame! It only creates a reference to the same image. If you want to create a copy then must use method Simd::Frame::Clone.
+            \note This constructor does not create a new image frame! It only creates a reference to the same image. If you want to create a copy then must use method Simd::Frame::Clone.
 
             \param [in] view - an original image view.
             \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
@@ -203,7 +203,7 @@ namespace Simd
         /*!
             Creates reference to other Frame structure.
 
-            \note This function is not create copy of the frame! It only create a reference to the same frame.
+            \note This function does not create a copy of the frame! It only creates a reference to the same frame.
 
             \param [in] frame - an original frame.
             \return a reference to itself.
@@ -324,9 +324,9 @@ namespace Simd
         size_t DataSize() const;
 
         /*!
-            Gets area in pixels of of current Frame structure.
+            Gets area in pixels of current Frame structure.
 
-            \return - a area of current Frame in pixels.
+            \return - an area of current Frame in pixels.
         */
         size_t Area() const;
 
@@ -353,7 +353,7 @@ namespace Simd
         void Clear();
 
         /*!
-            Swaps content of two (this and other) Frame  structures.
+            Swaps content of two (this and other) Frame structures.
 
             \param [in] other - an other frame.
         */

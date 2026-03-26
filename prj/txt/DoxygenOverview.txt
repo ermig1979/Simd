@@ -78,7 +78,7 @@
     \endcode
     As result the library and the test application will be built in the current directory.
 	
-	There are addition build parameters:
+	There are additional build parameters:
 
      - `SIMD_AVX512` - Enable of AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) CPU extensions. It is switched on by default.
      - `SIMD_AVX512VNNI` - Enable of AVX-512-VNNI CPU extensions. It is switched on by default.
@@ -87,11 +87,11 @@
      - `SIMD_INFO` - Print build information. It is switched on by default.
      - `SIMD_PERF` - Enable of internal performance statistic. It is switched off by default.
      - `SIMD_SHARED` - Build as SHARED library. It is switched off by default.
-     - `SIMD_GET_VERSION` - Call scipt to get %Simd Library version. It is switched on by default.
+     - `SIMD_GET_VERSION` - Call script to get %Simd Library version. It is switched on by default.
      - `SIMD_SYNET` - Enable optimizations for Synet framework. It is switched on by default.
      - `SIMD_INT8_DEBUG` - Enable debug INT8 capabilities for Synet framework. It is switched off by default.
      - `SIMD_HIDE` - Hide internal functions of %Simd Library. It is switched off by default.
-     - `SIMD_RUNTIME` - Enable of runtime faster algorithm choise. It is switched on by default.
+     - `SIMD_RUNTIME` - Enable of runtime faster algorithm choice. It is switched on by default.
      - `SIMD_TEST_FLAGS` - Addition compiler flags to build test framework.
      - `SIMD_OPENCV` - Use OpenCV in test framework. It is switched off by default.
      - `SIMD_INSTALL` - Enabling of install target. It is switched on by default.
@@ -169,7 +169,7 @@
      - `-s=sample.avi` a video source (Simd::Motion test).
      - `-o=output.avi` an annotated video output (Simd::Motion test).
      - `-wt=1` a thread number used to parallelize algorithms. Use -1 to set maximum parallelization.
-     - `-fe=Abs` an exlude filter to exclude some tests.
+     - `-fe=Abs` an exclude filter to exclude some tests.
      - `-mt=100` a minimal test execution time (in milliseconds).
      - `-lc=1` to litter CPU cache between test runs.
      - `-ri=city.jpg` a name of real image used in some tests. The image have to be placed in `./data/image` directory.

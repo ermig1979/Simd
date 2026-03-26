@@ -71,7 +71,7 @@ namespace Simd
 
         \fn void AbsDifference(const View<A> & a, const View<A> & b, View<A> & c)
 
-        \short Gets absolute difference of two gray 8-bit images, pyxel by pixel.
+        \short Gets absolute difference of two gray 8-bit images, pixel by pixel.
 
         Both images must have the same width and height.
 
@@ -324,7 +324,7 @@ namespace Simd
         \param [in, out] y - Y-component of background YUV420P image.
         \param [in, out] u - U-component of background YUV420P image.
         \param [in, out] v - V-component of background YUV420P image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void AlphaBlendingBgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -413,7 +413,7 @@ namespace Simd
         \note This function is a C++ wrapper for function ::SimdAlphaPremultiply.
 
         \param [in] src - an input image.
-        \param [out] dst - an output premultiplyed image.
+        \param [out] dst - an output premultiplied image.
     */
     template<template<class> class A> SIMD_INLINE void AlphaPremultiply(const View<A>& src, View<A>& dst)
     {
@@ -443,7 +443,7 @@ namespace Simd
         \note This function is a C++ wrapper for function ::SimdAlphaUnpremultiply.
 
         \param [in] src - an input image.
-        \param [out] dst - an output unpremultiplyed image.
+        \param [out] dst - an output unpremultiplied image.
     */
     template<template<class> class A> SIMD_INLINE void AlphaUnpremultiply(const View<A>& src, View<A>& dst)
     {
@@ -929,7 +929,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -956,7 +956,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuv422p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -982,7 +982,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuv444p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1008,7 +1008,7 @@ namespace Simd
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
         \param [out] a - an output 8-bit image with alpha plane.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1221,7 +1221,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1248,7 +1248,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1274,7 +1274,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -2125,11 +2125,11 @@ namespace Simd
 
     /*! @ingroup histogram
 
-        \fn void uint8_t Mean(const uint32_t* histogram)
+        \fn double Mean(const uint32_t* histogram)
 
         \short Calculates mean from image histogram.
 
-        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integre values).
+        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integer values).
         \return value of mean for image with given histogram.
     */
     SIMD_INLINE double Mean(const uint32_t* histogram)
@@ -2147,11 +2147,11 @@ namespace Simd
 
     /*! @ingroup histogram
 
-        \fn void uint8_t OtsuThreshold(const uint32_t* histogram)
+        \fn uint8_t OtsuThreshold(const uint32_t* histogram)
 
-        \short Calculates Otsu threhsold from image histogram.
+        \short Calculates Otsu threshold from image histogram.
 
-        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integre values).
+        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integer values).
         \return value of Otsu threshold for image with given histogram.
     */
     SIMD_INLINE uint8_t OtsuThreshold(const uint32_t* histogram)
@@ -2200,7 +2200,7 @@ namespace Simd
         \param [in] src - an input 8-bit gray image. Its size must be a multiple of cell size.
         \param [in] cell - a size of cell.
         \param [in] quantization - a direction quantization. Must be even.
-        \param [out] histograms - a pointer to buffer with histograms. Array must has size grater or equal to (src.width/cell.x)*(src.height/cell.y)*quantization.
+        \param [out] histograms - a pointer to buffer with histograms. Array must have size greater or equal to (src.width/cell.x)*(src.height/cell.y)*quantization.
     */
     template<template<class> class A> SIMD_INLINE void HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms)
     {
@@ -2220,7 +2220,7 @@ namespace Simd
         \note This function is a C++ wrapper for function ::SimdHogExtractFeatures.
 
         \param [in] src - an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16.
-        \param [out] features - a pointer to buffer with features. Array must has size grater or equal to (width/8)*(height/8)*31.
+        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31.
     */
     template<template<class> class A> SIMD_INLINE void HogExtractFeatures(const View<A> & src, float * features)
     {
@@ -2399,7 +2399,7 @@ namespace Simd
 
         \short Calculates Laplace's filter.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -2427,7 +2427,7 @@ namespace Simd
 
         \short Calculates absolute value of Laplace's filter.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -2455,7 +2455,7 @@ namespace Simd
 
         \short Calculates sum of absolute value of Laplace's filter.
 
-        Input image must has 8-bit gray format.
+        Input image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -2559,7 +2559,7 @@ namespace Simd
 
     /*! @ingroup min_filter
 
-        \fn void MinFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1t)
+        \fn void MinFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
 
         \short Performs min filtration of input image (filter window is a square 3x3).
 
@@ -3271,7 +3271,7 @@ namespace Simd
 
         \short Changes certain index in mask.
 
-        Mask must has 8-bit gray pixel format.
+        Mask must have 8-bit gray pixel format.
 
         For every point:
         \verbatim
@@ -3298,7 +3298,7 @@ namespace Simd
 
         \short Fill single holes in mask.
 
-        Mask must has 8-bit gray pixel format.
+        Mask must have 8-bit gray pixel format.
 
         \note This function is a C++ wrapper for function ::SimdSegmentationFillSingleHoles.
 
@@ -3347,7 +3347,7 @@ namespace Simd
 
         \short Finds actual region of mask index location.
 
-        Mask must has 8-bit gray pixel format.
+        Mask must have 8-bit gray pixel format.
 
         \note This function is a C++ wrapper for function ::SimdSegmentationShrinkRegion.
 
@@ -3393,7 +3393,7 @@ namespace Simd
 
         \short Calculates Sobel's filter along x axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -3418,7 +3418,7 @@ namespace Simd
 
         \short Calculates absolute value of Sobel's filter along x axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -3443,7 +3443,7 @@ namespace Simd
 
         \short Calculates sum of absolute value of Sobel's filter along x axis.
 
-        Input image must has 8-bit gray format.
+        Input image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -3468,7 +3468,7 @@ namespace Simd
 
         \short Calculates Sobel's filter along y axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -3493,7 +3493,7 @@ namespace Simd
 
         \short Calculates absolute value of Sobel's filter along y axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -3518,7 +3518,7 @@ namespace Simd
 
         \short Calculates sum of absolute value of Sobel's filter along y axis.
 
-        Input image must has 8-bit gray format.
+        Input image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -3543,7 +3543,7 @@ namespace Simd
 
         \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
         This function is used for contour extraction.
 
         For every point:
@@ -3571,7 +3571,7 @@ namespace Simd
 
         \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
         This function is used for contour extraction.
 
         For every point:
@@ -3583,7 +3583,7 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdContourMetricsMasked.
 
-        \param [in] src - a  gray 8-bit input image.
+        \param [in] src - a gray 8-bit input image.
         \param [in] mask - a mask 8-bit image.
         \param [in] indexMin - a mask minimal permissible index.
         \param [out] dst - an output 16-bit image.
@@ -3601,7 +3601,7 @@ namespace Simd
 
         \short Extract contour anchors from contour metrics.
 
-        All images must have the same width and height. Input image must has 16-bit integer format, output image must has 8-bit gray format.
+        All images must have the same width and height. Input image must have 16-bit integer format, output image must have 8-bit gray format.
         Input image with metrics can be estimated by using ::SimdContourMetrics or ::SimdContourMetricsMasked functions.
         This function is used for contour extraction.
 
@@ -3689,7 +3689,7 @@ namespace Simd
 
         \short Finds minimal, maximal and average pixel values for given image.
 
-        The image must has 8-bit gray format.
+        The image must have 8-bit gray format.
 
         \note This function is a C++ wrapper for function ::SimdGetStatistic.
 
@@ -3711,7 +3711,7 @@ namespace Simd
 
         \short Calculate statistical characteristics (moments) of pixels with given index.
 
-        The image must has 8-bit gray format.
+        The image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -3751,7 +3751,7 @@ namespace Simd
 
         \short Calculate statistical characteristics (moments) of given object.
 
-        The images must has 8-bit gray format and equal size. One of them can be empty.
+        The images must have 8-bit gray format and equal size. One of them can be empty.
 
         For every point:
         \verbatim
@@ -3773,7 +3773,7 @@ namespace Simd
         \param [in] src - an input image.
         \param [in] mask - a mask image. Can be empty.
         \param [in] index - an object index.
-        \param [out] n - a reference to unsigned 64-bit integer value with found are of given object.
+        \param [out] n - a reference to unsigned 64-bit integer value with found area of given object.
         \param [out] s - a reference to unsigned 64-bit integer value with sum of image values of given object.
         \param [out] sx - a reference to unsigned 64-bit integer value with found first-order moment x of given object.
         \param [out] sy - a reference to unsigned 64-bit integer value with found first-order moment y of given object.
@@ -3846,7 +3846,7 @@ namespace Simd
 
         \fn void GetAbsDyRowSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of absolute derivate along y axis for rows for given 8-bit gray image.
+        \short Calculate sums of absolute derivative along y axis for rows for given 8-bit gray image.
 
         For all rows except the last:
         \verbatim
@@ -3874,7 +3874,7 @@ namespace Simd
 
         \fn void GetAbsDxColSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of absolute derivate along x axis for columns for given 8-bit gray image.
+        \short Calculate sums of absolute derivative along x axis for columns for given 8-bit gray image.
 
         For all columns except the last:
         \verbatim
@@ -4240,7 +4240,7 @@ namespace Simd
 
         \param [in] uyvy - an input 16-bit UYVY422 image.
         \param [out] bgr - an output 24-bit BGR image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Uyvy422ToBgr(const View<A>& uyvy, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4287,7 +4287,7 @@ namespace Simd
         \param [in] mat - a pointer to 2x3 matrix with coefficients of affine warp.
         \param [in, out] dst - an output image.
         \param [in] flags - a flags of algorithm parameters. By default is equal to ::SimdWarpAffineChannelByte | ::SimdWarpAffineInterpBilinear | ::SimdWarpAffineBorderConstant.
-        \param [in] border - a pointer to to the array with color of border. The size of the array must be equal to channels.
+        \param [in] border - a pointer to the array with color of border. The size of the array must be equal to channels.
                              It parameter is actual for SimdWarpAffineBorderConstant flag. By default is equal to NULL.
     */
     template<template<class> class A> SIMD_INLINE void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, 
@@ -4365,7 +4365,7 @@ namespace Simd
         \param [in] v - an input 8-bit image with V color plane.
         \param [in] a - an input 8-bit image with alpha channel.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4393,7 +4393,7 @@ namespace Simd
         \param [in] v - an input 8-bit image with V color plane.
         \param [in] a - an input 8-bit image with alpha channel.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuva422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4421,7 +4421,7 @@ namespace Simd
         \param [in] v - an input 8-bit image with V color plane.
         \param [in] a - an input 8-bit image with alpha channel.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuva444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4446,7 +4446,7 @@ namespace Simd
         \param [in] u - an input 8-bit image with U color plane.
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] bgr - an output 24-bit BGR image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv420pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4473,7 +4473,7 @@ namespace Simd
         \param [in] u - an input 8-bit image with U color plane.
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] bgr - an output 24-bit BGR image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv422pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4499,7 +4499,7 @@ namespace Simd
         \param [in] u - an input 8-bit image with U color plane.
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] bgr - an output 24-bit BGR image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv444pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4524,7 +4524,7 @@ namespace Simd
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] bgra - an output 32-bit BGRA image.
         \param [in] alpha - a value of alpha channel. It is equal to 255 by default.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4552,7 +4552,7 @@ namespace Simd
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] bgra - an output 32-bit BGRA image.
         \param [in] alpha - a value of alpha channel. It is equal to 255 by default.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4579,7 +4579,7 @@ namespace Simd
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] bgra - an output 32-bit BGRA image.
         \param [in] alpha - a value of alpha channel. It is equal to 255 by default.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4694,7 +4694,7 @@ namespace Simd
         \param [in] u - an input 8-bit image with U color plane.
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] rgb - an output 24-bit RGB image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4721,7 +4721,7 @@ namespace Simd
         \param [in] u - an input 8-bit image with U color plane.
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] rgb - an output 24-bit RGB image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4747,7 +4747,7 @@ namespace Simd
         \param [in] u - an input 8-bit image with U color plane.
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] rgb - an output 24-bit RGB image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -4771,7 +4771,7 @@ namespace Simd
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] rgba - an output 32-bit RGBA image.
         \param [in] alpha - a value of alpha channel. It is equal to 255 by default.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void Yuv444pToRgba(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgba, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
     {

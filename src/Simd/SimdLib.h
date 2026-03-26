@@ -262,7 +262,7 @@ typedef enum
 typedef enum
 {
     SimdCpuInfoSockets,/*!< A number of sockets. */
-    SimdCpuInfoCores, /*!< A number of psysical CPU cores. */
+    SimdCpuInfoCores, /*!< A number of physical CPU cores. */
     SimdCpuInfoThreads, /*!< A number of logical CPU cores. */
     SimdCpuInfoCacheL1, /*!< A size of level 1 data cache. */
     SimdCpuInfoCacheL2, /*!< A size of level 2 cache. */
@@ -532,7 +532,7 @@ typedef enum
     SimdSynetCompatibilityFmaMask = 3, /*!< Bit mask of options of FMA instructions using. */
     SimdSynetCompatibility8iPrecise = 0, /*!< Using of precise 8-bit integer multiplication (VNNI, or its 16-bit emulation). */
     SimdSynetCompatibility8iOverflow = 4, /*!< Allow 16-bit integer overflow. */
-    SimdSynetCompatibility8iNarrowed = 8, /*!< Using of narrowed range (signed: [-90 .. 90], unsigned: [0 .. 180]) to awoid 16-bit integer overflow. */
+    SimdSynetCompatibility8iNarrowed = 8, /*!< Using of narrowed range (signed: [-90 .. 90], unsigned: [0 .. 180]) to avoid 16-bit integer overflow. */
     SimdSynetCompatibility8iMask = 12, /*!< Bit mask of options of 8-bit integer multiplication. */
     SimdSynetCompatibility16bfAvoid = 0, /*!< Not use BFloat16 (Brain Floating Point) format. */
     SimdSynetCompatibility16bfHard = 16, /*!< Use BFloat16 (Brain Floating Point) format only if hardware support exists. */
@@ -564,9 +564,9 @@ typedef enum
     SimdSynetUnaryOperation32fAbs,
     /*! Gets ceil for every point of input tensor. */
     SimdSynetUnaryOperation32fCeil,
-    /*! Gets erf (error function) for every point of input tensor. */
-    SimdSynetUnaryOperation32fCos,
     /*! Gets cosine function for every point of input tensor. */
+    SimdSynetUnaryOperation32fCos,
+    /*! Gets erf (error function) for every point of input tensor. */
     SimdSynetUnaryOperation32fErf,
     /*! Gets exponent for every point of input tensor. */
     SimdSynetUnaryOperation32fExp,
@@ -629,12 +629,12 @@ typedef enum
 typedef enum
 {
     SimdTransformRotate0 = 0, /*!< An original image. The output image has the same size as input image.*/
-    SimdTransformRotate90, /*!< Image rotated 90 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+    SimdTransformRotate90, /*!< Image rotated 90 degrees counterclockwise. The output width and height are equal to the input height and width. */
     SimdTransformRotate180, /*!< Image rotated 180 degrees counterclockwise. The output image has the same size as input image. */
-    SimdTransformRotate270, /*!< Image rotated 270 degrees counterclockwise. The output width and height are equal to the input height and widht. */
-    SimdTransformTransposeRotate0, /*!< Transposed image. The output width and height are equal to the input height and widht. */
+    SimdTransformRotate270, /*!< Image rotated 270 degrees counterclockwise. The output width and height are equal to the input height and width. */
+    SimdTransformTransposeRotate0, /*!< Transposed image. The output width and height are equal to the input height and width. */
     SimdTransformTransposeRotate90, /*!< Image transposed and rotated 90 degrees counterclockwise. It is equal to horizontal mirroring of image. The output image has the same size as input image.*/
-    SimdTransformTransposeRotate180, /*!< Image transposed and rotated 180 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+    SimdTransformTransposeRotate180, /*!< Image transposed and rotated 180 degrees counterclockwise. The output width and height are equal to the input height and width. */
     SimdTransformTransposeRotate270, /*!< Image transposed and rotated 270 degrees counterclockwise. It is equal to vertical mirroring of image. The output image has the same size as input image.*/
 } SimdTransformType;
 
@@ -977,7 +977,7 @@ extern "C"
 
         \fn void SimdSetAmxFull();
 
-        \short Set configuration of AMX registers to maximat size. It is x86 specific functionality. Affect only on CPU with AMX support.
+        \short Set configuration of AMX registers to maximum size. It is x86 specific functionality. Affect only on CPU with AMX support.
     */
     SIMD_API void SimdSetAmxFull(void);
 
@@ -1013,7 +1013,7 @@ extern "C"
 
         \fn void SimdAbsDifference(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, uint8_t * c, size_t cStride, size_t width, size_t height);
 
-        \short Gets absolute difference of two gray 8-bit images, pyxel by pixel.
+        \short Gets absolute difference of two gray 8-bit images, pixel by pixel.
 
         The three images must have the same width and height.
 
@@ -1279,7 +1279,7 @@ extern "C"
         \param [in] uStride - a row size of U-component.
         \param [in, out] v - a pointer to pixels data of V-component of background YUV420P image.
         \param [in] vStride - a row size of V-component.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdAlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, 
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
@@ -1306,7 +1306,7 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] channelCount - a channel count for foreground and background images (1 <= channelCount <= 4).
-        \param [in] alpha - a pvalue of alpha.
+        \param [in] alpha - a value of alpha.
         \param [in, out] dst - a pointer to pixels data of background image.
         \param [in] dstStride - a row size of the background image.
     */
@@ -1364,8 +1364,8 @@ extern "C"
         \param [in] srcStride - a row size of the input image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of output premultiplyed image.
-        \param [in] dstStride - a row size of the output premultiplyed image.
+        \param [out] dst - a pointer to pixels data of output premultiplied image.
+        \param [in] dstStride - a row size of the output premultiplied image.
         \param [in] argb - a boolean flag describing image format (BGRA32, RGBA32 - SimdFalse; ARGB32 - SimdTrue).
     */
     SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb);
@@ -1394,8 +1394,8 @@ extern "C"
         \param [in] srcStride - a row size of the input image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of output unpremultiplyed image.
-        \param [in] dstStride - a row size of the output unpremultiplyed image.
+        \param [out] dst - a pointer to pixels data of output unpremultiplied image.
+        \param [in] dstStride - a row size of the output unpremultiplied image.
         \param [in] argb - a boolean flag describing image format (BGRA32, RGBA32 - SimdFalse; ARGB32 - SimdTrue).
     */
     SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb);
@@ -1698,7 +1698,7 @@ extern "C"
         \param [in] src - a pointer to Base64 encoded input string.
         \param [in] srcSize - a length of input string.
         \param [out] dst - a pointer to the output buffer with decoded string. The size of the buffer is must be at least srcSize / 4 * 3.
-        \param [out] dstSize - a pointer to the value with lenght of decoded string. 
+        \param [out] dstSize - a pointer to the value with length of decoded string. 
     */
     SIMD_API void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
 
@@ -1877,7 +1877,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -1902,7 +1902,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -1926,7 +1926,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, 
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
@@ -1954,7 +1954,7 @@ extern "C"
         \param [in] vStride - a row size of the v image.
         \param [out] a - a pointer to pixels data of output 8-bit image with alpha plane.
         \param [in] aStride - a row size of the a image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuva420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, uint8_t* a, size_t aStride, SimdYuvType yuvType);
@@ -2014,7 +2014,7 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] green - a pointer to pixels data of input 16-bit image with green color plane.
-        \param [in] greenStride - a row size of the blue image.
+        \param [in] greenStride - a row size of the green image.
         \param [in] red - a pointer to pixels data of input 16-bit image with red color plane.
         \param [in] redStride - a row size of the red image.
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
@@ -2142,7 +2142,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgrToYuv420pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -2167,7 +2167,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgrToYuv422pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -2191,7 +2191,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgrToYuv444pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -2537,9 +2537,9 @@ extern "C"
 
         \fn void * SimdDescrIntInit(size_t size, size_t depth);
 
-        \short Initilizes Integer Descriptor Engine.
+        \short Initializes Integer Descriptor Engine.
 
-        \param [in] size - a length of original (32-bit or 16-bit) float descriptor. It be multiple of 8. Also it must be less or equal than 32768.
+        \param [in] size - a length of original (32-bit or 16-bit) float descriptor. It must be multiple of 8. Also it must be less or equal than 32768.
         \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 4, 5, 6, 7, 8.
         \return a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function ::SimdRelease.
                 This pointer is used in functions ::SimdDescrIntEncodedSize, ::SimdDescrIntDecodedSize, 
@@ -2602,7 +2602,7 @@ extern "C"
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] src - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
-        \param [out] dst - a pointer to output 32-bit float descriptor. Its lenght can be determined by function ::SimdDescrIntDecodedSize.
+        \param [out] dst - a pointer to output 32-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
     */
     SIMD_API void SimdDescrIntDecode32f(const void* context, const uint8_t* src, float* dst);
 
@@ -2624,7 +2624,7 @@ extern "C"
 
         \short Calculates cosine distance of two integer descriptors.
 
-        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] a - a pointer to the first integer descriptor. 
@@ -2639,7 +2639,7 @@ extern "C"
 
         \short Calculates mutual cosine distance of two arrays of integer descriptor arrays.
 
-        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] M - a number of A arrays.
@@ -2656,7 +2656,7 @@ extern "C"
 
         \short Calculates mutual cosine distance of two arrays of integer descriptors.
 
-        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] M - a number of A arrays.
@@ -2673,7 +2673,7 @@ extern "C"
 
         \short Calculates vector norm for integer descriptor.
 
-        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] a - a pointer to integer descriptor.
@@ -2870,7 +2870,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2894,7 +2894,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2918,7 +2918,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2942,7 +2942,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2966,7 +2966,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2990,7 +2990,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -3013,7 +3013,7 @@ extern "C"
         \param [in] y1 - Y coordinate of the first point of the line.
         \param [in] x2 - X coordinate of the second point of the line.
         \param [in] y2 - Y coordinate of the second point of the line.
-        \param [in] color - a ponter to line color.
+        \param [in] color - a pointer to line color.
         \param [in] lineWidth - a line width.
     */
     SIMD_API void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
@@ -3035,7 +3035,7 @@ extern "C"
         \param [in] top - a top of the rectangle.
         \param [in] right - a right of the rectangle.
         \param [in] bottom - a bottom of the rectangle.
-        \param [in] color - a ponter to rectangle color.
+        \param [in] color - a pointer to rectangle color.
         \param [in] lineWidth - a line width of rectangle.
     */
     SIMD_API void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
@@ -3257,7 +3257,7 @@ extern "C"
         \param [in] text - a pointer to text.
         \param [in] left - an X coordinate of start position to draw text.
         \param [in] top - an Y coordinate of start position to draw text.
-        \param [in] color - a ponter to font color.
+        \param [in] color - a pointer to font color.
     */
     SIMD_API void SimdFontDraw(void* context, uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t* color);
 
@@ -3501,7 +3501,7 @@ extern "C"
 
         \fn void SimdGaussianBlurRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
-        \short Performs image Gaussian bluring.
+        \short Performs image Gaussian blurring.
 
         Bluring algorithm for every point:
         \verbatim
@@ -3622,7 +3622,7 @@ extern "C"
 
     /*! @ingroup gray_conversion
 
-        \fn SimdGrayToY(const uint8_t* gray, size_t width, size_t height, size_t grayStride, uint8_t* y, size_t yStride);
+        \fn void SimdGrayToY(const uint8_t* gray, size_t width, size_t height, size_t grayStride, uint8_t* y, size_t yStride);
 
         \short Converts 8-bit gray image to 8-bit Y-plane of YUV.
 
@@ -3659,7 +3659,7 @@ extern "C"
         \param [in] height - an image height.
         \param [in] stride - a row size of the image.
         \param [in] step - a step for second derivative calculation.
-        \param [in] indent - a indent from image boundary.
+        \param [in] indent - an indent from image boundary.
         \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
     */
     SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride,
@@ -3812,7 +3812,7 @@ extern "C"
         \param [in] cellX - a width of cell.
         \param [in] cellY - a height of cell.
         \param [in] quantization - a direction quantization. Must be even.
-        \param [out] histograms - a pointer to buffer with histograms. Array must has size grater or equal to (width/cellX)*(height/cellY)*quantization.
+        \param [out] histograms - a pointer to buffer with histograms. Array must have size greater or equal to (width/cellX)*(height/cellY)*quantization.
     */
     SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
         size_t cellX, size_t cellY, size_t quantization, float * histograms);
@@ -3823,7 +3823,7 @@ extern "C"
 
         \short Extracts HOG features for 8-bit gray image.
 
-        Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.
+        Extracts HOG features for 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.
 
         \note This function has a C++ wrapper Simd::HogExtractFeatures(const View<A> & src, float * features).
 
@@ -3831,7 +3831,7 @@ extern "C"
         \param [in] stride - a row size of the image.
         \param [in] width - an image width. It must be a multiple of 8. Its minimal value is 16.
         \param [in] height - an image height. It must be a multiple of 8. Its minimal value is 16.
-        \param [out] features - a pointer to buffer with features. Array must has size grater or equal to (width/8)*(height/8)*31.
+        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31.
     */
     SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
@@ -3897,7 +3897,7 @@ extern "C"
         \param [in] height - a height of input image.
         \param [in] format - a pixel format of input image. 
             Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
-        \param [in] file - a format of output image file. To auto choise format of output file set this parameter to ::SimdImageFileUndefined.
+        \param [in] file - a format of output image file. To auto choose format of output file set this parameter to ::SimdImageFileUndefined.
         \param [in] quality - a parameter of compression quality (if file format supports it).
         \param [out] size - a pointer to the size of output image file in bytes.
         \return a pointer to memory buffer with output image file. 
@@ -3919,7 +3919,7 @@ extern "C"
         \param [in] height - a height of input image.
         \param [in] format - a pixel format of input image. 
             Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
-        \param [in] file - a format of output image file. To auto choise format of output file set this parameter to ::SimdImageFileUndefined.
+        \param [in] file - a format of output image file. To auto choose format of output file set this parameter to ::SimdImageFileUndefined.
         \param [in] quality - a parameter of compression quality (if file format supports it).
         \param [in] path - a path to output image file.
         \return result of the operation.
@@ -3938,7 +3938,7 @@ extern "C"
         \param [in] uvStride - a row size of the uv image.
         \param [in] width - a width of input image. It must be even number.
         \param [in] height - a height of input image. It must be even number.
-        \param [in] yuvType - a type of input YUV image(see descriprion of::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
         \param [in] quality - a parameter of compression quality.
         \param [out] size - a pointer to the size of output image file in bytes.
         \return a pointer to memory buffer with output image file.
@@ -3960,7 +3960,7 @@ extern "C"
         \param [in] vStride - a row size of the v image.
         \param [in] width - a width of input image. It must be even number.
         \param [in] height - a height of input image. It must be even number.
-        \param [in] yuvType - a type of input YUV image(see descriprion of::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
         \param [in] quality - a parameter of compression quality.
         \param [out] size - a pointer to the size of output image file in bytes.
         \return a pointer to memory buffer with output image file.
@@ -4029,8 +4029,8 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] srcStride - a row size of the 16-bit signed integer image.
-        \param [out] dst - a pointer to pixels data of input 8-bit gray image.
-        \param [out] dstStride - a row size of the gray image.
+        \param [out] dst - a pointer to pixels data of output 8-bit gray image.
+        \param [in] dstStride - a row size of the gray image.
     */
     SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
 
@@ -4143,7 +4143,7 @@ extern "C"
 
         \short Calculates Laplace's filter.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -4170,7 +4170,7 @@ extern "C"
 
         \short Calculates absolute value of Laplace's filter.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -4197,7 +4197,7 @@ extern "C"
 
         \short Calculates sum of absolute value of Laplace's filter.
 
-        Input image must has 8-bit gray format.
+        Input image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -4482,7 +4482,7 @@ extern "C"
 
         \fn void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
-        \short Converts a 8-bit gray image to the 32-bit float array.
+        \short Converts an 8-bit gray image to the 32-bit float array.
 
         The length of output array must be equal to the area of input image.
 
@@ -5025,8 +5025,8 @@ extern "C"
         \param [in] padY - a pad to the y-coordinate of the input image.
         \param [in] strideX - a x-stride of the convolution.
         \param [in] strideY - a y-stride of the convolution.
-        \param [in] dilationX - a x-stride of the convolution.
-        \param [in] dilationY - a y-stride of the convolution.
+        \param [in] dilationX - a x-dilation of the convolution.
+        \param [in] dilationY - a y-dilation of the convolution.
         \param [in, out] buffer - a pointer to the external temporal buffer used by the algorithm. Can be NULL (the algorithm uses internal buffer).
         \param [in, out] size - a pointer to the size of the external temporal buffer. If the size is too small it will contain required value. Required size is approximately equal to `dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float)`. Can be NULL.
         \param [in, out] dst - a pointer to the output multichannel 32-bit float image. Total size of the output image is equal to `dstWidth*dstHeight*dstDepth`.
@@ -5174,7 +5174,7 @@ extern "C"
         \param [in] dstWidth - a width of the output image.
         \param [in] dstHeight - a height of the output image.
         \param [in] dstStride - a row size of the output image.
-        \param [in] channelCount - a nmber of channels for input and output images.
+        \param [in] channelCount - a number of channels for input and output images.
     */
     SIMD_API void SimdReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
@@ -5285,7 +5285,7 @@ extern "C"
             compensation ? 128 : 0) / 256;
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::ReduceGray5x5(const Viewc<A>& src, View<A>& dst, bool compensation).
+        \note This function has a C++ wrappers: Simd::ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -5476,7 +5476,7 @@ extern "C"
 
         \short Changes certain index in mask.
 
-        Mask must has 8-bit gray pixel format.
+        Mask must have 8-bit gray pixel format.
 
         For every point:
         \verbatim
@@ -5501,14 +5501,14 @@ extern "C"
 
         \short Fill single holes in mask.
 
-        Mask must has 8-bit gray pixel format.
+        Mask must have 8-bit gray pixel format.
 
         \note This function has a C++ wrappers: Simd::SegmentationFillSingleHoles(View<A> & mask, uint8_t index).
 
         \param [in, out] mask - a pointer to pixels data of 8-bit gray mask image.
         \param [in] stride - a row size of the mask image.
-        \param [in] width - an mask width.
-        \param [in] height - an mask height.
+        \param [in] width - a mask width.
+        \param [in] height - a mask height.
         \param [in] index - a mask index.
     */
     SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
@@ -5547,14 +5547,14 @@ extern "C"
 
         \short Finds actual region of mask index location.
 
-        Mask must has 8-bit gray pixel format.
+        Mask must have 8-bit gray pixel format.
 
         \note This function has a C++ wrappers: Simd::SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect).
 
         \param [in] mask - a pointer to pixels data of 8-bit gray mask image.
         \param [in] stride - a row size of the mask image.
-        \param [in] width - an mask width.
-        \param [in] height - an mask height.
+        \param [in] width - a mask width.
+        \param [in] height - a mask height.
         \param [in] index - a mask index.
         \param [in, out] left - a pointer to left side.
         \param [in, out] top - a pointer to top side.
@@ -5643,8 +5643,8 @@ extern "C"
         \param [in] currHeight - a height of current image.
         \param [in] initShiftX - an initial shift X position to start search.
         \param [in] initShiftY - an initial shift Y position to start search.
-        \param [in] maxShiftX - maximal possible shift alogn X axis.
-        \param [in] maxShiftY - maximal possible shift alogn Y axis.
+        \param [in] maxShiftX - maximal possible shift along X axis.
+        \param [in] maxShiftY - maximal possible shift along Y axis.
         \param [in] hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image. Can be NULL (no restriction).
         \param [in] regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
         \return a result of shift estimation (true or false). In positive case use function ::SimdShiftDetectorGetShift to get shift and other parameters. 
@@ -5662,9 +5662,9 @@ extern "C"
 
         \param [in] context - a shift detector context. It must be created by function ::SimdShiftDetectorInitBuffers and released by function ::SimdRelease.
         \param [out] shift - a pointer to array[2] to estimated integer shift of current image relative to background image. Can be NULL. 
-        \param [out] refinedShift - a pointer to array[2] to rifined shift (with sub-pixel accuracy) shift of current image relative to background image. Can be NULL.
+        \param [out] refinedShift - a pointer to array[2] to refined shift (with sub-pixel accuracy) shift of current image relative to background image. Can be NULL.
         \param [out] stability - a value which characterizes stability (reliability) of found shift. Can be NULL.
-        \param [out] correlation - a  best correlation of background and current image. Can be NULL.
+        \param [out] correlation - a best correlation of background and current image. Can be NULL.
     */
     SIMD_API void SimdShiftDetectorGetShift(const void* context, ptrdiff_t* shift, double * refinedShift, double * stability, double * correlation);
 
@@ -5674,7 +5674,7 @@ extern "C"
 
         \short Calculates Sobel's filter along x axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \n dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
@@ -5696,7 +5696,7 @@ extern "C"
 
         \short Calculates absolute value of Sobel's filter along x axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -5720,7 +5720,7 @@ extern "C"
 
         \short Calculates sum of absolute value of Sobel's filter along x axis.
 
-        Input image must has 8-bit gray format.
+        Input image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -5743,7 +5743,7 @@ extern "C"
 
         \short Calculates Sobel's filter along y axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -5767,7 +5767,7 @@ extern "C"
 
         \short Calculates absolute value of Sobel's filter along y axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
 
         For every point:
         \verbatim
@@ -5791,7 +5791,7 @@ extern "C"
 
         \short Calculates sum of absolute value of Sobel's filter along y axis.
 
-        Input image must has 8-bit gray format.
+        Input image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -5814,7 +5814,7 @@ extern "C"
 
         \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
         This function is used for contour extraction.
 
         For every point:
@@ -5841,7 +5841,7 @@ extern "C"
 
         \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask.
 
-        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.
+        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
         This function is used for contour extraction.
 
         For every point:
@@ -5872,7 +5872,7 @@ extern "C"
 
         \short Extract contour anchors from contour metrics.
 
-        All images must have the same width and height. Input image must has 16-bit integer format, output image must has 8-bit gray format.
+        All images must have the same width and height. Input image must have 16-bit integer format, output image must have 8-bit gray format.
         Input image with metrics can be estimated by using ::SimdContourMetrics or ::SimdContourMetricsMasked functions.
         This function is used for contour extraction.
 
@@ -6007,7 +6007,7 @@ extern "C"
 
         \short Finds minimal, maximal and average pixel values for given image.
 
-        The image must has 8-bit gray format.
+        The image must have 8-bit gray format.
 
         \note This function has a C++ wrappers: Simd::GetStatistic(const View<A>& src, uint8_t & min, uint8_t & max, uint8_t & average).
 
@@ -6028,7 +6028,7 @@ extern "C"
 
         \short Calculate statistical characteristics (moments) of pixels with given index.
 
-        The image must has 8-bit gray format.
+        The image must have 8-bit gray format.
 
         For every point:
         \verbatim
@@ -6066,7 +6066,7 @@ extern "C"
 
         \short Calculate statistical characteristics (moments) of given object.
 
-        The images must has 8-bit gray format and equal size. One of them can be empty.
+        The images must have 8-bit gray format and equal size. One of them can be empty.
 
         For every point:
         \verbatim
@@ -6277,7 +6277,7 @@ extern "C"
         \param [in] stride - a row size of the image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channels - an image channels count. It my be equal to 1, 2, 3 or 4.
+        \param [in] channels - an image channels count. It may be equal to 1, 2, 3 or 4.
         \param [out] valueSums - the pointer to output buffer with value sums. Size of the buffer must be at least channels count.
         \param [out] squareSums - the pointer to output buffer with square sums. Size of the buffer must be at least channels count.
     */
@@ -6332,7 +6332,7 @@ extern "C"
 
         \fn void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
 
-        \short Initilizes add algorithm.
+        \short Initializes add algorithm.
 
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
@@ -6375,7 +6375,7 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is eqial to channels.
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is equal to channels.
         \param [in] channels - a number of channels in the image tensor.
         \param [in] spatial - a spatial size of image tensor.
         \param [in, out] dst - a pointer to cumulative 32-bit image tensor. The size of the array is equal to channels * spatial.
@@ -6492,7 +6492,7 @@ extern "C"
 
         \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
 
-        \short Initilizes FP32 convolution algorithm.
+        \short Initializes FP32 convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
@@ -6543,7 +6543,7 @@ extern "C"
 
         \param [in, out] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to convolution weights.
-        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
         \param [in] bias - a pointer to bias. Can be NULL.
         \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
     */
@@ -6566,7 +6566,7 @@ extern "C"
 
         \fn void * SimdSynetConvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initilizes BF16 convolution algorithm.
+        \short Initializes BF16 convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
@@ -6640,7 +6640,7 @@ extern "C"
 
         \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initilizes INT8 convolution algorithm.
+        \short Initializes INT8 convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
@@ -6715,7 +6715,7 @@ extern "C"
 
         \fn void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initilizes FP32 deconvolution algorithm.
+        \short Initializes FP32 deconvolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to deconvolution parameters.
@@ -6763,11 +6763,11 @@ extern "C"
 
         \fn void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-        \short Sets weights, beases and parameters of activation function required for FP32 deconvolution algorithm.
+        \short Sets weights, biases and parameters of activation function required for FP32 deconvolution algorithm.
 
         \param [in, out] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to deconvolution weights.
-        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
         \param [in] bias - a pointer to bias. Can be NULL.
         \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
     */
@@ -6790,7 +6790,7 @@ extern "C"
 
     \fn void * SimdSynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-    \short Initilizes BF16 deconvolution algorithm.
+    \short Initializes BF16 deconvolution algorithm.
 
     \param [in] batch - a batch size.
     \param [in] conv - a pointer to deconvolution parameters.
@@ -6924,7 +6924,7 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to poitres to the input 32-bit float arrays. 
+        \param [in] src - a pointer to pointers to the input 32-bit float arrays. 
         \param [in] weight - a pointer to the 32-bit float array with sum coefficients. It is need only for ::SimdSynetEltwiseOperationSum operation type otherwise it can be NULL.
         \param [in] count - a count of input arrays. Must be at least 2.
         \param [in] size - a size of the input and output arrays.
@@ -7046,7 +7046,7 @@ extern "C"
 
         \fn void* SimdSynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW, SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
 
-        \short Initilizes <a href="https://github.com/onnx/onnx/blob/main/docs/Operators.md#GridSample">grid sample</a> 2D algorithm.
+        \short Initializes <a href="https://github.com/onnx/onnx/blob/main/docs/Operators.md#GridSample">grid sample</a> 2D algorithm.
 
         \param [in] batch - a batch size.
         \param [in] channels - a number of channels in the input and output tensors.
@@ -7140,7 +7140,7 @@ extern "C"
 
         \fn void * SimdSynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
-        \short Initilizes FP32 inner product algorithm.
+        \short Initializes FP32 inner product algorithm.
 
         \param [in] M - a height of A and height of C matrices.
         \param [in] N - a width of B and width of C matrices.
@@ -7181,11 +7181,11 @@ extern "C"
 
         \fn void SimdSynetInnerProduct32fSetParams(void* context, const float* weight, SimdBool* internal, const float* bias, const float* params);
 
-        \short Sets weights, beases and parameters of activation function required for FP32 inner product algorithm.
+        \short Sets weights, biases and parameters of activation function required for FP32 inner product algorithm.
 
         \param [in, out] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to inner product weights.
-        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
         \param [in] bias - a pointer to bias. Can be NULL.
         \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
     */
@@ -7238,7 +7238,7 @@ extern "C"
 
         \fn void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
-        \short Initilizes BF16 inner product (matrix mutiplication) algorithm.
+        \short Initializes BF16 inner product (matrix multiplication) algorithm.
 
         Algorithm's details (transpA = false, bias = true, activation = SimdConvolutionActivationIdentity):
         \verbatim
@@ -7261,7 +7261,7 @@ extern "C"
         \param [in] constB - a matrix B is constant.
         \param [in] bias - a flag to add bias to output matrix C.
         \param [in] activation - an activation function type used after inner product.
-        \return a pointer to BF32 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+        \return a pointer to BF16 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetInnerProduct16bInternalBufferSize, ::SimdSynetInnerProduct16bExternalBufferSize, 
             ::SimdSynetInnerProduct16bInfo, ::SimdSynetInnerProduct16bSetParams and ::SimdSynetInnerProduct16bForward.
     */
@@ -7304,7 +7304,7 @@ extern "C"
 
         \fn void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, SimdBool* internal, const float* bias);
 
-        \short Sets weights and beases required for BF16 inner product algorithm.
+        \short Sets weights and biases required for BF16 inner product algorithm.
 
         \param [in, out] context - a pointer to BF16 inner product context. It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to B matrix. Can be NULL.
@@ -7399,12 +7399,12 @@ extern "C"
 
         \fn void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
-        \short Initilizes FP32 merged convolution algorithm.
+        \short Initializes FP32 merged convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signilizes if we need to add source to output value.
+        \param [in] add - a flag that signalizes if we need to add source to output value.
         \return a pointer to FP32 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution32fExternalBufferSize, ::SimdSynetMergedConvolution32fInternalBufferSize, 
             ::SimdSynetMergedConvolution32fInfo, ::SimdSynetMergedConvolution32fSetParams and ::SimdSynetMergedConvolution32fForward.
@@ -7448,11 +7448,11 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
-        \short Sets weights, beases and parameters of activation function required for FP32 merged convolution algorithm.
+        \short Sets weights, biases and parameters of activation function required for FP32 merged convolution algorithm.
 
         \param [in, out] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [out] internal - a pointer to the array of flags signalizing that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
     */
@@ -7475,12 +7475,12 @@ extern "C"
 
         \fn void * SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
 
-        \short Initilizes BF16 merged convolution algorithm.
+        \short Initializes BF16 merged convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signilizes if we need to add source to output value.
+        \param [in] add - a flag that signalizes if we need to add source to output value.
         \return a pointer to BF16 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution16bExternalBufferSize, ::SimdSynetMergedConvolution16bInternalBufferSize, 
             ::SimdSynetMergedConvolution16bInfo, ::SimdSynetMergedConvolution16bSetParams and ::SimdSynetMergedConvolution16bForward.
@@ -7524,7 +7524,7 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, const float* const* bias, const float* const* params);
 
-        \short Sets weights, beases and parameters of activation function required for BF16 merged convolution algorithm.
+        \short Sets weights, biases and parameters of activation function required for BF16 merged convolution algorithm.
 
         \param [in, out] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
@@ -7550,7 +7550,7 @@ extern "C"
 
         \fn void * SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
 
-        \short Initilizes INT8 merged convolution algorithm.
+        \short Initializes INT8 merged convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
@@ -7599,11 +7599,11 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
 
-        \short Sets weights, beases and parameters of activation function required for INT8 merged convolution algorithm.
+        \short Sets weights, biases and parameters of activation function required for INT8 merged convolution algorithm.
 
         \param [in, out] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [out] internal - a pointer to the array of flags signalizing that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]), interim(min - stats[2], max - stats[3]) and output(min - stats[4], max - stats[5]) tensors.
@@ -7935,7 +7935,7 @@ extern "C"
         \param [in] kernelC - a channel size of the pooling kernel in 3D case. In 2D case it must be equal to 1.
         \param [in] kernelY - a height of the pooling kernel.
         \param [in] kernelX - a width of the pooling kernel.
-        \param [in] strideC - a �-stride of the pooling in 3D case. In 2D case it must be equal to 1.
+        \param [in] strideC - a c-stride of the pooling in 3D case. In 2D case it must be equal to 1.
         \param [in] strideY - a y-stride of the pooling.
         \param [in] strideX - a x-stride of the pooling.
         \param [in] padC - a channel pad to the begin of the input image.
@@ -8005,7 +8005,7 @@ extern "C"
 
         \fn void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero, const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
 
-        \short Initilizes quantized addition algorithm.
+        \short Initializes quantized addition algorithm.
 
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
@@ -8068,7 +8068,7 @@ extern "C"
 
         \fn void * SimdSynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
 
-        \short Initilizes Quantized convolution algorithm.
+        \short Initializes Quantized convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
@@ -8144,7 +8144,7 @@ extern "C"
 
         \fn void* SimdSynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
 
-        \short Initilizes quantized inner product (matrix mutiplication) algorithm.
+        \short Initializes quantized inner product (matrix multiplication) algorithm.
 
         Algorithm's details (transpA = false, bias = true):
         \verbatim
@@ -8207,7 +8207,7 @@ extern "C"
 
     /*! @ingroup synet_quantized_inner_product
 
-        \fn void SimdSynetQuantizedInnerProductSetParams(void* context, const float* weight, SimdBool* internal, const float* bias);
+        \fn void SimdSynetQuantizedInnerProductSetParams(void* context, const float* aScale, const uint8_t* aZero, const int8_t* b, const float* bScale, const int32_t* bias, const float* cScale, const uint8_t* cZero);
 
         \short Sets weights, biases, input/output parameters required for quantized inner product algorithm.
 
@@ -8241,12 +8241,12 @@ extern "C"
 
         \fn void * SimdSynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, int add);
 
-        \short Initilizes Quantized merged convolution algorithm.
+        \short Initializes Quantized merged convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signilizes if we need to add source to output value.
+        \param [in] add - a flag that signalizes if we need to add source to output value.
         \return a pointer to Quantized merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetQuantizedMergedConvolutionExternalBufferSize, ::SimdSynetQuantizedMergedConvolutionInternalBufferSize,
             ::SimdSynetQuantizedMergedConvolutionInfo, ::SimdSynetQuantizedMergedConvolutionSetParams and ::SimdSynetQuantizedMergedConvolutionForward.
@@ -8433,7 +8433,7 @@ extern "C"
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] =  src[i] > 0 ? src[i] : (slope*src[i];
+            dst[i] =  src[i] > 0 ? src[i] : slope*src[i];
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -8449,7 +8449,7 @@ extern "C"
 
         \fn void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
-        \short This function is used in order to restrict range for given 320bit float array.
+        \short This function is used in order to restrict range for given 32-bit float array.
 
         Algorithm's details:
         \verbatim
@@ -8471,10 +8471,10 @@ extern "C"
 
         \fn void* SimdSynetScale16bInit(size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias);
 
-        \short Initilizes BF16 scale algorithm.
+        \short Initializes BF16 scale algorithm.
 
         \param [in] channels - a number of channels in the (input/output) image tensor.
-        \param [in] spatial - a spaial size (height*width) of (input/output) image tensor.
+        \param [in] spatial - a spatial size (height*width) of (input/output) image tensor.
         \param [in] srcType - a type of input tensor. Can be FP32 of BF16.
         \param [in] dstType - a type of output tensor. Can be FP32 of BF16.
         \param [in] format - a format of input/output tensors.
@@ -8531,10 +8531,10 @@ extern "C"
 
         \fn void * SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
-        \short Initilizes INT8 scale algorithm.
+        \short Initializes INT8 scale algorithm.
 
         \param [in] batch - a batch size.
-        \param [in] channels - a numbeo of channels.
+        \param [in] channels - a number of channels.
         \param [in] spatial - a spatial image size.
         \param [in] srcType - an input data type (SimdTensorData32f or SimdTensorData8u).
         \param [in] dstType - an output data type (SimdTensorData32f or SimdTensorData8u).
@@ -8583,7 +8583,7 @@ extern "C"
 
     /*! @ingroup synet_conversion
 
-        \fn void void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
+        \fn void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
 
         \short Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -8671,7 +8671,7 @@ extern "C"
 
         \param [in] src - a pointer to the input FP32 array. The size of the array must be equal to outer*count*inner.
         \param [in] outer - an outer size of input and output arrays.
-        \param [in] count - a size of softmax dimmension.
+        \param [in] count - a size of softmax dimension.
         \param [in] inner - an inner size of input and output arrays.
         \param [out] dst - a pointer to the output FP32 array. The size of the array must be equal to outer*count*inner.
     */
@@ -8687,7 +8687,7 @@ extern "C"
 
         \param [in] src - a pointer to the input BF16 array. The size of the array must be equal to outer*count*inner.
         \param [in] outer - an outer size of input and output arrays.
-        \param [in] count - a size of softmax dimmension.
+        \param [in] count - a size of softmax dimension.
         \param [in] inner - an inner size of input and output arrays.
         \param [out] dst - a pointer to the output BF16 array. The size of the array must be equal to outer*count*inner.
     */
@@ -8782,7 +8782,7 @@ extern "C"
         \param [in] width - a width of (input/output) image tensor.
         \param [in] format - a format of (input/output) image tensor.
         \param [in] ver - a pointer to the 32-bit float array with vertical scale coefficients. The size of the array is equal to channels * width.
-        \param [in] hor - a pointer to the 32-bit float array with horisontal scale coefficients. The size of the array is equal to channels. * height.
+        \param [in] hor - a pointer to the 32-bit float array with horizontal scale coefficients. The size of the array is equal to channels * height.
         \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * height * width. Input and output image tensors can be the same.
     */
     SIMD_API void SimdSynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
@@ -8795,7 +8795,7 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to poitres to the input 32-bit float arrays.
+        \param [in] src - a pointer to the input 32-bit float arrays.
         \param [in] size - a size of the input and output arrays.
         \param [in] type - an unary operation type (see ::SimdSynetUnaryOperation32fType).
         \param [out] dst - a pointer to the output 32-bit float array.
@@ -8954,7 +8954,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
         \param [in] bgrStride - a row size of the bgr image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdUyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
 
@@ -9017,7 +9017,7 @@ extern "C"
         \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
         \param [in] mat - a pointer to 2x3 matrix with coefficients of affine warp.
         \param [in] flags - a flags of algorithm parameters.
-        \param [in] border - a pointer to to the array with color of border. The size of the array must be equal to channels.
+        \param [in] border - a pointer to the array with color of border. The size of the array must be equal to channels.
                              It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL.
         \return a pointer to warp affine context. On error it returns NULL.
                 This pointer is used in functions ::SimdWarpAffineRun.
@@ -9434,7 +9434,7 @@ extern "C"
 
     /*! @ingroup yuv_conversion
 
-        \fn SimdYToGray(const uint8_t* y, size_t width, size_t height, size_t yStride, uint8_t* gray, size_t grayStride);
+        \fn void SimdYToGray(const uint8_t* y, size_t yStride, size_t width, size_t height, uint8_t* gray, size_t grayStride);
 
         \short Converts 8-bit Y-plane of YUV to 8-bit gray image.
 
@@ -9474,7 +9474,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
         \param [in] bgraStride - a row size of the bgra image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuva420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType);
@@ -9502,7 +9502,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
         \param [in] bgraStride - a row size of the bgra image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuva422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType);
@@ -9529,7 +9529,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
         \param [in] bgraStride - a row size of the bgra image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType);
@@ -9555,7 +9555,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
         \param [in] bgrStride - a row size of the bgr image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
@@ -9581,7 +9581,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
         \param [in] bgrStride - a row size of the bgr image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
@@ -9606,7 +9606,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
         \param [in] bgrStride - a row size of the bgr image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv444pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
@@ -9633,7 +9633,7 @@ extern "C"
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
         \param [in] bgraStride - a row size of the bgra image.
         \param [in] alpha - a value of alpha channel.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
@@ -9660,7 +9660,7 @@ extern "C"
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
         \param [in] bgraStride - a row size of the bgra image.
         \param [in] alpha - a value of alpha channel.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
@@ -9686,7 +9686,7 @@ extern "C"
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
         \param [in] bgraStride - a row size of the bgra image.
         \param [in] alpha - a value of alpha channel.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
@@ -9794,7 +9794,7 @@ extern "C"
 
         \short Converts YUV420P image to 24-bit RGB image.
 
-        The input Y and output RGBA images must have the same width and height.
+        The input Y and output RGB images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component).
 
         \note This function has a C++ wrappers: Simd::Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601);
@@ -9809,7 +9809,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] rgb - a pointer to pixels data of output 24-bit RGB image.
         \param [in] rgbStride - a row size of the rgb image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType);
@@ -9835,7 +9835,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] rgb - a pointer to pixels data of output 24-bit RGB image.
         \param [in] rgbStride - a row size of the rgb image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv422pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType);
@@ -9860,14 +9860,14 @@ extern "C"
         \param [in] height - an image height.
         \param [out] rgb - a pointer to pixels data of output 24-bit RGB image.
         \param [in] rgbStride - a row size of the rgb image.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType);
 
     /*! @ingroup yuv_conversion
 
-        \fn void void SimdYuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha, SimdYuvType yuvType);
+        \fn void SimdYuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha, SimdYuvType yuvType);
 
         \short Converts YUV444P image to 32-bit RGBA image.
 
@@ -9886,7 +9886,7 @@ extern "C"
         \param [out] rgba - a pointer to pixels data of output 32-bit RGBA image.
         \param [in] rgbaStride - a row size of the rgba image.
         \param [in] alpha - a value of alpha channel.
-        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdYuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
         size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha, SimdYuvType yuvType);

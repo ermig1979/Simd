@@ -182,7 +182,7 @@
 
 /*! @ingroup conversion
     @defgroup interleave_conversion Interleave
-    \short Functions to intereleave planar images.
+    \short Functions to interleave planar images.
 */
 
 /*! @ingroup conversion
@@ -402,12 +402,12 @@
 
 /*! @ingroup synet
     @defgroup synet_activation Activation functions
-    \short Functions to acceleratе activation functions in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate activation functions in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
     @defgroup synet_conversion Conversion functions
-    \short Functions to acceleratе conversion in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate conversion in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
@@ -437,22 +437,22 @@
 
 /*! @ingroup synet
     @defgroup synet_gather_elements GatherElements algorithm
-    \short Functions to acceleratе GatherElements algorithm in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate GatherElements algorithm in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
     @defgroup synet_grid_sample GridSampleLayer functions
-    \short Functions to acceleratе GridSampleLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate GridSampleLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
     @defgroup synet_inner_product InnerProductLayer functions
-    \short Functions to acceleratе InnerProductLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate InnerProductLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
     @defgroup synet_inner_product_bf16 InnerProduct16bLayer functions
-    \short Functions to acceleratе InnerProduct16bLayer  in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate InnerProduct16bLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
@@ -472,27 +472,27 @@
 
 /*! @ingroup synet
     @defgroup synet_normalize NormalizeLayer functions
-    \short Functions to acceleratе NormalizeLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate NormalizeLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
     @defgroup synet_permute PermuteLayer functions
-    \short Functions to acceleratе PermuteLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate PermuteLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
     @defgroup synet_pooling PoolingLayer functions
-    \short Functions to acceleratе PoolingLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate PoolingLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
     @defgroup synet_scale ScaleLayer functions
-    \short Functions to acceleratе layer scale in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate layer scale in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
     @defgroup synet_winograd Winograd functions
-    \short Functions to acceleratе Winograd convolution algorithm in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    \short Functions to accelerate Winograd convolution algorithm in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet
@@ -531,13 +531,13 @@
 */
 
 /*! @ingroup synet_quantized
-    @defgroup synet_quantized_activation Activation functions need to quantization
-    \short These function are used to accelerate quantization algorithms in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    @defgroup synet_quantized_activation Activation functions needed for quantization
+    \short These functions are used to accelerate quantization algorithms in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet_quantized
-    @defgroup synet_quantized_other Other functions need to quantization
-    \short These function are used to accelerate quantization algorithms in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+    @defgroup synet_quantized_other Other functions needed for quantization
+    \short These functions are used to accelerate quantization algorithms in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup functions

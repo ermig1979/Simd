@@ -203,7 +203,7 @@ namespace Simd
             {
             }
         };
-        typedef std::vector<Object> Objects; /*!< A vector of objects type defenition. */
+        typedef std::vector<Object> Objects; /*!< A vector of objects type definition. */
 
         /*!
             Creates a new empty Detection structure.
