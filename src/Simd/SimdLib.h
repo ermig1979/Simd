@@ -262,7 +262,7 @@ typedef enum
 typedef enum
 {
     SimdCpuInfoSockets,/*!< A number of sockets. */
-    SimdCpuInfoCores, /*!< A number of psysical CPU cores. */
+    SimdCpuInfoCores, /*!< A number of physical CPU cores. */
     SimdCpuInfoThreads, /*!< A number of logical CPU cores. */
     SimdCpuInfoCacheL1, /*!< A size of level 1 data cache. */
     SimdCpuInfoCacheL2, /*!< A size of level 2 cache. */
@@ -532,7 +532,7 @@ typedef enum
     SimdSynetCompatibilityFmaMask = 3, /*!< Bit mask of options of FMA instructions using. */
     SimdSynetCompatibility8iPrecise = 0, /*!< Using of precise 8-bit integer multiplication (VNNI, or its 16-bit emulation). */
     SimdSynetCompatibility8iOverflow = 4, /*!< Allow 16-bit integer overflow. */
-    SimdSynetCompatibility8iNarrowed = 8, /*!< Using of narrowed range (signed: [-90 .. 90], unsigned: [0 .. 180]) to awoid 16-bit integer overflow. */
+    SimdSynetCompatibility8iNarrowed = 8, /*!< Using of narrowed range (signed: [-90 .. 90], unsigned: [0 .. 180]) to avoid 16-bit integer overflow. */
     SimdSynetCompatibility8iMask = 12, /*!< Bit mask of options of 8-bit integer multiplication. */
     SimdSynetCompatibility16bfAvoid = 0, /*!< Not use BFloat16 (Brain Floating Point) format. */
     SimdSynetCompatibility16bfHard = 16, /*!< Use BFloat16 (Brain Floating Point) format only if hardware support exists. */
@@ -564,9 +564,9 @@ typedef enum
     SimdSynetUnaryOperation32fAbs,
     /*! Gets ceil for every point of input tensor. */
     SimdSynetUnaryOperation32fCeil,
-    /*! Gets erf (error function) for every point of input tensor. */
-    SimdSynetUnaryOperation32fCos,
     /*! Gets cosine function for every point of input tensor. */
+    SimdSynetUnaryOperation32fCos,
+    /*! Gets erf (error function) for every point of input tensor. */
     SimdSynetUnaryOperation32fErf,
     /*! Gets exponent for every point of input tensor. */
     SimdSynetUnaryOperation32fExp,
@@ -629,12 +629,12 @@ typedef enum
 typedef enum
 {
     SimdTransformRotate0 = 0, /*!< An original image. The output image has the same size as input image.*/
-    SimdTransformRotate90, /*!< Image rotated 90 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+    SimdTransformRotate90, /*!< Image rotated 90 degrees counterclockwise. The output width and height are equal to the input height and width. */
     SimdTransformRotate180, /*!< Image rotated 180 degrees counterclockwise. The output image has the same size as input image. */
-    SimdTransformRotate270, /*!< Image rotated 270 degrees counterclockwise. The output width and height are equal to the input height and widht. */
-    SimdTransformTransposeRotate0, /*!< Transposed image. The output width and height are equal to the input height and widht. */
+    SimdTransformRotate270, /*!< Image rotated 270 degrees counterclockwise. The output width and height are equal to the input height and width. */
+    SimdTransformTransposeRotate0, /*!< Transposed image. The output width and height are equal to the input height and width. */
     SimdTransformTransposeRotate90, /*!< Image transposed and rotated 90 degrees counterclockwise. It is equal to horizontal mirroring of image. The output image has the same size as input image.*/
-    SimdTransformTransposeRotate180, /*!< Image transposed and rotated 180 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+    SimdTransformTransposeRotate180, /*!< Image transposed and rotated 180 degrees counterclockwise. The output width and height are equal to the input height and width. */
     SimdTransformTransposeRotate270, /*!< Image transposed and rotated 270 degrees counterclockwise. It is equal to vertical mirroring of image. The output image has the same size as input image.*/
 } SimdTransformType;
 
@@ -977,7 +977,7 @@ extern "C"
 
         \fn void SimdSetAmxFull();
 
-        \short Set configuration of AMX registers to maximat size. It is x86 specific functionality. Affect only on CPU with AMX support.
+        \short Set configuration of AMX registers to maximum size. It is x86 specific functionality. Affect only on CPU with AMX support.
     */
     SIMD_API void SimdSetAmxFull(void);
 
@@ -1013,7 +1013,7 @@ extern "C"
 
         \fn void SimdAbsDifference(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, uint8_t * c, size_t cStride, size_t width, size_t height);
 
-        \short Gets absolute difference of two gray 8-bit images, pyxel by pixel.
+        \short Gets absolute difference of two gray 8-bit images, pixel by pixel.
 
         The three images must have the same width and height.
 
@@ -1279,7 +1279,7 @@ extern "C"
         \param [in] uStride - a row size of U-component.
         \param [in, out] v - a pointer to pixels data of V-component of background YUV420P image.
         \param [in] vStride - a row size of V-component.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdAlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, 
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
@@ -1306,7 +1306,7 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] channelCount - a channel count for foreground and background images (1 <= channelCount <= 4).
-        \param [in] alpha - a pvalue of alpha.
+        \param [in] alpha - a value of alpha.
         \param [in, out] dst - a pointer to pixels data of background image.
         \param [in] dstStride - a row size of the background image.
     */
@@ -1364,8 +1364,8 @@ extern "C"
         \param [in] srcStride - a row size of the input image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of output premultiplyed image.
-        \param [in] dstStride - a row size of the output premultiplyed image.
+        \param [out] dst - a pointer to pixels data of output premultiplied image.
+        \param [in] dstStride - a row size of the output premultiplied image.
         \param [in] argb - a boolean flag describing image format (BGRA32, RGBA32 - SimdFalse; ARGB32 - SimdTrue).
     */
     SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb);
@@ -1394,8 +1394,8 @@ extern "C"
         \param [in] srcStride - a row size of the input image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of output unpremultiplyed image.
-        \param [in] dstStride - a row size of the output unpremultiplyed image.
+        \param [out] dst - a pointer to pixels data of output unpremultiplied image.
+        \param [in] dstStride - a row size of the output unpremultiplied image.
         \param [in] argb - a boolean flag describing image format (BGRA32, RGBA32 - SimdFalse; ARGB32 - SimdTrue).
     */
     SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdBool argb);
@@ -1698,7 +1698,7 @@ extern "C"
         \param [in] src - a pointer to Base64 encoded input string.
         \param [in] srcSize - a length of input string.
         \param [out] dst - a pointer to the output buffer with decoded string. The size of the buffer is must be at least srcSize / 4 * 3.
-        \param [out] dstSize - a pointer to the value with lenght of decoded string. 
+        \param [out] dstSize - a pointer to the value with length of decoded string. 
     */
     SIMD_API void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
 
@@ -1877,7 +1877,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -1902,7 +1902,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuv422pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -1926,7 +1926,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, 
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
@@ -1954,7 +1954,7 @@ extern "C"
         \param [in] vStride - a row size of the v image.
         \param [out] a - a pointer to pixels data of output 8-bit image with alpha plane.
         \param [in] aStride - a row size of the a image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgraToYuva420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, uint8_t* a, size_t aStride, SimdYuvType yuvType);
@@ -2014,7 +2014,7 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] green - a pointer to pixels data of input 16-bit image with green color plane.
-        \param [in] greenStride - a row size of the blue image.
+        \param [in] greenStride - a row size of the green image.
         \param [in] red - a pointer to pixels data of input 16-bit image with red color plane.
         \param [in] redStride - a row size of the red image.
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
@@ -2142,7 +2142,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgrToYuv420pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -2167,7 +2167,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgrToYuv422pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -2191,7 +2191,7 @@ extern "C"
         \param [in] uStride - a row size of the u image.
         \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
         \param [in] vStride - a row size of the v image.
-        \param [in] yuvType - a type of output YUV image (see descriprion of ::SimdYuvType).
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType).
     */
     SIMD_API void SimdBgrToYuv444pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
