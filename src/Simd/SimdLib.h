@@ -2537,9 +2537,9 @@ extern "C"
 
         \fn void * SimdDescrIntInit(size_t size, size_t depth);
 
-        \short Initilizes Integer Descriptor Engine.
+        \short Initializes Integer Descriptor Engine.
 
-        \param [in] size - a length of original (32-bit or 16-bit) float descriptor. It be multiple of 8. Also it must be less or equal than 32768.
+        \param [in] size - a length of original (32-bit or 16-bit) float descriptor. It must be multiple of 8. Also it must be less or equal than 32768.
         \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 4, 5, 6, 7, 8.
         \return a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function ::SimdRelease.
                 This pointer is used in functions ::SimdDescrIntEncodedSize, ::SimdDescrIntDecodedSize, 
@@ -2602,7 +2602,7 @@ extern "C"
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] src - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
-        \param [out] dst - a pointer to output 32-bit float descriptor. Its lenght can be determined by function ::SimdDescrIntDecodedSize.
+        \param [out] dst - a pointer to output 32-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
     */
     SIMD_API void SimdDescrIntDecode32f(const void* context, const uint8_t* src, float* dst);
 
@@ -2624,7 +2624,7 @@ extern "C"
 
         \short Calculates cosine distance of two integer descriptors.
 
-        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] a - a pointer to the first integer descriptor. 
@@ -2639,7 +2639,7 @@ extern "C"
 
         \short Calculates mutual cosine distance of two arrays of integer descriptor arrays.
 
-        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] M - a number of A arrays.
@@ -2656,7 +2656,7 @@ extern "C"
 
         \short Calculates mutual cosine distance of two arrays of integer descriptors.
 
-        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] M - a number of A arrays.
@@ -2673,7 +2673,7 @@ extern "C"
 
         \short Calculates vector norm for integer descriptor.
 
-        \note Integer descriptor can be recieved with using of functions ::SimdDescrIntEncode32f of ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
         \param [in] a - a pointer to integer descriptor.
@@ -2870,7 +2870,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2894,7 +2894,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2918,7 +2918,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2942,7 +2942,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2966,7 +2966,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -2990,7 +2990,7 @@ extern "C"
         \param [in] top - a top side of bounding box which restricts detection region.
         \param [in] right - a right side of bounding box which restricts detection region.
         \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
         \param [in] dstStride - a row size of the dst image.
     */
     SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -3013,7 +3013,7 @@ extern "C"
         \param [in] y1 - Y coordinate of the first point of the line.
         \param [in] x2 - X coordinate of the second point of the line.
         \param [in] y2 - Y coordinate of the second point of the line.
-        \param [in] color - a ponter to line color.
+        \param [in] color - a pointer to line color.
         \param [in] lineWidth - a line width.
     */
     SIMD_API void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
@@ -3035,7 +3035,7 @@ extern "C"
         \param [in] top - a top of the rectangle.
         \param [in] right - a right of the rectangle.
         \param [in] bottom - a bottom of the rectangle.
-        \param [in] color - a ponter to rectangle color.
+        \param [in] color - a pointer to rectangle color.
         \param [in] lineWidth - a line width of rectangle.
     */
     SIMD_API void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
@@ -3257,7 +3257,7 @@ extern "C"
         \param [in] text - a pointer to text.
         \param [in] left - an X coordinate of start position to draw text.
         \param [in] top - an Y coordinate of start position to draw text.
-        \param [in] color - a ponter to font color.
+        \param [in] color - a pointer to font color.
     */
     SIMD_API void SimdFontDraw(void* context, uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t* color);
 
@@ -3501,7 +3501,7 @@ extern "C"
 
         \fn void SimdGaussianBlurRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
-        \short Performs image Gaussian bluring.
+        \short Performs image Gaussian blurring.
 
         Bluring algorithm for every point:
         \verbatim
@@ -3622,7 +3622,7 @@ extern "C"
 
     /*! @ingroup gray_conversion
 
-        \fn SimdGrayToY(const uint8_t* gray, size_t width, size_t height, size_t grayStride, uint8_t* y, size_t yStride);
+        \fn void SimdGrayToY(const uint8_t* gray, size_t width, size_t height, size_t grayStride, uint8_t* y, size_t yStride);
 
         \short Converts 8-bit gray image to 8-bit Y-plane of YUV.
 
@@ -3659,7 +3659,7 @@ extern "C"
         \param [in] height - an image height.
         \param [in] stride - a row size of the image.
         \param [in] step - a step for second derivative calculation.
-        \param [in] indent - a indent from image boundary.
+        \param [in] indent - an indent from image boundary.
         \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
     */
     SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride,
@@ -3812,7 +3812,7 @@ extern "C"
         \param [in] cellX - a width of cell.
         \param [in] cellY - a height of cell.
         \param [in] quantization - a direction quantization. Must be even.
-        \param [out] histograms - a pointer to buffer with histograms. Array must has size grater or equal to (width/cellX)*(height/cellY)*quantization.
+        \param [out] histograms - a pointer to buffer with histograms. Array must have size greater or equal to (width/cellX)*(height/cellY)*quantization.
     */
     SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
         size_t cellX, size_t cellY, size_t quantization, float * histograms);
@@ -3823,7 +3823,7 @@ extern "C"
 
         \short Extracts HOG features for 8-bit gray image.
 
-        Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.
+        Extracts HOG features for 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.
 
         \note This function has a C++ wrapper Simd::HogExtractFeatures(const View<A> & src, float * features).
 
@@ -3831,7 +3831,7 @@ extern "C"
         \param [in] stride - a row size of the image.
         \param [in] width - an image width. It must be a multiple of 8. Its minimal value is 16.
         \param [in] height - an image height. It must be a multiple of 8. Its minimal value is 16.
-        \param [out] features - a pointer to buffer with features. Array must has size grater or equal to (width/8)*(height/8)*31.
+        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31.
     */
     SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
@@ -3897,7 +3897,7 @@ extern "C"
         \param [in] height - a height of input image.
         \param [in] format - a pixel format of input image. 
             Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
-        \param [in] file - a format of output image file. To auto choise format of output file set this parameter to ::SimdImageFileUndefined.
+        \param [in] file - a format of output image file. To auto choose format of output file set this parameter to ::SimdImageFileUndefined.
         \param [in] quality - a parameter of compression quality (if file format supports it).
         \param [out] size - a pointer to the size of output image file in bytes.
         \return a pointer to memory buffer with output image file. 
@@ -3919,7 +3919,7 @@ extern "C"
         \param [in] height - a height of input image.
         \param [in] format - a pixel format of input image. 
             Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
-        \param [in] file - a format of output image file. To auto choise format of output file set this parameter to ::SimdImageFileUndefined.
+        \param [in] file - a format of output image file. To auto choose format of output file set this parameter to ::SimdImageFileUndefined.
         \param [in] quality - a parameter of compression quality (if file format supports it).
         \param [in] path - a path to output image file.
         \return result of the operation.
@@ -3938,7 +3938,7 @@ extern "C"
         \param [in] uvStride - a row size of the uv image.
         \param [in] width - a width of input image. It must be even number.
         \param [in] height - a height of input image. It must be even number.
-        \param [in] yuvType - a type of input YUV image(see descriprion of::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
         \param [in] quality - a parameter of compression quality.
         \param [out] size - a pointer to the size of output image file in bytes.
         \return a pointer to memory buffer with output image file.
@@ -3960,7 +3960,7 @@ extern "C"
         \param [in] vStride - a row size of the v image.
         \param [in] width - a width of input image. It must be even number.
         \param [in] height - a height of input image. It must be even number.
-        \param [in] yuvType - a type of input YUV image(see descriprion of::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
         \param [in] quality - a parameter of compression quality.
         \param [out] size - a pointer to the size of output image file in bytes.
         \return a pointer to memory buffer with output image file.
@@ -4029,8 +4029,8 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] srcStride - a row size of the 16-bit signed integer image.
-        \param [out] dst - a pointer to pixels data of input 8-bit gray image.
-        \param [out] dstStride - a row size of the gray image.
+        \param [out] dst - a pointer to pixels data of output 8-bit gray image.
+        \param [in] dstStride - a row size of the gray image.
     */
     SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
 
@@ -4482,7 +4482,7 @@ extern "C"
 
         \fn void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
-        \short Converts a 8-bit gray image to the 32-bit float array.
+        \short Converts an 8-bit gray image to the 32-bit float array.
 
         The length of output array must be equal to the area of input image.
 
@@ -7452,7 +7452,7 @@ extern "C"
 
         \param [in, out] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [out] internal - a pointer to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
     */
@@ -7603,7 +7603,7 @@ extern "C"
 
         \param [in, out] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [out] internal - a pointer to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
         \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]), interim(min - stats[2], max - stats[3]) and output(min - stats[4], max - stats[5]) tensors.
