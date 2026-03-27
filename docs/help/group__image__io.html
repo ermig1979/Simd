@@ -142,7 +142,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a pixel format of input image. Supported pixel formats: <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a47c73032733f1ce1fbd5f27c5cc433b9">SimdPixelFormatGray8</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393afc326697127f235517ffa5887ed4ab71">SimdPixelFormatBgr24</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393ae44d7b4e3041b9007d284ea7458b5434">SimdPixelFormatBgra32</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393ab8728eeaf379df98637a870290bb2dac">SimdPixelFormatRgb24</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a202b9f3345228a42203de97ba5e3ad43">SimdPixelFormatRgba32</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">file</td><td>- a format of output image file. To auto choise format of output file set this parameter to <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">file</td><td>- a format of output image file. To auto choose format of output file set this parameter to <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">quality</td><td>- a parameter of compression quality (if file format supports it). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>- a pointer to the size of output image file in bytes. </td></tr>
   </table>
@@ -223,7 +223,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a pixel format of input image. Supported pixel formats: <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a47c73032733f1ce1fbd5f27c5cc433b9">SimdPixelFormatGray8</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393afc326697127f235517ffa5887ed4ab71">SimdPixelFormatBgr24</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393ae44d7b4e3041b9007d284ea7458b5434">SimdPixelFormatBgra32</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393ab8728eeaf379df98637a870290bb2dac">SimdPixelFormatRgb24</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a202b9f3345228a42203de97ba5e3ad43">SimdPixelFormatRgba32</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">file</td><td>- a format of output image file. To auto choise format of output file set this parameter to <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">file</td><td>- a format of output image file. To auto choose format of output file set this parameter to <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">quality</td><td>- a parameter of compression quality (if file format supports it). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to output image file. </td></tr>
   </table>
@@ -310,7 +310,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">uvStride</td><td>- a row size of the uv image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input image. It must be even number. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input image. It must be even number. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image(see descriprion of::SimdYuvType). Now only <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d">SimdYuvTrect871</a> (T-REC-T.871 format) is supported. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image (see description of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). Now only <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d">SimdYuvTrect871</a> (T-REC-T.871 format) is supported. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">quality</td><td>- a parameter of compression quality. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>- a pointer to the size of output image file in bytes. </td></tr>
   </table>
@@ -411,7 +411,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">vStride</td><td>- a row size of the v image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input image. It must be even number. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input image. It must be even number. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image(see descriprion of::SimdYuvType). Now only <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d">SimdYuvTrect871</a> (T-REC-T.871 format) is supported. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType</td><td>- a type of input YUV image (see description of <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>). Now only <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d">SimdYuvTrect871</a> (T-REC-T.871 format) is supported. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">quality</td><td>- a parameter of compression quality. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>- a pointer to the size of output image file in bytes. </td></tr>
   </table>

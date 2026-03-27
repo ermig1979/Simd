@@ -215,7 +215,7 @@ for(i = 0; i &lt; count; ++i)
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to poitres to the input 32-bit float arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pointers to the input 32-bit float arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the 32-bit float array with sum coefficients. It is need only for <a class="el" href="group__synet__types.html#gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7">SimdSynetEltwiseOperationSum</a> operation type otherwise it can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a count of input arrays. Must be at least 2. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of the input and output arrays. </td></tr>
@@ -447,7 +447,7 @@ for(i = 0; i &lt; count; ++i)
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input FP32 array. The size of the array must be equal to outer*count*inner. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">outer</td><td>- an outer size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax dimmension. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax dimension. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- an inner size of input and output arrays. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output FP32 array. The size of the array must be equal to outer*count*inner. </td></tr>
   </table>
@@ -506,7 +506,7 @@ for(i = 0; i &lt; count; ++i)
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input BF16 array. The size of the array must be equal to outer*count*inner. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">outer</td><td>- an outer size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax dimmension. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax dimension. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- an inner size of input and output arrays. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output BF16 array. The size of the array must be equal to outer*count*inner. </td></tr>
   </table>
@@ -591,7 +591,7 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of (input/output) image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">ver</td><td>- a pointer to the 32-bit float array with vertical scale coefficients. The size of the array is equal to channels * width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">hor</td><td>- a pointer to the 32-bit float array with horisontal scale coefficients. The size of the array is equal to channels. * height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hor</td><td>- a pointer to the 32-bit float array with horizontal scale coefficients. The size of the array is equal to channels * height. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * height * width. Input and output image tensors can be the same. </td></tr>
   </table>
   </dd>
@@ -641,7 +641,7 @@ for(i = 0; i &lt; count; ++i)
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to poitres to the input 32-bit float arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of the input and output arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- an unary operation type (see <a class="el" href="group__synet__types.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a>). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>

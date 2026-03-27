@@ -144,7 +144,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">cellX</td><td>- a width of cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">cellY</td><td>- a height of cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">quantization</td><td>- a direction quantization. Must be even. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">histograms</td><td>- a pointer to buffer with histograms. Array must has size grater or equal to (width/cellX)*(height/cellY)*quantization. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">histograms</td><td>- a pointer to buffer with histograms. Array must have size greater or equal to (width/cellX)*(height/cellY)*quantization. </td></tr>
   </table>
   </dd>
 </dl>
@@ -196,7 +196,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Extracts HOG features for 8-bit gray image. </p>
-<p >Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.</p>
+<p >Extracts HOG features for 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::HogExtractFeatures(const View&lt;A&gt; &amp; src, float * features).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -204,7 +204,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. It must be a multiple of 8. Its minimal value is 16. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. It must be a multiple of 8. Its minimal value is 16. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must has size grater or equal to (width/8)*(height/8)*31. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31. </td></tr>
   </table>
   </dd>
 </dl>
@@ -424,7 +424,7 @@ else
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must has size grater or equal to (width/8)*(height/8)*31. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31. </td></tr>
   </table>
   </dd>
 </dl>

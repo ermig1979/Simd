@@ -51,7 +51,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga9fe43a24843547138f4cb8321820bbdc"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc">SimdNeuralConvert</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, float *dst, size_t dstStride, int inversion)</td></tr>
-<tr class="memdesc:ga9fe43a24843547138f4cb8321820bbdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 8-bit gray image to the 32-bit float array.  <a href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc">More...</a><br /></td></tr>
+<tr class="memdesc:ga9fe43a24843547138f4cb8321820bbdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an 8-bit gray image to the 32-bit float array.  <a href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc">More...</a><br /></td></tr>
 <tr class="separator:ga9fe43a24843547138f4cb8321820bbdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga60e042d289be2ec6d799a484eee27173"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga60e042d289be2ec6d799a484eee27173">SimdNeuralDerivativeSigmoid</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
 <tr class="memdesc:ga60e042d289be2ec6d799a484eee27173"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multiplies output 32-bit float array by derivative of sigmoid from input 32-bit float array.  <a href="group__neural.html#ga60e042d289be2ec6d799a484eee27173">More...</a><br /></td></tr>
@@ -195,7 +195,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts a 8-bit gray image to the 32-bit float array. </p>
+<p>Converts an 8-bit gray image to the 32-bit float array. </p>
 <p >The length of output array must be equal to the area of input image.</p>
 <p >For every point: </p><pre class="fragment">dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::NeuralConvert(const View&lt;A&gt;&amp; src, float * dst, bool inversion).</dd></dl>
@@ -2007,8 +2007,8 @@ dstHeight = (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY +
     <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the y-coordinate of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the convolution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">strideY</td><td>- a y-stride of the convolution. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dilationX</td><td>- a x-stride of the convolution. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dilationY</td><td>- a y-stride of the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dilationX</td><td>- a x-dilation of the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dilationY</td><td>- a y-dilation of the convolution. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">buffer</td><td>- a pointer to the external temporal buffer used by the algorithm. Can be NULL (the algorithm uses internal buffer). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">size</td><td>- a pointer to the size of the external temporal buffer. If the size is too small it will contain required value. Required size is approximately equal to <code>dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float)</code>. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to the output multichannel 32-bit float image. Total size of the output image is equal to <code>dstWidth*dstHeight*dstDepth</code>. </td></tr>
@@ -2063,7 +2063,7 @@ dstHeight = (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY +
 <p>Converts a 8-bit gray image to the 32-bit float array. </p>
 <p >The length of output array must be equal to the area of input image.</p>
 <p >For every point: </p><pre class="fragment">dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc" title="Converts a 8-bit gray image to the 32-bit float array.">SimdNeuralConvert</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc" title="Converts an 8-bit gray image to the 32-bit float array.">SimdNeuralConvert</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>

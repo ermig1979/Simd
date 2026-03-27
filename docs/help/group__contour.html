@@ -126,7 +126,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis. </p>
-<p >All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. This function is used for contour extraction.</p>
+<p >All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format. This function is used for contour extraction.</p>
 <p >For every point: </p><pre class="fragment">dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
 dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
 dst[x, y] = (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
@@ -214,7 +214,7 @@ dst[x, y] = (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
 </div><div class="memdoc">
 
 <p>Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask. </p>
-<p >All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. This function is used for contour extraction.</p>
+<p >All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format. This function is used for contour extraction.</p>
 <p >For every point: </p><pre class="fragment">dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
 dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
 dst[x, y] = mask[x, y] &lt; indexMin ? 0 : (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
@@ -299,7 +299,7 @@ dst[x, y] = mask[x, y] &lt; indexMin ? 0 : (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
 </div><div class="memdoc">
 
 <p>Extract contour anchors from contour metrics. </p>
-<p >All images must have the same width and height. Input image must has 16-bit integer format, output image must has 8-bit gray format. Input image with metrics can be estimated by using <a class="el" href="group__contour.html#ga9e84068417f5cc8b02081791145f808a" title="Calculates contour metrics based on absolute value and direction of Sobel&#39;s filter along y and y axis...">SimdContourMetrics</a> or <a class="el" href="group__contour.html#ga39a5983f29f25f04e2d867822607d364" title="Calculates contour metrics based on absolute value and direction of Sobel&#39;s filter along y and y axis...">SimdContourMetricsMasked</a> functions. This function is used for contour extraction.</p>
+<p >All images must have the same width and height. Input image must have 16-bit integer format, output image must have 8-bit gray format. Input image with metrics can be estimated by using <a class="el" href="group__contour.html#ga9e84068417f5cc8b02081791145f808a" title="Calculates contour metrics based on absolute value and direction of Sobel&#39;s filter along y and y axis...">SimdContourMetrics</a> or <a class="el" href="group__contour.html#ga39a5983f29f25f04e2d867822607d364" title="Calculates contour metrics based on absolute value and direction of Sobel&#39;s filter along y and y axis...">SimdContourMetricsMasked</a> functions. This function is used for contour extraction.</p>
 <p >For every point (except border): </p><pre class="fragment">a[x, y] = src[x, y] &gt;&gt; 1.
 if(src[x, y] &amp; 1)
     dst[x, y] = a[x, y] &gt; 0 &amp;&amp; (a[x, y] - a[x + 1, y] &gt;= threshold) &amp;&amp; (a[x, y] - a[x - 1, y] &gt;= threshold) ? 255 : 0;
@@ -349,7 +349,7 @@ else
 </div><div class="memdoc">
 
 <p>Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis. </p>
-<p >All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. This function is used for contour extraction.</p>
+<p >All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format. This function is used for contour extraction.</p>
 <p >For every point: </p><pre class="fragment">dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
 dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
 dst[x, y] = (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
@@ -403,7 +403,7 @@ dst[x, y] = (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
 </div><div class="memdoc">
 
 <p>Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask. </p>
-<p >All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. This function is used for contour extraction.</p>
+<p >All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format. This function is used for contour extraction.</p>
 <p >For every point: </p><pre class="fragment">dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
 dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
 dst[x, y] = mask[x, y] &lt; indexMin ? 0 : (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
@@ -459,7 +459,7 @@ dst[x, y] = mask[x, y] &lt; indexMin ? 0 : (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
 </div><div class="memdoc">
 
 <p>Extract contour anchors from contour metrics. </p>
-<p >All images must have the same width and height. Input image must has 16-bit integer format, output image must has 8-bit gray format. Input image with metrics can be estimated by using <a class="el" href="group__contour.html#ga9e84068417f5cc8b02081791145f808a" title="Calculates contour metrics based on absolute value and direction of Sobel&#39;s filter along y and y axis...">SimdContourMetrics</a> or <a class="el" href="group__contour.html#ga39a5983f29f25f04e2d867822607d364" title="Calculates contour metrics based on absolute value and direction of Sobel&#39;s filter along y and y axis...">SimdContourMetricsMasked</a> functions. This function is used for contour extraction.</p>
+<p >All images must have the same width and height. Input image must have 16-bit integer format, output image must have 8-bit gray format. Input image with metrics can be estimated by using <a class="el" href="group__contour.html#ga9e84068417f5cc8b02081791145f808a" title="Calculates contour metrics based on absolute value and direction of Sobel&#39;s filter along y and y axis...">SimdContourMetrics</a> or <a class="el" href="group__contour.html#ga39a5983f29f25f04e2d867822607d364" title="Calculates contour metrics based on absolute value and direction of Sobel&#39;s filter along y and y axis...">SimdContourMetricsMasked</a> functions. This function is used for contour extraction.</p>
 <p >For every point (except border): </p><pre class="fragment">a[x, y] = src[x, y] &gt;&gt; 1.
 if(src[x, y] &amp; 1)
     dst[x, y] = a[x, y] &gt; 0 &amp;&amp; (a[x, y] - a[x + 1, y] &gt;= threshold) &amp;&amp; (a[x, y] - a[x - 1, y] &gt;= threshold) ? 255 : 0;

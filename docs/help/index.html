@@ -89,7 +89,7 @@ The library building for Linux</h1>
 <div class="line">cmake ../prj/cmake -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/aarch64-linux-gnu-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;aarch64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
 <div class="line">make</div>
 </div><!-- fragment --><p> As result the library and the test application will be built in the current directory.</p>
-<p >There are addition build parameters:</p>
+<p >There are additional build parameters:</p>
 <ul>
 <li><code>SIMD_AVX512</code> - Enable of AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) CPU extensions. It is switched on by default.</li>
 <li><code>SIMD_AVX512VNNI</code> - Enable of AVX-512-VNNI CPU extensions. It is switched on by default.</li>
@@ -98,11 +98,11 @@ The library building for Linux</h1>
 <li><code>SIMD_INFO</code> - Print build information. It is switched on by default.</li>
 <li><code>SIMD_PERF</code> - Enable of internal performance statistic. It is switched off by default.</li>
 <li><code>SIMD_SHARED</code> - Build as SHARED library. It is switched off by default.</li>
-<li><code>SIMD_GET_VERSION</code> - Call scipt to get Simd Library version. It is switched on by default.</li>
+<li><code>SIMD_GET_VERSION</code> - Call script to get Simd Library version. It is switched on by default.</li>
 <li><code>SIMD_SYNET</code> - Enable optimizations for Synet framework. It is switched on by default.</li>
 <li><code>SIMD_INT8_DEBUG</code> - Enable debug INT8 capabilities for Synet framework. It is switched off by default.</li>
 <li><code>SIMD_HIDE</code> - Hide internal functions of Simd Library. It is switched off by default.</li>
-<li><code>SIMD_RUNTIME</code> - Enable of runtime faster algorithm choise. It is switched on by default.</li>
+<li><code>SIMD_RUNTIME</code> - Enable of runtime faster algorithm choice. It is switched on by default.</li>
 <li><code>SIMD_TEST_FLAGS</code> - Addition compiler flags to build test framework.</li>
 <li><code>SIMD_OPENCV</code> - Use OpenCV in test framework. It is switched off by default.</li>
 <li><code>SIMD_INSTALL</code> - Enabling of install target. It is switched on by default.</li>
@@ -147,7 +147,7 @@ Test Framework</h1>
 <li><code>-s=sample.avi</code> a video source (<a class="el" href="namespace_simd_1_1_motion.html" title="Contains Framework for motion detection.">Simd::Motion</a> test).</li>
 <li><code>-o=output.avi</code> an annotated video output (<a class="el" href="namespace_simd_1_1_motion.html" title="Contains Framework for motion detection.">Simd::Motion</a> test).</li>
 <li><code>-wt=1</code> a thread number used to parallelize algorithms. Use -1 to set maximum parallelization.</li>
-<li><code>-fe=Abs</code> an exlude filter to exclude some tests.</li>
+<li><code>-fe=Abs</code> an exclude filter to exclude some tests.</li>
 <li><code>-mt=100</code> a minimal test execution time (in milliseconds).</li>
 <li><code>-lc=1</code> to litter CPU cache between test runs.</li>
 <li><code>-ri=city.jpg</code> a name of real image used in some tests. The image have to be placed in <code>./data/image</code> directory.</li>
