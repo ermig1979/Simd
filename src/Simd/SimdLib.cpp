@@ -6,7 +6,7 @@
 *               2018-2018 Radchenko Andrey,
 *               2019-2019 Facundo Galan,
 *               2026-2026 TianWei Lin,
-*               2026-2026 Brian Cain.
+*               Qualcomm Technologies, Inc. and/or its subsidiaries.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
