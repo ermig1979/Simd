@@ -3,7 +3,7 @@
 *
 * Copyright (c) 2011-2025 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail,
-*               2026-2026 Brian Cain.
+*               Qualcomm Technologies, Inc. and/or its subsidiaries.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
