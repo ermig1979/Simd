@@ -22,11 +22,15 @@
 * SOFTWARE.
 */
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
     namespace Base
     {
+#if defined(_MSC_VER) && defined(NDEBUG)
+#pragma optimize ("", off)
+#endif
         void BgrToHsl(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsl, size_t hslStride)
         {
             for (size_t row = 0; row < height; ++row)
@@ -39,5 +43,8 @@ namespace Simd
                 }
             }
         }
+#if defined(_MSC_VER) && defined(NDEBUG)
+#pragma optimize ("", on)
+#endif
     }
 }
