@@ -271,6 +271,11 @@ namespace Test
         if (TestBase(options))
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsl24, FUNC_O(Simd::Base::BgrToHsl), FUNC_O(SimdBgrToHsl));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options) && W >= Simd::Sse41::A)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsl24, FUNC_O(Simd::Sse41::BgrToHsl), FUNC_O(SimdBgrToHsl));
+#endif
+
         return result;
     }
 
