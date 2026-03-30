@@ -33,7 +33,7 @@ namespace Simd
     {
         SIMD_INLINE __m128i MulDiv32(__m128i dividend, __m128i divisor, const __m128& scale)
         {
-            return _mm_cvttps_epi32(_mm_div_ps(_mm_mul_ps(scale, _mm_cvtepi32_ps(dividend)), _mm_cvtepi32_ps(divisor)));
+            return _mm_cvttps_epi32(_mm_floor_ps(_mm_div_ps(_mm_mul_ps(scale, _mm_cvtepi32_ps(dividend)), _mm_cvtepi32_ps(divisor))));
         }
 
         SIMD_INLINE __m128i MulDiv16(__m128i dividend, __m128i divisor, const __m128& scale)
