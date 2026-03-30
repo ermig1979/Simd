@@ -87,12 +87,12 @@ namespace Simd
             __m128i denomSafe_lo = _mm_max_epi32(denom_lo, K32_1);
             __m128i denomSafe_hi = _mm_max_epi32(denom_hi, K32_1);
 
-            __m128i sat_lo = _mm_cvttps_epi32(_mm_div_ps(
+            __m128i sat_lo = _mm_cvttps_epi32(_mm_floor_ps(_mm_div_ps(
                 _mm_mul_ps(K_255F, _mm_cvtepi32_ps(range_lo)),
-                _mm_cvtepi32_ps(denomSafe_lo)));
-            __m128i sat_hi = _mm_cvttps_epi32(_mm_div_ps(
+                _mm_cvtepi32_ps(denomSafe_lo))));
+            __m128i sat_hi = _mm_cvttps_epi32(_mm_floor_ps(_mm_div_ps(
                 _mm_mul_ps(K_255F, _mm_cvtepi32_ps(range_hi)),
-                _mm_cvtepi32_ps(denomSafe_hi)));
+                _mm_cvtepi32_ps(denomSafe_hi))));
 
             __m128i zeroRangeMask_lo = _mm_cmpeq_epi32(range_lo, K_ZERO);
             __m128i zeroRangeMask_hi = _mm_cmpeq_epi32(range_hi, K_ZERO);
