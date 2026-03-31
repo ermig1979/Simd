@@ -193,8 +193,8 @@ namespace Test
             exclude = GetArgs("-fe", Strings(), false);
             testThreads = std::min<int>(std::max<int>(FromString<int>(GetArg("-tt", "0", false)), 0), std::thread::hardware_concurrency());
             workThreads = std::min<int>(std::max<int>(FromString<int>(GetArg("-wt", "1", false)), 1), std::thread::hardware_concurrency());
-            testRepeats = std::min<int>(FromString<int>(GetArg("-tr", "1", false)), 1);
-            testStatistics = std::min<int>(FromString<int>(GetArg("-ts", "0", false)), 0);
+            testRepeats = std::max<int>(FromString<int>(GetArg("-tr", "1", false)), 1);
+            testStatistics = std::max<int>(FromString<int>(GetArg("-ts", "0", false)), 0);
             checkCpp = FromString<bool>(GetArg("-cc", "0", false));
             printAlign = FromString<bool>(GetArg("-pa", "0", false));
             printInternal = FromString<bool>(GetArg("-pi", "1", false));

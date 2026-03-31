@@ -475,6 +475,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetSoftmax32f.cpp">
       <Filter>Avx2\Synet\Softmax</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToHsl.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">
@@ -855,6 +858,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedDepthwise.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMax.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

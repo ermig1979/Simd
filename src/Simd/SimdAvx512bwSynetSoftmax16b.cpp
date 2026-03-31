@@ -539,7 +539,13 @@ namespace Simd
                 else if (count == 3)
                     SynetSoftmax16b31(src, outer, dst);
                 else
+                {
+#if defined(__clang__) && defined(NDEBUG)
+                    Avx2::SynetSoftmax16b(src, outer, count, inner, dst);
+#else
                     SynetSoftmax16bX1(src, outer, count, dst);
+#endif
+                }
             }
             else
             {

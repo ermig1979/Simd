@@ -71,7 +71,7 @@
  <li>HVX optimizations of function ValueSquareSum.</li>
  <li>HVX optimizations of function ValueSquareSums.</li>
  <li>HVX optimizations of function CorrelationSum.</li>
- <li>SSE4.1 optimizations of function BgrToHsl.</li>
+ <li>SSE4.1, AVX2, AVX-512BW optimizations of function BgrToHsl.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -112,6 +112,13 @@
  <li>Tests for verifying functionality of class SynetGatherElements.</li>
  <li>Tests for verifying functionality of function SynetNormalizeLayerForward16bV2.</li>
  <li>Tests for verifying functionality of function SynetSoftmax16b.</li>
+</ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Wrong parsing of 'testStatistics' command line option.</li>
+ <li>Wrong parsing of 'testRepeats' command line option.</li>
+ <li>Too long github action test step in msbuild.yml.</li>
+ <li>Too long github action test step in cmake.yml.</li>
 </ul>
 
 <h4>Documentation</h4>
