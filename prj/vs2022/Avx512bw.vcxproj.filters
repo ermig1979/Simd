@@ -493,6 +493,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetSoftmax32f.cpp">
       <Filter>Avx512bw\Synet\Softmax</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToHsl.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">
@@ -861,6 +864,21 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConvert.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMax.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedDepthwise.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
