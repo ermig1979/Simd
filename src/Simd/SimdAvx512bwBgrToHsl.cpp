@@ -1,0 +1,261 @@
+/*
+* Simd Library (http://ermig1979.github.io/Simd).
+*
+* Copyright (c) 2011-2025 Yermalayeu Ihar.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdStore.h"
+#include "Simd/SimdInterleave.h"
+
+namespace Simd
+{
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
+    {
+        // Per 16-byte lane, extract one channel from the BGRA-like permuted layout:
+        //   [B,G,R,B, G,R,B,G, R,B,G,R, X,X,X,X]  (4 pixels per 16-byte lane)
+        // Blues at byte offsets 0,3,6,9 within each lane.
+        const __m512i K8_PERMUTED_BGR_TO_BLUE = SIMD_MM512_SETR_EPI8(
+            0, 3, 6, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            0, 3, 6, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            0, 3, 6, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            0, 3, 6, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+
+        // Greens at byte offsets 1,4,7,10 within each lane.
+        const __m512i K8_PERMUTED_BGR_TO_GREEN = SIMD_MM512_SETR_EPI8(
+            1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+
+        // Reds at byte offsets 2,5,8,11 within each lane.
+        const __m512i K8_PERMUTED_BGR_TO_RED = SIMD_MM512_SETR_EPI8(
+            2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+
+        // After _mm512_shuffle_epi8 with the above constants, each 16-byte lane holds
+        // 4 channel bytes at positions 0-3 and zeros at positions 4-15.  The 4-byte
+        // payloads sit at 32-bit word indices 0, 4, 8, 12 within the 512-bit register.
+        // This index vector for _mm512_permutex2var_epi32 gathers those four words from
+        // src0 (indices 0x00..0x0C) and four from src1 (indices 0x10..0x1C) into words
+        // 0-7 of the result, yielding 32 contiguous channel bytes in result bytes 0-31.
+        const __m512i K32_PACK_CHANNEL_PAIRS = SIMD_MM512_SETR_EPI32(
+            0x00, 0x04, 0x08, 0x0C, 0x10, 0x14, 0x18, 0x1C,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+
+        SIMD_INLINE __m512i MulDiv32Hsl(const __m512i& dividend, const __m512i& divisor, const __m512& scale)
+        {
+            return _mm512_cvttps_epi32(_mm512_div_ps(
+                _mm512_mul_ps(scale, _mm512_cvtepi32_ps(dividend)),
+                _mm512_cvtepi32_ps(divisor)));
+        }
+
+        SIMD_INLINE __m512i MulDiv16Hsl(const __m512i& dividend, const __m512i& divisor, const __m512& scale)
+        {
+            const __m512i lo = MulDiv32Hsl(_mm512_unpacklo_epi16(dividend, K_ZERO),
+                _mm512_unpacklo_epi16(divisor, K_ZERO), scale);
+            const __m512i hi = MulDiv32Hsl(_mm512_unpackhi_epi16(dividend, K_ZERO),
+                _mm512_unpackhi_epi16(divisor, K_ZERO), scale);
+            return _mm512_packs_epi32(lo, hi);
+        }
+
+        // Extract one channel from two 16-pixel BGRA-like permuted vectors and
+        // return the 32 resulting uint8 values zero-extended to uint16 in a __m512i.
+        SIMD_INLINE __m512i ExtractChannel16(const __m512i& perm0, const __m512i& perm1, const __m512i& shuf)
+        {
+            __m512i c0 = _mm512_shuffle_epi8(perm0, shuf);
+            __m512i c1 = _mm512_shuffle_epi8(perm1, shuf);
+            // Compact: collect the 4-byte payloads at word offsets {0,4,8,12} from
+            // c0 and c1 into consecutive words 0-7 of `packed`.
+            __m512i packed = _mm512_permutex2var_epi32(c0, K32_PACK_CHANNEL_PAIRS, c1);
+            // The lower 256 bits of `packed` now contain 32 channel bytes in order.
+            return _mm512_cvtepu8_epi16(_mm512_castsi512_si256(packed));
+        }
+
+        // Pack 32 uint16 channel values (in a __m512i) to 32 uint8 values
+        // returned in a __m256i.
+        SIMD_INLINE __m256i PackChannel(const __m512i& ch)
+        {
+            // _mm512_packus_epi16(ch, K_ZERO) produces 8 valid bytes + 8 zero bytes per
+            // 16-byte lane.  K32_PERMUTE_FOR_PACK collects the valid words {0,1,4,5,8,9,
+            // 12,13} into words 0-7, so the lower 256 bits hold the 32 packed bytes.
+            return _mm512_castsi512_si256(
+                _mm512_permutexvar_epi32(K32_PERMUTE_FOR_PACK,
+                    _mm512_packus_epi16(ch, K_ZERO)));
+        }
+
+        // Compute HSL for 32 pixels whose B, G, R channels are provided as 32
+        // uint16 values each in a __m512i.
+        SIMD_INLINE void BgrToHsl32(__m512i blue, __m512i green, __m512i red,
+            __m512i& hue, __m512i& sat, __m512i& lgt,
+            const __m512& KF_255_DIV_6, const __m512& K_255F)
+        {
+            __m512i max = _mm512_max_epi16(red, _mm512_max_epi16(green, blue));
+            __m512i min = _mm512_min_epi16(red, _mm512_min_epi16(green, blue));
+            __m512i range = _mm512_sub_epi16(max, min);
+            __m512i sum = _mm512_add_epi16(max, min);
+
+            // --- Hue ---
+            const __mmask32 redMaxMask = _mm512_cmpeq_epi16_mask(red, max);
+            const __mmask32 greenMaxMask = (~redMaxMask) & _mm512_cmpeq_epi16_mask(green, max);
+            const __mmask32 blueMaxMask = ~(redMaxMask | greenMaxMask);
+
+            __m512i hueDividend = _mm512_maskz_add_epi16(redMaxMask,
+                _mm512_sub_epi16(green, blue), _mm512_mullo_epi16(range, K16_0006));
+            hueDividend = _mm512_mask_add_epi16(hueDividend, greenMaxMask,
+                _mm512_sub_epi16(blue, red), _mm512_mullo_epi16(range, K16_0002));
+            hueDividend = _mm512_mask_add_epi16(hueDividend, blueMaxMask,
+                _mm512_sub_epi16(red, green), _mm512_mullo_epi16(range, K16_0004));
+
+            __m512i safeRange = _mm512_max_epi16(range, K16_0001);
+            // AND with 0xFF mask (zero where range == 0) combines range-zero guard
+            // and clamping to [0, 255] in a single operation.
+            hue = _mm512_and_si512(
+                MulDiv16Hsl(hueDividend, safeRange, KF_255_DIV_6),
+                _mm512_maskz_set1_epi16(_mm512_cmpneq_epi16_mask(range, K_ZERO), 0xFF));
+
+            // --- Lightness: L = (max + min) / 2 ---
+            lgt = _mm512_srli_epi16(sum, 1);
+
+            // --- Saturation: S = range * 255 / min(sum, 510 - sum), 0 when range == 0 ---
+            const __m512i K32_510 = _mm512_set1_epi32(510);
+            const __m512i K32_1 = _mm512_set1_epi32(1);
+
+            __m512i range_lo = _mm512_unpacklo_epi16(range, K_ZERO);
+            __m512i range_hi = _mm512_unpackhi_epi16(range, K_ZERO);
+            __m512i sum_lo = _mm512_unpacklo_epi16(sum, K_ZERO);
+            __m512i sum_hi = _mm512_unpackhi_epi16(sum, K_ZERO);
+
+            __m512i denom_lo = _mm512_min_epi32(sum_lo, _mm512_sub_epi32(K32_510, sum_lo));
+            __m512i denom_hi = _mm512_min_epi32(sum_hi, _mm512_sub_epi32(K32_510, sum_hi));
+            __m512i denomSafe_lo = _mm512_max_epi32(denom_lo, K32_1);
+            __m512i denomSafe_hi = _mm512_max_epi32(denom_hi, K32_1);
+
+            __m512i sat_lo = _mm512_cvttps_epi32(_mm512_floor_ps(_mm512_div_ps(
+                _mm512_mul_ps(K_255F, _mm512_cvtepi32_ps(range_lo)),
+                _mm512_cvtepi32_ps(denomSafe_lo))));
+            __m512i sat_hi = _mm512_cvttps_epi32(_mm512_floor_ps(_mm512_div_ps(
+                _mm512_mul_ps(K_255F, _mm512_cvtepi32_ps(range_hi)),
+                _mm512_cvtepi32_ps(denomSafe_hi))));
+
+            sat_lo = _mm512_maskz_mov_epi32(_mm512_cmpneq_epi32_mask(range_lo, K_ZERO), sat_lo);
+            sat_hi = _mm512_maskz_mov_epi32(_mm512_cmpneq_epi32_mask(range_hi, K_ZERO), sat_hi);
+
+            sat = _mm512_packs_epi32(sat_lo, sat_hi);
+        }
+
+        // Process 64 BGR pixels and write 64 HSL pixels.
+        // tails[0..2]: masks for the three 64-byte BGR input chunks.
+        // tails[3..5]: masks for the three 64-byte HSL output chunks (same values).
+        template <bool align, bool mask> SIMD_INLINE void BgrToHsl64(
+            const uint8_t* bgr, uint8_t* hsl,
+            const __m512& KF, const __m512& K255,
+            const __mmask64 tails[6])
+        {
+            // Load 3 × 64 bytes of packed BGR data.
+            __m512i bgr0 = Load<align, mask>(bgr + 0 * A, tails[0]);
+            __m512i bgr1 = Load<align, mask>(bgr + 1 * A, tails[1]);
+            __m512i bgr2 = Load<align, mask>(bgr + 2 * A, tails[2]);
+
+            // Expand packed BGR into 4 BGRA-like groups of 16 pixels each.
+            // Each group's 16-byte lane layout: [B,G,R,B, G,R,B,G, R,B,G,R, X,X,X,X].
+            __m512i perm0 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_0, bgr0);
+            __m512i perm1 = _mm512_permutex2var_epi32(bgr0, K32_PERMUTE_BGR_TO_BGRA_1, bgr1);
+            __m512i perm2 = _mm512_permutex2var_epi32(bgr1, K32_PERMUTE_BGR_TO_BGRA_2, bgr2);
+            __m512i perm3 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_3, bgr2);
+
+            // Extract B, G, R as 32 uint16 values for pixels 0-31 (perm0 + perm1).
+            __m512i blue01 = ExtractChannel16(perm0, perm1, K8_PERMUTED_BGR_TO_BLUE);
+            __m512i green01 = ExtractChannel16(perm0, perm1, K8_PERMUTED_BGR_TO_GREEN);
+            __m512i red01 = ExtractChannel16(perm0, perm1, K8_PERMUTED_BGR_TO_RED);
+
+            // Extract B, G, R as 32 uint16 values for pixels 32-63 (perm2 + perm3).
+            __m512i blue23 = ExtractChannel16(perm2, perm3, K8_PERMUTED_BGR_TO_BLUE);
+            __m512i green23 = ExtractChannel16(perm2, perm3, K8_PERMUTED_BGR_TO_GREEN);
+            __m512i red23 = ExtractChannel16(perm2, perm3, K8_PERMUTED_BGR_TO_RED);
+
+            // Compute H, S, L for pixels 0-31.
+            __m512i hue01, sat01, lgt01;
+            BgrToHsl32(blue01, green01, red01, hue01, sat01, lgt01, KF, K255);
+
+            // Compute H, S, L for pixels 32-63.
+            __m512i hue23, sat23, lgt23;
+            BgrToHsl32(blue23, green23, red23, hue23, sat23, lgt23, KF, K255);
+
+            // Pack each channel from uint16 to uint8 and combine both halves into a
+            // single 64-element __m512i.
+            __m512i hue8 = _mm512_inserti64x4(
+                _mm512_castsi256_si512(PackChannel(hue01)), PackChannel(hue23), 1);
+            __m512i sat8 = _mm512_inserti64x4(
+                _mm512_castsi256_si512(PackChannel(sat01)), PackChannel(sat23), 1);
+            __m512i lgt8 = _mm512_inserti64x4(
+                _mm512_castsi256_si512(PackChannel(lgt01)), PackChannel(lgt23), 1);
+
+            // Interleave H, S, L into packed HSL and store 3 × 64 bytes.
+            Store<align, mask>((__m512i*)hsl + 0, InterleaveBgr<0>(hue8, sat8, lgt8), tails[3]);
+            Store<align, mask>((__m512i*)hsl + 1, InterleaveBgr<1>(hue8, sat8, lgt8), tails[4]);
+            Store<align, mask>((__m512i*)hsl + 2, InterleaveBgr<2>(hue8, sat8, lgt8), tails[5]);
+        }
+
+        template <bool align> void BgrToHsl(const uint8_t* bgr, size_t width, size_t height,
+            size_t bgrStride, uint8_t* hsl, size_t hslStride)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(hsl) && Aligned(hslStride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            // Build tail masks for the three 64-byte BGR input chunks and (identically)
+            // for the three 64-byte HSL output chunks (both are 3-byte-per-pixel).
+            __mmask64 tails[6];
+            for (size_t i = 0; i < 3; ++i)
+                tails[i] = TailMask64((width - alignedWidth) * 3 - A * i);
+            for (size_t i = 3; i < 6; ++i)
+                tails[i] = tails[i - 3];
+
+            const __m512 KF = _mm512_set1_ps(Base::KF_255_DIV_6);
+            const __m512 K255 = _mm512_set1_ps(255.0f);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < alignedWidth; col += A)
+                    BgrToHsl64<align, false>(bgr + col * 3, hsl + col * 3, KF, K255, tails);
+                if (col < width)
+                    BgrToHsl64<align, true>(bgr + col * 3, hsl + col * 3, KF, K255, tails);
+                bgr += bgrStride;
+                hsl += hslStride;
+            }
+        }
+
+        void BgrToHsl(const uint8_t* bgr, size_t width, size_t height,
+            size_t bgrStride, uint8_t* hsl, size_t hslStride)
+        {
+            if (Aligned(bgr) && Aligned(bgrStride) && Aligned(hsl) && Aligned(hslStride))
+                BgrToHsl<true>(bgr, width, height, bgrStride, hsl, hslStride);
+            else
+                BgrToHsl<false>(bgr, width, height, bgrStride, hsl, hslStride);
+        }
+    }
+#endif
+}
