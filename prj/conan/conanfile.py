@@ -65,7 +65,8 @@ class SimdConan(ConanFile):
     def export_sources(self):
         root = self._repo_root()
         copy(self, "**", src=os.path.join(root, "src"), dst=os.path.join(self.export_sources_folder, "src"))
-        copy(self, "**", src=os.path.join(root, "prj", "cmake"), dst=os.path.join(self.export_sources_folder, "prj", "cmake"))
+        copy(self, "**", src=os.path.join(root, "prj", "cmake"), dst=os.path.join(self.export_sources_folder, "prj", "cmake"),
+             excludes=["cmake-build*/*"])
         copy(self, "**", src=os.path.join(root, "prj", "sh"), dst=os.path.join(self.export_sources_folder, "prj", "sh"))
         copy(self, "**", src=os.path.join(root, "prj", "cmd"), dst=os.path.join(self.export_sources_folder, "prj", "cmd"))
         copy(self, "**", src=os.path.join(root, "prj", "txt"), dst=os.path.join(self.export_sources_folder, "prj", "txt"))
