@@ -276,6 +276,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsl24, FUNC_O(Simd::Sse41::BgrToHsl), FUNC_O(SimdBgrToHsl));
 #endif
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options) && W >= Simd::Avx2::A)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsl24, FUNC_O(Simd::Avx2::BgrToHsl), FUNC_O(SimdBgrToHsl));
+#endif
+
         return result;
     }
 
