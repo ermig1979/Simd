@@ -212,9 +212,9 @@ namespace Simd
                 _mm512_castsi256_si512(PackChannel(lgt01)), PackChannel(lgt23), 1);
 
             // Interleave H, S, L into packed HSL and store 3 × 64 bytes.
-            Store<align, mask>((__m512i*)hsl + 0, InterleaveBgr<0>(hue8, sat8, lgt8), tails[3]);
-            Store<align, mask>((__m512i*)hsl + 1, InterleaveBgr<1>(hue8, sat8, lgt8), tails[4]);
-            Store<align, mask>((__m512i*)hsl + 2, InterleaveBgr<2>(hue8, sat8, lgt8), tails[5]);
+            Store<align, mask>(hsl + 0 * A, InterleaveBgr<0>(hue8, sat8, lgt8), tails[3]);
+            Store<align, mask>(hsl + 1 * A, InterleaveBgr<1>(hue8, sat8, lgt8), tails[4]);
+            Store<align, mask>(hsl + 2 * A, InterleaveBgr<2>(hue8, sat8, lgt8), tails[5]);
         }
 
         template <bool align> void BgrToHsl(const uint8_t* bgr, size_t width, size_t height,
