@@ -478,6 +478,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToHsl.cpp">
       <Filter>Avx2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToHsv.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">

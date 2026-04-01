@@ -28,6 +28,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToHsl.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToHsv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToLab.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToYuvV2.cpp" />
