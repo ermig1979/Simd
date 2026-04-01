@@ -190,18 +190,17 @@ namespace Test
 
     void CreateTestImage(View& canvas, int rects, int labels)
     {
+        View buffer(canvas.Size(), canvas.format);
         switch (canvas.format)
         {
-        case View::Gray8: DrawTestImage<uint8_t>(canvas, rects, labels); break;
-        case View::Bgr24: DrawTestImage<Simd::Pixel::Bgr24>(canvas, rects, labels); break;
-        case View::Bgra32: DrawTestImage<Simd::Pixel::Bgra32>(canvas, rects, labels); break;
-        case View::Rgb24: DrawTestImage<Simd::Pixel::Rgb24>(canvas, rects, labels); break;
-        case View::Rgba32: DrawTestImage<Simd::Pixel::Rgba32>(canvas, rects, labels); break;
+        case View::Gray8: DrawTestImage<uint8_t>(buffer, rects, labels); break;
+        case View::Bgr24: DrawTestImage<Simd::Pixel::Bgr24>(buffer, rects, labels); break;
+        case View::Bgra32: DrawTestImage<Simd::Pixel::Bgra32>(buffer, rects, labels); break;
+        case View::Rgb24: DrawTestImage<Simd::Pixel::Rgb24>(buffer, rects, labels); break;
+        case View::Rgba32: DrawTestImage<Simd::Pixel::Rgba32>(buffer, rects, labels); break;
         default: assert(0); break;
         }
-        View buffer(canvas.Size(), canvas.format);
-        Simd::MeanFilter3x3(canvas, buffer);
-        buffer.Swap(canvas);
+        Simd::MeanFilter3x3(buffer, canvas);
     }
 
     //---------------------------------------------------------------------------------------------
