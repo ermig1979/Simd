@@ -199,6 +199,9 @@ namespace Test
         case View::Rgba32: DrawTestImage<Simd::Pixel::Rgba32>(canvas, rects, labels); break;
         default: assert(0); break;
         }
+        View buffer(canvas.Size(), canvas.format);
+        Simd::MeanFilter3x3(canvas, buffer);
+        buffer.Swap(canvas);
     }
 
     //---------------------------------------------------------------------------------------------
