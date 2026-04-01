@@ -155,7 +155,7 @@ namespace Test
         else
         {
 #ifdef TEST_RESIZE_REAL_IMAGE
-            ::srand(0);
+            Srand(0);
             FillPicture(src);
 #else
             FillRandom(src);
@@ -374,7 +374,7 @@ namespace Test
 
         View bgraSrc(W, H, View::Bgra32);
 #ifdef TEST_RESIZE_REAL_IMAGE
-        ::srand(0);
+        Srand(0);
         FillPicture(bgraSrc);
 #else
         FillRandom(bgraSrc);
@@ -490,7 +490,7 @@ namespace Test
 
         View src(srcSize, format);
 #ifdef TEST_RESIZE_REAL_IMAGE
-        ::srand(0);
+        Srand(0);
         FillPicture(src);
 #else
         FillRandom(src);

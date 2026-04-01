@@ -26,19 +26,11 @@
 
 #include "Test/TestLog.h"
 
-#define TEST_RAND_VERSION 0
-
 namespace Test
 {
-    SIMD_INLINE int Rand()
-    {
-        return ::rand();
-    }
+    int Rand();
 
-    SIMD_INLINE void Srand(unsigned int seed)
-    {
-        ::srand(seed);
-    }
+    void Srand(unsigned int seed);
 
     SIMD_INLINE int RandMax()
     {
@@ -53,12 +45,12 @@ namespace Test
 
     SIMD_INLINE int Random(int range)
     {
-        return ((::rand() & INT16_MAX) * range) / INT16_MAX;
+        return ((Rand() & INT16_MAX) * range) / INT16_MAX;
     }
 
     SIMD_INLINE double Random()
     {
-        return ((::rand() & INT16_MAX) * 1.0) / INT16_MAX;
+        return ((Rand() & INT16_MAX) * 1.0) / INT16_MAX;
     }
 
     template<class T> inline void Fill(T* data, size_t size, T value)
@@ -95,4 +87,4 @@ namespace Test
 
     void FillRandom(Tensor32f& tensor, float* min, float* max, size_t channels, int negative, float upper = 1.0f, float range = 0.01f);
 }
-#endif//__TestRandom_h__
+#endif

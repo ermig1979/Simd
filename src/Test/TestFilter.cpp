@@ -60,7 +60,7 @@ namespace Test
             }
             else
             {
-                ::srand(0);
+                Srand(0);
                 CreateTestImage(image, 10, 10);
                 //FillPicture(image);
             }

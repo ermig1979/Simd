@@ -100,6 +100,7 @@
  <li>Compiler error in assert conditions in function Simd::DeinterleaveRgba.</li>
  <li>Compiler error in assert conditions in function Simd::GetObjectMoments.</li>
  <li>MSVS compiler bug in Base implementation of function BgrToHsl (Release, x64).</li>
+ <li>MSVS compiler bug in Base implementation of function SynetQuantizedScaleLayerForward (Release, Win32).</li>
 </ul>
 <h5>Renaming</h5>
 <ul>
@@ -112,6 +113,11 @@
  <li>Tests for verifying functionality of class SynetGatherElements.</li>
  <li>Tests for verifying functionality of function SynetNormalizeLayerForward16bV2.</li>
  <li>Tests for verifying functionality of function SynetSoftmax16b.</li>
+</ul>
+<h5>Improving</h5>
+<ul>
+ <li>Add thread save state to functions Test::Rand and Test::Srand.</li>
+ <li>Add smoothing to function Test::CreateTestImage.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>

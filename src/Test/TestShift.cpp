@@ -186,7 +186,7 @@ namespace Test
     {
         typedef Simd::ShiftDetector<Simd::Allocator> ShiftDetector;
 
-        ::srand(1);
+        Srand(1);
 
         Rect region;
         View background(1920, 1080, View::Gray8);

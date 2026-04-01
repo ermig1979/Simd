@@ -29,6 +29,9 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
+#if defined(_MSC_VER) && defined(NDEBUG)
+#pragma optimize ("", off)
+#endif
         SIMD_INLINE void QuantizedScale(const uint8_t& src, int sBias, float sNorm, float scale, float bias, uint8_t& dst, float dNorm, int dZero)
         {
             float _src = DequantizeLinear(src, sBias, sNorm);
@@ -44,7 +47,7 @@ namespace Simd
                 defaultBias.Resize(channels, true);
                 bias = defaultBias.data;
             }
-            float sBias = -srcZero;
+            int sBias = -srcZero;
             float sNorm = srcScale[0], dNorm = 1.0f / dstScale[0];
             if (format == SimdTensorFormatNhwc)
             {
@@ -71,6 +74,9 @@ namespace Simd
                 }
             }
         }
+#if defined(_MSC_VER) && defined(NDEBUG)
+#pragma optimize ("", on)
+#endif
     }
 #endif
 }

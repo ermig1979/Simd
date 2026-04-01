@@ -28,10 +28,48 @@
 #include "Simd/SimdSynet.h"
 #include "Test/TestRandom.h"
 
+#define TEST_RAND_VERSION 1
+
+#if TEST_RAND_VERSION == 0
 #include <random>
+#endif
 
 namespace Test
 {
+#if TEST_RAND_VERSION == 1
+    static int32_t& RandState()
+    {
+        static thread_local int32_t state = 0;
+        return state;
+    }
+#endif
+
+    int Rand()
+    {
+#if TEST_RAND_VERSION == 0
+        return ::rand();
+#elif TEST_RAND_VERSION == 1
+        int32_t& state = RandState();
+        state = ((state * 1103515245) + 12345) & 0x7fffffff;
+        return state;
+#else
+#error Unknown value of TEST_RAND_VERSION!
+#endif
+    }
+
+    void Srand(unsigned int seed)
+    {
+#if TEST_RAND_VERSION == 0
+        ::srand(seed);
+#elif TEST_RAND_VERSION == 1
+        RandState() = seed;
+#else
+#error Unknown value of TEST_RAND_VERSION!
+#endif
+    }
+
+    //--------------------------------------------------------------------------------------------------
+
     void FillSequence(View & view)
     {
         for (size_t i = 0, n = view.DataSize(); i < n; ++i)
@@ -94,7 +132,7 @@ namespace Test
         }
     }
 
-    //---------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------
 
     template<class Color> Color GetColor(uint8_t b, uint8_t g, uint8_t r)
     {
@@ -118,7 +156,7 @@ namespace Test
 
     template<class Color> void DrawTestImage(View& canvas, int rects, int labels)
     {
-        ::srand(0);
+        Srand(0);
         int w = int(canvas.width), h = int(canvas.height);
         Simd::Fill(canvas, 0);
 
@@ -152,15 +190,17 @@ namespace Test
 
     void CreateTestImage(View& canvas, int rects, int labels)
     {
+        View buffer(canvas.Size(), canvas.format);
         switch (canvas.format)
         {
-        case View::Gray8: DrawTestImage<uint8_t>(canvas, rects, labels); break;
-        case View::Bgr24: DrawTestImage<Simd::Pixel::Bgr24>(canvas, rects, labels); break;
-        case View::Bgra32: DrawTestImage<Simd::Pixel::Bgra32>(canvas, rects, labels); break;
-        case View::Rgb24: DrawTestImage<Simd::Pixel::Rgb24>(canvas, rects, labels); break;
-        case View::Rgba32: DrawTestImage<Simd::Pixel::Rgba32>(canvas, rects, labels); break;
+        case View::Gray8: DrawTestImage<uint8_t>(buffer, rects, labels); break;
+        case View::Bgr24: DrawTestImage<Simd::Pixel::Bgr24>(buffer, rects, labels); break;
+        case View::Bgra32: DrawTestImage<Simd::Pixel::Bgra32>(buffer, rects, labels); break;
+        case View::Rgb24: DrawTestImage<Simd::Pixel::Rgb24>(buffer, rects, labels); break;
+        case View::Rgba32: DrawTestImage<Simd::Pixel::Rgba32>(buffer, rects, labels); break;
         default: assert(0); break;
         }
+        Simd::MeanFilter3x3(buffer, canvas);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -169,39 +209,39 @@ namespace Test
     bool InitRand8u()
     {
         for (size_t i = 0, n = UINT16_MAX; i < n; ++i)
-            g_rand8u[i] = ::rand();
+            g_rand8u[i] = Rand();
         return true;
     }
     bool g_rand8u_inited = InitRand8u();
     SIMD_INLINE const uint8_t * Rand8u()
     {
-        return g_rand8u + (::rand()&INT16_MAX);
+        return g_rand8u + (Rand()&INT16_MAX);
     }
 
     int16_t g_rand16i[UINT16_MAX];
     bool InitRand16i()
     {
         for (size_t i = 0, n = UINT16_MAX; i < n; ++i)
-            g_rand16i[i] = (::rand() & INT16_MAX);
+            g_rand16i[i] = (Rand() & INT16_MAX);
         return true;
     }
     bool g_rand16i_inited = InitRand16i();
     SIMD_INLINE const int16_t* Rand16i()
     {
-        return g_rand16i + (::rand() & INT16_MAX);
+        return g_rand16i + (Rand() & INT16_MAX);
     }
 
     uint16_t g_rand16u[UINT16_MAX];
     bool InitRand16u()
     {
         for (size_t i = 0, n = UINT16_MAX; i < n; ++i)
-            g_rand16u[i] = (::rand() & UINT16_MAX);
+            g_rand16u[i] = (Rand() & UINT16_MAX);
         return true;
     }
     bool g_rand16u_inited = InitRand16u();
     SIMD_INLINE const uint16_t* Rand16u()
     {
-        return g_rand16u + (::rand() & INT16_MAX);
+        return g_rand16u + (Rand() & INT16_MAX);
     }
 
     void FillRandom(View & view, uint8_t lo, uint8_t hi)

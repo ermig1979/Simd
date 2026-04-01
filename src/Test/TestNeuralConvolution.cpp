@@ -375,13 +375,13 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size.x << ", " << size.y << "].");
 
         View src(size.x + core.x - 1, size.y + core.y - 1, View::Float, NULL, TEST_ALIGN(size.x));
-        FillRandom32f(src, -1, 1);
+        FillRandom32f(src, -0.5f, 0.5f);
 
         View dst(size.x, size.y, View::Float, NULL, TEST_ALIGN(size.x));
-        FillRandom32f(dst, -1, 1);
+        FillRandom32f(dst, -0.5f, 0.5f);
 
         View sumsSrc(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
-        FillRandom32f(sumsSrc, 3000, 3000);
+        FillRandom32f(sumsSrc, 2500, 3500);
 
         View sumsDst1(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
         View sumsDst2(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
