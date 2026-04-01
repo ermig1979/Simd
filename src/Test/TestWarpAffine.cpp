@@ -142,7 +142,7 @@ namespace Test
         if ((SimdWarpAffineChannelMask & flags) == SimdWarpAffineChannelByte)
         {
 #ifdef TEST_WARP_AFFINE_REAL_IMAGE
-            ::srand(0);
+            Srand(0);
             FillPicture(src);
 #else
             FillRandom(src);
@@ -320,7 +320,7 @@ namespace Test
         }
 
         View src(srcW, srcH, format, NULL, TEST_ALIGN(srcW));
-        ::srand(0);
+        Srand(0);
         FillPicture(src);
         Simd::DrawRectangle(src, Rect(0, 0, srcW - 1, srcH - 1), Simd::Pixel::Bgr24(255, 255, 0), 1);
 

@@ -65,7 +65,7 @@ namespace Test
             TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
             image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
 #if 0
-            ::srand(0);
+            Srand(0);
             View buffer(image.Size(), image.format);
             FillRandom(buffer);
             Simd::MeanFilter3x3(buffer, image);

@@ -32,6 +32,7 @@
 #include "Test/TestTensor.h"
 #include "Test/TestOptions.h"
 #include "Test/TestGroup.h"
+#include "Test/TestRandom.h"
 
 #if defined(_MSC_VER)
 #ifndef NOMINMAX
@@ -632,6 +633,7 @@ namespace Test
     private:
         static bool RunGroup(const Group & group, const Options& options)
         {
+            Test::Srand(0);
 #if defined(_MSC_VER)
             __try
             {
@@ -803,6 +805,7 @@ namespace Test
         {
             TEST_LOG_SS(Info, group.name << "SpecialTest is started :");
             group.start = GetTime();
+            Test::Srand(0);
             bool result = group.specialTest(options);
             group.finish = GetTime();
             TEST_LOG_SS(Info, group.name << "SpecialTest is finished " << (result ? "successfully." : "with errors!") << std::endl);
