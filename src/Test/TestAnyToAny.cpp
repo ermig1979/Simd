@@ -296,6 +296,21 @@ namespace Test
         if (TestBase(options))
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsv24, FUNC_O(Simd::Base::BgrToHsv), FUNC_O(SimdBgrToHsv));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options) && W >= Simd::Sse41::A)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsv24, FUNC_O(Simd::Sse41::BgrToHsv), FUNC_O(SimdBgrToHsv));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options) && W >= Simd::Avx2::A)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsv24, FUNC_O(Simd::Avx2::BgrToHsv), FUNC_O(SimdBgrToHsv));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options) && W >= Simd::Avx512bw::A)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsv24, FUNC_O(Simd::Avx512bw::BgrToHsv), FUNC_O(SimdBgrToHsv));
+#endif
+
         return result;
     }
 

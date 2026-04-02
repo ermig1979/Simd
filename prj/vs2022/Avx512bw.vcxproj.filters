@@ -496,6 +496,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToHsl.cpp">
       <Filter>Avx512bw\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToHsv.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">

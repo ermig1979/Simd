@@ -34,6 +34,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToHsl.cpp">
       <Filter>Sse41\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToHsv.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToLab.cpp">
       <Filter>Sse41\Convert</Filter>
     </ClCompile>
