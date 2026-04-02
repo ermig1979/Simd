@@ -34,7 +34,7 @@ import Simd
 def LoadTestImage(args, fmt = Simd.PixelFormat.Rgb24) -> Simd.Image :
 	if not os.path.isdir(args.root):
 		raise Exception("Project root directory '{0}' is not exist!".format(args.root))
-	path = "{0}/data/image/city.jpg".format(args.root)
+	path = "{0}/{1}".format(args.root, args.testImage)
 	image = Simd.Image()
 	if not image.Load(path, fmt) :
 		raise Exception("Can't load image '{0}' in {1} format!".format(path, fmt))
@@ -45,7 +45,7 @@ def LoadTestImage(args, fmt = Simd.PixelFormat.Rgb24) -> Simd.Image :
 def LoadTestImageFrame(args, fmt = Simd.FrameFormat.Rgb24) -> Simd.ImageFrame :
 	if not os.path.isdir(args.root):
 		raise Exception("Project root directory '{0}' is not exist!".format(args.root))
-	path = "{0}/data/image/city.jpg".format(args.root)
+	path = "{0}/{1}".format(args.root, args.testImage)
 	imageFrame = Simd.ImageFrame()
 	if not imageFrame.Load(path, fmt) :
 		raise Exception("Can't load image frame '{0}' in {1} format!".format(path, fmt))
@@ -354,6 +354,7 @@ def main():
 	parser.add_argument("-r", "--root", help="Simd Library root directory.", required=False, type=str, default=".")
 	parser.add_argument("-i", "--include", help="Include tests filter.", required=False, default=[], action="append")
 	parser.add_argument("-e", "--exclude", help="Exclude tests filter.", required=False, default=[], action="append")
+	parser.add_argument("-ti", "--testImage", help="Test image name.", required=False, type=str, default="data/image/city.jpg")
 	args = parser.parse_args()
 	
 	Simd.Lib.Init(args.bin)
