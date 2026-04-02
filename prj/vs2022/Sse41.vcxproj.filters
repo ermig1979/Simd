@@ -196,6 +196,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgrV2.cpp">
       <Filter>Sse41\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToHsl.cpp">
+      <Filter>Sse41\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToHue.cpp">
       <Filter>Sse41\Convert</Filter>
     </ClCompile>

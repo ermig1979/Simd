@@ -7662,7 +7662,22 @@ SIMD_API void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t 
                                size_t width, size_t height, uint8_t * hsl, size_t hslStride)
 {
     SIMD_EMPTY();
-    Base::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx512bw::A)
+        Avx512bw::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+    else
+#endif
+        Base::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
 }
 
 SIMD_API void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
