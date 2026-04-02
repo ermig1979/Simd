@@ -170,9 +170,9 @@ namespace Simd
                 _mm512_castsi256_si512(PackChannelHsv(val01)), PackChannelHsv(val23), 1);
 
             // Interleave H, S, V into packed HSV and store 3 × 64 bytes.
-            Store<align, mask>(hsv + 0 * A, InterleaveBgr<0>(hue8, sat8, val8), tails[3]);
-            Store<align, mask>(hsv + 1 * A, InterleaveBgr<1>(hue8, sat8, val8), tails[4]);
-            Store<align, mask>(hsv + 2 * A, InterleaveBgr<2>(hue8, sat8, val8), tails[5]);
+            Store<align, mask>(hsv + 0 * A, InterleaveBgr<0>(hue8, sat8, val8), tails[0]);
+            Store<align, mask>(hsv + 1 * A, InterleaveBgr<1>(hue8, sat8, val8), tails[1]);
+            Store<align, mask>(hsv + 2 * A, InterleaveBgr<2>(hue8, sat8, val8), tails[2]);
         }
 
         template <bool align> void BgrToHsv(const uint8_t* bgr, size_t width, size_t height,
@@ -183,11 +183,9 @@ namespace Simd
                 assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(hsv) && Aligned(hsvStride));
 
             size_t alignedWidth = AlignLo(width, A);
-            __mmask64 tails[6];
+            __mmask64 tails[3];
             for (size_t i = 0; i < 3; ++i)
                 tails[i] = TailMask64((width - alignedWidth) * 3 - A * i);
-            for (size_t i = 3; i < 6; ++i)
-                tails[i] = tails[i - 3];
 
             const __m512 KF = _mm512_set1_ps(Base::KF_255_DIV_6);
             const __m512 K255 = _mm512_set1_ps(255.0f);

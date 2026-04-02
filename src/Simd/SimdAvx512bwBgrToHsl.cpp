@@ -212,9 +212,9 @@ namespace Simd
                 _mm512_castsi256_si512(PackChannel(lgt01)), PackChannel(lgt23), 1);
 
             // Interleave H, S, L into packed HSL and store 3 × 64 bytes.
-            Store<align, mask>(hsl + 0 * A, InterleaveBgr<0>(hue8, sat8, lgt8), tails[3]);
-            Store<align, mask>(hsl + 1 * A, InterleaveBgr<1>(hue8, sat8, lgt8), tails[4]);
-            Store<align, mask>(hsl + 2 * A, InterleaveBgr<2>(hue8, sat8, lgt8), tails[5]);
+            Store<align, mask>(hsl + 0 * A, InterleaveBgr<0>(hue8, sat8, lgt8), tails[0]);
+            Store<align, mask>(hsl + 1 * A, InterleaveBgr<1>(hue8, sat8, lgt8), tails[1]);
+            Store<align, mask>(hsl + 2 * A, InterleaveBgr<2>(hue8, sat8, lgt8), tails[2]);
         }
 
         template <bool align> void BgrToHsl(const uint8_t* bgr, size_t width, size_t height,
@@ -227,11 +227,9 @@ namespace Simd
             size_t alignedWidth = AlignLo(width, A);
             // Build tail masks for the three 64-byte BGR input chunks and (identically)
             // for the three 64-byte HSL output chunks (both are 3-byte-per-pixel).
-            __mmask64 tails[6];
+            __mmask64 tails[3];
             for (size_t i = 0; i < 3; ++i)
                 tails[i] = TailMask64((width - alignedWidth) * 3 - A * i);
-            for (size_t i = 3; i < 6; ++i)
-                tails[i] = tails[i - 3];
 
             const __m512 KF = _mm512_set1_ps(Base::KF_255_DIV_6);
             const __m512 K255 = _mm512_set1_ps(255.0f);
