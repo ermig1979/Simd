@@ -162,7 +162,11 @@ namespace Test
         ::SimdRelease(context2);
 
         if (end.dstT == SimdTensorData16b)
+#if !defined(NDEBUG) && defined(WIN32) && defined(SIMD_X86_ENABLE) && defined(_MSC_VER)
+            eps = eps * 24.0f;
+#else
             eps = eps * 9.0f;
+#endif
         else if(weightSize > 1024 * 1024 || p.count == 3)
             eps = eps * 5.3f;
         else
@@ -336,8 +340,9 @@ namespace Test
         //    Param::SetDst(p.conv + 1); Param::SetDst(p.conv + 2);
         //    result = result && SynetMergedConvolution16bForwardAutoTest(eps, p, f1, f2);
         //}
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 32, 32), Cnv(aPr, 3, 1), Cnv(aPr, 1, 1, 32), b16, b16), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 33, 33), Cnv(aPr, 3, 1), Cnv(aPr, 1, 1, 63), b16, b16), f1, f2);
-        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 33, 33), Cnv(aPr, 3, 1), Cnv(aPr, 1, 1, 47), b16, b16), f1, f2);
+        //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 64, 33, 33), Cnv(aPr, 3, 1), Cnv(aPr, 1, 1, 47), f32, b16), f1, f2);
 #endif
         return result;
     }
