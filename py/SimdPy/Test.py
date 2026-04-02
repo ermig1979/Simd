@@ -168,6 +168,17 @@ def ImageResizeTest(args) :
 	
 ###################################################################################################
 
+def ImageNumpyResizeTest(args) :
+	srcSimd = LoadTestImage(args)
+	copySrcNumpy = srcSimd.CopyToNumpyArray()
+	copySrcSimd = Simd.Image(srcSimd.Format(), srcSimd.Width(), srcSimd.Height(), 0, srcSimd.Width() * srcSimd.Format().PixelSize(), copySrcNumpy.ctypes.data)
+	dstSimd = Simd.ResizedImage(copySrcSimd, srcSimd.Width() // 2, srcSimd.Height() // 2, Simd.ResizeMethod.Area)
+	copyDstNumpy = dstSimd.CopyToNumpyArray()
+	copyDstSimd = Simd.Image(dstSimd.Format(), dstSimd.Width(), dstSimd.Height(), 0, dstSimd.Width() * dstSimd.Format().PixelSize(), copyDstNumpy.ctypes.data)
+	copyDstSimd.Save("numpy_resized.jpg", Simd.ImageFile.Jpeg, 85)
+	
+###################################################################################################
+
 def ImageWarpAffineTest(args) :
 	image = LoadTestImage(args)
 	center = image.RegionAt(image.Width() // 2, image.Height() // 2, Simd.Position.MiddleCenter).Copy()
@@ -303,6 +314,7 @@ def InitTestList(args) :
 	tests.append(ImageAbsGradientSaturatedSumTest)
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)
+	tests.append(ImageNumpyResizeTest)
 	tests.append(ImageShiftBilinearTest)
 	tests.append(ReduceGray2x2Test)
 	tests.append(ShiftDetectorFunctionsTest)
