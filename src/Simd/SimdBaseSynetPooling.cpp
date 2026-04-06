@@ -24,6 +24,7 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
@@ -273,10 +274,76 @@ namespace Simd
                     strideC, strideY, strideX, padC, padY, padX, dst, dstC, dstH, dstW, format);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         void SynetPoolingMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
         {
             SynetPoolingMax2D(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        void SynetPoolingMax16b(const uint16_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, uint16_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
+        {
+            if (format == SimdTensorFormatNhwc)
+            {
+                Array32f max(srcC);
+                for (size_t dh = 0; dh < dstH; ++dh)
+                {
+                    size_t hBeg = dh * strideY - padY;
+                    size_t hEnd = Simd::Min(hBeg + kernelY, srcH);
+                    hBeg = Simd::Max<ptrdiff_t>(0, hBeg);
+                    for (size_t dw = 0; dw < dstW; ++dw)
+                    {
+                        size_t wBeg = dw * strideX - padX;
+                        size_t wEnd = Simd::Min(wBeg + kernelX, srcW);
+                        wBeg = Simd::Max<ptrdiff_t>(0, wBeg);
+                        for (size_t c = 0; c < srcC; ++c)
+                            max[c] = -FLT_MAX;
+                        for (size_t sh = hBeg; sh < hEnd; ++sh)
+                        {
+                            for (size_t sw = wBeg; sw < wEnd; ++sw)
+                            {
+                                const uint16_t* ps = src + (sh * srcW + sw) * srcC;
+                                for (size_t c = 0; c < srcC; ++c)
+                                    max[c] = Simd::Max(max[c], BFloat16ToFloat32(ps[c]));
+                            }
+                        }
+                        for (size_t c = 0; c < srcC; ++c)
+                            dst[c] = Float32ToBFloat16(max[c]);
+                        dst += srcC;
+                    }
+                }
+            }
+            else if (format == SimdTensorFormatNchw)
+            {
+                for (size_t c = 0; c < srcC; ++c)
+                {
+                    for (size_t dh = 0; dh < dstH; ++dh)
+                    {
+                        size_t hBeg = dh * strideY - padY;
+                        size_t hEnd = Simd::Min(hBeg + kernelY, srcH);
+                        hBeg = Simd::Max<ptrdiff_t>(0, hBeg);
+                        for (size_t dw = 0; dw < dstW; ++dw)
+                        {
+                            size_t wBeg = dw * strideX - padX;
+                            size_t wEnd = Simd::Min(wBeg + kernelX, srcW);
+                            wBeg = Simd::Max<ptrdiff_t>(0, wBeg);
+                            float max = -FLT_MAX;
+                            for (size_t sh = hBeg; sh < hEnd; ++sh)
+                                for (size_t sw = wBeg; sw < wEnd; ++sw)
+                                    max = Simd::Max(max, BFloat16ToFloat32(src[sh * srcW + sw]));
+                            dst[dh * dstW + dw] = Float32ToBFloat16(max);
+                        }
+                    }
+                    src += srcW * srcH;
+                    dst += dstW * dstH;
+                }
+            }
+            else
+                assert(0);
         }
     }
 #endif

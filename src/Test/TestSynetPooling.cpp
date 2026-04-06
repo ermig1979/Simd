@@ -425,8 +425,8 @@ namespace Test
     {
         bool result = true;
 
-        //if (TestBase(options))
-            //result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Base::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+        if (TestBase(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Base::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
 
 //#ifdef SIMD_SSE41_ENABLE
 //        if (Simd::Sse41::Enable && TestSse41(options))
