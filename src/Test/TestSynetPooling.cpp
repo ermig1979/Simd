@@ -415,7 +415,7 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && SynetPoolingMax16bAutoTest(::SimdTensorFormatNchw, f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(::SimdTensorFormatNchw, f1, f2);
         result = result && SynetPoolingMax16bAutoTest(::SimdTensorFormatNhwc, f1, f2);
 
         return result;
@@ -428,11 +428,11 @@ namespace Test
         if (TestBase(options))
             result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Base::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41(options))
-//            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Sse41::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Sse41::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2(options))
 //            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx2::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
