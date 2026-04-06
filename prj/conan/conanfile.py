@@ -9,6 +9,7 @@ from conan.tools.scm import Git
 
 class SimdConan(ConanFile):
     name = "simd"
+    version_file = "prj/txt/UserVersion.txt"
     license = "MIT"
     author = "Ermig1979"
     url = "https://github.com/ermig1979/Simd"
