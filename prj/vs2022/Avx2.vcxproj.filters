@@ -25,6 +25,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2BayerToBgra.cpp">
       <Filter>Avx2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToBayer.cpp">
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToBayer.cpp">
       <Filter>Avx2\Convert</Filter>
     </ClCompile>
