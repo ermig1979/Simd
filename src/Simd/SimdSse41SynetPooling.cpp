@@ -801,28 +801,7 @@ namespace Simd
             }
             else if (format == SimdTensorFormatNchw)
             {
-                for (size_t c = 0; c < srcC; ++c)
-                {
-                    for (size_t dh = 0; dh < dstH; ++dh)
-                    {
-                        size_t hBeg = dh * strideY - padY;
-                        size_t hEnd = Simd::Min(hBeg + kernelY, srcH);
-                        hBeg = Simd::Max<ptrdiff_t>(0, hBeg);
-                        for (size_t dw = 0; dw < dstW; ++dw)
-                        {
-                            size_t wBeg = dw * strideX - padX;
-                            size_t wEnd = Simd::Min(wBeg + kernelX, srcW);
-                            wBeg = Simd::Max<ptrdiff_t>(0, wBeg);
-                            float max = -FLT_MAX;
-                            for (size_t sh = hBeg; sh < hEnd; ++sh)
-                                for (size_t sw = wBeg; sw < wEnd; ++sw)
-                                    max = Simd::Max(max, Base::BFloat16ToFloat32(src[sh * srcW + sw]));
-                            dst[dh * dstW + dw] = Base::Float32ToBFloat16(max);
-                        }
-                    }
-                    src += srcW * srcH;
-                    dst += dstW * dstH;
-                }
+                Base::SynetPoolingMax16b(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
             }
             else
                 assert(0);

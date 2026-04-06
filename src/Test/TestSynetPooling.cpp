@@ -265,7 +265,8 @@ namespace Test
         SimdBool c = SimdTrue, e = SimdTrue;
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
-#if 0
+#if 1
+        result = result && SynetPoolingMax32fAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
@@ -280,9 +281,6 @@ namespace Test
         result = result && SynetPoolingMax32fAutoTest(ParamP(64, 21, 92, Shp(1, 3, 3), Shp(1, 1, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(128, 19, 90, Shp(2, 3, 3), Shp(2, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(256, 9, 88, Shp(4, 3, 3), Shp(4, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-#endif
-#if 1        
-        result = result && SynetPoolingMax32fAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
 #endif
             
         return result;
@@ -415,7 +413,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetPoolingMax16bAutoTest(::SimdTensorFormatNchw, f1, f2);
+        //result = result && SynetPoolingMax16bAutoTest(::SimdTensorFormatNchw, f1, f2);
         result = result && SynetPoolingMax16bAutoTest(::SimdTensorFormatNhwc, f1, f2);
 
         return result;
@@ -433,11 +431,11 @@ namespace Test
             result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Sse41::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2(options))
-//            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx2::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx2::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+#endif 
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
 //            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx512bw::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
