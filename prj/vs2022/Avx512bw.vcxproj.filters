@@ -505,6 +505,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToHsv.cpp">
       <Filter>Avx512bw\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPoolingMax16b.cpp">
+      <Filter>Avx512bw\Synet\Pooling</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">

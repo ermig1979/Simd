@@ -436,10 +436,10 @@ namespace Test
             result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx2::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-//            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx512bw::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx512bw::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+#endif
 
         return result;
     }
