@@ -349,6 +349,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgrV2.cpp">
       <Filter>Avx2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToHsl.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToHsv.cpp">
+      <Filter>Avx2\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToHue.cpp">
       <Filter>Avx2\Convert</Filter>
     </ClCompile>

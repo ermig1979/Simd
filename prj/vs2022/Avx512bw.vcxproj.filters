@@ -235,6 +235,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgrV2.cpp">
       <Filter>Avx512bw\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHsl.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHsv.cpp">
+      <Filter>Avx512bw\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp">
       <Filter>Avx512bw\Convert</Filter>
     </ClCompile>

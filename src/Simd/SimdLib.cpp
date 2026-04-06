@@ -514,6 +514,11 @@ SIMD_API void SimdAlphaBlending2x(const uint8_t* src0, size_t src0Stride, const 
     size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
 {
     SIMD_EMPTY();
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx512bw::A)
+        Avx512bw::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
@@ -7677,14 +7682,44 @@ SIMD_API void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t 
                                size_t width, size_t height, uint8_t * hsl, size_t hslStride)
 {
     SIMD_EMPTY();
-    Base::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx512bw::A)
+        Avx512bw::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+    else
+#endif
+        Base::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
 }
 
 SIMD_API void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
                                size_t width, size_t height, uint8_t * hsv, size_t hsvStride)
 {
     SIMD_EMPTY();
-    Base::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx512bw::A)
+        Avx512bw::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
+    else
+#endif
+        Base::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
 }
 
 SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
