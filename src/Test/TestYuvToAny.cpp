@@ -115,6 +115,11 @@ namespace Test
             result = result && YuvToAnyAutoTest(1, 1, View::Hsl24, FUNC(Simd::Avx512bw::Yuv444pToHsl), FUNC(SimdYuv444pToHsl));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && YuvToAnyAutoTest(1, 1, View::Hsl24, FUNC(Simd::Neon::Yuv444pToHsl), FUNC(SimdYuv444pToHsl));
+#endif
+
         return result;
     }
 

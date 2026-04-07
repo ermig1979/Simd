@@ -38,6 +38,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToHsl.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp" />
@@ -124,6 +125,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgrV2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHsl.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHue.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToUyvy.cpp" />
   </ItemGroup>
