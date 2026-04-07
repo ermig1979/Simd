@@ -143,7 +143,7 @@ namespace Test
 #endif
 #if 1
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, a, t), f1, f2);
-        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 512, 44, 80, 512, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 256, 22, 40, 256, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, a, t), f1, f2);

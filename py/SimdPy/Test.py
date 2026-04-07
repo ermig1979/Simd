@@ -34,7 +34,7 @@ import Simd
 def LoadTestImage(args, fmt = Simd.PixelFormat.Rgb24) -> Simd.Image :
 	if not os.path.isdir(args.root):
 		raise Exception("Project root directory '{0}' is not exist!".format(args.root))
-	path = "{0}/data/image/city.jpg".format(args.root)
+	path = "{0}/{1}".format(args.root, args.testImage)
 	image = Simd.Image()
 	if not image.Load(path, fmt) :
 		raise Exception("Can't load image '{0}' in {1} format!".format(path, fmt))
@@ -45,7 +45,7 @@ def LoadTestImage(args, fmt = Simd.PixelFormat.Rgb24) -> Simd.Image :
 def LoadTestImageFrame(args, fmt = Simd.FrameFormat.Rgb24) -> Simd.ImageFrame :
 	if not os.path.isdir(args.root):
 		raise Exception("Project root directory '{0}' is not exist!".format(args.root))
-	path = "{0}/data/image/city.jpg".format(args.root)
+	path = "{0}/{1}".format(args.root, args.testImage)
 	imageFrame = Simd.ImageFrame()
 	if not imageFrame.Load(path, fmt) :
 		raise Exception("Can't load image frame '{0}' in {1} format!".format(path, fmt))
@@ -165,6 +165,17 @@ def ImageResizeTest(args) :
 	image = LoadTestImage(args)
 	resized = Simd.ResizedImage(image, image.Width() // 4, image.Height() // 4, Simd.ResizeMethod.BilinearOpenCv)
 	resized.Save("resized.jpg", Simd.ImageFile.Jpeg, 85)
+	
+###################################################################################################
+
+def ImageNumpyResizeTest(args) :
+	srcSimd = LoadTestImage(args)
+	copySrcNumpy = srcSimd.CopyToNumpyArray()
+	copySrcSimd = Simd.Image(srcSimd.Format(), srcSimd.Width(), srcSimd.Height(), 0, srcSimd.Width() * srcSimd.Format().PixelSize(), copySrcNumpy.ctypes.data)
+	dstSimd = Simd.ResizedImage(copySrcSimd, srcSimd.Width() // 2, srcSimd.Height() // 2, Simd.ResizeMethod.Area)
+	copyDstNumpy = dstSimd.CopyToNumpyArray()
+	copyDstSimd = Simd.Image(dstSimd.Format(), dstSimd.Width(), dstSimd.Height(), 0, dstSimd.Width() * dstSimd.Format().PixelSize(), copyDstNumpy.ctypes.data)
+	copyDstSimd.Save("numpy_resized.jpg", Simd.ImageFile.Jpeg, 85)
 	
 ###################################################################################################
 
@@ -303,6 +314,7 @@ def InitTestList(args) :
 	tests.append(ImageAbsGradientSaturatedSumTest)
 	tests.append(ConvertImageTest)
 	tests.append(ImageResizeTest)
+	tests.append(ImageNumpyResizeTest)
 	tests.append(ImageShiftBilinearTest)
 	tests.append(ReduceGray2x2Test)
 	tests.append(ShiftDetectorFunctionsTest)
@@ -354,6 +366,7 @@ def main():
 	parser.add_argument("-r", "--root", help="Simd Library root directory.", required=False, type=str, default=".")
 	parser.add_argument("-i", "--include", help="Include tests filter.", required=False, default=[], action="append")
 	parser.add_argument("-e", "--exclude", help="Exclude tests filter.", required=False, default=[], action="append")
+	parser.add_argument("-ti", "--testImage", help="Test image name.", required=False, type=str, default="data/image/city.jpg")
 	args = parser.parse_args()
 	
 	Simd.Lib.Init(args.bin)

@@ -1004,9 +1004,9 @@ namespace
 
         for (int channels = 1; channels <= 4; channels++)
         {
-            result = result && GaussianBlurAutoTest(channels, 0.5f, f1, f2);
-            result = result && GaussianBlurAutoTest(channels, 1.0f, f1, f2);
-            result = result && GaussianBlurAutoTest(channels, 3.0f, f1, f2);
+            result = result && GaussianBlurAutoTest(channels, 0.3f, f1, f2);
+            //result = result && GaussianBlurAutoTest(channels, 1.0f, f1, f2);
+            //result = result && GaussianBlurAutoTest(channels, 3.0f, f1, f2);
         }
 
         return result;

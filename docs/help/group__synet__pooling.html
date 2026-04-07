@@ -56,6 +56,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga6a8f46b2bbe2b37c16f436f756dad3e6"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__pooling.html#ga6a8f46b2bbe2b37c16f436f756dad3e6">SimdSynetPoolingMax32f</a> (const float *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX, size_t padC, size_t padY, size_t padX, float *dst, size_t dstC, size_t dstH, size_t dstW, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:ga6a8f46b2bbe2b37c16f436f756dad3e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling, 32-bit float). It supports 2D and 3D pooling.  <a href="group__synet__pooling.html#ga6a8f46b2bbe2b37c16f436f756dad3e6">More...</a><br /></td></tr>
 <tr class="separator:ga6a8f46b2bbe2b37c16f436f756dad3e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga77e1a42bbc30254e6f1680e2cb3fb4ec"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__pooling.html#ga77e1a42bbc30254e6f1680e2cb3fb4ec">SimdSynetPoolingMax16b</a> (const uint16_t *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint16_t *dst, size_t dstH, size_t dstW, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
+<tr class="memdesc:ga77e1a42bbc30254e6f1680e2cb3fb4ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling, BF16).  <a href="group__synet__pooling.html#ga77e1a42bbc30254e6f1680e2cb3fb4ec">More...</a><br /></td></tr>
+<tr class="separator:ga77e1a42bbc30254e6f1680e2cb3fb4ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf1085e49786016ed00af04022ff55f7f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__pooling.html#gaf1085e49786016ed00af04022ff55f7f">SimdSynetPoolingMax8u</a> (const uint8_t *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t *dst, size_t dstH, size_t dstW, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:gaf1085e49786016ed00af04022ff55f7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling, 8-bit unsigned integer).  <a href="group__synet__pooling.html#gaf1085e49786016ed00af04022ff55f7f">More...</a><br /></td></tr>
 <tr class="separator:gaf1085e49786016ed00af04022ff55f7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -333,6 +336,128 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstC</td><td>- a number of output channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga77e1a42bbc30254e6f1680e2cb3fb4ec" name="ga77e1a42bbc30254e6f1680e2cb3fb4ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga77e1a42bbc30254e6f1680e2cb3fb4ec">&#9670;&#160;</a></span>SimdSynetPoolingMax16b()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetPoolingMax16b </td>
+          <td>(</td>
+          <td class="paramtype">const uint16_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of PoolingLayer (MaxPooling, BF16). </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input BF16 array. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelY</td><td>- a height of the pooling kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelX</td><td>- a width of the pooling kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideY</td><td>- a y-stride of the pooling. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the pooling. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output BF16 float array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
