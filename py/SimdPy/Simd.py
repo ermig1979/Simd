@@ -77,7 +77,7 @@ class CpuInfo(enum.Enum) :
 class FrameFormat(enum.Enum) :	
 	## An undefined pixel format.
 	Empty = 0
-	## Two planes (8-bit full size Y plane, 16-bit interlived half size UV plane) NV12 pixel format.
+	## Two planes (8-bit full size Y plane, 16-bit interleaved half size UV plane) NV12 pixel format.
 	Nv12 = 1
 	## Three planes (8-bit full size Y plane, 8-bit half size U plane, 8-bit half size V plane) YUV420P pixel format.
 	Yuv420p = 2
@@ -121,9 +121,9 @@ class ImageFile(enum.Enum) :
     PgmTxt = 1
     ## A PGM (Portable Gray Map) binary (P5) image file format.
     PgmBin = 2
-    ## A PGM (Portable Pixel Map) text (P3) image file format.
+    ## A PPM (Portable Pixel Map) text (P3) image file format.
     PpmTxt = 3
-    ## A PGM (Portable Pixel Map) binary (P6) image file format.
+    ## A PPM (Portable Pixel Map) binary (P6) image file format.
     PpmBin = 4
     ## A PNG (Portable Network Graphics) image file format.
     Png = 5
@@ -347,21 +347,21 @@ class TensorData(enum.Enum) :
 	## 32-bit floating point (Single Precision).
 	FP32 = 0 
 	## 32-bit signed integer.
-	INT32 = 0 
+	INT32 = 1 
 	## 8-bit signed integer.
-	INT8 = 1 
+	INT8 = 2 
 	## 8-bit unsigned integer.
-	UINT8 = 2 
+	UINT8 = 3 
 	## 64-bit signed integer.
-	INT64 = 3 
+	INT64 = 4 
 	## 64-bit unsigned integer.
-	UINT64 = 4 
+	UINT64 = 5 
 	## 8-bit Boolean.
-	BOOL = 5 
+	BOOL = 6 
 	## 16-bit BFloat16 (Brain Floating Point).
-	BF16 = 6 
+	BF16 = 7 
 	## 16-bit floating point (Half Precision).
-	FP16 = 7 
+	FP16 = 8 
 	
 ## @ingroup python
 # Describes Warp Affine flags. This type used in function Simd.WarpAffineInit.
@@ -378,11 +378,11 @@ class WarpAffineFlags(enum.Flag) :
     InterpBilinear = 2 
 	## Bit mask of pixel interpolation options.
     InterpMask = 2 
-	## Nearest pixel interpolation method.
+	## Constant border type.
     BorderConstant = 0
-	## Bilinear pixel interpolation method.
+	## Transparent border type.
     BorderTransparent = 4 
-	## Bit mask of pixel interpolation options.
+	## Bit mask of border type options.
     BorderMask = 4 
 
 	
@@ -761,7 +761,7 @@ class Lib():
 		return str(ptr, encoding='utf-8')
 	
     ## Allocates aligned memory block.
-    # @note The memory allocated by this function is must be deleted by function Simd.Lib.Free.
+    # @note The memory allocated by this function must be deleted by function Simd.Lib.Free.
 	# @param size - an original size.
     # @param  align - a required alignment.
 	# @return return a pointer to allocated memory.
@@ -895,7 +895,7 @@ class Lib():
     # @param uStride - a row size of the u image.
     # @param v - a pointer to pixels data of output 8-bit image with V color plane.
     # @param vStride - a row size of the v image.
-    # @param yuvType - a type of output YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of output YUV image (see description of Simd.YuvType).
 	def BgraToYuv420p(src : ctypes.c_void_p, srcStride: int, width: int, height: int, y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdBgraToYuv420pV2(src, srcStride, width, height, y, yStride, u, uStride, v, vStride, yuvType.value)
 
@@ -911,7 +911,7 @@ class Lib():
     # @param uStride - a row size of the u image.
     # @param v - a pointer to pixels data of output 8-bit image with V color plane.
     # @param vStride - a row size of the v image.
-    # @param yuvType - a type of output YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of output YUV image (see description of Simd.YuvType).
 	def BgraToYuv444p(src : ctypes.c_void_p, srcStride: int, width: int, height: int, y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdBgraToYuv444pV2(src, srcStride, width, height, y, yStride, u, uStride, v, vStride, yuvType.value)
 		
@@ -969,7 +969,7 @@ class Lib():
     # @param uStride - a row size of the u image.
     # @param v - a pointer to pixels data of output 8-bit image with V color plane.
     # @param vStride - a row size of the v image.
-    # @param yuvType - a type of output YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of output YUV image (see description of Simd.YuvType).
 	def BgrToYuv420p(src : ctypes.c_void_p, srcStride: int, width: int, height: int, y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdBgrToYuv420pV2(src, srcStride, width, height, y, yStride, u, uStride, v, vStride, yuvType.value)
 
@@ -985,7 +985,7 @@ class Lib():
     # @param uStride - a row size of the u image.
     # @param v - a pointer to pixels data of output 8-bit image with V color plane.
     # @param vStride - a row size of the v image.
-    # @param yuvType - a type of output YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of output YUV image (see description of Simd.YuvType).
 	def BgrToYuv444p(src : ctypes.c_void_p, srcStride: int, width: int, height: int, y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdBgrToYuv444pV2(src, srcStride, width, height, y, yStride, u, uStride, v, vStride, yuvType.value)
 		
@@ -1136,7 +1136,7 @@ class Lib():
     # @param width - a width of input image.
     # @param height - a height of input image.
     # @param format - a pixel format of input image. Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
-    # @param file - a format of output image file. To auto choise format of output file set this parameter to Simd.ImageFile.Undefined.
+    # @param file - a format of output image file. To auto choice format of output file set this parameter to Simd.ImageFile.Undefined.
     # @param quality - a parameter of compression quality (if file format supports it).
     # @param path - a path to output image file.
     # @return result of the operation.
@@ -1147,7 +1147,7 @@ class Lib():
     # @param path - a path to input image file.
     # @param desiredFormat - a desired pixel format of output image. It can be Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, 
     #                 Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32 or Simd.PixelFormat.Empty (use pixel format of input image file).
-	# @return a pointer to pixel data, row size in bytes, image width, image height, output pixel format. The output pixel data mast be deleted after use by function Simd.Lib.Free.
+	# @return a pointer to pixel data, row size in bytes, image width, image height, output pixel format. The output pixel data must be deleted after use by function Simd.Lib.Free.
 	def ImageLoadFromFile(path : str, desiredFormat: Simd.PixelFormat):
 		stride = ctypes.c_size_t()
 		width = ctypes.c_size_t()
@@ -1281,8 +1281,8 @@ class Lib():
     # @param currHeight - a height of current image.
     # @param initShiftX - an initial shift X position.
     # @param initShiftY - an initial shift Y position.
-    # @param maxShiftX - maximal possible shift alogn X axis.
-    # @param maxShiftY - maximal possible shift alogn Y axis.
+    # @param maxShiftX - maximal possible shift along X axis.
+    # @param maxShiftY - maximal possible shift along Y axis.
     # @param hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
     # @param regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
     # @return a result of shift estimation (true or false). In positive case use functions Simd.Lib.ShiftDetectorGetShift, Simd.Lib.ShiftDetectorGetRefinedShift, Simd.Lib.ShiftDetectorGetStability, Simd.Lib.ShiftDetectorGetCorrelation to get shift and other parameters.
@@ -1378,7 +1378,7 @@ class Lib():
     # @param channels - a channel number of input and output image. Its value must be in range [1..4].
     # @param mat - an array with coefficients of affine warp (2x3 matrix).
     # @param flags - a flags of algorithm parameters.
-    # @param border - an array with color of border. The size of the array mast be equal to channels.
+    # @param border - an array with color of border. The size of the array must be equal to channels.
     #                 It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL.
     # @return a pointer to warp affine context. On error it returns NULL.
     #         This pointer is used in functions Simd.Lib.WarpAffineRun.
@@ -1416,7 +1416,7 @@ class Lib():
     # @param height - a height of input/output image.
     # @param dst - a pointer to pixels data of output 24-bit BGR image.
     # @param dstStride - a row size of output image in bytes.
-    # @param yuvType - a type of input YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of input YUV image (see description of Simd.YuvType).
 	def Yuv420pToBgr(y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdYuv420pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, yuvType.value)
 
@@ -1432,7 +1432,7 @@ class Lib():
     # @param height - a height of input/output image.
     # @param dst - a pointer to pixels data of output 24-bit BGR image.
     # @param dstStride - a row size of output image in bytes.
-    # @param yuvType - a type of input YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of input YUV image (see description of Simd.YuvType).
 	def Yuv444pToBgr(y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdYuv444pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, yuvType.value)
 		
@@ -1450,7 +1450,7 @@ class Lib():
     # @param dst - a pointer to pixels data of output 32-bit BGRA image.
     # @param dstStride - a row size of output image in bytes.
     # @param alpha - a value of alpha channel. By default it is equal to 255.
-    # @param yuvType - a type of input YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of input YUV image (see description of Simd.YuvType).
 	def Yuv420pToBgra(y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, alpha = 255, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdYuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, alpha, yuvType.value)
 
@@ -1467,7 +1467,7 @@ class Lib():
     # @param dst - a pointer to pixels data of output 32-bit BGRA image.
     # @param dstStride - a row size of output image in bytes.
     # @param alpha - a value of alpha channel. By default it is equal to 255.
-    # @param yuvType - a type of input YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of input YUV image (see description of Simd.YuvType).
 	def Yuv444pToBgra(y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, alpha = 255, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdYuv444pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, alpha, yuvType.value)
 		
@@ -1484,7 +1484,7 @@ class Lib():
     # @param height - a height of input/output image.
     # @param dst - a pointer to pixels data of output 24-bit RGB image.
     # @param dstStride - a row size of output image in bytes.
-    # @param yuvType - a type of input YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of input YUV image (see description of Simd.YuvType).
 	def Yuv420pToRgb(y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdYuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, yuvType.value)
 
@@ -1500,7 +1500,7 @@ class Lib():
     # @param height - a height of input/output image.
     # @param dst - a pointer to pixels data of output 24-bit RGB image.
     # @param dstStride - a row size of output image in bytes.
-    # @param yuvType - a type of input YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of input YUV image (see description of Simd.YuvType).
 	def Yuv444pToRgb(y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdYuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, yuvType.value)
 
@@ -1517,7 +1517,7 @@ class Lib():
     # @param dst - a pointer to pixels data of output 32-bit RGBA image.
     # @param dstStride - a row size of output image in bytes.
     # @param alpha - a value of alpha channel. By default it is equal to 255.
-    # @param yuvType - a type of input YUV image (see descriprion of Simd.YuvType).
+    # @param yuvType - a type of input YUV image (see description of Simd.YuvType).
 	def Yuv444pToRgba(y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, alpha = 255, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdYuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, alpha, yuvType.value)
 
@@ -1531,7 +1531,7 @@ class Image():
 	# @param format - image pixel format.
 	# @param width - image width.
 	# @param height - image height.
-	# @param align - a row size alingnment in bytes (optional).
+	# @param align - a row size alignment in bytes (optional).
 	# @param stride - a row size in bytes of image created on the base of external image (optional). 
 	# @param data - a pointer to external image pixel data (optional). 
 	def __init__(self, format = Simd.PixelFormat.Empty, width = 0, height = 0, align = 0, stride = 0, data = ctypes.c_void_p(0)) :
@@ -1553,7 +1553,7 @@ class Image():
 	# @param format - a new image pixel format.
 	# @param width - a new image width.
 	# @param height - a new image height.	
-	# @param align - a row size alingnment in bytes (optional).
+	# @param align - a row size alignment in bytes (optional).
 	def Recreate(self, format : Simd.PixelFormat, width : int, height : int, align = 0) :
 		if format == self.__format and width == self.__width and height == self.__height :
 			return
@@ -1652,7 +1652,7 @@ class Image():
     ## Saves the image to file in given image file format.
     # @note Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
     # @param path - a path to output image file.
-    # @param file - a format of output image file. To auto choise format of output file set this parameter to Simd.ImageFile.Undefined.
+    # @param file - a format of output image file. To auto choice format of output file set this parameter to Simd.ImageFile.Undefined.
     # @param quality - a parameter of compression quality (if file format supports it).
     # @return result of the operation.
 	def Save(self, path : str, file = Simd.ImageFile.Undefined, quality = 100) -> bool:
@@ -1873,7 +1873,7 @@ class ImageFrame():
 		self.__yuvType = YuvType.Unknown
 		self.__planes = [ Image(), Image(), Image(), Image() ]
 	
-	## Recreates the imagee.
+	## Recreates the image.
 	# @param format - a new frame format.
 	# @param width - a new frame width.
 	# @param height - a new frame height.
@@ -2215,7 +2215,7 @@ class ImageFrame():
 
 	## Saves the image frame to file in given image file format.
     # @param path - a path to output image file.
-    # @param file - a format of output image file. To auto choise format of output file set this parameter to Simd.ImageFile.Undefined.
+    # @param file - a format of output image file. To auto choice format of output file set this parameter to Simd.ImageFile.Undefined.
     # @param quality - a parameter of compression quality (if file format supports it).
     # @return result of the operation.
 	def Save(self, path : str, file = Simd.ImageFile.Undefined, quality = 100) -> bool:
@@ -2308,10 +2308,10 @@ class ShiftingDetector():
 			gray = background.Converted(Simd.PixelFormat.Gray8)
 			Simd.Lib.ShiftDetectorSetBackground(self.__context, gray.Data(), gray.Stride(), True)
 
-	##Estimates shift of current image relative to background image.
+	## Estimates shift of current image relative to background image.
 	# @param current - A current image.
     # @param initShift - an initial shift X and Y position.
-    # @param maxShift - maximal possible shift alogn X and Y axex.
+    # @param maxShift - maximal possible shift along X and Y axes.
     # @param hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
     # @param regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
 	def Estimate(self, current: Simd.Image, initShift: [int, int], maxShift: [int, int], hiddenAreaPenalty = 0.0, regionAreaMin = 25) -> bool:
@@ -2347,7 +2347,7 @@ class ShiftingDetector():
 # The TextFont class provides text drawing.
 class TextFont():
 	## Creates a new font.
-	# @param height - a height of created font. Ith default value is 16.
+	# @param height - a height of created font. Its default value is 16.
 	def __init__(self, height = 16) :
 		self.__valid = False
 		self.__context = Simd.Lib.FontInit()
@@ -2440,7 +2440,7 @@ def AbsGradientSaturatedSum(src : Image, dst : Image) -> Image :
 ## @ingroup python
 # Reduces input 8-bit gray image in two times.
 # @param src - an input 8-bit gray image.
-# @param dst - a stretched output 8-bit gray imaget. Can be empty.
+# @param dst - a stretched output 8-bit gray image. Can be empty.
 # @return - output stretched 8-bit gray image.
 def ReduceGray2x2(src : Image, dst : Image) -> Image :
 	if src.Format() != Simd.PixelFormat.Gray8 :
@@ -2534,7 +2534,7 @@ def ShiftBilinear(src : Image, bkg : Image, shift : [float, float], crop: [int, 
 ## @ingroup python
 # Stretches input 8-bit gray image in two times.
 # @param src - an input 8-bit gray image.
-# @param dst - a stretched output 8-bit gray imaget. Can be empty.
+# @param dst - a stretched output 8-bit gray image. Can be empty.
 # @return - output stretched 8-bit gray image.
 def StretchGray2x2(src : Image, dst : Image) -> Image :
 	if src.Format() != Simd.PixelFormat.Gray8 :
@@ -2548,7 +2548,7 @@ def StretchGray2x2(src : Image, dst : Image) -> Image :
 
 ##  @ingroup python
 # Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-# @param src - an input image. There are following supported pixel format: aSimd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
+# @param src - an input image. There are following supported pixel format: a Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
 # @param lower - an array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
 # @param upper - an array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
 # @param dst - a pointer to the output 32-bit float image tensor.
@@ -2568,9 +2568,9 @@ def SynetSetInput(src : Image, lower : array.array('f'), upper : array.array('f'
 #                  It parameter is actual for Simd.WarpAffineFlags.BorderConstant flag. 
 def WarpAffine(src : Image, mat: array.array('f'), dst : Image, flags = (Simd.WarpAffineFlags.ChannelByte | Simd.WarpAffineFlags.InterpBilinear | Simd.WarpAffineFlags.BorderConstant), border = array.array('B', [])) :
 	if src.Format() != dst.Format() or src.Format().ChannelSize() != 1 :
-		raise Exception("Uncompartible image format for Warp Affine!")
+		raise Exception("Incompatible image format for Warp Affine!")
 	if (flags & Simd.WarpAffineFlags.ChannelMask) != Simd.WarpAffineFlags.ChannelByte :
-		raise Exception("Uncompartible Warp Affine flag!")
+		raise Exception("Incompatible Warp Affine flag!")
 	
 	context = Lib.WarpAffineInit(src.Width(), src.Height(), src.Stride(), dst.Width(), dst.Height(), dst.Stride(), src.Format().ChannelCount(), mat, flags, border)
 	if context == ctypes.c_void_p(0) :
