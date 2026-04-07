@@ -30,15 +30,15 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
-        SIMD_INLINE int32x4_t MulDiv32(const int32x4_t & dividend, const int32x4_t & divisor, const float32x4_t & KF)
+        SIMD_INLINE int32x4_t MulDiv32Hsl(const int32x4_t & dividend, const int32x4_t & divisor, const float32x4_t & KF)
         {
             return vcvtq_s32_f32(Div<SIMD_NEON_RCP_ITER>(vmulq_f32(KF, vcvtq_f32_s32(dividend)), vcvtq_f32_s32(divisor)));
         }
 
-        SIMD_INLINE int16x8_t MulDiv16(const int16x8_t & dividend, const int16x8_t & divisor, const float32x4_t & KF)
+        SIMD_INLINE int16x8_t MulDiv16Hsl(const int16x8_t & dividend, const int16x8_t & divisor, const float32x4_t & KF)
         {
-            int32x4_t lo = MulDiv32(UnpackI16<0>(dividend), UnpackI16<0>(divisor), KF);
-            int32x4_t hi = MulDiv32(UnpackI16<1>(dividend), UnpackI16<1>(divisor), KF);
+            int32x4_t lo = MulDiv32Hsl(UnpackI16<0>(dividend), UnpackI16<0>(divisor), KF);
+            int32x4_t hi = MulDiv32Hsl(UnpackI16<1>(dividend), UnpackI16<1>(divisor), KF);
             return PackI32(lo, hi);
         }
 
@@ -66,7 +66,7 @@ namespace Simd
 
             int16x8_t safeRange = vmaxq_s16(range, (int16x8_t)K16_0001);
             hue = vandq_s16(vmvnq_s16((int16x8_t)vceqq_s16(range, (int16x8_t)K16_0000)),
-                vandq_s16(MulDiv16(dividend, safeRange, KF_255_DIV_6), (int16x8_t)K16_00FF));
+                vandq_s16(MulDiv16Hsl(dividend, safeRange, KF_255_DIV_6), (int16x8_t)K16_00FF));
 
             // Lightness: L = (max + min) / 2
             lgt = vshrq_n_s16(sum, 1);
@@ -86,8 +86,8 @@ namespace Simd
             int32x4_t denomSafe_lo = vmaxq_s32(denom_lo, K32_1);
             int32x4_t denomSafe_hi = vmaxq_s32(denom_hi, K32_1);
 
-            int32x4_t sat_lo = MulDiv32(range_lo, denomSafe_lo, K_255F);
-            int32x4_t sat_hi = MulDiv32(range_hi, denomSafe_hi, K_255F);
+            int32x4_t sat_lo = MulDiv32Hsl(range_lo, denomSafe_lo, K_255F);
+            int32x4_t sat_hi = MulDiv32Hsl(range_hi, denomSafe_hi, K_255F);
 
             uint32x4_t zeroRangeMask_lo = vceqq_s32(range_lo, K32_0);
             uint32x4_t zeroRangeMask_hi = vceqq_s32(range_hi, K32_0);
