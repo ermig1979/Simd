@@ -671,6 +671,142 @@ namespace Simd
                     strideC, strideY, strideX, padC, padY, padX, dst, dstC, dstH, dstW, format);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void PoolingMax16bNhwc1(const uint16_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m128& min, uint16_t* dst)
+        {
+            __m128 max0 = min;
+            for (size_t h = 0; h < kH; ++h)
+            {
+                for (size_t w = 0; w < kW; ++w)
+                {
+                    __m128i src0 = _mm_loadl_epi64((__m128i*)(src + w * srcC + 0 * DF));
+                    max0 = _mm_max_ps(max0, BFloat16ToFloat32<0>(src0));
+                }
+                src += srcS;
+            }
+            _mm_storel_epi64((__m128i*)(dst + 0 * DF), _mm_packus_epi32(Float32ToBFloat16(max0), K_ZERO));
+        }
+
+        SIMD_INLINE void PoolingMax16bNhwc2(const uint16_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m128& min, uint16_t* dst)
+        {
+            __m128 max0 = min, max1 = min;
+            for (size_t h = 0; h < kH; ++h)
+            {
+                for (size_t w = 0; w < kW; ++w)
+                {
+                    __m128i src01 = _mm_loadu_si128((__m128i*)(src + w * srcC + 0 * DF));
+                    max0 = _mm_max_ps(max0, BFloat16ToFloat32<0>(src01));
+                    max1 = _mm_max_ps(max1, BFloat16ToFloat32<1>(src01));
+                }
+                src += srcS;
+            }
+            _mm_storeu_si128((__m128i*)(dst + 0 * DF), Float32ToBFloat16(max0, max1));
+        }
+
+        SIMD_INLINE void PoolingMax16bNhwc4(const uint16_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m128& min, uint16_t* dst)
+        {
+            __m128 max0 = min, max1 = min;
+            __m128 max2 = min, max3 = min;
+            for (size_t h = 0; h < kH; ++h)
+            {
+                for (size_t w = 0; w < kW; ++w)
+                {
+                    __m128i src01 = _mm_loadu_si128((__m128i*)(src + w * srcC + 0 * DF));
+                    max0 = _mm_max_ps(max0, BFloat16ToFloat32<0>(src01));
+                    max1 = _mm_max_ps(max1, BFloat16ToFloat32<1>(src01));
+                    __m128i src23 = _mm_loadu_si128((__m128i*)(src + w * srcC + 1 * DF));
+                    max2 = _mm_max_ps(max2, BFloat16ToFloat32<0>(src23));
+                    max3 = _mm_max_ps(max3, BFloat16ToFloat32<1>(src23));
+                }
+                src += srcS;
+            }
+            _mm_storeu_si128((__m128i*)(dst + 0 * DF), Float32ToBFloat16(max0, max1));
+            _mm_storeu_si128((__m128i*)(dst + 1 * DF), Float32ToBFloat16(max2, max3));
+        }
+
+        SIMD_INLINE void PoolingMax16bNhwc8(const uint16_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m128& min, uint16_t* dst)
+        {
+            __m128 max0 = min, max1 = min;
+            __m128 max2 = min, max3 = min;
+            __m128 max4 = min, max5 = min;
+            __m128 max6 = min, max7 = min;
+            for (size_t h = 0; h < kH; ++h)
+            {
+                for (size_t w = 0; w < kW; ++w)
+                {
+                    __m128i src01 = _mm_loadu_si128((__m128i*)(src + w * srcC + 0 * DF));
+                    max0 = _mm_max_ps(max0, BFloat16ToFloat32<0>(src01));
+                    max1 = _mm_max_ps(max1, BFloat16ToFloat32<1>(src01));
+                    __m128i src23 = _mm_loadu_si128((__m128i*)(src + w * srcC + 1 * DF));
+                    max2 = _mm_max_ps(max2, BFloat16ToFloat32<0>(src23));
+                    max3 = _mm_max_ps(max3, BFloat16ToFloat32<1>(src23));
+                    __m128i src45 = _mm_loadu_si128((__m128i*)(src + w * srcC + 2 * DF));
+                    max4 = _mm_max_ps(max4, BFloat16ToFloat32<0>(src45));
+                    max5 = _mm_max_ps(max5, BFloat16ToFloat32<1>(src45));
+                    __m128i src67 = _mm_loadu_si128((__m128i*)(src + w * srcC + 3 * DF));
+                    max6 = _mm_max_ps(max6, BFloat16ToFloat32<0>(src67));
+                    max7 = _mm_max_ps(max7, BFloat16ToFloat32<1>(src67));
+                }
+                src += srcS;
+            }
+            _mm_storeu_si128((__m128i*)(dst + 0 * DF), Float32ToBFloat16(max0, max1));
+            _mm_storeu_si128((__m128i*)(dst + 1 * DF), Float32ToBFloat16(max2, max3));
+            _mm_storeu_si128((__m128i*)(dst + 2 * DF), Float32ToBFloat16(max4, max5));
+            _mm_storeu_si128((__m128i*)(dst + 3 * DF), Float32ToBFloat16(max6, max7));
+        }
+
+        void SynetPoolingMax16b(const uint16_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, uint16_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
+        {
+            if (format == SimdTensorFormatNhwc)
+            {
+                if (srcC >= F)
+                {
+                    Array32f max(srcC);
+                    size_t srcS = srcW * srcC;
+                    size_t srcCF1 = AlignLo(srcC, 1 * F);
+                    size_t srcCF2 = AlignLo(srcC, 2 * F);
+                    size_t srcCF4 = AlignLo(srcC, 4 * F);
+                    size_t srcCF8 = AlignLo(srcC, 8 * F);
+                    __m128 min = _mm_set1_ps(-FLT_MAX);
+                    for (size_t ph = 0; ph < dstH; ++ph)
+                    {
+                        size_t hStart = ph * strideY - padY;
+                        size_t hEnd = Simd::Min(hStart + kernelY, srcH);
+                        hStart = Simd::Max<ptrdiff_t>(0, hStart);
+                        for (size_t pw = 0; pw < dstW; ++pw)
+                        {
+                            size_t wStart = pw * strideX - padX;
+                            size_t wEnd = Simd::Min(wStart + kernelX, srcW);
+                            wStart = Simd::Max<ptrdiff_t>(0, wStart);
+                            const uint16_t* ps = src + hStart * srcS + wStart * srcC;
+                            size_t c = 0;
+                            for (; c < srcCF8; c += 8 * F)
+                                PoolingMax16bNhwc8(ps + c, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + c);
+                            for (; c < srcCF4; c += 4 * F)
+                                PoolingMax16bNhwc4(ps + c, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + c);
+                            for (; c < srcCF2; c += 2 * F)
+                                PoolingMax16bNhwc2(ps + c, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + c);
+                            for (; c < srcCF1; c += 1 * F)
+                                PoolingMax16bNhwc1(ps + c, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + c);
+                            if (c < srcC)
+                                PoolingMax16bNhwc1(ps + srcC - F, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + srcC - F);
+                            dst += srcC;
+                        }
+                    }
+                }
+                else
+                    Base::SynetPoolingMax16b(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+            }
+            else if (format == SimdTensorFormatNchw)
+            {
+                Base::SynetPoolingMax16b(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+            }
+            else
+                assert(0);
+        }
+
         //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE void PoolingMax8uNhwc1(const uint8_t * src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m128i & min, uint8_t* dst)

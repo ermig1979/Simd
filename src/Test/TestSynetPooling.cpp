@@ -265,7 +265,8 @@ namespace Test
         SimdBool c = SimdTrue, e = SimdTrue;
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
-#if 0
+#if 1
+        result = result && SynetPoolingMax32fAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
@@ -280,9 +281,6 @@ namespace Test
         result = result && SynetPoolingMax32fAutoTest(ParamP(64, 21, 92, Shp(1, 3, 3), Shp(1, 1, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(128, 19, 90, Shp(2, 3, 3), Shp(2, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(256, 9, 88, Shp(4, 3, 3), Shp(4, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-#endif
-#if 1        
-        result = result && SynetPoolingMax32fAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
 #endif
             
         return result;
@@ -324,6 +322,124 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetPoolingMax32fAutoTest(FUNC_PM32F(Simd::Neon::SynetPoolingMax32f), FUNC_PM32F(SimdSynetPoolingMax32f));
 #endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    struct FuncPM16b
+    {
+        typedef void(*FuncPtr)(const uint16_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, 
+            size_t strideY, size_t strideX, size_t padY, size_t padX, uint16_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+
+        FuncPtr func;
+        String desc;
+
+        FuncPM16b(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+        void Update(const ParamP& p)
+        {
+            std::stringstream ss;
+            ss << desc;
+            ss << "[" << p.srcC << "x" << p.srcH << "x" << p.srcW;
+            ss << "-" << p.kernelY << "x" << p.kernelX;
+            ss << "-" << p.strideY << "x" << p.strideX;
+            ss << "-" << Simd::Max(p.padX, p.padY);
+            ss << "-" << (p.format == SimdTensorFormatNhwc ? "1" : "0");
+            ss << "]";
+            desc = ss.str();
+        }
+
+        void Call(const ParamP& p, const Tensor16u& src, Tensor16u& dst) const
+        {
+            TEST_PERFORMANCE_TEST(desc);
+            func(src.Data(), p.srcC, p.srcH, p.srcW, p.kernelY, p.kernelX, p.strideY, p.strideX, p.padY, p.padX, dst.Data(), p.dstH, p.dstW, p.format);
+        }
+    };
+
+#define FUNC_PM16B(function) FuncPM16b(function, #function)
+
+    bool SynetPoolingMax16bAutoTest(const ParamP& p, FuncPM16b f1, FuncPM16b f2)
+    {
+        bool result = true;
+
+        f1.Update(p);
+        f2.Update(p);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << "].");
+
+        Shape srcS = ToShape(p.srcC, p.srcH, p.srcW, p.format);
+        Shape dstS = ToShape(p.dstC, p.dstH, p.dstW, p.format);
+        Tensor32f src32f(srcS, p.format), dst32f1(dstS, p.format), dst32f2(dstS, p.format);
+        Tensor16u src16u(srcS, p.format), dst16u1(dstS, p.format), dst16u2(dstS, p.format);
+
+        FillRandom(src32f.Data(), src32f.Size(), -1.0, 1.0f);
+        SimdFloat32ToBFloat16(src32f.Data(), src32f.Size(), src16u.Data());
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, src16u, dst16u1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, src16u, dst16u2));
+
+        SimdBFloat16ToFloat32(dst16u1.Data(), dst16u1.Size(), dst32f1.Data());
+        SimdBFloat16ToFloat32(dst16u2.Data(), dst16u2.Size(), dst32f2.Data());
+
+        result = result && Compare(dst32f1, dst32f2, EPS, true, 64, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool SynetPoolingMax16bAutoTest(::SimdTensorFormatType f, const FuncPM16b& f1, const FuncPM16b& f2)
+    {
+        bool result = true;
+
+        SimdBool c = SimdTrue, e = SimdTrue;
+        Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
+
+#if 1
+        result = result && SynetPoolingMax16bAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
+#endif
+
+        return result;
+    }
+
+    bool SynetPoolingMax16bAutoTest(const FuncPM16b& f1, const FuncPM16b& f2)
+    {
+        bool result = true;
+
+        //result = result && SynetPoolingMax16bAutoTest(::SimdTensorFormatNchw, f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(::SimdTensorFormatNhwc, f1, f2);
+
+        return result;
+    }
+
+    bool SynetPoolingMax16bAutoTest(const Options& options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Base::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Sse41::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx2::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx512bw::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+#endif
 
         return result;
     }
