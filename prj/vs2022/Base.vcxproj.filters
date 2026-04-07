@@ -469,6 +469,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetSoftmax32f.cpp">
       <Filter>Base\Synet\Softmax</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcGemmV2.cpp">
+      <Filter>Base\Synet\Convolution</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
