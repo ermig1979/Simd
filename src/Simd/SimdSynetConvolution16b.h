@@ -206,6 +206,44 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class SynetConvolution16bNhwcGemmV2 : public SynetConvolution16b
+        {
+        public:
+            SynetConvolution16bNhwcGemmV2(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t batch, K, M;
+                size_t F, microD, microM, microK;
+                size_t macroD, macroH, macroK;
+                size_t bufD, bufM, bufK, elem, dB;
+                int reorderType, sumBuf;
+            };
+
+            typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
+                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, float* buf, uint8_t* dst);
+
+        protected:
+            void SetAlgParam();
+            virtual void SetWeight(const float* weight);
+            void Forward(const uint8_t* src, uint16_t* tmp, float* sum, float * buf, uint8_t* dst);
+
+            AlgParam _alg;
+            ConvertPtr _convert;
+            ConvolutionPtr _convolutions[2];
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution16bNhwcSpecV0 : public SynetConvolution16b
         {
         public:

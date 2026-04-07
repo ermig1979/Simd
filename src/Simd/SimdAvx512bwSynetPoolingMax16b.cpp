@@ -122,6 +122,9 @@ namespace Simd
         {
             if (format == SimdTensorFormatNhwc)
             {
+#if (defined(_MSC_VER) && !defined(NDEBUG) && defined(SIMD_X86_ENABLE)) || defined(__clang__)
+                Avx2::SynetPoolingMax16b(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+#else
                 Array32f max(srcC);
                 size_t srcS = srcW * srcC;
                 size_t srcCF1 = AlignLo(srcC, 1 * F);
@@ -155,6 +158,7 @@ namespace Simd
                         dst += srcC;
                     }
                 }
+#endif
             }
             else if (format == SimdTensorFormatNchw)
             {

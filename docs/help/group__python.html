@@ -213,7 +213,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
-    <tr><td class="paramname">dst</td><td>- a stretched output 8-bit gray imaget. Can be empty. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a stretched output 8-bit gray image. Can be empty. </td></tr>
   </table>
   </dd>
 </dl>
@@ -501,7 +501,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
-    <tr><td class="paramname">dst</td><td>- a stretched output 8-bit gray imaget. Can be empty. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a stretched output 8-bit gray image. Can be empty. </td></tr>
   </table>
   </dd>
 </dl>
@@ -568,7 +568,7 @@ Functions</h2></td></tr>
 <p>Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">src</td><td>- an input image. There are following supported pixel format: aSimd.PixelFormat.Gray8, <a class="el" href="class_simd_1_1_pixel_format.html#a0b1b1a17224566f43dd3427347bdb0dc" title="A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.">Simd.PixelFormat.Bgr24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#ab1b15f83aaa223e4e6b2075aefe522be" title="A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.">Simd.PixelFormat.Bgra32</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a86f519c808ef15faed67904830427970" title="A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.">Simd.PixelFormat.Rgb24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a90d499b9eff49bf15196e5af0e4ef264" title="A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.">Simd.PixelFormat.Rgba32</a>. </td></tr>
+    <tr><td class="paramname">src</td><td>- an input image. There are following supported pixel format: a <a class="el" href="class_simd_1_1_pixel_format.html#a50493d3c7232815237fa6dee16fc5b1b" title="A 8-bit gray pixel format.">Simd.PixelFormat.Gray8</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a0b1b1a17224566f43dd3427347bdb0dc" title="A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.">Simd.PixelFormat.Bgr24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#ab1b15f83aaa223e4e6b2075aefe522be" title="A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.">Simd.PixelFormat.Bgra32</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a86f519c808ef15faed67904830427970" title="A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.">Simd.PixelFormat.Rgb24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a90d499b9eff49bf15196e5af0e4ef264" title="A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.">Simd.PixelFormat.Rgba32</a>. </td></tr>
     <tr><td class="paramname">lower</td><td>- an array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
     <tr><td class="paramname">upper</td><td>- an array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
     <tr><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image tensor. </td></tr>
@@ -631,8 +631,8 @@ Functions</h2></td></tr>
     <tr><td class="paramname">src</td><td>- an input image to warp affine. </td></tr>
     <tr><td class="paramname">mat</td><td>- a pointer to 2x3 matrix with coefficients of affine warp. </td></tr>
     <tr><td class="paramname">dst</td><td>- a background input/output image. </td></tr>
-    <tr><td class="paramname">flags</td><td>- a flags of algorithm parameters. By default is equal to <a class="el" href="class_simd_1_1_warp_affine_flags.html#a873a6aba6a5f9b7eb4dc4d189e0dc071" title="8-bit integer channel type.">Simd.WarpAffineFlags.ChannelByte</a> | <a class="el" href="class_simd_1_1_warp_affine_flags.html#a435357d60512378935f0b93bd8480a1a" title="Bilinear pixel interpolation method.">Simd.WarpAffineFlags.InterpBilinear</a> | <a class="el" href="class_simd_1_1_warp_affine_flags.html#a0a80ede35a765cfff820946b7a9c81e8" title="Nearest pixel interpolation method.">Simd.WarpAffineFlags.BorderConstant</a>. </td></tr>
-    <tr><td class="paramname">border</td><td>- an array with color of border. The size of the array must be equal to channels. It parameter is actual for <a class="el" href="class_simd_1_1_warp_affine_flags.html#a0a80ede35a765cfff820946b7a9c81e8" title="Nearest pixel interpolation method.">Simd.WarpAffineFlags.BorderConstant</a> flag. </td></tr>
+    <tr><td class="paramname">flags</td><td>- a flags of algorithm parameters. By default is equal to <a class="el" href="class_simd_1_1_warp_affine_flags.html#a873a6aba6a5f9b7eb4dc4d189e0dc071" title="8-bit integer channel type.">Simd.WarpAffineFlags.ChannelByte</a> | <a class="el" href="class_simd_1_1_warp_affine_flags.html#a435357d60512378935f0b93bd8480a1a" title="Bilinear pixel interpolation method.">Simd.WarpAffineFlags.InterpBilinear</a> | <a class="el" href="class_simd_1_1_warp_affine_flags.html#a0a80ede35a765cfff820946b7a9c81e8" title="Constant border type.">Simd.WarpAffineFlags.BorderConstant</a>. </td></tr>
+    <tr><td class="paramname">border</td><td>- an array with color of border. The size of the array must be equal to channels. It parameter is actual for <a class="el" href="class_simd_1_1_warp_affine_flags.html#a0a80ede35a765cfff820946b7a9c81e8" title="Constant border type.">Simd.WarpAffineFlags.BorderConstant</a> flag. </td></tr>
   </table>
   </dd>
 </dl>
