@@ -205,7 +205,7 @@ namespace Simd
             }
         }
 
-        bool SynetConvolution16bNhwcGemmV0::Preferable(const ConvParam& p)
+        bool SynetConvolution16bNhwcGemmV2::Preferable(const ConvParam& p)
         {
             return p.trans != 0 && p.group == 1;
         }
