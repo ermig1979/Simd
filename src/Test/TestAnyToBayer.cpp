@@ -95,6 +95,11 @@ namespace Test
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Sse41::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options) && W >= Simd::Avx2::A)
+            result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Avx2::BgrToBayer), FUNC(SimdBgrToBayer));
+#endif
+
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Avx512bw::BgrToBayer), FUNC(SimdBgrToBayer));
@@ -119,6 +124,11 @@ namespace Test
         if (Simd::Sse41::Enable && TestSse41(options) && W >= Simd::Sse41::A)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Sse41::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options) && W >= Simd::Avx2::A)
+            result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Avx2::BgraToBayer), FUNC(SimdBgraToBayer));
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))

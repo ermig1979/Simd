@@ -1014,6 +1014,11 @@ SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height,
         Avx512bw::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
     else
 #endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
+    else
+#endif
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
@@ -1245,6 +1250,11 @@ SIMD_API void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, s
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
         Avx512bw::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
