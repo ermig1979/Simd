@@ -346,6 +346,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Lab24, FUNC_N(Simd::Avx512bw::BgrToLab), FUNC_N(SimdBgrToLab));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::F)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Lab24, FUNC_N(Simd::Neon::BgrToLab), FUNC_N(SimdBgrToLab));
+#endif 
+
         return result;
     }
 

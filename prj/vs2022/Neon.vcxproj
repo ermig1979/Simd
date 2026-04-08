@@ -40,6 +40,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToHsl.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToHsv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToLab.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp" />

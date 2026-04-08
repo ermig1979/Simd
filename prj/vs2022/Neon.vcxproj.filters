@@ -58,6 +58,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToHsv.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToLab.cpp">
+      <Filter>Neon\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>

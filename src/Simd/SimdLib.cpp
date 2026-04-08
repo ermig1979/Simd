@@ -1424,6 +1424,11 @@ SIMD_API void SimdBgrToLab(const uint8_t* bgr, size_t bgrStride, size_t width, s
         Sse41::BgrToLab(bgr, bgrStride, width, height, lab, labStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::F)
+        Neon::BgrToLab(bgr, bgrStride, width, height, lab, labStride);
+    else
+#endif
         Base::BgrToLab(bgr, bgrStride, width, height, lab, labStride);
 }
 
