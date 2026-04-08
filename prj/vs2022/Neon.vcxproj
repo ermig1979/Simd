@@ -62,6 +62,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonGemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonImageLoad.cpp" />

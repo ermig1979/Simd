@@ -133,6 +133,25 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        SIMD_INLINE uint8x16_t GrayToY(uint8x16_t g)
+        {
+            const uint16x8_t G2Y_SCALE = vdupq_n_u16(Base::G2Y_SCALE);
+            const uint16x8_t G2Y_ROUND = vdupq_n_u16(Base::G2Y_ROUND);
+            const uint8x16_t G2Y_LO = vdupq_n_u8(Base::G2Y_LO);
+            const uint8x16_t G2Y_HI = vdupq_n_u8(Base::G2Y_HI);
+            uint16x8_t g0 = vmovl_u8(vget_low_u8(g));
+            uint16x8_t g1 = vmovl_u8(vget_high_u8(g));
+            uint8x8_t y0 = vshrn_n_u16(vaddq_u16(vmulq_u16(g0, G2Y_SCALE), G2Y_ROUND), Base::G2Y_SHIFT);
+            uint8x8_t y1 = vshrn_n_u16(vaddq_u16(vmulq_u16(g1, G2Y_SCALE), G2Y_ROUND), Base::G2Y_SHIFT);
+            uint8x16_t y = vcombine_u8(y0, y1);
+            return vminq_u8(vqaddq_u8(y, G2Y_LO), G2Y_HI);
+        }
+    }
+#endif
+
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {

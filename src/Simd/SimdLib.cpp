@@ -2683,11 +2683,11 @@ SIMD_API void SimdGrayToY(const uint8_t * gray, size_t grayStride, size_t width,
         Sse41::GrayToY(gray, grayStride, width, height, y, yStride);
     else
 #endif
-//#ifdef SIMD_NEON_ENABLE
-//    if (Neon::Enable && width >= Neon::A)
-//        Neon::GrayToY(gray, grayStride, width, height, y, yStride);
-//    else
-//#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::GrayToY(gray, grayStride, width, height, y, yStride);
+    else
+#endif
         Base::GrayToY(gray, grayStride, width, height, y, yStride);
 }
 
