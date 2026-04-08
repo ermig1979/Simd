@@ -1372,6 +1372,11 @@ SIMD_API void SimdBgrToHsl(const uint8_t * bgr, size_t width, size_t height, siz
         Sse41::BgrToHsl(bgr, width, height, bgrStride, hsl, hslStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::BgrToHsl(bgr, width, height, bgrStride, hsl, hslStride);
+    else
+#endif
         Base::BgrToHsl(bgr, width, height, bgrStride, hsl, hslStride);
 }
 
@@ -1391,6 +1396,11 @@ SIMD_API void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, siz
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::BgrToHsv(bgr, width, height, bgrStride, hsv, hsvStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::BgrToHsv(bgr, width, height, bgrStride, hsv, hsvStride);
     else
 #endif
         Base::BgrToHsv(bgr, width, height, bgrStride, hsv, hsvStride);
@@ -7707,6 +7717,11 @@ SIMD_API void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t 
         Sse41::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+    else
+#endif
         Base::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
 }
 
@@ -7727,6 +7742,11 @@ SIMD_API void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t 
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
     else
 #endif
         Base::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
