@@ -37,7 +37,7 @@ namespace Simd
     namespace AmxBf16
 	{
 		typedef Base::SynetConvolution16bNhwcGemmV2::AlgParam AlgParam;
-		typedef Base::SynetConvolution16bNhwcGemmV2::ConvolutionPtr Convolution;
+		typedef Base::SynetConvolution16bNhwcGemmV2::GemmPtr GemmPtr;
 
 		//-----------------------------------------------------------------------------------------
 
@@ -226,14 +226,13 @@ namespace Simd
 			}
 		}
 
-        static void Convert16bNhwcGemm1x1D(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Convert16bNhwcGemm1x1D(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t M, uint16_t* dst)
         {
             const float* src = (float*)src8;
-            size_t srcC32 = AlignLo(p.srcC, 32), n = (yEnd - yBeg) * p.dstW;
+            size_t srcC32 = AlignLo(p.srcC, 32);
             __mmask16 srcMask0 = TailMask16(p.srcC - srcC32 - F * 0);
             __mmask16 srcMask1 = TailMask16(p.srcC - srcC32 - F * 1);
-            src += yBeg * p.srcW * p.srcC;
-            for (size_t i = 0; i < n; ++i)
+            for (size_t i = 0; i < M; ++i)
             {
                 size_t sc = 0;
                 for (; sc < srcC32; sc += 32)
@@ -245,16 +244,15 @@ namespace Simd
             }
         }
 
-        static void Convert16bNhwcGemm1x1R(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Convert16bNhwcGemm1x1R(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t M, uint16_t* dst)
         {
             const float* src = (float*)src8;
-            size_t srcC32 = AlignLo(p.srcC, 32), n = (yEnd - yBeg) * p.dstW;
+            size_t srcC32 = AlignLo(p.srcC, 32);
             __mmask16 srcMask0 = TailMask16(p.srcC - srcC32 - F * 0);
             __mmask16 srcMask1 = TailMask16(p.srcC - srcC32 - F * 1);
-            src += yBeg * p.srcW * p.srcC;
-            for (size_t i = 0; i < n; i += 16)
+            for (size_t i = 0; i < M; i += 16)
             {
-                size_t m = Min(i + 16, n) - i;
+                size_t m = Min(i + 16, M) - i;
                 size_t sc = 0;
                 for (; sc < srcC32; sc += 32)
                 {
@@ -453,15 +451,14 @@ namespace Simd
             }
         }
 
-        static void Reorder16bNhwcGemm1x1R(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Reorder16bNhwcGemm1x1R(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t M, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
-            size_t srcC32 = AlignLo(p.srcC, 32), n = (yEnd - yBeg) * p.dstW;
+            size_t srcC32 = AlignLo(p.srcC, 32);
             __mmask32 srcMask = TailMask32(p.srcC - srcC32);
-            src += yBeg * p.srcW * p.srcC;
-            for (size_t i = 0; i < n; i += 16)
+            for (size_t i = 0; i < M; i += 16)
             {
-                size_t m = Min(i + 16, n) - i;
+                size_t m = Min(i + 16, M) - i;
                 size_t sc = 0;
                 for (; sc < srcC32; sc += 32)
                 {
@@ -486,7 +483,9 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam& p, const AlgParam & a, Convolution* convolutions)
+        //--------------------------------------------------------------------------------------------------
+
+        template <SimdConvolutionActivationType type> SIMD_INLINE void SetGemm(const ConvParam& p, const AlgParam & a, GemmPtr* gemm)
         {
             //if (a.macroK < a.K)
             //{
@@ -510,80 +509,98 @@ namespace Simd
             : Base::SynetConvolution16bNhwcGemmV2(p)
         {
             SetAlgParam();
-            AlgParam& a = _alg;            
-            if (_src16b)
-            {
-                if (_is1x1 && a.K == a.bufK)
-                    _convert = NULL;
-                else
-                {
-                    if (_is1x1 && a.batch == 1)
-                    {
-                        _convert = Reorder16bNhwcGemm1x1R;
-                        a.reorderType = 1;
-                    }
-                    else
-                    {
-                        if (Aligned(p.srcC, 32) && a.batch == 1 && Aligned(p.dstW, a.F))
-                        {
-                            _convert = Reorder16bNhwcGemmR;
-                            a.reorderType = 1;
-                        }
-                        else
-                        {
-                            if (p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32)
-                                _convert = Reorder16bNhwcGemmD_1d32ck;
-                            else
-                                _convert = Reorder16bNhwcGemmD;
-                        }
-                    }
-                }
-            }
-            else
+            AlgParam& a = _alg; 
+            if (a.tmpBuf)
             {
                 if (_is1x1)
                 {
-                    if (a.batch == 1/* && a.macroK < a.bufK*/)
+                    if (_src16b)
                     {
-                        _convert = Convert16bNhwcGemm1x1R;
-                        a.reorderType = 1;
+                        _conv1x1 = Reorder16bNhwcGemm1x1R;
                     }
                     else
                     {
-                        _convert = Convert16bNhwcGemm1x1D;
-                        a.reorderType = 0;
+                        _conv1x1 = a.reorderType ? Convert16bNhwcGemm1x1R : Convert16bNhwcGemm1x1D;
                     }
                 }
                 else
                 {
-                    if (p.srcC == AlignLo(p.srcC, 32) && a.batch == 1 && Aligned(p.dstW, a.F))
-                    {
-                        _convert = Convert16bNhwcGemmR;
-                        a.reorderType = 1;
-                    }
-                    else
-                    {
-                        if (p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32)
-                            _convert = Convert16bNhwcGemmD_1d32ck;
-                        else
-                            _convert = Convert16bNhwcGemmD;
-                        a.reorderType = 0;
-                    }
+                    assert(0);
                 }
             }
+            //if (_src16b)
+            //{
+            //    if (_is1x1 && a.K == a.bufK)
+            //        _convert = NULL;
+            //    else
+            //    {
+            //        if (_is1x1 && a.batch == 1)
+            //        {
+            //            _convert = Reorder16bNhwcGemm1x1R;
+            //            a.reorderType = 1;
+            //        }
+            //        else
+            //        {
+            //            if (Aligned(p.srcC, 32) && a.batch == 1 && Aligned(p.dstW, a.F))
+            //            {
+            //                _convert = Reorder16bNhwcGemmR;
+            //                a.reorderType = 1;
+            //            }
+            //            else
+            //            {
+            //                if (p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32)
+            //                    _convert = Reorder16bNhwcGemmD_1d32ck;
+            //                else
+            //                    _convert = Reorder16bNhwcGemmD;
+            //            }
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    if (_is1x1)
+            //    {
+            //        if (a.batch == 1/* && a.macroK < a.bufK*/)
+            //        {
+            //            _convert = Convert16bNhwcGemm1x1R;
+            //            a.reorderType = 1;
+            //        }
+            //        else
+            //        {
+            //            _convert = Convert16bNhwcGemm1x1D;
+            //            a.reorderType = 0;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        if (p.srcC == AlignLo(p.srcC, 32) && a.batch == 1 && Aligned(p.dstW, a.F))
+            //        {
+            //            _convert = Convert16bNhwcGemmR;
+            //            a.reorderType = 1;
+            //        }
+            //        else
+            //        {
+            //            if (p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32)
+            //                _convert = Convert16bNhwcGemmD_1d32ck;
+            //            else
+            //                _convert = Convert16bNhwcGemmD;
+            //            a.reorderType = 0;
+            //        }
+            //    }
+            //}
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRelu>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationHardSigmoid: Set<SimdConvolutionActivationHardSigmoid>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationSwish: Set<SimdConvolutionActivationSwish>(p, _alg, _convolutions); break;
-            case SimdConvolutionActivationGelu: Set<SimdConvolutionActivationGelu>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationIdentity: SetGemm<SimdConvolutionActivationIdentity>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationRelu: SetGemm<SimdConvolutionActivationRelu>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationLeakyRelu: SetGemm<SimdConvolutionActivationLeakyRelu>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationRestrictRange: SetGemm<SimdConvolutionActivationRestrictRange>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationPrelu: SetGemm<SimdConvolutionActivationPrelu>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationElu: SetGemm<SimdConvolutionActivationElu>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationHswish: SetGemm<SimdConvolutionActivationHswish>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationMish: SetGemm<SimdConvolutionActivationMish>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationHardSigmoid: SetGemm<SimdConvolutionActivationHardSigmoid>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationSwish: SetGemm<SimdConvolutionActivationSwish>(p, _alg, _gemm); break;
+            case SimdConvolutionActivationGelu: SetGemm<SimdConvolutionActivationGelu>(p, _alg, _gemm); break;
             default: assert(0);
             }
         }
