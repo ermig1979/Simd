@@ -117,19 +117,19 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            size_t D = DivHi(p.dstC, _alg.microD);
+            size_t D = DivHi(p.dstC, _alg.F);
             _weight.Resize(a.bufK * a.bufD, true);
             uint16_t* dst = _weight.data;
             for (size_t d = 0; d < D; d++)
             {
                 for (size_t k = 0; k < a.bufK; k += 2)
                 {
-                    const float* src = weight + k * p.dstC + d * _alg.microD;
-                    for (size_t f = 0; f < _alg.microD; ++f)
+                    const float* src = weight + k * p.dstC + d * _alg.F;
+                    for (size_t f = 0; f < _alg.F; ++f)
                     {
                         for (size_t i = 0; i < 2; ++i)
                         {
-                            if (d * _alg.microD + f < p.dstC && k + i < a.K)
+                            if (d * _alg.F + f < p.dstC && k + i < a.K)
                                 *(dst++) = Float32ToBFloat16(src[i * p.dstC]);
                             else
                                 *(dst++) = 0;
@@ -175,7 +175,7 @@ namespace Simd
                 for (size_t mak = 0; mak < a.K; mak += a.macroK)
                 {
                     size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-                    for (size_t i = 0; i < M;)
+                    for (size_t i = 0; i < M; i += a.macroM)
                     {
                         size_t macroM = Simd::Min(M, i + a.macroM) - i;
                         size_t tmpOffs = (a.macroK == a.bufK && a.tmpBuf) ? 0 : i * a.bufK + (a.reorderType ? mak * a.F : mak);
@@ -184,11 +184,9 @@ namespace Simd
                         if (dc == 0 && mak == 0 && a.tmpBuf)
                             _conv1x1(src + i * p.srcC + mak, p, a, M, tmp + tmpOffs);
                         if (mak + macroK == a.bufK)
-                            _gemm[1](tmp + tmpOffs, p, a, macroD, macroM, macroK, macroK == a.bufK ? 1 : 0,
-                                weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
+                            _gemm[1](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
                         else
-                            _gemm[0](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0,
-                                weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
+                            _gemm[0](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
                     }
                     weight += macroK * a.microD;
                 }
