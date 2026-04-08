@@ -30,15 +30,15 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
-        SIMD_INLINE int32x4_t MulDiv32YuvHsv(const int32x4_t & dividend, const int32x4_t & divisor, const float32x4_t & KF)
+        SIMD_INLINE int32x4_t MulDiv32Hsv(const int32x4_t & dividend, const int32x4_t & divisor, const float32x4_t & KF)
         {
             return vcvtq_s32_f32(Div<SIMD_NEON_RCP_ITER>(vmulq_f32(KF, vcvtq_f32_s32(dividend)), vcvtq_f32_s32(divisor)));
         }
 
-        SIMD_INLINE int16x8_t MulDiv16YuvHsv(const int16x8_t & dividend, const int16x8_t & divisor, const float32x4_t & KF)
+        SIMD_INLINE int16x8_t MulDiv16Hsv(const int16x8_t & dividend, const int16x8_t & divisor, const float32x4_t & KF)
         {
-            int32x4_t lo = MulDiv32YuvHsv(UnpackI16<0>(dividend), UnpackI16<0>(divisor), KF);
-            int32x4_t hi = MulDiv32YuvHsv(UnpackI16<1>(dividend), UnpackI16<1>(divisor), KF);
+            int32x4_t lo = MulDiv32Hsv(UnpackI16<0>(dividend), UnpackI16<0>(divisor), KF);
+            int32x4_t hi = MulDiv32Hsv(UnpackI16<1>(dividend), UnpackI16<1>(divisor), KF);
             return PackI32(lo, hi);
         }
 
@@ -69,7 +69,7 @@ namespace Simd
 
             int16x8_t safeRange = vmaxq_s16(range, (int16x8_t)K16_0001);
             hue = vandq_s16(vmvnq_s16((int16x8_t)vceqq_s16(range, (int16x8_t)K16_0000)),
-                vandq_s16(MulDiv16YuvHsv(dividend, safeRange, KF_255_DIV_6), (int16x8_t)K16_00FF));
+                vandq_s16(MulDiv16Hsv(dividend, safeRange, KF_255_DIV_6), (int16x8_t)K16_00FF));
 
             // Value: V = max
             val = max;
@@ -77,7 +77,7 @@ namespace Simd
             // Saturation: S = 255 * range / max, zero when max == 0
             int16x8_t safeMax = vmaxq_s16(max, (int16x8_t)K16_0001);
             sat = vandq_s16(vmvnq_s16((int16x8_t)vceqq_s16(max, (int16x8_t)K16_0000)),
-                MulDiv16YuvHsv(range, safeMax, K_255F));
+                MulDiv16Hsv(range, safeMax, K_255F));
         }
 
         template <bool align> SIMD_INLINE void YuvToHsv16x(const uint8_t * y, const uint8_t * u, const uint8_t * v,
