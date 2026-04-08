@@ -611,6 +611,14 @@ namespace Simd
             void SetMacro32x32i_old();
         };
 
+        class SynetConvolution16bNhwcGemmV2 : public Base::SynetConvolution16bNhwcGemmV2
+        {
+        public:
+            SynetConvolution16bNhwcGemmV2(const ConvParam& p);
+
+            virtual String Ext() const { return "AmxBf16"; }
+        };
+
         class SynetConvolution16bNhwcSpecV0 : public Avx512bw::SynetConvolution16bNhwcSpecV0
         {
         public:
