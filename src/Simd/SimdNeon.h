@@ -645,6 +645,9 @@ namespace Simd
         void Yuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
             size_t width, size_t height, uint8_t * hsl, size_t hslStride);
 
+        void Yuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            size_t width, size_t height, uint8_t * hsv, size_t hsvStride);
+
         void Yuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType);
 

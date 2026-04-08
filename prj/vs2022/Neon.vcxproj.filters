@@ -313,6 +313,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHsl.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHsv.cpp">
+      <Filter>Neon\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHue.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>
