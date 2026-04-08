@@ -149,6 +149,20 @@ namespace Simd
             uint8x16_t y = vcombine_u8(y0, y1);
             return vminq_u8(vqaddq_u8(y, G2Y_LO), G2Y_HI);
         }
+
+        SIMD_INLINE uint8x16_t YToGray(uint8x16_t y)
+        {
+            const uint16x8_t Y2G_SCALE = vdupq_n_u16(Base::Y2G_SCALE);
+            const uint16x8_t Y2G_ROUND = vdupq_n_u16(Base::Y2G_ROUND);
+            const uint8x16_t G2Y_LO = vdupq_n_u8(Base::G2Y_LO);
+            const uint8x16_t G2Y_HI = vdupq_n_u8(Base::G2Y_HI);
+            y = vqsubq_u8(vminq_u8(y, G2Y_HI), G2Y_LO);
+            uint16x8_t y0 = vmovl_u8(vget_low_u8(y));
+            uint16x8_t y1 = vmovl_u8(vget_high_u8(y));
+            uint8x8_t g0 = vshrn_n_u16(vaddq_u16(vmulq_u16(y0, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
+            uint8x8_t g1 = vshrn_n_u16(vaddq_u16(vmulq_u16(y1, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
+            return vcombine_u8(g0, g1);
+        }
     }
 #endif
 

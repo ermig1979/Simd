@@ -256,6 +256,8 @@ namespace Simd
 
         void GrayToY(const uint8_t* gray, size_t grayStride, size_t width, size_t height, uint8_t* y, size_t yStride);
 
+        void YToGray(const uint8_t* y, size_t yStride, size_t width, size_t height, uint8_t* gray, size_t grayStride);
+
         void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 

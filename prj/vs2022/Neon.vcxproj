@@ -126,6 +126,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgrV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHsl.cpp" />
