@@ -98,7 +98,7 @@ namespace Simd
         size_t SynetConvolution16bNhwcGemmV2::ExternalBufferSize() const
         {
             const AlgParam& a = _alg;
-            size_t size = 4 * 16 * 16 * sizeof(float);
+            size_t size = 2048 * sizeof(float);
             if(a.tmpBuf)
                 size += a.bufM * a.bufK * sizeof(uint16_t);
             if (a.sumBuf)
@@ -147,7 +147,7 @@ namespace Simd
             buf8 = Buffer(buf8);
             uint16_t* bufT = a.tmpBuf ? Allocate<uint16_t>(buf8, a.bufM * a.bufK) : NULL;
             float* bufS = a.sumBuf ? Allocate<float>(buf8, a.macroD * a.bufM) : NULL;
-            float* bufD = Allocate<float>(buf8, 1024);
+            float* bufD = Allocate<float>(buf8, 2048);
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
                 uint16_t* tmp = a.tmpBuf ? bufT : (uint16_t*)src;
@@ -252,7 +252,8 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV2::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1 && p.Is1x1();
+            static int choise = 0;
+            return p.trans != 0 && p.group == 1 && p.Is1x1();// && ((choise++) & 1);
         }
     }
 #endif

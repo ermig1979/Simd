@@ -880,8 +880,6 @@ namespace Simd
         {
             size_t n = 32, Mn = AlignLoAny(M, n), m = M - Mn;
             size_t dW = a.bufK * DF, dS = a.bufK, dB = (term == Term16bInterim ? a.dB : DF), dD = p.dstC * a.elem;
-            if (sum == NULL && p.dstT == SimdTensorData32f)
-                sum = (float*)dst;
             __m512 _bias[2], _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
             _params[1] = _mm512_set1_ps(params[1]);
