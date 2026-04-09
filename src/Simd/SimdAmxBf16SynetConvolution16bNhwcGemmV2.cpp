@@ -633,15 +633,18 @@ namespace Simd
             {
                 for (size_t cds = 0; cds < dstS; cds += 32)
                 {
+                    size_t bds = cds;
                     if (cds + 16 >= dstS)
                     {
-                        cds = Simd::Min(dstS - 16, cds);
-                        Convolution16bNhwcGemmV2_Gemm1xMx1<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + cds * dB, NULL, sum0 + cds * dB, NULL, tailD);
+                        if (a.reorderType == 0)
+                            cds = Simd::Min(dstS - 16, cds);
+                        Convolution16bNhwcGemmV2_Gemm1xMx1<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + bds * dB, NULL, sum0 + bds * dB, NULL, tailD);
                     }
                     else
                     {
-                        cds = Simd::Min(dstS - 32, cds);
-                        Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + cds * dB, NULL, sum0 + cds * dB, NULL, tailD);
+                        if (a.reorderType == 0)
+                            cds = Simd::Min(dstS - 32, cds);
+                        Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + bds * dB, NULL, sum0 + bds * dB, NULL, tailD);
                     }
                 }
             }
@@ -652,17 +655,18 @@ namespace Simd
                 for (; cds < dstS; pds = cds, cds += 32)
                 {
                     Swap(buf1, buf2);
+                    size_t bds = cds;
                     if (cds + 16 >= dstS)
                     {
                         if(a.reorderType == 0)
                             cds = Simd::Min(dstS - 16, cds);
-                        Convolution16bNhwcGemmV2_Gemm1xMx1<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
+                        Convolution16bNhwcGemmV2_Gemm1xMx1<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + bds * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                     else
                     {
                         if (a.reorderType == 0)
                             cds = Simd::Min(dstS - 32, cds);
-                        Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
+                        Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + bds * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                 }
                 uint8_t* dst1 = dst + pds * dD;

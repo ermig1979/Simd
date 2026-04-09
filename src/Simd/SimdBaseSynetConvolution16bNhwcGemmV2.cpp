@@ -84,7 +84,7 @@ namespace Simd
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, a.bufD);
             a.bufM = a.batch * p.dstH * AlignHi(p.dstW, a.F);
             a.elem = _elemD;
-            a.tmpBuf = !_src16b || !_is1x1 || a.K != a.bufK;
+            a.tmpBuf = !_src16b || !_is1x1 || a.K != a.bufK;// || (a.bufK > 2 * a.macroK && !Aligned(a.batch * p.dstH * p.dstW, a.F));
             a.sumBuf = _dst16b && a.macroK < a.bufK;
             a.reorderType = a.tmpBuf != 0 && _is1x1;
             if (a.sumBuf == 0 && a.macroD > p.dstC)
