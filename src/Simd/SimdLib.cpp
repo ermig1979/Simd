@@ -1424,6 +1424,11 @@ SIMD_API void SimdBgrToLab(const uint8_t* bgr, size_t bgrStride, size_t width, s
         Sse41::BgrToLab(bgr, bgrStride, width, height, lab, labStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::F)
+        Neon::BgrToLab(bgr, bgrStride, width, height, lab, labStride);
+    else
+#endif
         Base::BgrToLab(bgr, bgrStride, width, height, lab, labStride);
 }
 
@@ -2678,11 +2683,11 @@ SIMD_API void SimdGrayToY(const uint8_t * gray, size_t grayStride, size_t width,
         Sse41::GrayToY(gray, grayStride, width, height, y, yStride);
     else
 #endif
-//#ifdef SIMD_NEON_ENABLE
-//    if (Neon::Enable && width >= Neon::A)
-//        Neon::GrayToY(gray, grayStride, width, height, y, yStride);
-//    else
-//#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::GrayToY(gray, grayStride, width, height, y, yStride);
+    else
+#endif
         Base::GrayToY(gray, grayStride, width, height, y, yStride);
 }
 
@@ -7447,11 +7452,11 @@ SIMD_API void SimdYToGray(const uint8_t* y, size_t yStride, size_t width, size_t
         Sse41::YToGray(y, yStride, width, height, gray, grayStride);
     else
 #endif
-//#ifdef SIMD_NEON_ENABLE
-//    if (Neon::Enable && width >= Neon::A)
-//        Neon::YToGray(y, yStride, width, height, gray, grayStride);
-//    else
-//#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::YToGray(y, yStride, width, height, gray, grayStride);
+    else
+#endif
         Base::YToGray(y, yStride, width, height, gray, grayStride);
 }
 
@@ -7906,11 +7911,11 @@ SIMD_API void SimdYuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_
         Sse41::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
     else
 #endif
-//#ifdef SIMD_NEON_ENABLE
-//    if (Neon::Enable && width >= Neon::A)
-//        Neon::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
-//    else
-//#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
+    else
+#endif
         Base::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
 }
 

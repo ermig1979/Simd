@@ -58,6 +58,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToHsv.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToLab.cpp">
+      <Filter>Neon\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>
@@ -119,6 +122,9 @@
       <Filter>Neon\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgra.cpp">
+      <Filter>Neon\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonGrayToY.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp">
@@ -302,6 +308,12 @@
       <Filter>Neon\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToYuv.cpp">
+      <Filter>Neon\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonYToGray.cpp">
+      <Filter>Neon\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgraV2.cpp">
