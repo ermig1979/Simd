@@ -540,7 +540,7 @@ namespace Simd
                     SynetSoftmax16b31(src, outer, dst);
                 else
                 {
-#if defined(__clang__) && defined(NDEBUG)
+#if (defined(__clang__) && defined(NDEBUG)) || (defined(_MSC_VER) && !defined(NDEBUG) && defined(SIMD_X86_ENABLE))
                     Avx2::SynetSoftmax16b(src, outer, count, inner, dst);
 #else
                     SynetSoftmax16bX1(src, outer, count, dst);

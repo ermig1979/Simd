@@ -222,24 +222,28 @@ namespace Simd
             {
                 size_t batch, K, M;
                 size_t F, microD, microM, microK;
-                size_t macroD, macroH, macroK;
+                size_t macroD, macroH, macroM, macroK;
                 size_t bufD, bufM, bufK, elem, dB;
-                int reorderType, sumBuf;
+                int tmpBuf, sumBuf, reorderType;
             };
 
-            typedef void(*ConvertPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+            typedef void(*Conv1x1Ptr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t M, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH,
-                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, float* buf, uint8_t* dst);
+            typedef void(*ConvAnyPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst);
+
+            typedef void(*GemmPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, size_t N, size_t M, size_t K, 
+                int zero, const uint16_t* weight, const float* bias, const float* params, float* sum, float* buf, uint8_t* dst);
 
         protected:
             void SetAlgParam();
             virtual void SetWeight(const float* weight);
-            void Forward(const uint8_t* src, uint16_t* tmp, float* sum, float * buf, uint8_t* dst);
+            void Forward1x1(const uint8_t* src, uint16_t* tmp, size_t batch, float* sum, float * buf, uint8_t* dst);
+            void ForwardAny(const uint8_t* src, uint16_t* tmp, size_t batch, float* sum, float* buf, uint8_t* dst);
 
             AlgParam _alg;
-            ConvertPtr _convert;
-            ConvolutionPtr _convolutions[2];
+            Conv1x1Ptr _conv1x1;
+            ConvAnyPtr _convAny;
+            GemmPtr _gemm[2];
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -609,6 +613,14 @@ namespace Simd
             void SetMacro64x16i();
             void SetMacro32x32i();
             void SetMacro32x32i_old();
+        };
+
+        class SynetConvolution16bNhwcGemmV2 : public Base::SynetConvolution16bNhwcGemmV2
+        {
+        public:
+            SynetConvolution16bNhwcGemmV2(const ConvParam& p);
+
+            virtual String Ext() const { return "AmxBf16"; }
         };
 
         class SynetConvolution16bNhwcSpecV0 : public Avx512bw::SynetConvolution16bNhwcSpecV0
