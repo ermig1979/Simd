@@ -489,7 +489,8 @@ namespace Simd
             const __m512* bias, const __m512* params, float* buf0, float* buf1, float* buf2, uint8_t* dst, __mmask32 tailD)
         {
             int dD = int(p.dstC * a.elem), dS = (int)a.bufK, dW = 16, strideW = 64;
-            int stepS = 32, strideS = dS * 2, dB = term == Term16bInterim ? (int)AlignHi(p.dstC, F) : DF, strideB = dB * 4;
+            int stepS = a.reorderType ? 512 : 32, strideS = a.reorderType ? 64 : dS * 2;
+            int dB = term == Term16bInterim ? (int)AlignHi(p.dstC, F) : DF, strideB = dB * 4;
             const uint16_t* src1 = src0 + 16 * dS;
             const uint16_t* weight1 = weight0 + a.bufK * F;
 
@@ -566,7 +567,8 @@ namespace Simd
             const __m512* bias, const __m512* params, float* buf0, float* buf1, float* buf2, uint8_t* dst, __mmask32 tailD)
         {
             int dD = int(p.dstC * a.elem), dS = (int)a.bufK, dW = 16, strideW = 64;
-            int stepS = 32, strideS = dS * 2, dB = term == Term16bInterim ? (int)AlignHi(p.dstC, F) : DF, strideB = dB * 4;
+            int stepS = a.reorderType ? 512 : 32, strideS = a.reorderType ? 64 : dS * 2;
+            int dB = term == Term16bInterim ? (int)AlignHi(p.dstC, F) : DF, strideB = dB * 4;
             const uint16_t* src1 = src0 + 16 * dS;
             const uint16_t* weight1 = weight0 + a.bufK * F;
 
@@ -652,12 +654,14 @@ namespace Simd
                     Swap(buf1, buf2);
                     if (cds + 16 >= dstS)
                     {
-                        cds = Simd::Min(dstS - 16, cds);
+                        if(a.reorderType == 0)
+                            cds = Simd::Min(dstS - 16, cds);
                         Convolution16bNhwcGemmV2_Gemm1xMx1<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                     else
                     {
-                        cds = Simd::Min(dstS - 32, cds);
+                        if (a.reorderType == 0)
+                            cds = Simd::Min(dstS - 32, cds);
                         Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                 }
