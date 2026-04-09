@@ -188,7 +188,7 @@ namespace Simd
                         else
                             _gemm[0](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
                     }
-                    weight += macroK * a.microD;
+                    weight += macroK * a.F;
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
@@ -252,8 +252,8 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV2::Preferable(const ConvParam& p)
         {
-            static int choise = 0;
-            return p.trans != 0 && p.group == 1 && p.Is1x1();// && ((choise++) & 1);
+            static int choise = 1;
+            return p.trans != 0 && p.group == 1 && p.Is1x1() && 1;// ((choise++) & 1);
         }
     }
 #endif

@@ -624,7 +624,7 @@ namespace Simd
         }
 
         template<Term16bType term, SimdConvolutionActivationType type, int flush, int M, int apply> void Convolution16bNhwcGemmV2_GemmNxMx2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstS, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* buf0, float* buf1, uint8_t* dst, __mmask32 tailD)
+            size_t srcC, size_t dstS, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* sum0, float* buf1, uint8_t* dst, __mmask32 tailD)
         {
             int dB = (int)AlignHi(p.dstC, F), dD = int(p.dstC * a.elem), dS = (int)a.bufK;
             float* buf2 = buf1 + 1024;
@@ -636,19 +636,19 @@ namespace Simd
                     if (cds + 16 >= dstS)
                     {
                         cds = Simd::Min(dstS - 16, cds);
-                        Convolution16bNhwcGemmV2_Gemm1xMx1<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, NULL, buf0 + cds * dB, NULL, tailD);
+                        Convolution16bNhwcGemmV2_Gemm1xMx1<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + cds * dB, NULL, sum0 + cds * dB, NULL, tailD);
                     }
                     else
                     {
                         cds = Simd::Min(dstS - 32, cds);
-                        Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, NULL, buf0 + cds * dB, NULL, tailD);
+                        Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, 0>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + cds * dB, NULL, sum0 + cds * dB, NULL, tailD);
                     }
                 }
             }
             else
             {
                 size_t cds = 0, pds = 0;
-                Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, 0>(src0, p, a, srcC, zero, weight0, bias, params, buf0, buf1, buf2, dst, tailD), cds += 32;
+                Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, 0>(src0, p, a, srcC, zero, weight0, bias, params, sum0, buf1, buf2, dst, tailD), cds += 32;
                 for (; cds < dstS; pds = cds, cds += 32)
                 {
                     Swap(buf1, buf2);
@@ -656,13 +656,13 @@ namespace Simd
                     {
                         if(a.reorderType == 0)
                             cds = Simd::Min(dstS - 16, cds);
-                        Convolution16bNhwcGemmV2_Gemm1xMx1<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
+                        Convolution16bNhwcGemmV2_Gemm1xMx1<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                     else
                     {
                         if (a.reorderType == 0)
                             cds = Simd::Min(dstS - 32, cds);
-                        Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, buf0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
+                        Convolution16bNhwcGemmV2_Gemm1xMx2<term, type, flush, M, apply>(src0 + cds * dS, p, a, srcC, zero, weight0, bias, params, sum0 + cds * dB, buf1, buf2, dst + pds * dD, tailD);
                     }
                 }
                 uint8_t* dst1 = dst + pds * dD;
