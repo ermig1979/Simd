@@ -490,7 +490,7 @@ namespace Simd
         {
             int dD = int(p.dstC * a.elem), dS = (int)a.bufK, dW = 16, strideW = 64;
             int stepS = a.reorderType ? 512 : 32, strideS = a.reorderType ? 64 : dS * 2;
-            int dB = term == Term16bInterim ? (int)AlignHi(p.dstC, F) : DF, strideB = dB * 4;
+            int dB = term == Term16bInterim ? (int)a.dB : DF, strideB = dB * 4;
             const uint16_t* src1 = src0 + 16 * dS;
             const uint16_t* weight1 = weight0 + a.bufK * F;
 
@@ -503,7 +503,7 @@ namespace Simd
             }
             else
             {
-                int dB = (int)AlignHi(p.dstC, F), strideB = dB * 4;
+                int dB = (int)a.dB, strideB = dB * 4;
                 if (M > 0) _tile_stream_loadd(0, buf0 + 0, strideB);
                 if (M > 1) _tile_stream_loadd(1, buf0 + F, strideB);
                 buf0 += 16 * dB;
@@ -568,7 +568,7 @@ namespace Simd
         {
             int dD = int(p.dstC * a.elem), dS = (int)a.bufK, dW = 16, strideW = 64;
             int stepS = a.reorderType ? 512 : 32, strideS = a.reorderType ? 64 : dS * 2;
-            int dB = term == Term16bInterim ? (int)AlignHi(p.dstC, F) : DF, strideB = dB * 4;
+            int dB = term == Term16bInterim ? (int)a.dB : DF, strideB = dB * 4;
             const uint16_t* src1 = src0 + 16 * dS;
             const uint16_t* weight1 = weight0 + a.bufK * F;
 
@@ -579,7 +579,7 @@ namespace Simd
             }
             else
             {
-                int dB = (int)AlignHi(p.dstC, F), strideB = dB * 4;
+                int dB = (int)a.dB, strideB = dB * 4;
                 if (M > 0) _tile_stream_loadd(0, buf0 + 0, strideB);
                 if (M > 1) _tile_stream_loadd(1, buf0 + F, strideB);
             }
@@ -626,7 +626,7 @@ namespace Simd
         template<Term16bType term, SimdConvolutionActivationType type, int flush, int M, int apply> void Convolution16bNhwcGemmV2_GemmNxMx2(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
             size_t srcC, size_t dstS, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* sum0, float* buf1, uint8_t* dst, __mmask32 tailD)
         {
-            int dB = (int)AlignHi(p.dstC, F), dD = int(p.dstC * a.elem), dS = (int)a.bufK;
+            int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK;
             float* buf2 = buf1 + 1024;
 
             if (term == Term16bInterim)
