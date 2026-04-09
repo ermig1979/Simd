@@ -40,6 +40,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToHsl.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToHsv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToLab.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp" />
@@ -61,6 +62,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonGemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonImageLoad.cpp" />
@@ -124,6 +126,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgrV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHsl.cpp" />

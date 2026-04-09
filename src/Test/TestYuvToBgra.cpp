@@ -357,10 +357,10 @@ namespace Test
 //            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv444pToRgbaV2), FUNC_YUV2(SimdYuv444pToRgbaV2), 1, 1);
 //#endif 
 //
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable && TestNeon(options))
-//            result = result && YuvToRgba2AutoTest(FUNC_YUV2(Simd::Neon::Yuv444pToRgbaV2), FUNC_YUV2(SimdYuv444pToRgbaV2), 1, 1);
-//#endif 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Neon::Yuv444pToRgbaV2), FUNC_YUV2(SimdYuv444pToRgbaV2), 1, 1);
+#endif 
 
         return result;
     }
