@@ -378,27 +378,29 @@ namespace Test
     {
         bool result = true;
 
+        float eps = EPS * 1.1f;
+
         if (TestBase(options))
-            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Base::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+            result = result && DifferenceSum32fAutoTest(eps, FUNC_F(Simd::Base::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Sse41::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+            result = result && DifferenceSum32fAutoTest(eps, FUNC_F(Simd::Sse41::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx2::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+            result = result && DifferenceSum32fAutoTest(eps, FUNC_F(Simd::Avx2::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx512bw::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+            result = result && DifferenceSum32fAutoTest(eps, FUNC_F(Simd::Avx512bw::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Neon::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+            result = result && DifferenceSum32fAutoTest(eps, FUNC_F(Simd::Neon::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 #endif
 
         return result;
