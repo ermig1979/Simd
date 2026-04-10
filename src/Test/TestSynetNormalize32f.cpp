@@ -138,6 +138,11 @@ namespace Test
             result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Avx512bw::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Neon::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
+#endif
+
         return result;
     }
 
@@ -240,6 +245,11 @@ namespace Test
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx512bw::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Neon::SynetNormalizeLayerForwardV2), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV2));
+#endif
+
         return result;
     }
 
@@ -264,6 +274,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx512bw::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
 #endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Neon::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
+#endif
 
         return result;
     }
@@ -290,6 +305,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Avx512bw::SynetNormalizeLayerForwardV4), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV4));
 #endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Neon::SynetNormalizeLayerForwardV4), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV4));
+#endif
 
         return result;
     }

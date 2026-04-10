@@ -6219,7 +6219,7 @@ SIMD_API void SimdSynetNormalizeLayerForward(const float* src, size_t batch, siz
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForwardPtr) (const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
-    const static SimdSynetNormalizeLayerForwardPtr simdSynetNormalizeLayerForward = SIMD_FUNC3(SynetNormalizeLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForwardPtr simdSynetNormalizeLayerForward = SIMD_FUNC4(SynetNormalizeLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForward(src, batch, channels, spatial, scale, eps, acrossSpatial, format, buf, dst);
 #else
@@ -6234,7 +6234,7 @@ SIMD_API void SimdSynetNormalizeLayerForwardV2(const float* src, size_t batch, s
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForwardV2Ptr) (const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
-    const static SimdSynetNormalizeLayerForwardV2Ptr simdSynetNormalizeLayerForwardV2 = SIMD_FUNC3(SynetNormalizeLayerForwardV2, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForwardV2Ptr simdSynetNormalizeLayerForwardV2 = SIMD_FUNC4(SynetNormalizeLayerForwardV2, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForwardV2(src, batch, channels, spatial, scale, shift, eps, format, buf, dst);
 #else
@@ -6249,7 +6249,7 @@ SIMD_API void SimdSynetNormalizeLayerForwardV3(const float* src, size_t batch, s
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForwardV3Ptr) (const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
-    const static SimdSynetNormalizeLayerForwardV3Ptr simdSynetNormalizeLayerForwardV3 = SIMD_FUNC3(SynetNormalizeLayerForwardV3, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForwardV3Ptr simdSynetNormalizeLayerForwardV3 = SIMD_FUNC4(SynetNormalizeLayerForwardV3, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForwardV3(src, batch, channels, spatial, scale, shift, eps, format, buf, dst);
 #else
@@ -6264,7 +6264,7 @@ SIMD_API void SimdSynetNormalizeLayerForwardV4(const float* src, size_t batch, s
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForwardV4Ptr) (const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
-    const static SimdSynetNormalizeLayerForwardV4Ptr simdSynetNormalizeLayerForwardV4 = SIMD_FUNC3(SynetNormalizeLayerForwardV4, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForwardV4Ptr simdSynetNormalizeLayerForwardV4 = SIMD_FUNC4(SynetNormalizeLayerForwardV4, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForwardV4(src, batch, channels, spatial, scale, shift, eps, format, buf, dst);
 #else
