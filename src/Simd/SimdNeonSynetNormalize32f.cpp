@@ -72,7 +72,7 @@ namespace Simd
                 buf = _buf.data;
             }
             size_t spatialF = AlignLo(spatial, F);
-            float32x4_t _eps = vdupq_n_f32(eps), _1 = vdupq_n_f32(1.0f);
+            float32x4_t _eps = vdupq_n_f32(eps);
             for (size_t b = 0; b < batch; ++b)
             {
                 size_t s = 0;
