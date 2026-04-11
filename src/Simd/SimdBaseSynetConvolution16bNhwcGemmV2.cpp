@@ -85,7 +85,7 @@ namespace Simd
             a.bufM = a.batch * p.dstH * AlignHi(p.dstW, a.F);
             a.elem = _elemD;
             a.tmpBuf = !_src16b || !_is1x1 || a.K != a.bufK;
-            a.sumBuf = _dst16b && a.macroK < a.bufK;
+            a.sumBuf = (_dst16b || a.bufD != p.dstC) && a.macroK < a.bufK;
             a.reorderType = a.tmpBuf != 0 && _is1x1;
             if (a.sumBuf == 0 && a.macroD > p.dstC)
                 a.macroD = p.dstC;
@@ -93,6 +93,15 @@ namespace Simd
 
             _stepS = p.srcH * p.srcW * p.srcC * a.batch * _elemS;
             _stepD = p.dstH * p.dstW * p.dstC * a.batch * _elemD;
+
+            //std::cout << " p.srcC " << p.srcC << std::endl;
+            //std::cout << " a.bufK " << a.bufK << std::endl;
+            //std::cout << " p.dstC " << p.dstC << std::endl;
+            //std::cout << " a.macroK " << a.macroK << std::endl;
+            //std::cout << " a.macroD " << a.macroD << std::endl;
+            //std::cout << " a.macroM " << a.macroM << std::endl;
+            //std::cout << " a.tmpBuf " << a.tmpBuf << std::endl;
+            //std::cout << " a.sumBuf " << a.sumBuf << std::endl;
         }
 
         size_t SynetConvolution16bNhwcGemmV2::ExternalBufferSize() const
