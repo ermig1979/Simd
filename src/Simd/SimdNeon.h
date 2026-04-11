@@ -512,6 +512,18 @@ namespace Simd
 
         void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
 
+        void SynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale,
+            const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
+
+        void SynetNormalizeLayerForwardV2(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
+
+        void SynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
+
+        void SynetNormalizeLayerForwardV4(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
+
         void SynetPoolingAverage(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
 
@@ -544,7 +556,9 @@ namespace Simd
         void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst);
 
         void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst);
-        
+
+        void SynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
+
         void SynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 
         void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,

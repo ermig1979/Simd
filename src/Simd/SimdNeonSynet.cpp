@@ -847,6 +847,77 @@ namespace Simd
                 }
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void SynetTiledScale2D32fNchw(const float* src, const float* ver, float32x4_t hor, float* dst, size_t offset)
+        {
+            vst1q_f32(dst + offset, vmulq_f32(vld1q_f32(src + offset), vmulq_f32(vld1q_f32(ver + offset), hor)));
+        }
+
+        SIMD_INLINE void SynetTiledScale2D32fNhwc(const float* src, const float* ver, const float* hor, float* dst, size_t offset)
+        {
+            vst1q_f32(dst + offset, vmulq_f32(vld1q_f32(src + offset), vmulq_f32(vld1q_f32(ver + offset), vld1q_f32(hor + offset))));
+        }
+
+        void SynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst)
+        {
+            if (format == SimdTensorFormatNchw)
+            {
+                size_t widthF = AlignLo(width, F);
+                size_t width4F = AlignLo(width, 4 * F);
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    for (size_t y = 0; y < height; ++y)
+                    {
+                        float32x4_t _hor = vdupq_n_f32(hor[y]);
+                        size_t x = 0;
+                        for (; x < width4F; x += 4 * F)
+                        {
+                            SynetTiledScale2D32fNchw(src, ver, _hor, dst, x + 0 * F);
+                            SynetTiledScale2D32fNchw(src, ver, _hor, dst, x + 1 * F);
+                            SynetTiledScale2D32fNchw(src, ver, _hor, dst, x + 2 * F);
+                            SynetTiledScale2D32fNchw(src, ver, _hor, dst, x + 3 * F);
+                        }
+                        for (; x < widthF; x += F)
+                            SynetTiledScale2D32fNchw(src, ver, _hor, dst, x);
+                        for (; x < width; x += 1)
+                            dst[x] = src[x] * ver[x] * hor[y];
+                        src += width, dst += width;
+                    }
+                    hor += height;
+                    ver += width;
+                }
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                size_t channelsF = AlignLo(channels, F);
+                size_t channels4F = AlignLo(channels, 4 * F);
+                for (size_t y = 0; y < height; ++y)
+                {
+                    const float* pVer = ver;
+                    for (size_t x = 0; x < width; ++x)
+                    {
+                        size_t c = 0;
+                        for (; c < channels4F; c += 4 * F)
+                        {
+                            SynetTiledScale2D32fNhwc(src, pVer, hor, dst, c + 0 * F);
+                            SynetTiledScale2D32fNhwc(src, pVer, hor, dst, c + 1 * F);
+                            SynetTiledScale2D32fNhwc(src, pVer, hor, dst, c + 2 * F);
+                            SynetTiledScale2D32fNhwc(src, pVer, hor, dst, c + 3 * F);
+                        }
+                        for (; c < channelsF; c += F)
+                            SynetTiledScale2D32fNhwc(src, pVer, hor, dst, c);
+                        for (; c < channels; c += 1)
+                            dst[c] = src[c] * pVer[c] * hor[c];
+                        src += channels, dst += channels, pVer += channels;
+                    }
+                    hor += channels;
+                }
+            }
+            else
+                assert(0);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }

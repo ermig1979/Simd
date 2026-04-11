@@ -546,6 +546,11 @@ namespace Test
             result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Avx512bw::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Neon::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
+#endif
+
         return result;
     }
 #endif
