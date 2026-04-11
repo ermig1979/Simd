@@ -68,13 +68,13 @@ namespace Test
             d += core - Size(1, 1);
 
         View src(s.x, s.y, View::Float, NULL, TEST_ALIGN(size.x));
-        FillRandom32f(src, 0, 1);
+        FillRandom32f(src, 0.0f, 1.0f);
 
         View weights(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
-        FillRandom32f(weights, -1, 1);
+        FillRandom32f(weights, -0.5f, 0.5f);
 
         View dstSrc(d.x, d.y, View::Float, NULL, TEST_ALIGN(size.x));
-        FillRandom32f(dstSrc, -1000, 1000);
+        FillRandom32f(dstSrc, 1000.0f, 2000.0f);
 
         View dstDst1(d.x, d.y, View::Float, NULL, TEST_ALIGN(size.x));
         View dstDst2(d.x, d.y, View::Float, NULL, TEST_ALIGN(size.x));
@@ -604,8 +604,8 @@ namespace Test
         Vector dstDst2(dstIndex.Volume());
         Vector buffer(dstIndex.Area()*srcIndex.depth*kernel.x*kernel.y * 2 + dstIndex.Area() * 2);
 
-        FillRandom(src, 0, 1);
-        FillRandom(weight, -1, 1);
+        FillRandom(src, 0.0f, 1.0f);
+        FillRandom(weight, -0.5f, 0.5f);
         const float level = 100;
         FillRandom(dstSrc, level, level);
 
