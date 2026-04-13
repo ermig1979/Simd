@@ -219,7 +219,6 @@ namespace Simd
                             size_t srcOffs = (i * p.srcC + mak) * _elemS;
                             _conv1x1(src + srcOffs, p, a, macroM, tmp + tmpOffs);
                         }
-                        std::cout << "  1x1 tmpOffs " << tmpOffs << " macroM " << macroM << std::endl;
                         if (mak + macroK == a.bufK)
                             _gemm[1](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
                         else
