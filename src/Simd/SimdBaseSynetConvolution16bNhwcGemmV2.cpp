@@ -267,7 +267,8 @@ namespace Simd
         bool SynetConvolution16bNhwcGemmV2::Preferable(const ConvParam& p)
         {
             static int choise = 1;
-            return p.trans != 0 && p.group == 1 && p.Is1x1() && p.srcC > 128 && 1;// ((choise++) & 1);
+            size_t K = p.srcC * p.kernelX * p.kernelY;
+            return p.trans != 0 && p.group == 1 && p.Is1x1() && K > 128 && 1;// ((choise++) & 1);
         }
     }
 #endif
