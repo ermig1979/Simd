@@ -82,13 +82,32 @@ namespace Simd
             a.macroM = Simd::RestrictRange(AlignLoAny(L2 / a.macroK / 2, a.microM), a.microM, a.batch * a.M);
             a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, a.bufD);
-            if (a.macroK == a.bufK && a.macroD == a.bufD)
-                a.macroM = Simd::Min<size_t>(a.batch * a.M, 256);
+            if (_is1x1)
+            {
+                if (a.macroK == a.bufK && a.macroD == a.bufD && a.macroM > 256)
+                    a.macroM = 256;
+            }
+            else
+            {
+                a.isAlMaH = Aligned(a.macroH * p.dstW, a.microM);
+                if (!a.isAlMaH)
+                {
+                    size_t hAlign = a.microM / Pow2Divider(a.macroH * p.dstW);
+                    //std::cout << " hAlign " << hAlign << std::endl;
+                    if (hAlign < a.macroH)
+                    {
+                        a.macroH = AlignLo(a.macroH, hAlign);
+                        if (a.macroK == a.bufK && a.macroD == a.bufD && a.macroH * p.dstW > 256)
+                            a.macroH = Simd::Min(a.macroH, AlignLo(DivHi(256, p.dstW), hAlign));
+                        a.isAlMaH = 1;
+                    }
+                }
+            }
             a.bufM = AlignHi(a.batch * p.dstH * p.dstW, a.F);
             a.elem = _elemD;
             a.tmpBuf = !_src16b || !_is1x1 || a.K != a.bufK;
             a.sumBuf = (_dst16b || a.bufD != p.dstC || a.bufM != a.batch * p.dstH * p.dstW) && a.macroK < a.bufK;
-            a.reorderType = a.tmpBuf != 0 && _is1x1;
+            a.reorderType = a.tmpBuf != 0 && (_is1x1 || (Aligned(p.srcC, a.microK) && a.isAlMaH));
             if (a.sumBuf == 0 && a.macroD > p.dstC)
                 a.macroD = p.dstC;
             a.dB = (a.sumBuf ? a.macroD : p.dstC);
@@ -102,8 +121,12 @@ namespace Simd
             //std::cout << " a.macroK " << a.macroK << std::endl;
             //std::cout << " a.macroD " << a.macroD << std::endl;
             //std::cout << " a.macroM " << a.macroM << std::endl;
+            //std::cout << " a.macroH " << a.macroH << std::endl;
+            //std::cout << " p.dstW " << p.dstW << std::endl;
             //std::cout << " a.tmpBuf " << a.tmpBuf << std::endl;
             //std::cout << " a.sumBuf " << a.sumBuf << std::endl;
+            //std::cout << " a.reorderType " << a.reorderType << std::endl;
+            //std::cout << " a.isAlMaH " << a.isAlMaH << std::endl;
         }
 
         size_t SynetConvolution16bNhwcGemmV2::ExternalBufferSize() const
@@ -215,60 +238,60 @@ namespace Simd
 
         void SynetConvolution16bNhwcGemmV2::ForwardAny(const uint8_t* src, uint16_t* tmp, size_t batch, float* sum, float* buf, uint8_t* dst)
         {
-            //const ConvParam& p = _param;
-            //const AlgParam& a = _alg;
-            //const float* bias = _bias.data, * params = _params.data;
-            //size_t dstH = p.dstH * a.batch;
-            //for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
-            //{
-            //    size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-            //    const uint16_t* weight = _weight.data + dc * a.bufK;
-            //    for (size_t mak = 0; mak < a.K; mak += a.macroK)
-            //    {
-            //        size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-            //        for (size_t yBeg = 0; yBeg < dstH;)
-            //        {
-            //            size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-            //            size_t tmpOffs = (a.macroK < a.bufK || _convert == NULL) ? 
-            //                yBeg * (_convert ? AlignHi(p.dstW, a.F) : p.dstW) * a.bufK + (a.reorderType ? mak * a.F : mak) : 0;
-            //            size_t sumOffs = a.macroK < a.bufK ? yBeg * (a.microK > 2 ? AlignHi(p.dstW, a.F) : p.dstW)* a.dB : 0;
-            //            size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
-            //            if (dc == 0 && mak == 0 && _convert)
-            //            {
-            //                if (a.batch > 1)
-            //                {
-            //                    size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
-            //                    size_t dB = p.dstH * p.dstW * a.bufK;
-            //                    for (size_t b = 0; b < a.batch; ++b)
-            //                        _convert(src + b * dS, p, a, 0, p.dstH, tmp + b * dB);
-            //                }
-            //                else
-            //                    _convert(src, p, a, yBeg, yEnd, tmp + tmpOffs);
-            //            }
-            //            if (mak + macroK == a.bufK)
-            //                _convolutions[1](tmp + tmpOffs, p, a, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 1 : 0,
-            //                    weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
-            //            else
-            //                _convolutions[0](tmp + tmpOffs, p, a, macroD, yEnd - yBeg, macroK, mak == 0 ? 1 : 0,
-            //                    weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
-            //            yBeg = yEnd;
-            //        }
-            //        weight += macroK * a.microD;
-            //    }
-            //    bias += macroD;
-            //    if (p.activation == ::SimdConvolutionActivationPrelu)
-            //        params += macroD;
-            //    dst += macroD * _elemD;
-            //    if (!a.sumBuf)
-            //        sum += macroD;
-            //}
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            const float* bias = _bias.data, * params = _params.data;
+            size_t dstH = p.dstH * a.batch;
+            for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
+            {
+                size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
+                const uint16_t* weight = _weight.data + dc * a.bufK;
+                for (size_t mak = 0; mak < a.K; mak += a.macroK)
+                {
+                    size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
+                    for (size_t yBeg = 0; yBeg < dstH;)
+                    {
+                        size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
+                        size_t tmpOffs = (a.macroK == a.bufK && a.isAlMaH) ? 0 : yBeg * p.dstW * a.bufK + (a.reorderType ? mak * a.F : mak);
+                        size_t sumOffs = a.macroK < a.bufK ? yBeg * p.dstW * a.dB : 0;
+                        size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
+                        if (dc == 0 && mak == 0 && a.tmpBuf)
+                        {
+                            if (a.batch > 1)
+                            {
+                                size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
+                                size_t dB = p.dstH * p.dstW * a.bufK;
+                                for (size_t b = 0; b < a.batch; ++b)
+                                    _convAny(src + b * dS, p, a, 0, p.dstH, tmp + b * dB);
+                            }
+                            else
+                                _convAny(src, p, a, yBeg, yEnd, tmp + tmpOffs);
+                        }
+                        size_t macroM = (yEnd - yBeg) * p.dstW;
+                        if (mak + macroK == a.bufK)
+                            _gemm[1](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
+                        else
+                            _gemm[0](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
+                        yBeg = yEnd;
+                    }
+                    weight += macroK * a.microD;
+                }
+                bias += macroD;
+                if (p.activation == ::SimdConvolutionActivationPrelu)
+                    params += macroD;
+                dst += macroD * _elemD;
+                if (!a.sumBuf)
+                    sum += macroD;
+            }
         }
 
         bool SynetConvolution16bNhwcGemmV2::Preferable(const ConvParam& p)
         {
             static int choise = 1;
             size_t K = p.srcC * p.kernelX * p.kernelY;
-            return p.trans != 0 && p.group == 1 && p.Is1x1() && K > 128 && 1;// ((choise++) & 1);
+            return p.trans != 0 && p.group == 1 
+                && (p.Is1x1() || (p.srcT == SimdTensorData16b && Aligned(p.srcC, 32))) 
+                && K > 128 && 1;// ((choise++) & 1);
         }
     }
 #endif

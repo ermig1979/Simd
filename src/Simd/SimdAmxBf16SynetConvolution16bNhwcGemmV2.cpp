@@ -276,7 +276,7 @@ namespace Simd
             }
         }
 
-        static void Reorder16bNhwcGemmD(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Convolution16bNhwcGemmV2_ReorderAnyD(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
             size_t srcC32 = AlignLo(p.srcC, 32);
@@ -410,7 +410,7 @@ namespace Simd
             }
         }
 
-        static void Reorder16bNhwcGemmR(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Convolution16bNhwcGemmV2_ReorderAnyR(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
             size_t srcC32 = AlignLo(p.srcC, 32);
@@ -988,7 +988,14 @@ namespace Simd
                 }
                 else
                 {
-                    assert(0);
+                    if (_src16b)
+                    {
+                        _convAny = a.reorderType ? Convolution16bNhwcGemmV2_ReorderAnyR : Convolution16bNhwcGemmV2_ReorderAnyD;
+                    }
+                    else
+                    {
+                        assert(0);
+                    }
                 }
             }
             //if (_src16b)

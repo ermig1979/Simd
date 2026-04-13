@@ -224,7 +224,7 @@ namespace Simd
                 size_t F, microD, microM, microK;
                 size_t macroD, macroH, macroM, macroK;
                 size_t bufD, bufM, bufK, elem, dB;
-                int tmpBuf, sumBuf, reorderType;
+                int tmpBuf, sumBuf, reorderType, isAlMaH;
             };
 
             typedef void(*Conv1x1Ptr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t M, uint16_t* dst);
