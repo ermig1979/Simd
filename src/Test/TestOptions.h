@@ -191,7 +191,11 @@ namespace Test
             help = HasArg("--help", "-?");
             include = GetArgs("-fi", Strings(), false);
             exclude = GetArgs("-fe", Strings(), false);
-            testThreads = std::min<int>(std::max<int>(FromString<int>(GetArg("-tt", "0", false)), 0), std::thread::hardware_concurrency());
+            testThreads = FromString<int>(GetArg("-tt", "0", false));
+            if (testThreads < 0)
+                testThreads = std::thread::hardware_concurrency() / std::abs((int)testThreads);
+            else
+                testThreads = std::min(testThreads, (size_t)std::thread::hardware_concurrency());
             workThreads = std::min<int>(std::max<int>(FromString<int>(GetArg("-wt", "1", false)), 1), std::thread::hardware_concurrency());
             testRepeats = std::max<int>(FromString<int>(GetArg("-tr", "1", false)), 1);
             testStatistics = std::max<int>(FromString<int>(GetArg("-ts", "0", false)), 0);

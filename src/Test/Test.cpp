@@ -835,7 +835,9 @@ namespace Test
         std::cout << "               with using of different SIMD instructions such as SSE4.1, " << std::endl;
         std::cout << "               AVX2, and other). Also it can be: " << std::endl;
         std::cout << "               -m=s - running of special tests." << std::endl << std::endl;
-        std::cout << "-tt=1        - a number of test threads." << std::endl;
+        std::cout << "-tt=1        - a number of test threads. There are special values: " << std::endl; 
+        std::cout << "               '-1' - using of all available threads for tests, " << std::endl;
+        std::cout << "               '-2' - using of half of all available threads for tests." << std::endl << std::endl;
         std::cout << "-fi=Sobel    - an include filter. In current case will be tested only" << std::endl;
         std::cout << "               functions which contain word 'Sobel' in their names." << std::endl;
         std::cout << "               If you miss this parameter then full testing will be" << std::endl;

@@ -180,7 +180,7 @@ Where next parameters were used:
 In this case different implementations of each functions will be compared between themselves 
 (for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
 Also it can be `-m=s` (running of special tests).
-* `-tt=1` - a number of test threads. Use -1 to set maximum parallelization.
+* `-tt=1` - a number of test threads. There are special values: '-1' - using of all available threads for tests, '-2' - using of half of all available threads for tests.
 * `-fi=Sobel` - an include filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
 If you miss this parameter then full testing will be performed.
 You can use several filters - function name has to satisfy at least one of them.
