@@ -791,9 +791,9 @@ namespace Simd
             {
                 size_t ds = 0, dstS8 = dstS & (~7);
                 for (; ds < dstS8; ds += 8)
-                    ApplyMxN<term, type, flush, 2, 8>(dst + ds * dD, dD, buf0 + ds * DF, bias, params, tailD);
+                    ApplyMxN<term, type, flush, 1, 8>(dst + ds * dD, dD, buf0 + ds * DF, bias, params, tailD);
                 for (; ds < dstS; ++ds)
-                    ApplyMxN<term, type, flush, 2, 1>(dst + ds * dD, dD, buf0 + ds * DF, bias, params, tailD);
+                    ApplyMxN<term, type, flush, 1, 1>(dst + ds * dD, dD, buf0 + ds * DF, bias, params, tailD);
             }
         }
 
