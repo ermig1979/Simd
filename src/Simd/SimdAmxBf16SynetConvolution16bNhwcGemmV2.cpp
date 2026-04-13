@@ -950,9 +950,9 @@ namespace Simd
         {
             gemm[0] = Convolution16bNhwcGemmV2_Gemm<Term16bInterim, SimdConvolutionActivationIdentity, 0, 0>;
             if (p.dstT == SimdTensorData16b)
-                gemm[1] = Convolution16bNhwcGemmV2_Gemm<Term16bLast16b, type, 1, apply>;
+                gemm[1] = Convolution16bNhwcGemmV2_Gemm<Term16bLast16b, type, 0, apply>;
             else
-                gemm[1] = Convolution16bNhwcGemmV2_Gemm<Term16bLast32f, type, 1, apply>;
+                gemm[1] = Convolution16bNhwcGemmV2_Gemm<Term16bLast32f, type, 0, apply>;
         }
 
         template <SimdConvolutionActivationType type> SIMD_INLINE void SetGemm(const ConvParam& p, const AlgParam & a, GemmPtr* gemm)
