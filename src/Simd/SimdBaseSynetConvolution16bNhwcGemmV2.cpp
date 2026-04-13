@@ -93,7 +93,6 @@ namespace Simd
                 if (!a.isAlMaH)
                 {
                     size_t hAlign = a.microM / Pow2Divider(a.macroH * p.dstW);
-                    //std::cout << " hAlign " << hAlign << std::endl;
                     if (hAlign < a.macroH)
                     {
                         a.macroH = AlignLo(a.macroH, hAlign);
@@ -220,6 +219,7 @@ namespace Simd
                             size_t srcOffs = (i * p.srcC + mak) * _elemS;
                             _conv1x1(src + srcOffs, p, a, macroM, tmp + tmpOffs);
                         }
+                        std::cout << "  1x1 tmpOffs " << tmpOffs << " macroM " << macroM << std::endl;
                         if (mak + macroK == a.bufK)
                             _gemm[1](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
                         else
@@ -249,12 +249,12 @@ namespace Simd
                 for (size_t mak = 0; mak < a.K; mak += a.macroK)
                 {
                     size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-                    for (size_t yBeg = 0; yBeg < dstH;)
+                    for (size_t yBeg = 0, i = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                        size_t tmpOffs = (a.macroK == a.bufK && a.isAlMaH) ? 0 : yBeg * p.dstW * a.bufK + (a.reorderType ? mak * a.F : mak);
-                        size_t sumOffs = a.macroK < a.bufK ? yBeg * p.dstW * a.dB : 0;
-                        size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
+                        size_t tmpOffs = (a.macroK == a.bufK && a.isAlMaH) ? 0 : i * a.bufK + (a.reorderType ? mak * a.F : mak);
+                        size_t sumOffs = a.macroK < a.bufK ? i * a.dB : 0;
+                        size_t dstOffs = i * p.dstC * _elemD;
                         if (dc == 0 && mak == 0 && a.tmpBuf)
                         {
                             if (a.batch > 1)
@@ -265,16 +265,22 @@ namespace Simd
                                     _convAny(src + b * dS, p, a, 0, p.dstH, tmp + b * dB);
                             }
                             else
+                            {
+                                size_t tmpOffs = (a.macroK == a.bufK && a.isAlMaH) ? 0 : yBeg * p.dstW * a.bufK + (a.reorderType ? mak * a.F : mak);
                                 _convAny(src, p, a, yBeg, yEnd, tmp + tmpOffs);
+                            }
                         }
-                        size_t macroM = (yEnd - yBeg) * p.dstW;
+                        size_t macroM = yEnd * p.dstW - i;
+                        if (yEnd < dstH)
+                            macroM = AlignLo(macroM, a.microM);
                         if (mak + macroK == a.bufK)
                             _gemm[1](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
                         else
                             _gemm[0](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, bias, params, sum + sumOffs, buf, dst + dstOffs);
                         yBeg = yEnd;
+                        i += macroM;
                     }
-                    weight += macroK * a.microD;
+                    weight += macroK * a.F;
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
@@ -290,7 +296,7 @@ namespace Simd
             static int choise = 1;
             size_t K = p.srcC * p.kernelX * p.kernelY;
             return p.trans != 0 && p.group == 1 
-                && (p.Is1x1() || (p.srcT == SimdTensorData16b && Aligned(p.srcC, 32))) 
+                && (p.Is1x1() || (Aligned(p.srcC, 32))) 
                 && K > 128 && 1;// ((choise++) & 1);
         }
     }
