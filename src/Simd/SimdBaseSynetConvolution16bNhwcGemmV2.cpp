@@ -79,9 +79,11 @@ namespace Simd
                         a.batch = batch;
             }
             a.batch = DivHi(p.batch, DivHi(p.batch, a.batch));
-            a.macroM = Simd::RestrictRange(AlignLoAny(L2 / a.macroK / 2, a.microM), a.microM, Simd::Min<size_t>(a.batch * a.M, 1024));
+            a.macroM = Simd::RestrictRange(AlignLoAny(L2 / a.macroK / 2, a.microM), a.microM, a.batch * a.M);
             a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW / 2, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK / 2, a.microD), a.microD, a.bufD);
+            if (a.macroK == a.bufK && a.macroD == a.bufD)
+                a.macroM = Simd::Min<size_t>(a.batch * a.M, 256);
             a.bufM = AlignHi(a.batch * p.dstH * p.dstW, a.F);
             a.elem = _elemD;
             a.tmpBuf = !_src16b || !_is1x1 || a.K != a.bufK;
@@ -265,7 +267,7 @@ namespace Simd
         bool SynetConvolution16bNhwcGemmV2::Preferable(const ConvParam& p)
         {
             static int choise = 1;
-            return p.trans != 0 && p.group == 1 && p.Is1x1() && 1;// ((choise++) & 1);
+            return p.trans != 0 && p.group == 1 && p.Is1x1() && p.srcC > 128 && 1;// ((choise++) & 1);
         }
     }
 #endif
