@@ -94,14 +94,14 @@ namespace Simd
                 if (!a.isAlMaH && a.batch == 1)
                 {
 
-                    size_t hAlign = a.microM / Pow2Divider(a.macroH * p.dstW);
-                    //std::cout << " hAlign " << hAlign << std::endl;
+                    size_t hAlign = a.microM / Pow2Divider(p.dstW);
+                    //std::cout << " a.macroH " << a.macroH << " hAlign " << hAlign << std::endl;
                     if (hAlign < a.macroH)
                     {
                         a.macroH = AlignLo(a.macroH, hAlign);
                         if (a.macroK == a.bufK && a.macroD == a.bufD && a.macroH * p.dstW > 256)
-                            a.macroH = Simd::Min(a.macroH, AlignLo(DivHi(256, p.dstW), hAlign));
-                        a.isAlMaH = 1;
+                            a.macroH = Simd::Min(a.macroH, AlignHi(DivHi(256, p.dstW), hAlign));
+                        a.isAlMaH = Aligned(a.macroH * p.dstW, a.microM);
                     }
                 }
             }
