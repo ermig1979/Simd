@@ -48,8 +48,8 @@ namespace Simd
 
         SIMD_INLINE int ExtractInt32Sum(__m128i a)
         {
-            int SIMD_ALIGNED(16) _a[4];
-            _mm_store_si128((__m128i*)_a, a);
+            SIMD_ALIGNED(16) int _a[4];
+            _mm_storeu_si128((__m128i*)_a, a);
             return _a[0] + _a[1] + _a[2] + _a[3];
         }
 
@@ -64,8 +64,8 @@ namespace Simd
 
         SIMD_INLINE int64_t ExtractInt64Sum(__m128i a)
         {
-            int64_t SIMD_ALIGNED(16) _a[2];
-            _mm_store_si128((__m128i*)_a, a);
+            SIMD_ALIGNED(16) int64_t _a[2];
+            _mm_storeu_si128((__m128i*)_a, a);
             return _a[0] + _a[1];
         }
 
@@ -84,22 +84,22 @@ namespace Simd
             return _mm_hadd_epi32(_mm_hadd_epi32(a0, a1), _mm_hadd_epi32(a2, a3));
         }
     }
-#endif//SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
         SIMD_INLINE float ExtractValue(__m256 a, int i)
         {
-            float SIMD_ALIGNED(32) _a[8];
-            _mm256_store_ps(_a, a);
+            SIMD_ALIGNED(32) float _a[8];
+            _mm256_storeu_ps(_a, a);
             return _a[i];
         }
 
         SIMD_INLINE float ExtractSum(__m256 a)
         {
-            float SIMD_ALIGNED(32) _a[8];
-            _mm256_store_ps(_a, _mm256_hadd_ps(_mm256_hadd_ps(a, _mm256_setzero_ps()), _mm256_setzero_ps()));
+            SIMD_ALIGNED(32) float _a[8];
+            _mm256_storeu_ps(_a, _mm256_hadd_ps(_mm256_hadd_ps(a, _mm256_setzero_ps()), _mm256_setzero_ps()));
             return _a[0] + _a[4];
         }
 
@@ -119,7 +119,7 @@ namespace Simd
         {
             const size_t size = A / sizeof(T);
             assert(index < size);
-            T buffer[size];
+            SIMD_ALIGNED(32) T buffer[size];
             _mm256_storeu_si256((__m256i*)buffer, a);
             return buffer[index];
         }
@@ -127,7 +127,7 @@ namespace Simd
         template <class T> SIMD_INLINE T ExtractSum(__m256i a)
         {
             const size_t size = A / sizeof(T);
-            T buffer[size];
+            SIMD_ALIGNED(32) T buffer[size];
             _mm256_storeu_si256((__m256i*)buffer, a);
             T sum = 0;
             for (size_t i = 0; i < size; ++i)
@@ -160,7 +160,7 @@ namespace Simd
 #endif
 #else
             SIMD_ALIGNED(32) int64_t buffer[4];
-            _mm256_store_si256((__m256i*)buffer, value);
+            _mm256_storeu_si256((__m256i*)buffer, value);
             return buffer[index];
 #endif
         }
@@ -180,14 +180,14 @@ namespace Simd
             return _mm256_add_epi32(_mm256_permute2x128_si256(b0, b1, 0x20), _mm256_permute2x128_si256(b0, b1, 0x31));
         }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
         SIMD_INLINE float Extract(const __m512& a, size_t index)
         {
-            float buffer[F];
+            SIMD_ALIGNED(64) float buffer[F];
             _mm512_storeu_ps(buffer, a);
             return buffer[index];
         }
@@ -222,7 +222,7 @@ namespace Simd
         template <class T> SIMD_INLINE T ExtractSum(__m512i a)
         {
             const size_t size = A / sizeof(T);
-            T buffer[size];
+            SIMD_ALIGNED(64) T buffer[size];
             _mm512_storeu_si512(buffer, a);
             T sum = 0;
             for (size_t i = 0; i < size; ++i)
@@ -262,7 +262,7 @@ namespace Simd
             return _mm_add_epi32(_mm256_castsi256_si128(c), _mm256_extracti128_si256(c, 1));
         }
     }
-#endif//SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
@@ -319,7 +319,7 @@ namespace Simd
             return vaddq_u32(vaddq_u32(c0.val[0], c0.val[1]), vaddq_u32(c1.val[0], c1.val[1]));
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }
 
-#endif//__SimdExtract_h__
+#endif

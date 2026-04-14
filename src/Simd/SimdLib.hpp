@@ -4244,7 +4244,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void Uyvy422ToBgr(const View<A>& uyvy, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
     {
-        assert(EqualSize(uyvy, bgr) && uyvy.format == View<A>::Uyvy32 && bgr.format == View<A>::Bgr24);
+        assert(EqualSize(uyvy, bgr) && uyvy.format == View<A>::Uyvy16 && bgr.format == View<A>::Bgr24);
 
         SimdUyvy422ToBgr(uyvy.data, uyvy.stride, uyvy.width, uyvy.height, bgr.data, bgr.stride, yuvType);
     }
@@ -4270,7 +4270,7 @@ namespace Simd
         assert(y.width == uyvy.width && y.height == uyvy.height);
         assert(y.width == 2 * u.width && y.height == 2 * u.height && y.format == u.format);
         assert(y.width == 2 * v.width && y.height == 2 * v.height && y.format == v.format);
-        assert(uyvy.format == View<A>::Uyvy32 && y.format == View<A>::Gray8);
+        assert(uyvy.format == View<A>::Uyvy16 && y.format == View<A>::Gray8);
 
         SimdUyvy422ToBgr(uyvy.data, uyvy.stride, uyvy.width, uyvy.height, y.data, y.stride, u.data, u.stride, v.data, v.stride);
     }
@@ -4801,7 +4801,7 @@ namespace Simd
         assert(y.width == uyvy.width && y.height == uyvy.height);
         assert(y.width == 2 * u.width && y.height == 2 * u.height && y.format == u.format);
         assert(y.width == 2 * v.width && y.height == 2 * v.height && y.format == v.format);
-        assert(uyvy.format == View<A>::Uyvy32 && y.format == View<A>::Gray8);
+        assert(uyvy.format == View<A>::Uyvy16 && y.format == View<A>::Gray8);
 
         SimdYuv420pToUyvy422(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, uyvy.data, uyvy.stride);
     }

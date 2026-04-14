@@ -48,6 +48,14 @@ namespace Simd
         return pow2;
     }
 
+    SIMD_INLINE size_t Pow2Divider(size_t value)
+    {
+        size_t divider = 1;
+        for (; value%2 == 0; value = value / 2)
+            divider *= 2;
+        return divider;
+    }
+
     SIMD_INLINE size_t AlignHiAny(size_t size, size_t align)
     {
         return (size + align - 1) / align * align;

@@ -54,11 +54,21 @@
  <li>NEON optimizations of function GrayToY.</li>
  <li>NEON optimizations of function YToGray.</li>
  <li>NEON optimizations of function Yuv444pToRgbaV2.</li>
+ <li>NEON optimizations of function SynetTiledScale2D32f.</li>
+ <li>NEON optimizations of function SynetNormalizeLayerForward.</li>
+ <li>NEON optimizations of function SynetNormalizeLayerForwardV2.</li>
+ <li>NEON optimizations of function SynetNormalizeLayerForwardV3.</li>
+ <li>NEON optimizations of function SynetNormalizeLayerForwardV4.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Error in NEON optimization of function TransformImage (BGR, T0 transform).</li>
  <li>Error in AVX-512BW optimizations of function SynetSoftmax16b (MSVS, Debug, Win32).</li>
+ <li>Possible aligned load of unaligned memory in AVX2 optimizations of function AbsDifferenceSums3 (Windows 7, x64, gcc 8.1.0).</li>
+ <li>Possible aligned store in file SimdExtract.h for SSE4.1, AVX2, AVX-512BW.</li>
+ <li>Wrong assert condition in function Simd::Uyvy422ToBgr.</li>
+ <li>Wrong assert condition in function Simd::Uyvy422ToYuv420p.</li>
+ <li>Wrong assert condition in function Simd::Yuv420pToUyvy422.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -71,6 +81,9 @@
 <ul>
  <li>Error in Python test ShiftDetectorFunctionsTest.</li>
  <li>Error in Python test ShiftDetectorClassTest.</li>
+ <li>Error in test SquaredDifferenceSum32f.</li>
+ <li>Error in test NeuralAddConvolution2x2ForwardAutoTest.</li>
+ <li>Error in parsing of 'testThreads' command line options.</li>
 </ul>
 
 <h4>Infrastructure</h4>

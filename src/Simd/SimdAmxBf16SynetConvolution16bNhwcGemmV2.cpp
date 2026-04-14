@@ -42,7 +42,7 @@ namespace Simd
 
 		//-----------------------------------------------------------------------------------------
 
-		static void Convert16bNhwcGemmD(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+		static void Convolution16bNhwcGemmV2_ConvertAnyD(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
 		{
 			const float* src = (float*)src8;
 			size_t srcC32 = AlignLo(p.srcC, 32);
@@ -91,7 +91,7 @@ namespace Simd
 			}
 		}
 
-        static void Convert16bNhwcGemmD_1d32ck(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Convolution16bNhwcGemmV2_ConvertAnyD_1d32ck(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             assert(p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32);
             const float* src = (float*)src8;
@@ -185,7 +185,7 @@ namespace Simd
             }
         }
 
-		static void Convert16bNhwcGemmR(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+		static void Convolution16bNhwcGemmV2_ConvertAnyR(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
 		{
 			const float* src = (float*)src8;
 			size_t srcC32 = AlignLo(p.srcC, 32);
@@ -276,7 +276,7 @@ namespace Simd
             }
         }
 
-        static void Reorder16bNhwcGemmD(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Convolution16bNhwcGemmV2_ReorderAnyD(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
             size_t srcC32 = AlignLo(p.srcC, 32);
@@ -317,7 +317,7 @@ namespace Simd
             }
         }
 
-        static void Reorder16bNhwcGemmD_1d32ck(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Convolution16bNhwcGemmV2_ReorderAnyD_1d32ck(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             assert(p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32);
             const uint16_t* src = (uint16_t*)src8;
@@ -410,7 +410,7 @@ namespace Simd
             }
         }
 
-        static void Reorder16bNhwcGemmR(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
+        static void Convolution16bNhwcGemmV2_ReorderAnyR(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const uint16_t* src = (uint16_t*)src8;
             size_t srcC32 = AlignLo(p.srcC, 32);
@@ -628,7 +628,6 @@ namespace Simd
         {
             int dB = (int)a.dB, dD = int(p.dstC * a.elem), dS = (int)a.bufK;
             float* buf2 = buf1 + 1024;
-
             if (term == Term16bInterim)
             {
                 for (size_t cds = 0; cds < dstS; cds += 32)
@@ -791,9 +790,9 @@ namespace Simd
             {
                 size_t ds = 0, dstS8 = dstS & (~7);
                 for (; ds < dstS8; ds += 8)
-                    ApplyMxN<term, type, flush, 2, 8>(dst + ds * dD, dD, buf0 + ds * DF, bias, params, tailD);
+                    ApplyMxN<term, type, flush, 1, 8>(dst + ds * dD, dD, buf0 + ds * DF, bias, params, tailD);
                 for (; ds < dstS; ++ds)
-                    ApplyMxN<term, type, flush, 2, 1>(dst + ds * dD, dD, buf0 + ds * DF, bias, params, tailD);
+                    ApplyMxN<term, type, flush, 1, 1>(dst + ds * dD, dD, buf0 + ds * DF, bias, params, tailD);
             }
         }
 
@@ -950,9 +949,9 @@ namespace Simd
         {
             gemm[0] = Convolution16bNhwcGemmV2_Gemm<Term16bInterim, SimdConvolutionActivationIdentity, 0, 0>;
             if (p.dstT == SimdTensorData16b)
-                gemm[1] = Convolution16bNhwcGemmV2_Gemm<Term16bLast16b, type, 1, apply>;
+                gemm[1] = Convolution16bNhwcGemmV2_Gemm<Term16bLast16b, type, 0, apply>;
             else
-                gemm[1] = Convolution16bNhwcGemmV2_Gemm<Term16bLast32f, type, 1, apply>;
+                gemm[1] = Convolution16bNhwcGemmV2_Gemm<Term16bLast32f, type, 0, apply>;
         }
 
         template <SimdConvolutionActivationType type> SIMD_INLINE void SetGemm(const ConvParam& p, const AlgParam & a, GemmPtr* gemm)
@@ -988,69 +987,26 @@ namespace Simd
                 }
                 else
                 {
-                    assert(0);
+                    if (_src16b)
+                    {
+                        if (a.reorderType)
+                            _convAny = Convolution16bNhwcGemmV2_ReorderAnyR;
+                        else if (p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32)
+                            _convAny = Convolution16bNhwcGemmV2_ReorderAnyD_1d32ck;
+                        else
+                            _convAny = Convolution16bNhwcGemmV2_ReorderAnyD;
+                    }
+                    else
+                    {
+                        if (a.reorderType)
+                            _convAny = Convolution16bNhwcGemmV2_ConvertAnyR;
+                        else if (p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32)
+                            _convAny = Convolution16bNhwcGemmV2_ConvertAnyD_1d32ck;
+                        else
+                            _convAny = Convolution16bNhwcGemmV2_ConvertAnyD;
+                    }
                 }
             }
-            //if (_src16b)
-            //{
-            //    if (_is1x1 && a.K == a.bufK)
-            //        _convert = NULL;
-            //    else
-            //    {
-            //        if (_is1x1 && a.batch == 1)
-            //        {
-            //            _convert = Reorder16bNhwcGemm1x1R;
-            //            a.reorderType = 1;
-            //        }
-            //        else
-            //        {
-            //            if (Aligned(p.srcC, 32) && a.batch == 1 && Aligned(p.dstW, a.F))
-            //            {
-            //                _convert = Reorder16bNhwcGemmR;
-            //                a.reorderType = 1;
-            //            }
-            //            else
-            //            {
-            //                if (p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32)
-            //                    _convert = Reorder16bNhwcGemmD_1d32ck;
-            //                else
-            //                    _convert = Reorder16bNhwcGemmD;
-            //            }
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    if (_is1x1)
-            //    {
-            //        if (a.batch == 1/* && a.macroK < a.bufK*/)
-            //        {
-            //            _convert = Convert16bNhwcGemm1x1R;
-            //            a.reorderType = 1;
-            //        }
-            //        else
-            //        {
-            //            _convert = Convert16bNhwcGemm1x1D;
-            //            a.reorderType = 0;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        if (p.srcC == AlignLo(p.srcC, 32) && a.batch == 1 && Aligned(p.dstW, a.F))
-            //        {
-            //            _convert = Convert16bNhwcGemmR;
-            //            a.reorderType = 1;
-            //        }
-            //        else
-            //        {
-            //            if (p.IsDilation(1) && p.srcC <= 8 && p.srcC * p.kernelX <= 32)
-            //                _convert = Convert16bNhwcGemmD_1d32ck;
-            //            else
-            //                _convert = Convert16bNhwcGemmD;
-            //            a.reorderType = 0;
-            //        }
-            //    }
-            //}
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: SetGemm<SimdConvolutionActivationIdentity>(p, _alg, _gemm); break;
