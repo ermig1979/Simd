@@ -51,7 +51,7 @@ namespace Simd
     SIMD_INLINE size_t Pow2Divider(size_t value)
     {
         size_t divider = 1;
-        for (; value&1 == 0; value /= 2)
+        for (; value%2 == 0; value = value / 2)
             divider *= 2;
         return divider;
     }

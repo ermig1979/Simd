@@ -92,7 +92,9 @@ namespace Simd
                 a.isAlMaH = Aligned(a.macroH * p.dstW, a.microM) && (a.batch == 1 || Aligned(p.dstH * p.dstW, a.microM));
                 if (!a.isAlMaH && a.batch == 1)
                 {
+
                     size_t hAlign = a.microM / Pow2Divider(a.macroH * p.dstW);
+                    //std::cout << " hAlign " << hAlign << std::endl;
                     if (hAlign < a.macroH)
                     {
                         a.macroH = AlignLo(a.macroH, hAlign);
