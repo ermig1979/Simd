@@ -89,7 +89,8 @@ namespace Simd
             }
             else
             {
-                a.isAlMaH = Aligned(a.macroH * p.dstW, a.microM) && (a.batch == 1 || Aligned(p.dstH * p.dstW, a.microM));
+                a.isAlMaH = (a.macroH == p.dstH * a.batch || Aligned(a.macroH * p.dstW, a.microM))
+                    && (a.batch == 1 || Aligned(p.dstH * p.dstW, a.microM));
                 if (!a.isAlMaH && a.batch == 1)
                 {
 
