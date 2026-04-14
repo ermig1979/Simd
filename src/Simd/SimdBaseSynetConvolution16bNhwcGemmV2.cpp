@@ -240,7 +240,7 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             const float* bias = _bias.data, * params = _params.data;
-            size_t dstH = p.dstH * a.batch;
+            size_t dstH = p.dstH * batch;
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
@@ -256,11 +256,11 @@ namespace Simd
                         size_t dstOffs = i * p.dstC * _elemD;
                         if (dc == 0 && mak == 0 && a.tmpBuf)
                         {
-                            if (a.batch > 1)
+                            if (batch > 1)
                             {
                                 size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
                                 size_t dB = p.dstH * p.dstW * a.bufK;
-                                for (size_t b = 0; b < a.batch; ++b)
+                                for (size_t b = 0; b < batch; ++b)
                                     _convAny(src + b * dS, p, a, 0, p.dstH, tmp + b * dB);
                             }
                             else
