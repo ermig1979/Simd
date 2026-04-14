@@ -89,8 +89,8 @@ namespace Simd
             }
             else
             {
-                a.isAlMaH = Aligned(a.macroH * p.dstW, a.microM);
-                if (!a.isAlMaH)
+                a.isAlMaH = Aligned(a.macroH * p.dstW, a.microM) && (a.batch == 1 || Aligned(p.dstH * p.dstW, a.microM));
+                if (!a.isAlMaH && a.batch == 1)
                 {
                     size_t hAlign = a.microM / Pow2Divider(a.macroH * p.dstW);
                     if (hAlign < a.macroH)
