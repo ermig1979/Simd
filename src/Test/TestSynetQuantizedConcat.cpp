@@ -138,6 +138,11 @@ namespace Test
             result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx512bw::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Neon::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
+#endif
+
         return result;
     }
 #endif

@@ -370,6 +370,86 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        SIMD_INLINE float32x4_t DequantizeLinear(int32x4_t value, int32x4_t bias, float32x4_t norm)
+        {
+            return vmulq_f32(vcvtq_f32_s32(vaddq_s32(value, bias)), norm);
+        }
+
+        SIMD_INLINE void DequantizeLinear1(const uint8_t* src, int32x4_t bias, float32x4_t norm, float* dst)
+        {
+            int32x4_t _src = vreinterpretq_s32_u32(vdupq_n_u32((uint32_t)src[0]));
+            dst[0] = vgetq_lane_f32(DequantizeLinear(_src, bias, norm), 0);
+        }
+
+        SIMD_INLINE void DequantizeLinear4(const uint8_t* src, int32x4_t bias, float32x4_t norm, float* dst)
+        {
+            uint8x8_t u8 = vreinterpret_u8_u32(vdup_n_u32(*(const uint32_t*)src));
+            int32x4_t i32 = vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(u8))));
+            vst1q_f32(dst, DequantizeLinear(i32, bias, norm));
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE int32x4_t QuantizeLinear(float32x4_t value, float32x4_t norm, int32x4_t zero)
+        {
+            return vaddq_s32(Round(vmulq_f32(value, norm)), zero);
+        }
+
+        SIMD_INLINE void QuantizeLinear1(const float* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
+        {
+            int32x4_t i32 = QuantizeLinear(vdupq_n_f32(src[0]), norm, zero);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(i32), vdup_n_s16(0)));
+            dst[0] = vget_lane_u8(u8, 0);
+        }
+
+        SIMD_INLINE void QuantizeLinear4(const float* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
+        {
+            int32x4_t i32 = QuantizeLinear(vld1q_f32(src), norm, zero);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(i32), vdup_n_s16(0)));
+            vst1_lane_u32((uint32_t*)dst, vreinterpret_u32_u8(u8), 0);
+        }
+
+        SIMD_INLINE void QuantizeLinear16(const float* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
+        {
+            int32x4_t i0 = QuantizeLinear(vld1q_f32(src + 0 * F), norm, zero);
+            int32x4_t i1 = QuantizeLinear(vld1q_f32(src + 1 * F), norm, zero);
+            int32x4_t i2 = QuantizeLinear(vld1q_f32(src + 2 * F), norm, zero);
+            int32x4_t i3 = QuantizeLinear(vld1q_f32(src + 3 * F), norm, zero);
+            vst1q_u8(dst, vcombine_u8(
+                vqmovun_s16(vcombine_s16(vqmovn_s32(i0), vqmovn_s32(i1))),
+                vqmovun_s16(vcombine_s16(vqmovn_s32(i2), vqmovn_s32(i3)))));
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void DequantizeQuantizeLinear1(const uint8_t* src, int32x4_t bias, float32x4_t norm, float32x4_t scale, int32x4_t zero, uint8_t* dst)
+        {
+            int32x4_t d0 = QuantizeLinear(DequantizeLinear(vreinterpretq_s32_u32(vdupq_n_u32((uint32_t)src[0])), bias, norm), scale, zero);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vdup_n_s16(0)));
+            dst[0] = vget_lane_u8(u8, 0);
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinear4(const uint8_t* src, int32x4_t bias, float32x4_t norm, float32x4_t scale, int32x4_t zero, uint8_t* dst)
+        {
+            uint8x8_t u8src = vreinterpret_u8_u32(vdup_n_u32(*(const uint32_t*)src));
+            int32x4_t i32 = vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(u8src))));
+            int32x4_t d0 = QuantizeLinear(DequantizeLinear(i32, bias, norm), scale, zero);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vdup_n_s16(0)));
+            vst1_lane_u32((uint32_t*)dst, vreinterpret_u32_u8(u8), 0);
+        }
+
+        SIMD_INLINE void DequantizeQuantizeLinear16(const uint8_t* src, int32x4_t bias, float32x4_t norm, float32x4_t scale, int32x4_t zero, uint8_t* dst)
+        {
+            uint8x16_t s8 = vld1q_u8(src);
+            uint16x8_t s16lo = vmovl_u8(vget_low_u8(s8)), s16hi = vmovl_u8(vget_high_u8(s8));
+            int32x4_t d0 = QuantizeLinear(DequantizeLinear(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(s16lo))), bias, norm), scale, zero);
+            int32x4_t d1 = QuantizeLinear(DequantizeLinear(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(s16lo))), bias, norm), scale, zero);
+            int32x4_t d2 = QuantizeLinear(DequantizeLinear(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(s16hi))), bias, norm), scale, zero);
+            int32x4_t d3 = QuantizeLinear(DequantizeLinear(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(s16hi))), bias, norm), scale, zero);
+            vst1q_u8(dst, vcombine_u8(
+                vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vqmovn_s32(d1))),
+                vqmovun_s16(vcombine_s16(vqmovn_s32(d2), vqmovn_s32(d3)))));
+        }
     }
 #endif
 }

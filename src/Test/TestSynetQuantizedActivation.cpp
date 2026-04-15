@@ -128,6 +128,11 @@ namespace Test
             result = result && SynetQuantizedPreluLayerForwardAutoTest(FUNC_SQPLF(Simd::Avx512bw::SynetQuantizedPreluLayerForward), FUNC_SQPLF(SimdSynetQuantizedPreluLayerForward));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedPreluLayerForwardAutoTest(FUNC_SQPLF(Simd::Neon::SynetQuantizedPreluLayerForward), FUNC_SQPLF(SimdSynetQuantizedPreluLayerForward));
+#endif
+
         return result;
     }
 #endif

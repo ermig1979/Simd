@@ -332,6 +332,11 @@ namespace Test
             result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Avx512bw::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Neon::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
+#endif
+
         return result;
     }
 
