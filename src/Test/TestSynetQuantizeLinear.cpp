@@ -114,6 +114,11 @@ namespace Test
             result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Avx512bw::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Neon::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
+#endif
+
         return result;
     }
 
@@ -197,6 +202,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Avx512bw::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
 #endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Neon::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
+#endif
 
         return result;
     }

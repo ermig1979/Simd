@@ -160,6 +160,11 @@ namespace Test
             result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Avx512bw::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Neon::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
+#endif
+
         return result;
     }
 #endif

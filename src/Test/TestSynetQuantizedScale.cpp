@@ -129,6 +129,11 @@ namespace Test
             result = result && SynetQuantizedScaleLayerForwardAutoTest(FUNC_SQCLF(Simd::Avx512bw::SynetQuantizedScaleLayerForward), FUNC_SQCLF(SimdSynetQuantizedScaleLayerForward));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedScaleLayerForwardAutoTest(FUNC_SQCLF(Simd::Neon::SynetQuantizedScaleLayerForward), FUNC_SQCLF(SimdSynetQuantizedScaleLayerForward));
+#endif
+
         return result;
     }
 #endif

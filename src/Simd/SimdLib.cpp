@@ -5274,7 +5274,7 @@ SIMD_API void SimdSynetAdd8i(const uint8_t* aData, const float* aScale, const fl
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetAdd8iPtr) (const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
         uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetAdd8iPtr simdSynetAdd8i = SIMD_FUNC3(SynetAdd8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetAdd8iPtr simdSynetAdd8i = SIMD_FUNC4(SynetAdd8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetAdd8i(aData, aScale, aShift, bData, bScale, bShift, cData, cScale, cShift, batch, channels, spatial, format, compatibility);
 #else
@@ -5313,7 +5313,7 @@ SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t c
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetConvert8uTo32fPtr) (const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvert8uTo32fPtr simdSynetConvert8uTo32f = SIMD_FUNC3(SynetConvert8uTo32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_NEON_FUNC);
+    const static SimdSynetConvert8uTo32fPtr simdSynetConvert8uTo32f = SIMD_FUNC4(SynetConvert8uTo32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetConvert8uTo32f(src, batch, channels, height, width, format, scale, shift, dst, compatibility);
 #else
@@ -5671,7 +5671,7 @@ SIMD_API void SimdSynetDequantizeLinear(const uint8_t* src, size_t size, int32_t
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetDequantizeLinearPtr) (const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
-    const static SimdSynetDequantizeLinearPtr simdSynetDequantizeLinear = SIMD_FUNC3(SynetDequantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetDequantizeLinearPtr simdSynetDequantizeLinear = SIMD_FUNC4(SynetDequantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetDequantizeLinear(src, size, bias, norm, dst);
 #else
@@ -6406,7 +6406,7 @@ SIMD_API void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, Si
     typedef void* (*SimdSynetQuantizedAddInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
         const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
         SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
-    const static SimdSynetQuantizedAddInitPtr simdSynetQuantizedAddInit = SIMD_FUNC3(SynetQuantizedAddInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetQuantizedAddInitPtr simdSynetQuantizedAddInit = SIMD_FUNC4(SynetQuantizedAddInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetQuantizedAddInit(aShape, aCount, aType, aScale, aZero, bShape, bCount, bType, bScale, bZero, actType, actParams, dstType, dstScale, dstZero);
 #else
@@ -6431,7 +6431,7 @@ SIMD_API void SimdSynetQuantizedConcatLayerForward(size_t count, const uint8_t**
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedConcatLayerForwardPtr) (size_t count, const uint8_t** src, size_t num, const size_t* size, const int32_t* bias, const float* norm, const float* scale, int32_t zero, uint8_t* dst);
-    const static SimdSynetQuantizedConcatLayerForwardPtr simdSynetQuantizedConcatLayerForward = SIMD_FUNC3(SynetQuantizedConcatLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetQuantizedConcatLayerForwardPtr simdSynetQuantizedConcatLayerForward = SIMD_FUNC4(SynetQuantizedConcatLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizedConcatLayerForward(count, src, num, size, bias, norm, scale, zero, dst);
 #else
@@ -6652,7 +6652,7 @@ SIMD_API void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const floa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedPreluLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
-    const static SimdSynetQuantizedPreluLayerForwardPtr simdSynetQuantizedPreluLayerForward = SIMD_FUNC3(SynetQuantizedPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetQuantizedPreluLayerForwardPtr simdSynetQuantizedPreluLayerForward = SIMD_FUNC4(SynetQuantizedPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizedPreluLayerForward(src, srcScale, srcZero, channels, spatial, slope, dst, dstScale, dstZero, format);
 #else
@@ -6665,7 +6665,7 @@ SIMD_API void SimdSynetQuantizedScaleLayerForward(const uint8_t* src, const floa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedScaleLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* scale, const float* bias, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
-    const static SimdSynetQuantizedScaleLayerForwardPtr simdSynetQuantizedScaleLayerForward = SIMD_FUNC3(SynetQuantizedScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetQuantizedScaleLayerForwardPtr simdSynetQuantizedScaleLayerForward = SIMD_FUNC4(SynetQuantizedScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizedScaleLayerForward(src, srcScale, srcZero, channels, spatial, scale, bias, dst, dstScale, dstZero, format);
 #else
@@ -6680,7 +6680,7 @@ SIMD_API void SimdSynetQuantizedShuffleLayerForward(const uint8_t* src0, int bia
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedShuffleLayerForwardPtr) (const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1,
         size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type);
-    const static SimdSynetQuantizedShuffleLayerForwardPtr simdSynetQuantizedShuffleLayerForward = SIMD_FUNC3(SynetQuantizedShuffleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetQuantizedShuffleLayerForwardPtr simdSynetQuantizedShuffleLayerForward = SIMD_FUNC4(SynetQuantizedShuffleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizedShuffleLayerForward(src0, bias0, norm0, srcC0, src1, bias1, norm1, srcC1, spatial, dst0, dst1, scale, zero, format, type);
 #else
@@ -6693,7 +6693,7 @@ SIMD_API void SimdSynetQuantizeLinear(const float* src, size_t size, const float
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizeLinearPtr) (const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
-    const static SimdSynetQuantizeLinearPtr simdSynetQuantizeLinear = SIMD_FUNC3(SynetQuantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetQuantizeLinearPtr simdSynetQuantizeLinear = SIMD_FUNC4(SynetQuantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizeLinear(src, size, norm, zero, dst);
 #else
@@ -6758,7 +6758,7 @@ SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatia
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetScale8iInitPtr) (size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC3(SynetScale8iInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC4(SynetScale8iInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetScale8iInit(batch, channels, spatial, srcType, dstType, format, compatibility);
 #else
