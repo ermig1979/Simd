@@ -148,7 +148,7 @@ namespace Simd
         SIMD_INLINE int32x4_t QuantizedAdd(int32x4_t a, float32x4_t adScale, int32x4_t b, float32x4_t bdScale, float32x4_t term)
         {
             float32x4_t fa = vmlaq_f32(term, vcvtq_f32_s32(a), adScale);
-            return vcvtnq_s32_f32(vmlaq_f32(fa, vcvtq_f32_s32(b), bdScale));
+            return Round(vmlaq_f32(fa, vcvtq_f32_s32(b), bdScale));
         }
 
         SIMD_INLINE void QuantizedAdd8u8u8u1(const uint8_t* a, float32x4_t adScale, const uint8_t* b, float32x4_t bdScale, float32x4_t term, uint8_t* dst)

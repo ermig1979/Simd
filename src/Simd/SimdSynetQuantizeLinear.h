@@ -392,7 +392,7 @@ namespace Simd
 
         SIMD_INLINE int32x4_t QuantizeLinear(float32x4_t value, float32x4_t norm, int32x4_t zero)
         {
-            return vaddq_s32(vcvtnq_s32_f32(vmulq_f32(value, norm)), zero);
+            return vaddq_s32(Round(vmulq_f32(value, norm)), zero);
         }
 
         SIMD_INLINE void QuantizeLinear1(const float* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
