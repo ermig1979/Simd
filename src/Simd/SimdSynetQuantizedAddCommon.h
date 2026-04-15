@@ -141,6 +141,50 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        SIMD_INLINE int32x4_t QuantizedAdd(int32x4_t a, float32x4_t adScale, int32x4_t b, float32x4_t bdScale, float32x4_t term)
+        {
+            float32x4_t fa = vmlaq_f32(term, vcvtq_f32_s32(a), adScale);
+            return vcvtnq_s32_f32(vmlaq_f32(fa, vcvtq_f32_s32(b), bdScale));
+        }
+
+        SIMD_INLINE void QuantizedAdd8u8u8u1(const uint8_t* a, float32x4_t adScale, const uint8_t* b, float32x4_t bdScale, float32x4_t term, uint8_t* dst)
+        {
+            int32x4_t d0 = QuantizedAdd(vdupq_n_s32(a[0]), adScale, vdupq_n_s32(b[0]), bdScale, term);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vdup_n_s16(0)));
+            dst[0] = vget_lane_u8(u8, 0);
+        }
+
+        SIMD_INLINE void QuantizedAdd8u8u8u4(const uint8_t* a, float32x4_t adScale, const uint8_t* b, float32x4_t bdScale, float32x4_t term, uint8_t* dst)
+        {
+            uint8x8_t a8 = vreinterpret_u8_u32(vdup_n_u32(*(const uint32_t*)a));
+            uint8x8_t b8 = vreinterpret_u8_u32(vdup_n_u32(*(const uint32_t*)b));
+            int32x4_t a32 = vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(a8))));
+            int32x4_t b32 = vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(b8))));
+            int32x4_t d0 = QuantizedAdd(a32, adScale, b32, bdScale, term);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vdup_n_s16(0)));
+            vst1_lane_u32((uint32_t*)dst, vreinterpret_u32_u8(u8), 0);
+        }
+
+        SIMD_INLINE void QuantizedAdd8u8u8u16(const uint8_t* a, float32x4_t adScale, const uint8_t* b, float32x4_t bdScale, float32x4_t term, uint8_t* dst)
+        {
+            uint8x16_t a8 = vld1q_u8(a);
+            uint8x16_t b8 = vld1q_u8(b);
+            uint16x8_t a16lo = vmovl_u8(vget_low_u8(a8)), a16hi = vmovl_u8(vget_high_u8(a8));
+            uint16x8_t b16lo = vmovl_u8(vget_low_u8(b8)), b16hi = vmovl_u8(vget_high_u8(b8));
+            int32x4_t d0 = QuantizedAdd(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(a16lo))), adScale, vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(b16lo))), bdScale, term);
+            int32x4_t d1 = QuantizedAdd(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(a16lo))), adScale, vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(b16lo))), bdScale, term);
+            int32x4_t d2 = QuantizedAdd(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(a16hi))), adScale, vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(b16hi))), bdScale, term);
+            int32x4_t d3 = QuantizedAdd(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(a16hi))), adScale, vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(b16hi))), bdScale, term);
+            vst1q_u8(dst, vcombine_u8(
+                vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vqmovn_s32(d1))),
+                vqmovun_s16(vcombine_s16(vqmovn_s32(d2), vqmovn_s32(d3)))));
+        }
+    }
+#endif
 }
 
 #endif
