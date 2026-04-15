@@ -362,6 +362,17 @@ namespace Simd
                     }
                 }
                 if (size == 0)
+                {
+                    ::FILE* p = ::popen("lscpu -C=ONE-SIZE -B | sed -n '4p'", "r");
+                    if (p)
+                    {
+                        char buffer[PATH_MAX];
+                        while (::fgets(buffer, PATH_MAX, p));
+                        size = ::atoi(buffer);
+                        ::pclose(p);
+                    }
+                }
+                if (size == 0)
                     size = 256 * 1024;
                 break;
             }
@@ -375,6 +386,17 @@ namespace Simd
                 if (size == 0)
                 {
                     ::FILE* p = ::popen("getconf -a | grep LEVEL3_CACHE_SIZE | grep -oE '[^ ]+$'", "r");
+                    if (p)
+                    {
+                        char buffer[PATH_MAX];
+                        while (::fgets(buffer, PATH_MAX, p));
+                        size = ::atoi(buffer);
+                        ::pclose(p);
+                    }
+                }
+                if (size == 0)
+                {
+                    ::FILE* p = ::popen("lscpu -C=ONE-SIZE -B | sed -n '5p'", "r");
                     if (p)
                     {
                         char buffer[PATH_MAX];
