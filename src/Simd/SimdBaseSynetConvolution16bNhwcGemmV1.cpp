@@ -278,8 +278,8 @@ namespace Simd
         bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
         {
 #if !defined(SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE)            
-            const size_t K = p.srcC * p.kernelX * p.kernelY;
-            return 1 && p.dstH * p.dstW >= 16 && K >= 32 && K <= 128 && p.IsKernel(1);
+            const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.batch * p.dstH * p.dstW;
+            return 1 && M >= 16 && K >= 32 && K <= 128 && p.IsKernel(1);
 #else
             return false;
 #endif        
