@@ -329,6 +329,17 @@ namespace Simd
                     }
                 }
                 if (size == 0)
+                {
+                    ::FILE* p = ::popen("lscpu -C=ONE-SIZE -B | sed -n '2p'", "r");
+                    if (p)
+                    {
+                        char buffer[PATH_MAX];
+                        while (::fgets(buffer, PATH_MAX, p));
+                        size = ::atoi(buffer);
+                        ::pclose(p);
+                    }
+                }
+                if (size == 0)
                     size = 32 * 1024;
                 break;
             }
