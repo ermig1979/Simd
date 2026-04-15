@@ -5313,7 +5313,7 @@ SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t c
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetConvert8uTo32fPtr) (const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvert8uTo32fPtr simdSynetConvert8uTo32f = SIMD_FUNC3(SynetConvert8uTo32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_NEON_FUNC);
+    const static SimdSynetConvert8uTo32fPtr simdSynetConvert8uTo32f = SIMD_FUNC4(SynetConvert8uTo32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetConvert8uTo32f(src, batch, channels, height, width, format, scale, shift, dst, compatibility);
 #else
