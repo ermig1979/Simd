@@ -377,7 +377,7 @@ namespace Simd
 
         SIMD_INLINE void DequantizeLinear1(const uint8_t* src, int32x4_t bias, float32x4_t norm, float* dst)
         {
-            int32x4_t _src = vdupq_n_s32(src[0]);
+            int32x4_t _src = vreinterpretq_s32_u32(vdupq_n_u32((uint32_t)src[0]));
             dst[0] = vgetq_lane_f32(DequantizeLinear(_src, bias, norm), 0);
         }
 
