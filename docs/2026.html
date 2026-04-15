@@ -59,6 +59,16 @@
  <li>NEON optimizations of function SynetNormalizeLayerForwardV2.</li>
  <li>NEON optimizations of function SynetNormalizeLayerForwardV3.</li>
  <li>NEON optimizations of function SynetNormalizeLayerForwardV4.</li>
+ <li>NEON optimizations of function SynetAdd8i.</li>
+ <li>NEON optimizations of function SynetConvert8uTo32f.</li>
+ <li>NEON optimizations of function SynetDequantizeLinear.</li>
+ <li>NEON optimizations of function SynetQuantizeLinear.</li>
+ <li>NEON optimizations of class SynetQuantizedAdd.</li>
+ <li>NEON optimizations of function SynetQuantizedConcatLayerForward.</li>
+ <li>NEON optimizations of function SynetQuantizedPreluLayerForward.</li>
+ <li>NEON optimizations of function SynetQuantizedScaleLayerForward.</li>
+ <li>NEON optimizations of function SynetQuantizedShuffleLayerForward.</li>
+ <li>NEON optimizations of class SynetScale8i.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -69,6 +79,7 @@
  <li>Wrong assert condition in function Simd::Uyvy422ToBgr.</li>
  <li>Wrong assert condition in function Simd::Uyvy422ToYuv420p.</li>
  <li>Wrong assert condition in function Simd::Yuv420pToUyvy422.</li>
+ <li>Error in function Base::CpuCacheSize on ARM64 platform.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -90,7 +101,7 @@
 <h5>New features</h5>
 <ul>
  <li>Job build_and_test_arm64 in Github actions script for CMake.</li>
-</ul>
+ <li>test.yml github action to test dev branch</li>
 
 <h4>Documentation</h4>
 <h5>Bug fixing</h5>

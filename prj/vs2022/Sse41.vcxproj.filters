@@ -472,12 +472,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample.cpp">
-      <Filter>Sse41\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample2d32fBlZ.cpp">
-      <Filter>Sse41\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPermute.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
@@ -507,6 +501,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetSoftmax32f.cpp">
       <Filter>Sse41\Synet\Softmax</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample.cpp">
+      <Filter>Sse41\Synet\GridSample</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample2d32fBlZ.cpp">
+      <Filter>Sse41\Synet\GridSample</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -575,6 +575,9 @@
     </Filter>
     <Filter Include="Sse41\Synet\Softmax">
       <UniqueIdentifier>{ed08cb07-9bc1-4386-a759-c6398c2116ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\GridSample">
+      <UniqueIdentifier>{091bda5a-e613-4505-9ebc-b93add6f7274}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

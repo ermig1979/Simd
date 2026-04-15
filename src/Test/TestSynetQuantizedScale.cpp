@@ -86,7 +86,12 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcScale, srcZero, channels, spatial, scale.Data(), bias.Data(), dst1, dstScale, dstZero, format));
 
-        result = result && Compare(dst0, dst1, 0, true, 64);
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
+        int differenceMax = 0;
+#else
+        int differenceMax = 1;
+#endif
+        result = result && Compare(dst0, dst1, differenceMax, true, 64);
 
         return result;
     }

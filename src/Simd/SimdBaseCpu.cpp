@@ -305,43 +305,116 @@ namespace Simd
             return value ? value : otherwise;
         }
 
-#if defined(_SC_LEVEL1_DCACHE_SIZE) && defined(_SC_LEVEL2_CACHE_SIZE) && defined(_SC_LEVEL3_CACHE_SIZE)
         size_t CpuCacheSize(size_t level)
         {
+            ptrdiff_t size = 0;
             switch (level)
             {
             case 1:
             {
-                const size_t sz = ::sysconf(_SC_LEVEL1_DCACHE_SIZE) < 0 ? 0 : ::sysconf(_SC_LEVEL1_DCACHE_SIZE);
-                return CorrectIfZero(sz, 32 * 1024);
+#if defined(_SC_LEVEL1_DCACHE_SIZE)
+                size = ::sysconf(_SC_LEVEL1_DCACHE_SIZE);
+                if (size < 0)
+                    size = 0;
+#endif
+                if (size == 0)
+                {
+                    ::FILE* p = ::popen("getconf -a | grep LEVEL1_DCACHE_SIZE | grep -oE '[^ ]+$'", "r");
+                    if (p)
+                    {
+                        char buffer[PATH_MAX];
+                        while (::fgets(buffer, PATH_MAX, p));
+                        size = ::atoi(buffer);
+                        ::pclose(p);
+                    }
+                }
+                if (size == 0)
+                {
+                    ::FILE* p = ::popen("lscpu -C=ONE-SIZE -B | sed -n '2p'", "r");
+                    if (p)
+                    {
+                        char buffer[PATH_MAX];
+                        while (::fgets(buffer, PATH_MAX, p));
+                        size = ::atoi(buffer);
+                        ::pclose(p);
+                    }
+                }
+                if (size == 0)
+                    size = 32 * 1024;
+                break;
             }
             case 2:
             {
-                const size_t sz = ::sysconf(_SC_LEVEL2_CACHE_SIZE) < 0 ? 0 : ::sysconf(_SC_LEVEL2_CACHE_SIZE);
-                return CorrectIfZero(sz, 256 * 1024);
+#if defined(_SC_LEVEL2_CACHE_SIZE)
+                size = ::sysconf(_SC_LEVEL2_CACHE_SIZE);
+                if (size < 0)
+                    size = 0;
+#endif
+                if (size == 0)
+                {
+                    ::FILE* p = ::popen("getconf -a | grep LEVEL2_CACHE_SIZE | grep -oE '[^ ]+$'", "r");
+                    if (p)
+                    {
+                        char buffer[PATH_MAX];
+                        while (::fgets(buffer, PATH_MAX, p));
+                        size = ::atoi(buffer);
+                        ::pclose(p);
+                    }
+                }
+                if (size == 0)
+                {
+                    ::FILE* p = ::popen("lscpu -C=ONE-SIZE -B | sed -n '4p'", "r");
+                    if (p)
+                    {
+                        char buffer[PATH_MAX];
+                        while (::fgets(buffer, PATH_MAX, p));
+                        size = ::atoi(buffer);
+                        ::pclose(p);
+                    }
+                }
+                if (size == 0)
+                    size = 256 * 1024;
+                break;
             }
             case 3:
             {
-                const size_t sz = ::sysconf(_SC_LEVEL3_CACHE_SIZE) < 0 ? 0 : ::sysconf(_SC_LEVEL3_CACHE_SIZE);
-                return CorrectIfZero(sz, 2048 * 1024);
-            }
-            default:
-                return 0;
-            }
-        }
-#else
-        size_t CpuCacheSize(size_t level)
-        {
-            switch (level)
-            {
-            case 1: return 32 * 1024;
-            case 2: return 256 * 1024;
-            case 3: return 2048 * 1024;
-            default:
-                return 0;
-            }
-        }
+#if defined(_SC_LEVEL3_CACHE_SIZE)
+                size = ::sysconf(_SC_LEVEL3_CACHE_SIZE);
+                if (size < 0)
+                    size = 0;
 #endif
+                if (size == 0)
+                {
+                    ::FILE* p = ::popen("getconf -a | grep LEVEL3_CACHE_SIZE | grep -oE '[^ ]+$'", "r");
+                    if (p)
+                    {
+                        char buffer[PATH_MAX];
+                        while (::fgets(buffer, PATH_MAX, p));
+                        size = ::atoi(buffer);
+                        ::pclose(p);
+                    }
+                }
+                if (size == 0)
+                {
+                    ::FILE* p = ::popen("lscpu -C=ONE-SIZE -B | sed -n '5p'", "r");
+                    if (p)
+                    {
+                        char buffer[PATH_MAX];
+                        while (::fgets(buffer, PATH_MAX, p));
+                        size = ::atoi(buffer);
+                        ::pclose(p);
+                    }
+                }
+                if (size == 0)
+                    size = 2048 * 1024;
+                break;
+            }
+            default:
+                return 0;
+            }
+            return size;
+        }
+
         uint64_t CpuRamSize()
         {
             uint64_t size = 0;
