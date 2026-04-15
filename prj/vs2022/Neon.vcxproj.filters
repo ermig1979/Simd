@@ -229,72 +229,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonStretchGray2x2.cpp">
       <Filter>Neon\Resize</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetActivation.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution8i.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32f.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNchw.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fGemm.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDepthwise.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2f.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2r.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect3r.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect4r.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution32f.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCd.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCdc.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fDc.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetPermute.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetUnaryOperation.cpp">
-      <Filter>Neon\Synet</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd1.cpp">
       <Filter>Neon\Math</Filter>
     </ClCompile>
@@ -340,6 +274,93 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp">
       <Filter>Neon\Motion</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution8i.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32f.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNchw.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fGemm.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDepthwise.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2f.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2r.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect3r.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect4r.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCd.cpp">
+      <Filter>Neon\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCdc.cpp">
+      <Filter>Neon\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fDc.cpp">
+      <Filter>Neon\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetActivation.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution32f.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetPermute.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetUnaryOperation.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedActivation.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedAdd.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConcat.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedScale.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedShuffle.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizeLinear.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetScale.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Neon">
@@ -383,6 +404,18 @@
     </Filter>
     <Filter Include="Neon\Synet">
       <UniqueIdentifier>{8890cf8b-7e4e-47fe-8ac6-852fac5a2f11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Neon\Synet\Convolution">
+      <UniqueIdentifier>{7f6ff01c-4656-47e4-b1aa-ef2187741143}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Neon\Synet\MergedConvolution">
+      <UniqueIdentifier>{dc461725-566b-42a3-8d98-3c0314da5e6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Neon\Synet\Quantized">
+      <UniqueIdentifier>{1ecb6b0f-87a4-41c3-9f12-7a2c65f56838}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Neon\Synet\Other">
+      <UniqueIdentifier>{70d03600-18de-48a5-bc25-212969871a71}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -603,6 +636,33 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBgrToLab.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConvert.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGrayToY.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMax.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

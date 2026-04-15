@@ -118,6 +118,13 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fDc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedActivation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedAdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConcat.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedScale.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedShuffle.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizeLinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetUnaryOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonTransform.cpp" />
@@ -144,10 +151,12 @@
     <ClInclude Include="..\..\src\Simd\SimdBase64.h" />
     <ClInclude Include="..\..\src\Simd\SimdBayer.h" />
     <ClInclude Include="..\..\src\Simd\SimdBFloat16.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBgrToLab.h" />
     <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConvert.h" />
     <ClInclude Include="..\..\src\Simd\SimdCopy.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
@@ -162,6 +171,7 @@
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGrayToY.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSaveJpeg.h" />
@@ -172,6 +182,7 @@
     <ClInclude Include="..\..\src\Simd\SimdLoadBlock.h" />
     <ClInclude Include="..\..\src\Simd\SimdLog.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMax.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemoryStream.h" />
     <ClInclude Include="..\..\src\Simd\SimdNeon.h" />
@@ -200,6 +211,11 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTransform.h" />
     <ClInclude Include="..\..\src\Simd\SimdTranspose.h" />
