@@ -298,8 +298,8 @@ namespace Simd
             static int choise = 1;
             size_t K = p.srcC * p.kernelX * p.kernelY;
             return p.trans != 0 && p.group == 1 
-                && (p.Is1x1() || (Aligned(p.srcC, 32))) 
-                && K > 128 && 1;// ((choise++) & 1);
+                && (!p.IsKernel(1) || K < 32 || K > 128)
+                && 1;// ((choise++) & 1);
         }
     }
 #endif

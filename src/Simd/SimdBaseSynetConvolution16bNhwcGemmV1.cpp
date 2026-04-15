@@ -279,7 +279,7 @@ namespace Simd
         {
 #if !defined(SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE)            
             const size_t K = p.srcC * p.kernelX * p.kernelY;
-            return 1 && p.dstH * p.dstW >= 16 && K >= 32 && K <= 128 && Is1x1(p);
+            return 1 && p.dstH * p.dstW >= 16 && K >= 32 && K <= 128 && p.IsKernel(1);
 #else
             return false;
 #endif        
