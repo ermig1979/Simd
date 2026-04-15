@@ -6693,7 +6693,7 @@ SIMD_API void SimdSynetQuantizeLinear(const float* src, size_t size, const float
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizeLinearPtr) (const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
-    const static SimdSynetQuantizeLinearPtr simdSynetQuantizeLinear = SIMD_FUNC3(SynetQuantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetQuantizeLinearPtr simdSynetQuantizeLinear = SIMD_FUNC4(SynetQuantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizeLinear(src, size, norm, zero, dst);
 #else

@@ -503,6 +503,8 @@ namespace Simd
 
         void SynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
 
+        void SynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
+
         void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
 
         void SynetElu32f(const float * src, size_t size, const float * alpha, float * dst);

@@ -57,6 +57,21 @@ namespace Simd
             for (; i < size; i += 1)
                 DequantizeLinear1(src + i, _bias, _norm, dst + i);
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        void SynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst)
+        {
+            float32x4_t _norm = vdupq_n_f32(norm[0]);
+            int32x4_t _zero = vdupq_n_s32(zero);
+            size_t i = 0, size4 = AlignLo(size, 4), size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+                QuantizeLinear16(src + i, _norm, _zero, dst + i);
+            for (; i < size4; i += 4)
+                QuantizeLinear4(src + i, _norm, _zero, dst + i);
+            for (; i < size; i += 1)
+                QuantizeLinear1(src + i, _norm, _zero, dst + i);
+        }
     }
 #endif
 }
