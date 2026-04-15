@@ -114,6 +114,11 @@ namespace Test
             result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Avx512bw::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetDequantizeLinearAutoTest(FUNC_DL(Simd::Neon::SynetDequantizeLinear), FUNC_DL(SimdSynetDequantizeLinear));
+#endif
+
         return result;
     }
 

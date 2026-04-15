@@ -370,6 +370,23 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        SIMD_INLINE float32x4_t DequantizeLinear(int32x4_t value, int32x4_t bias, float32x4_t norm)
+        {
+            return vmulq_f32(vcvtq_f32_s32(vaddq_s32(value, bias)), norm);
+        }
+
+        SIMD_INLINE void DequantizeLinear1(const uint8_t* src, int32x4_t bias, float32x4_t norm, float* dst)
+        {
+            int32x4_t _src = vdupq_n_s32(src[0]);
+            dst[0] = vgetq_lane_f32(DequantizeLinear(_src, bias, norm), 0);
+        }
+
+        SIMD_INLINE void DequantizeLinear4(const uint8_t* src, int32x4_t bias, float32x4_t norm, float* dst)
+        {
+            uint8x8_t u8 = vreinterpret_u8_u32(vdup_n_u32(*(const uint32_t*)src));
+            int32x4_t i32 = vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(u8))));
+            vst1q_f32(dst, DequantizeLinear(i32, bias, norm));
+        }
     }
 #endif
 }
