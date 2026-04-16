@@ -304,7 +304,7 @@ namespace Simd
             const size_t M = p.dstH * p.dstW;
             static int choise = 0;
             return 1 && p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) && p.dstC >= 4
-                && p.srcC >= 9 && p.srcC <= 128 && M >= 16;// && (choise++) & 0;
+                && p.srcC >= 4 && p.srcC <= 128 && M >= 16;// && (choise++) & 0;
         }
     }
 #endif

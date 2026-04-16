@@ -391,12 +391,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetPooling.cpp">
       <Filter>Base\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale.cpp">
-      <Filter>Base\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale16b.cpp">
-      <Filter>Base\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetUnaryOperation.cpp">
       <Filter>Base\Synet\Other</Filter>
     </ClCompile>
@@ -471,6 +465,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcGemmV2.cpp">
       <Filter>Base\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale.cpp">
+      <Filter>Base\Synet\Scale</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale16b.cpp">
+      <Filter>Base\Synet\Scale</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -856,6 +856,9 @@
     </Filter>
     <Filter Include="Base\Synet\Softmax">
       <UniqueIdentifier>{c4df5a95-1cea-4d8d-aa1d-94813a69eb18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base\Synet\Scale">
+      <UniqueIdentifier>{0bf20606-4515-4339-bffc-2010b668c587}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
