@@ -89,6 +89,36 @@ namespace Simd
             _mm512_mask_storeu_epi16(dst, tail, Float32ToBFloat16Interlived(dstE, dstO));
         }
 
+        template <typename S, typename D> void NormBias16bDF(const S* src, const __m512& norm0, const __m512& bias0, const __m512& norm1, const __m512& bias1, D* dst, __mmask32 tail, __mmask16 tail0, __mmask16 tail1);
+
+        template <> SIMD_INLINE void NormBias16bDF(const float* src, const __m512& norm0, const __m512& bias0, const __m512& norm1, const __m512& bias1, float* dst, __mmask32 tail, __mmask16 tail0, __mmask16 tail1)
+        {
+            _mm512_mask_storeu_ps(dst + 0, tail0, _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail0, src + 0), norm0, bias0));
+            _mm512_mask_storeu_ps(dst + F, tail1, _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail1, src + F), norm1, bias1));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, const __m512& norm0, const __m512& bias0, const __m512& norm1, const __m512& bias1, float* dst, __mmask32 tail, __mmask16 tail0, __mmask16 tail1)
+        {
+            __m512i _src = _mm512_maskz_loadu_epi16(tail, src);
+            _mm512_mask_storeu_ps(dst + 0, tail0, _mm512_fmadd_ps(BFloat16ToFloat32<0>(_src), norm0, bias0));
+            _mm512_mask_storeu_ps(dst + F, tail1, _mm512_fmadd_ps(BFloat16ToFloat32<1>(_src), norm1, bias1));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const float* src, const __m512& norm0, const __m512& bias0, const __m512& norm1, const __m512& bias1, uint16_t* dst, __mmask32 tail, __mmask16 tail0, __mmask16 tail1)
+        {
+            __m512 dst0 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail0, src + 0), norm0, bias0);
+            __m512 dst1 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail1, src + F), norm1, bias1);
+            _mm512_mask_storeu_epi16(dst, tail, Float32ToBFloat16(dst0, dst1));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, const __m512& norm0, const __m512& bias0, const __m512& norm1, const __m512& bias1, uint16_t* dst, __mmask32 tail, __mmask16 tail0, __mmask16 tail1)
+        {
+            __m512i _src = _mm512_maskz_loadu_epi16(tail, src);
+            __m512 dst0 = _mm512_fmadd_ps(BFloat16ToFloat32<0>(_src), norm0, bias0);
+            __m512 dst1 = _mm512_fmadd_ps(BFloat16ToFloat32<1>(_src), norm1, bias1);
+            _mm512_mask_storeu_epi16(dst, tail, Float32ToBFloat16(dst0, dst1));
+        }
+
         template<class S, class D> void SynetNormBias16b(const uint8_t* src8, size_t channels, size_t spatial, SimdTensorFormatType format, const float* norm, const float* bias, uint8_t* dst8)
         {
             const S* src = (const S*)src8;
@@ -113,18 +143,48 @@ namespace Simd
             }
             else if (format == SimdTensorFormatNhwc)
             {
-                size_t channelsDF = AlignLo(channels, DF);
-                __mmask32 tail = TailMask32(channels - channelsDF);
-                __mmask16 tail0 = TailMask16(channels - channelsDF), tail1 = TailMask16(channels - channelsDF - F);
-                for (size_t s = 0; s < spatial; ++s)
+                if (channels == 3)
                 {
-                    size_t c = 0;
-                    for (; c < channelsDF; c += DF)
-                        NormBias16bDF<S, D>(src + c, norm + c, bias + c, dst + c, __mmask32(-1), __mmask16(-1), __mmask16(-1));
-                    if (c < channels)
-                        NormBias16bDF<S, D>(src + c, norm + c, bias + c, dst + c, tail, tail0, tail1);
-                    src += channels;
-                    dst += channels;
+                    size_t spatialDF = AlignLo(spatial, DF) * 3;
+                    spatial *= 3;
+                    __m512 _norm[3];
+                    _norm[0] = _mm512_setr_ps(norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0]);
+                    _norm[1] = _mm512_setr_ps(norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1]);
+                    _norm[2] = _mm512_setr_ps(norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2]);
+                    __m512 _bias[3];
+                    _bias[0] = _mm512_setr_ps(bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0]);
+                    _bias[1] = _mm512_setr_ps(bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1]);
+                    _bias[2] = _mm512_setr_ps(bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2]);
+                    __mmask32 tail = __mmask32(-1);
+                    __mmask16 tail0 = __mmask16(-1), tail1 = __mmask16(-1);
+                    size_t s = 0;
+                    for (; s < spatialDF; s += 3 * DF)
+                    {
+                        NormBias16bDF<S, D>(src + s + 0 * DF, _norm[0], _bias[0], _norm[1], _bias[1], dst + s + 0 * DF, tail, tail0, tail1);
+                        NormBias16bDF<S, D>(src + s + 1 * DF, _norm[2], _bias[2], _norm[0], _bias[0], dst + s + 1 * DF, tail, tail0, tail1);
+                        NormBias16bDF<S, D>(src + s + 2 * DF, _norm[1], _bias[1], _norm[2], _bias[2], dst + s + 2 * DF, tail, tail0, tail1);
+                    }
+                    for (size_t t = 0; s < spatial; s += DF, t += 2)
+                    {
+                        tail = TailMask32(spatial - s), tail0 = TailMask16(spatial - s), tail1 = TailMask16(spatial - s - F);
+                        NormBias16bDF<S, D>(src + s, _norm[(t + 0) % 3], _bias[(t + 0) % 3], _norm[(t + 1) % 3], _bias[(t + 1) % 3], dst + s, tail, tail0, tail1);
+                    }
+                }
+                else
+                {
+                    size_t channelsDF = AlignLo(channels, DF);
+                    __mmask32 tail = TailMask32(channels - channelsDF);
+                    __mmask16 tail0 = TailMask16(channels - channelsDF), tail1 = TailMask16(channels - channelsDF - F);
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t c = 0;
+                        for (; c < channelsDF; c += DF)
+                            NormBias16bDF<S, D>(src + c, norm + c, bias + c, dst + c, __mmask32(-1), __mmask16(-1), __mmask16(-1));
+                        if (c < channels)
+                            NormBias16bDF<S, D>(src + c, norm + c, bias + c, dst + c, tail, tail0, tail1);
+                        src += channels;
+                        dst += channels;
+                    }
                 }
             }
             else
