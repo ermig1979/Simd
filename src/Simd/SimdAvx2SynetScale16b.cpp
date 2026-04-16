@@ -170,11 +170,14 @@ namespace Simd
                 else if (channels == 8)
                 {
                     spatial *= 8;
+                    size_t spatialDF = AlignLo(spatial, DF);
                     __m256 _norm = _mm256_loadu_ps(norm);
                     __m256 _bias = _mm256_loadu_ps(bias);
                     size_t s = 0;
-                    for (; s < spatial; s += DF)
+                    for (; s < spatialDF; s += DF)
                         NormBias16bDF<S, D>(src + s, _norm, _bias, _norm, _bias, dst + s);
+                    for (size_t t = 0; s < spatial; s += 1, t += 1)
+                        Base::NormBias16b<S, D>(src[s], norm[t], bias[t], dst[s]);
                 }
                 else
                 {

@@ -170,6 +170,22 @@ namespace Simd
                         NormBias16bDF<S, D>(src + s, _norm[(t + 0) % 3], _bias[(t + 0) % 3], _norm[(t + 1) % 3], _bias[(t + 1) % 3], dst + s, tail, tail0, tail1);
                     }
                 }
+                else if (channels == 8)
+                {
+                    spatial *= 8;
+                    size_t spatialDF = AlignLo(spatial, DF);
+                    __m512 _norm = Load<false>(norm, norm);
+                    __m512 _bias = Load<false>(bias, bias);
+                    size_t s = 0;
+                    for (; s < spatialDF; s += DF)
+                        NormBias16bDF<S, D>(src + s, _norm, _bias, _norm, _bias, dst + s, __mmask32(-1), __mmask16(-1), __mmask16(-1));
+                    if (s < spatial)
+                    {
+                        __mmask32 tail = TailMask32(spatial - spatialDF);
+                        __mmask16 tail0 = TailMask16(spatial - spatialDF), tail1 = TailMask16(spatial - spatialDF - F);
+                        NormBias16bDF<S, D>(src + s, _norm, _bias, _norm, _bias, dst + s, tail, tail0, tail1);
+                    }
+                }
                 else
                 {
                     size_t channelsDF = AlignLo(channels, DF);
