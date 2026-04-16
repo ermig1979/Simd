@@ -394,12 +394,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp">
       <Filter>Avx2\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp">
-      <Filter>Avx2\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale16b.cpp">
-      <Filter>Avx2\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetUnaryOperation.cpp">
       <Filter>Avx2\Synet\Other</Filter>
     </ClCompile>
@@ -492,6 +486,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2Interleave.cpp">
       <Filter>Avx2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp">
+      <Filter>Avx2\Synet\Scale</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale16b.cpp">
+      <Filter>Avx2\Synet\Scale</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -877,6 +877,9 @@
     </Filter>
     <Filter Include="Avx2\Synet\InnerProduct">
       <UniqueIdentifier>{617371e8-07e1-472a-91e3-e281f152f0a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\Scale">
+      <UniqueIdentifier>{6113d8a6-e8f0-41a4-b375-7c1f7491f66d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
