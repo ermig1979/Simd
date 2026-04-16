@@ -173,7 +173,7 @@ namespace Simd
                     __m128 _norm[2];
                     _norm[0] = _mm_loadu_ps(norm + 0);
                     _norm[1] = _mm_loadu_ps(norm + F);
-                    __m128 _bias[3];
+                    __m128 _bias[2];
                     _bias[0] = _mm_loadu_ps(bias + 0);
                     _bias[1] = _mm_loadu_ps(bias + F);
                     size_t s = 0;

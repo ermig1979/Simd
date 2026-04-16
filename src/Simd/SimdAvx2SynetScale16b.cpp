@@ -167,6 +167,15 @@ namespace Simd
                         Base::NormBias16b<S, D>(src[s + 2], norm[2], bias[2], dst[s + 2]);
                     }
                 }
+                else if (channels == 8)
+                {
+                    spatial *= 8;
+                    __m256 _norm = _mm256_loadu_ps(norm);
+                    __m256 _bias = _mm256_loadu_ps(bias);
+                    size_t s = 0;
+                    for (; s < spatial; s += DF)
+                        NormBias16bDF<S, D>(src + s, _norm, _bias, _norm, _bias, dst + s);
+                }
                 else
                 {
                     size_t channelsDF = AlignLo(channels, DF);

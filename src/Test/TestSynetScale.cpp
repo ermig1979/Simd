@@ -437,6 +437,10 @@ namespace Test
         const SimdBool t = SimdTrue, f = SimdFalse;
 
 #if 1
+        result = result && SynetScale16bAutoTest(16, 28 * 24, b16, b16, nhwc, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(16, 28 * 24, f32, b16, nhwc, t, t, f1, f2);
+        result = result && SynetScale16bAutoTest(16, 28 * 24, b16, b16, nchw, t, t, f1, f2);
+
         result = result && SynetScale16bAutoTest(3, 112 * 96, b16, b16, nhwc, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(3, 112 * 96, b16, b16, nchw, t, t, f1, f2);
 
