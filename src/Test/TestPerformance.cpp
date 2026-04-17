@@ -248,6 +248,7 @@ namespace Test
         T avx512vnni;
         T amxBf16;
         T neon;
+        T sve1;
 
         size_t Size() const { return sizeof(Statistic) / sizeof(T); };
         T & operator [] (size_t i) { return (&simd)[i]; }
@@ -298,6 +299,8 @@ namespace Test
             AddToFunction(src, dst.amxBf16, enable.amxBf16);
         if (desc.find("Simd::Neon::") != std::string::npos)
             AddToFunction(src, dst.neon, enable.neon);
+        if (desc.find("Simd::Sve1::") != std::string::npos)
+            AddToFunction(src, dst.sve1, enable.sve1);
     }
 
     static inline const Function & Cond(const Function & a, const Function & b)
@@ -321,6 +324,7 @@ namespace Test
         if (enable.avx512vnni) Add(Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base)))), d.avx512vnni);
         if (enable.amxBf16) Add(Cond(s.amxBf16, Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base))))), d.amxBf16);
         if (enable.neon) Add(Cond(s.neon, s.base), d.neon);
+        if (enable.sve1) Add(Cond(s.sve1, Cond(s.neon, s.base)), d.sve1);
     }
 
 	static void AddHeader(Table & table, const StatisticNames & names, const StatisticEnable & enable, bool align)
@@ -398,8 +402,8 @@ namespace Test
 
         FunctionStatisticMap functions;
         CommonStatistic common;
-        StatisticEnable enable = { false, false, false, false, false, false, false, false};
-        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse41", "S4" },{ "Avx2", "A2" },{ "Avx5b", "A5" },{ "Vnni", "Vn" },{ "Amx", "Am" },{ "Neon", "Ne" } };
+        StatisticEnable enable = { false, false, false, false, false, false, false, false, false};
+        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse41", "S4" },{ "Avx2", "A2" },{ "Avx5b", "A5" },{ "Vnni", "Vn" },{ "Amx", "Am" },{ "Neon", "Ne" }, { "Sve", "S1" } };
         double timeMax = 0;
         for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
@@ -470,6 +474,7 @@ namespace Test
         info << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA AVX" : "");
         info << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3 SSE2 SSE" : "");
         info << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
+        info << (SimdCpuInfo(SimdCpuInfoSve) ? " SVE" : "");
         info << ".";
 
         return info.str();
