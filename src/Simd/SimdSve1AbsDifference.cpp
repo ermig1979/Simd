@@ -38,11 +38,11 @@ namespace Simd
             {
                 for (size_t col = 0; col < width; col += step)
                 {
-                    const svbool_t mask = svwhilelt_b32(col, width);
-                    const auto _a = svld1(mask, a + col);
-                    const auto _b = svld1(mask, b + col);
-                    const auto _c = svabd_z(mask, _a, _b);
-                    svst1(mask, c + col, _c);
+                    const svbool_t mask = svwhilelt_b8(col, width);
+                    svuint8_t _a = svld1_u8(mask, a + col);
+                    svuint8_t _b = svld1_u8(mask, b + col);
+                    svuint8_t _c = svabd_x(mask, _a, _b);
+                    svst1_u8(mask, c + col, _c);
                 }
                 a += aStride;
                 b += bStride;
