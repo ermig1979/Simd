@@ -900,17 +900,9 @@ namespace Test
 
 void TmpTest()
 {
-    //typedef Simd::View<Simd::Allocator> View;
-    //View srcView(256, 192, View::Format::Rgba32);
-    //srcView.Load("grass.jpg", View::Format::Rgba32);
-
-    //View dstView(1028, 1028, View::Format::Rgba32);
-
-    //Simd::Resize(srcView, dstView, SimdResizeMethodType::SimdResizeMethodBilinear);
-
-    //dstView.Save("resized_grass.jpg");
-
-    //exit(0);
+#if !defined(SIMD_SVE_ENABLE)
+    TEST_LOG_SS(Warning, " SIMD_SVE_ENABLE is not defined!");
+#endif
 }
 
 //-------------------------------------------------------------------------------------------------
