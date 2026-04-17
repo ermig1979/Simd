@@ -48,7 +48,6 @@ namespace Simd
 #elif defined(__GNUC__)
             long hwcaps = getauxval(AT_HWCAP);
             return hwcaps & HWCAP_SVE;
-            //return Base::CheckBit(AT_HWCAP, HWCAP_SVE);
 #else
 #error Do not know how to detect SVE support!
 #endif

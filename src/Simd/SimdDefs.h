@@ -228,7 +228,7 @@
 #define SIMD_NEON_FP16_ENABLE
 #endif
 
-#if !defined(SIMD_SVE_DISABLE) && defined(__ARM_FEATURE_SVE) && defined(__ARM_NEON) && defined(__ARM_NEON_FP)
+#if !defined(SIMD_SVE_DISABLE) && defined(__ARM_FEATURE_SVE) && defined(__ARM_NEON)
 #define SIMD_SVE_ENABLE
 #endif
 

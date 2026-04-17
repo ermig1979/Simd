@@ -900,9 +900,7 @@ namespace Test
 
 void TmpTest()
 {
-#if !defined(SIMD_SVE_ENABLE)
-    TEST_LOG_SS(Warning, " SIMD_SVE_ENABLE is not defined!");
-#endif
+
 }
 
 //-------------------------------------------------------------------------------------------------
