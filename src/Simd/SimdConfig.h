@@ -39,6 +39,8 @@
 
 //#define SIMD_NEON_FP16_DISABLE
 
+//#define SIMD_SVE_DISABLE
+
 //#define SIMD_HVX_DISABLE
 
 //#define SIMD_STATIC

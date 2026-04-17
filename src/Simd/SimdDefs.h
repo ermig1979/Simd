@@ -228,6 +228,10 @@
 #define SIMD_NEON_FP16_ENABLE
 #endif
 
+#if !defined(SIMD_SVE_DISABLE) && defined(__ARM_FEATURE_SVE) && defined(__ARM_NEON) && defined(__ARM_NEON_FP)
+#define SIMD_SVE_ENABLE
+#endif
+
 #endif//defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 
 #if defined(SIMD_HEXAGON_ENABLE)
@@ -267,6 +271,10 @@
 
 #if defined(SIMD_NEON_ENABLE)
 #include <arm_neon.h>
+#endif
+
+#if defined(SIMD_SVE_ENABLE)
+#include <arm_sve.h>
 #endif
 
 #if defined(SIMD_HVX_ENABLE)
