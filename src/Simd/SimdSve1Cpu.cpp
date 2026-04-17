@@ -46,7 +46,9 @@ namespace Simd
 #if defined(_MSC_VER)
             return false;
 #elif defined(__GNUC__)
-            return Base::CheckBit(AT_HWCAP, HWCAP_SVE);
+            long hwcaps = getauxval(AT_HWCAP);
+            return hwcaps & HWCAP_SVE;
+            //return Base::CheckBit(AT_HWCAP, HWCAP_SVE);
 #else
 #error Do not know how to detect SVE support!
 #endif
