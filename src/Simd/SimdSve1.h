@@ -33,6 +33,7 @@ namespace Simd
 #ifdef SIMD_SVE_ENABLE
     namespace Sve
     {
+        void AbsDifference(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride, size_t width, size_t height);
     }
 #endif
 }

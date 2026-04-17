@@ -10,6 +10,9 @@
     <Filter Include="Sve1\System">
       <UniqueIdentifier>{33918117-532b-4155-85d8-b634a938c885}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve1\Filter">
+      <UniqueIdentifier>{579a6e24-50bc-403c-ad01-51e0288a6577}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve1.h">
@@ -19,6 +22,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp">
       <Filter>Sve1\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifference.cpp">
+      <Filter>Sve1\Filter</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

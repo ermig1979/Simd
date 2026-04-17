@@ -21,6 +21,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp" />
   </ItemGroup>
   <ItemGroup>
