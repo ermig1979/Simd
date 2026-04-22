@@ -25,11 +25,11 @@ jobs:
         sudo apt-get -y install g++-${{matrix.gcc_version}}
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SVE=ON
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native -march=armv8-a+sve" -DSIMD_SVE=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
       
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ./Test "-r=.." -m=a -tt=0 -ts=5 -mt=1 -w=640 -h=480 -c=256
+      run: ./Test "-r=.." -m=a -tt=4 -ts=5 -mt=1 -w=640 -h=480 -c=256
