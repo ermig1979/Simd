@@ -36,7 +36,7 @@ namespace Simd
     {
         SIMD_INLINE uint32x4_t Encode32f(float32x4_t src, float32x4_t scale, float32x4_t min, uint32x4_t& sum, uint32x4_t& sqsum)
         {
-            uint32x4_t value = RoundPositive(vmulq_f32(vsubq_f32(src, min), scale));
+            uint32x4_t value = vminq_u32(RoundPositive(vmulq_f32(vsubq_f32(src, min), scale)), K32_000000FF);
             sum = vaddq_u32(value, sum);
             sqsum = vmlaq_u32(sqsum, value, value);
             return value;

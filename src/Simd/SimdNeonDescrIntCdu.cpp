@@ -503,5 +503,5 @@ namespace Simd
             return MacroCorrelation;
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }
