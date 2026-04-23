@@ -34,6 +34,7 @@
 #endif
 #include <sstream>
 #include <iostream>
+#include <fstream>
 
 #if defined(_WIN32)
 
@@ -300,9 +301,31 @@ namespace Simd
             return number;
         }
 
-        SIMD_INLINE size_t CorrectIfZero(size_t value, size_t otherwise)
+        size_t CpuCacheSizeFromLscpu(size_t row)
         {
-            return value ? value : otherwise;
+            char buffer[PATH_MAX];
+            ::FILE* pv = ::popen("lscpu -V", "r");
+            if (pv)
+            {
+                while (::fgets(buffer, PATH_MAX, pv));
+                char* beg = buffer;
+                while (beg < buffer + PATH_MAX && *beg++ != '.');
+                size_t ver = ::atoi(beg);
+                ::pclose(pv);
+                if (ver < 34)
+                    return 0;
+            }
+            std::stringstream ss;
+            ss << "lscpu -C=ONE-SIZE -B | sed -n '" << row << "p'";
+            size_t size = 0;
+            ::FILE* pc = ::popen(ss.str().c_str(), "r");
+            if (pc)
+            {
+                while (::fgets(buffer, PATH_MAX, pc));
+                size = ::atoi(buffer);
+                ::pclose(pc);
+            }
+            return size;
         }
 
         size_t CpuCacheSize(size_t level)
@@ -329,16 +352,7 @@ namespace Simd
                     }
                 }
                 if (size == 0)
-                {
-                    ::FILE* p = ::popen("lscpu -C=ONE-SIZE -B | sed -n '2p'", "r");
-                    if (p)
-                    {
-                        char buffer[PATH_MAX];
-                        while (::fgets(buffer, PATH_MAX, p));
-                        size = ::atoi(buffer);
-                        ::pclose(p);
-                    }
-                }
+                    size = CpuCacheSizeFromLscpu(2);
                 if (size == 0)
                     size = 32 * 1024;
                 break;
@@ -362,16 +376,7 @@ namespace Simd
                     }
                 }
                 if (size == 0)
-                {
-                    ::FILE* p = ::popen("lscpu -C=ONE-SIZE -B | sed -n '4p'", "r");
-                    if (p)
-                    {
-                        char buffer[PATH_MAX];
-                        while (::fgets(buffer, PATH_MAX, p));
-                        size = ::atoi(buffer);
-                        ::pclose(p);
-                    }
-                }
+                    size = CpuCacheSizeFromLscpu(4);
                 if (size == 0)
                     size = 256 * 1024;
                 break;
@@ -395,16 +400,7 @@ namespace Simd
                     }
                 }
                 if (size == 0)
-                {
-                    ::FILE* p = ::popen("lscpu -C=ONE-SIZE -B | sed -n '5p'", "r");
-                    if (p)
-                    {
-                        char buffer[PATH_MAX];
-                        while (::fgets(buffer, PATH_MAX, p));
-                        size = ::atoi(buffer);
-                        ::pclose(p);
-                    }
-                }
+                    size = CpuCacheSizeFromLscpu(5);
                 if (size == 0)
                     size = 2048 * 1024;
                 break;

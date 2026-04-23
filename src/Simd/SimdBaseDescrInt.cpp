@@ -682,7 +682,7 @@ namespace Simd
             int sum, sqsum;
             _encode32f(src, scale, min, _size, sum, sqsum, dst + 16);
             ((float*)dst)[2] = float(sum) * invScale + 0.5f * float(_size) * min;
-            ((float*)dst)[3] = ::sqrt(float(sqsum) * invScale * invScale + 2.0f * sum * invScale * min  + float(_size) * min * min);
+            ((float*)dst)[3] = ::sqrt(float(sqsum) * invScale * invScale + 2.0f * sum * invScale * min + float(_size) * min * min);
         }
 
         void DescrInt::Encode16f(const uint16_t* src, uint8_t* dst) const

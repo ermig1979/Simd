@@ -264,16 +264,18 @@ typedef enum
     SimdCpuInfoSockets,/*!< A number of sockets. */
     SimdCpuInfoCores, /*!< A number of physical CPU cores. */
     SimdCpuInfoThreads, /*!< A number of logical CPU cores. */
-    SimdCpuInfoCacheL1, /*!< A size of level 1 data cache. */
-    SimdCpuInfoCacheL2, /*!< A size of level 2 cache. */
-    SimdCpuInfoCacheL3, /*!< A size of level 3 cache. */
-    SimdCpuInfoRam, /*!< A size of physical RAM. */
+    SimdCpuInfoCacheL1, /*!< A size of level 1 data cache in bytes. */
+    SimdCpuInfoCacheL2, /*!< A size of level 2 cache in bytes. */
+    SimdCpuInfoCacheL3, /*!< A size of level 3 cache in bytes. */
+    SimdCpuInfoRam, /*!< A size of physical RAM in bytes. */
     SimdCpuInfoSse41, /*!< Availability of SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2 (x86). */
     SimdCpuInfoAvx2, /*!< Availability of AVX, FMA, AVX2 (x86). */
     SimdCpuInfoAvx512bw, /*!< Availability of AVX-512F, AVX-512BW (x86). */
     SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */
     SimdCpuInfoAmxBf16, /*!< Availability of AVX-512VBMI, AVX-512FP16, AMX-BF16, AMX-INT8 (x86). */
     SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
+    SimdCpuInfoSve, /*!< Availability of SVE (ARM). */
+    SimdCpuInfoSveSize, /*!< A size of SVE (ARM) vector in bytes. */
     SimdCpuInfoHvx, /*!< Availability of HVX (Hexagon). */
     SimdCpuInfoCurrentFrequency, /*!< Gets CPU current frequency (for current CPU core). */
 } SimdCpuInfoType;

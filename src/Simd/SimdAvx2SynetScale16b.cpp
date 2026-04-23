@@ -89,6 +89,36 @@ namespace Simd
             _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16Interlived(dstE, dstO));
         }
 
+        template <typename S, typename D> void NormBias16bDF(const S* src, const __m256& norm0, const __m256& bias0, const __m256& norm1, const __m256& bias1, D* dst);
+
+        template <> SIMD_INLINE void NormBias16bDF(const float* src, const __m256& norm0, const __m256& bias0, const __m256& norm1, const __m256& bias1, float* dst)
+        {
+            _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(_mm256_loadu_ps(src + 0), norm0, bias0));
+            _mm256_storeu_ps(dst + F, _mm256_fmadd_ps(_mm256_loadu_ps(src + F), norm1, bias1));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, const __m256& norm0, const __m256& bias0, const __m256& norm1, const __m256& bias1, float* dst)
+        {
+            __m256i _src = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)src), 0xD8);
+            _mm256_storeu_ps(dst + 0, _mm256_fmadd_ps(BFloat16ToFloat32<0>(_src), norm0, bias0));
+            _mm256_storeu_ps(dst + F, _mm256_fmadd_ps(BFloat16ToFloat32<1>(_src), norm1, bias1));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const float* src, const __m256& norm0, const __m256& bias0, const __m256& norm1, const __m256& bias1, uint16_t* dst)
+        {
+            __m256 dst0 = _mm256_fmadd_ps(_mm256_loadu_ps(src + 0), norm0, bias0);
+            __m256 dst1 = _mm256_fmadd_ps(_mm256_loadu_ps(src + F), norm1, bias1);
+            _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16(dst0, dst1));
+        }
+
+        template <> SIMD_INLINE void NormBias16bDF(const uint16_t* src, const __m256& norm0, const __m256& bias0, const __m256& norm1, const __m256& bias1, uint16_t* dst)
+        {
+            __m256i _src = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)src), 0xD8);
+            __m256 dst0 = _mm256_fmadd_ps(BFloat16ToFloat32<0>(_src), norm0, bias0);
+            __m256 dst1 = _mm256_fmadd_ps(BFloat16ToFloat32<1>(_src), norm1, bias1);
+            _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16(dst0, dst1));
+        }
+
         template<class S, class D> void SynetNormBias16b(const uint8_t* src8, size_t channels, size_t spatial, SimdTensorFormatType format, const float* norm, const float* bias, uint8_t* dst8)
         {
             const S* src = (const S*)src8;
@@ -111,16 +141,57 @@ namespace Simd
             }
             else if (format == SimdTensorFormatNhwc)
             {
-                size_t channelsDF = AlignLo(channels, DF);
-                for (size_t s = 0; s < spatial; ++s)
+                if (channels == 3)
                 {
-                    size_t c = 0;
-                    for (; c < channelsDF; c += DF)
-                        NormBias16bDF<S, D>(src + c, norm + c, bias + c, dst + c);
-                    for (; c < channels; ++c)
-                        Base::NormBias16b<S, D>(src[c], norm[c], bias[c], dst[c]);
-                    src += channels;
-                    dst += channels;
+                    size_t spatialDF = AlignLo(spatial, DF) * 3;
+                    spatial *= 3;
+                    __m256 _norm[3];
+                    _norm[0] = _mm256_setr_ps(norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1]);
+                    _norm[1] = _mm256_setr_ps(norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2], norm[0]);
+                    _norm[2] = _mm256_setr_ps(norm[1], norm[2], norm[0], norm[1], norm[2], norm[0], norm[1], norm[2]);
+                    __m256 _bias[3];
+                    _bias[0] = _mm256_setr_ps(bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1]);
+                    _bias[1] = _mm256_setr_ps(bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2], bias[0]);
+                    _bias[2] = _mm256_setr_ps(bias[1], bias[2], bias[0], bias[1], bias[2], bias[0], bias[1], bias[2]);
+                    size_t s = 0;
+                    for (; s < spatialDF; s += 3 * DF)
+                    {
+                        NormBias16bDF<S, D>(src + s + 0 * DF, _norm[0], _bias[0], _norm[1], _bias[1], dst + s + 0 * DF);
+                        NormBias16bDF<S, D>(src + s + 1 * DF, _norm[2], _bias[2], _norm[0], _bias[0], dst + s + 1 * DF);
+                        NormBias16bDF<S, D>(src + s + 2 * DF, _norm[1], _bias[1], _norm[2], _bias[2], dst + s + 2 * DF);
+                    }
+                    for (; s < spatial; s += 3)
+                    {
+                        Base::NormBias16b<S, D>(src[s + 0], norm[0], bias[0], dst[s + 0]);
+                        Base::NormBias16b<S, D>(src[s + 1], norm[1], bias[1], dst[s + 1]);
+                        Base::NormBias16b<S, D>(src[s + 2], norm[2], bias[2], dst[s + 2]);
+                    }
+                }
+                else if (channels == 8)
+                {
+                    spatial *= 8;
+                    size_t spatialDF = AlignLo(spatial, DF);
+                    __m256 _norm = _mm256_loadu_ps(norm);
+                    __m256 _bias = _mm256_loadu_ps(bias);
+                    size_t s = 0;
+                    for (; s < spatialDF; s += DF)
+                        NormBias16bDF<S, D>(src + s, _norm, _bias, _norm, _bias, dst + s);
+                    for (size_t t = 0; s < spatial; s += 1, t += 1)
+                        Base::NormBias16b<S, D>(src[s], norm[t], bias[t], dst[s]);
+                }
+                else
+                {
+                    size_t channelsDF = AlignLo(channels, DF);
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t c = 0;
+                        for (; c < channelsDF; c += DF)
+                            NormBias16bDF<S, D>(src + c, norm + c, bias + c, dst + c);
+                        for (; c < channels; ++c)
+                            Base::NormBias16b<S, D>(src[c], norm[c], bias[c], dst[c]);
+                        src += channels;
+                        dst += channels;
+                    }
                 }
             }
             else

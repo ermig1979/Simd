@@ -51,6 +51,9 @@
     <ProjectReference Include="Sse41.vcxproj">
       <Project>{50073d4b-e2ef-4fa5-9868-380c4a4dae0c}</Project>
     </ProjectReference>
+    <ProjectReference Include="Sve1.vcxproj">
+      <Project>{60a83864-3250-4b24-a645-624856dfd2b3}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\Test.cpp" />

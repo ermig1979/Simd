@@ -23,15 +23,29 @@ set_source_files_properties(${SIMD_BASE_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_
 file(GLOB_RECURSE SIMD_NEON_SRC ${SIMD_ROOT}/src/Simd/SimdNeon*.cpp)
 set_source_files_properties(${SIMD_NEON_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_NEON_FLAG}")
 
+set(SIMD_LIB_FLAGS "${COMMON_CXX_FLAGS} ${CXX_NEON_FLAG}")
+set(SIMD_ALG_SRC ${SIMD_BASE_SRC} ${SIMD_NEON_SRC})
+
+if(UNIX AND SIMD_SVE)
+	file(GLOB_RECURSE SIMD_SVE_SRC ${SIMD_ROOT}/src/Simd/SimdSve1*.cpp)
+	set_source_files_properties(${SIMD_SVE_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -march=armv8-a+sve -msve-vector-bits=scalable")
+
+	set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -march=armv8-a+sve -msve-vector-bits=scalable")
+	set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_SVE_SRC})
+	if(SIMD_INFO)
+		message("Use SVE")
+	endif()
+endif()
+
 file(GLOB_RECURSE SIMD_LIB_SRC ${SIMD_ROOT}/src/Simd/SimdLib.cpp)
-set_source_files_properties(${SIMD_LIB_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_NEON_FLAG}")
-add_library(Simd ${SIMD_LIB_TYPE} ${SIMD_LIB_SRC} ${SIMD_BASE_SRC} ${SIMD_NEON_SRC})
+set_source_files_properties(${SIMD_LIB_SRC} PROPERTIES COMPILE_FLAGS "${SIMD_LIB_FLAGS}")
+add_library(Simd ${SIMD_LIB_TYPE} ${SIMD_LIB_SRC} ${SIMD_ALG_SRC})
 
 if(SIMD_TEST)
 	file(GLOB_RECURSE TEST_SRC_C ${SIMD_ROOT}/src/Test/*.c)
 	file(GLOB_RECURSE TEST_SRC_CPP ${SIMD_ROOT}/src/Test/*.cpp)
 	if((NOT ${SIMD_TARGET} STREQUAL "") OR (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0"))
-		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_NEON_FLAG} -D_GLIBCXX_USE_NANOSLEEP")
+		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${SIMD_LIB_FLAGS} -D_GLIBCXX_USE_NANOSLEEP")
 	else()
 		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${SIMD_TEST_FLAGS} -mtune=native -D_GLIBCXX_USE_NANOSLEEP")
 	endif()

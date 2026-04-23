@@ -69,6 +69,14 @@
  <li>NEON optimizations of function SynetQuantizedScaleLayerForward.</li>
  <li>NEON optimizations of function SynetQuantizedShuffleLayerForward.</li>
  <li>NEON optimizations of class SynetScale8i.</li>
+ <li>SSE4.1 optimizations of class SynetScale16b.</li>
+ <li>Support of SVE extension (ARM/ARM64 platform).</li>
+ <li>SVE optimizations of function AbsDifference.</li>
+ <li>SimdCpuInfoSveSize member in SimdCpuInfoType enumeration.</li>
+</ul>
+<h5>Improving</h5>
+<ul>
+ <li>SSE4.1, AVX2, AVX-512BW optimizations of class SynetScale16b.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -80,6 +88,7 @@
  <li>Wrong assert condition in function Simd::Uyvy422ToYuv420p.</li>
  <li>Wrong assert condition in function Simd::Yuv420pToUyvy422.</li>
  <li>Error in function Base::CpuCacheSize on ARM64 platform.</li>
+ <li>Error in NEON optimizations of function DescrInt::Encode32f.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -102,6 +111,7 @@
 <ul>
  <li>Job build_and_test_arm64 in Github actions script for CMake.</li>
  <li>test.yml github action to test dev branch</li>
+</ul>
 
 <h4>Documentation</h4>
 <h5>Bug fixing</h5>

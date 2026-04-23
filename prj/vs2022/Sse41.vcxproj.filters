@@ -478,12 +478,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp">
-      <Filter>Sse41\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale16b.cpp">
-      <Filter>Sse41\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetUnaryOperation.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
@@ -507,6 +501,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetGridSample2d32fBlZ.cpp">
       <Filter>Sse41\Synet\GridSample</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp">
+      <Filter>Sse41\Synet\Scale</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale16b.cpp">
+      <Filter>Sse41\Synet\Scale</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -578,6 +578,9 @@
     </Filter>
     <Filter Include="Sse41\Synet\GridSample">
       <UniqueIdentifier>{091bda5a-e613-4505-9ebc-b93add6f7274}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\Scale">
+      <UniqueIdentifier>{19fa35de-9f52-4984-8715-4cd7211d8ff3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

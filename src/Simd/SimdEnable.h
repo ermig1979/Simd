@@ -87,6 +87,19 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_SVE_ENABLE
+    namespace Sve
+    {
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
+
+        size_t GetSveSize();
+
+        const size_t SveSize = GetSveSize();
+    }
+#endif
+
 #ifdef SIMD_HVX_ENABLE
     namespace Hvx
     {
@@ -152,4 +165,4 @@ namespace Simd
 #define SIMD_FUNC8(func, EXT1, EXT2, EXT3, EXT4, EXT5, EXT6, EXT7, EXT8) EXT1(func) EXT2(func) EXT3(func) EXT4(func) EXT5(func) EXT6(func) EXT7(func) EXT8(func) SIMD_BASE_FUNC(func)
 #define SIMD_FUNC9(func, EXT1, EXT2, EXT3, EXT4, EXT5, EXT6, EXT7, EXT8, EXT9) EXT1(func) EXT2(func) EXT3(func) EXT4(func) EXT5(func) EXT6(func) EXT7(func) EXT8(func) EXT9(func) SIMD_BASE_FUNC(func)
 
-#endif//__SimdEnable_h__
+#endif

@@ -69,16 +69,24 @@ jobs:
       run: |
         sudo apt-get update 
         sudo apt-get -y install g++-${{matrix.gcc_version}}
+        sudo apt-get install python3-numpy
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native"
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native -march=armv8-a+sve" -DSIMD_SVE=ON -DSIMD_SHARED=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
       
-    - name: Test
+    - name: Test C++
       working-directory: ${{github.workspace}}/build
-      run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256
+
+    - name: Test Python
+      if: ${{ matrix.build_type == 'Release' }}
+      working-directory: ${{github.workspace}}/build
+      run: python3 ./Test.py "-r=.."
 
   build_and_test_clang:
     runs-on: ubuntu-latest
