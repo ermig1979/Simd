@@ -68,5 +68,5 @@ namespace Simd
                 AbsDifference<false>(a, aStride, b, bStride, c, cStride, width, height);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }

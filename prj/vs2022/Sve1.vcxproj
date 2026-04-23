@@ -23,6 +23,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve1Operation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve1.h" />

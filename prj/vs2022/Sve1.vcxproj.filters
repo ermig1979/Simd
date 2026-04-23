@@ -13,6 +13,9 @@
     <Filter Include="Sve1\Filter">
       <UniqueIdentifier>{579a6e24-50bc-403c-ad01-51e0288a6577}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve1\Math">
+      <UniqueIdentifier>{feb2abaf-d716-41ec-8b72-afb246cf3b13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve1.h">
@@ -25,6 +28,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifference.cpp">
       <Filter>Sve1\Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve1Operation.cpp">
+      <Filter>Sve1\Math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
