@@ -62,7 +62,7 @@ namespace Simd
 
         size_t GetSveSize()
         {
-            if(Enable)
+            if(SupportedByCPU())
                 return svlen(svuint8_t());
             return 0;
         }

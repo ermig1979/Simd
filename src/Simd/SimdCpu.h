@@ -214,6 +214,13 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_SVE_ENABLE
+    namespace Sve
+    {
+        extern const size_t SveSize;
+    }
+#endif
 }
 
 #endif
