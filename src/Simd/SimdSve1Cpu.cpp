@@ -57,6 +57,15 @@ namespace Simd
         {
             return SupportedByCPU();
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        size_t GetSveSize()
+        {
+            if(Enable)
+                return svlen(svuint8_t());
+            return 0;
+        }
     }
 #endif
 }

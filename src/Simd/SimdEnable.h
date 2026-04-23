@@ -93,6 +93,10 @@ namespace Simd
         bool GetEnable();
 
         const bool Enable = GetEnable();
+
+        size_t GetSveSize();
+
+        const size_t SveSize = GetSveSize();
     }
 #endif
 

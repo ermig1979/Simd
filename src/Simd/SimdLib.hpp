@@ -64,7 +64,8 @@ namespace Simd
         os << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA AVX" : "");
         os << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3 SSE2 SSE" : "");
         os << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
-        os << (SimdCpuInfo(SimdCpuInfoSve) ? " SVE" : "");
+        if (SimdCpuInfo(SimdCpuInfoSve))
+            os << " SVE(" << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << ")";
         os << std::endl;
     }
 
