@@ -35,6 +35,8 @@ namespace Simd
     {
         void AbsDifference(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride, size_t width, size_t height);
 
+        void AbsGradientSaturatedSum(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+
         void OperationBinary8u(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride, SimdOperationBinary8uType type);
 

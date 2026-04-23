@@ -32,5 +32,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSve1Operation.cpp">
       <Filter>Sve1\Math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve1AbsGradientSaturatedSum.cpp">
+      <Filter>Sve1\Filter</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
