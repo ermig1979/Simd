@@ -248,7 +248,7 @@ namespace Test
         T avx512vnni;
         T amxBf16;
         T neon;
-        T sve1;
+        T sve;
 
         size_t Size() const { return sizeof(Statistic) / sizeof(T); };
         T & operator [] (size_t i) { return (&simd)[i]; }
@@ -299,8 +299,8 @@ namespace Test
             AddToFunction(src, dst.amxBf16, enable.amxBf16);
         if (desc.find("Simd::Neon::") != std::string::npos)
             AddToFunction(src, dst.neon, enable.neon);
-        if (desc.find("Simd::Sve1::") != std::string::npos)
-            AddToFunction(src, dst.sve1, enable.sve1);
+        if (desc.find("Simd::Sve::") != std::string::npos)
+            AddToFunction(src, dst.sve, enable.sve);
     }
 
     static inline const Function & Cond(const Function & a, const Function & b)
@@ -324,7 +324,7 @@ namespace Test
         if (enable.avx512vnni) Add(Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base)))), d.avx512vnni);
         if (enable.amxBf16) Add(Cond(s.amxBf16, Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base))))), d.amxBf16);
         if (enable.neon) Add(Cond(s.neon, s.base), d.neon);
-        if (enable.sve1) Add(Cond(s.sve1, Cond(s.neon, s.base)), d.sve1);
+        if (enable.sve) Add(Cond(s.sve, Cond(s.neon, s.base)), d.sve);
     }
 
 	static void AddHeader(Table & table, const StatisticNames & names, const StatisticEnable & enable, bool align)
