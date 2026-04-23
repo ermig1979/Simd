@@ -33,16 +33,26 @@ namespace Simd
     {
         void AbsDifference(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride, size_t width, size_t height)
         {
-            size_t step = svlen(svuint8_t());
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svwhilelt_b8(size_t(0), A);
+            const svbool_t tail = svwhilelt_b8(widthA, width);
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t col = 0; col < width; col += step)
+                size_t col = 0;
+                for (; col < widthA; col += A)
                 {
-                    const svbool_t mask = svwhilelt_b8(col, width);
-                    svuint8_t _a = svld1_u8(mask, a + col);
-                    svuint8_t _b = svld1_u8(mask, b + col);
-                    svuint8_t _c = svabd_x(mask, _a, _b);
-                    svst1_u8(mask, c + col, _c);
+                    svuint8_t _a = svld1_u8(body, a + col);
+                    svuint8_t _b = svld1_u8(body, b + col);
+                    svuint8_t _c = svabd_x(body, _a, _b);
+                    svst1_u8(body, c + col, _c);
+                }
+                if (widthA < width)
+                {
+                    svuint8_t _a = svld1_u8(tail, a + col);
+                    svuint8_t _b = svld1_u8(tail, b + col);
+                    svuint8_t _c = svabd_x(tail, _a, _b);
+                    svst1_u8(tail, c + col, _c);
                 }
                 a += aStride;
                 b += bStride;
