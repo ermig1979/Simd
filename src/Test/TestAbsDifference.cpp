@@ -115,6 +115,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_SVE_ENABLE
+		std::cout << " Simd::Sve::Enable " << Simd::Sve::Enable << std::endl;
+		std::cout << " TestSve(options) " << TestSve(options) << std::endl;
 		if (Simd::Sve::Enable && TestSve(options))
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Sve::AbsDifference), FUNC1(SimdAbsDifference), 1);
 #endif
