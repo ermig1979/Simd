@@ -84,6 +84,7 @@ jobs:
         ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256
 
     - name: Test Python
+      if: ${{ matrix.build_type == 'Release' }}
       working-directory: ${{github.workspace}}/build
       run: python3 ./Test.py "-r=.."
 
