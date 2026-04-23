@@ -66,6 +66,7 @@ namespace Simd
         os << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
         if (SimdCpuInfo(SimdCpuInfoSve))
             os << " SVE(" << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << ")";
+        os << (SimdCpuInfo(SimdCpuInfoHvx) ? " HVX" : "");
         os << std::endl;
     }
 
