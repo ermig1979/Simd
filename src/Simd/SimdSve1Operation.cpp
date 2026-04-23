@@ -98,8 +98,7 @@ namespace Simd
             }
         }
 
-        void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-            size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type)
+        void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type)
         {
             switch (type)
             {
@@ -120,6 +119,60 @@ namespace Simd
                 return OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedAddition:
                 return OperationBinary8u<SimdOperationBinary8uSaturatedAddition>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <SimdOperationBinary16iType type> SIMD_INLINE svint16_t OperationBinary16i(const svbool_t& mask, const svint16_t& a, const svint16_t& b);
+
+        template <> SIMD_INLINE svint16_t OperationBinary16i<SimdOperationBinary16iAddition>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svadd_x(mask, a, b);
+        }
+
+        template <> SIMD_INLINE svint16_t OperationBinary16i<SimdOperationBinary16iSubtraction>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svsub_x(mask, a, b);
+        }
+
+        template <SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            size_t A = svlen(svint16_t());
+            size_t widthA = Simd::AlignLo(width, A);
+            const svbool_t body = svwhilelt_b16(size_t(0), A);
+            const svbool_t tail = svwhilelt_b16(widthA, width);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                {
+                    const svint16_t _a = svld1_s16(body, (int16_t*)a + col);
+                    const svint16_t _b = svld1_s16(body, (int16_t*)b + col);
+                    svst1_s16(body, (int16_t*)dst + col, OperationBinary16i<type>(body, _a, _b));
+                }
+                if (widthA < width)
+                {
+                    const svint16_t _a = svld1_s16(tail, (int16_t*)a + col);
+                    const svint16_t _b = svld1_s16(tail, (int16_t*)b + col);
+                    svst1_s16(tail, (int16_t*)dst + col, OperationBinary16i<type>(tail, _a, _b));
+                }
+                a += aStride;
+                b += bStride;
+                dst += dstStride;
+            }
+        }
+
+        void OperationBinary16i(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdOperationBinary16iType type)
+        {
+            switch (type)
+            {
+            case SimdOperationBinary16iAddition:
+                return OperationBinary16i<SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
+            case SimdOperationBinary16iSubtraction:
+                return OperationBinary16i<SimdOperationBinary16iSubtraction>(a, aStride, b, bStride, width, height, dst, dstStride);
             default:
                 assert(0);
             }

@@ -4024,6 +4024,11 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
         Neon::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
+    else
+#endif
         Base::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
 }
 

@@ -35,7 +35,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
-        ./Test "-r=.." -m=a -tt=0 -ts=5 -mt=100 -w=640 -h=480 -c=256 -fi=AbsDifference -fi=OperationBinary8u -fe=Sum
+        ./Test "-r=.." -m=a -tt=0 -ts=5 -mt=100 -w=640 -h=480 -c=256 -fi=AbsDifference -fi=OperationBinary -fe=Sum
         
     - name: Test Python
       working-directory: ${{github.workspace}}/build

@@ -281,6 +281,11 @@ namespace Test
             result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Neon::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 #endif
 
+#ifdef SIMD_SVE_ENABLE
+        if (Simd::Sve::Enable && TestSve(options))
+            result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Sve::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
+#endif
+
         return result;
     }
 
