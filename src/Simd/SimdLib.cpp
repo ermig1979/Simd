@@ -451,6 +451,11 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
         Neon::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_HVX_ENABLE
     if (Hvx::Enable && width >= Hvx::A)
         Hvx::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
@@ -1888,6 +1893,11 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
         Neon::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+    else
+#endif
         Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 }
 
@@ -3065,6 +3075,11 @@ SIMD_API void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t 
         Neon::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
+    else
+#endif
         Base::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
 }
 
@@ -3987,6 +4002,11 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
         Neon::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+    else
+#endif
 #ifdef SIMD_HVX_ENABLE
     if (Hvx::Enable && width*channelCount >= Hvx::A)
         Hvx::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
@@ -4017,6 +4037,11 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::HA)
         Neon::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
+    else
+#endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
         Base::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);

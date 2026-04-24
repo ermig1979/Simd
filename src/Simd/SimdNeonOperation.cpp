@@ -129,6 +129,8 @@ namespace Simd
                 OperationBinary8u<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template <SimdOperationBinary16iType type> SIMD_INLINE int16x8_t OperationBinary16i(const int16x8_t & a, const int16x8_t & b);
 
         template <> SIMD_INLINE int16x8_t OperationBinary16i<SimdOperationBinary16iAddition>(const int16x8_t & a, const int16x8_t & b)
@@ -227,5 +229,5 @@ namespace Simd
                 VectorProduct<false>(vertical, horizontal, dst, stride, width, height);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }

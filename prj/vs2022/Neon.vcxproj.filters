@@ -7,9 +7,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonAbsDifferenceSum.cpp">
       <Filter>Neon\Statistics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonAbsGradientSaturatedSum.cpp">
-      <Filter>Neon\Statistics</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonAddFeatureDifference.cpp">
       <Filter>Neon\Motion</Filter>
     </ClCompile>
@@ -360,6 +357,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetScale.cpp">
       <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAbsGradientSaturatedSum.cpp">
+      <Filter>Neon\Filter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
