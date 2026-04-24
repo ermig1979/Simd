@@ -41,5 +41,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSve1Deinterleave.cpp">
       <Filter>Sve1\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve1Interleave.cpp">
+      <Filter>Sve1\Convert</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -25,6 +25,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve1AbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Deinterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve1Interleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Operation.cpp" />
   </ItemGroup>
   <ItemGroup>
