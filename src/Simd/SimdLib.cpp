@@ -1893,6 +1893,11 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
         Neon::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+    else
+#endif
         Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 }
 
