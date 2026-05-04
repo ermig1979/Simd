@@ -75,6 +75,8 @@ namespace Simd
                 AbsDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         template <bool align> void AbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
         {
@@ -130,6 +132,8 @@ namespace Simd
             else
                 AbsDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
         }
+
+        //--------------------------------------------------------------------------------------------------
 
         template <bool align> void AbsDifferenceSums3(uint8x16_t current, const uint8_t * background, uint16x8_t sums[3])
         {
@@ -228,6 +232,8 @@ namespace Simd
                 AbsDifferenceSums3x3<false>(current, currentStride, background, backgroundStride, width, height, sums);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         template <bool align> void AbsDifferenceSums3Masked16(uint8x16_t current, const uint8_t * background, uint8x16_t mask, uint16x8_t sums[3])
         {
             sums[0] = vaddq_u16(sums[0], vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<align>(background - 1)))));
@@ -318,5 +324,5 @@ namespace Simd
                 AbsDifferenceSums3x3Masked<false>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }

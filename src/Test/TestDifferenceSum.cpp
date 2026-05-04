@@ -315,6 +315,11 @@ namespace Test
             result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Neon::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked), 1);
 #endif 
 
+#ifdef SIMD_SVE_ENABLE
+        if (Simd::Sve::Enable && TestSve(options))
+            result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Sve::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked), 1);
+#endif 
+
         return result;
     }
 
