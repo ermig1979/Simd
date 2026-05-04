@@ -99,11 +99,11 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void AbsDifferenceSums3(const svuint8_t& current, const uint8_t* background, const svuint8_t& _1, const svbool_t& mask, svuint32x3_t sums)
+        SIMD_INLINE void AbsDifferenceSums3(const svuint8_t& current, const uint8_t* background, const svuint8_t& _1, const svbool_t& mask, svuint32x3_t & sums)
         {
-            svset3(sums, 0, svdot_u32(svget3(sums, 0), svabd_x(mask, current, svld1_u8(mask, background - 1)), _1));
-            svset3(sums, 1, svdot_u32(svget3(sums, 1), svabd_x(mask, current, svld1_u8(mask, background)), _1));
-            svset3(sums, 2, svdot_u32(svget3(sums, 2), svabd_x(mask, current, svld1_u8(mask, background + 1)), _1));
+            sums = svset3(sums, 0, svdot_u32(svget3(sums, 0), svabd_x(mask, current, svld1_u8(mask, background - 1)), _1));
+            sums = svset3(sums, 1, svdot_u32(svget3(sums, 1), svabd_x(mask, current, svld1_u8(mask, background)), _1));
+            sums = svset3(sums, 2, svdot_u32(svget3(sums, 2), svabd_x(mask, current, svld1_u8(mask, background + 1)), _1));
         }
 
         SIMD_INLINE void AbsDifferenceSums3x3(const uint8_t* current, const uint8_t* background, size_t stride, const svuint8_t& _1, 
