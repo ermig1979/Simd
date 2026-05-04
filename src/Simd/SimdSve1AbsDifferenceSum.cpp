@@ -96,6 +96,66 @@ namespace Simd
                 mask += maskStride;
             }
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void AbsDifferenceSums3(const svuint8_t& current, const uint8_t* background, const svuint8_t& _1, const svbool_t& mask, svuint32x3_t sums)
+        {
+            svset3(sums, 0, svdot_u32(svget3(sums, 0), svabd_x(mask, current, svld1_u8(mask, background - 1)), _1));
+            svset3(sums, 1, svdot_u32(svget3(sums, 1), svabd_x(mask, current, svld1_u8(mask, background)), _1));
+            svset3(sums, 2, svdot_u32(svget3(sums, 2), svabd_x(mask, current, svld1_u8(mask, background + 1)), _1));
+        }
+
+        SIMD_INLINE void AbsDifferenceSums3x3(const uint8_t* current, const uint8_t* background, size_t stride, const svuint8_t& _1, 
+            const svbool_t& mask, svuint32x3_t &sums0, svuint32x3_t &sums3, svuint32x3_t& sums6)
+        {
+            svuint8_t _current = svld1_u8(mask, current);
+            AbsDifferenceSums3(_current, background - stride, _1, mask, sums0);
+            AbsDifferenceSums3(_current, background, _1, mask, sums3);
+            AbsDifferenceSums3(_current, background + stride, _1, mask, sums6);
+        }
+
+        SIMD_INLINE void AddRowSums3(svuint32x3_t src, uint64_t* dst)
+        {
+            dst[0] += svaddv_u32(svptrue_b32(), svget3(src, 0));
+            dst[1] += svaddv_u32(svptrue_b32(), svget3(src, 1));
+            dst[2] += svaddv_u32(svptrue_b32(), svget3(src, 2));
+        }
+
+        void AbsDifferenceSums3x3(const uint8_t* current, size_t currentStride, const uint8_t* background, size_t backgroundStride, size_t width, size_t height, uint64_t* sums)
+        {
+            assert(height > 2 && width > 2);
+
+            width -= 2;
+            height -= 2;
+            current += 1 + currentStride;
+            background += 1 + backgroundStride;
+
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svwhilelt_b8(size_t(0), A);
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _1 = svdup_n_u8(1);
+
+            for (size_t i = 0; i < 9; ++i)
+                sums[i] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                svuint32x3_t sums0 = svcreate3_u32(svdup_n_u32(0), svdup_n_u32(0), svdup_n_u32(0));
+                svuint32x3_t sums3 = svcreate3_u32(svdup_n_u32(0), svdup_n_u32(0), svdup_n_u32(0));
+                svuint32x3_t sums6 = svcreate3_u32(svdup_n_u32(0), svdup_n_u32(0), svdup_n_u32(0));
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    AbsDifferenceSums3x3(current + col, background + col, backgroundStride, _1, body, sums0, sums3, sums6);
+                if (widthA < width)
+                    AbsDifferenceSums3x3(current + col, background + col, backgroundStride, _1, tail, sums0, sums3, sums6);
+                AddRowSums3(sums0, sums + 0);
+                AddRowSums3(sums3, sums + 3);
+                AddRowSums3(sums6, sums + 6);
+                current += currentStride;
+                background += backgroundStride;
+            }
+        }
     }
 #endif
 }

@@ -350,6 +350,11 @@ namespace Test
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Neon::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3), 9);
 #endif
 
+#ifdef SIMD_SVE_ENABLE
+        if (Simd::Sve::Enable && TestSve(options))
+            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Sve::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3), 9);
+#endif
+
         return result;
     }
 
