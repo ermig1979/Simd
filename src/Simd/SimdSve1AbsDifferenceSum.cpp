@@ -84,7 +84,7 @@ namespace Simd
                     svuint8_t _b = svld1_u8(body, b + col);
                     svuint8_t _m = svld1_u8(body, mask + col);
                     svbool_t _mask = svcmpeq_u8(body, _m, _i);
-                    svuint8_t abd = svabd_x(_mask, _a, _b);
+                    svuint8_t abd = svabd_z(_mask, _a, _b);
                     _sum = svdot_u32(_sum, abd, _1);
                 }
                 if (widthA < width)
@@ -93,7 +93,7 @@ namespace Simd
                     svuint8_t _b = svld1_u8(tail, b + col);
                     svuint8_t _m = svld1_u8(tail, mask + col);
                     svbool_t _mask = svcmpeq_u8(tail, _m, _i);
-                    svuint8_t abd = svabd_x(_mask, _a, _b);
+                    svuint8_t abd = svabd_z(_mask, _a, _b);
                     _sum = svdot_u32(_sum, abd, _1);
                 }
                 *sum += svaddv_u32(svptrue_b32(), _sum);
