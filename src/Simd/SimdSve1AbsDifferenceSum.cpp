@@ -37,31 +37,30 @@ namespace Simd
             size_t widthA = AlignLo(width, A);
             const svbool_t body = svwhilelt_b8(size_t(0), A);
             const svbool_t tail = svwhilelt_b8(widthA, width);
-            //svuint8_t _a
-            //svuint64_t _sum = svdup_n_u64(0);
-            uint64_t _sum = 0;
+            svuint8_t _1 = svdup_n_u8(1);
+            *sum = 0;
             for (size_t row = 0; row < height; ++row)
             {
-                //svuint32_t rowSum = svdup_n_u32(0);
                 size_t col = 0;
+                svuint32_t _sum = svdup_n_u32(0);
                 for (; col < widthA; col += A)
                 {
                     svuint8_t _a = svld1_u8(body, a + col);
                     svuint8_t _b = svld1_u8(body, b + col);
                     svuint8_t abd = svabd_x(body, _a, _b);
-                    _sum += svaddv_u8(body, abd);
+                    _sum = svdot_u32(_sum, abd, _1);
                 }
                 if (widthA < width)
                 {
                     svuint8_t _a = svld1_u8(tail, a + col);
                     svuint8_t _b = svld1_u8(tail, b + col);
                     svuint8_t abd = svabd_x(tail, _a, _b);
-                    _sum += svaddv_u8(tail, abd);
+                    _sum = svdot_u32(_sum, abd, _1);
                 }
+                *sum += svaddv_u32(svptrue_b32(), _sum);
                 a += aStride;
                 b += bStride;
             }
-            *sum = _sum;
         }
     }
 #endif
