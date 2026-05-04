@@ -333,6 +333,11 @@ SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8
         Sse41::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);

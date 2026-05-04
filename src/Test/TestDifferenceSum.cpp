@@ -215,7 +215,6 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Neon::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
 #endif
-
         return result;
     }
 
@@ -274,6 +273,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Neon::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum), 1);
+#endif
+
+#ifdef SIMD_SVE_ENABLE
+        if (Simd::Sve::Enable && TestSve(options))
+            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Sve::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum), 1);
 #endif
 
 #ifdef SIMD_HVX_ENABLE

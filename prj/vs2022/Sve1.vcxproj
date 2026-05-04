@@ -22,6 +22,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1AbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1BgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp" />
