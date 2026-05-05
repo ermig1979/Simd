@@ -36,7 +36,7 @@ namespace Simd
             svuint8_t _hi = svld1_u8(mask, hi);
 
             svbool_t inc = svcmpgt_u8(mask, _value, _hi);
-            svbool_t dec = svcmpgt_u8(mask, _value, _lo);
+            svbool_t dec = svcmplt_u8(mask, _value, _lo);
 
             svst1_u8(mask, lo, svqsub_u8(_lo, svand_u8_z(dec, _1, _1)));
             svst1_u8(mask, hi, svqadd_u8(_hi, svand_u8_z(inc, _1, _1)));
