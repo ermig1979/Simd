@@ -787,17 +787,17 @@ extern "C"
 
         \short Gets version of %Simd Library.
 
-        \return string with version of %Simd Library (major version number, minor version number, release number, number of SVN's commits).
-    */
-    SIMD_API const char * SimdVersion(void);
+        Returns a pointer to a null-terminated, statically allocated string that encodes the library version.
+        The format of the string is:
+        \verbatim
+        major.minor.release[.branch-sha]
+        \endverbatim
+        where \b major, \b minor and \b release are numeric components taken from the library's version file,
+        and the optional \b branch and \b sha suffix identify the Git branch name and short commit hash at
+        build time (e.g. <tt>"7.1.161.main-a1b2c3d"</tt>). When version information is not available at
+        build time the function returns <tt>"unknown"</tt>.
 
-    /*! @ingroup info
-
-        \fn const char* SimdCpuDesc(SimdCpuDescType type);
-
-        \short Gets description of CPU and %Simd Library.
-
-        \note See enumeration ::SimdCpuDescType.
+        The returned pointer is valid for the lifetime of the process and must not be freed.
 
         Using example:
         \verbatim
@@ -806,13 +806,46 @@ extern "C"
 
         int main()
         {
-            std::cout << "CPU: " << SimdCpuDesc(SimdCpuDescModel) << std::endl;
+            std::cout << "Simd Library version: " << SimdVersion() << std::endl;
             return 0;
         }
         \endverbatim
 
-        \param [in] type - a type of required description.
-        \return a value which contains description of CPU and %Simd Library.
+        \return a pointer to a static null-terminated string with the version of %Simd Library.
+    */
+    SIMD_API const char * SimdVersion(void);
+
+    /*! @ingroup info
+
+        \fn const char* SimdCpuDesc(SimdCpuDescType type);
+
+        \short Gets a text description of the CPU.
+
+        Returns a pointer to a null-terminated string whose content depends on the requested ::SimdCpuDescType:
+        - ::SimdCpuDescModel — the CPU brand/model name string (e.g. <tt>"Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"</tt>).
+          On x86 it is read from the CPUID brand-string leaves; on Linux/ARM it is obtained via \c lscpu.
+          An empty string is returned on platforms where the model name is not available (Apple, Android).
+
+        The returned pointer is valid for the lifetime of the process and must not be freed.
+        For an unknown or unsupported \a type value the function returns \c NULL.
+
+        \note See enumeration ::SimdCpuDescType for the full list of supported types.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdLib.h"
+        #include <iostream>
+
+        int main()
+        {
+            std::cout << "CPU model: " << SimdCpuDesc(SimdCpuDescModel) << std::endl;
+            return 0;
+        }
+        \endverbatim
+
+        \param [in] type - a type of required description. See ::SimdCpuDescType.
+        \return a pointer to a static null-terminated string with the requested CPU description,
+                or \c NULL if \a type is not supported.
     */
     SIMD_API const char* SimdCpuDesc(SimdCpuDescType type);
 
@@ -821,6 +854,15 @@ extern "C"
         \fn uint64_t SimdCpuInfo(SimdCpuInfoType type);
 
         \short Gets information about CPU and %Simd Library.
+
+        Depending on the requested ::SimdCpuInfoType, the function returns one of the following kinds of values:
+        - CPU topology: number of sockets, physical cores, or logical threads.
+        - Cache / RAM sizes in bytes (L1 data cache, L2 cache, L3 cache, physical RAM).
+        - SIMD extension availability: 1 if the extension is supported and enabled by the library, 0 otherwise.
+          The extensions covered are SSE4.1 (and below), AVX2 (and FMA/AVX), AVX-512BW (and AVX-512F),
+          AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, SVE, and HVX.
+        - SVE vector width in bytes (::SimdCpuInfoSveSize).
+        - Current CPU core frequency in Hz (::SimdCpuInfoCurrentFrequency); returns 0 if unavailable on the platform.
 
         \note See enumeration ::SimdCpuInfoType.
 
@@ -844,12 +886,17 @@ extern "C"
             std::cout << "AVX-512VNNI: " << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? "Yes" : "No") << std::endl;
             std::cout << "AMX-BF16: " << (SimdCpuInfo(SimdCpuInfoAmxBf16) ? "Yes" : "No") << std::endl;
             std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
+            std::cout << "ARM-SVE: " << (SimdCpuInfo(SimdCpuInfoSve) ? "Yes" : "No") << std::endl;
+            std::cout << "ARM-SVE size: " << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << " bits" << std::endl;
+            std::cout << "HVX: " << (SimdCpuInfo(SimdCpuInfoHvx) ? "Yes" : "No") << std::endl;
+            std::cout << "Current frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000000 << " MHz" << std::endl;
             return 0;
         }
         \endverbatim
 
         \param [in] type - a type of required information.
-        \return a value which contains information about CPU and %Simd Library.
+        \return a value whose meaning depends on \a type: a count (topology), size in bytes (cache/RAM),
+                1 or 0 (SIMD availability), size in bytes (SVE vector width), or frequency in Hz (current CPU frequency).
     */
     SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type);
 
@@ -869,14 +916,38 @@ extern "C"
 
         \fn void * SimdAllocate(size_t size, size_t align);
 
-        \short Allocates aligned memory block.
+        \short Allocates an aligned memory block.
 
-        \note The memory allocated by this function is must be deleted by function ::SimdFree.
+        Allocates a contiguous memory block of at least \a size bytes whose start address is a multiple of \a align.
+        The alignment value must be a power of two and, on POSIX platforms (GCC), is rounded up to at least
+        <tt>sizeof(void*)</tt> internally. The actual allocation is performed via the platform-appropriate
+        aligned allocator: \c _aligned_malloc (MSVC), \c __mingw_aligned_malloc (MinGW), \c posix_memalign (GCC),
+        or plain \c malloc on platforms that do not support aligned allocation.
 
-        \param [in] size - a size of memory block.
-        \param [in] align - a required alignment of memory block.
+        The block must be released with ::SimdFree — passing it to the standard \c free or \c delete is undefined behaviour.
 
-        \return a pointer to allocated memory.
+        Using example:
+        \verbatim
+        #include "Simd/SimdLib.h"
+
+        int main()
+        {
+            const size_t size  = 1024;
+            const size_t align = SimdAlignment();
+            uint8_t * data = (uint8_t *)SimdAllocate(size, align);
+            if (data)
+            {
+                // use data ...
+                SimdFree(data);
+            }
+            return 0;
+        }
+        \endverbatim
+
+        \param [in] size - the number of bytes to allocate. Must be greater than zero.
+        \param [in] align - the required alignment of the allocated block in bytes. Must be a power of two.
+                            Use ::SimdAlignment to obtain the optimal alignment for the current platform.
+        \return a pointer to the newly allocated aligned memory block, or \c NULL if the allocation fails.
     */
     SIMD_API void * SimdAllocate(size_t size, size_t align);
 
@@ -884,11 +955,19 @@ extern "C"
 
         \fn void SimdFree(void * ptr);
 
-        \short Frees aligned memory block.
+        \short Frees an aligned memory block previously allocated by ::SimdAllocate.
 
-        \note This function frees a memory allocated by function ::SimdAllocate.
+        Releases the memory block pointed to by \a ptr, which must have been returned by a prior call to
+        ::SimdAllocate. Passing a pointer obtained from any other allocator (e.g. \c malloc, \c new,
+        or \c _aligned_malloc) is undefined behaviour.
 
-        \param [in] ptr - a pointer to the memory to be deleted.
+        Passing \c NULL is safe and has no effect, consistent with the behaviour of the standard \c free function.
+
+        The underlying release call matches the allocator used by ::SimdAllocate for the current platform:
+        \c _aligned_free (MSVC), \c __mingw_aligned_free (MinGW), or \c free (GCC and others).
+
+        \param [in] ptr - a pointer to the memory block to free. Must have been returned by ::SimdAllocate,
+                          or \c NULL (in which case the call has no effect).
     */
     SIMD_API void SimdFree(void * ptr);
 
@@ -896,12 +975,19 @@ extern "C"
 
         \fn size_t SimdAlign(size_t size, size_t align);
 
-        \short Gets aligned size.
+        \short Rounds a size value up to the nearest multiple of a given alignment.
 
-        \param [in] size - an original size.
-        \param [in] align - a required alignment.
+        Returns the smallest value that is both a multiple of \a align and greater than or equal to \a size.
+        If \a size is already a multiple of \a align, it is returned unchanged.
 
-        \return an aligned size.
+        The function uses the bitwise formula <tt>(size + align - 1) & ~(align - 1)</tt>, which requires
+        \a align to be a positive power of two.
+
+        \param [in] size - the original size in bytes (or elements) to be aligned.
+        \param [in] align - the required alignment in bytes. Must be a positive power of two.
+                            Use ::SimdAlignment to obtain the optimal alignment for the current platform.
+
+        \return the smallest multiple of \a align that is greater than or equal to \a size.
     */
     SIMD_API size_t SimdAlign(size_t size, size_t align);
 
@@ -909,9 +995,23 @@ extern "C"
 
         \fn size_t SimdAlignment();
 
-        \short Gets alignment required for the most productive work of Simd Library.
+        \short Returns the optimal memory alignment for the current platform.
 
-        \return a required alignment.
+        Returns the byte-width of the widest SIMD register available at runtime, which is the recommended
+        alignment value to pass to ::SimdAllocate and ::SimdAlign in order to achieve best performance.
+
+        The value is determined once at library initialization time by probing the active SIMD extensions
+        and is constant for the lifetime of the process:
+        - \b 64 bytes — AVX-512 (x86, when either AVX-512BW or AVX-512VNNI is available)
+        - \b 32 bytes — AVX2 (x86)
+        - \b 16 bytes — SSE4.1 (x86) or NEON (ARM)
+        - <b>sizeof(HVX_Vector)</b> — HVX (Qualcomm Hexagon)
+        - <b>sizeof(void*)</b> — scalar fallback (no SIMD extensions detected)
+
+        The returned value is always a power of two and equals the value of the \c SIMD_ALIGN compile-time
+        constant used internally by the library.
+
+        \return the optimal alignment in bytes for the current platform.
     */
     SIMD_API size_t SimdAlignment(void);
 
@@ -919,11 +1019,25 @@ extern "C"
 
         \fn void SimdRelease(void * context);
 
-        \short Releases context created with using of Simd Library API.
+        \short Destroys an opaque context object created by the Simd Library API.
 
-        \note This function releases a context created by functions ::SimdDetectionLoadA and ::SimdDetectionInit.
+        Releases any context object returned by a Simd Library context-creation function,
+        i.e. any function whose name ends in \c Init (such as ::SimdGaussianBlurInit,
+        ::SimdResizerInit, ::SimdWarpAffineInit, ::SimdDescrIntInit, ::SimdFontInit,
+        ::SimdSynetConvolution32fInit, and others), as well as ::SimdDetectionLoadA.
 
-        \param [in] context - a context to be released.
+        Internally the function performs a polymorphic \c delete through the virtual
+        destructor of the internal \c Deletable base class, ensuring that the correct
+        destructor is always invoked regardless of the actual context type.
+
+        Passing \c NULL is safe and has no effect, consistent with the behaviour of a
+        C++ \c delete expression on a null pointer.
+
+        \note Passing a pointer that was not returned by a Simd Library context-creation
+              function (for example a pointer from ::SimdAllocate, \c malloc, or \c new)
+              is undefined behaviour.
+
+        \param [in] context - a pointer to the context to be released, or \c NULL.
     */    
     SIMD_API void SimdRelease(void * context);
 
