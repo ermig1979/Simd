@@ -108,12 +108,12 @@ namespace Simd
         }
 
         SIMD_INLINE void AbsDifferenceSums3x3(const uint8_t* current, const uint8_t* background, size_t stride, const svuint8_t& _1, const svbool_t& mask, 
-            svuint32_t& sum0, svuint32_t& sum1, svuint32_t& sum2, svuint32_t& sum3, svuint32_t& sum4, svuint32_t& sum5, svuint32_t& sum6, svuint32_t& sum7, svuint32_t& sum8)
+            svuint32_t& s0, svuint32_t& s1, svuint32_t& s2, svuint32_t& s3, svuint32_t& s4, svuint32_t& s5, svuint32_t& s6, svuint32_t& s7, svuint32_t& s8)
         {
             svuint8_t _current = svld1_u8(mask, current);
-            AbsDifferenceSums3(_current, background - stride, _1, mask, sum0, sum1, sum2);
-            AbsDifferenceSums3(_current, background, _1, mask, sum3, sum4, sum5);
-            AbsDifferenceSums3(_current, background + stride, _1, mask, sum6, sum7, sum8);
+            AbsDifferenceSums3(_current, background - stride, _1, mask, s0, s1, s2);
+            AbsDifferenceSums3(_current, background, _1, mask, s3, s4, s5);
+            AbsDifferenceSums3(_current, background + stride, _1, mask, s6, s7, s8);
         }
 
         SIMD_INLINE void ClearSums(svuint32_t& sum0, svuint32_t& sum1, svuint32_t& sum2)
@@ -150,7 +150,7 @@ namespace Simd
             svuint32_t s0, s1, s2, s3, s4, s5, s6, s7, s8;
             for (size_t row = 0; row < height; ++row)
             {
-                ClearSums(s0, s1, s3);
+                ClearSums(s0, s1, s2);
                 ClearSums(s3, s4, s5);
                 ClearSums(s6, s7, s8);
                 size_t col = 0;
