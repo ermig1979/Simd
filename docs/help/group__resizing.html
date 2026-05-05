@@ -732,7 +732,7 @@ if (resizer)
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to resize context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__resizing.html#gaa38558511e560de8645e511740442e83" title="Performs image resizing.">SimdResizerRun</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to resize context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__resizing.html#gaa38558511e560de8645e511740442e83" title="Performs image resizing.">SimdResizerRun</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -783,7 +783,7 @@ if (resizer)
 <p>Performs image resizing. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">resizer</td><td>- a resize context. It must be created by function <a class="el" href="group__resizing.html#gabee5cdab6c6e3c678381d5b872287184" title="Creates resize context.">SimdResizerInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">resizer</td><td>- a resize context. It must be created by function <a class="el" href="group__resizing.html#gabee5cdab6c6e3c678381d5b872287184" title="Creates resize context.">SimdResizerInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size (in bytes) of the input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the resized output image. </td></tr>

@@ -111,7 +111,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to permute context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__permute.html#ga19c5f9b48d3652187cd63618aa871ba4" title="Gets size of internal buffer used inside permute algorithm.">SimdSynetPermuteInternalBufferSize</a>, and <a class="el" href="group__synet__permute.html#gad7252175085b7daa48c7a802bd2bda29" title="Performs forward propagation of permute algorithm.">SimdSynetPermuteForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to permute context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__permute.html#ga19c5f9b48d3652187cd63618aa871ba4" title="Gets size of internal buffer used inside permute algorithm.">SimdSynetPermuteInternalBufferSize</a>, and <a class="el" href="group__synet__permute.html#gad7252175085b7daa48c7a802bd2bda29" title="Performs forward propagation of permute algorithm.">SimdSynetPermuteForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -134,7 +134,7 @@ Functions</h2></td></tr>
 <p>Gets size of internal buffer used inside permute algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to permute context. It must be created by function <a class="el" href="group__synet__permute.html#gaab60c1320f3858dcde156c87e56a6437" title="Initializes permute algorithm.">SimdSynetPermuteInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to permute context. It must be created by function <a class="el" href="group__synet__permute.html#gaab60c1320f3858dcde156c87e56a6437" title="Initializes permute algorithm.">SimdSynetPermuteInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -177,7 +177,7 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of permute algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to permute context. It must be created by function <a class="el" href="group__synet__permute.html#gaab60c1320f3858dcde156c87e56a6437" title="Initializes permute algorithm.">SimdSynetPermuteInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to permute context. It must be created by function <a class="el" href="group__synet__permute.html#gaab60c1320f3858dcde156c87e56a6437" title="Initializes permute algorithm.">SimdSynetPermuteInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output image. </td></tr>
   </table>

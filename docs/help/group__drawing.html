@@ -977,7 +977,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 </div><div class="memdoc">
 
 <p>Creates font context. </p>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Sets font height.">SimdFontResize</a>, <a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80" title="Gets current font height.">SimdFontHeight</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Sets font height.">SimdFontResize</a>, <a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80" title="Gets current font height.">SimdFontHeight</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -1010,7 +1010,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p>Sets font height. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a new height of font. </td></tr>
   </table>
   </dd>
@@ -1038,7 +1038,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p>Gets current font height. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1087,7 +1087,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p>Measures size of region which need to draw current text with using of given font. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a pointer to text. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">width</td><td>- a measured width of region need to draw this text. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">height</td><td>- a measured height of region need to draw this text. </td></tr>
@@ -1174,7 +1174,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p>Draws a text on canvas at current position with using of given font and color. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a pointer to pixels data of canvas image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image. </td></tr>
