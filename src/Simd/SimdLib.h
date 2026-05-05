@@ -81,6 +81,14 @@ typedef unsigned __int64  uint64_t;
 #if _MSVC_LANG >= 201703L
 #define SIMD_CPP_2017_ENABLE
 #endif
+
+#if _MSVC_LANG >= 202002L
+#define SIMD_CPP_2020_ENABLE
+#endif
+
+#if _MSVC_LANG >= 202302L
+#define SIMD_CPP_2023_ENABLE
+#endif
 #else
 #if __cplusplus >= 201103L
 #define SIMD_CPP_2011_ENABLE
@@ -96,6 +104,10 @@ typedef unsigned __int64  uint64_t;
 
 #if __cplusplus >= 202002L
 #define SIMD_CPP_2020_ENABLE
+#endif
+
+#if __cplusplus >= 202302L
+#define SIMD_CPP_2023_ENABLE
 #endif
 #endif
 
