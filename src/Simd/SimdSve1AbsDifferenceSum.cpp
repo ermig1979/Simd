@@ -99,6 +99,20 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void ClearSums(svuint32_t& sum0, svuint32_t& sum1, svuint32_t& sum2)
+        {
+            sum0 = svdup_n_u32(0);
+            sum1 = svdup_n_u32(0);
+            sum2 = svdup_n_u32(0);
+        }
+
+        SIMD_INLINE void AddSums(const svuint32_t& sum0, const svuint32_t& sum1, const svuint32_t& sum2, uint64_t* sums)
+        {
+            sums[0] += svaddv_u32(svptrue_b32(), sum0);
+            sums[1] += svaddv_u32(svptrue_b32(), sum1);
+            sums[2] += svaddv_u32(svptrue_b32(), sum2);
+        }
+
         SIMD_INLINE void AbsDifferenceSums3(const svuint8_t& current, const uint8_t* background, const svuint8_t& _1, const svbool_t& mask, 
             svuint32_t &sum0, svuint32_t& sum1, svuint32_t& sum2)
         {
@@ -116,18 +130,28 @@ namespace Simd
             AbsDifferenceSums3(_current, background + stride, _1, mask, s6, s7, s8);
         }
 
-        SIMD_INLINE void ClearSums(svuint32_t& sum0, svuint32_t& sum1, svuint32_t& sum2)
+        SIMD_INLINE void AbsDifferenceSums3x2(const svuint8_t& c0, const svuint8_t& c1, const uint8_t* b, const svuint8_t& _1, const svbool_t& mask,
+            svuint32_t& s0, svuint32_t& s1, svuint32_t& s2, svuint32_t& s3, svuint32_t& s4, svuint32_t& s5)
         {
-            sum0 = svdup_n_u32(0);
-            sum1 = svdup_n_u32(0);
-            sum2 = svdup_n_u32(0);
+            svuint8_t b0 = svld1_u8(mask, b - 1);
+            s0 = svdot_u32(s0, svabd_x(mask, c0, b0), _1);
+            s3 = svdot_u32(s3, svabd_x(mask, c1, b0), _1);
+            svuint8_t b1 = svld1_u8(mask, b);
+            s1 = svdot_u32(s1, svabd_x(mask, c0, b1), _1);
+            s4 = svdot_u32(s4, svabd_x(mask, c1, b1), _1);
+            svuint8_t b2 = svld1_u8(mask, b + 1);
+            s2 = svdot_u32(s2, svabd_x(mask, c0, b2), _1);
+            s5 = svdot_u32(s5, svabd_x(mask, c1, b2), _1);
         }
 
-        SIMD_INLINE void AddSums(const svuint32_t& sum0, const svuint32_t& sum1, const svuint32_t& sum2, uint64_t* sums)
+        SIMD_INLINE void AbsDifferenceSums3x3x2(const uint8_t* c, size_t cStride, const uint8_t* b, size_t bStride, const svuint8_t& _1, const svbool_t& mask,
+            svuint32_t& s0, svuint32_t& s1, svuint32_t& s2, svuint32_t& s3, svuint32_t& s4, svuint32_t& s5, svuint32_t& s6, svuint32_t& s7, svuint32_t& s8)
         {
-            sums[0] += svaddv_u32(svptrue_b32(), sum0);
-            sums[1] += svaddv_u32(svptrue_b32(), sum1);
-            sums[2] += svaddv_u32(svptrue_b32(), sum2);
+            svuint8_t c0 = svld1_u8(mask, c), c1 = svld1_u8(mask, c + cStride);
+            AbsDifferenceSums3(c0, b - bStride, _1, mask, s0, s1, s2);
+            AbsDifferenceSums3x2(c1, c0, b, _1, mask, s0, s1, s2, s3, s4, s5);
+            AbsDifferenceSums3x2(c1, c0, b + bStride, _1, mask, s3, s4, s5, s6, s7, s8);
+            AbsDifferenceSums3(c1, b + 2 * bStride, _1, mask, s6, s7, s8);
         }
 
         void AbsDifferenceSums3x3(const uint8_t* current, size_t currentStride, const uint8_t* background, size_t backgroundStride, size_t width, size_t height, uint64_t* sums)
@@ -141,6 +165,7 @@ namespace Simd
 
             size_t A = svlen(svuint8_t());
             size_t widthA = AlignLo(width, A);
+            size_t height2 = AlignLo(height, 2);
             const svbool_t body = svwhilelt_b8(size_t(0), A);
             const svbool_t tail = svwhilelt_b8(widthA, width);
             svuint8_t _1 = svdup_n_u8(1);
@@ -148,7 +173,24 @@ namespace Simd
             for (size_t i = 0; i < 9; ++i)
                 sums[i] = 0;
             svuint32_t s0, s1, s2, s3, s4, s5, s6, s7, s8;
-            for (size_t row = 0; row < height; ++row)
+            size_t row = 0;
+            for (; row < height2; row += 2)
+            {
+                ClearSums(s0, s1, s2);
+                ClearSums(s3, s4, s5);
+                ClearSums(s6, s7, s8);
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    AbsDifferenceSums3x3x2(current + col, currentStride, background + col, backgroundStride, _1, body, s0, s1, s2, s3, s4, s5, s6, s7, s8);
+                if (widthA < width)
+                    AbsDifferenceSums3x3x2(current + col, currentStride, background + col, backgroundStride, _1, tail, s0, s1, s2, s3, s4, s5, s6, s7, s8);
+                AddSums(s0, s1, s2, sums + 0);
+                AddSums(s3, s4, s5, sums + 3);
+                AddSums(s6, s7, s8, sums + 6);
+                current += 2 * currentStride;
+                background += 2 * backgroundStride;
+            }
+            for (; row < height; ++row)
             {
                 ClearSums(s0, s1, s2);
                 ClearSums(s3, s4, s5);
