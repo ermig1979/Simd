@@ -165,6 +165,66 @@ namespace Simd
                 background += backgroundStride;
             }
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void AbsDifferenceSums3Masked(const svuint8_t& current, const uint8_t* background, const svuint8_t& _1, const svbool_t& mask,
+            svuint32_t& sum0, svuint32_t& sum1, svuint32_t& sum2)
+        {
+            sum0 = svdot_u32(sum0, svabd_z(mask, current, svld1_u8(mask, background - 1)), _1);
+            sum1 = svdot_u32(sum1, svabd_z(mask, current, svld1_u8(mask, background)), _1);
+            sum2 = svdot_u32(sum2, svabd_z(mask, current, svld1_u8(mask, background + 1)), _1);
+        }
+
+        SIMD_INLINE void AbsDifferenceSums3x3Masked(const uint8_t* c, const uint8_t* b, size_t stride, const uint8_t* m, const svuint8_t& _1, const svuint8_t& i, const svbool_t& mask,
+            svuint32_t& s0, svuint32_t& s1, svuint32_t& s2, svuint32_t& s3, svuint32_t& s4, svuint32_t& s5, svuint32_t& s6, svuint32_t& s7, svuint32_t& s8)
+        {
+            svuint8_t _c = svld1_u8(mask, c);
+            svuint8_t _m = svld1_u8(mask, m);
+            svbool_t _mask = svcmpeq_u8(mask, _m, i);
+            AbsDifferenceSums3Masked(_c, b - stride, _1, _mask, s0, s1, s2);
+            AbsDifferenceSums3Masked(_c, b, _1, _mask, s3, s4, s5);
+            AbsDifferenceSums3Masked(_c, b + stride, _1, _mask, s6, s7, s8);
+        }
+
+        void AbsDifferenceSums3x3Masked(const uint8_t* current, size_t currentStride, const uint8_t* background, size_t backgroundStride,
+            const uint8_t* mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t* sums)
+        {
+            assert(height > 2 && width > 2);
+
+            width -= 2;
+            height -= 2;
+            current += 1 + currentStride;
+            background += 1 + backgroundStride;
+            mask += 1 + maskStride;
+
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svwhilelt_b8(size_t(0), A);
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _index = svdup_n_u8(index), _1 = svdup_n_u8(1);
+
+            for (size_t i = 0; i < 9; ++i)
+                sums[i] = 0;
+            svuint32_t s0, s1, s2, s3, s4, s5, s6, s7, s8;
+            for (size_t row = 0; row < height; ++row)
+            {
+                ClearSums(s0, s1, s2);
+                ClearSums(s3, s4, s5);
+                ClearSums(s6, s7, s8);
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    AbsDifferenceSums3x3Masked(current + col, background + col, backgroundStride, mask + col, _1, _index, body, s0, s1, s2, s3, s4, s5, s6, s7, s8);
+                if (widthA < width)
+                    AbsDifferenceSums3x3Masked(current + col, background + col, backgroundStride, mask + col, _1, _index, tail, s0, s1, s2, s3, s4, s5, s6, s7, s8);
+                AddSums(s0, s1, s2, sums + 0);
+                AddSums(s3, s4, s5, sums + 3);
+                AddSums(s6, s7, s8, sums + 6);
+                current += currentStride;
+                background += backgroundStride;
+                mask += maskStride;
+            }
+        }
     }
 #endif
 }
