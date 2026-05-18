@@ -1,3 +1,5 @@
 /build
 /prj/txt/FullVersion.txt
 /src/Simd/SimdVersion.h
+.idea/
+cmake-build-*/

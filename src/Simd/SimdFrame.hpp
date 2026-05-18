@@ -201,6 +201,21 @@ namespace Simd
         Frame * Clone(Frame & buffer) const;
 
         /*!
+            Gets a copy of current frame by value.
+
+            \return a new Frame structure containing a copy of the frame.
+        */
+        Frame Copy() const;
+
+        /*!
+            Gets a copy of region of current frame bounded by the rectangle with specified coordinates, by value.
+
+            \param [in] rect - a rectangle which bounds the region.
+            \return a new Frame structure containing a copy of the region.
+        */
+        Frame Copy(const Rectangle<ptrdiff_t>& rect) const;
+
+        /*!
             Creates reference to other Frame structure.
 
             \note This function does not create a copy of the frame! It only creates a reference to the same frame.
@@ -678,6 +693,18 @@ namespace Simd
                                         flipped, timestamp, yuvType);
         Copy(*this, *clone);
         return clone;
+    }
+
+    template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Copy() const
+    {
+        Frame<A> copy(width, height, format, flipped, timestamp, yuvType);
+        Simd::Copy(*this, copy);
+        return copy;
+    }
+
+    template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Copy(const Rectangle<ptrdiff_t>& rect) const
+    {
+        return Region(rect).Copy();
     }
 
     template <template<class> class A> SIMD_INLINE Frame<A> & Frame<A>::operator = (const Frame<A> & frame)
