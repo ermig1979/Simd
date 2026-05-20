@@ -407,7 +407,7 @@ namespace Simd
                 const uint16_t* weight, float* sum, const float* bias, const float* params, const int* dstMask, const int* dstOffs, uint8_t* dst);
 
         protected:
-            void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
+            void SetAlgParam();
             virtual void SetWeight(const float* weight);
 
             void ForwardSingle(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
