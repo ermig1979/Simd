@@ -155,7 +155,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void Convolution16bNhwcSpecV3Body32x32(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* buf0)
+        SIMD_INLINE void Convolution16bNhwcSpecV3Body32x32_Any(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* buf0)
         {
             int dB = (int)a.macroD, dS = (int)a.microC, strideS = dS * 2, dW = 512, strideW = 64, strideB = dB * 4;
             const uint16_t* weight1 = weight0 + a.K * F;
@@ -195,6 +195,115 @@ namespace Simd
             }
             _tile_loadd(7, weight1, strideW);
             _tile_stream_loadd(5, src1 + offs[n1], strideS);
+
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_stored(0, buf0 + 0, strideB);
+            TileMoveToMemory(buf0 + 0, dB);
+
+            _tile_dpbf16ps(1, 4, 7);
+            _tile_stored(1, buf0 + F, strideB);
+            TileMoveToMemory(buf0 + F, dB);
+
+            _tile_dpbf16ps(2, 5, 6);
+            _tile_stored(2, buf1 + 0, strideB);
+            TileMoveToMemory(buf1 + 0, dB);
+
+            _tile_dpbf16ps(3, 5, 7);
+            _tile_stored(3, buf1 + F, strideB);
+            TileMoveToMemory(buf1 + F, dB);
+        }
+
+        SIMD_INLINE void Convolution16bNhwcSpecV3Body32x32_Yx3(const uint16_t* src0, const ConvParam& p, const AlgParam& a, const int* offs, size_t nK, int zero, const uint16_t* weight0, float* buf0)
+        {
+            int dB = (int)a.macroD, dS = (int)a.microC, strideS = dS * 4, dW = 512, strideW = 64, strideB = dB * 8;
+            const uint16_t* weight1 = weight0 + a.K * F;
+            const uint16_t* src1 = src0 + dS;
+            float* buf1 = buf0 + dB;
+
+            if (zero)
+            {
+                _tile_zero(0);
+                _tile_zero(1);
+                _tile_zero(2);
+                _tile_zero(3);
+            }
+            else
+            {
+                _tile_stream_loadd(0, buf0 + 0, strideB);
+                _tile_stream_loadd(1, buf0 + F, strideB);
+                _tile_stream_loadd(2, buf1 + 0, strideB);
+                _tile_stream_loadd(3, buf1 + F, strideB);
+            }
+
+            int n3 = (int)nK - 3, i = 0, o = offs[i];
+            _tile_stream_loadd(4, src0 + o, strideS);
+            _tile_loadd(6, weight0, strideW);
+
+            for (; i < n3; i += 3)
+            {
+                _tile_stream_loadd(5, src1 + o, strideS);
+                _tile_loadd(7, weight1, strideW);
+                weight1 += dW;
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_dpbf16ps(1, 4, 7);
+                o = offs[i + 1];
+                _tile_stream_loadd(4, src1 + o, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+                weight0 += dW;
+                _tile_loadd(6, weight0, strideW);
+                _tile_dpbf16ps(3, 5, 7);
+
+                //_tile_stream_loadd(4, src1 + o, strideS);
+                _tile_loadd(7, weight1, strideW);
+                weight1 += dW;
+                _tile_dpbf16ps(0, 5, 6);
+                _tile_dpbf16ps(1, 5, 7);
+                o = offs[i + 2];
+                _tile_stream_loadd(5, src1 + o, strideS);
+                _tile_dpbf16ps(2, 4, 6);
+                weight0 += dW;
+                _tile_loadd(6, weight0, strideW);
+                _tile_dpbf16ps(3, 4, 7);
+
+                //_tile_stream_loadd(5, src1 + o, strideS);
+                _tile_loadd(7, weight1, strideW);
+                weight1 += dW;
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_dpbf16ps(1, 4, 7);
+                o = offs[i + 3];
+                _tile_stream_loadd(4, src0 + o, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+                weight0 += dW;
+                _tile_loadd(6, weight0, strideW);
+                _tile_dpbf16ps(3, 5, 7);
+            }
+
+            _tile_stream_loadd(5, src1 + o, strideS);
+            _tile_loadd(7, weight1, strideW);
+            weight1 += dW;
+            _tile_dpbf16ps(0, 4, 6);
+            _tile_dpbf16ps(1, 4, 7);
+            o = offs[i + 1];
+            _tile_stream_loadd(4, src1 + o, strideS);
+            _tile_dpbf16ps(2, 5, 6);
+            weight0 += dW;
+            _tile_loadd(6, weight0, strideW);
+            _tile_dpbf16ps(3, 5, 7);
+
+            //_tile_stream_loadd(5, src1 + o, strideS);
+            _tile_loadd(7, weight1, strideW);
+            weight1 += dW;
+            _tile_dpbf16ps(0, 5, 6);
+            _tile_dpbf16ps(1, 5, 7);
+            o = offs[i + 2];
+            _tile_stream_loadd(5, src1 + o, strideS);
+            _tile_dpbf16ps(2, 4, 6);
+            weight0 += dW;
+            _tile_loadd(6, weight0, strideW);
+            _tile_dpbf16ps(3, 4, 7);
+
+            _tile_loadd(7, weight1, strideW);
+            //_tile_stream_loadd(5, src1 + o, strideS);
 
             _tile_dpbf16ps(0, 4, 6);
             _tile_stored(0, buf0 + 0, strideB);
@@ -334,8 +443,16 @@ namespace Simd
                 size_t i = 0;
                 if (dC > F)
                 {
-                    for (; i < nn; i += n)
-                        Convolution16bNhwcSpecV3Body32x32(src + i * dS, p, a, offs, nK, zero, weight, buf + i * dB);
+                    if (p.kernelX == 3 && 1)
+                    {
+                        for (; i < nn; i += n)
+                            Convolution16bNhwcSpecV3Body32x32_Yx3(src + i * dS, p, a, offs, nK, zero, weight, buf + i * dB);
+                    }
+                    else
+                    {
+                        for (; i < nn; i += n)
+                            Convolution16bNhwcSpecV3Body32x32_Any(src + i * dS, p, a, offs, nK, zero, weight, buf + i * dB);
+                    }
                     if (m)
                         Convolution16bNhwcSpecV3Body16x32(src + i * dS, p, a, offs, nK, zero, weight, buf + i * dB);
                 }
