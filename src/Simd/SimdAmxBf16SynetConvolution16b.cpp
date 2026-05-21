@@ -33,6 +33,8 @@ namespace Simd
             ConvParam param(batch, conv, compatibility);
             if (!param.Valid(SimdTensorData32f, SimdTensorData16b))
                 return NULL;
+            if (SynetConvolution16bNhwcSpecV3::Preferable(param))
+                return new AmxBf16::SynetConvolution16bNhwcSpecV3(param);
             if (SynetConvolution16bNhwcSpecV2::Preferable(param))
                 return new AmxBf16::SynetConvolution16bNhwcSpecV2(param);
             //if (SynetConvolution16bNhwcSpecV1::Preferable(param))
