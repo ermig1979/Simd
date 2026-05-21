@@ -443,7 +443,7 @@ namespace Simd
                 size_t i = 0;
                 if (dC > F)
                 {
-                    if (p.kernelX == 3 && 1)
+                    if (p.kernelX == 3 && 0)
                     {
                         for (; i < nn; i += n)
                             Convolution16bNhwcSpecV3Body32x32_Yx3(src + i * dS, p, a, offs, nK, zero, weight, buf + i * dB);
