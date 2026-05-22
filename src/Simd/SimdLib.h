@@ -1068,7 +1068,10 @@ extern "C"
 
         \fn void SimdEmpty();
 
-        \short Clears MMX registers (runs EMMS instruction). It is x86 specific functionality. 
+        \short Clears MMX state for x86 SIMD code paths.
+
+        On supported x86 builds this function executes \c EMMS (via \c _mm_empty()) when
+        the SSE4.1 backend is enabled at runtime. In other configurations it does nothing.
     */
     SIMD_API void SimdEmpty(void);
 
