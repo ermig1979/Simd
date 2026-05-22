@@ -1045,9 +1045,12 @@ extern "C"
 
         \fn size_t SimdGetThreadNumber();
 
-        \short Gets number of threads used by Simd Library to parallelize some algorithms.
+        \short Gets current global thread number configured for Simd Library parallel algorithms.
 
-        \return current thread number.
+        Returns the value set by ::SimdSetThreadNumber. By default this value is \c 1.
+        When set, it is restricted to the range \c [1, std::thread::hardware_concurrency()].
+
+        \return current configured thread number.
     */
     SIMD_API size_t SimdGetThreadNumber(void);
 
