@@ -1138,7 +1138,10 @@ namespace Simd
                 else                               
                     r->resample = JpegResampleRowGeneric;
             }
-            z->out.Resize(n * z->img_x * z->img_y + 1);
+            uint64_t outSize = (uint64_t)n * z->img_x * z->img_y + 1;
+            if (outSize > INT_MAX)
+                return JpegLoadError("too large", "Image too large to decode");
+            z->out.Resize((size_t)outSize);
             if (z->out.Empty()) 
                 return JpegLoadError("outofmem", "Out of memory");
             for (unsigned int j = 0; j < z->img_y; ++j) 
