@@ -1099,16 +1099,17 @@ extern "C"
 
         \fn void SimdSetFastMode(SimdBool value);
 
-        \short Sets the 'fast mode' state for floating-point subnormal handling.
+        \short Sets the current thread's 'fast mode' state for floating-point subnormal handling.
 
         When 'fast mode' is enabled, subnormal (denormalized) floating-point values are flushed
         to zero by the hardware rather than being processed normally, which avoids the significant
         performance penalty of software-assisted denormal handling.
 
         On x86 platforms with SSE4.1 support, sets or clears both the Flush-To-Zero (FTZ, bit 15)
-        and the Denormals-Are-Zero (DAZ, bit 6) bits in the MXCSR register. On ARM platforms with
-        Neon support, sets or clears the Flush-To-Zero (FTZ, bit 24) bit in the FPSCR (AArch32) or
-        FPCR (AArch64) register. Has no effect on platforms without hardware support for this feature.
+        and the Denormals-Are-Zero (DAZ, bit 6) bits in the current thread's MXCSR register. On ARM
+        platforms with Neon support, sets or clears the Flush-To-Zero (FTZ, bit 24) bit in the current
+        thread's FPSCR (AArch32) or FPCR (AArch64) register. Has no effect when this feature is not
+        supported or the corresponding SIMD backend is not enabled at runtime.
 
         \param [in] value - \c SimdTrue to enable fast mode, \c SimdFalse to disable it.
     */
