@@ -1119,7 +1119,15 @@ extern "C"
 
         \fn void SimdSetAmxFull();
 
-        \short Set configuration of AMX registers to maximum size. It is x86 specific functionality. Affect only on CPU with AMX support.
+        \short Loads the full AMX tile configuration for the current thread.
+
+        On x86 platforms with AMX-BF16 support, this function forces loading of a predefined full
+        AMX tile configuration into the current thread by calling the AMX tile configuration
+        instruction. It is intended for code paths that need the full tile layout used by the
+        library.
+
+        Has no effect on platforms without AMX-BF16 support or when the corresponding SIMD backend
+        is not enabled at runtime.
     */
     SIMD_API void SimdSetAmxFull(void);
 
