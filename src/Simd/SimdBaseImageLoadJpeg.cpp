@@ -899,7 +899,7 @@ namespace Simd
             }
             if (scan) 
                 return 1;
-            if (z->img_x* z->img_y * z->img_n > INT_MAX) 
+            if ((uint64_t)z->img_x * z->img_y * z->img_n > INT_MAX)
                 return JpegLoadError("too large", "Image too large to decode");
             int h_max = 1, v_max = 1;
             for (int i = 0; i < z->img_n; ++i) 
