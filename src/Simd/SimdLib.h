@@ -1079,9 +1079,19 @@ extern "C"
 
         \fn SimdBool SimdGetFastMode();
 
-        \short Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
+        \short Gets the current 'fast mode' state for floating-point subnormal handling.
 
-        \return current 'fast' mode.
+        When 'fast mode' is active, subnormal (denormalized) floating-point values are flushed
+        to zero by the hardware rather than being processed normally, which avoids the significant
+        performance penalty of software-assisted denormal handling.
+
+        On x86 platforms with SSE4.1 support, reads the MXCSR register and returns \c SimdTrue
+        when either the Flush-To-Zero (FTZ, bit 15) or the Denormals-Are-Zero (DAZ, bit 6)
+        bit is set. On ARM platforms with Neon support, reads the FPSCR (AArch32) or FPCR
+        (AArch64) register and returns \c SimdTrue when the Flush-To-Zero (FTZ, bit 24) bit
+        is set. On platforms without hardware support for this feature, always returns \c SimdFalse.
+
+        \return \c SimdTrue if fast mode is currently enabled, \c SimdFalse otherwise.
     */
     SIMD_API SimdBool SimdGetFastMode(void);
 
@@ -1089,9 +1099,18 @@ extern "C"
 
         \fn void SimdSetFastMode(SimdBool value);
 
-        \short Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
+        \short Sets the 'fast mode' state for floating-point subnormal handling.
 
-        \param [in] value - a value of 'fast' mode.
+        When 'fast mode' is enabled, subnormal (denormalized) floating-point values are flushed
+        to zero by the hardware rather than being processed normally, which avoids the significant
+        performance penalty of software-assisted denormal handling.
+
+        On x86 platforms with SSE4.1 support, sets or clears both the Flush-To-Zero (FTZ, bit 15)
+        and the Denormals-Are-Zero (DAZ, bit 6) bits in the MXCSR register. On ARM platforms with
+        Neon support, sets or clears the Flush-To-Zero (FTZ, bit 24) bit in the FPSCR (AArch32) or
+        FPCR (AArch64) register. Has no effect on platforms without hardware support for this feature.
+
+        \param [in] value - \c SimdTrue to enable fast mode, \c SimdFalse to disable it.
     */
     SIMD_API void SimdSetFastMode(SimdBool value);
 
