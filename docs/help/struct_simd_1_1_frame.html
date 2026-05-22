@@ -114,6 +114,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab290a93e205a0a559587a8ad71448313"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee79dc91ecfac4ab1e1698d2c9860375"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#aee79dc91ecfac4ab1e1698d2c9860375">Clone</a> (<a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;buffer) const</td></tr>
 <tr class="separator:aee79dc91ecfac4ab1e1698d2c9860375"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71bdb44bdab2a0046236a5960ebb6f57"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a71bdb44bdab2a0046236a5960ebb6f57">Copy</a> () const</td></tr>
+<tr class="separator:a71bdb44bdab2a0046236a5960ebb6f57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59d62b2aa8db42f1dcf63697e40a1c7e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a59d62b2aa8db42f1dcf63697e40a1c7e">Copy</a> (const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;rect) const</td></tr>
+<tr class="separator:a59d62b2aa8db42f1dcf63697e40a1c7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb0f5ceffbb62f990b89b200d6ce728c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#aeb0f5ceffbb62f990b89b200d6ce728c">operator=</a> (const <a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;frame)</td></tr>
 <tr class="separator:aeb0f5ceffbb62f990b89b200d6ce728c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a1fc672b62cee95f6bff6854c4aa01a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a5a1fc672b62cee95f6bff6854c4aa01a">operator=</a> (<a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&amp;frame)</td></tr>
@@ -753,6 +757,51 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a pointer to the new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure (not owner). The user must free this pointer after usage. </dd></dl>
+
+</div>
+</div>
+<a id="a71bdb44bdab2a0046236a5960ebb6f57" name="a71bdb44bdab2a0046236a5960ebb6f57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71bdb44bdab2a0046236a5960ebb6f57">&#9670;&#160;</a></span>Copy() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> Copy </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Gets a copy of current frame by value.</p>
+<dl class="section return"><dt>Returns</dt><dd>a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure containing a copy of the frame. </dd></dl>
+
+</div>
+</div>
+<a id="a59d62b2aa8db42f1dcf63697e40a1c7e" name="a59d62b2aa8db42f1dcf63697e40a1c7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59d62b2aa8db42f1dcf63697e40a1c7e">&#9670;&#160;</a></span>Copy() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> Copy </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rect</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Gets a copy of region of current frame bounded by the rectangle with specified coordinates, by value.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bounds the region. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure containing a copy of the region. </dd></dl>
 
 </div>
 </div>
