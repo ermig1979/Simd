@@ -1045,9 +1045,12 @@ extern "C"
 
         \fn size_t SimdGetThreadNumber();
 
-        \short Gets number of threads used by Simd Library to parallelize some algorithms.
+        \short Gets current global thread number configured for Simd Library parallel algorithms.
 
-        \return current thread number.
+        Returns the value set by ::SimdSetThreadNumber. By default this value is \c 1.
+        When set, it is restricted to the range \c [1, std::thread::hardware_concurrency()].
+
+        \return current configured thread number.
     */
     SIMD_API size_t SimdGetThreadNumber(void);
 
@@ -1065,7 +1068,10 @@ extern "C"
 
         \fn void SimdEmpty();
 
-        \short Clears MMX registers (runs EMMS instruction). It is x86 specific functionality. 
+        \short Clears MMX state for x86 SIMD code paths.
+
+        On supported x86 builds this function executes \c EMMS (via \c _mm_empty()) when
+        the SSE4.1 backend is enabled at runtime. In other configurations it does nothing.
     */
     SIMD_API void SimdEmpty(void);
 
@@ -1073,9 +1079,19 @@ extern "C"
 
         \fn SimdBool SimdGetFastMode();
 
-        \short Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
+        \short Gets the current 'fast mode' state for floating-point subnormal handling.
 
-        \return current 'fast' mode.
+        When 'fast mode' is active, subnormal (denormalized) floating-point values are flushed
+        to zero by the hardware rather than being processed normally, which avoids the significant
+        performance penalty of software-assisted denormal handling.
+
+        On x86 platforms with SSE4.1 support, reads the MXCSR register and returns \c SimdTrue
+        when either the Flush-To-Zero (FTZ, bit 15) or the Denormals-Are-Zero (DAZ, bit 6)
+        bit is set. On ARM platforms with Neon support, reads the FPSCR (AArch32) or FPCR
+        (AArch64) register and returns \c SimdTrue when the Flush-To-Zero (FTZ, bit 24) bit
+        is set. On platforms without hardware support for this feature, always returns \c SimdFalse.
+
+        \return \c SimdTrue if fast mode is currently enabled, \c SimdFalse otherwise.
     */
     SIMD_API SimdBool SimdGetFastMode(void);
 
@@ -1083,9 +1099,19 @@ extern "C"
 
         \fn void SimdSetFastMode(SimdBool value);
 
-        \short Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
+        \short Sets the current thread's 'fast mode' state for floating-point subnormal handling.
 
-        \param [in] value - a value of 'fast' mode.
+        When 'fast mode' is enabled, subnormal (denormalized) floating-point values are flushed
+        to zero by the hardware rather than being processed normally, which avoids the significant
+        performance penalty of software-assisted denormal handling.
+
+        On x86 platforms with SSE4.1 support, sets or clears both the Flush-To-Zero (FTZ, bit 15)
+        and the Denormals-Are-Zero (DAZ, bit 6) bits in the current thread's MXCSR register. On ARM
+        platforms with Neon support, sets or clears the Flush-To-Zero (FTZ, bit 24) bit in the current
+        thread's FPSCR (AArch32) or FPCR (AArch64) register. Has no effect when this feature is not
+        supported or the corresponding SIMD backend is not enabled at runtime.
+
+        \param [in] value - \c SimdTrue to enable fast mode, \c SimdFalse to disable it.
     */
     SIMD_API void SimdSetFastMode(SimdBool value);
 
@@ -1093,7 +1119,15 @@ extern "C"
 
         \fn void SimdSetAmxFull();
 
-        \short Set configuration of AMX registers to maximum size. It is x86 specific functionality. Affect only on CPU with AMX support.
+        \short Loads the full AMX tile configuration for the current thread.
+
+        On x86 platforms with AMX-BF16 support, this function forces loading of a predefined full
+        AMX tile configuration into the current thread by calling the AMX tile configuration
+        instruction. It is intended for code paths that need the full tile layout used by the
+        library.
+
+        Has no effect on platforms without AMX-BF16 support or when the corresponding SIMD backend
+        is not enabled at runtime.
     */
     SIMD_API void SimdSetAmxFull(void);
 
