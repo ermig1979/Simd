@@ -197,6 +197,18 @@ namespace Simd
 
         void ImageBmpLoader::SetConverters()
         {
+            if (_bpp == 8)
+            {
+                switch (_param.format)
+                {
+                case SimdPixelFormatBgr24: _toAny = Base::GrayToBgr; break;
+                case SimdPixelFormatRgb24: _toAny = Base::GrayToBgr; break;
+                case SimdPixelFormatBgra32: _toBgra = Base::GrayToBgra; break;
+                case SimdPixelFormatRgba32: _toBgra = Base::GrayToBgra; break;
+                default: break;
+                }
+                return;
+            }
             switch (_param.format)
             {
             case SimdPixelFormatGray8: _toAny = (_bpp == 32 ? Base::BgraToGray : (_bpp == 24 ? Base::BgrToGray : NULL)); break;
