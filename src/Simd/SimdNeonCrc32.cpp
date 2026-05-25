@@ -33,6 +33,33 @@ namespace Simd
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_ARM64_ENABLE)
     namespace Neon
     {
+        SIMD_INLINE void Crc32(uint32_t& crc, const uint64_t* p, const uint64_t* end)
+        {
+            while (p < end)
+                crc = __crc32d(crc, *p++);
+        }
+
+        SIMD_INLINE void Crc32(uint32_t& crc, const uint8_t* p, const uint8_t* end)
+        {
+            while (p < end)
+                crc = __crc32b(crc, *p++);
+        }
+
+        uint32_t Crc32(const void* src, size_t size)
+        {
+            uint8_t* nose = (uint8_t*)src;
+            uint64_t* body = (uint64_t*)AlignHi(nose, sizeof(uint64_t));
+            uint64_t* tail = (uint64_t*)AlignLo(nose + size, sizeof(uint64_t));
+
+            uint32_t crc = 0xFFFFFFFF;
+            Crc32(crc, nose, (uint8_t*)body);
+            Crc32(crc, body, tail);
+            Crc32(crc, (uint8_t*)tail, nose + size);
+            return ~crc;
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void Crc32c(uint32_t& crc, const uint64_t* p, const uint64_t* end)
         {
             while (p < end)

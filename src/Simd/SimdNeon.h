@@ -34,6 +34,8 @@ namespace Simd
     namespace Neon
     {
 #if defined(SIMD_ARM64_ENABLE)
+        uint32_t Crc32(const void* src, size_t size);
+
         uint32_t Crc32c(const void* src, size_t size);
 #endif
 

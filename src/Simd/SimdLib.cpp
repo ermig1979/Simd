@@ -260,10 +260,14 @@ SIMD_API void SimdSetAmxFull()
 #endif
 }
 
-
 SIMD_API uint32_t SimdCrc32(const void* src, size_t size)
 {
-    return Base::Crc32(src, size);
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_ARM64_ENABLE)
+    if (Neon::Enable)
+        return Neon::Crc32(src, size);
+    else
+#endif
+        return Base::Crc32(src, size);
 }
 
 SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
