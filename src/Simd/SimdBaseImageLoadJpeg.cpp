@@ -52,6 +52,11 @@ namespace Simd
         int JpegHuffman::Build(const int* count)
         {
             int i, j, k = 0;
+            int total = 0;
+            for (i = 0; i < 16; ++i)
+                total += count[i];
+            if (total > 256)
+                return JpegLoadError("bad DHT count", "Corrupt JPEG");
             for (i = 0; i < 16; ++i)
                 for (j = 0; j < count[i]; ++j)
                     size[k++] = (uint8_t)(i + 1);

@@ -319,7 +319,12 @@ namespace Simd
         static int jpeg__build_huffman(jpeg__huffman* h, int* count)
         {
             int i, j, k = 0;
+            int total = 0;
             unsigned int code;
+            for (i = 0; i < 16; ++i)
+                total += count[i];
+            if (total > 256)
+                return JpegLoadError("bad DHT count", "Corrupt JPEG");
             // build size list for each symbol (from JPEG spec)
             for (i = 0; i < 16; ++i)
                 for (j = 0; j < count[i]; ++j)
