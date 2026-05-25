@@ -109,6 +109,11 @@ namespace Test
             result = result && Crc32AutoTest(FUNC(Simd::Sse41::Crc32c), FUNC(SimdCrc32c));
 #endif 
 
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_ARM64_ENABLE)
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && Crc32AutoTest(FUNC(Simd::Neon::Crc32c), FUNC(SimdCrc32c));
+#endif
+
         return result;
     }
 }

@@ -33,6 +33,10 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
+#if defined(SIMD_ARM64_ENABLE)
+        uint32_t Crc32c(const void* src, size_t size);
+#endif
+
         void AbsDifference(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride,
             size_t width, size_t height);
 

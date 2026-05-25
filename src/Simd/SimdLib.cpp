@@ -274,6 +274,11 @@ SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
         return Sse41::Crc32c(src, size);
     else
 #endif
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_ARM64_ENABLE)
+    if (Neon::Enable)
+        return Neon::Crc32c(src, size);
+    else
+#endif
         return Base::Crc32c(src, size);
 }
 

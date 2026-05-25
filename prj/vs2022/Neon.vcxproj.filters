@@ -361,6 +361,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonAbsGradientSaturatedSum.cpp">
       <Filter>Neon\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonCrc32.cpp">
+      <Filter>Neon\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Neon">
