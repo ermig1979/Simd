@@ -46,7 +46,7 @@ namespace Simd
 
             size_t A = svlen(svuint8_t());
             size_t widthA = AlignLo(width, A);
-            const svbool_t body = svptrue_b32();
+            const svbool_t body = svptrue_b8();
             const svbool_t tail = svwhilelt_b8(widthA, width);
 
             svuint8_t _1 = svdup_n_u8(1);
