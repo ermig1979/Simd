@@ -994,7 +994,7 @@ namespace Simd
                 return false;
             if (_paletteChannels)
             {
-                if (_palette.size == 0 || chunk.size > _palette.size || !_stream.CanRead(chunk.size))
+                if (_palette.size == 0 || chunk.size > _palette.size / 4 || !_stream.CanRead(chunk.size))
                     return false;
                 _paletteChannels = 4;
                 for (size_t i = 0; i < chunk.size; ++i)
