@@ -30,6 +30,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve1Deinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Interleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Operation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve1Statistic.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve1.h" />

@@ -252,6 +252,7 @@ SIMD_API void SimdEmpty()
         Sse41::Empty();
 #endif
 }
+
 SIMD_API void SimdSetAmxFull()
 {
 #ifdef SIMD_AMXBF16_ENABLE
@@ -4952,6 +4953,11 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::GetStatistic(src, stride, width, height, min, max, average);
+    else
+#endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

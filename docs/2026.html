@@ -52,10 +52,16 @@
  <li>Base implementation, AMX-BF16 optimizations of class SynetConvolution16bNhwcSpecV3.</li>
  <li>NEON optimizations of function Crc32c.</li>
  <li>NEON optimizations of function Crc32.</li>
+ <li>Support of 8-bit BMP in function ImageLoadBmp.</li>
+ <li>SVE optimizations of function GetStatistics.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Error in function SimdAlignment for SVE (ARM).</li>
+ <li>Integer overflow in Base implementation of function JpegProcessFrameHeader.</li>
+ <li>Checking of correctness in Base::JpegHuffman::Build.</li>
+ <li>Checking of correctness in Base::JpegToRgba.</li>
+ <li>Error in ImagePngLoader::ReadTransparency.</li>
 </ul>
 
 <h4>Documentation</h4>
@@ -75,6 +81,22 @@
  <li>Description of function SimdGetFastMode.</li>
  <li>Description of function SimdSetFastMode.</li>
  <li>Description of function SimdSetAmxFull.</li>
+ <li>Description of function SimdCrc32.</li>
+ <li>Description of function SimdCrc32c.</li>
+ <li>Description of function SimdAbsDifference.</li>
+ <li>Description of function SimdAbsDifferenceSum.</li>
+ <li>Description of function SimdAbsDifferenceSumMasked.</li>
+ <li>Description of function SimdAbsDifferenceSums3x3.</li>
+ <li>Description of function SimdAbsDifferenceSums3x3Masked.</li>
+ <li>Description of function SimdAbsGradientSaturatedSum.</li>
+ <li>Description of function SimdAddFeatureDifference.</li>
+ <li>Description of function SimdAlphaBlending.</li>
+ <li>Description of function SimdAlphaBlending2x.</li>
+ <li>Description of function SimdAlphaBlendingBgraToYuv420p.</li>
+ <li>Description of function SimdAlphaBlendingUniform.</li>
+ <li>Description of function SimdAlphaFilling.</li>
+ <li>Description of function SimdAlphaPremultiply.</li>
+ <li>Description of function SimdAlphaUnpremultiply.</li>
 </ul>
 
 <a href="#HOME">Home</a>
