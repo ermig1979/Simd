@@ -1135,13 +1135,13 @@ extern "C"
 
         \fn uint32_t SimdCrc32(const void * src, size_t size);
 
-        \short Gets 32-bit cyclic redundancy check (CRC32) for current data.
+        \short Calculates 32-bit cyclic redundancy check (CRC-32) for input data.
 
-        Calculation is performed for polynomial 0xEDB88320.
+        The function uses reflected polynomial 0xEDB88320, initial value 0xFFFFFFFF and final bitwise inversion.
 
         \param [in] src - a pointer to data.
         \param [in] size - a size of the data.
-        \return 32-bit cyclic redundancy check (CRC32).
+        \return 32-bit cyclic redundancy check (CRC-32) of the input buffer.
     */
     SIMD_API uint32_t SimdCrc32(const void* src, size_t size);
 
@@ -1149,13 +1149,14 @@ extern "C"
 
         \fn uint32_t SimdCrc32c(const void * src, size_t size);
 
-        \short Gets 32-bit cyclic redundancy check (CRC32c) for current data.
+        \short Calculates 32-bit cyclic redundancy check (CRC-32C, Castagnoli) for input data.
 
-        Calculation is performed for polynomial 0x1EDC6F41 (Castagnoli-crc).
+        The function uses Castagnoli polynomial (reflected form 0x82F63B78, normal form 0x1EDC6F41),
+        initial value 0xFFFFFFFF and final bitwise inversion.
 
         \param [in] src - a pointer to data.
         \param [in] size - a size of the data.
-        \return 32-bit cyclic redundancy check (CRC32c).
+        \return 32-bit cyclic redundancy check (CRC-32C) of the input buffer.
     */
     SIMD_API uint32_t SimdCrc32c(const void * src, size_t size);
 
@@ -1163,9 +1164,13 @@ extern "C"
 
         \fn void SimdAbsDifference(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, uint8_t * c, size_t cStride, size_t width, size_t height);
 
-        \short Gets absolute difference of two gray 8-bit images, pixel by pixel.
+        \short Calculates per-pixel absolute difference of two gray 8-bit images.
 
-        The three images must have the same width and height.
+        The destination pixel values are computed as:
+        \verbatim
+        c[x, y] = abs(a[x, y] - b[x, y]).
+        \endverbatim
+        All three images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::AbsDifference(const View<A> & a, const View<A> & b, View<A> & c).
 
@@ -1184,8 +1189,12 @@ extern "C"
 
         \fn void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 
-        \short Gets sum of absolute difference of two gray 8-bit images.
+        \short Calculates sum of absolute differences (SAD) of two gray 8-bit images.
 
+        The result value is computed as:
+        \verbatim
+        sum = Σ abs(a[x, y] - b[x, y]).
+        \endverbatim
         Both images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::AbsDifferenceSum(const View<A> & a, const View<A> & b, uint64_t & sum).
@@ -1204,9 +1213,12 @@ extern "C"
 
         \fn void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
-        \short Gets sum of absolute difference of two gray 8-bit images based on gray 8-bit mask.
+        \short Calculates masked sum of absolute differences (SAD) of two gray 8-bit images.
 
-        Gets the absolute difference sum for all points when mask[i] == index.
+        The result value is computed for points where mask[x, y] equals index:
+        \verbatim
+        sum = Σ abs(a[x, y] - b[x, y]), for all (x, y) where mask[x, y] == index.
+        \endverbatim
         Both images and mask must have the same width and height.
 
         \note This function has a C++ wrapper Simd::AbsDifferenceSum(const View<A>& a, const View<A>& b, const View<A>& mask, uint8_t index, uint64_t & sum).
@@ -1229,11 +1241,16 @@ extern "C"
 
         \fn void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums);
 
-        \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3.
+        \short Calculates 9 sums of absolute differences for all shifts in 3x3 neighborhood.
 
         Both images must have the same width and height. The image height and width must be equal or greater 3.
-        The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
-        The shifts are lain in the range [-1, 1] for axis x and y.
+        The sums are computed for the central part of current image (without one-pixel border) and for background image
+        shifted by dx and dy in range [-1, 1]:
+        \verbatim
+        sums[(dy + 1)*3 + (dx + 1)] = Σ abs(current[x, y] - background[x + dx, y + dy]),
+                                       x = 1..width-2, y = 1..height-2.
+        \endverbatim
+        Output order is: (-1,-1), (0,-1), (1,-1), (-1,0), (0,0), (1,0), (-1,1), (0,1), (1,1).
 
         \note This function has a C++ wrapper Simd::AbsDifferenceSums3x3(const View<A>& current, const View<A>& background, uint64_t * sums).
 
@@ -1252,12 +1269,15 @@ extern "C"
 
         \fn void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride, const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 
-        \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask.
+        \short Calculates 9 masked sums of absolute differences for all shifts in 3x3 neighborhood.
 
-        Gets the absolute difference sums for all points when mask[i] == index.
+        The sums are computed only for points where mask[x, y] equals index:
+        \verbatim
+        sums[(dy + 1)*3 + (dx + 1)] = Σ abs(current[x, y] - background[x + dx, y + dy]),
+                                       for x = 1..width-2, y = 1..height-2 and mask[x, y] == index.
+        \endverbatim
         Both images and mask must have the same width and height. The image height and width must be equal or greater 3.
-        The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
-        The shifts are lain in the range [-1, 1] for axis x and y.
+        Output order is: (-1,-1), (0,-1), (1,-1), (-1,0), (0,0), (1,0), (-1,1), (0,1), (1,1).
 
         \note This function has a C++ wrapper Simd::AbsDifferenceSums3x3(const View<A>& current, const View<A>& background, const View<A>& mask, uint8_t index, uint64_t * sums).
 
