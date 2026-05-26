@@ -472,6 +472,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale16b.cpp">
       <Filter>Base\Synet\Scale</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV3.cpp">
+      <Filter>Base\Synet\Convolution</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

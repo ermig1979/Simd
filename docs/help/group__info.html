@@ -54,7 +54,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:gab492c1cf423815199787e5262e46573e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets version of Simd Library.  <a href="group__info.html#gab492c1cf423815199787e5262e46573e">More...</a><br /></td></tr>
 <tr class="separator:gab492c1cf423815199787e5262e46573e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad14c64b5882fb15ce8bc683bec8c0da1"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#gad14c64b5882fb15ce8bc683bec8c0da1">SimdCpuDesc</a> (<a class="el" href="group__c__types.html#ga111a9cea2240175930bb547eb01811eb">SimdCpuDescType</a> type)</td></tr>
-<tr class="memdesc:gad14c64b5882fb15ce8bc683bec8c0da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets description of CPU and Simd Library.  <a href="group__info.html#gad14c64b5882fb15ce8bc683bec8c0da1">More...</a><br /></td></tr>
+<tr class="memdesc:gad14c64b5882fb15ce8bc683bec8c0da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a text description of the CPU.  <a href="group__info.html#gad14c64b5882fb15ce8bc683bec8c0da1">More...</a><br /></td></tr>
 <tr class="separator:gad14c64b5882fb15ce8bc683bec8c0da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae2699c71293d16a769d1b18d33efdcaa"><td class="memItemLeft" align="right" valign="top">SIMD_API uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#gae2699c71293d16a769d1b18d33efdcaa">SimdCpuInfo</a> (<a class="el" href="group__c__types.html#ga1fae7864d7881bf1ec39a5186cabbb74">SimdCpuInfoType</a> type)</td></tr>
 <tr class="memdesc:gae2699c71293d16a769d1b18d33efdcaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets information about CPU and Simd Library.  <a href="group__info.html#gae2699c71293d16a769d1b18d33efdcaa">More...</a><br /></td></tr>
@@ -86,7 +86,18 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets version of Simd Library. </p>
-<dl class="section return"><dt>Returns</dt><dd>string with version of Simd Library (major version number, minor version number, release number, number of SVN's commits). </dd></dl>
+<p >Returns a pointer to a null-terminated, statically allocated string that encodes the library version. The format of the string is: </p><pre class="fragment">major.minor.release[.branch-sha]
+</pre><p> where <b>major</b>, <b>minor</b> and <b>release</b> are numeric components taken from the library's version file, and the optional <b>branch</b> and <b>sha</b> suffix identify the Git branch name and short commit hash at build time (e.g. <code>"7.1.161.main-a1b2c3d"</code>). When version information is not available at build time the function returns <code>"unknown"</code>.</p>
+<p >The returned pointer is valid for the lifetime of the process and must not be freed.</p>
+<p >Using example: </p><pre class="fragment">#include "Simd/SimdLib.h"
+#include &lt;iostream&gt;
+
+int main()
+{
+    std::cout &lt;&lt; "Simd Library version: " &lt;&lt; SimdVersion() &lt;&lt; std::endl;
+    return 0;
+}
+</pre><dl class="section return"><dt>Returns</dt><dd>a pointer to a static null-terminated string with the version of Simd Library. </dd></dl>
 
 </div>
 </div>
@@ -106,23 +117,27 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets description of CPU and Simd Library. </p>
-<dl class="section note"><dt>Note</dt><dd>See enumeration <a class="el" href="group__c__types.html#ga111a9cea2240175930bb547eb01811eb">SimdCpuDescType</a>.</dd></dl>
+<p>Gets a text description of the CPU. </p>
+<p >Returns a pointer to a null-terminated string whose content depends on the requested <a class="el" href="group__c__types.html#ga111a9cea2240175930bb547eb01811eb">SimdCpuDescType</a>:</p><ul>
+<li><a class="el" href="group__c__types.html#gga111a9cea2240175930bb547eb01811eba568fe08c74a07ad02c864add946d601a">SimdCpuDescModel</a> — the CPU brand/model name string (e.g. <code>"Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"</code>). On x86 it is read from the CPUID brand-string leaves; on Linux/ARM it is obtained via <code>lscpu</code>. An empty string is returned on platforms where the model name is not available (Apple, Android).</li>
+</ul>
+<p >The returned pointer is valid for the lifetime of the process and must not be freed. For an unknown or unsupported <em>type</em> value the function returns <code>NULL</code>.</p>
+<dl class="section note"><dt>Note</dt><dd>See enumeration <a class="el" href="group__c__types.html#ga111a9cea2240175930bb547eb01811eb">SimdCpuDescType</a> for the full list of supported types.</dd></dl>
 <p>Using example: </p><pre class="fragment">#include "Simd/SimdLib.h"
 #include &lt;iostream&gt;
 
 int main()
 {
-    std::cout &lt;&lt; "CPU: " &lt;&lt; SimdCpuDesc(SimdCpuDescModel) &lt;&lt; std::endl;
+    std::cout &lt;&lt; "CPU model: " &lt;&lt; SimdCpuDesc(SimdCpuDescModel) &lt;&lt; std::endl;
     return 0;
 }
 </pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a type of required description. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a type of required description. See <a class="el" href="group__c__types.html#ga111a9cea2240175930bb547eb01811eb">SimdCpuDescType</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a value which contains description of CPU and Simd Library. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to a static null-terminated string with the requested CPU description, or <code>NULL</code> if <em>type</em> is not supported. </dd></dl>
 
 </div>
 </div>
@@ -143,6 +158,13 @@ int main()
 </div><div class="memdoc">
 
 <p>Gets information about CPU and Simd Library. </p>
+<p >Depending on the requested <a class="el" href="group__c__types.html#ga1fae7864d7881bf1ec39a5186cabbb74">SimdCpuInfoType</a>, the function returns one of the following kinds of values:</p><ul>
+<li>CPU topology: number of sockets, physical cores, or logical threads.</li>
+<li>Cache / RAM sizes in bytes (L1 data cache, L2 cache, L3 cache, physical RAM).</li>
+<li>SIMD extension availability: 1 if the extension is supported and enabled by the library, 0 otherwise. The extensions covered are SSE4.1 (and below), AVX2 (and FMA/AVX), AVX-512BW (and AVX-512F), AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, SVE, and HVX.</li>
+<li>SVE vector width in bytes (<a class="el" href="group__c__types.html#gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357">SimdCpuInfoSveSize</a>).</li>
+<li>Current CPU core frequency in Hz (<a class="el" href="group__c__types.html#gga1fae7864d7881bf1ec39a5186cabbb74ac784f409bccc42223efa7ae4d63d241f">SimdCpuInfoCurrentFrequency</a>); returns 0 if unavailable on the platform.</li>
+</ul>
 <dl class="section note"><dt>Note</dt><dd>See enumeration <a class="el" href="group__c__types.html#ga1fae7864d7881bf1ec39a5186cabbb74">SimdCpuInfoType</a>.</dd></dl>
 <p>Using example: </p><pre class="fragment">#include "Simd/SimdLib.h"
 #include &lt;iostream&gt;
@@ -162,6 +184,10 @@ int main()
     std::cout &lt;&lt; "AVX-512VNNI: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "AMX-BF16: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAmxBf16) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "ARM-NEON: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "ARM-SVE: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoSve) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "ARM-SVE size: " &lt;&lt; SimdCpuInfo(SimdCpuInfoSveSize) * 8 &lt;&lt; " bits" &lt;&lt; std::endl;
+    std::cout &lt;&lt; "HVX: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoHvx) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "Current frequency: " &lt;&lt; SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000000 &lt;&lt; " MHz" &lt;&lt; std::endl;
     return 0;
 }
 </pre><dl class="params"><dt>Parameters</dt><dd>
@@ -170,7 +196,7 @@ int main()
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a value which contains information about CPU and Simd Library. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a value whose meaning depends on <em>type:</em> a count (topology), size in bytes (cache/RAM), 1 or 0 (SIMD availability), size in bytes (SVE vector width), or frequency in Hz (current CPU frequency). </dd></dl>
 
 </div>
 </div>

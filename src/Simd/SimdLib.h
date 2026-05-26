@@ -81,6 +81,14 @@ typedef unsigned __int64  uint64_t;
 #if _MSVC_LANG >= 201703L
 #define SIMD_CPP_2017_ENABLE
 #endif
+
+#if _MSVC_LANG >= 202002L
+#define SIMD_CPP_2020_ENABLE
+#endif
+
+#if _MSVC_LANG >= 202302L
+#define SIMD_CPP_2023_ENABLE
+#endif
 #else
 #if __cplusplus >= 201103L
 #define SIMD_CPP_2011_ENABLE
@@ -96,6 +104,10 @@ typedef unsigned __int64  uint64_t;
 
 #if __cplusplus >= 202002L
 #define SIMD_CPP_2020_ENABLE
+#endif
+
+#if __cplusplus >= 202302L
+#define SIMD_CPP_2023_ENABLE
 #endif
 #endif
 
@@ -1002,11 +1014,12 @@ extern "C"
 
         The value is determined once at library initialization time by probing the active SIMD extensions
         and is constant for the lifetime of the process:
+        - \b 128 bytes — HVX (Qualcomm Hexagon)
         - \b 64 bytes — AVX-512 (x86, when either AVX-512BW or AVX-512VNNI is available)
         - \b 32 bytes — AVX2 (x86)
         - \b 16 bytes — SSE4.1 (x86) or NEON (ARM)
-        - <b>sizeof(HVX_Vector)</b> — HVX (Qualcomm Hexagon)
         - <b>sizeof(void*)</b> — scalar fallback (no SIMD extensions detected)
+        - \b SVE vector size for current CPU in bytes — when SVE is available.
 
         The returned value is always a power of two and equals the value of the \c SIMD_ALIGN compile-time
         constant used internally by the library.

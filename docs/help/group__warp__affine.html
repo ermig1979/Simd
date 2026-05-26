@@ -228,7 +228,7 @@ if (context)
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to warp affine context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__warp__affine.html#gaa1b41e25cb57778b2320bbf6943a8dcc" title="Performs warp affine for current image.">SimdWarpAffineRun</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to warp affine context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__warp__affine.html#gaa1b41e25cb57778b2320bbf6943a8dcc" title="Performs warp affine for current image.">SimdWarpAffineRun</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -268,7 +268,7 @@ if (context)
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__warp__affine.html#ga03ebb0fcd0f0bb257db1662fd30d7333" title="Performs warp affine for current image.">Simd::WarpAffine</a>(const View&amp; src, const float * mat, View&amp; dst, SimdWarpAffineFlags flags = SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant, const uint8_t* border = NULL).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a warp affine context. It must be created by function <a class="el" href="group__warp__affine.html#ga190e3594adfa696ac4c75863dbd04c4f" title="Creates wrap affine context.">SimdWarpAffineInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a warp affine context. It must be created by function <a class="el" href="group__warp__affine.html#ga190e3594adfa696ac4c75863dbd04c4f" title="Creates wrap affine context.">SimdWarpAffineInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the filtered output image. </td></tr>
   </table>

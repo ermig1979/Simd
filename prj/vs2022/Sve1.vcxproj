@@ -22,12 +22,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1AbsGradientSaturatedSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve1Background.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1BgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Deinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Interleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Operation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve1Statistic.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve1.h" />

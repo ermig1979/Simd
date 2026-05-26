@@ -313,7 +313,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to shift detector context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16">SimdShiftDetectorSetBackground</a>, <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954">SimdShiftDetectorEstimate</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to shift detector context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16">SimdShiftDetectorSetBackground</a>, <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954">SimdShiftDetectorEstimate</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -358,7 +358,7 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bkg</td><td>- a pointer to pixels data of background image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bkgStride</td><td>- a row size of the background image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">makeCopy</td><td>- if true, copy of the background will be created. </td></tr>
@@ -451,7 +451,7 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">curr</td><td>- a pointer to pixels data of current image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">currStride</td><td>- a row size of the current image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">currWidth</td><td>- a width of current image. </td></tr>

@@ -19,6 +19,12 @@
     <Filter Include="Sve1\Convert">
       <UniqueIdentifier>{9b881931-b5e2-4e02-85e0-c84c24f7eacb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve1\Statistics">
+      <UniqueIdentifier>{b123ae36-270f-4b5c-8b87-372f66f78ba6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sve1\Motion">
+      <UniqueIdentifier>{c617af02-4208-4080-9349-d24bcf67c558}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve1.h">
@@ -46,6 +52,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve1BgrToRgb.cpp">
       <Filter>Sve1\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifferenceSum.cpp">
+      <Filter>Sve1\Statistics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve1Background.cpp">
+      <Filter>Sve1\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve1Statistic.cpp">
+      <Filter>Sve1\Statistics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -50,24 +50,43 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga622a23654c42d4453321dce478406455"><td class="memItemLeft" align="right" valign="top"><a id="ga622a23654c42d4453321dce478406455" name="ga622a23654c42d4453321dce478406455"></a>
-SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><b>SimdEmpty</b> (void)</td></tr>
-<tr class="memdesc:ga622a23654c42d4453321dce478406455"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears MMX registers (runs EMMS instruction). It is x86 specific functionality. <br /></td></tr>
+<tr class="memitem:ga622a23654c42d4453321dce478406455"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cpu__flags.html#ga622a23654c42d4453321dce478406455">SimdEmpty</a> (void)</td></tr>
+<tr class="memdesc:ga622a23654c42d4453321dce478406455"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears MMX state for x86 SIMD code paths.  <a href="group__cpu__flags.html#ga622a23654c42d4453321dce478406455">More...</a><br /></td></tr>
 <tr class="separator:ga622a23654c42d4453321dce478406455"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad032143094f20a39d0fa7abb7a3a4fbc"><td class="memItemLeft" align="right" valign="top">SIMD_API <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cpu__flags.html#gad032143094f20a39d0fa7abb7a3a4fbc">SimdGetFastMode</a> (void)</td></tr>
-<tr class="memdesc:gad032143094f20a39d0fa7abb7a3a4fbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.  <a href="group__cpu__flags.html#gad032143094f20a39d0fa7abb7a3a4fbc">More...</a><br /></td></tr>
+<tr class="memdesc:gad032143094f20a39d0fa7abb7a3a4fbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current 'fast mode' state for floating-point subnormal handling.  <a href="group__cpu__flags.html#gad032143094f20a39d0fa7abb7a3a4fbc">More...</a><br /></td></tr>
 <tr class="separator:gad032143094f20a39d0fa7abb7a3a4fbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad98c95021e9fcf3a06d59d29ba4906c3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cpu__flags.html#gad98c95021e9fcf3a06d59d29ba4906c3">SimdSetFastMode</a> (<a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> value)</td></tr>
-<tr class="memdesc:gad98c95021e9fcf3a06d59d29ba4906c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.  <a href="group__cpu__flags.html#gad98c95021e9fcf3a06d59d29ba4906c3">More...</a><br /></td></tr>
+<tr class="memdesc:gad98c95021e9fcf3a06d59d29ba4906c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the current thread's 'fast mode' state for floating-point subnormal handling.  <a href="group__cpu__flags.html#gad98c95021e9fcf3a06d59d29ba4906c3">More...</a><br /></td></tr>
 <tr class="separator:gad98c95021e9fcf3a06d59d29ba4906c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0308ab59c965b9e264a377866123cfeb"><td class="memItemLeft" align="right" valign="top"><a id="ga0308ab59c965b9e264a377866123cfeb" name="ga0308ab59c965b9e264a377866123cfeb"></a>
-SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><b>SimdSetAmxFull</b> (void)</td></tr>
-<tr class="memdesc:ga0308ab59c965b9e264a377866123cfeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set configuration of AMX registers to maximum size. It is x86 specific functionality. Affect only on CPU with AMX support. <br /></td></tr>
+<tr class="memitem:ga0308ab59c965b9e264a377866123cfeb"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cpu__flags.html#ga0308ab59c965b9e264a377866123cfeb">SimdSetAmxFull</a> (void)</td></tr>
+<tr class="memdesc:ga0308ab59c965b9e264a377866123cfeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the full AMX tile configuration for the current thread.  <a href="group__cpu__flags.html#ga0308ab59c965b9e264a377866123cfeb">More...</a><br /></td></tr>
 <tr class="separator:ga0308ab59c965b9e264a377866123cfeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions for CPU flags management. </p>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ga622a23654c42d4453321dce478406455" name="ga622a23654c42d4453321dce478406455"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga622a23654c42d4453321dce478406455">&#9670;&#160;</a></span>SimdEmpty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdEmpty </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Clears MMX state for x86 SIMD code paths. </p>
+<p >On supported x86 builds this function executes <code>EMMS</code> (via <code>_mm_empty()</code>) when the SSE4.1 backend is enabled at runtime. In other configurations it does nothing. </p>
+
+</div>
+</div>
 <a id="gad032143094f20a39d0fa7abb7a3a4fbc" name="gad032143094f20a39d0fa7abb7a3a4fbc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gad032143094f20a39d0fa7abb7a3a4fbc">&#9670;&#160;</a></span>SimdGetFastMode()</h2>
 
@@ -84,8 +103,10 @@ SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><b>SimdSetAmxFu
       </table>
 </div><div class="memdoc">
 
-<p>Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers. </p>
-<dl class="section return"><dt>Returns</dt><dd>current 'fast' mode. </dd></dl>
+<p>Gets the current 'fast mode' state for floating-point subnormal handling. </p>
+<p >When 'fast mode' is active, subnormal (denormalized) floating-point values are flushed to zero by the hardware rather than being processed normally, which avoids the significant performance penalty of software-assisted denormal handling.</p>
+<p >On x86 platforms with SSE4.1 support, reads the MXCSR register and returns <code>SimdTrue</code> when either the Flush-To-Zero (FTZ, bit 15) or the Denormals-Are-Zero (DAZ, bit 6) bit is set. On ARM platforms with Neon support, reads the FPSCR (AArch32) or FPCR (AArch64) register and returns <code>SimdTrue</code> when the Flush-To-Zero (FTZ, bit 24) bit is set. On platforms without hardware support for this feature, always returns <code>SimdFalse</code>.</p>
+<dl class="section return"><dt>Returns</dt><dd><code>SimdTrue</code> if fast mode is currently enabled, <code>SimdFalse</code> otherwise. </dd></dl>
 
 </div>
 </div>
@@ -105,13 +126,37 @@ SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><b>SimdSetAmxFu
       </table>
 </div><div class="memdoc">
 
-<p>Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers. </p>
+<p>Sets the current thread's 'fast mode' state for floating-point subnormal handling. </p>
+<p >When 'fast mode' is enabled, subnormal (denormalized) floating-point values are flushed to zero by the hardware rather than being processed normally, which avoids the significant performance penalty of software-assisted denormal handling.</p>
+<p >On x86 platforms with SSE4.1 support, sets or clears both the Flush-To-Zero (FTZ, bit 15) and the Denormals-Are-Zero (DAZ, bit 6) bits in the current thread's MXCSR register. On ARM platforms with Neon support, sets or clears the Flush-To-Zero (FTZ, bit 24) bit in the current thread's FPSCR (AArch32) or FPCR (AArch64) register. Has no effect when this feature is not supported or the corresponding SIMD backend is not enabled at runtime.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a value of 'fast' mode. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- <code>SimdTrue</code> to enable fast mode, <code>SimdFalse</code> to disable it. </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ga0308ab59c965b9e264a377866123cfeb" name="ga0308ab59c965b9e264a377866123cfeb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0308ab59c965b9e264a377866123cfeb">&#9670;&#160;</a></span>SimdSetAmxFull()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSetAmxFull </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Loads the full AMX tile configuration for the current thread. </p>
+<p >On x86 platforms with AMX-BF16 support, this function forces loading of a predefined full AMX tile configuration into the current thread by calling the AMX tile configuration instruction. It is intended for code paths that need the full tile layout used by the library.</p>
+<p >Has no effect on platforms without AMX-BF16 support or when the corresponding SIMD backend is not enabled at runtime. </p>
 
 </div>
 </div>

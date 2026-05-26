@@ -72,4 +72,11 @@ namespace Test
         return false; \
     } 
 
-#endif//__TestCompare_h__
+#define TEST_CHECK_VALUE_AS_INT(name) \
+    if(name##1 != name##2) \
+    { \
+        TEST_LOG_SS(Error, "Error " << #name << ": (" << (int)name##1  << " != " << (int)name##2 << ")! "); \
+        return false; \
+    }
+
+#endif

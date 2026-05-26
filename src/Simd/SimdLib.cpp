@@ -252,6 +252,7 @@ SIMD_API void SimdEmpty()
         Sse41::Empty();
 #endif
 }
+
 SIMD_API void SimdSetAmxFull()
 {
 #ifdef SIMD_AMXBF16_ENABLE
@@ -260,10 +261,14 @@ SIMD_API void SimdSetAmxFull()
 #endif
 }
 
-
 SIMD_API uint32_t SimdCrc32(const void* src, size_t size)
 {
-    return Base::Crc32(src, size);
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_ARM64_ENABLE)
+    if (Neon::Enable)
+        return Neon::Crc32(src, size);
+    else
+#endif
+        return Base::Crc32(src, size);
 }
 
 SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
@@ -272,6 +277,11 @@ SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable)
         return Sse41::Crc32c(src, size);
+    else
+#endif
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_ARM64_ENABLE)
+    if (Neon::Enable)
+        return Neon::Crc32c(src, size);
     else
 #endif
         return Base::Crc32c(src, size);
@@ -333,6 +343,11 @@ SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8
         Sse41::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
@@ -365,6 +380,11 @@ SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const
         Sse41::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
@@ -392,6 +412,11 @@ SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStr
         Sse41::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A + 2)
         Neon::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
@@ -417,6 +442,11 @@ SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t curr
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A + 2)
         Sse41::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -702,6 +732,11 @@ SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStr
         Sse41::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
@@ -727,6 +762,11 @@ SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStr
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
+    else
+#endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4913,6 +4953,11 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::GetStatistic(src, stride, width, height, min, max, average);
+    else
+#endif
+#ifdef SIMD_SVE_ENABLE
+    if (Sve::Enable)
+        Sve::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

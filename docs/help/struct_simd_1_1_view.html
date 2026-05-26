@@ -158,6 +158,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a43a05f488e79e8cee04e7edd082b9545"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a1f08b1e7b639b93f9fe4cd9ec9a343"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_view.html">View</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a1a1f08b1e7b639b93f9fe4cd9ec9a343">Clone</a> (<a class="el" href="struct_simd_1_1_view.html">View</a> &amp;buffer) const</td></tr>
 <tr class="separator:a1a1f08b1e7b639b93f9fe4cd9ec9a343"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdf8e3c2428064c7e53f33276573fe28"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_view.html">View</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#abdf8e3c2428064c7e53f33276573fe28">Copy</a> () const</td></tr>
+<tr class="separator:abdf8e3c2428064c7e53f33276573fe28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c621c43751a78fb444a105a47b11420"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_view.html">View</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a4c621c43751a78fb444a105a47b11420">Copy</a> (const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;rect) const</td></tr>
+<tr class="separator:a4c621c43751a78fb444a105a47b11420"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40a4f2d75dc5eef553b39bf929cbb4e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_view.html">View</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a40a4f2d75dc5eef553b39bf929cbb4e9">operator=</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a> &amp;view)</td></tr>
 <tr class="separator:a40a4f2d75dc5eef553b39bf929cbb4e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3e5c0345b395a3935b20f03b2ea6174"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_view.html">View</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#ac3e5c0345b395a3935b20f03b2ea6174">operator=</a> (<a class="el" href="struct_simd_1_1_view.html">View</a> &amp;&amp;view)</td></tr>
@@ -821,6 +825,48 @@ int main()
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a pointer to the new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure (not owner). The user must free this pointer after usage. </dd></dl>
+
+</div>
+</div>
+<a id="abdf8e3c2428064c7e53f33276573fe28" name="abdf8e3c2428064c7e53f33276573fe28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdf8e3c2428064c7e53f33276573fe28">&#9670;&#160;</a></span>Copy() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SIMD_INLINE <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; Copy</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Gets a copy of current image view by value.</p>
+<dl class="section return"><dt>Returns</dt><dd>a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure containing a copy of the image. </dd></dl>
+
+</div>
+</div>
+<a id="a4c621c43751a78fb444a105a47b11420" name="a4c621c43751a78fb444a105a47b11420"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c621c43751a78fb444a105a47b11420">&#9670;&#160;</a></span>Copy() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SIMD_INLINE <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; Copy </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rect</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Gets a copy of region of current image view bounded by the rectangle with specified coordinates, by value.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bounds the region. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure containing a copy of the region. </dd></dl>
 
 </div>
 </div>
@@ -1827,7 +1873,7 @@ int main()
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a released pointer to pixel data. It must be deleted by function <a class="el" href="group__memory.html#ga58c32d1470db0a1a698abd8280aeee52" title="Frees aligned memory block.">SimdFree</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>- a released pointer to pixel data. It must be deleted by function <a class="el" href="group__memory.html#ga58c32d1470db0a1a698abd8280aeee52" title="Frees an aligned memory block previously allocated by SimdAllocate.">SimdFree</a>. </dd></dl>
 
 </div>
 </div>

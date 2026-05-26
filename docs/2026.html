@@ -37,6 +37,76 @@
 
 <a href="#HOME">Home</a>
 <hr/>
+<h3 id="R162">June X, 2026 (version 7.1.162)</h3> 
+<h4>Algorithms</h4>
+<h5>New features</h5>
+<ul>
+ <li>SVE optimizations of function AbsDifferenceSum.</li>
+ <li>SVE optimizations of function AbsDifferenceSumMasked.</li>
+ <li>SVE optimizations of function AbsDifferenceSums3x3.</li>
+ <li>SVE optimizations of function AbsDifferenceSums3x3Masked.</li>
+ <li>SVE optimizations of function BackgroundGrowRangeSlow.</li>
+ <li>SVE optimizations of function BackgroundGrowRangeFast.</li>
+ <li>Method View::Copy.</li>
+ <li>Method Frame::Copy.</li>
+ <li>Base implementation, AMX-BF16 optimizations of class SynetConvolution16bNhwcSpecV3.</li>
+ <li>NEON optimizations of function Crc32c.</li>
+ <li>NEON optimizations of function Crc32.</li>
+ <li>Support of 8-bit BMP in function ImageLoadBmp.</li>
+ <li>SVE optimizations of function GetStatistic.</li>
+</ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Error in function SimdAlignment for SVE (ARM).</li>
+ <li>Integer overflow in Base implementation of function JpegProcessFrameHeader.</li>
+ <li>Checking of correctness in Base::JpegHuffman::Build.</li>
+ <li>Checking of correctness in Base::JpegToRgba.</li>
+ <li>Error in ImagePngLoader::ReadTransparency.</li>
+</ul>
+
+<h4>Test framework</h4>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Error in test GetStatisticAutoTest.</li>
+</ul>
+
+<h4>Documentation</h4>
+<h5>Improving</h5>
+<ul>
+ <li>Description of function SimdVersion.</li>
+ <li>Description of function SimdCpuDesc.</li>
+ <li>Description of function SimdCpuInfo.</li>
+ <li>Description of function SimdAllocate.</li>
+ <li>Description of function SimdFree.</li>
+ <li>Description of function SimdAlign.</li>
+ <li>Description of function SimdAlignment.</li>
+ <li>Description of function SimdRelease.</li>
+ <li>Description of function SimdGetThreadNumber.</li>
+ <li>Description of function SimdSetThreadNumber.</li>
+ <li>Description of function SimdEmpty.</li>
+ <li>Description of function SimdGetFastMode.</li>
+ <li>Description of function SimdSetFastMode.</li>
+ <li>Description of function SimdSetAmxFull.</li>
+ <li>Description of function SimdCrc32.</li>
+ <li>Description of function SimdCrc32c.</li>
+ <li>Description of function SimdAbsDifference.</li>
+ <li>Description of function SimdAbsDifferenceSum.</li>
+ <li>Description of function SimdAbsDifferenceSumMasked.</li>
+ <li>Description of function SimdAbsDifferenceSums3x3.</li>
+ <li>Description of function SimdAbsDifferenceSums3x3Masked.</li>
+ <li>Description of function SimdAbsGradientSaturatedSum.</li>
+ <li>Description of function SimdAddFeatureDifference.</li>
+ <li>Description of function SimdAlphaBlending.</li>
+ <li>Description of function SimdAlphaBlending2x.</li>
+ <li>Description of function SimdAlphaBlendingBgraToYuv420p.</li>
+ <li>Description of function SimdAlphaBlendingUniform.</li>
+ <li>Description of function SimdAlphaFilling.</li>
+ <li>Description of function SimdAlphaPremultiply.</li>
+ <li>Description of function SimdAlphaUnpremultiply.</li>
+</ul>
+
+<a href="#HOME">Home</a>
+<hr/>
 <h3 id="R161">May 4, 2026 (version 7.1.161)</h3> 
 <h4>Algorithms</h4>
 <h5>New features</h5>

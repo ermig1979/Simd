@@ -94,6 +94,11 @@ namespace Test
         if (TestBase(options))
             result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32), FUNC(SimdCrc32));
 
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_ARM64_ENABLE)
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && Crc32AutoTest(FUNC(Simd::Neon::Crc32), FUNC(SimdCrc32));
+#endif
+
         return result;
     }
 
@@ -108,6 +113,11 @@ namespace Test
         if (Simd::Sse41::Enable && TestSse41(options))
             result = result && Crc32AutoTest(FUNC(Simd::Sse41::Crc32c), FUNC(SimdCrc32c));
 #endif 
+
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_ARM64_ENABLE)
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && Crc32AutoTest(FUNC(Simd::Neon::Crc32c), FUNC(SimdCrc32c));
+#endif
 
         return result;
     }

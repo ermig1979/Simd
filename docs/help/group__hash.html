@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga780733c618846d58525d9cb2a9adf13b"><td class="memItemLeft" align="right" valign="top">SIMD_API uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hash.html#ga780733c618846d58525d9cb2a9adf13b">SimdCrc32</a> (const void *src, size_t size)</td></tr>
-<tr class="memdesc:ga780733c618846d58525d9cb2a9adf13b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 32-bit cyclic redundancy check (CRC32) for current data.  <a href="group__hash.html#ga780733c618846d58525d9cb2a9adf13b">More...</a><br /></td></tr>
+<tr class="memdesc:ga780733c618846d58525d9cb2a9adf13b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates 32-bit cyclic redundancy check (CRC-32) for input data.  <a href="group__hash.html#ga780733c618846d58525d9cb2a9adf13b">More...</a><br /></td></tr>
 <tr class="separator:ga780733c618846d58525d9cb2a9adf13b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacefa4dd81a5c0c5cfa54e5a2e5c59a68"><td class="memItemLeft" align="right" valign="top">SIMD_API uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hash.html#gacefa4dd81a5c0c5cfa54e5a2e5c59a68">SimdCrc32c</a> (const void *src, size_t size)</td></tr>
-<tr class="memdesc:gacefa4dd81a5c0c5cfa54e5a2e5c59a68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 32-bit cyclic redundancy check (CRC32c) for current data.  <a href="group__hash.html#gacefa4dd81a5c0c5cfa54e5a2e5c59a68">More...</a><br /></td></tr>
+<tr class="memdesc:gacefa4dd81a5c0c5cfa54e5a2e5c59a68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates 32-bit cyclic redundancy check (CRC-32C, Castagnoli) for input data.  <a href="group__hash.html#gacefa4dd81a5c0c5cfa54e5a2e5c59a68">More...</a><br /></td></tr>
 <tr class="separator:gacefa4dd81a5c0c5cfa54e5a2e5c59a68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -86,8 +86,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets 32-bit cyclic redundancy check (CRC32) for current data. </p>
-<p >Calculation is performed for polynomial 0xEDB88320.</p>
+<p>Calculates 32-bit cyclic redundancy check (CRC-32) for input data. </p>
+<p >The function uses reflected polynomial 0xEDB88320, initial value 0xFFFFFFFF and final bitwise inversion.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to data. </td></tr>
@@ -95,7 +95,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>32-bit cyclic redundancy check (CRC32). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>32-bit cyclic redundancy check (CRC-32) of the input buffer. </dd></dl>
 
 </div>
 </div>
@@ -125,8 +125,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets 32-bit cyclic redundancy check (CRC32c) for current data. </p>
-<p >Calculation is performed for polynomial 0x1EDC6F41 (Castagnoli-crc).</p>
+<p>Calculates 32-bit cyclic redundancy check (CRC-32C, Castagnoli) for input data. </p>
+<p >The function uses Castagnoli polynomial (reflected form 0x82F63B78, normal form 0x1EDC6F41), initial value 0xFFFFFFFF and final bitwise inversion.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to data. </td></tr>
@@ -134,7 +134,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>32-bit cyclic redundancy check (CRC32c). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>32-bit cyclic redundancy check (CRC-32C) of the input buffer. </dd></dl>
 
 </div>
 </div>

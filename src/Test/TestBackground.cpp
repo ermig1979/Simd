@@ -464,6 +464,11 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 #endif 
 
+#ifdef SIMD_SVE_ENABLE
+        if (Simd::Sve::Enable && TestSve(options))
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sve::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
+#endif 
+
         return result;
     }
 
@@ -493,6 +498,12 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
 #endif
+
+#ifdef SIMD_SVE_ENABLE
+        if (Simd::Sve::Enable && TestSve(options))
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sve::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
+#endif
+
         return result;
     }
 

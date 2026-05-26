@@ -51,25 +51,25 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga24392fe6c365dbb60678c9540c860e83"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga24392fe6c365dbb60678c9540c860e83">SimdAlphaBlending</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga24392fe6c365dbb60678c9540c860e83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs alpha blending operation.  <a href="group__drawing.html#ga24392fe6c365dbb60678c9540c860e83">More...</a><br /></td></tr>
+<tr class="memdesc:ga24392fe6c365dbb60678c9540c860e83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blends source image over destination image using per-pixel 8-bit alpha mask.  <a href="group__drawing.html#ga24392fe6c365dbb60678c9540c860e83">More...</a><br /></td></tr>
 <tr class="separator:ga24392fe6c365dbb60678c9540c860e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9">SimdAlphaBlending2x</a> (const uint8_t *src0, size_t src0Stride, const uint8_t *alpha0, size_t alpha0Stride, const uint8_t *src1, size_t src1Stride, const uint8_t *alpha1, size_t alpha1Stride, size_t width, size_t height, size_t channelCount, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs double alpha blending operation.  <a href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9">More...</a><br /></td></tr>
+<tr class="memdesc:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs two sequential alpha blendings of source images over destination image.  <a href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9">More...</a><br /></td></tr>
 <tr class="separator:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac766d3d07d13efab36a347b595424db1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gac766d3d07d13efab36a347b595424db1">SimdAlphaBlendingBgraToYuv420p</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
-<tr class="memdesc:gac766d3d07d13efab36a347b595424db1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs alpha blending of BGRA image to YUV420P.  <a href="group__drawing.html#gac766d3d07d13efab36a347b595424db1">More...</a><br /></td></tr>
+<tr class="memdesc:gac766d3d07d13efab36a347b595424db1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts BGRA to YUV420P and alpha-blends it with destination Y, U and V planes.  <a href="group__drawing.html#gac766d3d07d13efab36a347b595424db1">More...</a><br /></td></tr>
 <tr class="separator:gac766d3d07d13efab36a347b595424db1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac93b9719fbb80c729042c6cf8a737970"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gac93b9719fbb80c729042c6cf8a737970">SimdAlphaBlendingUniform</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gac93b9719fbb80c729042c6cf8a737970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs uniform alpha blending operation.  <a href="group__drawing.html#gac93b9719fbb80c729042c6cf8a737970">More...</a><br /></td></tr>
+<tr class="memdesc:gac93b9719fbb80c729042c6cf8a737970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blends source image over destination image with the same alpha value for all pixels.  <a href="group__drawing.html#gac93b9719fbb80c729042c6cf8a737970">More...</a><br /></td></tr>
 <tr class="separator:gac93b9719fbb80c729042c6cf8a737970"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8452528e17e594a4b12d82715425ae89"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga8452528e17e594a4b12d82715425ae89">SimdAlphaFilling</a> (uint8_t *dst, size_t dstStride, size_t width, size_t height, const uint8_t *channel, size_t channelCount, const uint8_t *alpha, size_t alphaStride)</td></tr>
-<tr class="memdesc:ga8452528e17e594a4b12d82715425ae89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs alpha filling operation.  <a href="group__drawing.html#ga8452528e17e594a4b12d82715425ae89">More...</a><br /></td></tr>
+<tr class="memdesc:ga8452528e17e594a4b12d82715425ae89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blends constant pixel value into destination image using per-pixel 8-bit alpha mask.  <a href="group__drawing.html#ga8452528e17e594a4b12d82715425ae89">More...</a><br /></td></tr>
 <tr class="separator:ga8452528e17e594a4b12d82715425ae89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga90a02f756b5bfca963d531127195bbce"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga90a02f756b5bfca963d531127195bbce">SimdAlphaPremultiply</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, uint8_t *dst, size_t dstStride, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> argb)</td></tr>
-<tr class="memdesc:ga90a02f756b5bfca963d531127195bbce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs premultiply operation.  <a href="group__drawing.html#ga90a02f756b5bfca963d531127195bbce">More...</a><br /></td></tr>
+<tr class="memdesc:ga90a02f756b5bfca963d531127195bbce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts straight-alpha 4-channel image to premultiplied-alpha representation.  <a href="group__drawing.html#ga90a02f756b5bfca963d531127195bbce">More...</a><br /></td></tr>
 <tr class="separator:ga90a02f756b5bfca963d531127195bbce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9f2d3f5d8e87939f998b5b712f244b4d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga9f2d3f5d8e87939f998b5b712f244b4d">SimdAlphaUnpremultiply</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, uint8_t *dst, size_t dstStride, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> argb)</td></tr>
-<tr class="memdesc:ga9f2d3f5d8e87939f998b5b712f244b4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs unpremultiply operation.  <a href="group__drawing.html#ga9f2d3f5d8e87939f998b5b712f244b4d">More...</a><br /></td></tr>
+<tr class="memdesc:ga9f2d3f5d8e87939f998b5b712f244b4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts premultiplied-alpha 4-channel image to straight-alpha representation.  <a href="group__drawing.html#ga9f2d3f5d8e87939f998b5b712f244b4d">More...</a><br /></td></tr>
 <tr class="separator:ga9f2d3f5d8e87939f998b5b712f244b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga23c105b8f21e71d15a8b98d3b9983622"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga23c105b8f21e71d15a8b98d3b9983622">SimdDrawLine</a> (uint8_t *canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t *color, size_t lineWidth)</td></tr>
 <tr class="memdesc:ga23c105b8f21e71d15a8b98d3b9983622"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a line at the image.  <a href="group__drawing.html#ga23c105b8f21e71d15a8b98d3b9983622">More...</a><br /></td></tr>
@@ -192,10 +192,11 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs alpha blending operation. </p>
+<p>Blends source image over destination image using per-pixel 8-bit alpha mask. </p>
 <p >All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alpha must be 8-bit gray image.</p>
-<p >For every point: </p><pre class="fragment">dst[x, y, c] = (src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
-</pre><p >This function is used for image drawing.</p>
+<p >For every point and channel: </p><pre class="fragment">dst[x, y, c] = DivideBy255(src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]));
+</pre><p> where DivideBy255(v) = (v + 1 + (v &gt;&gt; 8)) &gt;&gt; 8.</p>
+<p >This function is used for image drawing.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AlphaBlending(const View&lt;A&gt;&amp; src, const View&lt;A&gt;&amp; alpha, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -306,10 +307,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs double alpha blending operation. </p>
+<p>Performs two sequential alpha blendings of source images over destination image. </p>
 <p >All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alphas must be 8-bit gray image.</p>
-<p >For every point: </p><pre class="fragment">tmp = (src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]))/255;
-dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
+<p >For every point and channel: </p><pre class="fragment">tmp = DivideBy255(src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]));
+dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]));
 </pre><p >This function is used for image drawing.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AlphaBlending(const View&lt;A&gt;&amp; src0, const View&lt;A&gt;&amp; alpha0, const View&lt;A&gt;&amp; src1, const View&lt;A&gt;&amp; alpha1, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -413,8 +414,8 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
       </table>
 </div><div class="memdoc">
 
-<p>Performs alpha blending of BGRA image to YUV420P. </p>
-<p >This function is used for image drawing. The input BGRA and output Y images must have the same width and height. The output U and V images must have the same width and height (half size relative to Y component).</p>
+<p>Converts BGRA to YUV420P and alpha-blends it with destination Y, U and V planes. </p>
+<p >For every BGRA pixel, Y is computed from BGR and blended with corresponding destination Y using this pixel alpha. For every 2x2 BGRA block, U and V are computed from averaged B, G, R values and blended with destination U and V using average alpha of this 2x2 block. The input BGRA and output Y images must have the same width and height. The output U and V images must have half width and half height relative to Y component.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__drawing.html#gadcba495fb909153866dc329a2c63a7ee" title="Performs alpha blending of BGRA image to YUV420P.">Simd::AlphaBlendingBgraToYuv420p</a>(const View&amp; bgra, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -497,9 +498,9 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
       </table>
 </div><div class="memdoc">
 
-<p>Performs uniform alpha blending operation. </p>
+<p>Blends source image over destination image with the same alpha value for all pixels. </p>
 <p >All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32).</p>
-<p >For every point: </p><pre class="fragment">dst[x, y, c] = (src[x, y, c]*alpha + dst[x, y, c]*(255 - alpha))/255;
+<p >For every point and channel: </p><pre class="fragment">dst[x, y, c] = DivideBy255(src[x, y, c]*alpha + dst[x, y, c]*(255 - alpha));
 </pre><p >This function is used for image drawing.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AlphaBlending(const View&lt;A&gt;&amp; src, uint8_t alpha, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -580,9 +581,9 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
       </table>
 </div><div class="memdoc">
 
-<p>Performs alpha filling operation. </p>
+<p>Blends constant pixel value into destination image using per-pixel 8-bit alpha mask. </p>
 <p >All images must have the same width and height. Destination images must have 8 bit per channel (for example GRAY8, BGR24 or BGRA32). Alpha must be 8-bit gray image.</p>
-<p >For every point: </p><pre class="fragment">dst[x, y, c] = (channel[c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
+<p >For every point and channel: </p><pre class="fragment">dst[x, y, c] = DivideBy255(channel[c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]));
 </pre><p >This function is used for image drawing.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AlphaFilling(View&lt;A&gt; &amp; dst, const Pixel &amp; pixel, const View&lt;A&gt; &amp; alpha).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -657,13 +658,12 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
       </table>
 </div><div class="memdoc">
 
-<p>Performs premultiply operation. </p>
+<p>Converts straight-alpha 4-channel image to premultiplied-alpha representation. </p>
 <p >All images must have the same width, height and format (BGRA32, RGBA32, ARGB32).</p>
-<p >For every point (sample for BGRA32): </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] * src[x, y, 3] / 255;
- dst[x, y, 1] = src[x, y, 1] * src[x, y, 3] / 255;
- dst[x, y, 2] = src[x, y, 2] * src[x, y, 3] / 255;
- dst[x, y, 3] = src[x, y, 3];
-</pre><p >This function is used for image drawing as a part of alpha blending operation.</p>
+<p >For every point: </p><pre class="fragment"> color = DivideBy255(color * alpha);
+ alpha is copied unchanged.
+</pre><p> If argb == SimdFalse then alpha channel index is 3 (BGRA32/RGBA32 layout). If argb == SimdTrue then alpha channel index is 0 (ARGB32 layout).</p>
+<p >This function is used for image drawing as a part of alpha blending operation.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AlphaPremultiply(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -736,13 +736,12 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
       </table>
 </div><div class="memdoc">
 
-<p>Performs unpremultiply operation. </p>
+<p>Converts premultiplied-alpha 4-channel image to straight-alpha representation. </p>
 <p >All images must have the same width, height and format (BGRA32, RGBA32, ARGB32).</p>
-<p >For every point (sample for BGRA32): </p><pre class="fragment"> dst[x, y, 0] = src[x, y, 0] / src[x, y, 3] * 255;
- dst[x, y, 1] = src[x, y, 1] / src[x, y, 3] * 255;
- dst[x, y, 2] = src[x, y, 2] / src[x, y, 3] * 255;
- dst[x, y, 3] = src[x, y, 3];
-</pre><p >This function is used for image drawing as a part of alpha blending operation.</p>
+<p >For every point: </p><pre class="fragment"> color = clamp(int(color * (alpha ? 255.00001f/alpha : 0.0f)), 0, 255);
+ alpha is copied unchanged.
+</pre><p> If argb == SimdFalse then alpha channel index is 3 (BGRA32/RGBA32 layout). If argb == SimdTrue then alpha channel index is 0 (ARGB32 layout).</p>
+<p >This function is used for image drawing as a part of alpha blending operation.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AlphaUnpremultiply(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -977,7 +976,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 </div><div class="memdoc">
 
 <p>Creates font context. </p>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Sets font height.">SimdFontResize</a>, <a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80" title="Gets current font height.">SimdFontHeight</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Sets font height.">SimdFontResize</a>, <a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80" title="Gets current font height.">SimdFontHeight</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -1010,7 +1009,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p>Sets font height. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a new height of font. </td></tr>
   </table>
   </dd>
@@ -1038,7 +1037,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p>Gets current font height. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1087,7 +1086,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p>Measures size of region which need to draw current text with using of given font. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a pointer to text. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">width</td><td>- a measured width of region need to draw this text. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">height</td><td>- a measured height of region need to draw this text. </td></tr>
@@ -1174,7 +1173,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p>Draws a text on canvas at current position with using of given font and color. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a pointer to pixels data of canvas image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image. </td></tr>
@@ -1226,7 +1225,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p >All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alpha must be 8-bit gray image.</p>
 <p >For every point: </p><pre class="fragment">dst[x, y, c] = (src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
 </pre><p >This function is used for image drawing.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga24392fe6c365dbb60678c9540c860e83" title="Performs alpha blending operation.">SimdAlphaBlending</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga24392fe6c365dbb60678c9540c860e83" title="Blends source image over destination image using per-pixel 8-bit alpha mask.">SimdAlphaBlending</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a foreground image. </td></tr>
@@ -1287,7 +1286,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p >For every point: </p><pre class="fragment">tmp = (src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]))/255;
 dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 </pre><p >This function is used for image drawing.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9" title="Performs double alpha blending operation.">SimdAlphaBlending2x</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9" title="Performs two sequential alpha blendings of source images over destination image.">SimdAlphaBlending2x</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src0</td><td>- the first foreground image. </td></tr>
@@ -1347,7 +1346,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 
 <p>Performs alpha blending of BGRA image to YUV420P. </p>
 <p >This function is used for image drawing. The input BGRA and output Y images must have the same width and height. The output U and V images must have the same width and height (half size relative to Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#gac766d3d07d13efab36a347b595424db1" title="Performs alpha blending of BGRA image to YUV420P.">SimdAlphaBlendingBgraToYuv420p</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#gac766d3d07d13efab36a347b595424db1" title="Converts BGRA to YUV420P and alpha-blends it with destination Y, U and V planes.">SimdAlphaBlendingBgraToYuv420p</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a foreground BGRA-32 image. </td></tr>
@@ -1397,7 +1396,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p >All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32).</p>
 <p >For every point: </p><pre class="fragment">dst[x, y, c] = (src[x, y, c]*alpha + dst[x, y, c]*(255 - alpha))/255;
 </pre><p >This function is used for image drawing.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#gac93b9719fbb80c729042c6cf8a737970" title="Performs uniform alpha blending operation.">SimdAlphaBlendingUniform</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#gac93b9719fbb80c729042c6cf8a737970" title="Blends source image over destination image with the same alpha value for all pixels.">SimdAlphaBlendingUniform</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a foreground image. </td></tr>
@@ -1445,7 +1444,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
 <p >All images must have the same width and height. Destination images must have 8 bit per channel (for example GRAY8, BGR24 or BGRA32). Alpha must be 8-bit gray image.</p>
 <p >For every point: </p><pre class="fragment">dst[x, y, c] = (pixel[c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
 </pre><p >This function is used for image drawing.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga8452528e17e594a4b12d82715425ae89" title="Performs alpha filling operation.">SimdAlphaFilling</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga8452528e17e594a4b12d82715425ae89" title="Blends constant pixel value into destination image using per-pixel 8-bit alpha mask.">SimdAlphaFilling</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a background image. </td></tr>
@@ -1490,7 +1489,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
  dst[x, y, 2] = src[x, y, 2] * src[x, y, 3] / 255;
  dst[x, y, 3] = src[x, y, 3];
 </pre><p >This function is used for image drawing as a part of alpha blending operation.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga90a02f756b5bfca963d531127195bbce" title="Performs premultiply operation.">SimdAlphaPremultiply</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga90a02f756b5bfca963d531127195bbce" title="Converts straight-alpha 4-channel image to premultiplied-alpha representation.">SimdAlphaPremultiply</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
@@ -1534,7 +1533,7 @@ dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
  dst[x, y, 2] = src[x, y, 2] / src[x, y, 3] * 255;
  dst[x, y, 3] = src[x, y, 3];
 </pre><p >This function is used for image drawing as a part of alpha blending operation.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga9f2d3f5d8e87939f998b5b712f244b4d" title="Performs unpremultiply operation.">SimdAlphaUnpremultiply</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga9f2d3f5d8e87939f998b5b712f244b4d" title="Converts premultiplied-alpha 4-channel image to straight-alpha representation.">SimdAlphaUnpremultiply</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>

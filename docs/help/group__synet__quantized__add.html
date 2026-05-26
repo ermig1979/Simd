@@ -185,7 +185,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to quantized addition context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in function <a class="el" href="group__synet__quantized__add.html#ga4ac762cb4d76eacf764bbed5eb65887c" title="Performs forward propagation of quantized addition algorithm.">SimdSynetQuantizedAddForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to quantized addition context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in function <a class="el" href="group__synet__quantized__add.html#ga4ac762cb4d76eacf764bbed5eb65887c" title="Performs forward propagation of quantized addition algorithm.">SimdSynetQuantizedAddForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -230,7 +230,7 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of quantized addition algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized addition context. It must be created by function <a class="el" href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3" title="Initializes quantized addition algorithm.">SimdSynetQuantizedAddInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized addition context. It must be created by function <a class="el" href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3" title="Initializes quantized addition algorithm.">SimdSynetQuantizedAddInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to input A tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to input B tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>

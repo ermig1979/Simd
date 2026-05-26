@@ -68,9 +68,9 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, &min2, &max2, &average2));
 
-        TEST_CHECK_VALUE(min);
-        TEST_CHECK_VALUE(max);
-        TEST_CHECK_VALUE(average);
+        TEST_CHECK_VALUE_AS_INT(min);
+        TEST_CHECK_VALUE_AS_INT(max);
+        TEST_CHECK_VALUE_AS_INT(average);
 
         return result;
     }
@@ -111,6 +111,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && GetStatisticAutoTest(FUNC1(Simd::Neon::GetStatistic), FUNC1(SimdGetStatistic));
+#endif
+
+#ifdef SIMD_SVE_ENABLE
+        if (Simd::Sve::Enable && TestSve(options))
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Sve::GetStatistic), FUNC1(SimdGetStatistic));
 #endif
 
 #ifdef SIMD_HVX_ENABLE
