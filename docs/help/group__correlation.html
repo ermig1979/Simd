@@ -51,19 +51,19 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gadea7d6e612c1947395623569b4e5145d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#gadea7d6e612c1947395623569b4e5145d">SimdAbsDifference</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, uint8_t *c, size_t cStride, size_t width, size_t height)</td></tr>
-<tr class="memdesc:gadea7d6e612c1947395623569b4e5145d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets absolute difference of two gray 8-bit images, pixel by pixel.  <a href="group__correlation.html#gadea7d6e612c1947395623569b4e5145d">More...</a><br /></td></tr>
+<tr class="memdesc:gadea7d6e612c1947395623569b4e5145d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates per-pixel absolute difference of two gray 8-bit images.  <a href="group__correlation.html#gadea7d6e612c1947395623569b4e5145d">More...</a><br /></td></tr>
 <tr class="separator:gadea7d6e612c1947395623569b4e5145d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad6b60bbf1e7ac97fe80019e8edeb468c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#gad6b60bbf1e7ac97fe80019e8edeb468c">SimdAbsDifferenceSum</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, size_t width, size_t height, uint64_t *sum)</td></tr>
-<tr class="memdesc:gad6b60bbf1e7ac97fe80019e8edeb468c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of absolute difference of two gray 8-bit images.  <a href="group__correlation.html#gad6b60bbf1e7ac97fe80019e8edeb468c">More...</a><br /></td></tr>
+<tr class="memdesc:gad6b60bbf1e7ac97fe80019e8edeb468c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of absolute differences (SAD) of two gray 8-bit images.  <a href="group__correlation.html#gad6b60bbf1e7ac97fe80019e8edeb468c">More...</a><br /></td></tr>
 <tr class="separator:gad6b60bbf1e7ac97fe80019e8edeb468c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga82d2e3f956cacecd84fa26b54203078b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga82d2e3f956cacecd84fa26b54203078b">SimdAbsDifferenceSumMasked</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t *sum)</td></tr>
-<tr class="memdesc:ga82d2e3f956cacecd84fa26b54203078b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of absolute difference of two gray 8-bit images based on gray 8-bit mask.  <a href="group__correlation.html#ga82d2e3f956cacecd84fa26b54203078b">More...</a><br /></td></tr>
+<tr class="memdesc:ga82d2e3f956cacecd84fa26b54203078b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates masked sum of absolute differences (SAD) of two gray 8-bit images.  <a href="group__correlation.html#ga82d2e3f956cacecd84fa26b54203078b">More...</a><br /></td></tr>
 <tr class="separator:ga82d2e3f956cacecd84fa26b54203078b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac3d0d14be2615a2f5f8204454cc42296"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#gac3d0d14be2615a2f5f8204454cc42296">SimdAbsDifferenceSums3x3</a> (const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride, size_t width, size_t height, uint64_t *sums)</td></tr>
-<tr class="memdesc:gac3d0d14be2615a2f5f8204454cc42296"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3.  <a href="group__correlation.html#gac3d0d14be2615a2f5f8204454cc42296">More...</a><br /></td></tr>
+<tr class="memdesc:gac3d0d14be2615a2f5f8204454cc42296"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates 9 sums of absolute differences for all shifts in 3x3 neighborhood.  <a href="group__correlation.html#gac3d0d14be2615a2f5f8204454cc42296">More...</a><br /></td></tr>
 <tr class="separator:gac3d0d14be2615a2f5f8204454cc42296"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6063997a055e15012b2912af8dc57e20"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga6063997a055e15012b2912af8dc57e20">SimdAbsDifferenceSums3x3Masked</a> (const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride, const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t *sums)</td></tr>
-<tr class="memdesc:ga6063997a055e15012b2912af8dc57e20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask.  <a href="group__correlation.html#ga6063997a055e15012b2912af8dc57e20">More...</a><br /></td></tr>
+<tr class="memdesc:ga6063997a055e15012b2912af8dc57e20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates 9 masked sums of absolute differences for all shifts in 3x3 neighborhood.  <a href="group__correlation.html#ga6063997a055e15012b2912af8dc57e20">More...</a><br /></td></tr>
 <tr class="separator:ga6063997a055e15012b2912af8dc57e20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga39c2cab462a380fb5044106be786a1bf"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga39c2cab462a380fb5044106be786a1bf">SimdCosineDistance32f</a> (const float *a, const float *b, size_t size, float *distance)</td></tr>
 <tr class="memdesc:ga39c2cab462a380fb5044106be786a1bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates cosine distance of two 32-bit float arrays.  <a href="group__correlation.html#ga39c2cab462a380fb5044106be786a1bf">More...</a><br /></td></tr>
@@ -174,8 +174,9 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets absolute difference of two gray 8-bit images, pixel by pixel. </p>
-<p >The three images must have the same width and height.</p>
+<p>Calculates per-pixel absolute difference of two gray 8-bit images. </p>
+<p >The destination pixel values are computed as: </p><pre class="fragment">c[x, y] = abs(a[x, y] - b[x, y]).
+</pre><p> All three images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AbsDifference(const View&lt;A&gt; &amp; a, const View&lt;A&gt; &amp; b, View&lt;A&gt; &amp; c).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -249,8 +250,9 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets sum of absolute difference of two gray 8-bit images. </p>
-<p >Both images must have the same width and height.</p>
+<p>Calculates sum of absolute differences (SAD) of two gray 8-bit images. </p>
+<p >The result value is computed as: </p><pre class="fragment">sum = Σ abs(a[x, y] - b[x, y]).
+</pre><p> Both images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AbsDifferenceSum(const View&lt;A&gt; &amp; a, const View&lt;A&gt; &amp; b, uint64_t &amp; sum).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -341,8 +343,9 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets sum of absolute difference of two gray 8-bit images based on gray 8-bit mask. </p>
-<p >Gets the absolute difference sum for all points when mask[i] == index. Both images and mask must have the same width and height.</p>
+<p>Calculates masked sum of absolute differences (SAD) of two gray 8-bit images. </p>
+<p >The result value is computed for points where mask[x, y] equals index: </p><pre class="fragment">sum = Σ abs(a[x, y] - b[x, y]), for all (x, y) where mask[x, y] == index.
+</pre><p> Both images and mask must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AbsDifferenceSum(const View&lt;A&gt;&amp; a, const View&lt;A&gt;&amp; b, const View&lt;A&gt;&amp; mask, uint8_t index, uint64_t &amp; sum).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -418,8 +421,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3. </p>
-<p >Both images must have the same width and height. The image height and width must be equal or greater 3. The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift. The shifts are lain in the range [-1, 1] for axis x and y.</p>
+<p>Calculates 9 sums of absolute differences for all shifts in 3x3 neighborhood. </p>
+<p >Both images must have the same width and height. The image height and width must be equal or greater 3. The sums are computed for the central part of current image (without one-pixel border) and for background image shifted by dx and dy in range [-1, 1]: </p><pre class="fragment">sums[(dy + 1)*3 + (dx + 1)] = Σ abs(current[x, y] - background[x + dx, y + dy]),
+                               x = 1..width-2, y = 1..height-2.
+</pre><p> Output order is: (-1,-1), (0,-1), (1,-1), (-1,0), (0,0), (1,0), (-1,1), (0,1), (1,1).</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AbsDifferenceSums3x3(const View&lt;A&gt;&amp; current, const View&lt;A&gt;&amp; background, uint64_t * sums).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -510,8 +515,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask. </p>
-<p >Gets the absolute difference sums for all points when mask[i] == index. Both images and mask must have the same width and height. The image height and width must be equal or greater 3. The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift. The shifts are lain in the range [-1, 1] for axis x and y.</p>
+<p>Calculates 9 masked sums of absolute differences for all shifts in 3x3 neighborhood. </p>
+<p >The sums are computed only for points where mask[x, y] equals index: </p><pre class="fragment">sums[(dy + 1)*3 + (dx + 1)] = Σ abs(current[x, y] - background[x + dx, y + dy]),
+                               for x = 1..width-2, y = 1..height-2 and mask[x, y] == index.
+</pre><p> Both images and mask must have the same width and height. The image height and width must be equal or greater 3. Output order is: (-1,-1), (0,-1), (1,-1), (-1,0), (0,0), (1,0), (-1,1), (0,1), (1,1).</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AbsDifferenceSums3x3(const View&lt;A&gt;&amp; current, const View&lt;A&gt;&amp; background, const View&lt;A&gt;&amp; mask, uint8_t index, uint64_t * sums).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -903,7 +910,7 @@ for(i = 0; i &lt; size; ++i)
 
 <p>Gets absolute difference of two gray 8-bit images, pixel by pixel. </p>
 <p >Both images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#gadea7d6e612c1947395623569b4e5145d" title="Gets absolute difference of two gray 8-bit images, pixel by pixel.">SimdAbsDifference</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#gadea7d6e612c1947395623569b4e5145d" title="Calculates per-pixel absolute difference of two gray 8-bit images.">SimdAbsDifference</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -949,7 +956,7 @@ for(i = 0; i &lt; size; ++i)
 
 <p>Gets sum of absolute difference of two gray 8-bit images. </p>
 <p >Both images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#gad6b60bbf1e7ac97fe80019e8edeb468c" title="Gets sum of absolute difference of two gray 8-bit images.">SimdAbsDifferenceSum</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#gad6b60bbf1e7ac97fe80019e8edeb468c" title="Calculates sum of absolute differences (SAD) of two gray 8-bit images.">SimdAbsDifferenceSum</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -1007,7 +1014,7 @@ for(i = 0; i &lt; size; ++i)
 
 <p>Gets sum of absolute difference of two gray 8-bit images based on gray 8-bit mask. </p>
 <p >Gets the absolute difference sum for all points when mask[i] == index. Both images and mask must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#ga82d2e3f956cacecd84fa26b54203078b" title="Gets sum of absolute difference of two gray 8-bit images based on gray 8-bit mask.">SimdAbsDifferenceSumMasked</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#ga82d2e3f956cacecd84fa26b54203078b" title="Calculates masked sum of absolute differences (SAD) of two gray 8-bit images.">SimdAbsDifferenceSumMasked</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -1055,7 +1062,7 @@ for(i = 0; i &lt; size; ++i)
 
 <p>Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3. </p>
 <p >Both images must have the same width and height. The image height and width must be equal or greater 3. The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift. The shifts are lain in the range [-1, 1] for axis x and y.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#gac3d0d14be2615a2f5f8204454cc42296" title="Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborh...">SimdAbsDifferenceSums3x3</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#gac3d0d14be2615a2f5f8204454cc42296" title="Calculates 9 sums of absolute differences for all shifts in 3x3 neighborhood.">SimdAbsDifferenceSums3x3</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">current</td><td>- a current image. </td></tr>
@@ -1113,7 +1120,7 @@ for(i = 0; i &lt; size; ++i)
 
 <p>Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask. </p>
 <p >Gets the absolute difference sums for all points when mask[i] == index. Both images and mask must have the same width and height. The image height and width must be equal or greater 3. The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift. The shifts are lain in the range [-1, 1] for axis x and y.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#ga6063997a055e15012b2912af8dc57e20" title="Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborh...">SimdAbsDifferenceSums3x3Masked</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#ga6063997a055e15012b2912af8dc57e20" title="Calculates 9 masked sums of absolute differences for all shifts in 3x3 neighborhood.">SimdAbsDifferenceSums3x3Masked</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">current</td><td>- a current image. </td></tr>
