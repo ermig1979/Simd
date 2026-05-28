@@ -1882,14 +1882,19 @@ extern "C"
 
         \fn void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
 
-        \short Decode string from Base64.
+        \short Decodes a Base64-encoded byte sequence into its original binary data.
+
+        The function decodes a Base64-encoded input (as defined by RFC 4648) into the
+        original binary data. The input length must be a multiple of 4 and at least 4 bytes.
+        Padding characters ('=') at the end of the input are handled automatically, so the
+        actual decoded length may be 1 or 2 bytes less than srcSize / 4 * 3.
 
         \note This function has a C++ wrapper std::string Simd::Base64Decode(const std::string & src).
 
-        \param [in] src - a pointer to Base64 encoded input string.
-        \param [in] srcSize - a length of input string.
-        \param [out] dst - a pointer to the output buffer with decoded string. The size of the buffer is must be at least srcSize / 4 * 3.
-        \param [out] dstSize - a pointer to the value with length of decoded string. 
+        \param [in] src - a pointer to the Base64-encoded input data. Its length must be a multiple of 4 and at least 4.
+        \param [in] srcSize - a size (in bytes) of the Base64-encoded input. Must be a non-zero multiple of 4.
+        \param [out] dst - a pointer to the output buffer for the decoded binary data. The buffer size must be at least srcSize / 4 * 3 bytes.
+        \param [out] dstSize - a pointer to a variable that receives the number of bytes written to the output buffer.
     */
     SIMD_API void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
 
@@ -1897,13 +1902,18 @@ extern "C"
 
         \fn void SimdBase64Encode(const uint8_t* src, size_t size, uint8_t* dst);
 
-        \short Encode string to Base64.
+        \short Encodes binary data into a Base64 string.
+
+        The function encodes arbitrary binary data into its Base64 representation (as defined
+        by RFC 4648). Every 3 input bytes are encoded as 4 Base64 characters. If the input
+        length is not a multiple of 3, the output is padded with '=' characters to the next
+        multiple of 4. The output is NOT null-terminated; its length is exactly (size + 2) / 3 * 4 bytes.
 
         \note This function has a C++ wrapper std::string Simd::Base64Encode(const std::string & src).
 
-        \param [in] src - a pointer to original string.
-        \param [in] size - a length of input string.
-        \param [out] dst - a pointer to the output buffer with Base64 encoded string. The size of the buffer is must be at least (size + 2) / 3 * 4.
+        \param [in] src - a pointer to the input binary data to be encoded.
+        \param [in] size - a size (in bytes) of the input data.
+        \param [out] dst - a pointer to the output buffer for the Base64-encoded string. The buffer size must be at least (size + 2) / 3 * 4 bytes.
     */
     SIMD_API void SimdBase64Encode(const uint8_t* src, size_t size, uint8_t* dst);
 
@@ -1911,19 +1921,23 @@ extern "C"
 
         \fn void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
 
-        \short Converts 8-bit Bayer image to 24-bit BGR.
+        \short Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function performs demosaicing of a raw Bayer-patterned image into a full-color 24-bit BGR image.
+        Missing color samples at each pixel are reconstructed using a gradient-based interpolation that
+        selects between vertical and horizontal neighbors according to local edge strength, producing
+        sharper results along edges than simple bilinear interpolation.
+        Both images must have the same width and height, and both dimensions must be even.
 
         \note This function has a C++ wrapper Simd::BayerToBgr(const View<A>& bayer, View<A>& bgr).
 
         \param [in] bayer - a pointer to pixels data of input 8-bit Bayer image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] bayerStride - a row size of the bayer image.
+        \param [in] width - an image width. Must be even and at least 4.
+        \param [in] height - an image height. Must be even and at least 4.
+        \param [in] bayerStride - a row size (in bytes) of the bayer image.
         \param [in] bayerFormat - a format of the input bayer image. It can be ::SimdPixelFormatBayerGrbg, ::SimdPixelFormatBayerGbrg, ::SimdPixelFormatBayerRggb or ::SimdPixelFormatBayerBggr.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
-        \param [in] bgrStride - a row size of the bgr image.
+        \param [in] bgrStride - a row size (in bytes) of the bgr image.
     */
     SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
 
@@ -1931,20 +1945,24 @@ extern "C"
 
         \fn void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-        \short Converts 8-bit Bayer image to 32-bit BGRA.
+        \short Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function performs demosaicing of a raw Bayer-patterned image into a full-color 32-bit BGRA image.
+        Missing color samples at each pixel are reconstructed using a gradient-based interpolation that
+        selects between vertical and horizontal neighbors according to local edge strength. The alpha channel
+        of every output pixel is set to the constant value specified by the \a alpha parameter.
+        Both images must have the same width and height, and both dimensions must be even.
 
         \note This function has a C++ wrapper Simd::BayerToBgra(const View<A>& bayer, View<A>& bgra, uint8_t alpha).
 
         \param [in] bayer - a pointer to pixels data of input 8-bit Bayer image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] bayerStride - a row size of the bayer image.
+        \param [in] width - an image width. Must be even and at least 4.
+        \param [in] height - an image height. Must be even and at least 4.
+        \param [in] bayerStride - a row size (in bytes) of the bayer image.
         \param [in] bayerFormat - a format of the input bayer image. It can be ::SimdPixelFormatBayerGrbg, ::SimdPixelFormatBayerGbrg, ::SimdPixelFormatBayerRggb or ::SimdPixelFormatBayerBggr.
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
-        \param [in] bgraStride - a row size of the bgra image.
-        \param [in] alpha - a value of alpha channel.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel.
     */
     SIMD_API void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -1952,18 +1970,22 @@ extern "C"
 
         \fn void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
-        \short Converts 32-bit BGRA image to 8-bit Bayer image.
+        \short Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function down-samples a full-color 32-bit BGRA image to an 8-bit Bayer-patterned image.
+        For each 2x2 block of BGRA pixels, exactly one color channel value (Blue, Green, or Red) is
+        selected per output pixel according to the specified Bayer pattern. The alpha channel of the
+        input image is ignored. Both images must have the same width and height, and both dimensions
+        must be even.
 
         \note This function has a C++ wrapper Simd::BgraToBayer(const View<A>& bgra, View<A>& bayer).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] width - an image width. Must be even.
+        \param [in] height - an image height. Must be even.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] bayer - a pointer to pixels data of output 8-bit Bayer image.
-        \param [in] bayerStride - a row size of the bayer image.
+        \param [in] bayerStride - a row size (in bytes) of the bayer image.
         \param [in] bayerFormat - a format of the output bayer image. It can be ::SimdPixelFormatBayerGrbg, ::SimdPixelFormatBayerGbrg, ::SimdPixelFormatBayerRggb or ::SimdPixelFormatBayerBggr.
     */
     SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
@@ -1972,9 +1994,12 @@ extern "C"
 
         \fn void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
 
-        \short Converts 32-bit BGRA image to 24-bit BGR image. Also it can be used for 32-bit RGBA to 24-bit RGB conversion.
+        \short Converts a 32-bit BGRA image to a 24-bit BGR image by dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit BGR (Blue, Green, Red) image.
+        The Blue, Green, and Red channels are copied unchanged for each pixel; the alpha channel is discarded.
+        This function can also be used for 32-bit RGBA to 24-bit RGB conversion, since the channel layout
+        operation (dropping the 4th channel) is identical. Both images must have the same width and height.
 
         \note This function has C++ wrappers: Simd::BgraToBgr(const View<A>& bgra, View<A>& bgr)
             and Simd::RgbaToRgb(const View<A>& rgba, View<A>& rgb).
@@ -1982,9 +2007,9 @@ extern "C"
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image.
-        \param [in] bgrStride - a row size of the bgr image.
+        \param [in] bgrStride - a row size (in bytes) of the bgr image.
     */
     SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
 
@@ -1992,18 +2017,24 @@ extern "C"
 
         \fn void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
-        \short Converts 32-bit BGRA image to 8-bit gray image.
+        \short Converts a 32-bit BGRA image to an 8-bit grayscale image.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to an 8-bit grayscale image.
+        The alpha channel is ignored. The luminance value of each pixel is calculated from the Blue, Green,
+        and Red channels using the ITU-R BT.601 standard weighted sum:
+        \verbatim
+        gray = (0.114 * blue + 0.587 * green + 0.299 * red)
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::BgraToGray(const View<A>& bgra, View<A>& gray).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] gray - a pointer to pixels data of output 8-bit gray image.
-        \param [in] grayStride - a row size of the gray image.
+        \param [in] grayStride - a row size (in bytes) of the gray image.
     */
     SIMD_API void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
@@ -2011,9 +2042,12 @@ extern "C"
 
         \fn void SimdBgraToRgb(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * rgb, size_t rgbStride);
 
-        \short Converts 32-bit BGRA image to 24-bit RGB image. Also it can be used for 32-bit RGBA to 24-bit BGR conversion.
+        \short Converts a 32-bit BGRA image to a 24-bit RGB image by swapping the Red and Blue channels and dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit RGB (Red, Green, Blue) image.
+        The Blue and Red channels are swapped, the Green channel is copied unchanged, and the alpha channel is discarded.
+        This function can also be used for 32-bit RGBA to 24-bit BGR conversion, since the channel reordering
+        operation is identical. Both images must have the same width and height.
 
         \note This function has C++ wrappers: Simd::BgraToRgb(const View<A>& bgra, View<A>& rgb)
             and Simd::RgbaToBgr(const View<A>& rgba, View<A>& bgr).
@@ -2021,9 +2055,9 @@ extern "C"
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] rgb - a pointer to pixels data of output 24-bit RGB (or 24-bit BGR) image.
-        \param [in] rgbStride - a row size of the rgb image.
+        \param [in] rgbStride - a row size (in bytes) of the rgb image.
     */
     SIMD_API void SimdBgraToRgb(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgb, size_t rgbStride);
 
@@ -2031,9 +2065,12 @@ extern "C"
 
         \fn void SimdBgraToRgba(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * rgba, size_t rgbaStride);
 
-        \short Converts 32-bit BGRA image to 32-bit RGBA image. Also it can be used for 32-bit RGBA to 32-bit BGRA conversion.
+        \short Converts a 32-bit BGRA image to a 32-bit RGBA image by swapping the Red and Blue channels while preserving the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 32-bit RGBA (Red, Green, Blue, Alpha) image.
+        The Blue and Red channels are swapped, while the Green and Alpha channels are copied unchanged for each pixel.
+        This function can also be used for 32-bit RGBA to 32-bit BGRA conversion, since the transformation is its own inverse.
+        Both images must have the same width and height.
 
         \note This function has C++ wrappers: Simd::BgraToRgba(const View<A>& bgra, View<A>& rgba)
             and Simd::RgbaToBgra(const View<A>& rgba, View<A>& bgra).
@@ -2041,9 +2078,9 @@ extern "C"
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] rgba - a pointer to pixels data of output 32-bit RGBA (or 32-bit BGRA) image.
-        \param [in] rgbaStride - a row size of the rgb image.
+        \param [in] rgbaStride - a row size (in bytes) of the rgba image.
     */
     SIMD_API void SimdBgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride);
 
