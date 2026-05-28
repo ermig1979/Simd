@@ -1590,11 +1590,11 @@ extern "C"
 
         \fn void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-        \short Performs background update (initial grow, slow mode).
+        \short Performs slow expansion of background range.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For every point:
+        For every point, range bounds are moved by one step toward current value:
         \verbatim
         lo[i] -= value[i] < lo[i] ? 1 : 0;
         hi[i] += value[i] > hi[i] ? 1 : 0;
@@ -1620,11 +1620,11 @@ extern "C"
 
         \fn void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-        \short Performs background update (initial grow, fast mode).
+        \short Performs fast expansion of background range.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For every point:
+        For every point, range bounds are expanded to include current value:
         \verbatim
         lo[i] = value[i] < lo[i] ? value[i] : lo[i];
         hi[i] = value[i] > hi[i] ? value[i] : hi[i];
@@ -1650,11 +1650,11 @@ extern "C"
 
         \fn void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride, uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
 
-        \short Performs collection of background statistic.
+        \short Collects background out-of-range statistics.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Updates background statistic counters for every point:
+        For every point, counters are incremented with saturation to 255:
         \verbatim
         loCount[i] += (value[i] < loValue[i] && loCount[i] < 255) ? 1 : 0;
         hiCount[i] += (value[i] > hiValue[i] && hiCount[i] < 255) ? 1 : 0;
@@ -1685,11 +1685,11 @@ extern "C"
 
         \fn void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
-        \short Performs adjustment of background range.
+        \short Adjusts background range using collected counters.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Adjusts background range for every point:
+        For every point:
         \verbatim
         loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
         loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0;
@@ -1723,21 +1723,21 @@ extern "C"
 
         \fn void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
-        \short Performs adjustment of background range with using adjust range mask.
+        \short Adjusts background range using collected counters and update mask.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Adjusts background range for every point:
+        For every point:
         \verbatim
         if(mask[i])
         {
             loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
             loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0;
-            loCount[i] = 0;
             hiValue[i] += (hiCount[i] > threshold && hiValue[i] < 255) ? 1 : 0;
             hiValue[i] -= (hiCount[i] < threshold && hiValue[i] > 0) ? 1 : 0;
-            hiCount[i] = 0;
         }
+        loCount[i] = 0;
+        hiCount[i] = 0;
         \endverbatim
 
         This function is used for background updating in motion detection algorithm.
@@ -1766,21 +1766,23 @@ extern "C"
 
         \fn void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-        \short Shifts background range.
+        \short Shifts background range to include current value.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every point:
         \verbatim
-        if (value[i] > hi[i])
+        add = value[i] - hi[i];
+        sub = lo[i] - value[i];
+        if(add > 0)
         {
-            lo[i] = min(lo[i] + value[i] - hi[i], 255);
-            hi[i] = value[i];
+            lo[i] = min(lo[i] + add, 255);
+            hi[i] = min(hi[i] + add, 255);
         }
-        if (lo[i] > value[i])
+        if(sub > 0)
         {
-            lo[i] = value[i];
-            hi[i] = max(hi[i] - lo[i] + value[i], 0);
+            lo[i] = max(lo[i] - sub, 0);
+            hi[i] = max(hi[i] - sub, 0);
         }
         \endverbatim
 
@@ -1804,7 +1806,7 @@ extern "C"
 
         \fn void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
-        \short Shifts background range with using shift range mask.
+        \short Shifts background range to include current value using update mask.
 
         All images must have the same width, height and format (8-bit gray).
 
@@ -1812,15 +1814,17 @@ extern "C"
         \verbatim
         if(mask[i])
         {
-            if (value[i] > hi[i])
+            add = value[i] - hi[i];
+            sub = lo[i] - value[i];
+            if(add > 0)
             {
-                lo[i] = min(lo[i] + value[i] - hi[i], 255);
-                hi[i] = value[i];
+                lo[i] = min(lo[i] + add, 255);
+                hi[i] = min(hi[i] + add, 255);
             }
-            if (lo[i] > value[i])
+            if(sub > 0)
             {
-                lo[i] = value[i];
-                hi[i] = max(hi[i] - lo[i] + value[i], 0);
+                lo[i] = max(lo[i] - sub, 0);
+                hi[i] = max(hi[i] - sub, 0);
             }
         }
         \endverbatim
@@ -1847,14 +1851,15 @@ extern "C"
 
         \fn void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
-        \short Creates background update mask.
+        \short Initializes background update mask by selected source index.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every point:
         \verbatim
-        if(mask[i] == index)
+        if(src[i] == index)
             dst[i] = value;
+        // otherwise dst[i] is unchanged.
         \endverbatim
 
         This function is used for background updating in motion detection algorithm.
