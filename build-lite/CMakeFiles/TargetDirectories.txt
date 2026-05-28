@@ -1,0 +1,9 @@
+/tmp/workspace/ermig1979/Simd/build-lite/CMakeFiles/Simd.dir
+/tmp/workspace/ermig1979/Simd/build-lite/CMakeFiles/Test.dir
+/tmp/workspace/ermig1979/Simd/build-lite/CMakeFiles/uninstall.dir
+/tmp/workspace/ermig1979/Simd/build-lite/CMakeFiles/edit_cache.dir
+/tmp/workspace/ermig1979/Simd/build-lite/CMakeFiles/rebuild_cache.dir
+/tmp/workspace/ermig1979/Simd/build-lite/CMakeFiles/list_install_components.dir
+/tmp/workspace/ermig1979/Simd/build-lite/CMakeFiles/install.dir
+/tmp/workspace/ermig1979/Simd/build-lite/CMakeFiles/install/local.dir
+/tmp/workspace/ermig1979/Simd/build-lite/CMakeFiles/install/strip.dir
