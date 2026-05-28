@@ -1723,7 +1723,7 @@ extern "C"
 
         \fn void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
-        \short Adjusts background range using collected counters and update mask.
+        \short Adjusts background range using collected counters and a mask.
 
         All images must have the same width, height and format (8-bit gray).
 
@@ -1733,11 +1733,11 @@ extern "C"
         {
             loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
             loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0;
+            loCount[i] = 0;
             hiValue[i] += (hiCount[i] > threshold && hiValue[i] < 255) ? 1 : 0;
             hiValue[i] -= (hiCount[i] < threshold && hiValue[i] > 0) ? 1 : 0;
+            hiCount[i] = 0;
         }
-        loCount[i] = 0;
-        hiCount[i] = 0;
         \endverbatim
 
         This function is used for background updating in motion detection algorithm.
@@ -1806,7 +1806,7 @@ extern "C"
 
         \fn void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
-        \short Shifts background range to include current value using update mask.
+        \short Shifts background range to include current value using a mask.
 
         All images must have the same width, height and format (8-bit gray).
 
@@ -1859,7 +1859,6 @@ extern "C"
         \verbatim
         if(src[i] == index)
             dst[i] = value;
-        // otherwise dst[i] is unchanged.
         \endverbatim
 
         This function is used for background updating in motion detection algorithm.
