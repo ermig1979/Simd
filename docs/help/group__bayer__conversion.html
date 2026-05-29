@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga9ce7ed295e71acc2cf882622ab78c384"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bayer__conversion.html#ga9ce7ed295e71acc2cf882622ab78c384">SimdBayerToBgr</a> (const uint8_t *bayer, size_t width, size_t height, size_t bayerStride, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> bayerFormat, uint8_t *bgr, size_t bgrStride)</td></tr>
-<tr class="memdesc:ga9ce7ed295e71acc2cf882622ab78c384"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit Bayer image to 24-bit BGR.  <a href="group__bayer__conversion.html#ga9ce7ed295e71acc2cf882622ab78c384">More...</a><br /></td></tr>
+<tr class="memdesc:ga9ce7ed295e71acc2cf882622ab78c384"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.  <a href="group__bayer__conversion.html#ga9ce7ed295e71acc2cf882622ab78c384">More...</a><br /></td></tr>
 <tr class="separator:ga9ce7ed295e71acc2cf882622ab78c384"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5f976c211d21f1d52d70901ee2551a89"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bayer__conversion.html#ga5f976c211d21f1d52d70901ee2551a89">SimdBayerToBgra</a> (const uint8_t *bayer, size_t width, size_t height, size_t bayerStride, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> bayerFormat, uint8_t *bgra, size_t bgraStride, uint8_t alpha)</td></tr>
-<tr class="memdesc:ga5f976c211d21f1d52d70901ee2551a89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit Bayer image to 32-bit BGRA.  <a href="group__bayer__conversion.html#ga5f976c211d21f1d52d70901ee2551a89">More...</a><br /></td></tr>
+<tr class="memdesc:ga5f976c211d21f1d52d70901ee2551a89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.  <a href="group__bayer__conversion.html#ga5f976c211d21f1d52d70901ee2551a89">More...</a><br /></td></tr>
 <tr class="separator:ga5f976c211d21f1d52d70901ee2551a89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga03654a8e8f161b1c1e3753dafab91b70"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga03654a8e8f161b1c1e3753dafab91b70"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bayer__conversion.html#ga03654a8e8f161b1c1e3753dafab91b70">BayerToBgr</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bayer, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgr)</td></tr>
@@ -124,18 +124,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 8-bit Bayer image to 24-bit BGR. </p>
-<p >All images must have the same width and height. The width and the height must be even.</p>
+<p>Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing. </p>
+<p >The function performs demosaicing of a raw Bayer-patterned image into a full-color 24-bit BGR image. Missing color samples at each pixel are reconstructed using a gradient-based interpolation that selects between vertical and horizontal neighbors according to local edge strength, producing sharper results along edges than simple bilinear interpolation. Both images must have the same width and height, and both dimensions must be even.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BayerToBgr(const View&lt;A&gt;&amp; bayer, View&lt;A&gt;&amp; bgr).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bayer</td><td>- a pointer to pixels data of input 8-bit Bayer image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bayerStride</td><td>- a row size of the bayer image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. Must be even and at least 4. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. Must be even and at least 4. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bayerStride</td><td>- a row size (in bytes) of the bayer image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bayerFormat</td><td>- a format of the input bayer image. It can be <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393acc334db31599134aa38269cd25ce3c3d">SimdPixelFormatBayerGrbg</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a5b74355a0f9163d28d5ff57e3400826f">SimdPixelFormatBayerGbrg</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a571ba3af45a354119fa16d8226b7532b">SimdPixelFormatBayerRggb</a> or <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a819dfc2cdf87383bc81abf7cf3458816">SimdPixelFormatBayerBggr</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">bgr</td><td>- a pointer to pixels data of output 24-bit BGR image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgrStride</td><td>- a row size of the bgr image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgrStride</td><td>- a row size (in bytes) of the bgr image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -204,19 +204,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 8-bit Bayer image to 32-bit BGRA. </p>
-<p >All images must have the same width and height. The width and the height must be even.</p>
+<p>Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing. </p>
+<p >The function performs demosaicing of a raw Bayer-patterned image into a full-color 32-bit BGRA image. Missing color samples at each pixel are reconstructed using a gradient-based interpolation that selects between vertical and horizontal neighbors according to local edge strength. The alpha channel of every output pixel is set to the constant value specified by the <em>alpha</em> parameter. Both images must have the same width and height, and both dimensions must be even.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BayerToBgra(const View&lt;A&gt;&amp; bayer, View&lt;A&gt;&amp; bgra, uint8_t alpha).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bayer</td><td>- a pointer to pixels data of input 8-bit Bayer image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bayerStride</td><td>- a row size of the bayer image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. Must be even and at least 4. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. Must be even and at least 4. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bayerStride</td><td>- a row size (in bytes) of the bayer image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bayerFormat</td><td>- a format of the input bayer image. It can be <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393acc334db31599134aa38269cd25ce3c3d">SimdPixelFormatBayerGrbg</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a5b74355a0f9163d28d5ff57e3400826f">SimdPixelFormatBayerGbrg</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a571ba3af45a354119fa16d8226b7532b">SimdPixelFormatBayerRggb</a> or <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a819dfc2cdf87383bc81abf7cf3458816">SimdPixelFormatBayerBggr</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of output 32-bit BGRA image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a value of alpha channel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size (in bytes) of the bgra image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a constant value to fill the alpha channel of every output pixel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -251,7 +251,7 @@ Functions</h2></td></tr>
 
 <p>Converts 8-bit Bayer image to 24-bit BGR. </p>
 <p >All images must have the same width and height. The width and the height must be even.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bayer__conversion.html#ga9ce7ed295e71acc2cf882622ab78c384" title="Converts 8-bit Bayer image to 24-bit BGR.">SimdBayerToBgr</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bayer__conversion.html#ga9ce7ed295e71acc2cf882622ab78c384" title="Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.">SimdBayerToBgr</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bayer</td><td>- an input 8-bit Bayer image. </td></tr>
@@ -296,7 +296,7 @@ Functions</h2></td></tr>
 
 <p>Converts 8-bit Bayer image to 32-bit BGRA. </p>
 <p >All images must have the same width and height. The width and the height must be even.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bayer__conversion.html#ga5f976c211d21f1d52d70901ee2551a89" title="Converts 8-bit Bayer image to 32-bit BGRA.">SimdBayerToBgra</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bayer__conversion.html#ga5f976c211d21f1d52d70901ee2551a89" title="Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.">SimdBayerToBgra</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bayer</td><td>- an input 8-bit Bayer image. </td></tr>

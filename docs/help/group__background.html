@@ -51,28 +51,28 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga92518b3197a907a3b34c1adb08065697"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__background.html#ga92518b3197a907a3b34c1adb08065697">SimdBackgroundGrowRangeSlow</a> (const uint8_t *value, size_t valueStride, size_t width, size_t height, uint8_t *lo, size_t loStride, uint8_t *hi, size_t hiStride)</td></tr>
-<tr class="memdesc:ga92518b3197a907a3b34c1adb08065697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs background update (initial grow, slow mode).  <a href="group__background.html#ga92518b3197a907a3b34c1adb08065697">More...</a><br /></td></tr>
+<tr class="memdesc:ga92518b3197a907a3b34c1adb08065697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs slow expansion of background range.  <a href="group__background.html#ga92518b3197a907a3b34c1adb08065697">More...</a><br /></td></tr>
 <tr class="separator:ga92518b3197a907a3b34c1adb08065697"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga38559b41f752154fad2ec4c8b8f2421b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__background.html#ga38559b41f752154fad2ec4c8b8f2421b">SimdBackgroundGrowRangeFast</a> (const uint8_t *value, size_t valueStride, size_t width, size_t height, uint8_t *lo, size_t loStride, uint8_t *hi, size_t hiStride)</td></tr>
-<tr class="memdesc:ga38559b41f752154fad2ec4c8b8f2421b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs background update (initial grow, fast mode).  <a href="group__background.html#ga38559b41f752154fad2ec4c8b8f2421b">More...</a><br /></td></tr>
+<tr class="memdesc:ga38559b41f752154fad2ec4c8b8f2421b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs fast expansion of background range.  <a href="group__background.html#ga38559b41f752154fad2ec4c8b8f2421b">More...</a><br /></td></tr>
 <tr class="separator:ga38559b41f752154fad2ec4c8b8f2421b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9d7c378294c144324e85028cf5321222"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__background.html#ga9d7c378294c144324e85028cf5321222">SimdBackgroundIncrementCount</a> (const uint8_t *value, size_t valueStride, size_t width, size_t height, const uint8_t *loValue, size_t loValueStride, const uint8_t *hiValue, size_t hiValueStride, uint8_t *loCount, size_t loCountStride, uint8_t *hiCount, size_t hiCountStride)</td></tr>
-<tr class="memdesc:ga9d7c378294c144324e85028cf5321222"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs collection of background statistic.  <a href="group__background.html#ga9d7c378294c144324e85028cf5321222">More...</a><br /></td></tr>
+<tr class="memdesc:ga9d7c378294c144324e85028cf5321222"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collects background out-of-range statistics.  <a href="group__background.html#ga9d7c378294c144324e85028cf5321222">More...</a><br /></td></tr>
 <tr class="separator:ga9d7c378294c144324e85028cf5321222"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5eb435c051cd7957de7ad38850ec6d35"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__background.html#ga5eb435c051cd7957de7ad38850ec6d35">SimdBackgroundAdjustRange</a> (uint8_t *loCount, size_t loCountStride, size_t width, size_t height, uint8_t *loValue, size_t loValueStride, uint8_t *hiCount, size_t hiCountStride, uint8_t *hiValue, size_t hiValueStride, uint8_t threshold)</td></tr>
-<tr class="memdesc:ga5eb435c051cd7957de7ad38850ec6d35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs adjustment of background range.  <a href="group__background.html#ga5eb435c051cd7957de7ad38850ec6d35">More...</a><br /></td></tr>
+<tr class="memdesc:ga5eb435c051cd7957de7ad38850ec6d35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adjusts background range using collected counters.  <a href="group__background.html#ga5eb435c051cd7957de7ad38850ec6d35">More...</a><br /></td></tr>
 <tr class="separator:ga5eb435c051cd7957de7ad38850ec6d35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1b0395fb1632f6776ab0e05707e247ec"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__background.html#ga1b0395fb1632f6776ab0e05707e247ec">SimdBackgroundAdjustRangeMasked</a> (uint8_t *loCount, size_t loCountStride, size_t width, size_t height, uint8_t *loValue, size_t loValueStride, uint8_t *hiCount, size_t hiCountStride, uint8_t *hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t *mask, size_t maskStride)</td></tr>
-<tr class="memdesc:ga1b0395fb1632f6776ab0e05707e247ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs adjustment of background range with using adjust range mask.  <a href="group__background.html#ga1b0395fb1632f6776ab0e05707e247ec">More...</a><br /></td></tr>
+<tr class="memdesc:ga1b0395fb1632f6776ab0e05707e247ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adjusts background range using collected counters and a mask.  <a href="group__background.html#ga1b0395fb1632f6776ab0e05707e247ec">More...</a><br /></td></tr>
 <tr class="separator:ga1b0395fb1632f6776ab0e05707e247ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2bd823ad3311de3461a0c48bbbe97d7f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__background.html#ga2bd823ad3311de3461a0c48bbbe97d7f">SimdBackgroundShiftRange</a> (const uint8_t *value, size_t valueStride, size_t width, size_t height, uint8_t *lo, size_t loStride, uint8_t *hi, size_t hiStride)</td></tr>
-<tr class="memdesc:ga2bd823ad3311de3461a0c48bbbe97d7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shifts background range.  <a href="group__background.html#ga2bd823ad3311de3461a0c48bbbe97d7f">More...</a><br /></td></tr>
+<tr class="memdesc:ga2bd823ad3311de3461a0c48bbbe97d7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shifts background range to include current value.  <a href="group__background.html#ga2bd823ad3311de3461a0c48bbbe97d7f">More...</a><br /></td></tr>
 <tr class="separator:ga2bd823ad3311de3461a0c48bbbe97d7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8e1ba68024b122e393185a655581c06f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__background.html#ga8e1ba68024b122e393185a655581c06f">SimdBackgroundShiftRangeMasked</a> (const uint8_t *value, size_t valueStride, size_t width, size_t height, uint8_t *lo, size_t loStride, uint8_t *hi, size_t hiStride, const uint8_t *mask, size_t maskStride)</td></tr>
-<tr class="memdesc:ga8e1ba68024b122e393185a655581c06f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shifts background range with using shift range mask.  <a href="group__background.html#ga8e1ba68024b122e393185a655581c06f">More...</a><br /></td></tr>
+<tr class="memdesc:ga8e1ba68024b122e393185a655581c06f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shifts background range to include current value using a mask.  <a href="group__background.html#ga8e1ba68024b122e393185a655581c06f">More...</a><br /></td></tr>
 <tr class="separator:ga8e1ba68024b122e393185a655581c06f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf1e16149f47dcaa840531707ef49c52b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__background.html#gaf1e16149f47dcaa840531707ef49c52b">SimdBackgroundInitMask</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, uint8_t index, uint8_t value, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaf1e16149f47dcaa840531707ef49c52b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates background update mask.  <a href="group__background.html#gaf1e16149f47dcaa840531707ef49c52b">More...</a><br /></td></tr>
+<tr class="memdesc:gaf1e16149f47dcaa840531707ef49c52b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes background update mask by selected source index.  <a href="group__background.html#gaf1e16149f47dcaa840531707ef49c52b">More...</a><br /></td></tr>
 <tr class="separator:gaf1e16149f47dcaa840531707ef49c52b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad5d1fdc00d4f9d647ee6ac5068086931"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad5d1fdc00d4f9d647ee6ac5068086931"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__background.html#gad5d1fdc00d4f9d647ee6ac5068086931">BackgroundGrowRangeSlow</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;value, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;lo, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;hi)</td></tr>
@@ -172,9 +172,9 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs background update (initial grow, slow mode). </p>
+<p>Performs slow expansion of background range. </p>
 <p >All images must have the same width, height and format (8-bit gray).</p>
-<p >For every point: </p><pre class="fragment">lo[i] -= value[i] &lt; lo[i] ? 1 : 0;
+<p >For every point, range bounds are moved by one step toward current value: </p><pre class="fragment">lo[i] -= value[i] &lt; lo[i] ? 1 : 0;
 hi[i] += value[i] &gt; hi[i] ? 1 : 0;
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BackgroundGrowRangeSlow(const View&lt;A&gt;&amp; value, View&lt;A&gt;&amp; lo, View&lt;A&gt;&amp; hi).</dd></dl>
@@ -256,9 +256,9 @@ hi[i] += value[i] &gt; hi[i] ? 1 : 0;
       </table>
 </div><div class="memdoc">
 
-<p>Performs background update (initial grow, fast mode). </p>
+<p>Performs fast expansion of background range. </p>
 <p >All images must have the same width, height and format (8-bit gray).</p>
-<p >For every point: </p><pre class="fragment">lo[i] = value[i] &lt; lo[i] ? value[i] : lo[i];
+<p >For every point, range bounds are expanded to include current value: </p><pre class="fragment">lo[i] = value[i] &lt; lo[i] ? value[i] : lo[i];
 hi[i] = value[i] &gt; hi[i] ? value[i] : hi[i];
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BackgroundGrowRangeFast(const View&lt;A&gt;&amp; value, View&lt;A&gt;&amp; lo, View&lt;A&gt;&amp; hi).</dd></dl>
@@ -364,9 +364,9 @@ hi[i] = value[i] &gt; hi[i] ? value[i] : hi[i];
       </table>
 </div><div class="memdoc">
 
-<p>Performs collection of background statistic. </p>
+<p>Collects background out-of-range statistics. </p>
 <p >All images must have the same width, height and format (8-bit gray).</p>
-<p >Updates background statistic counters for every point: </p><pre class="fragment">loCount[i] += (value[i] &lt; loValue[i] &amp;&amp; loCount[i] &lt; 255) ? 1 : 0;
+<p >For every point, counters are incremented with saturation to 255: </p><pre class="fragment">loCount[i] += (value[i] &lt; loValue[i] &amp;&amp; loCount[i] &lt; 255) ? 1 : 0;
 hiCount[i] += (value[i] &gt; hiValue[i] &amp;&amp; hiCount[i] &lt; 255) ? 1 : 0;
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BackgroundIncrementCount(const View&lt;A&gt;&amp; value, const View&lt;A&gt;&amp; loValue, const View&lt;A&gt;&amp; hiValue, View&lt;A&gt;&amp; loCount, View&lt;A&gt;&amp; hiCount).</dd></dl>
@@ -470,9 +470,9 @@ hiCount[i] += (value[i] &gt; hiValue[i] &amp;&amp; hiCount[i] &lt; 255) ? 1 : 0;
       </table>
 </div><div class="memdoc">
 
-<p>Performs adjustment of background range. </p>
+<p>Adjusts background range using collected counters. </p>
 <p >All images must have the same width, height and format (8-bit gray).</p>
-<p >Adjusts background range for every point: </p><pre class="fragment">loValue[i] -= (loCount[i] &gt; threshold &amp;&amp; loValue[i] &gt; 0) ? 1 : 0;
+<p >For every point: </p><pre class="fragment">loValue[i] -= (loCount[i] &gt; threshold &amp;&amp; loValue[i] &gt; 0) ? 1 : 0;
 loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0;
 loCount[i] = 0;
 hiValue[i] += (hiCount[i] &gt; threshold &amp;&amp; hiValue[i] &lt; 255) ? 1 : 0;
@@ -591,9 +591,9 @@ hiCount[i] = 0;
       </table>
 </div><div class="memdoc">
 
-<p>Performs adjustment of background range with using adjust range mask. </p>
+<p>Adjusts background range using collected counters and a mask. </p>
 <p >All images must have the same width, height and format (8-bit gray).</p>
-<p >Adjusts background range for every point: </p><pre class="fragment">if(mask[i])
+<p >For every point: </p><pre class="fragment">if(mask[i])
 {
     loValue[i] -= (loCount[i] &gt; threshold &amp;&amp; loValue[i] &gt; 0) ? 1 : 0;
     loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0;
@@ -687,17 +687,19 @@ hiCount[i] = 0;
       </table>
 </div><div class="memdoc">
 
-<p>Shifts background range. </p>
+<p>Shifts background range to include current value. </p>
 <p >All images must have the same width, height and format (8-bit gray).</p>
-<p >For every point: </p><pre class="fragment">if (value[i] &gt; hi[i])
+<p >For every point: </p><pre class="fragment">add = value[i] - hi[i];
+sub = lo[i] - value[i];
+if(add &gt; 0)
 {
-    lo[i] = min(lo[i] + value[i] - hi[i], 255);
-    hi[i] = value[i];
+    lo[i] = min(lo[i] + add, 255);
+    hi[i] = min(hi[i] + add, 255);
 }
-if (lo[i] &gt; value[i])
+if(sub &gt; 0)
 {
-    lo[i] = value[i];
-    hi[i] = max(hi[i] - lo[i] + value[i], 0);
+    lo[i] = max(lo[i] - sub, 0);
+    hi[i] = max(hi[i] - sub, 0);
 }
 </pre><p >This function is used for fast background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BackgroundShiftRange(const View&lt;A&gt;&amp; value, View&lt;A&gt;&amp; lo, View&lt;A&gt;&amp; hi).</dd></dl>
@@ -791,19 +793,21 @@ if (lo[i] &gt; value[i])
       </table>
 </div><div class="memdoc">
 
-<p>Shifts background range with using shift range mask. </p>
+<p>Shifts background range to include current value using a mask. </p>
 <p >All images must have the same width, height and format (8-bit gray).</p>
 <p >For every point: </p><pre class="fragment">if(mask[i])
 {
-    if (value[i] &gt; hi[i])
+    add = value[i] - hi[i];
+    sub = lo[i] - value[i];
+    if(add &gt; 0)
     {
-        lo[i] = min(lo[i] + value[i] - hi[i], 255);
-        hi[i] = value[i];
+        lo[i] = min(lo[i] + add, 255);
+        hi[i] = min(hi[i] + add, 255);
     }
-    if (lo[i] &gt; value[i])
+    if(sub &gt; 0)
     {
-        lo[i] = value[i];
-        hi[i] = max(hi[i] - lo[i] + value[i], 0);
+        lo[i] = max(lo[i] - sub, 0);
+        hi[i] = max(hi[i] - sub, 0);
     }
 }
 </pre><p >This function is used for fast background updating in motion detection algorithm.</p>
@@ -888,9 +892,9 @@ if (lo[i] &gt; value[i])
       </table>
 </div><div class="memdoc">
 
-<p>Creates background update mask. </p>
+<p>Initializes background update mask by selected source index. </p>
 <p >All images must have the same width, height and format (8-bit gray).</p>
-<p >For every point: </p><pre class="fragment">if(mask[i] == index)
+<p >For every point: </p><pre class="fragment">if(src[i] == index)
     dst[i] = value;
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BackgroundInitMask(const View&lt;A&gt;&amp; src, uint8_t index, uint8_t value, View&lt;A&gt;&amp; dst).</dd></dl>
@@ -947,7 +951,7 @@ if (lo[i] &gt; value[i])
 <p >For every point: </p><pre class="fragment">lo[i] -= value[i] &lt; lo[i] ? 1 : 0;
 hi[i] += value[i] &gt; hi[i] ? 1 : 0;
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga92518b3197a907a3b34c1adb08065697" title="Performs background update (initial grow, slow mode).">SimdBackgroundGrowRangeSlow</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga92518b3197a907a3b34c1adb08065697" title="Performs slow expansion of background range.">SimdBackgroundGrowRangeSlow</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a current feature value. </td></tr>
@@ -996,7 +1000,7 @@ hi[i] += value[i] &gt; hi[i] ? 1 : 0;
 <p >For every point: </p><pre class="fragment">lo[i] = value[i] &lt; lo[i] ? value[i] : lo[i];
 hi[i] = value[i] &gt; hi[i] ? value[i] : hi[i];
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga38559b41f752154fad2ec4c8b8f2421b" title="Performs background update (initial grow, fast mode).">SimdBackgroundGrowRangeFast</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga38559b41f752154fad2ec4c8b8f2421b" title="Performs fast expansion of background range.">SimdBackgroundGrowRangeFast</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a current feature value. </td></tr>
@@ -1057,7 +1061,7 @@ hi[i] = value[i] &gt; hi[i] ? value[i] : hi[i];
 <p >Updates background statistic counters for every point: </p><pre class="fragment">loCount[i] += (value[i] &lt; loValue[i] &amp;&amp; loCount[i] &lt; 255) ? 1 : 0;
 hiCount[i] += (value[i] &gt; hiValue[i] &amp;&amp; hiCount[i] &lt; 255) ? 1 : 0;
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga9d7c378294c144324e85028cf5321222" title="Performs collection of background statistic.">SimdBackgroundIncrementCount</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga9d7c378294c144324e85028cf5321222" title="Collects background out-of-range statistics.">SimdBackgroundIncrementCount</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a current feature value. </td></tr>
@@ -1124,7 +1128,7 @@ hiValue[i] += (hiCount[i] &gt; threshold &amp;&amp; hiValue[i] &lt; 255) ? 1 : 0
 hiValue[i] -= (hiCount[i] &lt; threshold &amp;&amp; hiValue[i] &gt; 0) ? 1 : 0;
 hiCount[i] = 0;
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga5eb435c051cd7957de7ad38850ec6d35" title="Performs adjustment of background range.">SimdBackgroundAdjustRange</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga5eb435c051cd7957de7ad38850ec6d35" title="Adjusts background range using collected counters.">SimdBackgroundAdjustRange</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">loCount</td><td>- a count of feature lower bound of dynamic background. </td></tr>
@@ -1200,7 +1204,7 @@ hiCount[i] = 0;
     hiCount[i] = 0;
 }
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga1b0395fb1632f6776ab0e05707e247ec" title="Performs adjustment of background range with using adjust range mask.">SimdBackgroundAdjustRangeMasked</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga1b0395fb1632f6776ab0e05707e247ec" title="Adjusts background range using collected counters and a mask.">SimdBackgroundAdjustRangeMasked</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">loCount</td><td>- a count of feature lower bound of dynamic background. </td></tr>
@@ -1260,7 +1264,7 @@ if (lo[i] &gt; value[i])
     hi[i] = max(hi[i] - lo[i] + value[i], 0);
 }
 </pre><p >This function is used for fast background updating in motion detection algorithm.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga2bd823ad3311de3461a0c48bbbe97d7f" title="Shifts background range.">SimdBackgroundShiftRange</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga2bd823ad3311de3461a0c48bbbe97d7f" title="Shifts background range to include current value.">SimdBackgroundShiftRange</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a current feature value. </td></tr>
@@ -1326,7 +1330,7 @@ if (lo[i] &gt; value[i])
     }
 }
 </pre><p >This function is used for fast background updating in motion detection algorithm.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga8e1ba68024b122e393185a655581c06f" title="Shifts background range with using shift range mask.">SimdBackgroundShiftRangeMasked</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga8e1ba68024b122e393185a655581c06f" title="Shifts background range to include current value using a mask.">SimdBackgroundShiftRangeMasked</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a current feature value. </td></tr>
@@ -1382,7 +1386,7 @@ if (lo[i] &gt; value[i])
 <p >For every point: </p><pre class="fragment">if(mask[i] == index)
     dst[i] = value;
 </pre><p >This function is used for background updating in motion detection algorithm.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#gaf1e16149f47dcaa840531707ef49c52b" title="Creates background update mask.">SimdBackgroundInitMask</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#gaf1e16149f47dcaa840531707ef49c52b" title="Initializes background update mask by selected source index.">SimdBackgroundInitMask</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input mask image. </td></tr>
