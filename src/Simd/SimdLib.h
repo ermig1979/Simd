@@ -1590,11 +1590,11 @@ extern "C"
 
         \fn void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-        \short Performs background update (initial grow, slow mode).
+        \short Performs slow expansion of background range.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For every point:
+        For every point, range bounds are moved by one step toward current value:
         \verbatim
         lo[i] -= value[i] < lo[i] ? 1 : 0;
         hi[i] += value[i] > hi[i] ? 1 : 0;
@@ -1620,11 +1620,11 @@ extern "C"
 
         \fn void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-        \short Performs background update (initial grow, fast mode).
+        \short Performs fast expansion of background range.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For every point:
+        For every point, range bounds are expanded to include current value:
         \verbatim
         lo[i] = value[i] < lo[i] ? value[i] : lo[i];
         hi[i] = value[i] > hi[i] ? value[i] : hi[i];
@@ -1650,11 +1650,11 @@ extern "C"
 
         \fn void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride, uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
 
-        \short Performs collection of background statistic.
+        \short Collects background out-of-range statistics.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Updates background statistic counters for every point:
+        For every point, counters are incremented with saturation to 255:
         \verbatim
         loCount[i] += (value[i] < loValue[i] && loCount[i] < 255) ? 1 : 0;
         hiCount[i] += (value[i] > hiValue[i] && hiCount[i] < 255) ? 1 : 0;
@@ -1685,11 +1685,11 @@ extern "C"
 
         \fn void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
-        \short Performs adjustment of background range.
+        \short Adjusts background range using collected counters.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Adjusts background range for every point:
+        For every point:
         \verbatim
         loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
         loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0;
@@ -1723,11 +1723,11 @@ extern "C"
 
         \fn void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
-        \short Performs adjustment of background range with using adjust range mask.
+        \short Adjusts background range using collected counters and a mask.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Adjusts background range for every point:
+        For every point:
         \verbatim
         if(mask[i])
         {
@@ -1766,21 +1766,23 @@ extern "C"
 
         \fn void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-        \short Shifts background range.
+        \short Shifts background range to include current value.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every point:
         \verbatim
-        if (value[i] > hi[i])
+        add = value[i] - hi[i];
+        sub = lo[i] - value[i];
+        if(add > 0)
         {
-            lo[i] = min(lo[i] + value[i] - hi[i], 255);
-            hi[i] = value[i];
+            lo[i] = min(lo[i] + add, 255);
+            hi[i] = min(hi[i] + add, 255);
         }
-        if (lo[i] > value[i])
+        if(sub > 0)
         {
-            lo[i] = value[i];
-            hi[i] = max(hi[i] - lo[i] + value[i], 0);
+            lo[i] = max(lo[i] - sub, 0);
+            hi[i] = max(hi[i] - sub, 0);
         }
         \endverbatim
 
@@ -1804,7 +1806,7 @@ extern "C"
 
         \fn void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
-        \short Shifts background range with using shift range mask.
+        \short Shifts background range to include current value using a mask.
 
         All images must have the same width, height and format (8-bit gray).
 
@@ -1812,15 +1814,17 @@ extern "C"
         \verbatim
         if(mask[i])
         {
-            if (value[i] > hi[i])
+            add = value[i] - hi[i];
+            sub = lo[i] - value[i];
+            if(add > 0)
             {
-                lo[i] = min(lo[i] + value[i] - hi[i], 255);
-                hi[i] = value[i];
+                lo[i] = min(lo[i] + add, 255);
+                hi[i] = min(hi[i] + add, 255);
             }
-            if (lo[i] > value[i])
+            if(sub > 0)
             {
-                lo[i] = value[i];
-                hi[i] = max(hi[i] - lo[i] + value[i], 0);
+                lo[i] = max(lo[i] - sub, 0);
+                hi[i] = max(hi[i] - sub, 0);
             }
         }
         \endverbatim
@@ -1847,13 +1851,13 @@ extern "C"
 
         \fn void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
-        \short Creates background update mask.
+        \short Initializes background update mask by selected source index.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every point:
         \verbatim
-        if(mask[i] == index)
+        if(src[i] == index)
             dst[i] = value;
         \endverbatim
 
@@ -1877,14 +1881,19 @@ extern "C"
 
         \fn void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
 
-        \short Decode string from Base64.
+        \short Decodes a Base64-encoded byte sequence into its original binary data.
+
+        The function decodes a Base64-encoded input (as defined by RFC 4648) into the
+        original binary data. The input length must be a multiple of 4 and at least 4 bytes.
+        Padding characters ('=') at the end of the input are handled automatically, so the
+        actual decoded length may be 1 or 2 bytes less than srcSize / 4 * 3.
 
         \note This function has a C++ wrapper std::string Simd::Base64Decode(const std::string & src).
 
-        \param [in] src - a pointer to Base64 encoded input string.
-        \param [in] srcSize - a length of input string.
-        \param [out] dst - a pointer to the output buffer with decoded string. The size of the buffer is must be at least srcSize / 4 * 3.
-        \param [out] dstSize - a pointer to the value with length of decoded string. 
+        \param [in] src - a pointer to the Base64-encoded input data. Its length must be a multiple of 4 and at least 4.
+        \param [in] srcSize - a size (in bytes) of the Base64-encoded input. Must be a non-zero multiple of 4.
+        \param [out] dst - a pointer to the output buffer for the decoded binary data. The buffer size must be at least srcSize / 4 * 3 bytes.
+        \param [out] dstSize - a pointer to a variable that receives the number of bytes written to the output buffer.
     */
     SIMD_API void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
 
@@ -1892,13 +1901,18 @@ extern "C"
 
         \fn void SimdBase64Encode(const uint8_t* src, size_t size, uint8_t* dst);
 
-        \short Encode string to Base64.
+        \short Encodes binary data into a Base64 string.
+
+        The function encodes arbitrary binary data into its Base64 representation (as defined
+        by RFC 4648). Every 3 input bytes are encoded as 4 Base64 characters. If the input
+        length is not a multiple of 3, the output is padded with '=' characters to the next
+        multiple of 4. The output is NOT null-terminated; its length is exactly (size + 2) / 3 * 4 bytes.
 
         \note This function has a C++ wrapper std::string Simd::Base64Encode(const std::string & src).
 
-        \param [in] src - a pointer to original string.
-        \param [in] size - a length of input string.
-        \param [out] dst - a pointer to the output buffer with Base64 encoded string. The size of the buffer is must be at least (size + 2) / 3 * 4.
+        \param [in] src - a pointer to the input binary data to be encoded.
+        \param [in] size - a size (in bytes) of the input data.
+        \param [out] dst - a pointer to the output buffer for the Base64-encoded string. The buffer size must be at least (size + 2) / 3 * 4 bytes.
     */
     SIMD_API void SimdBase64Encode(const uint8_t* src, size_t size, uint8_t* dst);
 
@@ -1906,19 +1920,23 @@ extern "C"
 
         \fn void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
 
-        \short Converts 8-bit Bayer image to 24-bit BGR.
+        \short Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function performs demosaicing of a raw Bayer-patterned image into a full-color 24-bit BGR image.
+        Missing color samples at each pixel are reconstructed using a gradient-based interpolation that
+        selects between vertical and horizontal neighbors according to local edge strength, producing
+        sharper results along edges than simple bilinear interpolation.
+        Both images must have the same width and height, and both dimensions must be even.
 
         \note This function has a C++ wrapper Simd::BayerToBgr(const View<A>& bayer, View<A>& bgr).
 
         \param [in] bayer - a pointer to pixels data of input 8-bit Bayer image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] bayerStride - a row size of the bayer image.
+        \param [in] width - an image width. Must be even and at least 4.
+        \param [in] height - an image height. Must be even and at least 4.
+        \param [in] bayerStride - a row size (in bytes) of the bayer image.
         \param [in] bayerFormat - a format of the input bayer image. It can be ::SimdPixelFormatBayerGrbg, ::SimdPixelFormatBayerGbrg, ::SimdPixelFormatBayerRggb or ::SimdPixelFormatBayerBggr.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
-        \param [in] bgrStride - a row size of the bgr image.
+        \param [in] bgrStride - a row size (in bytes) of the bgr image.
     */
     SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
 
@@ -1926,20 +1944,24 @@ extern "C"
 
         \fn void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-        \short Converts 8-bit Bayer image to 32-bit BGRA.
+        \short Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function performs demosaicing of a raw Bayer-patterned image into a full-color 32-bit BGRA image.
+        Missing color samples at each pixel are reconstructed using a gradient-based interpolation that
+        selects between vertical and horizontal neighbors according to local edge strength. The alpha channel
+        of every output pixel is set to the constant value specified by the \a alpha parameter.
+        Both images must have the same width and height, and both dimensions must be even.
 
         \note This function has a C++ wrapper Simd::BayerToBgra(const View<A>& bayer, View<A>& bgra, uint8_t alpha).
 
         \param [in] bayer - a pointer to pixels data of input 8-bit Bayer image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] bayerStride - a row size of the bayer image.
+        \param [in] width - an image width. Must be even and at least 4.
+        \param [in] height - an image height. Must be even and at least 4.
+        \param [in] bayerStride - a row size (in bytes) of the bayer image.
         \param [in] bayerFormat - a format of the input bayer image. It can be ::SimdPixelFormatBayerGrbg, ::SimdPixelFormatBayerGbrg, ::SimdPixelFormatBayerRggb or ::SimdPixelFormatBayerBggr.
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
-        \param [in] bgraStride - a row size of the bgra image.
-        \param [in] alpha - a value of alpha channel.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel.
     */
     SIMD_API void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -1947,18 +1969,22 @@ extern "C"
 
         \fn void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
-        \short Converts 32-bit BGRA image to 8-bit Bayer image.
+        \short Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function down-samples a full-color 32-bit BGRA image to an 8-bit Bayer-patterned image.
+        For each 2x2 block of BGRA pixels, exactly one color channel value (Blue, Green, or Red) is
+        selected per output pixel according to the specified Bayer pattern. The alpha channel of the
+        input image is ignored. Both images must have the same width and height, and both dimensions
+        must be even.
 
         \note This function has a C++ wrapper Simd::BgraToBayer(const View<A>& bgra, View<A>& bayer).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] width - an image width. Must be even.
+        \param [in] height - an image height. Must be even.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] bayer - a pointer to pixels data of output 8-bit Bayer image.
-        \param [in] bayerStride - a row size of the bayer image.
+        \param [in] bayerStride - a row size (in bytes) of the bayer image.
         \param [in] bayerFormat - a format of the output bayer image. It can be ::SimdPixelFormatBayerGrbg, ::SimdPixelFormatBayerGbrg, ::SimdPixelFormatBayerRggb or ::SimdPixelFormatBayerBggr.
     */
     SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
@@ -1967,9 +1993,12 @@ extern "C"
 
         \fn void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
 
-        \short Converts 32-bit BGRA image to 24-bit BGR image. Also it can be used for 32-bit RGBA to 24-bit RGB conversion.
+        \short Converts a 32-bit BGRA image to a 24-bit BGR image by dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit BGR (Blue, Green, Red) image.
+        The Blue, Green, and Red channels are copied unchanged for each pixel; the alpha channel is discarded.
+        This function can also be used for 32-bit RGBA to 24-bit RGB conversion, since the channel layout
+        operation (dropping the 4th channel) is identical. Both images must have the same width and height.
 
         \note This function has C++ wrappers: Simd::BgraToBgr(const View<A>& bgra, View<A>& bgr)
             and Simd::RgbaToRgb(const View<A>& rgba, View<A>& rgb).
@@ -1977,9 +2006,9 @@ extern "C"
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image.
-        \param [in] bgrStride - a row size of the bgr image.
+        \param [in] bgrStride - a row size (in bytes) of the bgr image.
     */
     SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
 
@@ -1987,18 +2016,24 @@ extern "C"
 
         \fn void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
-        \short Converts 32-bit BGRA image to 8-bit gray image.
+        \short Converts a 32-bit BGRA image to an 8-bit grayscale image.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to an 8-bit grayscale image.
+        The alpha channel is ignored. The luminance value of each pixel is calculated from the Blue, Green,
+        and Red channels using the ITU-R BT.601 standard weighted sum:
+        \verbatim
+        gray = (0.114 * blue + 0.587 * green + 0.299 * red)
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::BgraToGray(const View<A>& bgra, View<A>& gray).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] gray - a pointer to pixels data of output 8-bit gray image.
-        \param [in] grayStride - a row size of the gray image.
+        \param [in] grayStride - a row size (in bytes) of the gray image.
     */
     SIMD_API void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
@@ -2006,9 +2041,12 @@ extern "C"
 
         \fn void SimdBgraToRgb(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * rgb, size_t rgbStride);
 
-        \short Converts 32-bit BGRA image to 24-bit RGB image. Also it can be used for 32-bit RGBA to 24-bit BGR conversion.
+        \short Converts a 32-bit BGRA image to a 24-bit RGB image by swapping the Red and Blue channels and dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit RGB (Red, Green, Blue) image.
+        The Blue and Red channels are swapped, the Green channel is copied unchanged, and the alpha channel is discarded.
+        This function can also be used for 32-bit RGBA to 24-bit BGR conversion, since the channel reordering
+        operation is identical. Both images must have the same width and height.
 
         \note This function has C++ wrappers: Simd::BgraToRgb(const View<A>& bgra, View<A>& rgb)
             and Simd::RgbaToBgr(const View<A>& rgba, View<A>& bgr).
@@ -2016,9 +2054,9 @@ extern "C"
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] rgb - a pointer to pixels data of output 24-bit RGB (or 24-bit BGR) image.
-        \param [in] rgbStride - a row size of the rgb image.
+        \param [in] rgbStride - a row size (in bytes) of the rgb image.
     */
     SIMD_API void SimdBgraToRgb(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgb, size_t rgbStride);
 
@@ -2026,9 +2064,12 @@ extern "C"
 
         \fn void SimdBgraToRgba(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * rgba, size_t rgbaStride);
 
-        \short Converts 32-bit BGRA image to 32-bit RGBA image. Also it can be used for 32-bit RGBA to 32-bit BGRA conversion.
+        \short Converts a 32-bit BGRA image to a 32-bit RGBA image by swapping the Red and Blue channels while preserving the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 32-bit RGBA (Red, Green, Blue, Alpha) image.
+        The Blue and Red channels are swapped, while the Green and Alpha channels are copied unchanged for each pixel.
+        This function can also be used for 32-bit RGBA to 32-bit BGRA conversion, since the transformation is its own inverse.
+        Both images must have the same width and height.
 
         \note This function has C++ wrappers: Simd::BgraToRgba(const View<A>& bgra, View<A>& rgba)
             and Simd::RgbaToBgra(const View<A>& rgba, View<A>& bgra).
@@ -2036,9 +2077,9 @@ extern "C"
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] bgraStride - a row size (in bytes) of the bgra image.
         \param [out] rgba - a pointer to pixels data of output 32-bit RGBA (or 32-bit BGRA) image.
-        \param [in] rgbaStride - a row size of the rgb image.
+        \param [in] rgbaStride - a row size (in bytes) of the rgba image.
     */
     SIMD_API void SimdBgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride);
 
@@ -2046,10 +2087,13 @@ extern "C"
 
         \fn void SimdBgraToYuv420pV2(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, SimdYuvType yuvType);
 
-        \short Converts 32-bit BGRA image to YUV420P.
+        \short Converts a 32-bit BGRA image to planar YUV420P (4:2:0) and ignores input alpha.
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for every 2x2 block from averaged B, G, R values of this block.
         The input BGRA and output Y images must have the same width and height.
-        The output U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have half width and half height relative to Y.
+        The width and the height must be even.
 
         \note This function has a C++ wrapper Simd::BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
@@ -2071,10 +2115,13 @@ extern "C"
 
         \fn void SimdBgraToYuv422pV2(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, SimdYuvType yuvType);
 
-        \short Converts 32-bit BGRA image to YUV422P.
+        \short Converts a 32-bit BGRA image to planar YUV422P (4:2:2) and ignores input alpha.
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for each horizontal pair of pixels from averaged B, G, R values of this pair.
         The input BGRA and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The output U and V images must have half width and the same height relative to Y.
+        The width must be even.
 
         \note This function has a C++ wrapper Simd::BgraToYuv422p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
@@ -2096,8 +2143,9 @@ extern "C"
 
         \fn void SimdBgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
-        \short Converts 32-bit BGRA image to YUV444P.
+        \short Converts a 32-bit BGRA image to planar YUV444P (4:4:4) and ignores input alpha.
 
+        Y, U and V are computed for every source pixel from its B, G, R values.
         The input BGRA and output Y, U and V images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::BgraToYuv444p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
@@ -2121,10 +2169,14 @@ extern "C"
 
         \fn void SimdBgraToYuva420pV2(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride, SimdYuvType yuvType);
 
-        \short Converts 32-bit BGRA image to YUVA420P.
+        \short Converts a 32-bit BGRA image to planar YUVA420P (YUV 4:2:0 plus full-size alpha plane).
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for every 2x2 block from averaged B, G, R values of this block.
+        A is copied from the source alpha channel for every pixel without changes.
         The input BGRA and output Y and A images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have half width and half height relative to Y.
+        The width and the height must be even.
 
         \note This function has a C++ wrapper Simd::BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a, SimdYuvType yuvType = SimdYuvBt601).
 
@@ -2149,9 +2201,12 @@ extern "C"
 
         \fn void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
-        \short Converts 24-bit BGR image to 8-bit Bayer image.
+        \short Converts a 24-bit BGR image to a single-channel 8-bit Bayer mosaic image.
 
-        All images must have the same width and height. The width and the height must be even.
+        For each output pixel only one source color component (B, G or R) is selected according to bayerFormat
+        and its position inside a 2x2 Bayer pattern tile.
+        Input and output images must have the same width and height.
+        The width and the height must be even.
 
         \note This function has a C++ wrapper Simd::BgrToBayer(const View<A>& bgr, View<A>& bayer).
 
@@ -2169,9 +2224,10 @@ extern "C"
 
         \fn void SimdBgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-        \short Converts 24-bit BGR image to 32-bit BGRA image.
+        \short Converts a 24-bit BGR image to a 32-bit BGRA image with constant alpha.
 
-        All images must have the same width and height.
+        For each pixel, B, G and R are copied unchanged and A is set to the \a alpha parameter.
+        Input and output images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::BgrToBgra(const View<A>& bgr, View<A>& bgra, uint8_t alpha).
 
@@ -2189,9 +2245,11 @@ extern "C"
 
         \fn void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height, const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-        \short Converts 48-bit planar BGR image to 32-bit BGRA image.
+        \short Converts a planar 48-bit BGR image (three 16-bit planes) to 32-bit BGRA.
 
-        All images must have the same width and height.
+        For each pixel, one 8-bit value is taken from every 16-bit source channel
+        (low byte on little-endian systems, high byte on big-endian systems), and alpha is set to \a alpha.
+        All input and output images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::Bgr48pToBgra32(const View<A>& blue, const View<A>& green, const View<A>& red, View<A>& bgra, uint8_t alpha).
 
@@ -2214,9 +2272,13 @@ extern "C"
 
         \fn void SimdBgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
 
-        \short Converts 24-bit BGR image to 8-bit gray image.
+        \short Converts a 24-bit BGR image to an 8-bit gray image.
 
-        All images must have the same width and height.
+        For every pixel:
+        \verbatim
+        gray = round(0.114*blue + 0.587*green + 0.299*red).
+        \endverbatim
+        Input and output images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::BgrToGray(const View<A>& bgr, View<A>& gray).
 
@@ -2233,9 +2295,11 @@ extern "C"
 
         \fn void SimdBgrToHsl(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsl, size_t hslStride);
 
-        \short Converts 24-bit BGR image to 24-bit HSL(Hue, Saturation, Lightness) image.
+        \short Converts a 24-bit BGR image to a 24-bit HSL (Hue, Saturation, Lightness) image.
 
-        All images must have the same width and height.
+        For each output pixel: hsl[0] = hue, hsl[1] = saturation, hsl[2] = lightness.
+        All HSL components are stored as 8-bit values in range [0, 255].
+        Input and output images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::BgrToHsl(const View<A>& bgr, View<A>& hsl).
 
@@ -2252,9 +2316,11 @@ extern "C"
 
         \fn void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsv, size_t hsvStride);
 
-        \short Converts 24-bit BGR image to 24-bit HSV(Hue, Saturation, Value) image.
+        \short Converts a 24-bit BGR image to a 24-bit HSV (Hue, Saturation, Value) image.
 
-        All images must have the same width and height.
+        For each output pixel: hsv[0] = hue, hsv[1] = saturation, hsv[2] = value.
+        All HSV components are stored as 8-bit values in range [0, 255].
+        Input and output images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::BgrToHsv(const View<A>& bgr, View<A>& hsv).
 
