@@ -165,6 +165,9 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
     case SimdCpuInfoSve: return Sve::Enable ? 1 : 0;
     case SimdCpuInfoSveSize: return Sve::SveSize;
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    case SimdCpuInfoSve2: return Sve2::Enable ? 1 : 0;
+#endif
 #ifdef SIMD_HVX_ENABLE
     case SimdCpuInfoHvx: return Hvx::Enable ? 1 : 0;
 #endif

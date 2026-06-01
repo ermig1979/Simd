@@ -46,7 +46,7 @@ namespace Simd
 #if defined(_MSC_VER)
             return false;
 #elif defined(__GNUC__)
-            long hwcaps = getauxval(AT_HWCAP);
+            long hwcaps = getauxval(AT_HWCAP2);
             return hwcaps & HWCAP2_SVE2;
 #else
 #error Do not know how to detect SVE2 support!
