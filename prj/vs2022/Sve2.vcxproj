@@ -21,6 +21,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSve2BgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp" />
   </ItemGroup>
   <ItemGroup>

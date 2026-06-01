@@ -104,6 +104,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdSve1.h"
+#include "Simd/SimdSve2.h"
 #include "Simd/SimdHvx.h"
 
 #if !defined(SIMD_VERSION)
@@ -1397,6 +1398,11 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

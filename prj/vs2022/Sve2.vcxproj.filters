@@ -7,6 +7,9 @@
     <Filter Include="Sve2\System">
       <UniqueIdentifier>{92fef3f2-327b-4e9b-b4bc-afafe69cdc64}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Convert">
+      <UniqueIdentifier>{00e352e2-9b4f-40b0-a46c-898ab11edb22}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -16,6 +19,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp">
       <Filter>Sve2\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2BgrToGray.cpp">
+      <Filter>Sve2\Convert</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

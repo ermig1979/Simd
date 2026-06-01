@@ -67,6 +67,7 @@
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdSve1.h"
+#include "Simd/SimdSve2.h"
 #include "Simd/SimdHvx.h"
 
 namespace Test
