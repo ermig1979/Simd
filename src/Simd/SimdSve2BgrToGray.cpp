@@ -42,8 +42,8 @@ namespace Simd
         SIMD_INLINE svuint16_t BgrToGray(const svuint16_t& b, const svuint16_t& g, const svuint16_t& r, 
             const svuint32_t& wb, const svuint32_t& wg, const svuint32_t& wr, const svuint32_t& rt)
         {
-            svuint32_t bGray = BgrToGray(svshllb_n_u32(b, 0), svshllb_n_u32(g, 0), svshllb_n_u32(r, 0), wb, wg, wr, rt);
-            svuint32_t tGray = BgrToGray(svshllt_n_u32(b, 0), svshllt_n_u32(g, 0), svshllt_n_u32(r, 0), wb, wg, wr, rt);
+            svuint32_t bGray = BgrToGray(svmovlb_u32(b), svmovlb_u32(g), svmovlb_u32(r), wb, wg, wr, rt);
+            svuint32_t tGray = BgrToGray(svmovlt_u32(b), svmovlt_u32(g), svmovlt_u32(r), wb, wg, wr, rt);
             return svshrnt_n_u32(svshrnb_n_u32(bGray, 6), tGray, 6);
         }
 
