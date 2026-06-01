@@ -51,7 +51,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga47cf86145f80d5dd0862a860605c0234"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__conversion.html#ga47cf86145f80d5dd0862a860605c0234">SimdBgr48pToBgra32</a> (const uint8_t *blue, size_t blueStride, size_t width, size_t height, const uint8_t *green, size_t greenStride, const uint8_t *red, size_t redStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)</td></tr>
-<tr class="memdesc:ga47cf86145f80d5dd0862a860605c0234"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 48-bit planar BGR image to 32-bit BGRA image.  <a href="group__other__conversion.html#ga47cf86145f80d5dd0862a860605c0234">More...</a><br /></td></tr>
+<tr class="memdesc:ga47cf86145f80d5dd0862a860605c0234"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a planar 48-bit BGR image (three 16-bit planes) to 32-bit BGRA.  <a href="group__other__conversion.html#ga47cf86145f80d5dd0862a860605c0234">More...</a><br /></td></tr>
 <tr class="separator:ga47cf86145f80d5dd0862a860605c0234"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae2d8800553d2b36e4f3a358e2d89f56b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__conversion.html#gae2d8800553d2b36e4f3a358e2d89f56b">SimdFloat32ToUint8</a> (const float *src, size_t size, const float *lower, const float *upper, uint8_t *dst)</td></tr>
 <tr class="memdesc:gae2d8800553d2b36e4f3a358e2d89f56b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts numbers in the array from 32-bit float to 8-bit unsigned integer format.  <a href="group__other__conversion.html#gae2d8800553d2b36e4f3a358e2d89f56b">More...</a><br /></td></tr>
@@ -154,8 +154,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 48-bit planar BGR image to 32-bit BGRA image. </p>
-<p >All images must have the same width and height.</p>
+<p>Converts a planar 48-bit BGR image (three 16-bit planes) to 32-bit BGRA. </p>
+<p >For each pixel, one 8-bit value is taken from every 16-bit source channel (low byte on little-endian systems, high byte on big-endian systems), and alpha is set to <em>alpha</em>. All input and output images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::Bgr48pToBgra32(const View&lt;A&gt;&amp; blue, const View&lt;A&gt;&amp; green, const View&lt;A&gt;&amp; red, View&lt;A&gt;&amp; bgra, uint8_t alpha).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -408,7 +408,7 @@ Functions</h2></td></tr>
 
 <p>Converts 48-bit planar BGR image to 32-bit BGRA image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__conversion.html#ga47cf86145f80d5dd0862a860605c0234" title="Converts 48-bit planar BGR image to 32-bit BGRA image.">SimdBgr48pToBgra32</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__conversion.html#ga47cf86145f80d5dd0862a860605c0234" title="Converts a planar 48-bit BGR image (three 16-bit planes) to 32-bit BGRA.">SimdBgr48pToBgra32</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">blue</td><td>- an input 16-bit image with blue color plane. </td></tr>

@@ -51,31 +51,31 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaacf833a2ecf0704460d3993b4b175a84"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84">SimdBgraToBayer</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *bayer, size_t bayerStride, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> bayerFormat)</td></tr>
-<tr class="memdesc:gaacf833a2ecf0704460d3993b4b175a84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 8-bit Bayer image.  <a href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84">More...</a><br /></td></tr>
+<tr class="memdesc:gaacf833a2ecf0704460d3993b4b175a84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.  <a href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84">More...</a><br /></td></tr>
 <tr class="separator:gaacf833a2ecf0704460d3993b4b175a84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga95abace7b16978c81ddbeb9e0c6aeada"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga95abace7b16978c81ddbeb9e0c6aeada">SimdBgraToBgr</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *bgr, size_t bgrStride)</td></tr>
-<tr class="memdesc:ga95abace7b16978c81ddbeb9e0c6aeada"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 24-bit BGR image. Also it can be used for 32-bit RGBA to 24-bit RGB conversion.  <a href="group__bgra__conversion.html#ga95abace7b16978c81ddbeb9e0c6aeada">More...</a><br /></td></tr>
+<tr class="memdesc:ga95abace7b16978c81ddbeb9e0c6aeada"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit BGRA image to a 24-bit BGR image by dropping the alpha channel.  <a href="group__bgra__conversion.html#ga95abace7b16978c81ddbeb9e0c6aeada">More...</a><br /></td></tr>
 <tr class="separator:ga95abace7b16978c81ddbeb9e0c6aeada"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaff6b51b68d4e73e08cfb1dac020f9c0c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaff6b51b68d4e73e08cfb1dac020f9c0c">SimdBgraToGray</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride)</td></tr>
-<tr class="memdesc:gaff6b51b68d4e73e08cfb1dac020f9c0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 8-bit gray image.  <a href="group__bgra__conversion.html#gaff6b51b68d4e73e08cfb1dac020f9c0c">More...</a><br /></td></tr>
+<tr class="memdesc:gaff6b51b68d4e73e08cfb1dac020f9c0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit BGRA image to an 8-bit grayscale image.  <a href="group__bgra__conversion.html#gaff6b51b68d4e73e08cfb1dac020f9c0c">More...</a><br /></td></tr>
 <tr class="separator:gaff6b51b68d4e73e08cfb1dac020f9c0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7ebbd668a41ee055115adf6e85b7eb4c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga7ebbd668a41ee055115adf6e85b7eb4c">SimdBgraToRgb</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *rgb, size_t rgbStride)</td></tr>
-<tr class="memdesc:ga7ebbd668a41ee055115adf6e85b7eb4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 24-bit RGB image. Also it can be used for 32-bit RGBA to 24-bit BGR conversion.  <a href="group__bgra__conversion.html#ga7ebbd668a41ee055115adf6e85b7eb4c">More...</a><br /></td></tr>
+<tr class="memdesc:ga7ebbd668a41ee055115adf6e85b7eb4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit BGRA image to a 24-bit RGB image by swapping the Red and Blue channels and dropping the alpha channel.  <a href="group__bgra__conversion.html#ga7ebbd668a41ee055115adf6e85b7eb4c">More...</a><br /></td></tr>
 <tr class="separator:ga7ebbd668a41ee055115adf6e85b7eb4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaad727dcf1c17f35bda7cba70fec01c19"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaad727dcf1c17f35bda7cba70fec01c19">SimdBgraToRgba</a> (const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *rgba, size_t rgbaStride)</td></tr>
-<tr class="memdesc:gaad727dcf1c17f35bda7cba70fec01c19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to 32-bit RGBA image. Also it can be used for 32-bit RGBA to 32-bit BGRA conversion.  <a href="group__bgra__conversion.html#gaad727dcf1c17f35bda7cba70fec01c19">More...</a><br /></td></tr>
+<tr class="memdesc:gaad727dcf1c17f35bda7cba70fec01c19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit BGRA image to a 32-bit RGBA image by swapping the Red and Blue channels while preserving the alpha channel.  <a href="group__bgra__conversion.html#gaad727dcf1c17f35bda7cba70fec01c19">More...</a><br /></td></tr>
 <tr class="separator:gaad727dcf1c17f35bda7cba70fec01c19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa190fdea85df5dbb3072cee27c79c7a2"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaa190fdea85df5dbb3072cee27c79c7a2">SimdBgraToYuv420pV2</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
-<tr class="memdesc:gaa190fdea85df5dbb3072cee27c79c7a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV420P.  <a href="group__bgra__conversion.html#gaa190fdea85df5dbb3072cee27c79c7a2">More...</a><br /></td></tr>
+<tr class="memdesc:gaa190fdea85df5dbb3072cee27c79c7a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit BGRA image to planar YUV420P (4:2:0) and ignores input alpha.  <a href="group__bgra__conversion.html#gaa190fdea85df5dbb3072cee27c79c7a2">More...</a><br /></td></tr>
 <tr class="separator:gaa190fdea85df5dbb3072cee27c79c7a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa8e87ecc1e8624dd7b52d00510e683dd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaa8e87ecc1e8624dd7b52d00510e683dd">SimdBgraToYuv422pV2</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
-<tr class="memdesc:gaa8e87ecc1e8624dd7b52d00510e683dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV422P.  <a href="group__bgra__conversion.html#gaa8e87ecc1e8624dd7b52d00510e683dd">More...</a><br /></td></tr>
+<tr class="memdesc:gaa8e87ecc1e8624dd7b52d00510e683dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit BGRA image to planar YUV422P (4:2:2) and ignores input alpha.  <a href="group__bgra__conversion.html#gaa8e87ecc1e8624dd7b52d00510e683dd">More...</a><br /></td></tr>
 <tr class="separator:gaa8e87ecc1e8624dd7b52d00510e683dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga47b40bfee3757c58d0e41a3183e0d536"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga47b40bfee3757c58d0e41a3183e0d536">SimdBgraToYuv444pV2</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
-<tr class="memdesc:ga47b40bfee3757c58d0e41a3183e0d536"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUV444P.  <a href="group__bgra__conversion.html#ga47b40bfee3757c58d0e41a3183e0d536">More...</a><br /></td></tr>
+<tr class="memdesc:ga47b40bfee3757c58d0e41a3183e0d536"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit BGRA image to planar YUV444P (4:4:4) and ignores input alpha.  <a href="group__bgra__conversion.html#ga47b40bfee3757c58d0e41a3183e0d536">More...</a><br /></td></tr>
 <tr class="separator:ga47b40bfee3757c58d0e41a3183e0d536"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf54479c5b2f587f8523bfa09f68f26ed"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#gaf54479c5b2f587f8523bfa09f68f26ed">SimdBgraToYuva420pV2</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, uint8_t *a, size_t aStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
-<tr class="memdesc:gaf54479c5b2f587f8523bfa09f68f26ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit BGRA image to YUVA420P.  <a href="group__bgra__conversion.html#gaf54479c5b2f587f8523bfa09f68f26ed">More...</a><br /></td></tr>
+<tr class="memdesc:gaf54479c5b2f587f8523bfa09f68f26ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit BGRA image to planar YUVA420P (YUV 4:2:0 plus full-size alpha plane).  <a href="group__bgra__conversion.html#gaf54479c5b2f587f8523bfa09f68f26ed">More...</a><br /></td></tr>
 <tr class="separator:gaf54479c5b2f587f8523bfa09f68f26ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga89a38444c10eb8c30149b48ce1af8fc1"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga89a38444c10eb8c30149b48ce1af8fc1"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgra__conversion.html#ga89a38444c10eb8c30149b48ce1af8fc1">BgraToBayer</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bayer)</td></tr>
@@ -173,17 +173,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit BGRA image to 8-bit Bayer image. </p>
-<p >All images must have the same width and height. The width and the height must be even.</p>
+<p>Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels. </p>
+<p >The function down-samples a full-color 32-bit BGRA image to an 8-bit Bayer-patterned image. For each 2x2 block of BGRA pixels, exactly one color channel value (Blue, Green, or Red) is selected per output pixel according to the specified Bayer pattern. The alpha channel of the input image is ignored. Both images must have the same width and height, and both dimensions must be even.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BgraToBayer(const View&lt;A&gt;&amp; bgra, View&lt;A&gt;&amp; bayer).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. Must be even. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. Must be even. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size (in bytes) of the bgra image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">bayer</td><td>- a pointer to pixels data of output 8-bit Bayer image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bayerStride</td><td>- a row size of the bayer image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bayerStride</td><td>- a row size (in bytes) of the bayer image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bayerFormat</td><td>- a format of the output bayer image. It can be <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393acc334db31599134aa38269cd25ce3c3d">SimdPixelFormatBayerGrbg</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a5b74355a0f9163d28d5ff57e3400826f">SimdPixelFormatBayerGbrg</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a571ba3af45a354119fa16d8226b7532b">SimdPixelFormatBayerRggb</a> or <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a819dfc2cdf87383bc81abf7cf3458816">SimdPixelFormatBayerBggr</a>. </td></tr>
   </table>
   </dd>
@@ -241,17 +241,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit BGRA image to 24-bit BGR image. Also it can be used for 32-bit RGBA to 24-bit RGB conversion. </p>
-<p >All images must have the same width and height.</p>
+<p>Converts a 32-bit BGRA image to a 24-bit BGR image by dropping the alpha channel. </p>
+<p >The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit BGR (Blue, Green, Red) image. The Blue, Green, and Red channels are copied unchanged for each pixel; the alpha channel is discarded. This function can also be used for 32-bit RGBA to 24-bit RGB conversion, since the channel layout operation (dropping the 4th channel) is identical. Both images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::BgraToBgr(const View&lt;A&gt;&amp; bgra, View&lt;A&gt;&amp; bgr) and Simd::RgbaToRgb(const View&lt;A&gt;&amp; rgba, View&lt;A&gt;&amp; rgb).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size (in bytes) of the bgra image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">bgr</td><td>- a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgrStride</td><td>- a row size of the bgr image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgrStride</td><td>- a row size (in bytes) of the bgr image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -308,17 +308,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit BGRA image to 8-bit gray image. </p>
-<p >All images must have the same width and height.</p>
+<p>Converts a 32-bit BGRA image to an 8-bit grayscale image. </p>
+<p >The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to an 8-bit grayscale image. The alpha channel is ignored. The luminance value of each pixel is calculated from the Blue, Green, and Red channels using the ITU-R BT.601 standard weighted sum: </p><pre class="fragment">gray = (0.114 * blue + 0.587 * green + 0.299 * red)
+</pre><p> Both images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BgraToGray(const View&lt;A&gt;&amp; bgra, View&lt;A&gt;&amp; gray).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size (in bytes) of the bgra image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">gray</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size (in bytes) of the gray image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -375,17 +376,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit BGRA image to 24-bit RGB image. Also it can be used for 32-bit RGBA to 24-bit BGR conversion. </p>
-<p >All images must have the same width and height.</p>
+<p>Converts a 32-bit BGRA image to a 24-bit RGB image by swapping the Red and Blue channels and dropping the alpha channel. </p>
+<p >The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit RGB (Red, Green, Blue) image. The Blue and Red channels are swapped, the Green channel is copied unchanged, and the alpha channel is discarded. This function can also be used for 32-bit RGBA to 24-bit BGR conversion, since the channel reordering operation is identical. Both images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::BgraToRgb(const View&lt;A&gt;&amp; bgra, View&lt;A&gt;&amp; rgb) and Simd::RgbaToBgr(const View&lt;A&gt;&amp; rgba, View&lt;A&gt;&amp; bgr).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size (in bytes) of the bgra image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">rgb</td><td>- a pointer to pixels data of output 24-bit RGB (or 24-bit BGR) image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">rgbStride</td><td>- a row size of the rgb image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgbStride</td><td>- a row size (in bytes) of the rgb image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -442,17 +443,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit BGRA image to 32-bit RGBA image. Also it can be used for 32-bit RGBA to 32-bit BGRA conversion. </p>
-<p >All images must have the same width and height.</p>
+<p>Converts a 32-bit BGRA image to a 32-bit RGBA image by swapping the Red and Blue channels while preserving the alpha channel. </p>
+<p >The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 32-bit RGBA (Red, Green, Blue, Alpha) image. The Blue and Red channels are swapped, while the Green and Alpha channels are copied unchanged for each pixel. This function can also be used for 32-bit RGBA to 32-bit BGRA conversion, since the transformation is its own inverse. Both images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::BgraToRgba(const View&lt;A&gt;&amp; bgra, View&lt;A&gt;&amp; rgba) and Simd::RgbaToBgra(const View&lt;A&gt;&amp; rgba, View&lt;A&gt;&amp; bgra).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA (or 32-bit RGBA) image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size (in bytes) of the bgra image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">rgba</td><td>- a pointer to pixels data of output 32-bit RGBA (or 32-bit BGRA) image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">rgbaStride</td><td>- a row size of the rgb image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgbaStride</td><td>- a row size (in bytes) of the rgba image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -539,8 +540,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit BGRA image to YUV420P. </p>
-<p >The input BGRA and output Y images must have the same width and height. The output U and V images must have the same width and height (half size relative to Y component).</p>
+<p>Converts a 32-bit BGRA image to planar YUV420P (4:2:0) and ignores input alpha. </p>
+<p >Y is computed for every source pixel from its B, G, R values. U and V are computed for every 2x2 block from averaged B, G, R values of this block. The input BGRA and output Y images must have the same width and height. The output U and V images must have half width and half height relative to Y. The width and the height must be even.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#ga7f28bb1ac6c44cfb984597cbbda0f317" title="Converts 32-bit BGRA image to YUV420P.">Simd::BgraToYuv420p</a>(const View&amp; bgra, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -641,8 +642,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit BGRA image to YUV422P. </p>
-<p >The input BGRA and output Y images must have the same width and height. The input U and V images must have the same width and height (their width is equal to half width of Y component).</p>
+<p>Converts a 32-bit BGRA image to planar YUV422P (4:2:2) and ignores input alpha. </p>
+<p >Y is computed for every source pixel from its B, G, R values. U and V are computed for each horizontal pair of pixels from averaged B, G, R values of this pair. The input BGRA and output Y images must have the same width and height. The output U and V images must have half width and the same height relative to Y. The width must be even.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#ga7f7427a8d73e62e62d8bb9a3222b99ee" title="Converts 32-bit BGRA image to YUV422P.">Simd::BgraToYuv422p</a>(const View&amp; bgra, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -743,8 +744,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit BGRA image to YUV444P. </p>
-<p >The input BGRA and output Y, U and V images must have the same width and height.</p>
+<p>Converts a 32-bit BGRA image to planar YUV444P (4:4:4) and ignores input alpha. </p>
+<p >Y, U and V are computed for every source pixel from its B, G, R values. The input BGRA and output Y, U and V images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#ga5c45050f30f435df11a3f739fc8e8c54" title="Converts 32-bit BGRA image to YUV444P.">Simd::BgraToYuv444p</a>(const View&amp; bgra, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -857,8 +858,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit BGRA image to YUVA420P. </p>
-<p >The input BGRA and output Y and A images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
+<p>Converts a 32-bit BGRA image to planar YUVA420P (YUV 4:2:0 plus full-size alpha plane). </p>
+<p >Y is computed for every source pixel from its B, G, R values. U and V are computed for every 2x2 block from averaged B, G, R values of this block. A is copied from the source alpha channel for every pixel without changes. The input BGRA and output Y and A images must have the same width and height. The output U and V images must have half width and half height relative to Y. The width and the height must be even.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgra__conversion.html#ga95f94dcce123f351635bc30e560621e0" title="Converts 32-bit BGRA image to YUVA420P.">Simd::BgraToYuva420p</a>(const View &amp; bgra, View &amp; y, View &amp; u, View &amp; v, View &amp; a, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -909,7 +910,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to 8-bit Bayer image. </p>
 <p >All images must have the same width and height. The width and the height must be even.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84" title="Converts 32-bit BGRA image to 8-bit Bayer image.">SimdBgraToBayer</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84" title="Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.">SimdBgraToBayer</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
@@ -948,7 +949,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to 24-bit BGR image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#ga95abace7b16978c81ddbeb9e0c6aeada" title="Converts 32-bit BGRA image to 24-bit BGR image. Also it can be used for 32-bit RGBA to 24-bit RGB con...">SimdBgraToBgr</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#ga95abace7b16978c81ddbeb9e0c6aeada" title="Converts a 32-bit BGRA image to a 24-bit BGR image by dropping the alpha channel.">SimdBgraToBgr</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
@@ -987,7 +988,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to 8-bit gray image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaff6b51b68d4e73e08cfb1dac020f9c0c" title="Converts 32-bit BGRA image to 8-bit gray image.">SimdBgraToGray</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaff6b51b68d4e73e08cfb1dac020f9c0c" title="Converts a 32-bit BGRA image to an 8-bit grayscale image.">SimdBgraToGray</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
@@ -1026,7 +1027,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to 24-bit RGB image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#ga7ebbd668a41ee055115adf6e85b7eb4c" title="Converts 32-bit BGRA image to 24-bit RGB image. Also it can be used for 32-bit RGBA to 24-bit BGR con...">SimdBgraToRgb</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#ga7ebbd668a41ee055115adf6e85b7eb4c" title="Converts a 32-bit BGRA image to a 24-bit RGB image by swapping the Red and Blue channels and dropping...">SimdBgraToRgb</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
@@ -1065,7 +1066,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to 32-bit RGBA image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaad727dcf1c17f35bda7cba70fec01c19" title="Converts 32-bit BGRA image to 32-bit RGBA image. Also it can be used for 32-bit RGBA to 32-bit BGRA c...">SimdBgraToRgba</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaad727dcf1c17f35bda7cba70fec01c19" title="Converts a 32-bit BGRA image to a 32-bit RGBA image by swapping the Red and Blue channels while prese...">SimdBgraToRgba</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
@@ -1122,7 +1123,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUV420P. </p>
 <p >The input BGRA and output Y images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaa190fdea85df5dbb3072cee27c79c7a2" title="Converts 32-bit BGRA image to YUV420P.">SimdBgraToYuv420pV2</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaa190fdea85df5dbb3072cee27c79c7a2" title="Converts a 32-bit BGRA image to planar YUV420P (4:2:0) and ignores input alpha.">SimdBgraToYuv420pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
@@ -1182,7 +1183,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUV422P. </p>
 <p >The input BGRA and output Y images must have the same width and height. The input U and V images must have the same width and height (their width is equal to half width of Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaa8e87ecc1e8624dd7b52d00510e683dd" title="Converts 32-bit BGRA image to YUV422P.">SimdBgraToYuv422pV2</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaa8e87ecc1e8624dd7b52d00510e683dd" title="Converts a 32-bit BGRA image to planar YUV422P (4:2:2) and ignores input alpha.">SimdBgraToYuv422pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
@@ -1242,7 +1243,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUV444P. </p>
 <p >The input BGRA and output Y, U and V images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#ga47b40bfee3757c58d0e41a3183e0d536" title="Converts 32-bit BGRA image to YUV444P.">SimdBgraToYuv444pV2</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#ga47b40bfee3757c58d0e41a3183e0d536" title="Converts a 32-bit BGRA image to planar YUV444P (4:4:4) and ignores input alpha.">SimdBgraToYuv444pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>
@@ -1308,7 +1309,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit BGRA image to YUVA420P. </p>
 <p >The input BGRA and output Y and A images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaf54479c5b2f587f8523bfa09f68f26ed" title="Converts 32-bit BGRA image to YUVA420P.">SimdBgraToYuva420pV2</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgra__conversion.html#gaf54479c5b2f587f8523bfa09f68f26ed" title="Converts a 32-bit BGRA image to planar YUVA420P (YUV 4:2:0 plus full-size alpha plane).">SimdBgraToYuva420pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA image. </td></tr>

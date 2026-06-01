@@ -623,6 +623,7 @@ namespace Simd
         template<typename T, Term16bType term, SimdConvolutionActivationType type> static void DepthwiseConvolution_k3p1d1s1w8(const uint8_t* src8,
             const ConvParam& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint8_t* dst)
         {
+            //SIMD_PERF_FUNC();
             assert(p.IsKernel(3) && p.IsPad(1) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 8);
             const T* src = (T*)src8;
             size_t srcH = p.srcH, srcW = p.srcW;

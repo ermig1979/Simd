@@ -953,12 +953,14 @@ namespace Simd
                 a.yStep[1] = a.yStep[2] * c0.strideY;
                 a.yStart[1] = Simd::Min((a.yStart[2] - 1) * c0.strideY + c0.kernelY - c0.padY, c0.srcH);
 
-                _sizeB[2] = a.bufH[2] * p.conv[1].srcW * a.maC;
-                if (_sizeB[2] * 2 <= L2)
+                _sizeB[2] = a.bufH[2] * c1.srcW * a.maC;
+                size_t srcS = 0;// a.yStep[1] * c0.srcW* c0.srcC* a.elem[0];
+                if (srcS + _sizeB[2] * 2 <= L2)
                     break;
                 if (!SetPartOf(c0.dstH, yStep))
                     yStep--;
             }
+            //std::cout << "a.yStep[2] " << a.yStep[2] << " a.miK " << a.miK << std::endl;
             a.bufH[0] = 0;
             a.bufH[1] = 0;
             _sizeB[0] = 0;
