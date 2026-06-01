@@ -5,6 +5,7 @@ option(SIMD_AVX512 "AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512B
 option(SIMD_AVX512VNNI "AVX-512VNNI enable" ON)
 option(SIMD_AMXBF16 "AMX-INT8, AMX-BF16 and AVX-512BF16 enable" OFF)
 option(SIMD_SVE "SVE enable" OFF)
+option(SIMD_SVE2 "SVE2 enable" OFF)
 option(SIMD_TEST "Test framework enable" ON)
 option(SIMD_INFO "Print build information" ON)
 option(SIMD_PERF "Internal performance statistic" OFF)

@@ -320,6 +320,7 @@ namespace Test
 #if 1
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 16, 216, 120), Cnv(aRe, 3, 1), Cnv(aRe, 1, 1, 16), b16, b16), f1, f2);
         result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 16, 216, 120), Cnv(aRe, 3, 1), Cnv(aRe, 1, 1, 16), f32, b16), f1, f2);
+        result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 16, 216, 120), Cnv(aRe, 1, 1, 16), Cnv(aRe, 3, 1), f32, b16), f1, f2);
         //result = result && SynetMergedConvolution16bForwardAutoTest(eps, Param(Shp(1, 24, 108, 60), Cnv(aRe, 1, 1, 72), Cnv(aRe, 5, 2), b16, b16), f1, f2);
 #endif
 #if 0

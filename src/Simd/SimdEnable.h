@@ -100,6 +100,15 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
+    }
+#endif
+
 #ifdef SIMD_HVX_ENABLE
     namespace Hvx
     {

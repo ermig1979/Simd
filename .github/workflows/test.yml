@@ -26,7 +26,7 @@ jobs:
         sudo apt-get install python3-numpy
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native -march=armv8-a+sve" -DSIMD_SVE=ON -DSIMD_SHARED=ON
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native -march=armv9-a+sve2" -DSIMD_SVE=ON -DSIMD_SVE2=ON -DSIMD_SHARED=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)

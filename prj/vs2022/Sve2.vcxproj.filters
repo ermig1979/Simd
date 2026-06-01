@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Sve2">
+      <UniqueIdentifier>{1d98d89d-b691-4088-8c6a-66d1d3d14a66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sve2\System">
+      <UniqueIdentifier>{92fef3f2-327b-4e9b-b4bc-afafe69cdc64}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdSve2.h">
+      <Filter>Sve2</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp">
+      <Filter>Sve2\System</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

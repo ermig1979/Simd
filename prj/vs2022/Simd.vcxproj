@@ -145,6 +145,9 @@
     <ProjectReference Include="Sve1.vcxproj">
       <Project>{60a83864-3250-4b24-a645-624856dfd2b3}</Project>
     </ProjectReference>
+    <ProjectReference Include="Sve2.vcxproj">
+      <Project>{dcde515d-5609-4d55-8e6f-f70d04f1817a}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

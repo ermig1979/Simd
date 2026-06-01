@@ -41,6 +41,17 @@ if(UNIX AND SIMD_SVE)
 	endif()
 endif()
 
+if(UNIX AND SIMD_SVE2)
+	file(GLOB_RECURSE SIMD_SVE2_SRC ${SIMD_ROOT}/src/Simd/SimdSve2*.cpp)
+	set_source_files_properties(${SIMD_SVE2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -march=armv9-a+sve2 -msve-vector-bits=scalable")
+
+	set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -march=armv9-a+sve2 -msve-vector-bits=scalable")
+	set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_SVE2_SRC})
+	if(SIMD_INFO)
+		message("Use SVE2")
+	endif()
+endif()
+
 file(GLOB_RECURSE SIMD_LIB_SRC ${SIMD_ROOT}/src/Simd/SimdLib.cpp)
 set_source_files_properties(${SIMD_LIB_SRC} PROPERTIES COMPILE_FLAGS "${SIMD_LIB_FLAGS}")
 add_library(Simd ${SIMD_LIB_TYPE} ${SIMD_LIB_SRC} ${SIMD_ALG_SRC})

@@ -58,6 +58,14 @@
 #define SIMD_AMXBF16_DISABLE
 #endif
 
+#if defined(SIMD_NEON_DISABLE) && !defined(SIMD_SVE_DISABLE)
+#define SIMD_SVE_DISABLE
+#endif
+
+#if defined(SIMD_NSVE_DISABLE) && !defined(SIMD_SVE2_DISABLE)
+#define SIMD_SVE2_DISABLE
+#endif
+
 #if !defined(SIMD_SYNET_DISABLE)
 #define SIMD_SYNET_ENABLE
 #endif
@@ -232,6 +240,10 @@
 #define SIMD_SVE_ENABLE
 #endif
 
+#if !defined(SIMD_SVE2_DISABLE) && defined(__ARM_FEATURE_SVE2)
+#define SIMD_SVE2_ENABLE
+#endif
+
 #endif//defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 
 #if defined(SIMD_HEXAGON_ENABLE)
@@ -277,6 +289,10 @@
 #include <arm_sve.h>
 #endif
 
+#if defined(SIMD_SVE2_ENABLE)
+//#include <arm_sve2.h>
+#endif
+
 #if defined(SIMD_HVX_ENABLE)
 #include <hexagon_types.h>
 #include <hvx_hexagon_protos.h>
@@ -312,4 +328,4 @@
 #define SIMD_CAT_DO(a, b) a##b
 #define SIMD_CAT(a, b) SIMD_CAT_DO(a, b)
 
-#endif//__SimdDefs_h__
+#endif
