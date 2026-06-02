@@ -44,15 +44,15 @@ namespace Simd
         {
             svuint32_t bGray = BgrToGray(svmovlb_u32(b), svmovlb_u32(g), svmovlb_u32(r), wb, wg, wr, rt);
             svuint32_t tGray = BgrToGray(svmovlt_u32(b), svmovlt_u32(g), svmovlt_u32(r), wb, wg, wr, rt);
-            return svshrnt_n_u32(svshrnb_n_u32(bGray, 6), tGray, 6);
+            return svshrnt_n_u32(svshrnb_n_u32(bGray, 14), tGray, 14);
         }
 
         SIMD_INLINE void BgrToGray(const uint8_t* bgr, const svuint32_t& wb, const svuint32_t& wg, const svuint32_t& wr, const svuint32_t& rt, uint8_t* gray, const svbool_t& mask)
         {
             svuint8x3_t _bgr = svld3_u8(mask, bgr);
-            svuint16_t bGray = BgrToGray(svshllb_n_u16(svget3(_bgr, 0), 0), svshllb_n_u16(svget3(_bgr, 1), 0), svshllb_n_u16(svget3(_bgr, 2), 0), wb, wg, wr, rt);
-            svuint16_t tGray = BgrToGray(svshllt_n_u16(svget3(_bgr, 0), 0), svshllt_n_u16(svget3(_bgr, 1), 0), svshllt_n_u16(svget3(_bgr, 2), 0), wb, wg, wr, rt);
-            svst1_u8(mask, gray, svshrnt_n_u16(svshrnb_n_u16(bGray, 8), tGray, 8));
+            svuint16_t bGray = BgrToGray(svmovlb_u16(svget3(_bgr, 0)), svmovlb_u16(svget3(_bgr, 1)), svmovlb_u16(svget3(_bgr, 2)), wb, wg, wr, rt);
+            svuint16_t tGray = BgrToGray(svmovlt_u16(svget3(_bgr, 0)), svmovlt_u16(svget3(_bgr, 1)), svmovlt_u16(svget3(_bgr, 2)), wb, wg, wr, rt);
+            svst1_u8(mask, gray, svqxtnt_u16(svqxtnb_u16(bGray), tGray));
         }
 
         void BgrToGray(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* gray, size_t grayStride)
