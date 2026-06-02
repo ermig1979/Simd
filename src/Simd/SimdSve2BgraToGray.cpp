@@ -86,9 +86,9 @@ namespace Simd
             svuint32_t gray1 = RgbaToGray(svld1_vnum_u8(mask1, rgba, 1), wrb, wg0, rt);
             svuint32_t gray2 = RgbaToGray(svld1_vnum_u8(mask2, rgba, 2), wrb, wg0, rt);
             svuint32_t gray3 = RgbaToGray(svld1_vnum_u8(mask3, rgba, 3), wrb, wg0, rt);
-            svuint16_t gray01 = svzip1_u16(svreinterpret_u16_u32(gray0), svreinterpret_u16_u32(gray1));
-            svuint16_t gray23 = svzip1_u16(svreinterpret_u16_u32(gray2), svreinterpret_u16_u32(gray3));
-            svst1_u8(mask, gray, svzip1_u8(svreinterpret_u8_u16(gray01), svreinterpret_u8_u16(gray23)));
+            svuint16_t gray01 = svuzp1_u16(svreinterpret_u16_u32(gray0), svreinterpret_u16_u32(gray1));
+            svuint16_t gray23 = svuzp1_u16(svreinterpret_u16_u32(gray2), svreinterpret_u16_u32(gray3));
+            svst1_u8(mask, gray, svuzp1_u8(svreinterpret_u8_u16(gray01), svreinterpret_u8_u16(gray23)));
         }
 
         void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
