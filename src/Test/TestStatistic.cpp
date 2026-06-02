@@ -886,6 +886,11 @@ namespace Test
             result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Neon::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Sve2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+#endif
+
 #ifdef SIMD_HVX_ENABLE
         if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
         {

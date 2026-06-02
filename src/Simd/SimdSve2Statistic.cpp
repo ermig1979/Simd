@@ -88,6 +88,39 @@ namespace Simd
                 src += stride;
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void ValueSquareSum(const uint8_t* src, svbool_t mask, svuint8_t _1, svuint32_t& valueSum, svuint32_t& squareSum)
+        {
+            svuint8_t val = svld1_u8(mask, src);
+            valueSum = svdot_u32(valueSum, val, _1);
+            squareSum = svdot_u32(squareSum, val, val);
+        }
+
+        void ValueSquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSum, uint64_t* squareSum)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _1 = svdup_n_u8(1);
+            valueSum[0] = 0;
+            squareSum[0] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                svuint32_t _valueSum = svdup_n_u32(0);
+                svuint32_t _squareSum = svdup_n_u32(0);
+                for (; col < widthA; col += A)
+                    ValueSquareSum(src + col, body, _1, _valueSum, _squareSum);
+                if (widthA < width)
+                    ValueSquareSum(src + col, tail, _1, _valueSum, _squareSum);
+                valueSum[0] += svaddv_u32(svptrue_b32(), _valueSum);
+                squareSum[0] += svaddv_u32(svptrue_b32(), _squareSum);
+                src += stride;
+            }
+        }
     }
 #endif
 }
