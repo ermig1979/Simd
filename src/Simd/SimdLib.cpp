@@ -5194,6 +5194,11 @@ SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, siz
         Sse41::ValueSum(src, stride, width, height, sum);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ValueSum(src, stride, width, height, sum);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ValueSum(src, stride, width, height, sum);

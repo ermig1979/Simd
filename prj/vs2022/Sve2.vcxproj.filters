@@ -10,6 +10,9 @@
     <Filter Include="Sve2\Convert">
       <UniqueIdentifier>{00e352e2-9b4f-40b0-a46c-898ab11edb22}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Statistics">
+      <UniqueIdentifier>{2fe504bb-0b49-4b3a-ab9d-56d8f04314c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -25,6 +28,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2BgraToGray.cpp">
       <Filter>Sve2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Statistic.cpp">
+      <Filter>Sve2\Statistics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

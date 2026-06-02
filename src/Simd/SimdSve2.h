@@ -38,6 +38,8 @@ namespace Simd
         void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride);
 
         void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride);
+
+        void ValueSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
     }
 #endif
 }

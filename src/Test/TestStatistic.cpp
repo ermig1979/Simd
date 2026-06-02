@@ -651,6 +651,11 @@ namespace Test
             result = result && SumAutoTest(FUNC4(Simd::Neon::ValueSum), FUNC4(SimdValueSum));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SumAutoTest(FUNC4(Simd::Sve2::ValueSum), FUNC4(SimdValueSum));
+#endif
+
 #ifdef SIMD_HVX_ENABLE
         if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
         {
