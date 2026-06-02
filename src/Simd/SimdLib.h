@@ -2823,10 +2823,25 @@ extern "C"
 
         \fn void * SimdDescrIntInit(size_t size, size_t depth);
 
-        \short Initializes Integer Descriptor Engine.
+        \short Initializes Integer Descriptor Engine context.
 
-        \param [in] size - a length of original (32-bit or 16-bit) float descriptor. It must be multiple of 8. Also it must be less or equal than 32768.
-        \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 4, 5, 6, 7, 8.
+        The engine context stores the parameters needed to encode float descriptors into a compact
+        integer representation, decode them back, and compute cosine distances directly on the
+        encoded form without full decoding.
+
+        Each encoded descriptor produced by this engine is a byte buffer whose layout is:
+        - Bytes  0.. 3: 32-bit float inverse quantization scale (1 / scale).
+        - Bytes  4.. 7: 32-bit float minimum value (shift) used during quantization.
+        - Bytes  8..11: 32-bit float precomputed sum helper for dot-product reconstruction.
+        - Bytes 12..15: 32-bit float precomputed L2 norm of the original float descriptor.
+        - Bytes 16.. N: bit-packed quantized integer values, \a depth bits per element,
+                        packed contiguously in little-endian order.
+
+        The total byte size of the encoded buffer is returned by ::SimdDescrIntEncodedSize.
+
+        \param [in] size - a length of the original (32-bit or 16-bit float) descriptor, i.e. the number of float elements. 
+                          It must be a multiple of 8 and must not exceed 32768.
+        \param [in] depth - the number of bits used to represent each quantized element in the encoded descriptor. Supported values: 4, 5, 6, 7, 8.
         \return a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function ::SimdRelease.
                 This pointer is used in functions ::SimdDescrIntEncodedSize, ::SimdDescrIntDecodedSize, 
                 ::SimdDescrIntEncode32f, ::SimdDescrIntEncode16f, ::SimdDescrIntDecode32f, ::SimdDescrIntDecode16f, 
@@ -2838,10 +2853,15 @@ extern "C"
 
         \fn size_t SimdDescrIntEncodedSize(const void* context);
 
-        \short Gets size in bytes of encoded integer descriptor.
+        \short Gets the size in bytes of an encoded integer descriptor produced by this engine.
+
+        The encoded descriptor consists of a 16-byte header (4 x 32-bit floats storing the inverse
+        quantization scale, the minimum value, a precomputed sum helper, and the precomputed L2 norm)
+        followed by the bit-packed quantized integer data. The total size equals
+        16 + ceil(size * depth / 8), where \a size and \a depth are the values passed to ::SimdDescrIntInit.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \return size in bytes of encoded integer descriptor.
+        \return the size in bytes of an encoded integer descriptor.
     */
     SIMD_API size_t SimdDescrIntEncodedSize(const void* context);
 
@@ -2849,10 +2869,15 @@ extern "C"
 
         \fn size_t SimdDescrIntDecodedSize(const void* context);
 
-        \short Gets length of original (32-bit or 16-bit) float descriptor.
+        \short Gets the number of elements (floats) in the original descriptor.
+
+        This is the value of the \a size parameter that was passed to ::SimdDescrIntInit.
+        It equals the number of 32-bit or 16-bit float elements in the uncompressed descriptor,
+        and is the required length of the \a src buffer for ::SimdDescrIntEncode32f / ::SimdDescrIntEncode16f
+        and the \a dst buffer for ::SimdDescrIntDecode32f / ::SimdDescrIntDecode16f.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \return length of original (32-bit or 16-bit) float descriptor.
+        \return the number of float elements in the original (decoded) descriptor.
     */
     SIMD_API size_t SimdDescrIntDecodedSize(const void* context);
 
@@ -2860,11 +2885,25 @@ extern "C"
 
         \fn void SimdDescrIntEncode32f(const void* context, const float * src, uint8_t * dst);
 
-        \short Encodes 32-bit float descriptor to integer form.
+        \short Encodes a 32-bit float descriptor into a compact integer representation.
+
+        The function quantizes each element of the input float array linearly into the range
+        [0, 2^depth - 1], where \a depth was specified at context creation. The encoding procedure:
+        1. Finds the minimum and maximum values of the source descriptor.
+        2. Computes a quantization scale: scale = (2^depth - 1) / (max - min).
+        3. Quantizes each element: q[i] = round((src[i] - min) * scale).
+        4. Packs the quantized values bit-by-bit (\a depth bits per element) into the output buffer
+           starting at byte offset 16.
+        5. Writes a 16-byte header at the beginning of \a dst containing four 32-bit floats:
+           inverse scale (1/scale), minimum value (min), a precomputed sum helper used for
+           dot-product reconstruction, and the precomputed L2 norm of the original descriptor.
+
+        The precomputed norm and sum helper in the header allow ::SimdDescrIntCosineDistance and
+        related functions to compute cosine distances without decoding the descriptor.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to original 32-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
-        \param [out] dst - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
+        \param [in] src - a pointer to the input 32-bit float descriptor. The number of elements must equal the value returned by ::SimdDescrIntDecodedSize.
+        \param [out] dst - a pointer to the output encoded integer descriptor. The buffer size in bytes must be at least the value returned by ::SimdDescrIntEncodedSize.
     */
     SIMD_API void SimdDescrIntEncode32f(const void* context, const float * src, uint8_t * dst);
 
@@ -2872,11 +2911,17 @@ extern "C"
 
         \fn void SimdDescrIntEncode16f(const void* context, const uint16_t * src, uint8_t * dst);
 
-        \short Encodes 16-bit float descriptor to integer form.
+        \short Encodes a 16-bit float descriptor into a compact integer representation.
+
+        This function is identical in behavior to ::SimdDescrIntEncode32f except that the input
+        descriptor elements are 16-bit floats (half precision, stored as uint16_t). Each element is
+        first converted to 32-bit float internally, then quantized and packed in the same way.
+        The output encoded descriptor format is identical to that produced by ::SimdDescrIntEncode32f
+        and is fully compatible with all decode and distance functions.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to original 16-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
-        \param [out] dst - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
+        \param [in] src - a pointer to the input 16-bit float descriptor (half precision, stored as uint16_t). The number of elements must equal the value returned by ::SimdDescrIntDecodedSize.
+        \param [out] dst - a pointer to the output encoded integer descriptor. The buffer size in bytes must be at least the value returned by ::SimdDescrIntEncodedSize.
     */
     SIMD_API void SimdDescrIntEncode16f(const void* context, const uint16_t* src, uint8_t* dst);
 
@@ -2884,11 +2929,17 @@ extern "C"
 
         \fn void SimdDescrIntDecode32f(const void* context, const uint8_t* src, float* dst);
 
-        \short Decodes integer descriptor to original 32-bit float form.
+        \short Decodes an integer descriptor back into a 32-bit float descriptor.
+
+        The function reconstructs the original float values from the bit-packed quantized data
+        using the inverse scale and minimum value stored in the 16-byte header of the encoded
+        descriptor. Each reconstructed element is computed as: dst[i] = q[i] * invScale + min,
+        where \a invScale and \a min are read from the first two 32-bit floats of \a src.
+        The decoded values are approximations of the original floats; precision depends on \a depth.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
-        \param [out] dst - a pointer to output 32-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
+        \param [in] src - a pointer to the encoded integer descriptor. The buffer size in bytes must be at least the value returned by ::SimdDescrIntEncodedSize.
+        \param [out] dst - a pointer to the output 32-bit float descriptor. The number of elements must equal the value returned by ::SimdDescrIntDecodedSize.
     */
     SIMD_API void SimdDescrIntDecode32f(const void* context, const uint8_t* src, float* dst);
 
@@ -2896,11 +2947,15 @@ extern "C"
 
         \fn void SimdDescrIntDecode16f(const void* context, const uint8_t* src, uint16_t* dst);
 
-        \short Decodes integer descriptor to original 16-bit float form.
+        \short Decodes an integer descriptor back into a 16-bit float descriptor.
+
+        This function is identical in behavior to ::SimdDescrIntDecode32f except that each
+        reconstructed element is converted from 32-bit float to 16-bit float (half precision,
+        stored as uint16_t) before being written to the output buffer.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
-        \param [out] dst - a pointer to output 16-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
+        \param [in] src - a pointer to the encoded integer descriptor. The buffer size in bytes must be at least the value returned by ::SimdDescrIntEncodedSize.
+        \param [out] dst - a pointer to the output 16-bit float descriptor (half precision, stored as uint16_t). The number of elements must equal the value returned by ::SimdDescrIntDecodedSize.
     */
     SIMD_API void SimdDescrIntDecode16f(const void* context, const uint8_t* src, uint16_t* dst);
 
@@ -2908,14 +2963,22 @@ extern "C"
 
         \fn void SimdDescrIntCosineDistance(const void* context, const uint8_t* a, const uint8_t* b, float* distance);
 
-        \short Calculates cosine distance of two integer descriptors.
+        \short Calculates the cosine distance between two encoded integer descriptors.
 
-        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        The cosine distance is defined as: distance = 1 - dot(a, b) / (||a|| * ||b||),
+        where \a a and \a b are treated as vectors in the original float space.
+        The function computes the integer dot product directly on the bit-packed data and then
+        reconstructs the true float dot product using the quantization scale and shift stored
+        in the 16-byte headers of the encoded descriptors. The L2 norms are read directly from
+        the precomputed values in the headers, avoiding full decoding.
+        The result is clamped to the range [0, 2].
+
+        \note An encoded integer descriptor is produced by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] a - a pointer to the first integer descriptor. 
-        \param [in] b - a pointer to the second integer descriptor.
-        \param [out] distance - a pointer to 32-bit float with cosine distance.
+        \param [in] a - a pointer to the first encoded integer descriptor.
+        \param [in] b - a pointer to the second encoded integer descriptor.
+        \param [out] distance - a pointer to a 32-bit float that receives the cosine distance in the range [0, 2].
     */
     SIMD_API void SimdDescrIntCosineDistance(const void* context, const uint8_t* a, const uint8_t* b, float* distance);
 
@@ -2923,16 +2986,23 @@ extern "C"
 
         \fn void SimdDescrIntCosineDistancesMxNa(const void* context, size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances);
 
-        \short Calculates mutual cosine distance of two arrays of integer descriptor arrays.
+        \short Calculates all pairwise cosine distances between two sets of encoded integer descriptors (array-of-pointers form).
 
-        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        Computes the M x N matrix of cosine distances, where distances[i * N + j] is the cosine
+        distance between the i-th descriptor in \a A and the j-th descriptor in \a B.
+        See ::SimdDescrIntCosineDistance for the definition of cosine distance.
+        This variant accepts the descriptors through arrays of pointers, which allows non-contiguous
+        memory layouts. For contiguous storage use ::SimdDescrIntCosineDistancesMxNp instead.
+        The implementation automatically selects cache-friendly blocking strategies.
+
+        \note An encoded integer descriptor is produced by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] M - a number of A arrays.
-        \param [in] N - a number of B arrays.
-        \param [in] A - a pointer to the first array with pointers to integer descriptors.
-        \param [in] B - a pointer to the second array with pointers to integer descriptors.
-        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
+        \param [in] M - the number of descriptors in set \a A (number of rows in the output matrix).
+        \param [in] N - the number of descriptors in set \a B (number of columns in the output matrix).
+        \param [in] A - an array of M pointers, each pointing to an encoded integer descriptor.
+        \param [in] B - an array of N pointers, each pointing to an encoded integer descriptor.
+        \param [out] distances - a pointer to the output M x N matrix of 32-bit float cosine distances stored in row-major order. The buffer must hold at least M * N elements.
     */
     SIMD_API void SimdDescrIntCosineDistancesMxNa(const void* context, size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances);
 
@@ -2940,16 +3010,24 @@ extern "C"
 
         \fn void SimdDescrIntCosineDistancesMxNp(const void* context, size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances);
 
-        \short Calculates mutual cosine distance of two arrays of integer descriptors.
+        \short Calculates all pairwise cosine distances between two sets of encoded integer descriptors (packed/contiguous form).
 
-        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        Computes the M x N matrix of cosine distances, where distances[i * N + j] is the cosine
+        distance between the i-th descriptor in \a A and the j-th descriptor in \a B.
+        See ::SimdDescrIntCosineDistance for the definition of cosine distance.
+        This variant accepts the descriptors as two flat contiguous arrays, where descriptor \a i
+        starts at A + i * encodedSize and descriptor \a j starts at B + j * encodedSize,
+        with encodedSize returned by ::SimdDescrIntEncodedSize.
+        For non-contiguous memory layouts use ::SimdDescrIntCosineDistancesMxNa instead.
+
+        \note An encoded integer descriptor is produced by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] M - a number of A arrays.
-        \param [in] N - a number of B arrays.
-        \param [in] A - a pointer to the first array with integer descriptors.
-        \param [in] B - a pointer to the second array with integer descriptors.
-        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
+        \param [in] M - the number of descriptors in set \a A (number of rows in the output matrix).
+        \param [in] N - the number of descriptors in set \a B (number of columns in the output matrix).
+        \param [in] A - a pointer to the contiguous array of M encoded integer descriptors.
+        \param [in] B - a pointer to the contiguous array of N encoded integer descriptors.
+        \param [out] distances - a pointer to the output M x N matrix of 32-bit float cosine distances stored in row-major order. The buffer must hold at least M * N elements.
     */
     SIMD_API void SimdDescrIntCosineDistancesMxNp(const void* context, size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances);
 
@@ -2957,13 +3035,18 @@ extern "C"
 
         \fn void SimdDescrIntVectorNorm(const void* context, const uint8_t* a, float* norm);
 
-        \short Calculates vector norm for integer descriptor.
+        \short Gets the precomputed L2 norm of an encoded integer descriptor.
 
-        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        The L2 norm of the original float descriptor is computed and stored in the 16-byte header
+        of the encoded descriptor during encoding (by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f).
+        This function retrieves that precomputed value without performing any additional computation.
+        The norm equals the Euclidean length of the original float descriptor before quantization.
+
+        \note An encoded integer descriptor is produced by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] a - a pointer to integer descriptor.
-        \param [out] norm - a pointer to result 32-bit float norm.
+        \param [in] a - a pointer to the encoded integer descriptor.
+        \param [out] norm - a pointer to a 32-bit float that receives the precomputed L2 norm of the original float descriptor.
     */
     SIMD_API void SimdDescrIntVectorNorm(const void* context, const uint8_t* a, float* norm);
 
