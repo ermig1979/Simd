@@ -58,6 +58,36 @@ namespace Simd
                 src += stride;
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void SquareSum(const uint8_t* src, svbool_t mask, svuint32_t& sum)
+        {
+            svuint8_t val = svld1_u8(mask, src);
+            sum = svdot_u32(sum, val, val);
+        }
+
+        void SquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
+        {
+            assert(width <= 256 * 256);
+
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            sum[0] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                svuint32_t _sum = svdup_n_u32(0);
+                for (; col < widthA; col += A)
+                    SquareSum(src + col, body, _sum);
+                if (widthA < width)
+                    SquareSum(src + col, tail, _sum);
+                sum[0] += svaddv_u32(svptrue_b32(), _sum);
+                src += stride;
+            }
+        }
     }
 #endif
 }
