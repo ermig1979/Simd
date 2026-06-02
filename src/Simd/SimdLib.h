@@ -2337,9 +2337,11 @@ extern "C"
 
         \fn void SimdBgrToLab(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * lab, size_t labStride);
 
-        \short Converts 24-bit BGR image to 24-bit LAB(CIELAB) image.
+        \short Converts a 24-bit BGR image to a 24-bit CIELAB image.
 
-        All images must have the same width and height.
+        For each output pixel: lab[0] = L, lab[1] = A, lab[2] = B.
+        All LAB components are stored as 8-bit values (OpenCV-compatible CIELAB encoding).
+        Input and output images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::BgrToLab(const View<A>& bgr, View<A>& lab).
 
@@ -2356,9 +2358,10 @@ extern "C"
 
         \fn void SimdBgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride);
 
-        \short Converts 24-bit BGR image to 24-bit RGB image. Also it can be used for 24-bit RGB to 24-bit BGR conversion.
+        \short Swaps blue and red channels in a 24-bit image.
 
-        All images must have the same width and height.
+        For each output pixel: rgb[0] = bgr[2], rgb[1] = bgr[1], rgb[2] = bgr[0].
+        Input and output images must have the same width and height.
 
         \note This function has C++ wrappers: Simd::BgrToRgb(const View<A> & bgr, View<A> & rgb) 
             and Simd::RgbToBgr(const View<A>& rgb, View<A>& bgr).
@@ -2377,10 +2380,12 @@ extern "C"
 
         \fn void SimdBgrToYuv420pV2(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, SimdYuvType yuvType);
 
-        \short Converts 24-bit BGR image to YUV420P.
+        \short Converts a 24-bit BGR image to planar YUV420P.
 
         The input BGR and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        U and V images are half-sized in both dimensions: uWidth = vWidth = width/2 and uHeight = vHeight = height/2.
+        Image width and height must be even and not less than 2.
+        Y is computed for every source pixel. U and V are computed per each 2x2 source block from averaged B, G and R values.
 
         \note This function has a C++ wrapper Simd::BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
@@ -2402,10 +2407,12 @@ extern "C"
 
         \fn void SimdBgrToYuv422pV2(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, SimdYuvType yuvType);
 
-        \short Converts 24-bit BGR image to YUV422P.
+        \short Converts a 24-bit BGR image to planar YUV422P.
 
         The input BGR and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        U and V images are half-sized horizontally: uWidth = vWidth = width/2 and uHeight = vHeight = height.
+        Image width must be even and not less than 2.
+        Y is computed for every source pixel. U and V are computed per each pair of neighboring horizontal pixels from averaged B, G and R values.
 
         \note This function has a C++ wrapper Simd::BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
@@ -2427,9 +2434,10 @@ extern "C"
 
         \fn void SimdBgrToYuv444pV2(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, SimdYuvType yuvType);
 
-        \short Converts 24-bit BGR image to YUV444P.
+        \short Converts a 24-bit BGR image to planar YUV444P.
 
         The input BGR and output Y, U and V images must have the same width and height.
+        Y, U and V are computed for each source pixel without chroma subsampling.
 
         \note This function has a C++ wrapper Simd::BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
@@ -2451,7 +2459,7 @@ extern "C"
 
         \fn void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-        \short Performs binarization of 8-bit gray image.
+        \short Performs per-pixel binarization of an 8-bit gray image.
 
         All images must have 8-bit gray format and must have the same width and height.
 
@@ -2459,7 +2467,7 @@ extern "C"
         \verbatim
         dst[i] = compare(src[i], value) ? positive : negative;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) is selected by compareType (see ::SimdCompareType).
 
         \note This function has a C++ wrapper Simd::Binarization(const View<A>& src, uint8_t value, uint8_t positive, uint8_t negative, View<A>& dst, SimdCompareType compareType).
 
@@ -2481,9 +2489,10 @@ extern "C"
 
         \fn void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-        \short Performs averaging binarization of 8-bit gray image.
+        \short Performs neighborhood-based binarization of an 8-bit gray image.
 
         All images must have 8-bit gray format and must have the same width and height.
+        Image width and height must be greater than neighborhood; neighborhood must be less than 128.
 
         For every point:
         \verbatim
@@ -2495,14 +2504,14 @@ extern "C"
                 if(x + dx >= 0 && x + dx < width && y + dy >= 0 && y + dy < height)
                 {
                     area++;
-                    if(compare(src[x + dx, x + dy], value))
+                    if(compare(src[x + dx, y + dy], value))
                         sum++;
                 }
             }
         }
         dst[x, y] = sum*255 > area*threshold ? positive : negative;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) is selected by compareType (see ::SimdCompareType).
 
         \note This function has a C++ wrapper Simd::AveragingBinarization(const View<A>& src, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, View<A>& dst, SimdCompareType compareType).
 
@@ -2512,9 +2521,9 @@ extern "C"
         \param [in] height - an image height.
         \param [in] value - a second value for compare operation.
         \param [in] neighborhood - an averaging neighborhood.
-        \param [in] threshold - a threshold value for binarization. It can range from 0 to 255.
-        \param [in] positive - a destination value if for neighborhood of this point number of positive comparison is greater then threshold.
-        \param [in] negative - a destination value if for neighborhood of this point number of positive comparison is lesser or equal then threshold.
+        \param [in] threshold - a threshold value in range [0, 255] used as: sum*255 > area*threshold.
+        \param [in] positive - a destination value if for neighborhood of this point number of positive comparisons is greater than threshold.
+        \param [in] negative - a destination value if for neighborhood of this point number of positive comparisons is less than or equal to threshold.
         \param [out] dst - a pointer to pixels data of output 8-bit gray binarized image.
         \param [in] dstStride - a row size of the dst image.
         \param [in] compareType - a compare operation type (see ::SimdCompareType).
@@ -2527,9 +2536,10 @@ extern "C"
 
         \fn void SimdAveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride);
 
-        \short Performs averaging binarization of 8-bit gray image.
+        \short Performs adaptive mean-like binarization of an 8-bit gray image.
 
         All images must have 8-bit gray format and must have the same width and height.
+        Image width and height must be greater than neighborhood.
 
         For every point:
         \verbatim
@@ -2555,9 +2565,9 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] neighborhood - an averaging neighborhood.
-        \param [in] shift - a shift value for binarization. It can range from -255 to 255.
-        \param [in] positive - a destination value for positive value of condition (seen before).
-        \param [in] negative - a destination value for negative value of condition (seen before).
+        \param [in] shift - an additive shift in condition: (src[x, y] + shift)*area > sum.
+        \param [in] positive - a destination value for positive value of the condition.
+        \param [in] negative - a destination value for negative value of the condition.
         \param [out] dst - a pointer to pixels data of output 8-bit gray binarized image.
         \param [in] dstStride - a row size of the dst image.
     */
