@@ -30,24 +30,15 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE    
     namespace Sve2
     {
-        SIMD_INLINE svuint32_t BgrToGray(const svuint32_t& b, const svuint32_t& g, const svuint32_t& r, 
-            const svuint32_t& wb, const svuint32_t& wg, const svuint32_t& wr, const svuint32_t& rt)
-        {
-            svuint32_t gray = svmla_u32_x(svptrue_b8(), rt, b, wb);
-            gray = svmla_u32_x(svptrue_b8(), gray, g, wg);
-            gray = svmla_u32_x(svptrue_b8(), gray, r, wr);
-            return gray;
-        }
-
         SIMD_INLINE svuint16_t BgrToGray(const svuint16_t& b, const svuint16_t& g, const svuint16_t& r, 
-            const svuint32_t& wb, const svuint32_t& wg, const svuint32_t& wr, const svuint32_t& rt)
+            const svuint16_t& wb, const svuint16_t& wg, const svuint16_t& wr, const svuint32_t& rt)
         {
-            svuint32_t bGray = BgrToGray(svmovlb_u32(b), svmovlb_u32(g), svmovlb_u32(r), wb, wg, wr, rt);
-            svuint32_t tGray = BgrToGray(svmovlt_u32(b), svmovlt_u32(g), svmovlt_u32(r), wb, wg, wr, rt);
+            svuint32_t bGray = svmlalb_u16(svmlalb_u16(svmlalb_u16(rt, b, wb), g, wg), r, wr);
+            svuint32_t tGray = svmlalt_u16(svmlalt_u16(svmlalt_u16(rt, b, wb), g, wg), r, wr);
             return svshrnt_n_u32(svshrnb_n_u32(bGray, 14), tGray, 14);
         }
 
-        SIMD_INLINE void BgrToGray(const uint8_t* bgr, const svuint32_t& wb, const svuint32_t& wg, const svuint32_t& wr, const svuint32_t& rt, uint8_t* gray, const svbool_t& mask)
+        SIMD_INLINE void BgrToGray(const uint8_t* bgr, const svuint16_t& wb, const svuint16_t& wg, const svuint16_t& wr, const svuint32_t& rt, uint8_t* gray, const svbool_t& mask)
         {
             svuint8x3_t _bgr = svld3_u8(mask, bgr);
             svuint16_t bGray = BgrToGray(svmovlb_u16(svget3(_bgr, 0)), svmovlb_u16(svget3(_bgr, 1)), svmovlb_u16(svget3(_bgr, 2)), wb, wg, wr, rt);
@@ -61,9 +52,9 @@ namespace Simd
             size_t widthA = AlignLo(width, A), size = width * 3;
             const svbool_t body = svptrue_b8();
             const svbool_t tail = svwhilelt_b8(widthA, width);
-            svuint32_t wb = svdup_n_u32(Base::BLUE_TO_GRAY_WEIGHT);
-            svuint32_t wg = svdup_n_u32(Base::GREEN_TO_GRAY_WEIGHT);
-            svuint32_t wr = svdup_n_u32(Base::RED_TO_GRAY_WEIGHT);
+            svuint16_t wb = svdup_n_u16(Base::BLUE_TO_GRAY_WEIGHT);
+            svuint16_t wg = svdup_n_u16(Base::GREEN_TO_GRAY_WEIGHT);
+            svuint16_t wr = svdup_n_u16(Base::RED_TO_GRAY_WEIGHT);
             svuint32_t rt = svdup_n_u32(Base::BGR_TO_GRAY_ROUND_TERM);
             for (size_t row = 0; row < height; ++row)
             {
