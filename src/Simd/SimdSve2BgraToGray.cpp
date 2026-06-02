@@ -78,25 +78,25 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE svuint32_t RgbaToGray(svuint8_t rgba, const svuint16_t& wrb, const svuint16_t& wg0, const svuint32_t& rt)
-        {
-            svuint16_t rb = svmovlb_u16(rgba);
-            svuint16_t ga = svmovlt_u16(rgba);
-            svuint32_t gray = svmlalt_u32(svmlalb_u32(svmlalb_u32(rt, ga, wg0), rb, wrb), rb, wrb);
-            return svlsr_n_u32_x(svptrue_b8(), gray, Base::BGR_TO_GRAY_AVERAGING_SHIFT);
-        }
+        //SIMD_INLINE svuint32_t RgbaToGray(svuint8_t rgba, const svuint16_t& wrb, const svuint16_t& wg0, const svuint32_t& rt)
+        //{
+        //    svuint16_t rb = svmovlb_u16(rgba);
+        //    svuint16_t ga = svmovlt_u16(rgba);
+        //    svuint32_t gray = svmlalt_u32(svmlalb_u32(svmlalb_u32(rt, ga, wg0), rb, wrb), rb, wrb);
+        //    return svlsr_n_u32_x(svptrue_b8(), gray, Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+        //}
 
-        SIMD_INLINE void RgbaToGray(const uint8_t* rgba, const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3, 
-            const svuint16_t& wrb, const svuint16_t& wg0, const svuint32_t& rt, uint8_t* gray, const svbool_t& mask)
-        {
-            svuint32_t gray0 = RgbaToGray(svld1_vnum_u8(mask0, rgba, 0), wrb, wg0, rt);
-            svuint32_t gray1 = RgbaToGray(svld1_vnum_u8(mask1, rgba, 1), wrb, wg0, rt);
-            svuint32_t gray2 = RgbaToGray(svld1_vnum_u8(mask2, rgba, 2), wrb, wg0, rt);
-            svuint32_t gray3 = RgbaToGray(svld1_vnum_u8(mask3, rgba, 3), wrb, wg0, rt);
-            svuint16_t gray01 = svuzp1_u16(svreinterpret_u16_u32(gray0), svreinterpret_u16_u32(gray1));
-            svuint16_t gray23 = svuzp1_u16(svreinterpret_u16_u32(gray2), svreinterpret_u16_u32(gray3));
-            svst1_u8(mask, gray, svuzp1_u8(svreinterpret_u8_u16(gray01), svreinterpret_u8_u16(gray23)));
-        }
+        //SIMD_INLINE void RgbaToGray(const uint8_t* rgba, const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3, 
+        //    const svuint16_t& wrb, const svuint16_t& wg0, const svuint32_t& rt, uint8_t* gray, const svbool_t& mask)
+        //{
+        //    svuint32_t gray0 = RgbaToGray(svld1_vnum_u8(mask0, rgba, 0), wrb, wg0, rt);
+        //    svuint32_t gray1 = RgbaToGray(svld1_vnum_u8(mask1, rgba, 1), wrb, wg0, rt);
+        //    svuint32_t gray2 = RgbaToGray(svld1_vnum_u8(mask2, rgba, 2), wrb, wg0, rt);
+        //    svuint32_t gray3 = RgbaToGray(svld1_vnum_u8(mask3, rgba, 3), wrb, wg0, rt);
+        //    svuint16_t gray01 = svuzp1_u16(svreinterpret_u16_u32(gray0), svreinterpret_u16_u32(gray1));
+        //    svuint16_t gray23 = svuzp1_u16(svreinterpret_u16_u32(gray2), svreinterpret_u16_u32(gray3));
+        //    svst1_u8(mask, gray, svuzp1_u8(svreinterpret_u8_u16(gray01), svreinterpret_u8_u16(gray23)));
+        //}
 
         void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
         {
@@ -115,9 +115,9 @@ namespace Simd
             {
                 size_t col = 0, offset = 0;
                 for (; col < widthA; col += A, offset += A4)
-                    RgbaToGray(rgba + offset, body, body, body, body, wrb, wg0, rt, gray + col, body);
+                    BgraToGray(rgba + offset, body, body, body, body, wrb, wg0, rt, gray + col, body);
                 if (widthA < width)
-                    RgbaToGray(rgba + offset, tail0, tail1, tail2, tail3, wrb, wg0, rt, gray + col, tail);
+                    BgraToGray(rgba + offset, tail0, tail1, tail2, tail3, wrb, wg0, rt, gray + col, tail);
                 rgba += rgbaStride;
                 gray += grayStride;
             }
