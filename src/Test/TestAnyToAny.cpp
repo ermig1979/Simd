@@ -556,6 +556,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Neon::RgbaToGray), FUNC_O(SimdRgbaToGray));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Sve2::RgbaToGray), FUNC_O(SimdRgbaToGray));
+#endif
+
         return result;
     }
 
