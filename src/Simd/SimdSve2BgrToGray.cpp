@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2020 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ namespace Simd
         void BgrToGray(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* gray, size_t grayStride)
         {
             size_t A = svlen(svuint8_t()), A3 = A * 3;
-            size_t widthA = AlignLo(width, A), size = width * 3;
+            size_t widthA = AlignLo(width, A);
             const svbool_t body = svptrue_b8();
             const svbool_t tail = svwhilelt_b8(widthA, width);
             svuint16_t wb = svdup_n_u16(Base::BLUE_TO_GRAY_WEIGHT);
@@ -81,7 +81,7 @@ namespace Simd
         void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
         {
             size_t A = svlen(svuint8_t()), A3 = A * 3;
-            size_t widthA = AlignLo(width, A), size = width * 3;
+            size_t widthA = AlignLo(width, A);
             const svbool_t body = svptrue_b8();
             const svbool_t tail = svwhilelt_b8(widthA, width);
             svuint16_t wb = svdup_n_u16(Base::BLUE_TO_GRAY_WEIGHT);

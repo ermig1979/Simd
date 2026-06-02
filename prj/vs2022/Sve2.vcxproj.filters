@@ -23,5 +23,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToGray.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2BgraToGray.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
