@@ -4434,6 +4434,11 @@ SIMD_API void SimdRgbToGray(const uint8_t* rgb, size_t width, size_t height, siz
         Sse41::RgbToGray(rgb, width, height, rgbStride, gray, grayStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::RgbToGray(rgb, width, height, rgbStride, gray, grayStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::RgbToGray(rgb, width, height, rgbStride, gray, grayStride);
