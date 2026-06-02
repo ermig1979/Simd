@@ -248,6 +248,16 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        SIMD_INLINE svuint16_t Set16u(uint16_t a0, uint16_t a1)
+        {
+            return svzip1_u16(svdup_n_u16(a0), svdup_n_u16(a1));
+        }
+    }
+#endif
 }
 
 #endif
