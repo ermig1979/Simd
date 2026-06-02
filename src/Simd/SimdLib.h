@@ -2578,24 +2578,26 @@ extern "C"
 
         \fn void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);
 
-        \short Calculates number of points satisfying certain condition for 8-bit gray image.
+        \short Counts the number of pixels in an 8-bit gray image that satisfy a given comparison condition against a reference value.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], value))
+        if(compare(src[x, y], value))
             count++;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output count is initialized to zero before accumulation.
 
         \note This function has a C++ wrapper Simd::ConditionalCount8u(const View<A> & src, uint8_t value, SimdCompareType compareType, uint32_t & count).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image (first value for compare operation).
-        \param [in] stride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] count - a pointer to result unsigned 32-bit value.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image. Each pixel is compared against \a value.
+        \param [in] stride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] count - a pointer to an unsigned 32-bit integer that receives the number of pixels satisfying the condition.
     */
     SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
         uint8_t value, SimdCompareType compareType, uint32_t * count);
@@ -2604,24 +2606,28 @@ extern "C"
 
         \fn void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, SimdCompareType compareType, uint32_t * count);
 
-        \short Calculates number of points satisfying certain condition for 16-bit signed integer image.
+        \short Counts the number of pixels in a 16-bit signed integer image that satisfy a given comparison condition against a reference value.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], value))
+        if(compare(src[x, y], value))
             count++;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output count is initialized to zero before accumulation.
+        Although the \a src pointer has type `uint8_t *`, each pixel occupies 2 bytes and is interpreted as a signed 16-bit integer.
+        The \a stride is expressed in bytes, while \a width is expressed in 16-bit pixels (elements).
 
         \note This function has a C++ wrapper Simd::ConditionalCount16i(const View<A> & src, int16_t value, SimdCompareType compareType, uint32_t & count).
 
-        \param [in] src - a pointer to pixels data of input 16-bit signed integer image (first value for compare operation).
-        \param [in] stride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] count - a pointer to result unsigned 32-bit value.
+        \param [in] src - a pointer to pixels data of the input 16-bit signed integer image. Each pixel is compared against \a value.
+        \param [in] stride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in 16-bit pixels (elements per row).
+        \param [in] height - an image height in pixels.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] count - a pointer to an unsigned 32-bit integer that receives the number of pixels satisfying the condition.
     */
     SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height,
         int16_t value, SimdCompareType compareType, uint32_t * count);
@@ -2630,28 +2636,30 @@ extern "C"
 
         \fn void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-        \short Calculates sum of image points when mask points satisfying certain condition.
+        \short Calculates the sum of pixels in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(mask[i], value))
-            sum += src[i];
+        if(compare(mask[x, y], value))
+            sum += src[x, y];
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function has a C++ wrapper Simd::ConditionalSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] mask - a pointer to pixels data of 8-bit gray mask (first value for compare operation).
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image whose pixel values are accumulated.
+        \param [in] srcStride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] mask - a pointer to pixels data of the 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] maskStride - a row size of the \a mask image in bytes.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a pointer to an unsigned 64-bit integer that receives the accumulated sum.
     */
     SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
@@ -2660,28 +2668,30 @@ extern "C"
 
         \fn void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-        \short Calculates sum of squared image points when mask points satisfying certain condition.
+        \short Calculates the sum of squared pixel values in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(mask[i], value))
-            sum += src[i]*src[i];
+        if(compare(mask[x, y], value))
+            sum += src[x, y] * src[x, y];
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function has a C++ wrapper Simd::ConditionalSquareSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] mask - a pointer to pixels data of 8-bit gray mask (first value for compare operation).
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image whose squared pixel values are accumulated.
+        \param [in] srcStride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] mask - a pointer to pixels data of the 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] maskStride - a row size of the \a mask image in bytes.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a pointer to an unsigned 64-bit integer that receives the accumulated sum of squares.
     */
     SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
@@ -2690,11 +2700,12 @@ extern "C"
 
         \fn void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-        \short Calculates sum of squared gradient of image points when mask points satisfying certain condition.
+        \short Calculates the sum of squared gradient magnitudes in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height. The image height and width must be equal or greater 3.
+        All images must have 8-bit gray format and the same width and height. The image width and height must each be at least 3.
+        Border pixels (first and last row, first and last column) are excluded from processing.
 
-        For every point except border:
+        For every non-border pixel:
         \verbatim
         if(compare(mask[x, y], value))
         {
@@ -2703,19 +2714,21 @@ extern "C"
             sum += dx*dx + dy*dy;
         }
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function has a C++ wrapper Simd::ConditionalSquareGradientSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] mask - a pointer to pixels data of 8-bit gray mask (first value for compare operation).
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image used to compute gradients.
+        \param [in] srcStride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels (must be >= 3).
+        \param [in] height - an image height in pixels (must be >= 3).
+        \param [in] mask - a pointer to pixels data of the 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] maskStride - a row size of the \a mask image in bytes.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a pointer to an unsigned 64-bit integer that receives the accumulated sum of squared gradients.
     */
     SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
@@ -2724,28 +2737,28 @@ extern "C"
 
         \fn void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
-        \short Fills pixels of 8-bit gray image by given value if corresponding pixels of input 8-bit gray image satisfy certain condition.
+        \short Fills pixels of an 8-bit gray destination image with a given value at positions where the corresponding source pixels satisfy a given comparison condition. Pixels that do not satisfy the condition are left unchanged.
 
-        All images must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], threshold))
-            dst[i] = value;
+        if(compare(src[x, y], threshold))
+            dst[x, y] = value;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
 
         \note This function has a C++ wrapper Simd::ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of input image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] threshold - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [in] value - a value for fill operation.
-        \param [in, out] dst - a pointer to pixels data of the output 8-bit gray image.
-        \param [in] dstStride - a row size of output image.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image. Each pixel is compared against \a threshold.
+        \param [in] srcStride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] threshold - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [in] value - a fill value written to \a dst pixels where the condition is satisfied.
+        \param [in, out] dst - a pointer to pixels data of the output 8-bit gray image. Pixels not satisfying the condition retain their existing values.
+        \param [in] dstStride - a row size of the \a dst image in bytes.
     */
     SIMD_API void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
@@ -2754,19 +2767,21 @@ extern "C"
 
         \fn void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
-        \short Copies pixels data of image from source to destination.
+        \short Copies pixel data row by row from a source image to a destination image.
 
-        All images must have the same width, height and format.
+        Supports any pixel format; \a pixelSize specifies the number of bytes per pixel.
+        The source and destination images must have the same width, height, and pixel size,
+        but may have different row strides (e.g. due to row alignment padding).
 
         \note This function has a C++ wrapper Simd::Copy(const View<A> & src, View<B> & dst).
 
-        \param [in] src - a pointer to pixels data of source image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixelSize - a size of the image pixel.
-        \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] src - a pointer to pixels data of the source image.
+        \param [in] srcStride - a row size of the \a src image in bytes (including any padding).
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] pixelSize - a size of one pixel in bytes.
+        \param [out] dst - a pointer to pixels data of the destination image.
+        \param [in] dstStride - a row size of the \a dst image in bytes (including any padding).
     */
     SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
@@ -2774,23 +2789,32 @@ extern "C"
 
         \fn void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
-        \short Copies pixels data of image from source to destination except for the portion bounded frame.
+        \short Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched.
 
-        All images must have the same width, height and format.
+        The source and destination images must have the same width, height, and pixel size.
+        The frame is defined by the rectangle [\a frameLeft, \a frameRight) x [\a frameTop, \a frameBottom).
+        Only pixels outside this rectangle (i.e. the surrounding border area) are copied from \a src to \a dst.
+        Pixels inside the frame interior are not written to \a dst.
+
+        The following regions are copied:
+        - All rows above \a frameTop (full width).
+        - All rows at or below \a frameBottom (full width).
+        - For rows within [\a frameTop, \a frameBottom): columns to the left of \a frameLeft.
+        - For rows within [\a frameTop, \a frameBottom): columns at or to the right of \a frameRight.
 
         \note This function has a C++ wrapper Simd::CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst).
 
-        \param [in] src - a pointer to pixels data of source image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixelSize - a size of the image pixel.
-        \param [in] frameLeft - a frame left side.
-        \param [in] frameTop - a frame top side.
-        \param [in] frameRight - a frame right side.
-        \param [in] frameBottom - a frame bottom side.
-        \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] src - a pointer to pixels data of the source image.
+        \param [in] srcStride - a row size of the \a src image in bytes (including any padding).
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] pixelSize - a size of one pixel in bytes.
+        \param [in] frameLeft - the left boundary (inclusive) of the interior rectangle in pixels.
+        \param [in] frameTop - the top boundary (inclusive) of the interior rectangle in pixels.
+        \param [in] frameRight - the right boundary (exclusive) of the interior rectangle in pixels.
+        \param [in] frameBottom - the bottom boundary (exclusive) of the interior rectangle in pixels.
+        \param [out] dst - a pointer to pixels data of the destination image.
+        \param [in] dstStride - a row size of the \a dst image in bytes (including any padding).
     */
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
