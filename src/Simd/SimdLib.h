@@ -3777,17 +3777,19 @@ extern "C"
 
         \short Calculates sum of squared differences for two 16-bit float arrays.
 
-        All arrays must have the same size.
+        The input values are IEEE 754 binary16 values stored in uint16_t elements. Each element is
+        converted to 32-bit float before subtraction and accumulation. Input arrays must have the same size.
 
-        For every element:
+        Algorithm description:
         \verbatim
-        sum += (a[i] - b[i])*(a[i] - b[i]);
+        da = Float16ToFloat32(a[i]) - Float16ToFloat32(b[i]);
+        sum[0] = Sum(da*da);
         \endverbatim
 
         \param [in] a - a pointer to the first 16-bit float array.
         \param [in] b - a pointer to the second 16-bit float array.
-        \param [in] size - a size of arrays.
-        \param [out] sum - a pointer to 32-bit float point sum of squared differences.
+        \param [in] size - a number of elements in input arrays.
+        \param [out] sum - a pointer to 32-bit float sum of squared differences.
     */
     SIMD_API void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
 
@@ -3797,17 +3799,21 @@ extern "C"
 
         \short Calculates cosine distance of two 16-bit float arrays.
 
-        All arrays must have the same size.
+        The input values are IEEE 754 binary16 values stored in uint16_t elements. Each element is
+        converted to 32-bit float before multiplication and accumulation. Input arrays must have the same size
+        and non-zero Euclidean norm.
 
         Algorithm description:
         \verbatim
-        distance = 1 - Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
+        fa = Float16ToFloat32(a[i]);
+        fb = Float16ToFloat32(b[i]);
+        distance[0] = 1 - Sum(fa*fb)/Sqrt(Sum(fa*fa)*Sum(fb*fb));
         \endverbatim
 
         \param [in] a - a pointer to the first 16-bit float array.
         \param [in] b - a pointer to the second 16-bit float array.
-        \param [in] size - a size of arrays.
-        \param [out] distance - a pointer to 32-bit float with cosine distance.
+        \param [in] size - a number of elements in input arrays.
+        \param [out] distance - a pointer to 32-bit float cosine distance.
     */
     SIMD_API void SimdCosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance);
 
@@ -3815,19 +3821,24 @@ extern "C"
 
         \fn void SimdCosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances);
 
-        \short Calculates mutual cosine distance of two arrays of 16-bit float arrays.
+        \short Calculates pairwise cosine distances for two sets of 16-bit float vectors.
+
+        A is an array of M pointers to vectors of length K, and B is an array of N pointers to vectors
+        of length K. The input values are IEEE 754 binary16 values stored in uint16_t elements and are
+        converted to 32-bit float for accumulation. Every input vector is expected to have non-zero
+        Euclidean norm. The output matrix is stored in row-major order.
 
         Algorithm description:
         \verbatim
-        distances[i, j] = 1 - Sum(A[i][k]*B[j][k])/Sqrt(Sum(A[i][k]*A[i][k])*Sum(B[j][k]*B[j][k]));
+        distances[i*N + j] = SimdCosineDistance16f(A[i], B[j], K);
         \endverbatim
 
         \param [in] M - a number of A arrays.
         \param [in] N - a number of B arrays.
-        \param [in] K - a size of A and B arrays.
-        \param [in] A - a pointer to the first array with pointers to 16-bit float arrays.
-        \param [in] B - a pointer to the second array with pointers to 16-bit float arrays.
-        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
+        \param [in] K - a number of elements in every A and B vector.
+        \param [in] A - a pointer to the first array with M pointers to 16-bit float vectors.
+        \param [in] B - a pointer to the second array with N pointers to 16-bit float vectors.
+        \param [out] distances - a pointer to result 32-bit float array with row-major cosine distance matrix. Its size must be M*N.
     */
     SIMD_API void SimdCosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances);
 
@@ -3835,19 +3846,24 @@ extern "C"
 
         \fn void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
 
-        \short Calculates mutual cosine distance of two arrays of 16-bit float arrays.
+        \short Calculates pairwise cosine distances for two packed sets of 16-bit float vectors.
+
+        A contains M contiguous vectors of length K and B contains N contiguous vectors of length K.
+        The input values are IEEE 754 binary16 values stored in uint16_t elements and are converted
+        to 32-bit float for accumulation. Every input vector is expected to have non-zero Euclidean norm.
+        The output matrix is stored in row-major order.
 
         Algorithm description:
         \verbatim
-        distances[i, j] = 1 - Sum(A[i*K + k]*B[j*K + k])/Sqrt(Sum(A[i*K + k]*A[i*K + k])*Sum(B[j*K + k]*B[j*K + k]));
+        distances[i*N + j] = SimdCosineDistance16f(A + i*K, B + j*K, K);
         \endverbatim
 
         \param [in] M - a number of A arrays.
         \param [in] N - a number of B arrays.
-        \param [in] K - a size of A and B arrays.
-        \param [in] A - a pointer to 16-bit float arrays.
-        \param [in] B - a pointer to 16-bit float arrays.
-        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
+        \param [in] K - a number of elements in every A and B vector.
+        \param [in] A - a pointer to M packed 16-bit float vectors.
+        \param [in] B - a pointer to N packed 16-bit float vectors.
+        \param [out] distances - a pointer to result 32-bit float array with row-major cosine distance matrix. Its size must be M*N.
     */
     SIMD_API void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
 
@@ -3855,17 +3871,21 @@ extern "C"
 
         \fn void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms);
 
-        \short Calculates vector norms for array of 16-bit float arrays.
+        \short Calculates Euclidean norms for an array of 16-bit float vectors.
+
+        A is an array of N pointers to vectors of length K. The input values are IEEE 754 binary16
+        values stored in uint16_t elements and are converted to 32-bit float before accumulation.
 
         Algorithm description:
         \verbatim
-        norms[j] = Sqrt(Sum(A[j][k]*A[j][k]));
+        fa = Float16ToFloat32(A[j][k]);
+        norms[j] = Sqrt(Sum(fa*fa));
         \endverbatim
 
-        \param [in] N - a number of A arrays.
-        \param [in] K - a size of A arrays.
-        \param [in] A - a pointer to the array with pointers to 16-bit float arrays.
-        \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
+        \param [in] N - a number of A vectors.
+        \param [in] K - a number of elements in every A vector.
+        \param [in] A - a pointer to an array with N pointers to 16-bit float vectors.
+        \param [out] norms - a pointer to result 32-bit float array with vector norms. Its size must be N.
     */
     SIMD_API void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms);
 
@@ -3873,17 +3893,21 @@ extern "C"
 
         \fn void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms);
 
-        \short Calculates vector norms for array of 16-bit float arrays.
+        \short Calculates Euclidean norms for a packed array of 16-bit float vectors.
+
+        A contains N contiguous vectors of length K. The input values are IEEE 754 binary16 values
+        stored in uint16_t elements and are converted to 32-bit float before accumulation.
 
         Algorithm description:
         \verbatim
-        norms[j] = Sqrt(Sum(A[j*K + k]*A[j*K + k]));
+        fa = Float16ToFloat32(A[j*K + k]);
+        norms[j] = Sqrt(Sum(fa*fa));
         \endverbatim
 
-        \param [in] N - a number of A arrays.
-        \param [in] K - a size of A arrays.
-        \param [in] A - a pointer to 16-bit float arrays.
-        \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
+        \param [in] N - a number of A vectors.
+        \param [in] K - a number of elements in every A vector.
+        \param [in] A - a pointer to N packed 16-bit float vectors.
+        \param [out] norms - a pointer to result 32-bit float array with vector norms. Its size must be N.
     */
     SIMD_API void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms);
 
@@ -3891,15 +3915,19 @@ extern "C"
 
         \fn void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
 
-        \short Converts numbers in the array from 32-bit float to 8-bit unsigned integer format.
+        \short Converts an array of 32-bit floats to 8-bit unsigned integers with linear saturation.
+
+        lower and upper point to scalar bounds. Each source value is saturated to [lower[0], upper[0]],
+        shifted by lower[0], scaled to [0, 255], and stored as uint8_t. The upper bound must be greater
+        than the lower bound.
 
         For every element:
         \verbatim
-        dst[i] = (min(max(src[i], lower), upper) - lower)*255/(upper - lower);
+        dst[i] = uint8_t((Min(Max(src[i], lower[0]), upper[0]) - lower[0])*255/(upper[0] - lower[0]));
         \endverbatim
 
         \param [in] src - a pointer to the input array with 32-bit float point numbers.
-        \param [in] size - a size of input and output array.
+        \param [in] size - a number of elements in input and output arrays.
         \param [in] lower - a pointer to lower saturated bound of the input array.
         \param [in] upper - a pointer to upper saturated bound of the input array.
         \param [out] dst - a pointer to the output array with 8-bit unsigned integer numbers.
@@ -3910,15 +3938,18 @@ extern "C"
 
         \fn void SimdUint8ToFloat32(const uint8_t* src, size_t size, const float * lower, const float * upper, float * dst);
 
-        \short Converts numbers in the array from 8-bit unsigned integer to 32-bit float format.
+        \short Converts an array of 8-bit unsigned integers to 32-bit floats with linear scaling.
+
+        lower and upper point to scalar bounds. Each source value is scaled from [0, 255] to
+        [lower[0], upper[0]]. The upper bound must be greater than the lower bound.
 
         For every element:
         \verbatim
-        dst[i] = src[i]*(upper - lower)/255 + lower;
+        dst[i] = src[i]*(upper[0] - lower[0])/255 + lower[0];
         \endverbatim
 
         \param [in] src - a pointer to the input array with 8-bit unsigned integer numbers.
-        \param [in] size - a size of input and output array.
+        \param [in] size - a number of elements in input and output arrays.
         \param [in] lower - a pointer to lower bound of the output array.
         \param [in] upper - a pointer to upper bound of the output array.
         \param [out] dst - a pointer to the output array with 32-bit float point numbers.
