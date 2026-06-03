@@ -292,6 +292,38 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void CorrelationSum(const uint8_t* a, const uint8_t* b, svbool_t mask, svuint32_t& sum)
+        {
+            svuint8_t _a = svld1_u8(mask, a);
+            svuint8_t _b = svld1_u8(mask, b);
+            sum = svdot_u32(sum, _a, _b);
+        }
+
+        void CorrelationSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint64_t* sum)
+        {
+            assert(width <= 256 * 256);
+
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            sum[0] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                svuint32_t _sum = svdup_n_u32(0);
+                for (; col < widthA; col += A)
+                    CorrelationSum(a + col, b + col, body, _sum);
+                if (widthA < width)
+                    CorrelationSum(a + col, b + col, tail, _sum);
+                sum[0] += svaddv_u32(svptrue_b32(), _sum);
+                a += aStride;
+                b += bStride;
+            }
+        }
     }
 #endif
 }
