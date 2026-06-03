@@ -51,37 +51,37 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga6eba3c14ffe78667df250d0d91e0d768"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768">SimdDetectionLoadA</a> (const char *path)</td></tr>
-<tr class="memdesc:ga6eba3c14ffe78667df250d0d91e0d768"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a classifier cascade from file.  <a href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768">More...</a><br /></td></tr>
+<tr class="memdesc:ga6eba3c14ffe78667df250d0d91e0d768"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads an OpenCV-format cascade classifier from an XML file.  <a href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768">More...</a><br /></td></tr>
 <tr class="separator:ga6eba3c14ffe78667df250d0d91e0d768"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3505ce44c0562e8d4fe2c82d8a8228bb"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga3505ce44c0562e8d4fe2c82d8a8228bb">SimdDetectionLoadStringXml</a> (char *xml)</td></tr>
-<tr class="memdesc:ga3505ce44c0562e8d4fe2c82d8a8228bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a classifier cascade from a string.  <a href="group__object__detection.html#ga3505ce44c0562e8d4fe2c82d8a8228bb">More...</a><br /></td></tr>
+<tr class="memdesc:ga3505ce44c0562e8d4fe2c82d8a8228bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads an OpenCV-format cascade classifier from a mutable XML string.  <a href="group__object__detection.html#ga3505ce44c0562e8d4fe2c82d8a8228bb">More...</a><br /></td></tr>
 <tr class="separator:ga3505ce44c0562e8d4fe2c82d8a8228bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2741acb9a4edf6d227c83ec3cf8ab1e3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3">SimdDetectionInfo</a> (const void *data, size_t *width, size_t *height, <a class="el" href="group__c__types.html#gabedf47370ccee15c5ef55dbe5df6479a">SimdDetectionInfoFlags</a> *flags)</td></tr>
-<tr class="memdesc:ga2741acb9a4edf6d227c83ec3cf8ab1e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets information about the classifier cascade.  <a href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3">More...</a><br /></td></tr>
+<tr class="memdesc:ga2741acb9a4edf6d227c83ec3cf8ab1e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets original window size and feature flags of a loaded classifier cascade.  <a href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3">More...</a><br /></td></tr>
 <tr class="separator:ga2741acb9a4edf6d227c83ec3cf8ab1e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1c24fa9c803b2fbff5b175b9d582bfc5"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5">SimdDetectionInit</a> (const void *data, uint8_t *sum, size_t sumStride, size_t width, size_t height, uint8_t *sqsum, size_t sqsumStride, uint8_t *tilted, size_t tiltedStride, int throughColumn, int int16)</td></tr>
-<tr class="memdesc:ga1c24fa9c803b2fbff5b175b9d582bfc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.  <a href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5">More...</a><br /></td></tr>
+<tr class="memdesc:ga1c24fa9c803b2fbff5b175b9d582bfc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes a working classifier cascade context for integral images of a fixed input image size.  <a href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5">More...</a><br /></td></tr>
 <tr class="separator:ga1c24fa9c803b2fbff5b175b9d582bfc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8273855df9316d23cfaa85d981e75471"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471">SimdDetectionPrepare</a> (void *hid)</td></tr>
-<tr class="memdesc:ga8273855df9316d23cfaa85d981e75471"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepares hidden classifier cascade structure to work with given input 8-bit gray image.  <a href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471">More...</a><br /></td></tr>
+<tr class="memdesc:ga8273855df9316d23cfaa85d981e75471"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepares hidden classifier cascade context after integral images have been updated.  <a href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471">More...</a><br /></td></tr>
 <tr class="separator:ga8273855df9316d23cfaa85d981e75471"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaba65e21ccb1d49e55c899bc344fc8a46"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#gaba65e21ccb1d49e55c899bc344fc8a46">SimdDetectionHaarDetect32fp</a> (const void *hid, const uint8_t *mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaba65e21ccb1d49e55c899bc344fc8a46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers, processes all points).  <a href="group__object__detection.html#gaba65e21ccb1d49e55c899bc344fc8a46">More...</a><br /></td></tr>
+<tr class="memdesc:gaba65e21ccb1d49e55c899bc344fc8a46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every point.  <a href="group__object__detection.html#gaba65e21ccb1d49e55c899bc344fc8a46">More...</a><br /></td></tr>
 <tr class="separator:gaba65e21ccb1d49e55c899bc344fc8a46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7f0c306ca3748341a43d9b08f895c2ac"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga7f0c306ca3748341a43d9b08f895c2ac">SimdDetectionHaarDetect32fi</a> (const void *hid, const uint8_t *mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga7f0c306ca3748341a43d9b08f895c2ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers, processes only even points).  <a href="group__object__detection.html#ga7f0c306ca3748341a43d9b08f895c2ac">More...</a><br /></td></tr>
+<tr class="memdesc:ga7f0c306ca3748341a43d9b08f895c2ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every second point.  <a href="group__object__detection.html#ga7f0c306ca3748341a43d9b08f895c2ac">More...</a><br /></td></tr>
 <tr class="separator:ga7f0c306ca3748341a43d9b08f895c2ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf7b8ab17f35c923312d383259dea20e3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#gaf7b8ab17f35c923312d383259dea20e3">SimdDetectionLbpDetect32fp</a> (const void *hid, const uint8_t *mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaf7b8ab17f35c923312d383259dea20e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers, processes all points).  <a href="group__object__detection.html#gaf7b8ab17f35c923312d383259dea20e3">More...</a><br /></td></tr>
+<tr class="memdesc:gaf7b8ab17f35c923312d383259dea20e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights, scanning every point.  <a href="group__object__detection.html#gaf7b8ab17f35c923312d383259dea20e3">More...</a><br /></td></tr>
 <tr class="separator:gaf7b8ab17f35c923312d383259dea20e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga218cc08cbff2ae5b0807dded3486ac16"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga218cc08cbff2ae5b0807dded3486ac16">SimdDetectionLbpDetect32fi</a> (const void *hid, const uint8_t *mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga218cc08cbff2ae5b0807dded3486ac16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers, processes only even points).  <a href="group__object__detection.html#ga218cc08cbff2ae5b0807dded3486ac16">More...</a><br /></td></tr>
+<tr class="memdesc:ga218cc08cbff2ae5b0807dded3486ac16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights, scanning every second point.  <a href="group__object__detection.html#ga218cc08cbff2ae5b0807dded3486ac16">More...</a><br /></td></tr>
 <tr class="separator:ga218cc08cbff2ae5b0807dded3486ac16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga31f469e40e42cb70563dfe9ab63b6032"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga31f469e40e42cb70563dfe9ab63b6032">SimdDetectionLbpDetect16ip</a> (const void *hid, const uint8_t *mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga31f469e40e42cb70563dfe9ab63b6032"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers, processes all points).  <a href="group__object__detection.html#ga31f469e40e42cb70563dfe9ab63b6032">More...</a><br /></td></tr>
+<tr class="memdesc:ga31f469e40e42cb70563dfe9ab63b6032"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs LBP cascade detection with 16-bit integral sums and integer stage weights, scanning every point.  <a href="group__object__detection.html#ga31f469e40e42cb70563dfe9ab63b6032">More...</a><br /></td></tr>
 <tr class="separator:ga31f469e40e42cb70563dfe9ab63b6032"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2a3409fbda5e1e13852d066cfede2d9f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f">SimdDetectionLbpDetect16ii</a> (const void *hid, const uint8_t *mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga2a3409fbda5e1e13852d066cfede2d9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers, processes only even points).  <a href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f">More...</a><br /></td></tr>
+<tr class="memdesc:ga2a3409fbda5e1e13852d066cfede2d9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs LBP cascade detection with 16-bit integral sums and integer stage weights, scanning every second point.  <a href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f">More...</a><br /></td></tr>
 <tr class="separator:ga2a3409fbda5e1e13852d066cfede2d9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -103,16 +103,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Loads a classifier cascade from file. </p>
-<p >This function supports OpenCV HAAR and LBP cascades type. Tree based cascades and old cascade formats are not supported.</p>
+<p>Loads an OpenCV-format cascade classifier from an XML file. </p>
+<p >The loader parses BOOST cascades with HAAR or LBP features. HOG cascades, tree-based cascades and old cascade formats are not supported. The returned object contains parsed cascade data (original window size, stages, features and flags) and is used to create working detection contexts.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to cascade. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to XML cascade file. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to loaded cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets information about the classifier cascade.">SimdDetectionInfo</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.">SimdDetectionInit</a>, and must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to loaded cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets original window size and feature flags of a loaded classifier cascade.">SimdDetectionInfo</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes a working classifier cascade context for integral images of a fixed input image size.">SimdDetectionInit</a>, and must be released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -132,16 +132,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Loads a classifier cascade from a string. </p>
-<p >This function supports OpenCV HAAR and LBP cascades type. Tree based cascades and old cascade formats are not supported.</p>
+<p>Loads an OpenCV-format cascade classifier from a mutable XML string. </p>
+<p >The loader parses BOOST cascades with HAAR or LBP features. HOG cascades, tree-based cascades and old cascade formats are not supported. The XML buffer must be zero-terminated and writable: the parser can modify it while parsing. The buffer is needed only during this call; parsed cascade data is stored in the returned object.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">xml</td><td>- A string with the xml of a classifier cascade. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">xml</td><td>- a zero-terminated writable XML string with classifier cascade. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to loaded cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets information about the classifier cascade.">SimdDetectionInfo</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.">SimdDetectionInit</a>, and must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to loaded cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets original window size and feature flags of a loaded classifier cascade.">SimdDetectionInfo</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes a working classifier cascade context for integral images of a fixed input image size.">SimdDetectionInit</a>, and must be released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -183,14 +183,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets information about the classifier cascade. </p>
+<p>Gets original window size and feature flags of a loaded classifier cascade. </p>
+<p >For a valid cascade this function writes original scanning window size and cascade flags to non-NULL output pointers. If data is NULL the function does nothing. The low bits of flags contain cascade feature type (see <a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e">SimdDetectionInfoFeatureMask</a>). Other bits describe presence of tilted HAAR features and availability of 16-bit LBP detection.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>- a pointer to cascade which was received with using of function <a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768" title="Loads a classifier cascade from file.">SimdDetectionLoadA</a>. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">width</td><td>- a pointer to returned width of cascade window. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">height</td><td>- a pointer to returned height of cascade window. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">flags</td><td>- a pointer to flags with other information (See <a class="el" href="group__c__types.html#gabedf47370ccee15c5ef55dbe5df6479a">SimdDetectionInfoFlags</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>- a pointer to cascade received from <a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768" title="Loads an OpenCV-format cascade classifier from an XML file.">SimdDetectionLoadA</a> or <a class="el" href="group__object__detection.html#ga3505ce44c0562e8d4fe2c82d8a8228bb" title="Loads an OpenCV-format cascade classifier from a mutable XML string.">SimdDetectionLoadStringXml</a>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">width</td><td>- a pointer to returned width of original cascade window. It can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">height</td><td>- a pointer to returned height of original cascade window. It can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">flags</td><td>- a pointer to returned flags with other information (see <a class="el" href="group__c__types.html#gabedf47370ccee15c5ef55dbe5df6479a">SimdDetectionInfoFlags</a>). It can be NULL. </td></tr>
   </table>
   </dd>
 </dl>
@@ -277,25 +278,27 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image. </p>
+<p>Initializes a working classifier cascade context for integral images of a fixed input image size. </p>
+<p >The hidden context stores references to provided integral images and precomputes pointers to cascade features. The sum image size is also the integral image size; the corresponding source gray image has width - 1 by height - 1 pixels. Integral images must be calculated by <a class="el" href="group__integral.html#ga75ae2a37106447a4e1950b3c99d561c5" title="Calculates integral images for input 8-bit gray image.">SimdIntegral</a> with 32-bit integer sum format. HAAR cascades require sum and squared sum images, and require tilted image only when <a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aa43d8b0caaffb374855257070a623e0ed">SimdDetectionInfoHasTilted</a> is set. LBP cascades use only the sum image.</p>
+<p >If throughColumn is non-zero, the context is prepared for the interlaced detection functions (*32fi and *16ii), which scan every second row and column. If int16 is non-zero and the loaded LBP cascade has <a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30">SimdDetectionInfoCanInt16</a>, the context uses a 16-bit integer LBP representation and must be used with *16ip or *16ii detection functions. Otherwise LBP detection uses 32-bit integral sums and must be used with *32fp or *32fi detection functions.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>- a pointer to cascade which was received with using of function <a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768" title="Loads a classifier cascade from file.">SimdDetectionLoadA</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sum</td><td>- a pointer to pixels data of 32-bit integer image with integral sum of given input 8-bit gray image. See function <a class="el" href="group__integral.html#ga75ae2a37106447a4e1950b3c99d561c5" title="Calculates integral images for input 8-bit gray image.">SimdIntegral</a> in order to estimate this integral sum. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sumStride</td><td>- a row size of the sum image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the sum image. It must be per unit greater than width of input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the sum image. It must be per unit greater than height of input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sqsum</td><td>- a pointer to pixels data of 32-bit integer image with squared integral sum of given input 8-bit gray image. Its size must be equal to sum image. See function <a class="el" href="group__integral.html#ga75ae2a37106447a4e1950b3c99d561c5" title="Calculates integral images for input 8-bit gray image.">SimdIntegral</a> in order to estimate this squared integral sum. Its </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sqsumStride</td><td>- a row size of the sqsum image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">tilted</td><td>- a pointer to pixels data of 32-bit integer image with tilted integral sum of given input 8-bit gray image. Its size must be equal to sum image. See function <a class="el" href="group__integral.html#ga75ae2a37106447a4e1950b3c99d561c5" title="Calculates integral images for input 8-bit gray image.">SimdIntegral</a> in order to estimate this tilted integral sum. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">tiltedStride</td><td>- a row size of the tilted image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">throughColumn</td><td>- a flag to detect objects only in even columns and rows (to increase performance). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">int16</td><td>- a flag use for 16-bit integer version of detection algorithm. (See <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets information about the classifier cascade.">SimdDetectionInfo</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>- a pointer to cascade received from <a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768" title="Loads an OpenCV-format cascade classifier from an XML file.">SimdDetectionLoadA</a> or <a class="el" href="group__object__detection.html#ga3505ce44c0562e8d4fe2c82d8a8228bb" title="Loads an OpenCV-format cascade classifier from a mutable XML string.">SimdDetectionLoadStringXml</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sum</td><td>- a pointer to 32-bit integer integral sum image of input 8-bit gray image. See <a class="el" href="group__integral.html#ga75ae2a37106447a4e1950b3c99d561c5" title="Calculates integral images for input 8-bit gray image.">SimdIntegral</a> in order to estimate this integral sum. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sumStride</td><td>- a row size of the sum image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the integral images. It must be one greater than width of input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the integral images. It must be one greater than height of input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sqsum</td><td>- a pointer to 32-bit integer squared integral sum image. It is required for HAAR cascades and ignored for LBP cascades. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sqsumStride</td><td>- a row size of the sqsum image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tilted</td><td>- a pointer to 32-bit integer tilted integral sum image. It is required only for HAAR cascades with tilted features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tiltedStride</td><td>- a row size of the tilted image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">throughColumn</td><td>- a flag to prepare context for scanning every second row and column. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">int16</td><td>- a flag to request 16-bit integer LBP detection (see <a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30">SimdDetectionInfoCanInt16</a>). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to hidden cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade structure to work with given input 8-bit gray image.">SimdDetectionPrepare</a>, <a class="el" href="group__object__detection.html#gaba65e21ccb1d49e55c899bc344fc8a46" title="Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers,...">SimdDetectionHaarDetect32fp</a>, <a class="el" href="group__object__detection.html#ga7f0c306ca3748341a43d9b08f895c2ac" title="Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers,...">SimdDetectionHaarDetect32fi</a>, <a class="el" href="group__object__detection.html#gaf7b8ab17f35c923312d383259dea20e3" title="Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers,...">SimdDetectionLbpDetect32fp</a>, <a class="el" href="group__object__detection.html#ga218cc08cbff2ae5b0807dded3486ac16" title="Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers,...">SimdDetectionLbpDetect32fi</a>, <a class="el" href="group__object__detection.html#ga31f469e40e42cb70563dfe9ab63b6032" title="Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers,...">SimdDetectionLbpDetect16ip</a> and <a class="el" href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f" title="Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers,...">SimdDetectionLbpDetect16ii</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to hidden cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade context after integral images have been updated.">SimdDetectionPrepare</a>, <a class="el" href="group__object__detection.html#gaba65e21ccb1d49e55c899bc344fc8a46" title="Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every point.">SimdDetectionHaarDetect32fp</a>, <a class="el" href="group__object__detection.html#ga7f0c306ca3748341a43d9b08f895c2ac" title="Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every second point.">SimdDetectionHaarDetect32fi</a>, <a class="el" href="group__object__detection.html#gaf7b8ab17f35c923312d383259dea20e3" title="Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights,...">SimdDetectionLbpDetect32fp</a>, <a class="el" href="group__object__detection.html#ga218cc08cbff2ae5b0807dded3486ac16" title="Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights,...">SimdDetectionLbpDetect32fi</a>, <a class="el" href="group__object__detection.html#ga31f469e40e42cb70563dfe9ab63b6032" title="Performs LBP cascade detection with 16-bit integral sums and integer stage weights,...">SimdDetectionLbpDetect16ip</a> and <a class="el" href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f" title="Performs LBP cascade detection with 16-bit integral sums and integer stage weights,...">SimdDetectionLbpDetect16ii</a>. It must be released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -315,12 +318,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Prepares hidden classifier cascade structure to work with given input 8-bit gray image. </p>
-<p >You must call this function before calling of functions <a class="el" href="group__object__detection.html#gaba65e21ccb1d49e55c899bc344fc8a46" title="Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers,...">SimdDetectionHaarDetect32fp</a>, <a class="el" href="group__object__detection.html#ga7f0c306ca3748341a43d9b08f895c2ac" title="Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers,...">SimdDetectionHaarDetect32fi</a>, <a class="el" href="group__object__detection.html#gaf7b8ab17f35c923312d383259dea20e3" title="Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers,...">SimdDetectionLbpDetect32fp</a>, <a class="el" href="group__object__detection.html#ga218cc08cbff2ae5b0807dded3486ac16" title="Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers,...">SimdDetectionLbpDetect32fi</a>, <a class="el" href="group__object__detection.html#ga31f469e40e42cb70563dfe9ab63b6032" title="Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers,...">SimdDetectionLbpDetect16ip</a> and <a class="el" href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f" title="Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers,...">SimdDetectionLbpDetect16ii</a>.</p>
+<p>Prepares hidden classifier cascade context after integral images have been updated. </p>
+<p >This function rebuilds internal derived buffers from current integral image data: through-column copies for interlaced scanning and 16-bit converted sums for integer LBP detection. It must be called after every update of integral images and before any call to <a class="el" href="group__object__detection.html#gaba65e21ccb1d49e55c899bc344fc8a46" title="Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every point.">SimdDetectionHaarDetect32fp</a>, <a class="el" href="group__object__detection.html#ga7f0c306ca3748341a43d9b08f895c2ac" title="Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every second point.">SimdDetectionHaarDetect32fi</a>, <a class="el" href="group__object__detection.html#gaf7b8ab17f35c923312d383259dea20e3" title="Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights,...">SimdDetectionLbpDetect32fp</a>, <a class="el" href="group__object__detection.html#ga218cc08cbff2ae5b0807dded3486ac16" title="Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights,...">SimdDetectionLbpDetect32fi</a>, <a class="el" href="group__object__detection.html#ga31f469e40e42cb70563dfe9ab63b6032" title="Performs LBP cascade detection with 16-bit integral sums and integer stage weights,...">SimdDetectionLbpDetect16ip</a> or <a class="el" href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f" title="Performs LBP cascade detection with 16-bit integral sums and integer stage weights,...">SimdDetectionLbpDetect16ii</a>.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden cascade which was received with using of function <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.">SimdDetectionInit</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden cascade received from <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes a working classifier cascade context for integral images of a fixed input image size.">SimdDetectionInit</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -395,20 +398,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers, processes all points). </p>
-<p >You must call function <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade structure to work with given input 8-bit gray image.">SimdDetectionPrepare</a> before calling of this functions. All restriction (input mask and bounding box) affects to left-top corner of scanning window.</p>
+<p>Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every point. </p>
+<p >Use this function only with a HAAR hidden cascade initialized with throughColumn equal to 0. <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade context after integral images have been updated.">SimdDetectionPrepare</a> must be called before this function. The mask and bounding box restrict positions of the left-top corner of the scanning window. For each point in the half-open rectangle [left, right) x [top, bottom), a zero mask value skips detection and a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before calling this function if a zero background is required.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden cascade which was received with using of function <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.">SimdDetectionInit</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit image with mask. The mask restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden HAAR cascade received from <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes a working classifier cascade context for integral images of a fixed input image size.">SimdDetectionInit</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to 8-bit mask image. Its size is equal to source image size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -483,20 +486,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers, processes only even points). </p>
-<p >You must call function <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade structure to work with given input 8-bit gray image.">SimdDetectionPrepare</a> before calling of this functions. All restriction (input mask and bounding box) affects to left-top corner of scanning window.</p>
+<p>Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every second point. </p>
+<p >Use this function only with a HAAR hidden cascade initialized with throughColumn not equal to 0. <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade context after integral images have been updated.">SimdDetectionPrepare</a> must be called before this function. The mask and bounding box restrict positions of the left-top corner of the scanning window. The function checks every second row and column in the half-open rectangle [left, right) x [top, bottom). A zero mask value skips detection; a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before calling this function if a zero background is required.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden cascade which was received with using of function <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.">SimdDetectionInit</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit image with mask. The mask restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden HAAR cascade received from <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes a working classifier cascade context for integral images of a fixed input image size.">SimdDetectionInit</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to 8-bit mask image. Its size is equal to source image size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -571,20 +574,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers, processes all points). </p>
-<p >You must call function <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade structure to work with given input 8-bit gray image.">SimdDetectionPrepare</a> before calling of this functions. All restriction (input mask and bounding box) affects to left-top corner of scanning window.</p>
+<p>Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights, scanning every point. </p>
+<p >Use this function only with an LBP hidden cascade initialized with throughColumn equal to 0 and without 16-bit integer representation. <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade context after integral images have been updated.">SimdDetectionPrepare</a> must be called before this function. The mask and bounding box restrict positions of the left-top corner of the scanning window. For each point in the half-open rectangle [left, right) x [top, bottom), a zero mask value skips detection and a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before calling this function if a zero background is required.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden cascade which was received with using of function <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.">SimdDetectionInit</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit image with mask. The mask restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden LBP cascade received from <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes a working classifier cascade context for integral images of a fixed input image size.">SimdDetectionInit</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to 8-bit mask image. Its size is equal to source image size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -659,20 +662,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers, processes only even points). </p>
-<p >You must call function <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade structure to work with given input 8-bit gray image.">SimdDetectionPrepare</a> before calling of this functions. All restriction (input mask and bounding box) affects to left-top corner of scanning window.</p>
+<p>Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights, scanning every second point. </p>
+<p >Use this function only with an LBP hidden cascade initialized with throughColumn not equal to 0 and without 16-bit integer representation. <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade context after integral images have been updated.">SimdDetectionPrepare</a> must be called before this function. The mask and bounding box restrict positions of the left-top corner of the scanning window. The function checks every second row and column in the half-open rectangle [left, right) x [top, bottom). A zero mask value skips detection; a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before calling this function if a zero background is required.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden cascade which was received with using of function <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.">SimdDetectionInit</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit image with mask. The mask restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden LBP cascade received from <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes a working classifier cascade context for integral images of a fixed input image size.">SimdDetectionInit</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to 8-bit mask image. Its size is equal to source image size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -747,20 +750,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers, processes all points). </p>
-<p >You must call function <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade structure to work with given input 8-bit gray image.">SimdDetectionPrepare</a> before calling of this functions. All restriction (input mask and bounding box) affects to left-top corner of scanning window.</p>
+<p>Performs LBP cascade detection with 16-bit integral sums and integer stage weights, scanning every point. </p>
+<p >Use this function only with an LBP hidden cascade initialized with throughColumn equal to 0 and int16 not equal to 0. The loaded cascade must have <a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30">SimdDetectionInfoCanInt16</a> set. <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade context after integral images have been updated.">SimdDetectionPrepare</a> must be called before this function. The mask and bounding box restrict positions of the left-top corner of the scanning window. For each point in the half-open rectangle [left, right) x [top, bottom), a zero mask value skips detection and a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before calling this function if a zero background is required.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden cascade which was received with using of function <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.">SimdDetectionInit</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit image with mask. The mask restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden LBP cascade received from <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes a working classifier cascade context for integral images of a fixed input image size.">SimdDetectionInit</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to 8-bit mask image. Its size is equal to source image size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -835,20 +838,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers, processes only even points). </p>
-<p >You must call function <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade structure to work with given input 8-bit gray image.">SimdDetectionPrepare</a> before calling of this functions. All restriction (input mask and bounding box) affects to left-top corner of scanning window.</p>
+<p>Performs LBP cascade detection with 16-bit integral sums and integer stage weights, scanning every second point. </p>
+<p >Use this function only with an LBP hidden cascade initialized with throughColumn not equal to 0 and int16 not equal to 0. The loaded cascade must have <a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30">SimdDetectionInfoCanInt16</a> set. <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade context after integral images have been updated.">SimdDetectionPrepare</a> must be called before this function. The mask and bounding box restrict positions of the left-top corner of the scanning window. The function checks every second row and column in the half-open rectangle [left, right) x [top, bottom). A zero mask value skips detection; a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before calling this function if a zero background is required.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden cascade which was received with using of function <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.">SimdDetectionInit</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit image with mask. The mask restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of bounding box which restricts detection region. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hid</td><td>- a pointer to hidden LBP cascade received from <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes a working classifier cascade context for integral images of a fixed input image size.">SimdDetectionInit</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to 8-bit mask image. Its size is equal to source image size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of scan rectangle for window left-top corner. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
