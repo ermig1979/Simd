@@ -453,6 +453,43 @@ namespace Simd
     }
 #endif// SIMD_NEON_ENABLE
 
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        template<SimdCompareType compareType> SIMD_INLINE svbool_t Compare8u(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b);
+
+        template<> SIMD_INLINE svbool_t Compare8u<SimdCompareEqual>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svcmpeq_u8(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare8u<SimdCompareNotEqual>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svcmpne_u8(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare8u<SimdCompareGreater>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svcmpgt_u8(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare8u<SimdCompareGreaterOrEqual>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svcmpge_u8(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare8u<SimdCompareLesser>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svcmplt_u8(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare8u<SimdCompareLesserOrEqual>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svcmple_u8(mask, a, b);
+        }
+    }
+#endif
+
 #ifdef SIMD_HVX_ENABLE
     namespace Hvx
     {

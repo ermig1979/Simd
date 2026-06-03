@@ -119,6 +119,11 @@ namespace Test
             result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Neon::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Sve2::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
+#endif
+
         return result;
     }
 
