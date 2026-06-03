@@ -64,6 +64,8 @@ namespace Simd
             return a <= b;
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         template <SimdCompareType type> SIMD_INLINE bool Compare16i(const int16_t & src, const int16_t & b);
 
         template <> SIMD_INLINE bool Compare16i<SimdCompareEqual>(const int16_t & a, const int16_t & b)
@@ -125,6 +127,8 @@ namespace Simd
             return _mm_cmpeq_epi8(_mm_min_epu8(a, b), a);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         template<SimdCompareType compareType> SIMD_INLINE __m128i Compare8u(__m128i a, __m128i b);
 
         template<> SIMD_INLINE __m128i Compare8u<SimdCompareEqual>(__m128i a, __m128i b)
@@ -172,6 +176,8 @@ namespace Simd
             return _mm_andnot_si128(_mm_cmpgt_epi16(a, b), K_INV_ZERO);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         template<SimdCompareType compareType> SIMD_INLINE __m128i Compare16i(__m128i a, __m128i b);
 
         template<> SIMD_INLINE __m128i Compare16i<SimdCompareEqual>(__m128i a, __m128i b)
@@ -204,7 +210,7 @@ namespace Simd
             return LesserOrEqual16i(a, b);
         }
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
@@ -233,6 +239,8 @@ namespace Simd
         {
             return _mm256_cmpeq_epi8(_mm256_min_epu8(a, b), a);
         }
+
+        //--------------------------------------------------------------------------------------------------
 
         template<SimdCompareType compareType> SIMD_INLINE __m256i Compare8u(__m256i a, __m256i b);
 
@@ -281,6 +289,8 @@ namespace Simd
             return _mm256_andnot_si256(_mm256_cmpgt_epi16(a, b), K_INV_ZERO);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         template<SimdCompareType compareType> SIMD_INLINE __m256i Compare16i(__m256i a, __m256i b);
 
         template<> SIMD_INLINE __m256i Compare16i<SimdCompareEqual>(__m256i a, __m256i b)
@@ -313,7 +323,7 @@ namespace Simd
             return LesserOrEqual16i(a, b);
         }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
@@ -350,6 +360,8 @@ namespace Simd
             return _mm512_cmple_epu8_mask(a, b);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         template<SimdCompareType compareType> SIMD_INLINE __mmask32 Compare16i(__m512i a, __m512i b);
 
         template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareEqual>(__m512i a, __m512i b)
@@ -382,7 +394,7 @@ namespace Simd
             return _mm512_cmple_epi16_mask(a, b);
         }
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
@@ -419,6 +431,8 @@ namespace Simd
             return vcleq_u8(a, b);
         }
 
+        //--------------------------------------------------------------------------------------------------
+
         template<SimdCompareType compareType> SIMD_INLINE uint16x8_t Compare16i(const int16x8_t & a, const int16x8_t & b);
 
         template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareEqual>(const int16x8_t & a, const int16x8_t & b)
@@ -451,7 +465,7 @@ namespace Simd
             return vcleq_s16(a, b);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 
 #ifdef SIMD_SVE2_ENABLE    
     namespace Sve2
@@ -486,6 +500,40 @@ namespace Simd
         template<> SIMD_INLINE svbool_t Compare8u<SimdCompareLesserOrEqual>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
         {
             return svcmple_u8(mask, a, b);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template<SimdCompareType compareType> SIMD_INLINE svbool_t Compare16i(const svbool_t& mask, const svint16_t& a, const svint16_t& b);
+
+        template<> SIMD_INLINE svbool_t Compare16i<SimdCompareEqual>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svcmpeq_s16(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare16i<SimdCompareNotEqual>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svcmpne_s16(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare16i<SimdCompareGreater>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svcmpgt_s16(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare16i<SimdCompareGreaterOrEqual>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svcmpge_s16(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare16i<SimdCompareLesser>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svcmplt_s16(mask, a, b);
+        }
+
+        template<> SIMD_INLINE svbool_t Compare16i<SimdCompareLesserOrEqual>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svcmple_s16(mask, a, b);
         }
     }
 #endif
@@ -525,6 +573,6 @@ namespace Simd
             return Q6_Q_not_Q(Q6_Q_vcmp_gt_VubVub(a, b));
         }
     }
-#endif// SIMD_HVX_ENABLE
+#endif
 }
-#endif//__SimdCompare_h__
+#endif

@@ -1699,6 +1699,11 @@ SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t 
         Sse41::ConditionalCount8u(src, stride, width, height, value, compareType, count);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ConditionalCount8u(src, stride, width, height, value, compareType, count);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ConditionalCount8u(src, stride, width, height, value, compareType, count);
@@ -1724,6 +1729,11 @@ SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::HA)
         Sse41::ConditionalCount16i(src, stride, width, height, value, compareType, count);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ConditionalCount16i(src, stride, width, height, value, compareType, count);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

@@ -82,6 +82,61 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template <SimdCompareType compareType> SIMD_INLINE
+            void ConditionalCount16i(const int16_t* src, const svbool_t& mask, const svint16_t& value, svint16_t _1, svuint32_t& count)
+        {
+            svint16_t _src = svld1_s16(mask, src);
+            svbool_t cond = Compare16i<compareType>(mask, _src, value);
+            svuint8_t ones = svreinterpret_u8_s16(svand_s16_z(cond, _1, _1));
+            count = svdot_u32(count, ones, ones);
+        }
+
+        template <SimdCompareType compareType>
+        void ConditionalCount16i(const uint8_t* src, size_t stride, size_t width, size_t height, int16_t value, uint32_t* count)
+        {
+            size_t A = svlen(svint16_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b16();
+            const svbool_t tail = svwhilelt_b16(widthA, width);
+            svint16_t _1 = svdup_n_s16(1), _value = svdup_n_s16(value);
+            count[0] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                svuint32_t _count = svdup_n_u32(0);
+                const int16_t* s = (const int16_t*)src;
+                for (; col < widthA; col += A)
+                    ConditionalCount16i<compareType>(s + col, body, _value, _1, _count);
+                if (widthA < width)
+                    ConditionalCount16i<compareType>(s + col, tail, _value, _1, _count);
+                count[0] += svaddv_u32(svptrue_b32(), _count);
+                src += stride;
+            }
+        }
+
+        void ConditionalCount16i(const uint8_t* src, size_t stride, size_t width, size_t height, int16_t value, SimdCompareType compareType, uint32_t* count)
+        {
+            switch (compareType)
+            {
+            case SimdCompareEqual:
+                return ConditionalCount16i<SimdCompareEqual>(src, stride, width, height, value, count);
+            case SimdCompareNotEqual:
+                return ConditionalCount16i<SimdCompareNotEqual>(src, stride, width, height, value, count);
+            case SimdCompareGreater:
+                return ConditionalCount16i<SimdCompareGreater>(src, stride, width, height, value, count);
+            case SimdCompareGreaterOrEqual:
+                return ConditionalCount16i<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+            case SimdCompareLesser:
+                return ConditionalCount16i<SimdCompareLesser>(src, stride, width, height, value, count);
+            case SimdCompareLesserOrEqual:
+                return ConditionalCount16i<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+            default:
+                assert(0);
+            }
+        }
     }
 #endif
 }
