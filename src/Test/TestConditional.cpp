@@ -216,6 +216,11 @@ namespace Test
             result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Neon::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Sve2::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
+#endif
+
         return result;
     }
 
