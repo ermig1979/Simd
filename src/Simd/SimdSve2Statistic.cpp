@@ -125,12 +125,54 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void ValueSquareSums2(const uint8_t* src, svbool_t mask, svuint8_t _1, svuint32_t& valueSum0, svuint32_t& squareSum0,
+            svuint32_t& valueSum1, svuint32_t& squareSum1)
+        {
+            svuint8x2_t val = svld2_u8(mask, src);
+            svuint8_t val0 = svget2(val, 0);
+            valueSum0 = svdot_u32(valueSum0, val0, _1);
+            squareSum0 = svdot_u32(squareSum0, val0, val0);
+            svuint8_t val1 = svget2(val, 1);
+            valueSum1 = svdot_u32(valueSum1, val1, _1);
+            squareSum1 = svdot_u32(squareSum1, val1, val1);
+        }
+
+        void ValueSquareSums2(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _1 = svdup_n_u8(1);
+            valueSums[0] = 0;
+            squareSums[0] = 0;
+            valueSums[1] = 0;
+            squareSums[1] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                svuint32_t _valueSum0 = svdup_n_u32(0);
+                svuint32_t _squareSum0 = svdup_n_u32(0);
+                svuint32_t _valueSum1 = svdup_n_u32(0);
+                svuint32_t _squareSum1 = svdup_n_u32(0);
+                for (; col < widthA; col += A)
+                    ValueSquareSums2(src + col, body, _1, _valueSum0, _squareSum0, _valueSum1, _squareSum1);
+                if (widthA < width)
+                    ValueSquareSums2(src + col, tail, _1, _valueSum0, _squareSum0, _valueSum1, _squareSum1);
+                valueSums[0] += svaddv_u32(svptrue_b32(), _valueSum0);
+                squareSums[0] += svaddv_u32(svptrue_b32(), _squareSum0);
+                valueSums[1] += svaddv_u32(svptrue_b32(), _valueSum1);
+                squareSums[1] += svaddv_u32(svptrue_b32(), _squareSum1);
+                src += stride;
+            }
+        }
+
         void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)
         {
             switch (channels)
             {
             case 1: ValueSquareSum(src, stride, width, height, valueSums, squareSums); break;
-            //case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
+            case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
             //case 3: ValueSquareSums3(src, stride, width, height, valueSums, squareSums); break;
             //case 4: ValueSquareSums4(src, stride, width, height, valueSums, squareSums); break;
             default:
