@@ -3441,21 +3441,28 @@ extern "C"
 
         \fn void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
 
-        \short Draws a line at the image.
+        \short Draws a clipped line segment on an image.
 
-        \note This function has a C++ wrappers: Simd::DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1).
+        The function draws a line from (x1, y1) to (x2, y2) into canvas. Coordinates use the usual
+        image coordinate system: X grows to the right and Y grows downward. The segment is clipped
+        to the canvas rectangle [0, width - 1] x [0, height - 1]; if it is completely outside,
+        the function does nothing. Only images with 1, 2, 3 or 4 bytes per pixel are supported.
+        The color buffer must contain channels bytes. The line is drawn with the specified width
+        in pixels around the rasterized segment.
+
+        \note This function has a C++ wrapper: Simd::DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1).
 
         \param [out] canvas - a pointer to pixels data of canvas image.
-        \param [in] stride - a row size of canvas image.
-        \param [in] width - a width of canvas image.
-        \param [in] height - a height of canvas image.
-        \param [in] channels - a number of channels for canvas image.
+        \param [in] stride - a row size of canvas image (in bytes).
+        \param [in] width - a width of canvas image (in pixels).
+        \param [in] height - a height of canvas image (in pixels).
+        \param [in] channels - a size of one canvas pixel in bytes. It must be in range [1, 4].
         \param [in] x1 - X coordinate of the first point of the line.
         \param [in] y1 - Y coordinate of the first point of the line.
         \param [in] x2 - X coordinate of the second point of the line.
         \param [in] y2 - Y coordinate of the second point of the line.
-        \param [in] color - a pointer to line color.
-        \param [in] lineWidth - a line width.
+        \param [in] color - a pointer to line color. It must point to channels bytes.
+        \param [in] lineWidth - a line width (in pixels).
     */
     SIMD_API void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
 
@@ -3463,21 +3470,28 @@ extern "C"
 
         \fn void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
 
-        \short Draws a rectangle at the image.
+        \short Draws a clipped rectangle frame on an image.
 
-        \note This function has a C++ wrappers: Simd::DrawRectangle(View<A> & canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color & color, size_t width = 1).
+        The function draws four clipped lines: (left, top)-(right, top), (right, top)-(right, bottom),
+        (right, bottom)-(left, bottom) and (left, bottom)-(left, top). Coordinates use the usual image
+        coordinate system: X grows to the right and Y grows downward. The rectangle sides may be outside
+        the canvas; each side is clipped by ::SimdDrawLine. Only images with 1, 2, 3 or 4 bytes per pixel
+        are supported. The color buffer must contain channels bytes.
+
+        \note This function has C++ wrappers: Simd::DrawRectangle(View<A> & canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color & color, size_t width = 1),
+            Simd::DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1).
 
         \param [out] canvas - a pointer to pixels data of canvas image.
-        \param [in] stride - a row size of canvas image.
-        \param [in] width - a width of canvas image.
-        \param [in] height - a height of canvas image.
-        \param [in] channels - a number of channels for canvas image.
-        \param [in] left - a left of the rectangle.
-        \param [in] top - a top of the rectangle.
-        \param [in] right - a right of the rectangle.
-        \param [in] bottom - a bottom of the rectangle.
-        \param [in] color - a pointer to rectangle color.
-        \param [in] lineWidth - a line width of rectangle.
+        \param [in] stride - a row size of canvas image (in bytes).
+        \param [in] width - a width of canvas image (in pixels).
+        \param [in] height - a height of canvas image (in pixels).
+        \param [in] channels - a size of one canvas pixel in bytes. It must be in range [1, 4].
+        \param [in] left - X coordinate of the left side of the rectangle.
+        \param [in] top - Y coordinate of the top side of the rectangle.
+        \param [in] right - X coordinate of the right side of the rectangle.
+        \param [in] bottom - Y coordinate of the bottom side of the rectangle.
+        \param [in] color - a pointer to rectangle color. It must point to channels bytes.
+        \param [in] lineWidth - a width of rectangle frame (in pixels).
     */
     SIMD_API void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
 
@@ -3485,16 +3499,19 @@ extern "C"
 
         \fn void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
-        \short Fills pixels data of image by given value.
+        \short Fills every byte of image pixel data with the given 8-bit value.
+
+        For each row the function writes width*pixelSize bytes with value and then moves to the next
+        row by stride bytes. Padding bytes after width*pixelSize in each row are not modified.
 
         \note This function has a C++ wrapper Simd::Fill(View<A>& dst, uint8_t value).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixelSize - a size of the image pixel.
-        \param [in] value - a value to fill image.
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] pixelSize - a size of one image pixel (in bytes).
+        \param [in] value - a byte value to fill image pixel data.
     */
     SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
@@ -3502,20 +3519,25 @@ extern "C"
 
         \fn void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
-        \short Fills pixels data of image except for the portion bounded frame by given value.
+        \short Fills image pixel data outside of the given inner frame with the given 8-bit value.
+
+        The function fills four areas: rows above frameTop, rows below frameBottom, columns before
+        frameLeft inside frame vertical range, and columns after frameRight inside frame vertical range.
+        The rectangle [frameLeft, frameRight) x [frameTop, frameBottom) is left unchanged.
+        Frame coordinates must satisfy frameLeft <= frameRight <= width and frameTop <= frameBottom <= height.
 
         \note This function has a C++ wrapper Simd::FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixelSize - a size of the image pixel.
-        \param [in] frameLeft - a frame left side.
-        \param [in] frameTop - a frame top side.
-        \param [in] frameRight - a frame right side.
-        \param [in] frameBottom - a frame bottom side.
-        \param [in] value - a value to fill image.
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] pixelSize - a size of one image pixel (in bytes).
+        \param [in] frameLeft - a left side of the inner frame.
+        \param [in] frameTop - a top side of the inner frame.
+        \param [in] frameRight - a right side of the inner frame.
+        \param [in] frameBottom - a bottom side of the inner frame.
+        \param [in] value - a byte value to fill image pixel data outside of the frame.
     */
     SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
@@ -3524,17 +3546,20 @@ extern "C"
 
         \fn void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
-        \short Fills pixels data of 24-bit BGR image by given color(blue, green, red).
+        \short Fills every pixel of a 24-bit BGR image with the given color.
+
+        For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red.
+        Padding bytes after width*3 in each row are not modified.
 
         \note This function has a C++ wrapper Simd::FillBgr(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] blue - a blue channel of BGR to fill image.
-        \param [in] green - a green channel of BGR to fill image.
-        \param [in] red - a red channel of BGR to fill image.
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] blue - a blue channel value of BGR color.
+        \param [in] green - a green channel value of BGR color.
+        \param [in] red - a red channel value of BGR color.
     */
     SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
@@ -3542,18 +3567,21 @@ extern "C"
 
         \fn void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
-        \short Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha).
+        \short Fills every pixel of a 32-bit BGRA image with the given color.
+
+        For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red, dst[3] = alpha.
+        Padding bytes after width*4 in each row are not modified.
 
         \note This function has a C++ wrapper Simd::FillBgra(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] blue - a blue channel of BGRA to fill image.
-        \param [in] green - a green channel of BGRA to fill image.
-        \param [in] red - a red channel of BGRA to fill image.
-        \param [in] alpha - a alpha channel of BGRA to fill image.
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] blue - a blue channel value of BGRA color.
+        \param [in] green - a green channel value of BGRA color.
+        \param [in] red - a red channel value of BGRA color.
+        \param [in] alpha - an alpha channel value of BGRA color.
     */
     SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height,
         uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
@@ -3562,16 +3590,20 @@ extern "C"
 
         \fn void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
 
-        \short Fills image by value of given pixel.
+        \short Fills every image pixel with the given pixel value.
+
+        The function supports pixel sizes from 1 to 4 bytes. For pixelSize equal to 1, 2, 3 or 4
+        it fills the image as 8-bit gray, 16-bit two-channel, 24-bit BGR or 32-bit BGRA data
+        respectively. Padding bytes after width*pixelSize in each row are not modified.
 
         \note This function has a C++ wrapper Simd::FillPixel(View<A> & dst, const Pixel & pixel).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixel - a pointer to pixel to fill.
-        \param [in] pixelSize - a size of the image pixel. Parameter is restricted by range [1, 4]. 
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] pixel - a pointer to pixel value to fill image. It must point to pixelSize bytes.
+        \param [in] pixelSize - a size of one image pixel (in bytes). It must be in range [1, 4].
     */
     SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
 
@@ -3579,11 +3611,14 @@ extern "C"
 
         \fn void SimdFill32f(float * dst, size_t size, const float * value);
 
-        \short Fills 32-bit float array by given value.
+        \short Fills a 32-bit float array with the given value.
+
+        If value is NULL or value[0] is equal to 0.0, the function fills dst with zeros.
+        Otherwise every dst element is set to value[0].
 
         \param [out] dst - a pointer to 32-bit float array.
-        \param [in] size - a size of the array.
-        \param [in] value - a pointer to value to fill. Can be NULL (filling value is assumed to be equal to zero).
+        \param [in] size - a number of elements in the array.
+        \param [in] value - a pointer to value to fill. It can be NULL; in this case filling value is assumed to be zero.
     */
     SIMD_API void SimdFill32f(float * dst, size_t size, const float * value);
 
