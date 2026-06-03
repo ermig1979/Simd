@@ -3626,11 +3626,15 @@ extern "C"
 
         \fn void SimdFloat32ToBFloat16(const float * src, size_t size, uint16_t * dst);
 
-        \short Converts numbers in the array from 32-bit float to 16-bit bfloat format.
+        \short Converts an array of 32-bit floats to 16-bit bfloat16 values.
+
+        For each element the function stores the bfloat16 representation of src[i] to dst[i].
+        The bfloat16 value contains the high 16 bits of IEEE 754 binary32 after rounding the
+        discarded low 16 bits to nearest-even.
 
         \param [in] src - a pointer to the input array with 32-bit float point numbers.
-        \param [in] size - a size of input and output array.
-        \param [out] dst - a pointer to the output array with 16-bit bfloat point numbers.
+        \param [in] size - a number of elements in input and output arrays.
+        \param [out] dst - a pointer to the output array with 16-bit bfloat16 values.
     */
     SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst);
 
@@ -3638,10 +3642,13 @@ extern "C"
 
         \fn void SimdBFloat16ToFloat32(const uint16_t* src, size_t size, float  * dst);
 
-        \short Converts numbers in the array from 16-bit bfloat to 32-bit float format.
+        \short Converts an array of 16-bit bfloat16 values to 32-bit floats.
 
-        \param [in] src - a pointer to the input array with 16-bit bfloat point numbers.
-        \param [in] size - a size of input and output array.
+        For each element the function expands src[i] to IEEE 754 binary32 by placing the bfloat16
+        bits into the high 16 bits of the result and setting the low 16 bits to zero.
+
+        \param [in] src - a pointer to the input array with 16-bit bfloat16 values.
+        \param [in] size - a number of elements in input and output arrays.
         \param [out] dst - a pointer to the output array with 32-bit float point numbers.
     */
     SIMD_API void SimdBFloat16ToFloat32(const uint16_t* src, size_t size, float* dst);
@@ -3650,10 +3657,14 @@ extern "C"
 
         \fn void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst);
 
-        \short Converts numbers in the array from 32-bit float to 16-bit float format.
+        \short Converts an array of 32-bit floats to 16-bit float values.
+
+        For each element the function stores the IEEE 754 binary16 representation of src[i] to dst[i].
+        The conversion handles sign, normal values, subnormal values, infinities and NaNs according
+        to the internal half-precision conversion helper.
 
         \param [in] src - a pointer to the input array with 32-bit float point numbers.
-        \param [in] size - a size of input and output array.
+        \param [in] size - a number of elements in input and output arrays.
         \param [out] dst - a pointer to the output array with 16-bit float point numbers.
     */
     SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst);
@@ -3662,10 +3673,13 @@ extern "C"
 
         \fn void SimdFloat16ToFloat32(const uint16_t* src, size_t size, float  * dst);
 
-        \short Converts numbers in the array from 16-bit float to 32-bit float format.
+        \short Converts an array of 16-bit float values to 32-bit floats.
+
+        For each element the function expands the IEEE 754 binary16 value src[i] to a 32-bit
+        float value dst[i], including normal values, subnormal values, infinities and NaNs.
 
         \param [in] src - a pointer to the input array with 16-bit float point numbers.
-        \param [in] size - a size of input and output array.
+        \param [in] size - a number of elements in input and output arrays.
         \param [out] dst - a pointer to the output array with 32-bit float point numbers.
     */
     SIMD_API void SimdFloat16ToFloat32(const uint16_t * src, size_t size, float * dst);
@@ -3674,11 +3688,15 @@ extern "C"
 
         \fn void* SimdFontInit();
 
-        \short Creates font context.
+        \short Creates a font context with embedded ASCII glyph data.
+
+        The context stores a built-in monospace-like font and is used by ::SimdFontResize,
+        ::SimdFontHeight, ::SimdFontMeasure and ::SimdFontDraw. Call ::SimdFontResize to choose
+        a drawable font height before measuring or drawing text.
 
         \return a pointer to font context. On error it returns NULL.
-                This pointer is used in functions ::SimdFontResize, ::SimdFontHeight.
-                It must be released with using of function ::SimdRelease.
+                This pointer is used in functions ::SimdFontResize, ::SimdFontHeight, ::SimdFontMeasure and ::SimdFontDraw.
+                It must be released by function ::SimdRelease.
     */
     SIMD_API void* SimdFontInit();
 
@@ -3686,11 +3704,15 @@ extern "C"
 
         \fn SimdBool SimdFontResize(void * context, size_t height);
 
-        \short Sets font height.
+        \short Resizes the font context to the given glyph height.
 
-        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
-        \param [in] height - a new height of font. 
-        \return result of font resizing.
+        The function recreates internal 8-bit alpha glyph images from embedded font data.
+        It returns ::SimdFalse if height is outside the supported range of the embedded font.
+        Reusing the current height is a successful no-op.
+
+        \param [in] context - a font context. It must be created by ::SimdFontInit and released by ::SimdRelease.
+        \param [in] height - a new glyph height in pixels.
+        \return ::SimdTrue on success and ::SimdFalse on failure.
     */
     SIMD_API SimdBool SimdFontResize(void * context, size_t height);
 
@@ -3698,10 +3720,10 @@ extern "C"
 
         \fn size_t SimdFontHeight(void* context);
 
-        \short Gets current font height.
+        \short Gets current glyph height of the font context.
 
-        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
-        \return the font height.
+        \param [in] context - a font context. It must be created by ::SimdFontInit and released by ::SimdRelease.
+        \return the current glyph height in pixels.
     */
     SIMD_API size_t SimdFontHeight(void* context);
 
@@ -3709,12 +3731,18 @@ extern "C"
 
         \fn void SimdFontMeasure(void* context, const char* text, size_t* width, size_t* height);
 
-        \short Measures size of region which need to draw current text with using of given font.
+        \short Measures the rectangle required to draw a zero-terminated text string.
 
-        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
-        \param [in] text - a pointer to text.
-        \param [out] width - a measured width of region need to draw this text.
-        \param [out] height - a measured height of region need to draw this text.
+        The embedded font supports ASCII glyphs from the built-in font table. Supported glyphs advance
+        the current X position by current glyph width. The '\n' character starts a new line and advances
+        Y by current glyph height. Unsupported characters are ignored. If the text contains at least one
+        drawable glyph, the returned size also includes the font indentation on all sides. The width and
+        height output pointers are optional.
+
+        \param [in] context - a font context. It must be created by ::SimdFontInit and released by ::SimdRelease.
+        \param [in] text - a pointer to zero-terminated text string.
+        \param [out] width - a pointer to measured text region width in pixels. It can be NULL.
+        \param [out] height - a pointer to measured text region height in pixels. It can be NULL.
     */
     SIMD_API void SimdFontMeasure(void* context, const char* text, size_t* width, size_t* height);
 
@@ -3722,18 +3750,24 @@ extern "C"
 
         \fn void SimdFontDraw(void* context, uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t* color);
 
-        \short Draws a text on canvas at current position with using of given font and color.
+        \short Draws a zero-terminated text string on an 8-bit-per-channel image.
 
-        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
+        The function creates an 8-bit alpha mask from supported glyphs and blends color into canvas
+        through this mask by ::SimdAlphaFilling. The text position (left, top) specifies the top-left
+        corner of the measured text region; glyphs are shifted by the current font indentation inside it.
+        Drawing is clipped to the canvas. Supported glyphs advance X by current glyph width, '\n' starts
+        a new line, and unsupported characters are ignored. The canvas must have 1, 2, 3 or 4 channels.
+
+        \param [in] context - a font context. It must be created by ::SimdFontInit and released by ::SimdRelease.
         \param [out] canvas - a pointer to pixels data of canvas image.
-        \param [in] stride - a row size of canvas image.
-        \param [in] width - a width of canvas image.
-        \param [in] height - a height of canvas image.
-        \param [in] channels - a number of channels for canvas image.
-        \param [in] text - a pointer to text.
-        \param [in] left - an X coordinate of start position to draw text.
-        \param [in] top - an Y coordinate of start position to draw text.
-        \param [in] color - a pointer to font color.
+        \param [in] stride - a row size of canvas image (in bytes).
+        \param [in] width - a width of canvas image (in pixels).
+        \param [in] height - a height of canvas image (in pixels).
+        \param [in] channels - a number of 8-bit channels in canvas image. It must be in range [1, 4].
+        \param [in] text - a pointer to zero-terminated text string.
+        \param [in] left - X coordinate of the measured text region left side.
+        \param [in] top - Y coordinate of the measured text region top side.
+        \param [in] color - a pointer to text color. It must point to channels bytes.
     */
     SIMD_API void SimdFontDraw(void* context, uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t* color);
 
