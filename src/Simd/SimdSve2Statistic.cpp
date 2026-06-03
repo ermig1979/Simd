@@ -139,8 +139,8 @@ namespace Simd
 
         void ValueSquareSums2(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
         {
-            size_t A = svlen(svuint8_t());
-            size_t widthA = AlignLo(width, A);
+            size_t A = svlen(svuint8_t()), A2 = A * 2;
+            size_t widthA = AlignLo(width, A), size = width * 2, sizeA = widthA * 2;
             const svbool_t body = svptrue_b8();
             const svbool_t tail = svwhilelt_b8(widthA, width);
             svuint8_t _1 = svdup_n_u8(1);
@@ -150,15 +150,15 @@ namespace Simd
             squareSums[1] = 0;
             for (size_t row = 0; row < height; ++row)
             {
-                size_t col = 0;
+                size_t offset = 0;
                 svuint32_t _valueSum0 = svdup_n_u32(0);
                 svuint32_t _squareSum0 = svdup_n_u32(0);
                 svuint32_t _valueSum1 = svdup_n_u32(0);
                 svuint32_t _squareSum1 = svdup_n_u32(0);
-                for (; col < widthA; col += A)
-                    ValueSquareSums2(src + col, body, _1, _valueSum0, _squareSum0, _valueSum1, _squareSum1);
-                if (widthA < width)
-                    ValueSquareSums2(src + col, tail, _1, _valueSum0, _squareSum0, _valueSum1, _squareSum1);
+                for (; offset < sizeA; offset += A2)
+                    ValueSquareSums2(src + offset, body, _1, _valueSum0, _squareSum0, _valueSum1, _squareSum1);
+                if (sizeA < size)
+                    ValueSquareSums2(src + offset, tail, _1, _valueSum0, _squareSum0, _valueSum1, _squareSum1);
                 valueSums[0] += svaddv_u32(svptrue_b32(), _valueSum0);
                 squareSums[0] += svaddv_u32(svptrue_b32(), _squareSum0);
                 valueSums[1] += svaddv_u32(svptrue_b32(), _valueSum1);
