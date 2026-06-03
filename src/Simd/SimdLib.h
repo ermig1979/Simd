@@ -3054,10 +3054,17 @@ extern "C"
 
         \fn void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-        \short Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.
+        \short Deinterleaves 16-bit UV interleaved image into one or two separated 8-bit U and V planar images.
 
-        All images must have the same width and height.
-        This function used for NV12 to YUV420P conversion.
+        The input UV image and every non-null output image must have the same width and height.
+        For every point:
+        \verbatim
+        u[i] = uv[2*i + 0];
+        v[i] = uv[2*i + 1];
+        \endverbatim
+        Any output image pointer can be NULL; in this case corresponding channel is not extracted and its stride is ignored.
+        If both output image pointers are NULL, the function does nothing.
+        This function can be used for extraction of U and/or V planes from NV12 image.
 
         \note This function has a C++ wrapper Simd::DeinterleaveUv(const View<A>& uv, View<A>& u, View<A>& v).
 
@@ -3077,9 +3084,17 @@ extern "C"
 
         \fn void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride);
 
-        \short Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images.
+        \short Deinterleaves 24-bit BGR interleaved image into one, two or three separated 8-bit Blue, Green and Red planar images.
 
-        All images must have the same width and height.
+        The input BGR image and every non-null output image must have the same width and height.
+        For every point:
+        \verbatim
+        b[i] = bgr[3*i + 0];
+        g[i] = bgr[3*i + 1];
+        r[i] = bgr[3*i + 2];
+        \endverbatim
+        Any output image pointer can be NULL; in this case corresponding channel is not extracted and its stride is ignored.
+        If all output image pointers are NULL, the function does nothing.
 
         \note This function has C++ wrappers:
             Simd::DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r),
@@ -3103,9 +3118,18 @@ extern "C"
 
         \fn void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride);
 
-        \short Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images.
+        \short Deinterleaves 32-bit BGRA interleaved image into one, two, three or four separated 8-bit Blue, Green, Red and Alpha planar images.
 
-        All images must have the same width and height.
+        The input BGRA image and every non-null output image must have the same width and height.
+        For every point:
+        \verbatim
+        b[i] = bgra[4*i + 0];
+        g[i] = bgra[4*i + 1];
+        r[i] = bgra[4*i + 2];
+        a[i] = bgra[4*i + 3];
+        \endverbatim
+        Any output image pointer can be NULL; in this case corresponding channel is not extracted and its stride is ignored.
+        If all output image pointers are NULL, the function does nothing.
 
         \note This function has C++ wrappers:
             Simd::DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a),
