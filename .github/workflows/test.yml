@@ -40,3 +40,30 @@ jobs:
     - name: Test Python
       working-directory: ${{github.workspace}}/build
       run: python3 ./Test.py "-r=.."
+      
+  build_and_test_clang:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        clang_version: [19]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: sudo apt-get update && sudo apt-get -y install clang-${{matrix.clang_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="clang-${{matrix.clang_version}}" -DSIMD_TARGET="" -DSIMD_TEST_FLAGS="-march=native"
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256
