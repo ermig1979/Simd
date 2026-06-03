@@ -26,6 +26,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdNeon.h"
 
 namespace Simd
 {
@@ -119,6 +120,22 @@ namespace Simd
                 valueSum[0] += svaddv_u32(svptrue_b32(), _valueSum);
                 squareSum[0] += svaddv_u32(svptrue_b32(), _squareSum);
                 src += stride;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            switch (channels)
+            {
+            case 1: ValueSquareSum(src, stride, width, height, valueSums, squareSums); break;
+            //case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
+            //case 3: ValueSquareSums3(src, stride, width, height, valueSums, squareSums); break;
+            //case 4: ValueSquareSums4(src, stride, width, height, valueSums, squareSums); break;
+            default:
+                Neon::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
+                //assert(0);
             }
         }
     }
