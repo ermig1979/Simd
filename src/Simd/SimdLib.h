@@ -3055,10 +3055,17 @@ extern "C"
 
         \fn void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-        \short Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.
+        \short Deinterleaves 16-bit UV interleaved image into one or two separated 8-bit U and V planar images.
 
-        All images must have the same width and height.
-        This function used for NV12 to YUV420P conversion.
+        The input UV image and every non-null output image must have the same width and height.
+        For every point:
+        \verbatim
+        u[i] = uv[2*i + 0];
+        v[i] = uv[2*i + 1];
+        \endverbatim
+        Any output image pointer can be NULL; in this case corresponding channel is not extracted and its stride is ignored.
+        If both output image pointers are NULL, the function does nothing.
+        This function can be used for extraction of U and/or V planes from NV12 image.
 
         \note This function has a C++ wrapper Simd::DeinterleaveUv(const View<A>& uv, View<A>& u, View<A>& v).
 
@@ -3078,9 +3085,17 @@ extern "C"
 
         \fn void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride);
 
-        \short Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images.
+        \short Deinterleaves 24-bit BGR interleaved image into one, two or three separated 8-bit Blue, Green and Red planar images.
 
-        All images must have the same width and height.
+        The input BGR image and every non-null output image must have the same width and height.
+        For every point:
+        \verbatim
+        b[i] = bgr[3*i + 0];
+        g[i] = bgr[3*i + 1];
+        r[i] = bgr[3*i + 2];
+        \endverbatim
+        Any output image pointer can be NULL; in this case corresponding channel is not extracted and its stride is ignored.
+        If all output image pointers are NULL, the function does nothing.
 
         \note This function has C++ wrappers:
             Simd::DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r),
@@ -3104,9 +3119,18 @@ extern "C"
 
         \fn void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride);
 
-        \short Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images.
+        \short Deinterleaves 32-bit BGRA interleaved image into one, two, three or four separated 8-bit Blue, Green, Red and Alpha planar images.
 
-        All images must have the same width and height.
+        The input BGRA image and every non-null output image must have the same width and height.
+        For every point:
+        \verbatim
+        b[i] = bgra[4*i + 0];
+        g[i] = bgra[4*i + 1];
+        r[i] = bgra[4*i + 2];
+        a[i] = bgra[4*i + 3];
+        \endverbatim
+        Any output image pointer can be NULL; in this case corresponding channel is not extracted and its stride is ignored.
+        If all output image pointers are NULL, the function does nothing.
 
         \note This function has C++ wrappers:
             Simd::DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a),
@@ -3132,16 +3156,17 @@ extern "C"
 
         \fn void * SimdDetectionLoadA(const char * path);
 
-        \short Loads a classifier cascade from file.
+        \short Loads an OpenCV-format cascade classifier from an XML file.
 
-        This function supports OpenCV HAAR and LBP cascades type.
-        Tree based cascades and old cascade formats are not supported.
+        The loader parses BOOST cascades with HAAR or LBP features. HOG cascades, tree-based cascades
+        and old cascade formats are not supported. The returned object contains parsed cascade data
+        (original window size, stages, features and flags) and is used to create working detection contexts.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] path - a path to cascade.
+        \param [in] path - a path to XML cascade file.
         \return a pointer to loaded cascade. On error it returns NULL.
-                This pointer is used in functions ::SimdDetectionInfo and ::SimdDetectionInit, and must be released with using of function ::SimdRelease.
+                This pointer is used in functions ::SimdDetectionInfo and ::SimdDetectionInit, and must be released by function ::SimdRelease.
     */
     SIMD_API void * SimdDetectionLoadA(const char * path);
 
@@ -3149,16 +3174,18 @@ extern "C"
 
         \fn void * SimdDetectionLoadStringXml(char * xml);
 
-        \short Loads a classifier cascade from a string.
+        \short Loads an OpenCV-format cascade classifier from a mutable XML string.
 
-        This function supports OpenCV HAAR and LBP cascades type.
-        Tree based cascades and old cascade formats are not supported.
+        The loader parses BOOST cascades with HAAR or LBP features. HOG cascades, tree-based cascades
+        and old cascade formats are not supported. The XML buffer must be zero-terminated and writable:
+        the parser can modify it while parsing. The buffer is needed only during this call; parsed cascade
+        data is stored in the returned object.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in,out] xml - A string with the xml of a classifier cascade.
+        \param [in,out] xml - a zero-terminated writable XML string with classifier cascade.
         \return a pointer to loaded cascade. On error it returns NULL.
-                This pointer is used in functions ::SimdDetectionInfo and ::SimdDetectionInit, and must be released with using of function ::SimdRelease.
+                This pointer is used in functions ::SimdDetectionInfo and ::SimdDetectionInit, and must be released by function ::SimdRelease.
     */
     SIMD_API void * SimdDetectionLoadStringXml(char * xml);
 
@@ -3166,14 +3193,19 @@ extern "C"
 
         \fn void SimdDetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags);
 
-        \short Gets information about the classifier cascade.
+        \short Gets original window size and feature flags of a loaded classifier cascade.
+
+        For a valid cascade this function writes original scanning window size and cascade flags to
+        non-NULL output pointers. If data is NULL the function does nothing.
+        The low bits of flags contain cascade feature type (see ::SimdDetectionInfoFeatureMask).
+        Other bits describe presence of tilted HAAR features and availability of 16-bit LBP detection.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] data - a pointer to cascade which was received with using of function ::SimdDetectionLoadA.
-        \param [out] width - a pointer to returned width of cascade window.
-        \param [out] height - a pointer to returned height of cascade window.
-        \param [out] flags - a pointer to flags with other information (See ::SimdDetectionInfoFlags).
+        \param [in] data - a pointer to cascade received from ::SimdDetectionLoadA or ::SimdDetectionLoadStringXml.
+        \param [out] width - a pointer to returned width of original cascade window. It can be NULL.
+        \param [out] height - a pointer to returned height of original cascade window. It can be NULL.
+        \param [out] flags - a pointer to returned flags with other information (see ::SimdDetectionInfoFlags). It can be NULL.
     */
     SIMD_API void SimdDetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags);
 
@@ -3181,28 +3213,38 @@ extern "C"
 
         \fn void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16);
 
-        \short Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.
+        \short Initializes a working classifier cascade context for integral images of a fixed input image size.
+
+        The hidden context stores references to provided integral images and precomputes pointers to cascade features.
+        The sum image size is also the integral image size; the corresponding source gray image has
+        width - 1 by height - 1 pixels. Integral images must be calculated by ::SimdIntegral with 32-bit
+        integer sum format. HAAR cascades require sum and squared sum images, and require tilted image
+        only when ::SimdDetectionInfoHasTilted is set. LBP cascades use only the sum image.
+
+        If throughColumn is non-zero, the context is prepared for the interlaced detection functions
+        (*32fi and *16ii), which scan every second row and column. If int16 is non-zero and the loaded
+        LBP cascade has ::SimdDetectionInfoCanInt16, the context uses a 16-bit integer LBP representation
+        and must be used with *16ip or *16ii detection functions. Otherwise LBP detection uses 32-bit
+        integral sums and must be used with *32fp or *32fi detection functions.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] data - a pointer to cascade which was received with using of function ::SimdDetectionLoadA.
-        \param [in] sum - a pointer to pixels data of 32-bit integer image with integral sum of given input 8-bit gray image.
-                          See function ::SimdIntegral in order to estimate this integral sum.
-        \param [in] sumStride - a row size of the sum image.
-        \param [in] width - a width of the sum image. It must be per unit greater than width of input 8-bit gray image.
-        \param [in] height - a height of the sum image. It must be per unit greater than height of input 8-bit gray image.
-        \param [in] sqsum - a pointer to pixels data of 32-bit integer image with squared integral sum of given input 8-bit gray image.
-                            Its size must be equal to sum image. See function ::SimdIntegral in order to estimate this squared integral sum. Its
-        \param [in] sqsumStride - a row size of the sqsum image.
-        \param [in] tilted - a pointer to pixels data of 32-bit integer image with tilted integral sum of given input 8-bit gray image.
-                             Its size must be equal to sum image. See function ::SimdIntegral in order to estimate this tilted integral sum.
-        \param [in] tiltedStride - a row size of the tilted image.
-        \param [in] throughColumn - a flag to detect objects only in even columns and rows (to increase performance).
-        \param [in] int16 - a flag use for 16-bit integer version of detection algorithm. (See ::SimdDetectionInfo).
+        \param [in] data - a pointer to cascade received from ::SimdDetectionLoadA or ::SimdDetectionLoadStringXml.
+        \param [in] sum - a pointer to 32-bit integer integral sum image of input 8-bit gray image.
+                          See ::SimdIntegral in order to estimate this integral sum.
+        \param [in] sumStride - a row size of the sum image (in bytes).
+        \param [in] width - a width of the integral images. It must be one greater than width of input 8-bit gray image.
+        \param [in] height - a height of the integral images. It must be one greater than height of input 8-bit gray image.
+        \param [in] sqsum - a pointer to 32-bit integer squared integral sum image. It is required for HAAR cascades and ignored for LBP cascades.
+        \param [in] sqsumStride - a row size of the sqsum image (in bytes).
+        \param [in] tilted - a pointer to 32-bit integer tilted integral sum image. It is required only for HAAR cascades with tilted features.
+        \param [in] tiltedStride - a row size of the tilted image (in bytes).
+        \param [in] throughColumn - a flag to prepare context for scanning every second row and column.
+        \param [in] int16 - a flag to request 16-bit integer LBP detection (see ::SimdDetectionInfoCanInt16).
         \return a pointer to hidden cascade. On error it returns NULL.
                 This pointer is used in functions ::SimdDetectionPrepare, ::SimdDetectionHaarDetect32fp, ::SimdDetectionHaarDetect32fi,
                 ::SimdDetectionLbpDetect32fp, ::SimdDetectionLbpDetect32fi, ::SimdDetectionLbpDetect16ip and ::SimdDetectionLbpDetect16ii.
-                It must be released with using of function ::SimdRelease.
+                It must be released by function ::SimdRelease.
     */
     SIMD_API void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
         uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16);
@@ -3211,14 +3253,18 @@ extern "C"
 
         \fn void SimdDetectionPrepare(void * hid);
 
-        \short Prepares hidden classifier cascade structure to work with given input 8-bit gray image.
+        \short Prepares hidden classifier cascade context after integral images have been updated.
 
-        You must call this function before calling of functions ::SimdDetectionHaarDetect32fp, ::SimdDetectionHaarDetect32fi,
-         ::SimdDetectionLbpDetect32fp, ::SimdDetectionLbpDetect32fi, ::SimdDetectionLbpDetect16ip and ::SimdDetectionLbpDetect16ii.
+        This function rebuilds internal derived buffers from current integral image data:
+        through-column copies for interlaced scanning and 16-bit converted sums for integer LBP detection.
+        It must be called after every update of integral images and before any call to
+        ::SimdDetectionHaarDetect32fp, ::SimdDetectionHaarDetect32fi,
+        ::SimdDetectionLbpDetect32fp, ::SimdDetectionLbpDetect32fi,
+        ::SimdDetectionLbpDetect16ip or ::SimdDetectionLbpDetect16ii.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
+        \param [in] hid - a pointer to hidden cascade received from ::SimdDetectionInit.
     */
     SIMD_API void SimdDetectionPrepare(void * hid);
 
@@ -3226,22 +3272,26 @@ extern "C"
 
         \fn void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
-        \short Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers, processes all points).
+        \short Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every point.
 
-        You must call function ::SimdDetectionPrepare before calling of this functions.
-        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+        Use this function only with a HAAR hidden cascade initialized with throughColumn equal to 0.
+        ::SimdDetectionPrepare must be called before this function. The mask and bounding box restrict
+        positions of the left-top corner of the scanning window. For each point in the half-open rectangle
+        [left, right) x [top, bottom), a zero mask value skips detection and a non-zero mask value allows it.
+        When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before
+        calling this function if a zero background is required.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
-        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] left - a left side of bounding box which restricts detection region.
-        \param [in] top - a top side of bounding box which restricts detection region.
-        \param [in] right - a right side of bounding box which restricts detection region.
-        \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] hid - a pointer to hidden HAAR cascade received from ::SimdDetectionInit.
+        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
+        \param [in] maskStride - a row size of the mask image (in bytes).
+        \param [in] left - a left side of scan rectangle for window left-top corner.
+        \param [in] top - a top side of scan rectangle for window left-top corner.
+        \param [in] right - a right side of scan rectangle for window left-top corner.
+        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
+        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
+        \param [in] dstStride - a row size of the dst image (in bytes).
     */
     SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
@@ -3250,22 +3300,26 @@ extern "C"
 
         \fn void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
-        \short Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers, processes only even points).
+        \short Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every second point.
 
-        You must call function ::SimdDetectionPrepare before calling of this functions.
-        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+        Use this function only with a HAAR hidden cascade initialized with throughColumn not equal to 0.
+        ::SimdDetectionPrepare must be called before this function. The mask and bounding box restrict
+        positions of the left-top corner of the scanning window. The function checks every second row and
+        column in the half-open rectangle [left, right) x [top, bottom). A zero mask value skips detection;
+        a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set
+        to 1. Initialize dst before calling this function if a zero background is required.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
-        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] left - a left side of bounding box which restricts detection region.
-        \param [in] top - a top side of bounding box which restricts detection region.
-        \param [in] right - a right side of bounding box which restricts detection region.
-        \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] hid - a pointer to hidden HAAR cascade received from ::SimdDetectionInit.
+        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
+        \param [in] maskStride - a row size of the mask image (in bytes).
+        \param [in] left - a left side of scan rectangle for window left-top corner.
+        \param [in] top - a top side of scan rectangle for window left-top corner.
+        \param [in] right - a right side of scan rectangle for window left-top corner.
+        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
+        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
+        \param [in] dstStride - a row size of the dst image (in bytes).
     */
     SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
@@ -3274,22 +3328,26 @@ extern "C"
 
         \fn void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
-        \short Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers, processes all points).
+        \short Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights, scanning every point.
 
-        You must call function ::SimdDetectionPrepare before calling of this functions.
-        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+        Use this function only with an LBP hidden cascade initialized with throughColumn equal to 0 and
+        without 16-bit integer representation. ::SimdDetectionPrepare must be called before this function.
+        The mask and bounding box restrict positions of the left-top corner of the scanning window. For each
+        point in the half-open rectangle [left, right) x [top, bottom), a zero mask value skips detection and
+        a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set
+        to 1. Initialize dst before calling this function if a zero background is required.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
-        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] left - a left side of bounding box which restricts detection region.
-        \param [in] top - a top side of bounding box which restricts detection region.
-        \param [in] right - a right side of bounding box which restricts detection region.
-        \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] hid - a pointer to hidden LBP cascade received from ::SimdDetectionInit.
+        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
+        \param [in] maskStride - a row size of the mask image (in bytes).
+        \param [in] left - a left side of scan rectangle for window left-top corner.
+        \param [in] top - a top side of scan rectangle for window left-top corner.
+        \param [in] right - a right side of scan rectangle for window left-top corner.
+        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
+        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
+        \param [in] dstStride - a row size of the dst image (in bytes).
     */
     SIMD_API void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
@@ -3298,22 +3356,26 @@ extern "C"
 
         \fn void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
-        \short Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers, processes only even points).
+        \short Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights, scanning every second point.
 
-        You must call function ::SimdDetectionPrepare before calling of this functions.
-        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+        Use this function only with an LBP hidden cascade initialized with throughColumn not equal to 0 and
+        without 16-bit integer representation. ::SimdDetectionPrepare must be called before this function.
+        The mask and bounding box restrict positions of the left-top corner of the scanning window. The function
+        checks every second row and column in the half-open rectangle [left, right) x [top, bottom). A zero mask
+        value skips detection; a non-zero mask value allows it. When a window passes the cascade, the corresponding
+        dst point is set to 1. Initialize dst before calling this function if a zero background is required.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
-        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] left - a left side of bounding box which restricts detection region.
-        \param [in] top - a top side of bounding box which restricts detection region.
-        \param [in] right - a right side of bounding box which restricts detection region.
-        \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] hid - a pointer to hidden LBP cascade received from ::SimdDetectionInit.
+        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
+        \param [in] maskStride - a row size of the mask image (in bytes).
+        \param [in] left - a left side of scan rectangle for window left-top corner.
+        \param [in] top - a top side of scan rectangle for window left-top corner.
+        \param [in] right - a right side of scan rectangle for window left-top corner.
+        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
+        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
+        \param [in] dstStride - a row size of the dst image (in bytes).
     */
     SIMD_API void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
@@ -3322,22 +3384,27 @@ extern "C"
 
         \fn void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
-        \short Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers, processes all points).
+        \short Performs LBP cascade detection with 16-bit integral sums and integer stage weights, scanning every point.
 
-        You must call function ::SimdDetectionPrepare before calling of this functions.
-        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+        Use this function only with an LBP hidden cascade initialized with throughColumn equal to 0 and
+        int16 not equal to 0. The loaded cascade must have ::SimdDetectionInfoCanInt16 set.
+        ::SimdDetectionPrepare must be called before this function. The mask and bounding box restrict positions
+        of the left-top corner of the scanning window. For each point in the half-open rectangle [left, right) x
+        [top, bottom), a zero mask value skips detection and a non-zero mask value allows it. When a window passes
+        the cascade, the corresponding dst point is set to 1. Initialize dst before calling this function if a zero
+        background is required.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
-        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] left - a left side of bounding box which restricts detection region.
-        \param [in] top - a top side of bounding box which restricts detection region.
-        \param [in] right - a right side of bounding box which restricts detection region.
-        \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] hid - a pointer to hidden LBP cascade received from ::SimdDetectionInit.
+        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
+        \param [in] maskStride - a row size of the mask image (in bytes).
+        \param [in] left - a left side of scan rectangle for window left-top corner.
+        \param [in] top - a top side of scan rectangle for window left-top corner.
+        \param [in] right - a right side of scan rectangle for window left-top corner.
+        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
+        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
+        \param [in] dstStride - a row size of the dst image (in bytes).
     */
     SIMD_API void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
@@ -3346,22 +3413,27 @@ extern "C"
 
         \fn void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
-        \short Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers, processes only even points).
+        \short Performs LBP cascade detection with 16-bit integral sums and integer stage weights, scanning every second point.
 
-        You must call function ::SimdDetectionPrepare before calling of this functions.
-        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+        Use this function only with an LBP hidden cascade initialized with throughColumn not equal to 0 and
+        int16 not equal to 0. The loaded cascade must have ::SimdDetectionInfoCanInt16 set.
+        ::SimdDetectionPrepare must be called before this function. The mask and bounding box restrict positions
+        of the left-top corner of the scanning window. The function checks every second row and column in the
+        half-open rectangle [left, right) x [top, bottom). A zero mask value skips detection; a non-zero mask value
+        allows it. When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before
+        calling this function if a zero background is required.
 
         \note This function is used for implementation of Simd::Detection.
 
-        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
-        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] left - a left side of bounding box which restricts detection region.
-        \param [in] top - a top side of bounding box which restricts detection region.
-        \param [in] right - a right side of bounding box which restricts detection region.
-        \param [in] bottom - a bottom side of bounding box which restricts detection region.
-        \param [out] dst - a pointer to pixels data of 8-bit image with output result. Non-zero points refer to left-top corner of detected objects.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] hid - a pointer to hidden LBP cascade received from ::SimdDetectionInit.
+        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
+        \param [in] maskStride - a row size of the mask image (in bytes).
+        \param [in] left - a left side of scan rectangle for window left-top corner.
+        \param [in] top - a top side of scan rectangle for window left-top corner.
+        \param [in] right - a right side of scan rectangle for window left-top corner.
+        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
+        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
+        \param [in] dstStride - a row size of the dst image (in bytes).
     */
     SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
@@ -3370,21 +3442,28 @@ extern "C"
 
         \fn void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
 
-        \short Draws a line at the image.
+        \short Draws a clipped line segment on an image.
 
-        \note This function has a C++ wrappers: Simd::DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1).
+        The function draws a line from (x1, y1) to (x2, y2) into canvas. Coordinates use the usual
+        image coordinate system: X grows to the right and Y grows downward. The segment is clipped
+        to the canvas rectangle [0, width - 1] x [0, height - 1]; if it is completely outside,
+        the function does nothing. Only images with 1, 2, 3 or 4 bytes per pixel are supported.
+        The color buffer must contain channels bytes. The line is drawn with the specified width
+        in pixels around the rasterized segment.
+
+        \note This function has a C++ wrapper: Simd::DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1).
 
         \param [out] canvas - a pointer to pixels data of canvas image.
-        \param [in] stride - a row size of canvas image.
-        \param [in] width - a width of canvas image.
-        \param [in] height - a height of canvas image.
-        \param [in] channels - a number of channels for canvas image.
+        \param [in] stride - a row size of canvas image (in bytes).
+        \param [in] width - a width of canvas image (in pixels).
+        \param [in] height - a height of canvas image (in pixels).
+        \param [in] channels - a size of one canvas pixel in bytes. It must be in range [1, 4].
         \param [in] x1 - X coordinate of the first point of the line.
         \param [in] y1 - Y coordinate of the first point of the line.
         \param [in] x2 - X coordinate of the second point of the line.
         \param [in] y2 - Y coordinate of the second point of the line.
-        \param [in] color - a pointer to line color.
-        \param [in] lineWidth - a line width.
+        \param [in] color - a pointer to line color. It must point to channels bytes.
+        \param [in] lineWidth - a line width (in pixels).
     */
     SIMD_API void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
 
@@ -3392,21 +3471,28 @@ extern "C"
 
         \fn void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
 
-        \short Draws a rectangle at the image.
+        \short Draws a clipped rectangle frame on an image.
 
-        \note This function has a C++ wrappers: Simd::DrawRectangle(View<A> & canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color & color, size_t width = 1).
+        The function draws four clipped lines: (left, top)-(right, top), (right, top)-(right, bottom),
+        (right, bottom)-(left, bottom) and (left, bottom)-(left, top). Coordinates use the usual image
+        coordinate system: X grows to the right and Y grows downward. The rectangle sides may be outside
+        the canvas; each side is clipped by ::SimdDrawLine. Only images with 1, 2, 3 or 4 bytes per pixel
+        are supported. The color buffer must contain channels bytes.
+
+        \note This function has C++ wrappers: Simd::DrawRectangle(View<A> & canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color & color, size_t width = 1),
+            Simd::DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1).
 
         \param [out] canvas - a pointer to pixels data of canvas image.
-        \param [in] stride - a row size of canvas image.
-        \param [in] width - a width of canvas image.
-        \param [in] height - a height of canvas image.
-        \param [in] channels - a number of channels for canvas image.
-        \param [in] left - a left of the rectangle.
-        \param [in] top - a top of the rectangle.
-        \param [in] right - a right of the rectangle.
-        \param [in] bottom - a bottom of the rectangle.
-        \param [in] color - a pointer to rectangle color.
-        \param [in] lineWidth - a line width of rectangle.
+        \param [in] stride - a row size of canvas image (in bytes).
+        \param [in] width - a width of canvas image (in pixels).
+        \param [in] height - a height of canvas image (in pixels).
+        \param [in] channels - a size of one canvas pixel in bytes. It must be in range [1, 4].
+        \param [in] left - X coordinate of the left side of the rectangle.
+        \param [in] top - Y coordinate of the top side of the rectangle.
+        \param [in] right - X coordinate of the right side of the rectangle.
+        \param [in] bottom - Y coordinate of the bottom side of the rectangle.
+        \param [in] color - a pointer to rectangle color. It must point to channels bytes.
+        \param [in] lineWidth - a width of rectangle frame (in pixels).
     */
     SIMD_API void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
 
@@ -3414,16 +3500,19 @@ extern "C"
 
         \fn void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
-        \short Fills pixels data of image by given value.
+        \short Fills every byte of image pixel data with the given 8-bit value.
+
+        For each row the function writes width*pixelSize bytes with value and then moves to the next
+        row by stride bytes. Padding bytes after width*pixelSize in each row are not modified.
 
         \note This function has a C++ wrapper Simd::Fill(View<A>& dst, uint8_t value).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixelSize - a size of the image pixel.
-        \param [in] value - a value to fill image.
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] pixelSize - a size of one image pixel (in bytes).
+        \param [in] value - a byte value to fill image pixel data.
     */
     SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
@@ -3431,20 +3520,25 @@ extern "C"
 
         \fn void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
-        \short Fills pixels data of image except for the portion bounded frame by given value.
+        \short Fills image pixel data outside of the given inner frame with the given 8-bit value.
+
+        The function fills four areas: rows above frameTop, rows below frameBottom, columns before
+        frameLeft inside frame vertical range, and columns after frameRight inside frame vertical range.
+        The rectangle [frameLeft, frameRight) x [frameTop, frameBottom) is left unchanged.
+        Frame coordinates must satisfy frameLeft <= frameRight <= width and frameTop <= frameBottom <= height.
 
         \note This function has a C++ wrapper Simd::FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixelSize - a size of the image pixel.
-        \param [in] frameLeft - a frame left side.
-        \param [in] frameTop - a frame top side.
-        \param [in] frameRight - a frame right side.
-        \param [in] frameBottom - a frame bottom side.
-        \param [in] value - a value to fill image.
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] pixelSize - a size of one image pixel (in bytes).
+        \param [in] frameLeft - a left side of the inner frame.
+        \param [in] frameTop - a top side of the inner frame.
+        \param [in] frameRight - a right side of the inner frame.
+        \param [in] frameBottom - a bottom side of the inner frame.
+        \param [in] value - a byte value to fill image pixel data outside of the frame.
     */
     SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
@@ -3453,17 +3547,20 @@ extern "C"
 
         \fn void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
-        \short Fills pixels data of 24-bit BGR image by given color(blue, green, red).
+        \short Fills every pixel of a 24-bit BGR image with the given color.
+
+        For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red.
+        Padding bytes after width*3 in each row are not modified.
 
         \note This function has a C++ wrapper Simd::FillBgr(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] blue - a blue channel of BGR to fill image.
-        \param [in] green - a green channel of BGR to fill image.
-        \param [in] red - a red channel of BGR to fill image.
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] blue - a blue channel value of BGR color.
+        \param [in] green - a green channel value of BGR color.
+        \param [in] red - a red channel value of BGR color.
     */
     SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
@@ -3471,18 +3568,21 @@ extern "C"
 
         \fn void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
-        \short Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha).
+        \short Fills every pixel of a 32-bit BGRA image with the given color.
+
+        For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red, dst[3] = alpha.
+        Padding bytes after width*4 in each row are not modified.
 
         \note This function has a C++ wrapper Simd::FillBgra(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] blue - a blue channel of BGRA to fill image.
-        \param [in] green - a green channel of BGRA to fill image.
-        \param [in] red - a red channel of BGRA to fill image.
-        \param [in] alpha - a alpha channel of BGRA to fill image.
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] blue - a blue channel value of BGRA color.
+        \param [in] green - a green channel value of BGRA color.
+        \param [in] red - a red channel value of BGRA color.
+        \param [in] alpha - an alpha channel value of BGRA color.
     */
     SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height,
         uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
@@ -3491,16 +3591,20 @@ extern "C"
 
         \fn void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
 
-        \short Fills image by value of given pixel.
+        \short Fills every image pixel with the given pixel value.
+
+        The function supports pixel sizes from 1 to 4 bytes. For pixelSize equal to 1, 2, 3 or 4
+        it fills the image as 8-bit gray, 16-bit two-channel, 24-bit BGR or 32-bit BGRA data
+        respectively. Padding bytes after width*pixelSize in each row are not modified.
 
         \note This function has a C++ wrapper Simd::FillPixel(View<A> & dst, const Pixel & pixel).
 
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixel - a pointer to pixel to fill.
-        \param [in] pixelSize - a size of the image pixel. Parameter is restricted by range [1, 4]. 
+        \param [in] stride - a row size of the dst image (in bytes).
+        \param [in] width - an image width (in pixels).
+        \param [in] height - an image height (in pixels).
+        \param [in] pixel - a pointer to pixel value to fill image. It must point to pixelSize bytes.
+        \param [in] pixelSize - a size of one image pixel (in bytes). It must be in range [1, 4].
     */
     SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
 
@@ -3508,11 +3612,14 @@ extern "C"
 
         \fn void SimdFill32f(float * dst, size_t size, const float * value);
 
-        \short Fills 32-bit float array by given value.
+        \short Fills a 32-bit float array with the given value.
+
+        If value is NULL or value[0] is equal to 0.0, the function fills dst with zeros.
+        Otherwise every dst element is set to value[0].
 
         \param [out] dst - a pointer to 32-bit float array.
-        \param [in] size - a size of the array.
-        \param [in] value - a pointer to value to fill. Can be NULL (filling value is assumed to be equal to zero).
+        \param [in] size - a number of elements in the array.
+        \param [in] value - a pointer to value to fill. It can be NULL; in this case filling value is assumed to be zero.
     */
     SIMD_API void SimdFill32f(float * dst, size_t size, const float * value);
 
@@ -3520,11 +3627,15 @@ extern "C"
 
         \fn void SimdFloat32ToBFloat16(const float * src, size_t size, uint16_t * dst);
 
-        \short Converts numbers in the array from 32-bit float to 16-bit bfloat format.
+        \short Converts an array of 32-bit floats to 16-bit bfloat16 values.
+
+        For each element the function stores the bfloat16 representation of src[i] to dst[i].
+        The bfloat16 value contains the high 16 bits of IEEE 754 binary32 after rounding the
+        discarded low 16 bits to nearest-even.
 
         \param [in] src - a pointer to the input array with 32-bit float point numbers.
-        \param [in] size - a size of input and output array.
-        \param [out] dst - a pointer to the output array with 16-bit bfloat point numbers.
+        \param [in] size - a number of elements in input and output arrays.
+        \param [out] dst - a pointer to the output array with 16-bit bfloat16 values.
     */
     SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst);
 
@@ -3532,10 +3643,13 @@ extern "C"
 
         \fn void SimdBFloat16ToFloat32(const uint16_t* src, size_t size, float  * dst);
 
-        \short Converts numbers in the array from 16-bit bfloat to 32-bit float format.
+        \short Converts an array of 16-bit bfloat16 values to 32-bit floats.
 
-        \param [in] src - a pointer to the input array with 16-bit bfloat point numbers.
-        \param [in] size - a size of input and output array.
+        For each element the function expands src[i] to IEEE 754 binary32 by placing the bfloat16
+        bits into the high 16 bits of the result and setting the low 16 bits to zero.
+
+        \param [in] src - a pointer to the input array with 16-bit bfloat16 values.
+        \param [in] size - a number of elements in input and output arrays.
         \param [out] dst - a pointer to the output array with 32-bit float point numbers.
     */
     SIMD_API void SimdBFloat16ToFloat32(const uint16_t* src, size_t size, float* dst);
@@ -3544,10 +3658,14 @@ extern "C"
 
         \fn void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst);
 
-        \short Converts numbers in the array from 32-bit float to 16-bit float format.
+        \short Converts an array of 32-bit floats to 16-bit float values.
+
+        For each element the function stores the IEEE 754 binary16 representation of src[i] to dst[i].
+        The conversion handles sign, normal values, subnormal values, infinities and NaNs according
+        to the internal half-precision conversion helper.
 
         \param [in] src - a pointer to the input array with 32-bit float point numbers.
-        \param [in] size - a size of input and output array.
+        \param [in] size - a number of elements in input and output arrays.
         \param [out] dst - a pointer to the output array with 16-bit float point numbers.
     */
     SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst);
@@ -3556,10 +3674,13 @@ extern "C"
 
         \fn void SimdFloat16ToFloat32(const uint16_t* src, size_t size, float  * dst);
 
-        \short Converts numbers in the array from 16-bit float to 32-bit float format.
+        \short Converts an array of 16-bit float values to 32-bit floats.
+
+        For each element the function expands the IEEE 754 binary16 value src[i] to a 32-bit
+        float value dst[i], including normal values, subnormal values, infinities and NaNs.
 
         \param [in] src - a pointer to the input array with 16-bit float point numbers.
-        \param [in] size - a size of input and output array.
+        \param [in] size - a number of elements in input and output arrays.
         \param [out] dst - a pointer to the output array with 32-bit float point numbers.
     */
     SIMD_API void SimdFloat16ToFloat32(const uint16_t * src, size_t size, float * dst);
@@ -3568,11 +3689,15 @@ extern "C"
 
         \fn void* SimdFontInit();
 
-        \short Creates font context.
+        \short Creates a font context with embedded ASCII glyph data.
+
+        The context stores a built-in monospace-like font and is used by ::SimdFontResize,
+        ::SimdFontHeight, ::SimdFontMeasure and ::SimdFontDraw. Call ::SimdFontResize to choose
+        a drawable font height before measuring or drawing text.
 
         \return a pointer to font context. On error it returns NULL.
-                This pointer is used in functions ::SimdFontResize, ::SimdFontHeight.
-                It must be released with using of function ::SimdRelease.
+                This pointer is used in functions ::SimdFontResize, ::SimdFontHeight, ::SimdFontMeasure and ::SimdFontDraw.
+                It must be released by function ::SimdRelease.
     */
     SIMD_API void* SimdFontInit();
 
@@ -3580,11 +3705,15 @@ extern "C"
 
         \fn SimdBool SimdFontResize(void * context, size_t height);
 
-        \short Sets font height.
+        \short Resizes the font context to the given glyph height.
 
-        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
-        \param [in] height - a new height of font. 
-        \return result of font resizing.
+        The function recreates internal 8-bit alpha glyph images from embedded font data.
+        It returns ::SimdFalse if height is outside the supported range of the embedded font.
+        Reusing the current height is a successful no-op.
+
+        \param [in] context - a font context. It must be created by ::SimdFontInit and released by ::SimdRelease.
+        \param [in] height - a new glyph height in pixels.
+        \return ::SimdTrue on success and ::SimdFalse on failure.
     */
     SIMD_API SimdBool SimdFontResize(void * context, size_t height);
 
@@ -3592,10 +3721,10 @@ extern "C"
 
         \fn size_t SimdFontHeight(void* context);
 
-        \short Gets current font height.
+        \short Gets current glyph height of the font context.
 
-        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
-        \return the font height.
+        \param [in] context - a font context. It must be created by ::SimdFontInit and released by ::SimdRelease.
+        \return the current glyph height in pixels.
     */
     SIMD_API size_t SimdFontHeight(void* context);
 
@@ -3603,12 +3732,18 @@ extern "C"
 
         \fn void SimdFontMeasure(void* context, const char* text, size_t* width, size_t* height);
 
-        \short Measures size of region which need to draw current text with using of given font.
+        \short Measures the rectangle required to draw a zero-terminated text string.
 
-        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
-        \param [in] text - a pointer to text.
-        \param [out] width - a measured width of region need to draw this text.
-        \param [out] height - a measured height of region need to draw this text.
+        The embedded font supports ASCII glyphs from the built-in font table. Supported glyphs advance
+        the current X position by current glyph width. The '\n' character starts a new line and advances
+        Y by current glyph height. Unsupported characters are ignored. If the text contains at least one
+        drawable glyph, the returned size also includes the font indentation on all sides. The width and
+        height output pointers are optional.
+
+        \param [in] context - a font context. It must be created by ::SimdFontInit and released by ::SimdRelease.
+        \param [in] text - a pointer to zero-terminated text string.
+        \param [out] width - a pointer to measured text region width in pixels. It can be NULL.
+        \param [out] height - a pointer to measured text region height in pixels. It can be NULL.
     */
     SIMD_API void SimdFontMeasure(void* context, const char* text, size_t* width, size_t* height);
 
@@ -3616,18 +3751,24 @@ extern "C"
 
         \fn void SimdFontDraw(void* context, uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t* color);
 
-        \short Draws a text on canvas at current position with using of given font and color.
+        \short Draws a zero-terminated text string on an 8-bit-per-channel image.
 
-        \param [in] context - a font context. It must be created by function ::SimdFontInit and released by function ::SimdRelease.
+        The function creates an 8-bit alpha mask from supported glyphs and blends color into canvas
+        through this mask by ::SimdAlphaFilling. The text position (left, top) specifies the top-left
+        corner of the measured text region; glyphs are shifted by the current font indentation inside it.
+        Drawing is clipped to the canvas. Supported glyphs advance X by current glyph width, '\n' starts
+        a new line, and unsupported characters are ignored. The canvas must have 1, 2, 3 or 4 channels.
+
+        \param [in] context - a font context. It must be created by ::SimdFontInit and released by ::SimdRelease.
         \param [out] canvas - a pointer to pixels data of canvas image.
-        \param [in] stride - a row size of canvas image.
-        \param [in] width - a width of canvas image.
-        \param [in] height - a height of canvas image.
-        \param [in] channels - a number of channels for canvas image.
-        \param [in] text - a pointer to text.
-        \param [in] left - an X coordinate of start position to draw text.
-        \param [in] top - an Y coordinate of start position to draw text.
-        \param [in] color - a pointer to font color.
+        \param [in] stride - a row size of canvas image (in bytes).
+        \param [in] width - a width of canvas image (in pixels).
+        \param [in] height - a height of canvas image (in pixels).
+        \param [in] channels - a number of 8-bit channels in canvas image. It must be in range [1, 4].
+        \param [in] text - a pointer to zero-terminated text string.
+        \param [in] left - X coordinate of the measured text region left side.
+        \param [in] top - Y coordinate of the measured text region top side.
+        \param [in] color - a pointer to text color. It must point to channels bytes.
     */
     SIMD_API void SimdFontDraw(void* context, uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, const char* text, size_t left, size_t top, const uint8_t* color);
 
@@ -3637,17 +3778,19 @@ extern "C"
 
         \short Calculates sum of squared differences for two 16-bit float arrays.
 
-        All arrays must have the same size.
+        The input values are IEEE 754 binary16 values stored in uint16_t elements. Each element is
+        converted to 32-bit float before subtraction and accumulation. Input arrays must have the same size.
 
-        For every element:
+        Algorithm description:
         \verbatim
-        sum += (a[i] - b[i])*(a[i] - b[i]);
+        da = Float16ToFloat32(a[i]) - Float16ToFloat32(b[i]);
+        sum[0] = Sum(da*da);
         \endverbatim
 
         \param [in] a - a pointer to the first 16-bit float array.
         \param [in] b - a pointer to the second 16-bit float array.
-        \param [in] size - a size of arrays.
-        \param [out] sum - a pointer to 32-bit float point sum of squared differences.
+        \param [in] size - a number of elements in input arrays.
+        \param [out] sum - a pointer to 32-bit float sum of squared differences.
     */
     SIMD_API void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
 
@@ -3657,17 +3800,21 @@ extern "C"
 
         \short Calculates cosine distance of two 16-bit float arrays.
 
-        All arrays must have the same size.
+        The input values are IEEE 754 binary16 values stored in uint16_t elements. Each element is
+        converted to 32-bit float before multiplication and accumulation. Input arrays must have the same size
+        and non-zero Euclidean norm.
 
         Algorithm description:
         \verbatim
-        distance = 1 - Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
+        fa = Float16ToFloat32(a[i]);
+        fb = Float16ToFloat32(b[i]);
+        distance[0] = 1 - Sum(fa*fb)/Sqrt(Sum(fa*fa)*Sum(fb*fb));
         \endverbatim
 
         \param [in] a - a pointer to the first 16-bit float array.
         \param [in] b - a pointer to the second 16-bit float array.
-        \param [in] size - a size of arrays.
-        \param [out] distance - a pointer to 32-bit float with cosine distance.
+        \param [in] size - a number of elements in input arrays.
+        \param [out] distance - a pointer to 32-bit float cosine distance.
     */
     SIMD_API void SimdCosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance);
 
@@ -3675,19 +3822,24 @@ extern "C"
 
         \fn void SimdCosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances);
 
-        \short Calculates mutual cosine distance of two arrays of 16-bit float arrays.
+        \short Calculates pairwise cosine distances for two sets of 16-bit float vectors.
+
+        A is an array of M pointers to vectors of length K, and B is an array of N pointers to vectors
+        of length K. The input values are IEEE 754 binary16 values stored in uint16_t elements and are
+        converted to 32-bit float for accumulation. Every input vector is expected to have non-zero
+        Euclidean norm. The output matrix is stored in row-major order.
 
         Algorithm description:
         \verbatim
-        distances[i, j] = 1 - Sum(A[i][k]*B[j][k])/Sqrt(Sum(A[i][k]*A[i][k])*Sum(B[j][k]*B[j][k]));
+        distances[i*N + j] = SimdCosineDistance16f(A[i], B[j], K);
         \endverbatim
 
         \param [in] M - a number of A arrays.
         \param [in] N - a number of B arrays.
-        \param [in] K - a size of A and B arrays.
-        \param [in] A - a pointer to the first array with pointers to 16-bit float arrays.
-        \param [in] B - a pointer to the second array with pointers to 16-bit float arrays.
-        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
+        \param [in] K - a number of elements in every A and B vector.
+        \param [in] A - a pointer to the first array with M pointers to 16-bit float vectors.
+        \param [in] B - a pointer to the second array with N pointers to 16-bit float vectors.
+        \param [out] distances - a pointer to result 32-bit float array with row-major cosine distance matrix. Its size must be M*N.
     */
     SIMD_API void SimdCosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances);
 
@@ -3695,19 +3847,24 @@ extern "C"
 
         \fn void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
 
-        \short Calculates mutual cosine distance of two arrays of 16-bit float arrays.
+        \short Calculates pairwise cosine distances for two packed sets of 16-bit float vectors.
+
+        A contains M contiguous vectors of length K and B contains N contiguous vectors of length K.
+        The input values are IEEE 754 binary16 values stored in uint16_t elements and are converted
+        to 32-bit float for accumulation. Every input vector is expected to have non-zero Euclidean norm.
+        The output matrix is stored in row-major order.
 
         Algorithm description:
         \verbatim
-        distances[i, j] = 1 - Sum(A[i*K + k]*B[j*K + k])/Sqrt(Sum(A[i*K + k]*A[i*K + k])*Sum(B[j*K + k]*B[j*K + k]));
+        distances[i*N + j] = SimdCosineDistance16f(A + i*K, B + j*K, K);
         \endverbatim
 
         \param [in] M - a number of A arrays.
         \param [in] N - a number of B arrays.
-        \param [in] K - a size of A and B arrays.
-        \param [in] A - a pointer to 16-bit float arrays.
-        \param [in] B - a pointer to 16-bit float arrays.
-        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
+        \param [in] K - a number of elements in every A and B vector.
+        \param [in] A - a pointer to M packed 16-bit float vectors.
+        \param [in] B - a pointer to N packed 16-bit float vectors.
+        \param [out] distances - a pointer to result 32-bit float array with row-major cosine distance matrix. Its size must be M*N.
     */
     SIMD_API void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
 
@@ -3715,17 +3872,21 @@ extern "C"
 
         \fn void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms);
 
-        \short Calculates vector norms for array of 16-bit float arrays.
+        \short Calculates Euclidean norms for an array of 16-bit float vectors.
+
+        A is an array of N pointers to vectors of length K. The input values are IEEE 754 binary16
+        values stored in uint16_t elements and are converted to 32-bit float before accumulation.
 
         Algorithm description:
         \verbatim
-        norms[j] = Sqrt(Sum(A[j][k]*A[j][k]));
+        fa = Float16ToFloat32(A[j][k]);
+        norms[j] = Sqrt(Sum(fa*fa));
         \endverbatim
 
-        \param [in] N - a number of A arrays.
-        \param [in] K - a size of A arrays.
-        \param [in] A - a pointer to the array with pointers to 16-bit float arrays.
-        \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
+        \param [in] N - a number of A vectors.
+        \param [in] K - a number of elements in every A vector.
+        \param [in] A - a pointer to an array with N pointers to 16-bit float vectors.
+        \param [out] norms - a pointer to result 32-bit float array with vector norms. Its size must be N.
     */
     SIMD_API void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms);
 
@@ -3733,17 +3894,21 @@ extern "C"
 
         \fn void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms);
 
-        \short Calculates vector norms for array of 16-bit float arrays.
+        \short Calculates Euclidean norms for a packed array of 16-bit float vectors.
+
+        A contains N contiguous vectors of length K. The input values are IEEE 754 binary16 values
+        stored in uint16_t elements and are converted to 32-bit float before accumulation.
 
         Algorithm description:
         \verbatim
-        norms[j] = Sqrt(Sum(A[j*K + k]*A[j*K + k]));
+        fa = Float16ToFloat32(A[j*K + k]);
+        norms[j] = Sqrt(Sum(fa*fa));
         \endverbatim
 
-        \param [in] N - a number of A arrays.
-        \param [in] K - a size of A arrays.
-        \param [in] A - a pointer to 16-bit float arrays.
-        \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
+        \param [in] N - a number of A vectors.
+        \param [in] K - a number of elements in every A vector.
+        \param [in] A - a pointer to N packed 16-bit float vectors.
+        \param [out] norms - a pointer to result 32-bit float array with vector norms. Its size must be N.
     */
     SIMD_API void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms);
 
@@ -3751,15 +3916,19 @@ extern "C"
 
         \fn void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
 
-        \short Converts numbers in the array from 32-bit float to 8-bit unsigned integer format.
+        \short Converts an array of 32-bit floats to 8-bit unsigned integers with linear saturation.
+
+        lower and upper point to scalar bounds. Each source value is saturated to [lower[0], upper[0]],
+        shifted by lower[0], scaled to [0, 255], and stored as uint8_t. The upper bound must be greater
+        than the lower bound.
 
         For every element:
         \verbatim
-        dst[i] = (min(max(src[i], lower), upper) - lower)*255/(upper - lower);
+        dst[i] = uint8_t((Min(Max(src[i], lower[0]), upper[0]) - lower[0])*255/(upper[0] - lower[0]));
         \endverbatim
 
         \param [in] src - a pointer to the input array with 32-bit float point numbers.
-        \param [in] size - a size of input and output array.
+        \param [in] size - a number of elements in input and output arrays.
         \param [in] lower - a pointer to lower saturated bound of the input array.
         \param [in] upper - a pointer to upper saturated bound of the input array.
         \param [out] dst - a pointer to the output array with 8-bit unsigned integer numbers.
@@ -3770,15 +3939,18 @@ extern "C"
 
         \fn void SimdUint8ToFloat32(const uint8_t* src, size_t size, const float * lower, const float * upper, float * dst);
 
-        \short Converts numbers in the array from 8-bit unsigned integer to 32-bit float format.
+        \short Converts an array of 8-bit unsigned integers to 32-bit floats with linear scaling.
+
+        lower and upper point to scalar bounds. Each source value is scaled from [0, 255] to
+        [lower[0], upper[0]]. The upper bound must be greater than the lower bound.
 
         For every element:
         \verbatim
-        dst[i] = src[i]*(upper - lower)/255 + lower;
+        dst[i] = src[i]*(upper[0] - lower[0])/255 + lower[0];
         \endverbatim
 
         \param [in] src - a pointer to the input array with 8-bit unsigned integer numbers.
-        \param [in] size - a size of input and output array.
+        \param [in] size - a number of elements in input and output arrays.
         \param [in] lower - a pointer to lower bound of the output array.
         \param [in] upper - a pointer to upper bound of the output array.
         \param [out] dst - a pointer to the output array with 32-bit float point numbers.
