@@ -2337,9 +2337,11 @@ extern "C"
 
         \fn void SimdBgrToLab(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * lab, size_t labStride);
 
-        \short Converts 24-bit BGR image to 24-bit LAB(CIELAB) image.
+        \short Converts a 24-bit BGR image to a 24-bit CIELAB image.
 
-        All images must have the same width and height.
+        For each output pixel: lab[0] = L, lab[1] = A, lab[2] = B.
+        All LAB components are stored as 8-bit values (OpenCV-compatible CIELAB encoding).
+        Input and output images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::BgrToLab(const View<A>& bgr, View<A>& lab).
 
@@ -2356,9 +2358,10 @@ extern "C"
 
         \fn void SimdBgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride);
 
-        \short Converts 24-bit BGR image to 24-bit RGB image. Also it can be used for 24-bit RGB to 24-bit BGR conversion.
+        \short Swaps blue and red channels in a 24-bit image.
 
-        All images must have the same width and height.
+        For each output pixel: rgb[0] = bgr[2], rgb[1] = bgr[1], rgb[2] = bgr[0].
+        Input and output images must have the same width and height.
 
         \note This function has C++ wrappers: Simd::BgrToRgb(const View<A> & bgr, View<A> & rgb) 
             and Simd::RgbToBgr(const View<A>& rgb, View<A>& bgr).
@@ -2377,10 +2380,12 @@ extern "C"
 
         \fn void SimdBgrToYuv420pV2(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, SimdYuvType yuvType);
 
-        \short Converts 24-bit BGR image to YUV420P.
+        \short Converts a 24-bit BGR image to planar YUV420P.
 
         The input BGR and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        U and V images are half-sized in both dimensions: uWidth = vWidth = width/2 and uHeight = vHeight = height/2.
+        Image width and height must be even and not less than 2.
+        Y is computed for every source pixel. U and V are computed per each 2x2 source block from averaged B, G and R values.
 
         \note This function has a C++ wrapper Simd::BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
@@ -2402,10 +2407,12 @@ extern "C"
 
         \fn void SimdBgrToYuv422pV2(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, SimdYuvType yuvType);
 
-        \short Converts 24-bit BGR image to YUV422P.
+        \short Converts a 24-bit BGR image to planar YUV422P.
 
         The input BGR and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        U and V images are half-sized horizontally: uWidth = vWidth = width/2 and uHeight = vHeight = height.
+        Image width must be even and not less than 2.
+        Y is computed for every source pixel. U and V are computed per each pair of neighboring horizontal pixels from averaged B, G and R values.
 
         \note This function has a C++ wrapper Simd::BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
@@ -2427,9 +2434,10 @@ extern "C"
 
         \fn void SimdBgrToYuv444pV2(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, SimdYuvType yuvType);
 
-        \short Converts 24-bit BGR image to YUV444P.
+        \short Converts a 24-bit BGR image to planar YUV444P.
 
         The input BGR and output Y, U and V images must have the same width and height.
+        Y, U and V are computed for each source pixel without chroma subsampling.
 
         \note This function has a C++ wrapper Simd::BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601).
 
@@ -2451,7 +2459,7 @@ extern "C"
 
         \fn void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-        \short Performs binarization of 8-bit gray image.
+        \short Performs per-pixel binarization of an 8-bit gray image.
 
         All images must have 8-bit gray format and must have the same width and height.
 
@@ -2459,7 +2467,7 @@ extern "C"
         \verbatim
         dst[i] = compare(src[i], value) ? positive : negative;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) is selected by compareType (see ::SimdCompareType).
 
         \note This function has a C++ wrapper Simd::Binarization(const View<A>& src, uint8_t value, uint8_t positive, uint8_t negative, View<A>& dst, SimdCompareType compareType).
 
@@ -2481,9 +2489,10 @@ extern "C"
 
         \fn void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-        \short Performs averaging binarization of 8-bit gray image.
+        \short Performs neighborhood-based binarization of an 8-bit gray image.
 
         All images must have 8-bit gray format and must have the same width and height.
+        Image width and height must be greater than neighborhood; neighborhood must be less than 128.
 
         For every point:
         \verbatim
@@ -2495,14 +2504,14 @@ extern "C"
                 if(x + dx >= 0 && x + dx < width && y + dy >= 0 && y + dy < height)
                 {
                     area++;
-                    if(compare(src[x + dx, x + dy], value))
+                    if(compare(src[x + dx, y + dy], value))
                         sum++;
                 }
             }
         }
         dst[x, y] = sum*255 > area*threshold ? positive : negative;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) is selected by compareType (see ::SimdCompareType).
 
         \note This function has a C++ wrapper Simd::AveragingBinarization(const View<A>& src, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, View<A>& dst, SimdCompareType compareType).
 
@@ -2512,9 +2521,9 @@ extern "C"
         \param [in] height - an image height.
         \param [in] value - a second value for compare operation.
         \param [in] neighborhood - an averaging neighborhood.
-        \param [in] threshold - a threshold value for binarization. It can range from 0 to 255.
-        \param [in] positive - a destination value if for neighborhood of this point number of positive comparison is greater then threshold.
-        \param [in] negative - a destination value if for neighborhood of this point number of positive comparison is lesser or equal then threshold.
+        \param [in] threshold - a threshold value in range [0, 255] used as: sum*255 > area*threshold.
+        \param [in] positive - a destination value if for neighborhood of this point number of positive comparisons is greater than threshold.
+        \param [in] negative - a destination value if for neighborhood of this point number of positive comparisons is less than or equal to threshold.
         \param [out] dst - a pointer to pixels data of output 8-bit gray binarized image.
         \param [in] dstStride - a row size of the dst image.
         \param [in] compareType - a compare operation type (see ::SimdCompareType).
@@ -2527,9 +2536,10 @@ extern "C"
 
         \fn void SimdAveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride);
 
-        \short Performs averaging binarization of 8-bit gray image.
+        \short Performs adaptive mean-like binarization of an 8-bit gray image.
 
         All images must have 8-bit gray format and must have the same width and height.
+        Image width and height must be greater than neighborhood.
 
         For every point:
         \verbatim
@@ -2555,9 +2565,9 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] neighborhood - an averaging neighborhood.
-        \param [in] shift - a shift value for binarization. It can range from -255 to 255.
-        \param [in] positive - a destination value for positive value of condition (seen before).
-        \param [in] negative - a destination value for negative value of condition (seen before).
+        \param [in] shift - an additive shift in condition: (src[x, y] + shift)*area > sum.
+        \param [in] positive - a destination value for positive value of the condition.
+        \param [in] negative - a destination value for negative value of the condition.
         \param [out] dst - a pointer to pixels data of output 8-bit gray binarized image.
         \param [in] dstStride - a row size of the dst image.
     */
@@ -2568,24 +2578,26 @@ extern "C"
 
         \fn void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);
 
-        \short Calculates number of points satisfying certain condition for 8-bit gray image.
+        \short Counts the number of pixels in an 8-bit gray image that satisfy a given comparison condition against a reference value.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], value))
+        if(compare(src[x, y], value))
             count++;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output count is initialized to zero before accumulation.
 
         \note This function has a C++ wrapper Simd::ConditionalCount8u(const View<A> & src, uint8_t value, SimdCompareType compareType, uint32_t & count).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image (first value for compare operation).
-        \param [in] stride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] count - a pointer to result unsigned 32-bit value.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image. Each pixel is compared against \a value.
+        \param [in] stride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] count - a pointer to an unsigned 32-bit integer that receives the number of pixels satisfying the condition.
     */
     SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
         uint8_t value, SimdCompareType compareType, uint32_t * count);
@@ -2594,24 +2606,28 @@ extern "C"
 
         \fn void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, SimdCompareType compareType, uint32_t * count);
 
-        \short Calculates number of points satisfying certain condition for 16-bit signed integer image.
+        \short Counts the number of pixels in a 16-bit signed integer image that satisfy a given comparison condition against a reference value.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], value))
+        if(compare(src[x, y], value))
             count++;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output count is initialized to zero before accumulation.
+        Although the \a src pointer has type `uint8_t *`, each pixel occupies 2 bytes and is interpreted as a signed 16-bit integer.
+        The \a stride is expressed in bytes, while \a width is expressed in 16-bit pixels (elements).
 
         \note This function has a C++ wrapper Simd::ConditionalCount16i(const View<A> & src, int16_t value, SimdCompareType compareType, uint32_t & count).
 
-        \param [in] src - a pointer to pixels data of input 16-bit signed integer image (first value for compare operation).
-        \param [in] stride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] count - a pointer to result unsigned 32-bit value.
+        \param [in] src - a pointer to pixels data of the input 16-bit signed integer image. Each pixel is compared against \a value.
+        \param [in] stride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in 16-bit pixels (elements per row).
+        \param [in] height - an image height in pixels.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] count - a pointer to an unsigned 32-bit integer that receives the number of pixels satisfying the condition.
     */
     SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height,
         int16_t value, SimdCompareType compareType, uint32_t * count);
@@ -2620,28 +2636,30 @@ extern "C"
 
         \fn void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-        \short Calculates sum of image points when mask points satisfying certain condition.
+        \short Calculates the sum of pixels in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(mask[i], value))
-            sum += src[i];
+        if(compare(mask[x, y], value))
+            sum += src[x, y];
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function has a C++ wrapper Simd::ConditionalSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] mask - a pointer to pixels data of 8-bit gray mask (first value for compare operation).
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image whose pixel values are accumulated.
+        \param [in] srcStride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] mask - a pointer to pixels data of the 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] maskStride - a row size of the \a mask image in bytes.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a pointer to an unsigned 64-bit integer that receives the accumulated sum.
     */
     SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
@@ -2650,28 +2668,30 @@ extern "C"
 
         \fn void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-        \short Calculates sum of squared image points when mask points satisfying certain condition.
+        \short Calculates the sum of squared pixel values in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(mask[i], value))
-            sum += src[i]*src[i];
+        if(compare(mask[x, y], value))
+            sum += src[x, y] * src[x, y];
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function has a C++ wrapper Simd::ConditionalSquareSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] mask - a pointer to pixels data of 8-bit gray mask (first value for compare operation).
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image whose squared pixel values are accumulated.
+        \param [in] srcStride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] mask - a pointer to pixels data of the 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] maskStride - a row size of the \a mask image in bytes.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a pointer to an unsigned 64-bit integer that receives the accumulated sum of squares.
     */
     SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
@@ -2680,11 +2700,12 @@ extern "C"
 
         \fn void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-        \short Calculates sum of squared gradient of image points when mask points satisfying certain condition.
+        \short Calculates the sum of squared gradient magnitudes in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height. The image height and width must be equal or greater 3.
+        All images must have 8-bit gray format and the same width and height. The image width and height must each be at least 3.
+        Border pixels (first and last row, first and last column) are excluded from processing.
 
-        For every point except border:
+        For every non-border pixel:
         \verbatim
         if(compare(mask[x, y], value))
         {
@@ -2693,19 +2714,21 @@ extern "C"
             sum += dx*dx + dy*dy;
         }
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function has a C++ wrapper Simd::ConditionalSquareGradientSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] mask - a pointer to pixels data of 8-bit gray mask (first value for compare operation).
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image used to compute gradients.
+        \param [in] srcStride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels (must be >= 3).
+        \param [in] height - an image height in pixels (must be >= 3).
+        \param [in] mask - a pointer to pixels data of the 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] maskStride - a row size of the \a mask image in bytes.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a pointer to an unsigned 64-bit integer that receives the accumulated sum of squared gradients.
     */
     SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
@@ -2714,28 +2737,28 @@ extern "C"
 
         \fn void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
-        \short Fills pixels of 8-bit gray image by given value if corresponding pixels of input 8-bit gray image satisfy certain condition.
+        \short Fills pixels of an 8-bit gray destination image with a given value at positions where the corresponding source pixels satisfy a given comparison condition. Pixels that do not satisfy the condition are left unchanged.
 
-        All images must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], threshold))
-            dst[i] = value;
+        if(compare(src[x, y], threshold))
+            dst[x, y] = value;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
 
         \note This function has a C++ wrapper Simd::ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst).
 
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of input image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] threshold - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [in] value - a value for fill operation.
-        \param [in, out] dst - a pointer to pixels data of the output 8-bit gray image.
-        \param [in] dstStride - a row size of output image.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image. Each pixel is compared against \a threshold.
+        \param [in] srcStride - a row size of the \a src image in bytes.
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] threshold - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [in] value - a fill value written to \a dst pixels where the condition is satisfied.
+        \param [in, out] dst - a pointer to pixels data of the output 8-bit gray image. Pixels not satisfying the condition retain their existing values.
+        \param [in] dstStride - a row size of the \a dst image in bytes.
     */
     SIMD_API void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
@@ -2744,19 +2767,21 @@ extern "C"
 
         \fn void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
-        \short Copies pixels data of image from source to destination.
+        \short Copies pixel data row by row from a source image to a destination image.
 
-        All images must have the same width, height and format.
+        Supports any pixel format; \a pixelSize specifies the number of bytes per pixel.
+        The source and destination images must have the same width, height, and pixel size,
+        but may have different row strides (e.g. due to row alignment padding).
 
         \note This function has a C++ wrapper Simd::Copy(const View<A> & src, View<B> & dst).
 
-        \param [in] src - a pointer to pixels data of source image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixelSize - a size of the image pixel.
-        \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] src - a pointer to pixels data of the source image.
+        \param [in] srcStride - a row size of the \a src image in bytes (including any padding).
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] pixelSize - a size of one pixel in bytes.
+        \param [out] dst - a pointer to pixels data of the destination image.
+        \param [in] dstStride - a row size of the \a dst image in bytes (including any padding).
     */
     SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
@@ -2764,23 +2789,32 @@ extern "C"
 
         \fn void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
-        \short Copies pixels data of image from source to destination except for the portion bounded frame.
+        \short Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched.
 
-        All images must have the same width, height and format.
+        The source and destination images must have the same width, height, and pixel size.
+        The frame is defined by the rectangle [\a frameLeft, \a frameRight) x [\a frameTop, \a frameBottom).
+        Only pixels outside this rectangle (i.e. the surrounding border area) are copied from \a src to \a dst.
+        Pixels inside the frame interior are not written to \a dst.
+
+        The following regions are copied:
+        - All rows above \a frameTop (full width).
+        - All rows at or below \a frameBottom (full width).
+        - For rows within [\a frameTop, \a frameBottom): columns to the left of \a frameLeft.
+        - For rows within [\a frameTop, \a frameBottom): columns at or to the right of \a frameRight.
 
         \note This function has a C++ wrapper Simd::CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst).
 
-        \param [in] src - a pointer to pixels data of source image.
-        \param [in] srcStride - a row size of the src image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] pixelSize - a size of the image pixel.
-        \param [in] frameLeft - a frame left side.
-        \param [in] frameTop - a frame top side.
-        \param [in] frameRight - a frame right side.
-        \param [in] frameBottom - a frame bottom side.
-        \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] src - a pointer to pixels data of the source image.
+        \param [in] srcStride - a row size of the \a src image in bytes (including any padding).
+        \param [in] width - an image width in pixels.
+        \param [in] height - an image height in pixels.
+        \param [in] pixelSize - a size of one pixel in bytes.
+        \param [in] frameLeft - the left boundary (inclusive) of the interior rectangle in pixels.
+        \param [in] frameTop - the top boundary (inclusive) of the interior rectangle in pixels.
+        \param [in] frameRight - the right boundary (exclusive) of the interior rectangle in pixels.
+        \param [in] frameBottom - the bottom boundary (exclusive) of the interior rectangle in pixels.
+        \param [out] dst - a pointer to pixels data of the destination image.
+        \param [in] dstStride - a row size of the \a dst image in bytes (including any padding).
     */
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
@@ -2789,10 +2823,25 @@ extern "C"
 
         \fn void * SimdDescrIntInit(size_t size, size_t depth);
 
-        \short Initializes Integer Descriptor Engine.
+        \short Initializes Integer Descriptor Engine context.
 
-        \param [in] size - a length of original (32-bit or 16-bit) float descriptor. It must be multiple of 8. Also it must be less or equal than 32768.
-        \param [in] depth - a number of bits in encoded integer descriptor. Supported values: 4, 5, 6, 7, 8.
+        The engine context stores the parameters needed to encode float descriptors into a compact
+        integer representation, decode them back, and compute cosine distances directly on the
+        encoded form without full decoding.
+
+        Each encoded descriptor produced by this engine is a byte buffer whose layout is:
+        - Bytes  0.. 3: 32-bit float inverse quantization scale (1 / scale).
+        - Bytes  4.. 7: 32-bit float minimum value (shift) used during quantization.
+        - Bytes  8..11: 32-bit float precomputed sum helper for dot-product reconstruction.
+        - Bytes 12..15: 32-bit float precomputed L2 norm of the original float descriptor.
+        - Bytes 16.. N: bit-packed quantized integer values, \a depth bits per element,
+                        packed contiguously in little-endian order.
+
+        The total byte size of the encoded buffer is returned by ::SimdDescrIntEncodedSize.
+
+        \param [in] size - a length of the original (32-bit or 16-bit float) descriptor, i.e. the number of float elements. 
+                          It must be a multiple of 8 and must not exceed 32768.
+        \param [in] depth - the number of bits used to represent each quantized element in the encoded descriptor. Supported values: 4, 5, 6, 7, 8.
         \return a pointer to Integer Descriptor Engine context. On error it returns NULL. It must be released with using of function ::SimdRelease.
                 This pointer is used in functions ::SimdDescrIntEncodedSize, ::SimdDescrIntDecodedSize, 
                 ::SimdDescrIntEncode32f, ::SimdDescrIntEncode16f, ::SimdDescrIntDecode32f, ::SimdDescrIntDecode16f, 
@@ -2804,10 +2853,15 @@ extern "C"
 
         \fn size_t SimdDescrIntEncodedSize(const void* context);
 
-        \short Gets size in bytes of encoded integer descriptor.
+        \short Gets the size in bytes of an encoded integer descriptor produced by this engine.
+
+        The encoded descriptor consists of a 16-byte header (4 x 32-bit floats storing the inverse
+        quantization scale, the minimum value, a precomputed sum helper, and the precomputed L2 norm)
+        followed by the bit-packed quantized integer data. The total size equals
+        16 + ceil(size * depth / 8), where \a size and \a depth are the values passed to ::SimdDescrIntInit.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \return size in bytes of encoded integer descriptor.
+        \return the size in bytes of an encoded integer descriptor.
     */
     SIMD_API size_t SimdDescrIntEncodedSize(const void* context);
 
@@ -2815,10 +2869,15 @@ extern "C"
 
         \fn size_t SimdDescrIntDecodedSize(const void* context);
 
-        \short Gets length of original (32-bit or 16-bit) float descriptor.
+        \short Gets the number of elements (floats) in the original descriptor.
+
+        This is the value of the \a size parameter that was passed to ::SimdDescrIntInit.
+        It equals the number of 32-bit or 16-bit float elements in the uncompressed descriptor,
+        and is the required length of the \a src buffer for ::SimdDescrIntEncode32f / ::SimdDescrIntEncode16f
+        and the \a dst buffer for ::SimdDescrIntDecode32f / ::SimdDescrIntDecode16f.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \return length of original (32-bit or 16-bit) float descriptor.
+        \return the number of float elements in the original (decoded) descriptor.
     */
     SIMD_API size_t SimdDescrIntDecodedSize(const void* context);
 
@@ -2826,11 +2885,25 @@ extern "C"
 
         \fn void SimdDescrIntEncode32f(const void* context, const float * src, uint8_t * dst);
 
-        \short Encodes 32-bit float descriptor to integer form.
+        \short Encodes a 32-bit float descriptor into a compact integer representation.
+
+        The function quantizes each element of the input float array linearly into the range
+        [0, 2^depth - 1], where \a depth was specified at context creation. The encoding procedure:
+        1. Finds the minimum and maximum values of the source descriptor.
+        2. Computes a quantization scale: scale = (2^depth - 1) / (max - min).
+        3. Quantizes each element: q[i] = round((src[i] - min) * scale).
+        4. Packs the quantized values bit-by-bit (\a depth bits per element) into the output buffer
+           starting at byte offset 16.
+        5. Writes a 16-byte header at the beginning of \a dst containing four 32-bit floats:
+           inverse scale (1/scale), minimum value (min), a precomputed sum helper used for
+           dot-product reconstruction, and the precomputed L2 norm of the original descriptor.
+
+        The precomputed norm and sum helper in the header allow ::SimdDescrIntCosineDistance and
+        related functions to compute cosine distances without decoding the descriptor.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to original 32-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
-        \param [out] dst - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
+        \param [in] src - a pointer to the input 32-bit float descriptor. The number of elements must equal the value returned by ::SimdDescrIntDecodedSize.
+        \param [out] dst - a pointer to the output encoded integer descriptor. The buffer size in bytes must be at least the value returned by ::SimdDescrIntEncodedSize.
     */
     SIMD_API void SimdDescrIntEncode32f(const void* context, const float * src, uint8_t * dst);
 
@@ -2838,11 +2911,17 @@ extern "C"
 
         \fn void SimdDescrIntEncode16f(const void* context, const uint16_t * src, uint8_t * dst);
 
-        \short Encodes 16-bit float descriptor to integer form.
+        \short Encodes a 16-bit float descriptor into a compact integer representation.
+
+        This function is identical in behavior to ::SimdDescrIntEncode32f except that the input
+        descriptor elements are 16-bit floats (half precision, stored as uint16_t). Each element is
+        first converted to 32-bit float internally, then quantized and packed in the same way.
+        The output encoded descriptor format is identical to that produced by ::SimdDescrIntEncode32f
+        and is fully compatible with all decode and distance functions.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to original 16-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
-        \param [out] dst - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
+        \param [in] src - a pointer to the input 16-bit float descriptor (half precision, stored as uint16_t). The number of elements must equal the value returned by ::SimdDescrIntDecodedSize.
+        \param [out] dst - a pointer to the output encoded integer descriptor. The buffer size in bytes must be at least the value returned by ::SimdDescrIntEncodedSize.
     */
     SIMD_API void SimdDescrIntEncode16f(const void* context, const uint16_t* src, uint8_t* dst);
 
@@ -2850,11 +2929,17 @@ extern "C"
 
         \fn void SimdDescrIntDecode32f(const void* context, const uint8_t* src, float* dst);
 
-        \short Decodes integer descriptor to original 32-bit float form.
+        \short Decodes an integer descriptor back into a 32-bit float descriptor.
+
+        The function reconstructs the original float values from the bit-packed quantized data
+        using the inverse scale and minimum value stored in the 16-byte header of the encoded
+        descriptor. Each reconstructed element is computed as: dst[i] = q[i] * invScale + min,
+        where \a invScale and \a min are read from the first two 32-bit floats of \a src.
+        The decoded values are approximations of the original floats; precision depends on \a depth.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
-        \param [out] dst - a pointer to output 32-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
+        \param [in] src - a pointer to the encoded integer descriptor. The buffer size in bytes must be at least the value returned by ::SimdDescrIntEncodedSize.
+        \param [out] dst - a pointer to the output 32-bit float descriptor. The number of elements must equal the value returned by ::SimdDescrIntDecodedSize.
     */
     SIMD_API void SimdDescrIntDecode32f(const void* context, const uint8_t* src, float* dst);
 
@@ -2862,11 +2947,15 @@ extern "C"
 
         \fn void SimdDescrIntDecode16f(const void* context, const uint8_t* src, uint16_t* dst);
 
-        \short Decodes integer descriptor to original 16-bit float form.
+        \short Decodes an integer descriptor back into a 16-bit float descriptor.
+
+        This function is identical in behavior to ::SimdDescrIntDecode32f except that each
+        reconstructed element is converted from 32-bit float to 16-bit float (half precision,
+        stored as uint16_t) before being written to the output buffer.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to encoded integer descriptor. Its size in bytes can be determined by function ::SimdDescrIntEncodedSize.
-        \param [out] dst - a pointer to output 16-bit float descriptor. Its length can be determined by function ::SimdDescrIntDecodedSize.
+        \param [in] src - a pointer to the encoded integer descriptor. The buffer size in bytes must be at least the value returned by ::SimdDescrIntEncodedSize.
+        \param [out] dst - a pointer to the output 16-bit float descriptor (half precision, stored as uint16_t). The number of elements must equal the value returned by ::SimdDescrIntDecodedSize.
     */
     SIMD_API void SimdDescrIntDecode16f(const void* context, const uint8_t* src, uint16_t* dst);
 
@@ -2874,14 +2963,22 @@ extern "C"
 
         \fn void SimdDescrIntCosineDistance(const void* context, const uint8_t* a, const uint8_t* b, float* distance);
 
-        \short Calculates cosine distance of two integer descriptors.
+        \short Calculates the cosine distance between two encoded integer descriptors.
 
-        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        The cosine distance is defined as: distance = 1 - dot(a, b) / (||a|| * ||b||),
+        where \a a and \a b are treated as vectors in the original float space.
+        The function computes the integer dot product directly on the bit-packed data and then
+        reconstructs the true float dot product using the quantization scale and shift stored
+        in the 16-byte headers of the encoded descriptors. The L2 norms are read directly from
+        the precomputed values in the headers, avoiding full decoding.
+        The result is clamped to the range [0, 2].
+
+        \note An encoded integer descriptor is produced by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] a - a pointer to the first integer descriptor. 
-        \param [in] b - a pointer to the second integer descriptor.
-        \param [out] distance - a pointer to 32-bit float with cosine distance.
+        \param [in] a - a pointer to the first encoded integer descriptor.
+        \param [in] b - a pointer to the second encoded integer descriptor.
+        \param [out] distance - a pointer to a 32-bit float that receives the cosine distance in the range [0, 2].
     */
     SIMD_API void SimdDescrIntCosineDistance(const void* context, const uint8_t* a, const uint8_t* b, float* distance);
 
@@ -2889,16 +2986,23 @@ extern "C"
 
         \fn void SimdDescrIntCosineDistancesMxNa(const void* context, size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances);
 
-        \short Calculates mutual cosine distance of two arrays of integer descriptor arrays.
+        \short Calculates all pairwise cosine distances between two sets of encoded integer descriptors (array-of-pointers form).
 
-        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        Computes the M x N matrix of cosine distances, where distances[i * N + j] is the cosine
+        distance between the i-th descriptor in \a A and the j-th descriptor in \a B.
+        See ::SimdDescrIntCosineDistance for the definition of cosine distance.
+        This variant accepts the descriptors through arrays of pointers, which allows non-contiguous
+        memory layouts. For contiguous storage use ::SimdDescrIntCosineDistancesMxNp instead.
+        The implementation automatically selects cache-friendly blocking strategies.
+
+        \note An encoded integer descriptor is produced by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] M - a number of A arrays.
-        \param [in] N - a number of B arrays.
-        \param [in] A - a pointer to the first array with pointers to integer descriptors.
-        \param [in] B - a pointer to the second array with pointers to integer descriptors.
-        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
+        \param [in] M - the number of descriptors in set \a A (number of rows in the output matrix).
+        \param [in] N - the number of descriptors in set \a B (number of columns in the output matrix).
+        \param [in] A - an array of M pointers, each pointing to an encoded integer descriptor.
+        \param [in] B - an array of N pointers, each pointing to an encoded integer descriptor.
+        \param [out] distances - a pointer to the output M x N matrix of 32-bit float cosine distances stored in row-major order. The buffer must hold at least M * N elements.
     */
     SIMD_API void SimdDescrIntCosineDistancesMxNa(const void* context, size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances);
 
@@ -2906,16 +3010,24 @@ extern "C"
 
         \fn void SimdDescrIntCosineDistancesMxNp(const void* context, size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances);
 
-        \short Calculates mutual cosine distance of two arrays of integer descriptors.
+        \short Calculates all pairwise cosine distances between two sets of encoded integer descriptors (packed/contiguous form).
 
-        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        Computes the M x N matrix of cosine distances, where distances[i * N + j] is the cosine
+        distance between the i-th descriptor in \a A and the j-th descriptor in \a B.
+        See ::SimdDescrIntCosineDistance for the definition of cosine distance.
+        This variant accepts the descriptors as two flat contiguous arrays, where descriptor \a i
+        starts at A + i * encodedSize and descriptor \a j starts at B + j * encodedSize,
+        with encodedSize returned by ::SimdDescrIntEncodedSize.
+        For non-contiguous memory layouts use ::SimdDescrIntCosineDistancesMxNa instead.
+
+        \note An encoded integer descriptor is produced by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] M - a number of A arrays.
-        \param [in] N - a number of B arrays.
-        \param [in] A - a pointer to the first array with integer descriptors.
-        \param [in] B - a pointer to the second array with integer descriptors.
-        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
+        \param [in] M - the number of descriptors in set \a A (number of rows in the output matrix).
+        \param [in] N - the number of descriptors in set \a B (number of columns in the output matrix).
+        \param [in] A - a pointer to the contiguous array of M encoded integer descriptors.
+        \param [in] B - a pointer to the contiguous array of N encoded integer descriptors.
+        \param [out] distances - a pointer to the output M x N matrix of 32-bit float cosine distances stored in row-major order. The buffer must hold at least M * N elements.
     */
     SIMD_API void SimdDescrIntCosineDistancesMxNp(const void* context, size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances);
 
@@ -2923,13 +3035,18 @@ extern "C"
 
         \fn void SimdDescrIntVectorNorm(const void* context, const uint8_t* a, float* norm);
 
-        \short Calculates vector norm for integer descriptor.
+        \short Gets the precomputed L2 norm of an encoded integer descriptor.
 
-        \note Integer descriptor can be received with using of functions ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
+        The L2 norm of the original float descriptor is computed and stored in the 16-byte header
+        of the encoded descriptor during encoding (by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f).
+        This function retrieves that precomputed value without performing any additional computation.
+        The norm equals the Euclidean length of the original float descriptor before quantization.
+
+        \note An encoded integer descriptor is produced by ::SimdDescrIntEncode32f or ::SimdDescrIntEncode16f. Its size in bytes is determined by function ::SimdDescrIntEncodedSize.
 
         \param [in] context - a pointer to Integer Descriptor Engine context. It must be created by function ::SimdDescrIntInit and released by function ::SimdRelease.
-        \param [in] a - a pointer to integer descriptor.
-        \param [out] norm - a pointer to result 32-bit float norm.
+        \param [in] a - a pointer to the encoded integer descriptor.
+        \param [out] norm - a pointer to a 32-bit float that receives the precomputed L2 norm of the original float descriptor.
     */
     SIMD_API void SimdDescrIntVectorNorm(const void* context, const uint8_t* a, float* norm);
 
