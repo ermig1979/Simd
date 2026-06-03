@@ -167,13 +167,64 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void ValueSquareSums3(const uint8_t* src, svbool_t mask, svuint8_t _1, svuint32_t& valueSum0, svuint32_t& squareSum0,
+            svuint32_t& valueSum1, svuint32_t& squareSum1, svuint32_t& valueSum2, svuint32_t& squareSum2)
+        {
+            svuint8x3_t val = svld3_u8(mask, src);
+            svuint8_t val0 = svget3(val, 0);
+            valueSum0 = svdot_u32(valueSum0, val0, _1);
+            squareSum0 = svdot_u32(squareSum0, val0, val0);
+            svuint8_t val1 = svget3(val, 1);
+            valueSum1 = svdot_u32(valueSum1, val1, _1);
+            squareSum1 = svdot_u32(squareSum1, val1, val1);
+            svuint8_t val2 = svget3(val, 2);
+            valueSum2 = svdot_u32(valueSum2, val2, _1);
+            squareSum2 = svdot_u32(squareSum2, val2, val2);
+        }
+
+        void ValueSquareSums3(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            size_t A = svlen(svuint8_t()), A3 = A * 3;
+            size_t widthA = AlignLo(width, A), size = width * 3, sizeA = widthA * 3;
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _1 = svdup_n_u8(1);
+            valueSums[0] = 0;
+            squareSums[0] = 0;
+            valueSums[1] = 0;
+            squareSums[1] = 0;
+            valueSums[2] = 0;
+            squareSums[2] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t offset = 0;
+                svuint32_t _valueSum0 = svdup_n_u32(0);
+                svuint32_t _squareSum0 = svdup_n_u32(0);
+                svuint32_t _valueSum1 = svdup_n_u32(0);
+                svuint32_t _squareSum1 = svdup_n_u32(0);
+                svuint32_t _valueSum2 = svdup_n_u32(0);
+                svuint32_t _squareSum2 = svdup_n_u32(0);
+                for (; offset < sizeA; offset += A3)
+                    ValueSquareSums3(src + offset, body, _1, _valueSum0, _squareSum0, _valueSum1, _squareSum1, _valueSum2, _squareSum2);
+                if (sizeA < size)
+                    ValueSquareSums3(src + offset, tail, _1, _valueSum0, _squareSum0, _valueSum1, _squareSum1, _valueSum2, _squareSum2);
+                valueSums[0] += svaddv_u32(svptrue_b32(), _valueSum0);
+                squareSums[0] += svaddv_u32(svptrue_b32(), _squareSum0);
+                valueSums[1] += svaddv_u32(svptrue_b32(), _valueSum1);
+                squareSums[1] += svaddv_u32(svptrue_b32(), _squareSum1);
+                valueSums[2] += svaddv_u32(svptrue_b32(), _valueSum2);
+                squareSums[2] += svaddv_u32(svptrue_b32(), _squareSum2);
+                src += stride;
+            }
+        }
+
         void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)
         {
             switch (channels)
             {
             case 1: ValueSquareSum(src, stride, width, height, valueSums, squareSums); break;
             case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
-            //case 3: ValueSquareSums3(src, stride, width, height, valueSums, squareSums); break;
+            case 3: ValueSquareSums3(src, stride, width, height, valueSums, squareSums); break;
             //case 4: ValueSquareSums4(src, stride, width, height, valueSums, squareSums); break;
             default:
                 Neon::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
