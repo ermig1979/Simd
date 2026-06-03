@@ -66,19 +66,19 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga40f9516bd869bd354c90f51d78d4f8c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 24-bit BGR image to a 24-bit HSV (Hue, Saturation, Value) image.  <a href="group__bgr__conversion.html#ga40f9516bd869bd354c90f51d78d4f8c3">More...</a><br /></td></tr>
 <tr class="separator:ga40f9516bd869bd354c90f51d78d4f8c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafedc884c46dc0ab80c2d9597d4b88ace"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgr__conversion.html#gafedc884c46dc0ab80c2d9597d4b88ace">SimdBgrToLab</a> (const uint8_t *bgr, size_t bgrStride, size_t width, size_t height, uint8_t *lab, size_t labStride)</td></tr>
-<tr class="memdesc:gafedc884c46dc0ab80c2d9597d4b88ace"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to 24-bit LAB(CIELAB) image.  <a href="group__bgr__conversion.html#gafedc884c46dc0ab80c2d9597d4b88ace">More...</a><br /></td></tr>
+<tr class="memdesc:gafedc884c46dc0ab80c2d9597d4b88ace"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 24-bit BGR image to a 24-bit CIELAB image.  <a href="group__bgr__conversion.html#gafedc884c46dc0ab80c2d9597d4b88ace">More...</a><br /></td></tr>
 <tr class="separator:gafedc884c46dc0ab80c2d9597d4b88ace"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac17ade4536dee8931f70d34f27e2865f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgr__conversion.html#gac17ade4536dee8931f70d34f27e2865f">SimdBgrToRgb</a> (const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *rgb, size_t rgbStride)</td></tr>
-<tr class="memdesc:gac17ade4536dee8931f70d34f27e2865f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to 24-bit RGB image. Also it can be used for 24-bit RGB to 24-bit BGR conversion.  <a href="group__bgr__conversion.html#gac17ade4536dee8931f70d34f27e2865f">More...</a><br /></td></tr>
+<tr class="memdesc:gac17ade4536dee8931f70d34f27e2865f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Swaps blue and red channels in a 24-bit image.  <a href="group__bgr__conversion.html#gac17ade4536dee8931f70d34f27e2865f">More...</a><br /></td></tr>
 <tr class="separator:gac17ade4536dee8931f70d34f27e2865f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1321cb4a6c1a1d84dcac3aec7b0929c4"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgr__conversion.html#ga1321cb4a6c1a1d84dcac3aec7b0929c4">SimdBgrToYuv420pV2</a> (const uint8_t *bgr, size_t bgrStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
-<tr class="memdesc:ga1321cb4a6c1a1d84dcac3aec7b0929c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to YUV420P.  <a href="group__bgr__conversion.html#ga1321cb4a6c1a1d84dcac3aec7b0929c4">More...</a><br /></td></tr>
+<tr class="memdesc:ga1321cb4a6c1a1d84dcac3aec7b0929c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 24-bit BGR image to planar YUV420P.  <a href="group__bgr__conversion.html#ga1321cb4a6c1a1d84dcac3aec7b0929c4">More...</a><br /></td></tr>
 <tr class="separator:ga1321cb4a6c1a1d84dcac3aec7b0929c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa21448cc8582c5d79204e1786201f80a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgr__conversion.html#gaa21448cc8582c5d79204e1786201f80a">SimdBgrToYuv422pV2</a> (const uint8_t *bgr, size_t bgrStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
-<tr class="memdesc:gaa21448cc8582c5d79204e1786201f80a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to YUV422P.  <a href="group__bgr__conversion.html#gaa21448cc8582c5d79204e1786201f80a">More...</a><br /></td></tr>
+<tr class="memdesc:gaa21448cc8582c5d79204e1786201f80a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 24-bit BGR image to planar YUV422P.  <a href="group__bgr__conversion.html#gaa21448cc8582c5d79204e1786201f80a">More...</a><br /></td></tr>
 <tr class="separator:gaa21448cc8582c5d79204e1786201f80a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0dcc2892c67cac09aea0e648cd2405e7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bgr__conversion.html#ga0dcc2892c67cac09aea0e648cd2405e7">SimdBgrToYuv444pV2</a> (const uint8_t *bgr, size_t bgrStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
-<tr class="memdesc:ga0dcc2892c67cac09aea0e648cd2405e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit BGR image to YUV444P.  <a href="group__bgr__conversion.html#ga0dcc2892c67cac09aea0e648cd2405e7">More...</a><br /></td></tr>
+<tr class="memdesc:ga0dcc2892c67cac09aea0e648cd2405e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 24-bit BGR image to planar YUV444P.  <a href="group__bgr__conversion.html#ga0dcc2892c67cac09aea0e648cd2405e7">More...</a><br /></td></tr>
 <tr class="separator:ga0dcc2892c67cac09aea0e648cd2405e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga326559f1132fe37433d2b8e6acf3f7ab"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga326559f1132fe37433d2b8e6acf3f7ab"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__bgr__conversion.html#ga326559f1132fe37433d2b8e6acf3f7ab">BgrToBayer</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgr, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bayer)</td></tr>
@@ -528,8 +528,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 24-bit BGR image to 24-bit LAB(CIELAB) image. </p>
-<p >All images must have the same width and height.</p>
+<p>Converts a 24-bit BGR image to a 24-bit CIELAB image. </p>
+<p >For each output pixel: lab[0] = L, lab[1] = A, lab[2] = B. All LAB components are stored as 8-bit values (OpenCV-compatible CIELAB encoding). Input and output images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::BgrToLab(const View&lt;A&gt;&amp; bgr, View&lt;A&gt;&amp; lab).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -595,8 +595,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 24-bit BGR image to 24-bit RGB image. Also it can be used for 24-bit RGB to 24-bit BGR conversion. </p>
-<p >All images must have the same width and height.</p>
+<p>Swaps blue and red channels in a 24-bit image. </p>
+<p >For each output pixel: rgb[0] = bgr[2], rgb[1] = bgr[1], rgb[2] = bgr[0]. Input and output images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::BgrToRgb(const View&lt;A&gt; &amp; bgr, View&lt;A&gt; &amp; rgb) and Simd::RgbToBgr(const View&lt;A&gt;&amp; rgb, View&lt;A&gt;&amp; bgr).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -692,8 +692,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 24-bit BGR image to YUV420P. </p>
-<p >The input BGR and output Y images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
+<p>Converts a 24-bit BGR image to planar YUV420P. </p>
+<p >The input BGR and output Y images must have the same width and height. U and V images are half-sized in both dimensions: uWidth = vWidth = width/2 and uHeight = vHeight = height/2. Image width and height must be even and not less than 2. Y is computed for every source pixel. U and V are computed per each 2x2 source block from averaged B, G and R values.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgr__conversion.html#ga7c40ab19077c3a1fc815a6b832d324e9" title="Converts 24-bit BGR image to YUV420P.">Simd::BgrToYuv420p</a>(const View&amp; bgr, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -794,8 +794,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 24-bit BGR image to YUV422P. </p>
-<p >The input BGR and output Y images must have the same width and height. The input U and V images must have the same width and height (their width is equal to half width of Y component).</p>
+<p>Converts a 24-bit BGR image to planar YUV422P. </p>
+<p >The input BGR and output Y images must have the same width and height. U and V images are half-sized horizontally: uWidth = vWidth = width/2 and uHeight = vHeight = height. Image width must be even and not less than 2. Y is computed for every source pixel. U and V are computed per each pair of neighboring horizontal pixels from averaged B, G and R values.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgr__conversion.html#ga10f472b9f82b69d24de31ae8c9b60e5b" title="Converts 24-bit BGR image to YUV422P.">Simd::BgrToYuv422p</a>(const View&amp; bgr, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -896,8 +896,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 24-bit BGR image to YUV444P. </p>
-<p >The input BGR and output Y, U and V images must have the same width and height.</p>
+<p>Converts a 24-bit BGR image to planar YUV444P. </p>
+<p >The input BGR and output Y, U and V images must have the same width and height. Y, U and V are computed for each source pixel without chroma subsampling.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__bgr__conversion.html#ga0d53282793c511619e0b45dc8d458d05" title="Converts 24-bit BGR image to YUV444P.">Simd::BgrToYuv444p</a>(const View&amp; bgr, View&amp; y, View&amp; u, View&amp; v, SimdYuvType yuvType = SimdYuvBt601).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1148,7 +1148,7 @@ Functions</h2></td></tr>
 
 <p>Converts 24-bit BGR image to 24-bit LAB image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#gafedc884c46dc0ab80c2d9597d4b88ace" title="Converts 24-bit BGR image to 24-bit LAB(CIELAB) image.">SimdBgrToLab</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#gafedc884c46dc0ab80c2d9597d4b88ace" title="Converts a 24-bit BGR image to a 24-bit CIELAB image.">SimdBgrToLab</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgr</td><td>- an input 24-bit BGR image. </td></tr>
@@ -1187,7 +1187,7 @@ Functions</h2></td></tr>
 
 <p>Converts 24-bit BGR image to 24-bit RGB image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#gac17ade4536dee8931f70d34f27e2865f" title="Converts 24-bit BGR image to 24-bit RGB image. Also it can be used for 24-bit RGB to 24-bit BGR conve...">SimdBgrToRgb</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#gac17ade4536dee8931f70d34f27e2865f" title="Swaps blue and red channels in a 24-bit image.">SimdBgrToRgb</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgr</td><td>- an input 24-bit BGR image. </td></tr>
@@ -1290,7 +1290,7 @@ Functions</h2></td></tr>
 
 <p>Converts 24-bit BGR image to YUV420P. </p>
 <p >The input BGR and output Y images must have the same width and height. The input U and V images must have the same width and height (half size relative to Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#ga1321cb4a6c1a1d84dcac3aec7b0929c4" title="Converts 24-bit BGR image to YUV420P.">SimdBgrToYuv420pV2</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#ga1321cb4a6c1a1d84dcac3aec7b0929c4" title="Converts a 24-bit BGR image to planar YUV420P.">SimdBgrToYuv420pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgr</td><td>- an input 24-bit BGR image. </td></tr>
@@ -1350,7 +1350,7 @@ Functions</h2></td></tr>
 
 <p>Converts 24-bit BGR image to YUV422P. </p>
 <p >The input BGR and output Y images must have the same width and height. The input U and V images must have the same width and height (their width is equal to half width of Y component).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#gaa21448cc8582c5d79204e1786201f80a" title="Converts 24-bit BGR image to YUV422P.">SimdBgrToYuv422pV2</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#gaa21448cc8582c5d79204e1786201f80a" title="Converts a 24-bit BGR image to planar YUV422P.">SimdBgrToYuv422pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgr</td><td>- an input 24-bit BGR image. </td></tr>
@@ -1410,7 +1410,7 @@ Functions</h2></td></tr>
 
 <p>Converts 24-bit BGR image to YUV444P. </p>
 <p >The input BGR and output Y, U and V images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#ga0dcc2892c67cac09aea0e648cd2405e7" title="Converts 24-bit BGR image to YUV444P.">SimdBgrToYuv444pV2</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__bgr__conversion.html#ga0dcc2892c67cac09aea0e648cd2405e7" title="Converts a 24-bit BGR image to planar YUV444P.">SimdBgrToYuv444pV2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgr</td><td>- an input 24-bit BGR image. </td></tr>
