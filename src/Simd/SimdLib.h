@@ -6996,19 +6996,20 @@ extern "C"
 
         \fn void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t * min, uint8_t * max, uint8_t * average);
 
-        \short Finds minimal, maximal and average pixel values for given image.
+        \short Finds minimal, maximal and rounded average pixel values for an 8-bit gray image.
 
-        The image must have 8-bit gray format.
+        The image must have 8-bit gray format and non-zero area. The average is rounded to the
+        nearest integer as (sum + width*height/2)/(width*height).
 
         \note This function has a C++ wrappers: Simd::GetStatistic(const View<A>& src, uint8_t & min, uint8_t & max, uint8_t & average).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] stride - a row size of the image.
+        \param [in] stride - a row size of the image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] min - a pointer to unsigned 8-bit integer value with found minimal pixel value.
         \param [out] max - a pointer to unsigned 8-bit integer value with found maximal pixel value.
-        \param [out] average - a pointer to unsigned 8-bit integer value with found average pixel value.
+        \param [out] average - a pointer to unsigned 8-bit integer value with found rounded average pixel value.
     */
     SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
         uint8_t * min, uint8_t * max, uint8_t * average);
@@ -7017,30 +7018,31 @@ extern "C"
 
         \fn void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
-        \short Calculate statistical characteristics (moments) of pixels with given index.
+        \short Calculates geometric moments of mask pixels with a given index.
 
-        The image must have 8-bit gray format.
+        The mask image must have 8-bit gray format. All output values are initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
         if(mask[X, Y] == index)
         {
-            area += 1.
-            x += X.
-            y += Y.
-            xx += X*X.
-            xy += X*Y.
-            yy += Y*Y.
+            area[0] += 1;
+            x[0] += X;
+            y[0] += Y;
+            xx[0] += X*X;
+            xy[0] += X*Y;
+            yy[0] += Y*Y;
         }
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::GetMoments(const View<A>& mask, uint8_t index, uint64_t & area, uint64_t & x, uint64_t & y, uint64_t & xx, uint64_t & xy, uint64_t & yy).
 
         \param [in] mask - a pointer to pixels data of the mask image.
-        \param [in] stride - a row size of the mask image.
+        \param [in] stride - a row size of the mask image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] index - a mask index.
+        \param [in] index - a mask index to include in moment calculation.
         \param [out] area - a pointer to unsigned 64-bit integer value with found area (number of pixels with given index).
         \param [out] x - a pointer to unsigned 64-bit integer value with found first-order moment x.
         \param [out] y - a pointer to unsigned 64-bit integer value with found first-order moment y.
@@ -7055,35 +7057,38 @@ extern "C"
 
         \fn void SimdGetObjectMoments(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index, uint64_t * n, uint64_t * s,  uint64_t * sx, uint64_t * sy, uint64_t * sxx, uint64_t * sxy, uint64_t * syy);
 
-        \short Calculate statistical characteristics (moments) of given object.
+        \short Calculates weighted geometric moments of an object.
 
-        The images must have 8-bit gray format and equal size. One of them can be empty.
+        The images must have 8-bit gray format and equal size. Either \a src or \a mask can be NULL,
+        but not both. If \a mask is NULL, every source pixel is included. If \a src is NULL, every
+        selected mask pixel has weight 1. All output values are initialized to zero inside the function
+        before accumulation.
 
         For every point:
         \verbatim
-        if(mask[X, Y] == index || mask == 0)
+        if(mask == NULL || mask[X, Y] == index)
         {
             S = src ? src[X, Y] : 1;
-            n += 1.
-            s += S;
-            sx += S*X.
-            sy += S*Y.
-            sxx += S*X*X.
-            sxy += S*X*Y.
-            syy += S*Y*Y.
+            n[0] += 1;
+            s[0] += S;
+            sx[0] += S*X;
+            sy[0] += S*Y;
+            sxx[0] += S*X*X;
+            sxy[0] += S*X*Y;
+            syy[0] += S*Y*Y;
         }
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::GetObjectMoments(const View<A> & src, const View<A> & mask, uint8_t index, uint64_t & n, uint64_t & s,  uint64_t & sx, uint64_t & sy, uint64_t & sxx, uint64_t & sxy, uint64_t & syy).
 
-        \param [in] src - a pointer to pixels data of the input image. Can be NULL (its behaviour is equal to function SimdGetMoments).
-        \param [in] srcStride - a row size of the input image.
+        \param [in] src - a pointer to pixels data of the input image. Can be NULL to use weight 1 for selected pixels.
+        \param [in] srcStride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] mask - a pointer to pixels data of the mask image. Can be NULL (the moments will be collected over whole image).
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] index - a mask index.
-        \param [out] n - a pointer to unsigned 64-bit integer value with found area of given object.
+        \param [in] mask - a pointer to pixels data of the mask image. Can be NULL to include every pixel.
+        \param [in] maskStride - a row size of the mask image in bytes.
+        \param [in] index - a mask index to include when \a mask is not NULL.
+        \param [out] n - a pointer to unsigned 64-bit integer value with found number of selected pixels.
         \param [out] s - a pointer to unsigned 64-bit integer value with sum of image values of given object.
         \param [out] sx - a pointer to unsigned 64-bit integer value with found first-order moment x of given object.
         \param [out] sy - a pointer to unsigned 64-bit integer value with found first-order moment y of given object.
@@ -7098,21 +7103,22 @@ extern "C"
 
         \fn void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-        \short Calculate sums of rows for given 8-bit gray image.
+        \short Calculates row sums for an 8-bit gray image.
+
+        The output array is overwritten by the calculated row sums.
 
         For all rows:
         \verbatim
-        for(x = 0; x < width; ++x)
-            sums[y] += src[x, y];
+        sums[y] = Sum(src[x, y]), 0 <= x < width;
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::GetRowSums(const View<A>& src, uint32_t * sums).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] stride - a row size of the input image.
+        \param [in] stride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result sums of rows. It length must be equal to image height.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer row sums. Its length must be at least height.
     */
     SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
@@ -7120,21 +7126,22 @@ extern "C"
 
         \fn void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-        \short Calculate sums of columns for given 8-bit gray image.
+        \short Calculates column sums for an 8-bit gray image.
+
+        The output array is cleared to zero inside the function before accumulation.
 
         For all columns:
         \verbatim
-        for(y = 0; y < height; ++y)
-            sums[x] += src[x, y];
+        sums[x] = Sum(src[x, y]), 0 <= y < height;
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::GetColSums(const View<A>& src, uint32_t * sums).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] stride - a row size of the input image.
+        \param [in] stride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result sums of columns. It length must be equal to image width.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer column sums. Its length must be at least width.
     */
     SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
@@ -7142,12 +7149,11 @@ extern "C"
 
         \fn void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-        \short Calculate sums of absolute derivate along y axis for rows for given 8-bit gray image.
+        \short Calculates row sums of absolute vertical differences for an 8-bit gray image.
 
         For all rows except the last:
         \verbatim
-        for(x = 0; x < width; ++x)
-            sums[y] += abs(src[x, y+1] - src[x, y]);
+        sums[y] = Sum(Abs(src[x, y + 1] - src[x, y])), 0 <= x < width;
         \endverbatim
         For the last row:
         \verbatim
@@ -7157,10 +7163,10 @@ extern "C"
         \note This function has a C++ wrappers: Simd::GetAbsDyRowSums(const View<A>& src, uint32_t * sums).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] stride - a row size of the input image.
+        \param [in] stride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result sums. It length must be equal to image height.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer row sums. Its length must be at least height.
     */
     SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
@@ -7168,12 +7174,13 @@ extern "C"
 
         \fn void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-        \short Calculate sums of absolute derivate along x axis for columns for given 8-bit gray image.
+        \short Calculates column sums of absolute horizontal differences for an 8-bit gray image.
+
+        The output array is cleared to zero inside the function before accumulation.
 
         For all columns except the last:
         \verbatim
-        for(y = 0; y < height; ++y)
-            sums[y] += abs(src[x+1, y] - src[x, y]);
+        sums[x] = Sum(Abs(src[x + 1, y] - src[x, y])), 0 <= y < height;
         \endverbatim
         For the last column:
         \verbatim
@@ -7183,10 +7190,10 @@ extern "C"
         \note This function has a C++ wrappers: Simd::GetAbsDxColSums(const View<A>& src, uint32_t * sums).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] stride - a row size of the input image.
+        \param [in] stride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result columns. It length must be equal to image width.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer column sums. Its length must be at least width.
     */
     SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
@@ -7194,15 +7201,22 @@ extern "C"
 
         \fn void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
-        \short Gets sum of value of pixels for gray 8-bit image.
+        \short Calculates the sum of pixel values for an 8-bit gray image.
+
+        The output sum is initialized to zero inside the function before accumulation.
+
+        For every point:
+        \verbatim
+        sum[0] += src[x, y];
+        \endverbatim
 
         \note This function has a C++ wrappers: Simd::ValueSum(const View<A>& src, uint64_t & sum).
 
         \param [in] src - a pointer to pixels data of the image.
-        \param [in] stride - a row size of the image.
+        \param [in] stride - a row size of the image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] sum - the result sum.
+        \param [out] sum - a pointer to unsigned 64-bit integer result sum.
     */
     SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
@@ -7210,33 +7224,47 @@ extern "C"
 
         \fn void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
-        \short Gets sum of squared value of pixels for gray 8-bit image .
+        \short Calculates the sum of squared pixel values for an 8-bit gray image.
+
+        The output sum is initialized to zero inside the function before accumulation.
+
+        For every point:
+        \verbatim
+        sum[0] += src[x, y]*src[x, y];
+        \endverbatim
 
         \note This function has a C++ wrappers: Simd::SquareSum(const View<A>& src, uint64_t & sum).
 
         \param [in] src - a pointer to pixels data of the image.
-        \param [in] stride - a row size of the image.
+        \param [in] stride - a row size of the image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] sum - the result sum.
+        \param [out] sum - a pointer to unsigned 64-bit integer result sum.
     */
-    
     SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
-    
+
     /*! @ingroup other_statistic
 
         \fn void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum);
 
-        \short Gets sum and squared sum of value of pixels for gray 8-bit image.
+        \short Calculates value sum and squared value sum for an 8-bit gray image.
+
+        Output sums are initialized to zero inside the function before accumulation.
+
+        For every point:
+        \verbatim
+        valueSum[0] += src[x, y];
+        squareSum[0] += src[x, y]*src[x, y];
+        \endverbatim
 
         \note This function has a C++ wrappers: Simd::ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum).
 
         \param [in] src - a pointer to pixels data of the image.
-        \param [in] stride - a row size of the image.
+        \param [in] stride - a row size of the image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] valueSum - the result value sum.
-        \param [out] squareSum - the result square sum.
+        \param [out] valueSum - a pointer to unsigned 64-bit integer value sum.
+        \param [out] squareSum - a pointer to unsigned 64-bit integer squared value sum.
     */
     SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum);
 
@@ -7244,7 +7272,10 @@ extern "C"
 
         \fn void SimdValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums);
 
-        \short Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per channel.
+        \short Calculates per-channel value sums and squared value sums for an 8-bit image.
+
+        The image must have 8-bit depth per channel, and \a channels must be 1, 2, 3 or 4. Output
+        arrays are initialized to zero inside the function before accumulation.
 
         \verbatim
         for(c = 0; c < channels; c++)
@@ -7265,12 +7296,12 @@ extern "C"
         \note This function has a C++ wrappers: Simd::ValueSquareSums(const View<A>& src, uint64_t * valueSums, uint64_t * squareSums).
 
         \param [in] src - a pointer to pixels data of the image.
-        \param [in] stride - a row size of the image.
+        \param [in] stride - a row size of the image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channels - an image channels count. It may be equal to 1, 2, 3 or 4.
-        \param [out] valueSums - the pointer to output buffer with value sums. Size of the buffer must be at least channels count.
-        \param [out] squareSums - the pointer to output buffer with square sums. Size of the buffer must be at least channels count.
+        \param [in] channels - a number of image channels. It must be 1, 2, 3 or 4.
+        \param [out] valueSums - a pointer to output buffer with per-channel value sums. Its size must be at least \a channels.
+        \param [out] squareSums - a pointer to output buffer with per-channel squared value sums. Its size must be at least \a channels.
     */
     SIMD_API void SimdValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums);
     
@@ -7278,24 +7309,25 @@ extern "C"
 
         \fn void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 
-        \short Gets sum of pixel correlation for two gray 8-bit images.
+        \short Calculates the sum of pixel-wise products for two 8-bit gray images.
+
+        All images must have the same width and height and 8-bit gray pixel format. The output sum is
+        initialized to zero inside the function before accumulation.
 
         For all points:
         \verbatim
-        sum += a[i]*b[i];
+        sum[0] += a[i]*b[i];
         \endverbatim
-
-        All images must have the same width and height and 8-bit gray pixel format.
 
         \note This function has a C++ wrappers: Simd::CorrelationSum(const View<A> & a, const View<A> & b, uint64_t & sum).
 
         \param [in] a - a pointer to pixels data of the first image.
-        \param [in] aStride - a row size of the first image.
+        \param [in] aStride - a row size of the first image in bytes.
         \param [in] b - a pointer to pixels data of the second image.
-        \param [in] bStride - a row size of the second image.
-        \param [in] width - an images width.
-        \param [in] height - an images height.
-        \param [out] sum - a pointer to result sum.
+        \param [in] bStride - a row size of the second image in bytes.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] sum - a pointer to unsigned 64-bit integer result sum.
     */
     SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 
@@ -7303,18 +7335,27 @@ extern "C"
 
         \fn void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-        \short Stretches input 8-bit gray image in two times.
+        \short Stretches an 8-bit gray image by two in both dimensions using pixel replication.
+
+        The output size must be exactly: dstWidth = 2*srcWidth, dstHeight = 2*srcHeight.
+        For every source pixel:
+        \verbatim
+        dst[2*x + 0, 2*y + 0] = src[x, y];
+        dst[2*x + 1, 2*y + 0] = src[x, y];
+        dst[2*x + 0, 2*y + 1] = src[x, y];
+        dst[2*x + 1, 2*y + 1] = src[x, y];
+        \endverbatim
 
         \note This function has a C++ wrappers: Simd::StretchGray2x2(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
         \param [in] srcHeight - a height of the input image.
-        \param [in] srcStride - a row size of the input image.
+        \param [in] srcStride - a row size of the input image in bytes.
         \param [out] dst - a pointer to pixels data of the stretched output image.
         \param [in] dstWidth - a width of the output image.
         \param [in] dstHeight - a height of the output image.
-        \param [in] dstStride - a row size of the output image.
+        \param [in] dstStride - a row size of the output image in bytes.
     */
     SIMD_API void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
