@@ -253,6 +253,74 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template <SimdCompareType compareType> SIMD_INLINE
+            void ConditionalSquareGradientSum(const uint8_t* src, size_t stride, const uint8_t* msk, const svbool_t& mask, const svuint8_t& value, svuint32_t& sum)
+        {
+            svuint8_t _msk = svld1_u8(mask, msk);
+            svbool_t cond = Compare8u<compareType>(mask, _msk, value);
+            svuint8_t dx = svabd_u8_z(cond, svld1_u8(mask, src - 1), svld1_u8(mask, src + 1));
+            svuint8_t dy = svabd_u8_z(cond, svld1_u8(mask, src - stride), svld1_u8(mask, src + stride));
+            sum = svdot_u32(svdot_u32(sum, dx, dx), dy, dy);
+        }
+
+        template <SimdCompareType compareType>
+        void ConditionalSquareGradientSum(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t value, uint64_t* sum)
+        {
+            assert(width >= 3 && height >= 3);
+            assert(width <= 256 * 256);
+
+            src += srcStride;
+            mask += maskStride;
+            width -= 1;
+            height -= 2;
+
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            svbool_t nose = widthA ? svwhilege_b8(0, 1) : svand_b_z(svptrue_b8(), svwhilege_b8(0, 1), svwhilelt_b8(widthA, width));
+            svbool_t body = svptrue_b8();
+            svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _value = svdup_n_u8(value);
+            sum[0] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                svuint32_t _sum = svdup_n_u32(0);
+                size_t col = 0;
+                ConditionalSquareGradientSum<compareType>(src + col, srcStride, mask + col, nose, _value, _sum), col += A;
+                for (; col < widthA; col += A)
+                    ConditionalSquareGradientSum<compareType>(src + col, srcStride, mask + col, body, _value, _sum);
+                if (col < width)
+                    ConditionalSquareGradientSum<compareType>(src + col, srcStride, mask + col, tail, _value, _sum);
+                sum[0] += svaddv_u32(svptrue_b32(), _sum);
+                src += srcStride;
+                mask += maskStride;
+            }
+        }
+
+        void ConditionalSquareGradientSum(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t* sum)
+        {
+            switch (compareType)
+            {
+            case SimdCompareEqual:
+                return ConditionalSquareGradientSum<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareNotEqual:
+                return ConditionalSquareGradientSum<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreater:
+                return ConditionalSquareGradientSum<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreaterOrEqual:
+                return ConditionalSquareGradientSum<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesser:
+                return ConditionalSquareGradientSum<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesserOrEqual:
+                return ConditionalSquareGradientSum<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            default:
+                assert(0);
+            }
+        }
     }
 #endif
 }

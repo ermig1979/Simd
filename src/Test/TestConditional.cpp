@@ -385,6 +385,11 @@ namespace Test
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+    if (Simd::Sve2::Enable && TestSve2(options) && W >= 3)
+        result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sve2::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
+#endif 
+
         return result;
     }
 
