@@ -6471,27 +6471,32 @@ extern "C"
 
         \fn void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY, size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
 
-        \short Performs shifting of input image with using bilinear interpolation.
+        \short Shifts an image inside a crop rectangle with bilinear interpolation.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        All images must have the same width, height and number of 8-bit channels. The function first
+        copies the area outside [cropLeft, cropRight) x [cropTop, cropBottom) from \a src to \a dst.
+        Inside the crop rectangle it shifts \a src by (\a shiftX[0], \a shiftY[0]) and writes bilinear
+        interpolated pixels to \a dst. Pixels uncovered by the shift are copied from \a bkg; border
+        pixels where source and background overlap are mixed by the same bilinear weights.
+        The shift values must be smaller than the crop rectangle width and height.
 
         \note This function has a C++ wrappers: Simd::ShiftBilinear(const View<A> & src, const View<A> & bkg, const Point<double> & shift, const Rectangle<ptrdiff_t> & crop, View<A> & dst).
 
         \param [in] src - a pointer to pixels data of the foreground input image.
-        \param [in] srcStride - a row size of the input image.
+        \param [in] srcStride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [in] bkg - a pointer to pixels data of the background input image.
-        \param [in] bkgStride - a row size of the background image.
-        \param [in] shiftX - an image shift along x axis.
-        \param [in] shiftY - an image shift along y axis.
-        \param [in] cropLeft - a crop left side.
-        \param [in] cropTop - a crop top side.
-        \param [in] cropRight - a crop right side.
-        \param [in] cropBottom - a crop bottom side.
+        \param [in] bkgStride - a row size of the background image in bytes.
+        \param [in] shiftX - a pointer to the image shift along the X axis.
+        \param [in] shiftY - a pointer to the image shift along the Y axis.
+        \param [in] cropLeft - a left side of the crop rectangle.
+        \param [in] cropTop - a top side of the crop rectangle.
+        \param [in] cropRight - a right side of the crop rectangle.
+        \param [in] cropBottom - a bottom side of the crop rectangle.
         \param [out] dst - a pointer to pixels data of the output image.
-        \param [in] dstStride - a row size of the output image.
+        \param [in] dstStride - a row size of the output image in bytes.
     */
     SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
         const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
@@ -6501,18 +6506,24 @@ extern "C"
 
         \fn void * SimdShiftDetectorInitBuffers(size_t bkgWidth, size_t bkgHeight, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
 
-        Initializes internal buffers of shift detector.
+        \short Creates a shift detector context and its image pyramids.
+
+        The detector is used to estimate translation of a current gray image relative to a background
+        image. It stores background/current pyramids of \a levelCount levels with base size
+        \a bkgWidth by \a bkgHeight. The \a textureType parameter selects whether matching is done on
+        the original gray image or on the saturated sum of absolute X/Y gradients. The \a differenceType
+        parameter selects the difference metric minimized during search.
 
         \note This function used in class Simd::ShiftDetector.
 
-        \param [in] bkgWidth - a width of background image.
-        \param [in] bkgHeight - a height of background image.
+        \param [in] bkgWidth - a width of the background image.
+        \param [in] bkgHeight - a height of the background image.
         \param [in] levelCount - the number of levels in the internal image pyramids used to find shift.
-        \param [in] textureType - type of textures used to detect shift (see ::SimdShiftDetectorTextureType).
-        \param [in] differenceType - type of correlation functions used to detect shift (see ::SimdShiftDetectorDifferenceType).
+        \param [in] textureType - a type of texture used to detect shift (see ::SimdShiftDetectorTextureType).
+        \param [in] differenceType - a difference metric used to detect shift (see ::SimdShiftDetectorDifferenceType).
         \return a pointer to shift detector context. On error it returns NULL.
-                This pointer is used in functions ::SimdShiftDetectorSetBackground, ::SimdShiftDetectorEstimate.
-                It must be released with using of function ::SimdRelease.
+                This pointer is used by functions ::SimdShiftDetectorSetBackground, ::SimdShiftDetectorEstimate and ::SimdShiftDetectorGetShift.
+                It must be released with function ::SimdRelease.
     */
     SIMD_API void * SimdShiftDetectorInitBuffers(size_t bkgWidth, size_t bkgHeight, size_t levelCount, SimdShiftDetectorTextureType textureType, SimdShiftDetectorDifferenceType differenceType);
 
@@ -6520,14 +6531,20 @@ extern "C"
      
         \fn void SimdShiftDetectorSetBackground(void *context, const uint8_t* bkg, size_t bkgStride, SimdBool makeCopy);
      
-        Sets a background image. Size of background image is set by function ::SimdShiftDetectorInitBuffers.
+        \short Sets the background image for a shift detector context.
+
+        The background image size is fixed by ::SimdShiftDetectorInitBuffers. If the detector texture
+        type is ::SimdShiftDetectorTextureGray and \a makeCopy is SimdFalse, the context stores a view
+        of the external background buffer and the caller must keep it valid. Otherwise the background
+        data or its gradient texture is stored inside the context. After setting the base image the
+        function builds the internal 2x downsampled pyramid.
 
         \note This function used in class Simd::ShiftDetector.
 
         \param [in] context - a shift detector context. It must be created by function ::SimdShiftDetectorInitBuffers and released by function ::SimdRelease.
-        \param [in] bkg - a pointer to pixels data of background image.
-        \param [in] bkgStride - a row size of the background image.
-        \param [in] makeCopy - if true, copy of the background will be created.
+        \param [in] bkg - a pointer to pixels data of the 8-bit gray background image.
+        \param [in] bkgStride - a row size of the background image in bytes.
+        \param [in] makeCopy - a flag to copy the gray background data into the context.
     */
     SIMD_API void SimdShiftDetectorSetBackground(void *context, const uint8_t* bkg, size_t bkgStride, SimdBool makeCopy);
 
@@ -6535,39 +6552,54 @@ extern "C"
      
         \fn SimdBool SimdShiftDetectorEstimate(void *context, const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight, size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double* hiddenAreaPenalty, ptrdiff_t regionAreaMin);
         
-        Estimates shift of current image relative to background image. Background image must be set before by function ::SimdShiftDetectorSetBackground.
+        \short Estimates translation of a current image relative to the background.
+
+        The background must be set by ::SimdShiftDetectorSetBackground before this call. The current
+        image is interpreted as an 8-bit gray image. The rectangle
+        [initShiftX, initShiftX + currWidth) x [initShiftY, initShiftY + currHeight) defines the
+        current image position in background coordinates before applying the estimated shift. The search
+        is performed from coarse to fine pyramid levels and is limited by \a maxShiftX and \a maxShiftY.
+        \a hiddenAreaPenalty[0] penalizes candidate shifts that hide part of the initial region outside
+        the background; \a regionAreaMin selects the finest pyramid levels whose search region area is
+        large enough. On success, call ::SimdShiftDetectorGetShift to read the result.
 
         \note This function used in class Simd::ShiftDetector.
 
         \param [in] context - a shift detector context. It must be created by function ::SimdShiftDetectorInitBuffers and released by function ::SimdRelease.
-        \param [in] curr - a pointer to pixels data of current image.
-        \param [in] currStride - a row size of the current image.
-        \param [in] currWidth - a width of current image.
-        \param [in] currHeight - a height of current image.
-        \param [in] initShiftX - an initial shift X position to start search.
-        \param [in] initShiftY - an initial shift Y position to start search.
-        \param [in] maxShiftX - maximal possible shift along X axis.
-        \param [in] maxShiftY - maximal possible shift along Y axis.
-        \param [in] hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image. Can be NULL (no restriction).
-        \param [in] regionAreaMin - a parameter used to set minimal area of region use for shift estimation. 
-        \return a result of shift estimation (true or false). In positive case use function ::SimdShiftDetectorGetShift to get shift and other parameters. 
+        \param [in] curr - a pointer to pixels data of the 8-bit gray current image.
+        \param [in] currStride - a row size of the current image in bytes.
+        \param [in] currWidth - a width of the current image.
+        \param [in] currHeight - a height of the current image.
+        \param [in] initShiftX - an initial X position of current image in background coordinates.
+        \param [in] initShiftY - an initial Y position of current image in background coordinates.
+        \param [in] maxShiftX - maximal absolute shift along X axis.
+        \param [in] maxShiftY - maximal absolute shift along Y axis.
+        \param [in] hiddenAreaPenalty - a pointer to a penalty factor for shifts near/outside the background border.
+        \param [in] regionAreaMin - a minimal search-region area used to choose active pyramid levels.
+        \return a result of shift estimation (SimdTrue or SimdFalse). On success use ::SimdShiftDetectorGetShift to get shift and other parameters.
     */
     SIMD_API SimdBool SimdShiftDetectorEstimate(void* context, const uint8_t* curr, size_t currStride, size_t currWidth, size_t currHeight,
         size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double* hiddenAreaPenalty, ptrdiff_t regionAreaMin);
 
     /*! @ingroup shifting
 
-        \fn void SimdShiftDetectorGetShift(const void* context, size_t* shift, double * refinedShift, double * stability, double * correlation);
+        \fn void SimdShiftDetectorGetShift(const void* context, ptrdiff_t* shift, double * refinedShift, double * stability, double * correlation);
 
-        Gets shift and other parameters estimated before by function ::SimdShiftDetectorEstimate.
+        \short Gets shift and quality values estimated by ::SimdShiftDetectorEstimate.
+
+        Any output pointer can be NULL. The integer shift is the best discrete translation at the base
+        pyramid level. The refined shift adds sub-pixel refinement estimated from the 3x3 neighborhood
+        of difference values. Stability characterizes how well the minimum is separated from its
+        neighborhood. Correlation is derived from the best average difference and is close to 1 for
+        similar images.
 
         \note This function used in class Simd::ShiftDetector.
 
         \param [in] context - a shift detector context. It must be created by function ::SimdShiftDetectorInitBuffers and released by function ::SimdRelease.
-        \param [out] shift - a pointer to array[2] to estimated integer shift of current image relative to background image. Can be NULL. 
-        \param [out] refinedShift - a pointer to array[2] to refined shift (with sub-pixel accuracy) shift of current image relative to background image. Can be NULL.
-        \param [out] stability - a value which characterizes stability (reliability) of found shift. Can be NULL.
-        \param [out] correlation - a best correlation of background and current image. Can be NULL.
+        \param [out] shift - a pointer to array[2] that receives integer X and Y shift. Can be NULL.
+        \param [out] refinedShift - a pointer to array[2] that receives sub-pixel X and Y shift. Can be NULL.
+        \param [out] stability - a pointer to a value that receives stability of the found shift. Can be NULL.
+        \param [out] correlation - a pointer to a value that receives correlation of background and current image. Can be NULL.
     */
     SIMD_API void SimdShiftDetectorGetShift(const void* context, ptrdiff_t* shift, double * refinedShift, double * stability, double * correlation);
 
@@ -6575,21 +6607,28 @@ extern "C"
 
         \fn void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-        \short Calculates Sobel's filter along x axis.
+        \short Calculates the horizontal Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
-        \n dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
+        \verbatim
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = (src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                    (src[x0, y0] + 2*src[x0, y] + src[x0, y2]);
+        \endverbatim
 
         \note This function has a C++ wrappers: Simd::SobelDx(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] srcStride - a row size of the input image.
+        \param [in] srcStride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of the output image.
-        \param [in] dstStride - a row size of the output image (in bytes).
+        \param [out] dst - a pointer to pixels data of the signed 16-bit output image.
+        \param [in] dstStride - a row size of the output image in bytes. It must be a multiple of sizeof(int16_t).
     */
     SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -6597,23 +6636,28 @@ extern "C"
 
         \fn void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-        \short Calculates absolute value of Sobel's filter along x axis.
+        \short Calculates the absolute horizontal Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                        (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::SobelDxAbs(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] srcStride - a row size of the input image.
+        \param [in] srcStride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of the output image.
-        \param [in] dstStride - a row size of the output image (in bytes).
+        \param [out] dst - a pointer to pixels data of the signed 16-bit output image.
+        \param [in] dstStride - a row size of the output image in bytes. It must be a multiple of sizeof(int16_t).
     */
     SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -6621,19 +6665,24 @@ extern "C"
 
         \fn void SimdSobelDxAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
-        \short Calculates sum of absolute value of Sobel's filter along x axis.
+        \short Calculates the sum of absolute horizontal Sobel derivatives.
 
-        Input image must have 8-bit gray format.
+        Input image must have 8-bit gray format, and width must be greater than 1. At image borders
+        the nearest valid source row or column is reused. The output sum is initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
-        dst[x, y] = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        sum += Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                   (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::SobelDxAbsSum(const View<A>& src, uint64_t & sum).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] stride - a row size of the input image.
+        \param [in] stride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] sum - a pointer to unsigned 64-bit integer value with result sum.
@@ -6644,23 +6693,28 @@ extern "C"
 
         \fn void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-        \short Calculates Sobel's filter along y axis.
+        \short Calculates the vertical Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]);
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = (src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                    (src[x0, y0] + 2*src[x, y0] + src[x2, y0]);
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::SobelDy(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] srcStride - a row size of the input image.
+        \param [in] srcStride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of the output image.
-        \param [in] dstStride - a row size of the output image (in bytes).
+        \param [out] dst - a pointer to pixels data of the signed 16-bit output image.
+        \param [in] dstStride - a row size of the output image in bytes. It must be a multiple of sizeof(int16_t).
     */
     SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -6668,23 +6722,28 @@ extern "C"
 
         \fn void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-        \short Calculates absolute value of Sobel's filter along y axis.
+        \short Calculates the absolute vertical Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                        (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::SobelDyAbs(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] srcStride - a row size of the input image.
+        \param [in] srcStride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of the output image.
-        \param [in] dstStride - a row size of the output image (in bytes).
+        \param [out] dst - a pointer to pixels data of the signed 16-bit output image.
+        \param [in] dstStride - a row size of the output image in bytes. It must be a multiple of sizeof(int16_t).
     */
     SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -6692,19 +6751,24 @@ extern "C"
 
         \fn void SimdSobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
-        \short Calculates sum of absolute value of Sobel's filter along y axis.
+        \short Calculates the sum of absolute vertical Sobel derivatives.
 
-        Input image must have 8-bit gray format.
+        Input image must have 8-bit gray format, and width must be greater than 1. At image borders
+        the nearest valid source row or column is reused. The output sum is initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
-        sum += abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        sum += Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                   (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::SobelDyAbsSum(const View<A>& src, uint64_t & sum).
 
         \param [in] src - a pointer to pixels data of the input image.
-        \param [in] stride - a row size of the input image.
+        \param [in] stride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] sum - a pointer to unsigned 64-bit integer value with result sum.
