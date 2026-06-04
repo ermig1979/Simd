@@ -6779,26 +6779,34 @@ extern "C"
 
         \fn void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 
-        \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis.
+        \short Calculates contour metrics from horizontal and vertical Sobel derivatives.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused. The output value packs contour
+        magnitude and dominant direction: the high bits contain dx + dy, and the low bit is 0 when
+        dx >= dy and 1 otherwise.
         This function is used for contour extraction.
 
         For every point:
         \verbatim
-        dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
-        dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dx = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
+        dy = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         dst[x, y] = (dx + dy)*2 + (dx >= dy ? 0 : 1);
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::ContourMetrics(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the gray 8-bit input image.
-        \param [in] srcStride - a row size of the input image.
+        \param [in] srcStride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] dst - a pointer to pixels data of the output 16-bit image.
-        \param [in] dstStride - a row size of the output image (in bytes).
+        \param [in] dstStride - a row size of the output image in bytes. It must be a multiple of sizeof(uint16_t).
     */
     SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -6806,29 +6814,37 @@ extern "C"
 
         \fn void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
 
-        \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask.
+        \short Calculates masked contour metrics from horizontal and vertical Sobel derivatives.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input and mask images must have 8-bit gray format, output image must have 16-bit integer
+        format. All images must have the same width and height, and width must be greater than 1.
+        At image borders the nearest valid source row or column is reused. Pixels with mask value
+        lower than \a indexMin get zero output; other pixels use the same packed metric as
+        ::SimdContourMetrics.
         This function is used for contour extraction.
 
         For every point:
         \verbatim
-        dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
-        dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dx = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
+        dy = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         dst[x, y] = mask[x, y] < indexMin ? 0 : (dx + dy)*2 + (dx >= dy ? 0 : 1);
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::ContourMetrics(const View<A>& src, const View<A>& mask, uint8_t indexMin, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the gray 8-bit input image.
-        \param [in] srcStride - a row size of the input image.
+        \param [in] srcStride - a row size of the input image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] mask - a pointer to pixels data of the mask 8-bit image.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] indexMin - a mask minimal permissible index.
+        \param [in] maskStride - a row size of the mask image in bytes.
+        \param [in] indexMin - a minimal mask index that enables metric calculation.
         \param [out] dst - a pointer to pixels data of the output 16-bit image.
-        \param [in] dstStride - a row size of the output image (in bytes).
+        \param [in] dstStride - a row size of the output image in bytes. It must be a multiple of sizeof(uint16_t).
     */
     SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
@@ -6837,15 +6853,19 @@ extern "C"
 
         \fn void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
 
-        \short Extract contour anchors from contour metrics.
+        \short Extracts contour anchor points from packed contour metrics.
 
-        All images must have the same width and height. Input image must have 16-bit integer format, output image must have 8-bit gray format.
+        Input image must have 16-bit integer format produced by ::SimdContourMetrics or
+        ::SimdContourMetricsMasked, output image must have 8-bit gray format. All images must have
+        the same width and height. The first and last rows are cleared to zero. For processed inner
+        rows, the first and last columns are also set to zero. Rows are processed with increment
+        \a step beginning at row 1.
         Input image with metrics can be estimated by using ::SimdContourMetrics or ::SimdContourMetricsMasked functions.
         This function is used for contour extraction.
 
-        For every point (except border):
+        For every processed inner point:
         \verbatim
-        a[x, y] = src[x, y] >> 1.
+        a[x, y] = src[x, y] >> 1;
         if(src[x, y] & 1)
             dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x + 1, y] >= threshold) && (a[x, y] - a[x - 1, y] >= threshold) ? 255 : 0;
         else
@@ -6855,13 +6875,13 @@ extern "C"
         \note This function has a C++ wrappers: Simd::ContourAnchors(const View<A>& src, size_t step, int16_t threshold, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the 16-bit input image.
-        \param [in] srcStride - a row size of the input image.
+        \param [in] srcStride - a row size of the input image in bytes. It must be a multiple of sizeof(uint16_t).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] step - a row step (to skip some rows).
-        \param [in] threshold - a threshold of anchor creation.
+        \param [in] step - a row step for anchor extraction.
+        \param [in] threshold - a minimal metric difference required to create an anchor.
         \param [out] dst - a pointer to pixels data of the output 8-bit gray image.
-        \param [in] dstStride - a row size of the output image (in bytes).
+        \param [in] dstStride - a row size of the output image in bytes.
     */
     SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
 
@@ -6869,21 +6889,22 @@ extern "C"
 
         \fn void SimdSquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 
-        \short Calculates sum of squared differences for two 8-bit gray images.
+        \short Calculates the sum of squared differences for two 8-bit gray images.
 
-        All images must have the same width and height.
+        All images must have the same width and height. The output sum is initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
-        sum += (a[i] - b[i])*(a[i] - b[i]);
+        sum[0] += (a[i] - b[i])*(a[i] - b[i]);
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::SquaredDifferenceSum(const View<A>& a, const View<A>& b, uint64_t & sum).
 
         \param [in] a - a pointer to pixels data of the first image.
-        \param [in] aStride - a row size of the first image.
+        \param [in] aStride - a row size of the first image in bytes.
         \param [in] b - a pointer to pixels data of the second image.
-        \param [in] bStride - a row size of the second image.
+        \param [in] bStride - a row size of the second image in bytes.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] sum - a pointer to unsigned 64-bit integer value with result sum.
@@ -6895,25 +6916,27 @@ extern "C"
 
         \fn void SimdSquaredDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
-        \short Calculates sum of squared differences for two images with using mask.
+        \short Calculates the masked sum of squared differences for two 8-bit gray images.
 
-        All images must have the same width, height and format (8-bit gray).
+        All images must have the same width and height. The input and mask images must have 8-bit
+        gray format. Only pixels where mask equals \a index contribute to the result. The output sum
+        is initialized to zero inside the function before accumulation.
 
         For every point:
         \verbatim
         if(mask[i] == index)
-            sum += (a[i] - b[i])*(a[i] - b[i]);
+            sum[0] += (a[i] - b[i])*(a[i] - b[i]);
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::SquaredDifferenceSum(const View<A>& a, const View<A>& b, const View<A>& mask, uint8_t index, uint64_t & sum).
 
         \param [in] a - a pointer to pixels data of the first image.
-        \param [in] aStride - a row size of the first image.
+        \param [in] aStride - a row size of the first image in bytes.
         \param [in] b - a pointer to pixels data of the second image.
-        \param [in] bStride - a row size of the second image.
+        \param [in] bStride - a row size of the second image in bytes.
         \param [in] mask - a pointer to pixels data of the mask image.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] index - a mask index.
+        \param [in] maskStride - a row size of the mask image in bytes.
+        \param [in] index - a mask index that enables accumulation.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] sum - a pointer to unsigned 64-bit integer value with result sum.
@@ -6925,19 +6948,19 @@ extern "C"
 
         \fn void SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
-        \short Calculates sum of squared differences for two 32-bit float arrays.
+        \short Calculates the sum of squared differences for two 32-bit float arrays.
 
-        All arrays must have the same size.
+        All arrays must have the same size. The output sum is overwritten by the calculated value.
 
         For every element:
         \verbatim
-        sum += (a[i] - b[i])*(a[i] - b[i]);
+        sum[0] = Sum((a[i] - b[i])*(a[i] - b[i]));
         \endverbatim
 
         \param [in] a - a pointer to the first array.
         \param [in] b - a pointer to the second array.
         \param [in] size - a size of arrays.
-        \param [out] sum - a sum of squared differences.
+        \param [out] sum - a pointer to the 32-bit float sum of squared differences.
     */
     SIMD_API void SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
@@ -6945,26 +6968,27 @@ extern "C"
 
         \fn void SimdSquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
 
-        \short Calculates sum of squared differences for two 32-bit float arrays with using Kahan summation algorithm.
+        \short Calculates the sum of squared differences for two 32-bit float arrays using Kahan summation.
 
-        All arrays must have the same size.
+        All arrays must have the same size. This variant applies compensated summation to reduce
+        floating-point accumulation error. The output sum is overwritten by the calculated value.
 
         Algorithm pseudo code:
         \verbatim
-        sum = 0; corr = 0;
+        sum[0] = 0; corr = 0;
         for(i = 0; i < size; ++i)
         {
             diff = (a[i] - b[i])*(a[i] - b[i]) - corr;
-            temp = sum + diff;
-            corr = (temp - sum) - diff;
-            sum = temp;
+            temp = sum[0] + diff;
+            corr = (temp - sum[0]) - diff;
+            sum[0] = temp;
         }
         \endverbatim
 
         \param [in] a - a pointer to the first array.
         \param [in] b - a pointer to the second array.
         \param [in] size - a size of arrays.
-        \param [out] sum - a sum of squared differences.
+        \param [out] sum - a pointer to the 32-bit float sum of squared differences.
     */
     SIMD_API void SimdSquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
 
