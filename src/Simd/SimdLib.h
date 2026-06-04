@@ -4539,18 +4539,27 @@ extern "C"
 
         \fn uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t * size);
 
-        \short Saves an image to memory in given image file format.
+        \short Encodes an image to a memory buffer.
 
-        \param [in] src - a pointer to pixels data of input image. 
-        \param [in] stride - a row size of input image in bytes.
+        The source image must have non-zero width and height. Supported source pixel formats are
+        ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32,
+        ::SimdPixelFormatRgb24 and ::SimdPixelFormatRgba32. Supported output file formats are PGM,
+        PPM, PNG, JPEG and BMP variants from ::SimdImageFileType. If file is
+        ::SimdImageFileUndefined, the function saves Gray8 input as binary PGM and all other
+        supported inputs as binary PPM.
+
+        Encoders convert the input to the pixel layout required by the selected file format. For JPEG,
+        quality is clamped to the range [1..100]. The returned buffer is allocated by the library.
+
+        \param [in] src - a pointer to pixels data of input image.
+        \param [in] stride - a row size of input image (in bytes).
         \param [in] width - a width of input image.
         \param [in] height - a height of input image.
-        \param [in] format - a pixel format of input image. 
-            Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
-        \param [in] file - a format of output image file. To auto choose format of output file set this parameter to ::SimdImageFileUndefined.
-        \param [in] quality - a parameter of compression quality (if file format supports it).
+        \param [in] format - a pixel format of input image.
+        \param [in] file - a format of output image file.
+        \param [in] quality - a compression quality parameter for formats that use it.
         \param [out] size - a pointer to the size of output image file in bytes.
-        \return a pointer to memory buffer with output image file. 
+        \return a pointer to memory buffer with output image file.
             It has to be deleted after use by function ::SimdFree. On error it returns NULL.
     */
     SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t * size);
@@ -4559,20 +4568,25 @@ extern "C"
 
         \fn SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
 
-        \short Saves an image to file in given image file format.
+        \short Encodes an image and writes it to a file.
+
+        This function first uses ::SimdImageSaveToMemory and then writes the encoded buffer to path.
+        If file is ::SimdImageFileUndefined, the output format is selected from recognized file
+        extensions: .pgm, .ppm, .png, .jpg/.jpeg or .bmp. For .jpg/.jpeg with default quality 100,
+        the function uses quality 85. If the extension is not recognized, the same default selection
+        as ::SimdImageSaveToMemory is used.
 
         \note This function has a C++ wrapper Simd::View::Save(const std::string & path, ::SimdImageFileType type = ::SimdImageFileUndefined, int quality = 100).
 
         \param [in] src - a pointer to pixels data of input image.
-        \param [in] stride - a row size of input image in bytes.
+        \param [in] stride - a row size of input image (in bytes).
         \param [in] width - a width of input image.
         \param [in] height - a height of input image.
-        \param [in] format - a pixel format of input image. 
-            Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
-        \param [in] file - a format of output image file. To auto choose format of output file set this parameter to ::SimdImageFileUndefined.
-        \param [in] quality - a parameter of compression quality (if file format supports it).
+        \param [in] format - a pixel format of input image.
+        \param [in] file - a format of output image file, or ::SimdImageFileUndefined to infer it from path.
+        \param [in] quality - a compression quality parameter for formats that use it.
         \param [in] path - a path to output image file.
-        \return result of the operation.
+        \return ::SimdTrue if encoding, opening the file and writing all bytes succeeded; otherwise ::SimdFalse.
     */
     SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
 
@@ -4580,18 +4594,22 @@ extern "C"
 
         \fn uint8_t* SimdNv12SaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
 
-        \short Saves image in NV12 format to memory as JPEG.
+        \short Encodes an NV12 image to a JPEG memory buffer.
+
+        The input image has one full-size Y plane and one half-size interleaved UV plane. Width and
+        height must be even. The only supported YUV type is ::SimdYuvTrect871. Quality is clamped to
+        the range [1..100].
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
-        \param [in] yStride - a row size of the y image.
-        \param [in] uv - a pointer to pixels data of input 8-bit image with UV color plane.
-        \param [in] uvStride - a row size of the uv image.
+        \param [in] yStride - a row size of the y image (in bytes).
+        \param [in] uv - a pointer to pixels data of input interleaved UV plane.
+        \param [in] uvStride - a row size of the uv image (in bytes).
         \param [in] width - a width of input image. It must be even number.
         \param [in] height - a height of input image. It must be even number.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
-        \param [in] quality - a parameter of compression quality.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). Now only ::SimdYuvTrect871 is supported.
+        \param [in] quality - a JPEG compression quality parameter.
         \param [out] size - a pointer to the size of output image file in bytes.
-        \return a pointer to memory buffer with output image file.
+        \return a pointer to memory buffer with output JPEG file.
             It has to be deleted after use by function ::SimdFree. On error it returns NULL.
     */
     SIMD_API uint8_t* SimdNv12SaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
@@ -4600,20 +4618,24 @@ extern "C"
 
         \fn uint8_t* SimdYuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
 
-        \short Saves image in YUV420P format to memory as JPEG.
+        \short Encodes a YUV420P image to a JPEG memory buffer.
+
+        The input image has one full-size Y plane and two half-size U and V planes. Width and height
+        must be even. The only supported YUV type is ::SimdYuvTrect871. Quality is clamped to the
+        range [1..100].
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
-        \param [in] yStride - a row size of the y image.
+        \param [in] yStride - a row size of the y image (in bytes).
         \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
-        \param [in] uStride - a row size of the u image.
+        \param [in] uStride - a row size of the u image (in bytes).
         \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
-        \param [in] vStride - a row size of the v image.
+        \param [in] vStride - a row size of the v image (in bytes).
         \param [in] width - a width of input image. It must be even number.
         \param [in] height - a height of input image. It must be even number.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
-        \param [in] quality - a parameter of compression quality.
+        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). Now only ::SimdYuvTrect871 is supported.
+        \param [in] quality - a JPEG compression quality parameter.
         \param [out] size - a pointer to the size of output image file in bytes.
-        \return a pointer to memory buffer with output image file.
+        \return a pointer to memory buffer with output JPEG file.
             It has to be deleted after use by function ::SimdFree. On error it returns NULL.
     */
     SIMD_API uint8_t* SimdYuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, 
@@ -4623,7 +4645,13 @@ extern "C"
 
         \fn uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
 
-        \short Loads an image from memory buffer.
+        \short Decodes an image from a memory buffer.
+
+        The function detects PGM/PPM, PNG, JPEG and BMP files from their in-memory signatures. On
+        input, *format can request ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24,
+        ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24 or ::SimdPixelFormatRgba32. If *format is
+        ::SimdPixelFormatNone, the loader keeps the natural format chosen for the input file. On
+        success, stride, width, height and *format are filled with the decoded image properties.
 
         \note This function has a C++ wrapper Simd::View::Load(const uint8_t * src, size_t size, Simd::View::Format format = Simd::View::None).
 
@@ -4632,10 +4660,8 @@ extern "C"
         \param [out] stride - a pointer to row size of output image in bytes.
         \param [out] width - a pointer to width of output image.
         \param [out] height - a pointer to height of output image.
-        \param [in, out] format - a pointer to pixel format of output image. 
-            Here you can set desired pixel format (it can be ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32).
-            Or set ::SimdPixelFormatNone and use pixel format of input image file.
-        \return a pointer to pixels data of output image. 
+        \param [in, out] format - a pointer to requested pixel format on input and decoded pixel format on output.
+        \return a pointer to pixels data of output image.
             It has to be deleted after use by function ::SimdFree. On error it returns NULL.
     */
     SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
@@ -4644,7 +4670,10 @@ extern "C"
 
         \fn uint8_t* SimdImageLoadFromFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
 
-        \short Loads an image from file.
+        \short Decodes an image from a file.
+
+        The function reads the whole file into memory and then calls ::SimdImageLoadFromMemory. The
+        file type is detected from the file content, not from the extension.
 
         \note This function has a C++ wrapper Simd::View::Load(const std::string & path, Simd::View::Format format = Simd::View::None).
 
@@ -4652,9 +4681,7 @@ extern "C"
         \param [out] stride - a pointer to row size of output image in bytes.
         \param [out] width - a pointer to width of output image.
         \param [out] height - a pointer to height of output image.
-        \param [in, out] format - a pointer to pixel format of output image.
-            Here you can set desired pixel format (it can be ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32).
-            Or set ::SimdPixelFormatNone and use pixel format of input image file.
+        \param [in, out] format - a pointer to requested pixel format on input and decoded pixel format on output.
         \return a pointer to pixels data of output image.
             It has to be deleted after use by function ::SimdFree. On error it returns NULL.
     */
@@ -4664,23 +4691,24 @@ extern "C"
 
         \fn void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
 
-        \short Converts 16-bit signed integer image to 8-bit gray image with saturation
+        \short Converts a 16-bit signed integer image to an 8-bit gray image with saturation.
+
+        The source pointer is typed as uint8_t for ABI compatibility, but each source pixel is read as
+        int16_t. For every point:
+        \verbatim
+        dst[x, y] = RestrictRange((int)src16[x, y], 0, 255);
+        \endverbatim
 
         All images must have the same width and height.
-
-        For every point:
-        \verbatim
-        dst[i] = Max(0, Min(255, src[i]));
-        \endverbatim
 
         \note This function has a C++ wrapper Simd::Int16ToGray(const View<A> & src, View<A> & dst).
 
         \param [in] src - a pointer to pixels data of input 16-bit signed integer image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] srcStride - a row size of the 16-bit signed integer image.
+        \param [in] srcStride - a row size of the 16-bit signed integer image (in bytes).
         \param [out] dst - a pointer to pixels data of output 8-bit gray image.
-        \param [in] dstStride - a row size of the gray image.
+        \param [in] dstStride - a row size of the gray image (in bytes).
     */
     SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
 
@@ -4688,10 +4716,19 @@ extern "C"
 
         \fn void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
-        \short Calculates integral images for input 8-bit gray image.
+        \short Calculates integral images for an 8-bit gray image.
 
-        The function can calculates sum integral image, square sum integral image (optionally) and tilted sum integral image (optionally).
-        A integral images must have width and height per unit greater than that of the input image.
+        The sum, square-sum and tilted-sum images have width + 1 columns and height + 1 rows. The
+        first row and first column are initialized to zero for sum and square-sum images. The sum
+        image is always 32-bit integer:
+        \verbatim
+        sum[x + 1, y + 1] = Sum(src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        \endverbatim
+
+        sqsum and tilted are optional and can be NULL. If sqsum is not NULL, sqsumFormat selects
+        32-bit integer or 64-bit floating-point output. If tilted is not NULL, it is written as a
+        32-bit integer tilted integral image. sumFormat must be ::SimdPixelFormatInt32.
 
         \note This function has a C++ wrappers:
         \n Simd::Integral(const View<A>& src, View<A>& sum),
@@ -4699,7 +4736,7 @@ extern "C"
         \n Simd::Integral(const View<A>& src, View<A>& sum, View<A>& sqsum, View<A>& tilted).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] sum - a pointer to pixels data of 32-bit integer sum image.
@@ -4708,7 +4745,7 @@ extern "C"
         \param [in] sqsumStride - a row size of sqsum image (in bytes).
         \param [out] tilted - a pointer to pixels data of 32-bit integer tilted sum image. It can be NULL.
         \param [in] tiltedStride - a row size of tilted image (in bytes).
-        \param [in] sumFormat - a format of sum image and tilted image. It can be equal to ::SimdPixelFormatInt32.
+        \param [in] sumFormat - a format of sum image and tilted image. It must be equal to ::SimdPixelFormatInt32.
         \param [in] sqsumFormat - a format of sqsum image. It can be equal to ::SimdPixelFormatInt32 or ::SimdPixelFormatDouble.
     */
     SIMD_API void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -4719,21 +4756,26 @@ extern "C"
 
         \fn void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride);
 
-        \short Interleaves 8-bit U and V planar images into one 16-bit UV interleaved image.
+        \short Interleaves 8-bit U and V planar images into one 16-bit UV image.
 
-        All images must have the same width and height.
-        This function used for YUV420P to NV12 conversion.
+        For every point:
+        \verbatim
+        uv[2*x + 0, y] = u[x, y];
+        uv[2*x + 1, y] = v[x, y];
+        \endverbatim
+
+        All images must have the same width and height. This function is used for YUV420P to NV12 conversion.
 
         \note This function has a C++ wrapper Simd::InterleaveUv(const View<A>& u, const View<A>& v, View<A>& uv).
 
         \param [in] u - a pointer to pixels data of input 8-bit U planar image.
-        \param [in] uStride - a row size of the u image.
+        \param [in] uStride - a row size of the u image (in bytes).
         \param [in] v - a pointer to pixels data of input 8-bit V planar image.
-        \param [in] vStride - a row size of the v image.
+        \param [in] vStride - a row size of the v image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] uv - a pointer to pixels data of output 16-bit UV interleaved image.
-        \param [in] uvStride - a row size of the uv image.
+        \param [in] uvStride - a row size of the uv image (in bytes).
     */
     SIMD_API void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride);
 
@@ -4741,22 +4783,29 @@ extern "C"
 
         \fn void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
-        \short Interleaves 8-bit Blue, Green and Red planar images into one 24-bit BGR interleaved image.
+        \short Interleaves 8-bit Blue, Green and Red planar images into one 24-bit BGR image.
+
+        For every point:
+        \verbatim
+        bgr[3*x + 0, y] = b[x, y];
+        bgr[3*x + 1, y] = g[x, y];
+        bgr[3*x + 2, y] = r[x, y];
+        \endverbatim
 
         All images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::InterleaveBgr(const View<A>& b, const View<A>& g, const View<A>& r, View<A>& bgr).
 
         \param [in] b - a pointer to pixels data of input 8-bit Blue planar image.
-        \param [in] bStride - a row size of the b image.
+        \param [in] bStride - a row size of the b image (in bytes).
         \param [in] g - a pointer to pixels data of input 8-bit Green planar image.
-        \param [in] gStride - a row size of the g image.
+        \param [in] gStride - a row size of the g image (in bytes).
         \param [in] r - a pointer to pixels data of input 8-bit Red planar image.
-        \param [in] rStride - a row size of the r image.
+        \param [in] rStride - a row size of the r image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR interleaved image.
-        \param [in] bgrStride - a row size of the bgr image.
+        \param [in] bgrStride - a row size of the bgr image (in bytes).
     */
     SIMD_API void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride,
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
@@ -4765,27 +4814,36 @@ extern "C"
 
         \fn void SimdInterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
 
-        \short Interleaves 8-bit Blue, Green, Red and Alpha planar images into one 32-bit BGRA interleaved image.
+        \short Interleaves 8-bit Blue, Green, Red and Alpha planar images into one 32-bit BGRA image.
+
+        For every point:
+        \verbatim
+        bgra[4*x + 0, y] = b[x, y];
+        bgra[4*x + 1, y] = g[x, y];
+        bgra[4*x + 2, y] = r[x, y];
+        bgra[4*x + 3, y] = a[x, y];
+        \endverbatim
 
         All images must have the same width and height.
 
         \note This function has a C++ wrapper Simd::InterleaveBgra(const View<A>& b, const View<A>& g, const View<A>& r, const View<A>& a, View<A>& bgra).
 
         \param [in] b - a pointer to pixels data of input 8-bit Blue planar image.
-        \param [in] bStride - a row size of the b image.
+        \param [in] bStride - a row size of the b image (in bytes).
         \param [in] g - a pointer to pixels data of input 8-bit Green planar image.
-        \param [in] gStride - a row size of the g image.
+        \param [in] gStride - a row size of the g image (in bytes).
         \param [in] r - a pointer to pixels data of input 8-bit Red planar image.
-        \param [in] rStride - a row size of the r image.
+        \param [in] rStride - a row size of the r image (in bytes).
         \param [in] a - a pointer to pixels data of input 8-bit Alpha planar image.
-        \param [in] aStride - a row size of the a image.
+        \param [in] aStride - a row size of the a image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA interleaved image.
-        \param [in] bgraStride - a row size of the bgr image.
+        \param [in] bgraStride - a row size of the bgra image (in bytes).
     */
     SIMD_API void SimdInterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride,
         size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
+
 
     /*! @ingroup laplace_filter
 
