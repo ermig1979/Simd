@@ -62,7 +62,7 @@
 #define SIMD_SVE_DISABLE
 #endif
 
-#if defined(SIMD_NSVE_DISABLE) && !defined(SIMD_SVE2_DISABLE)
+#if defined(SIMD_SVE_DISABLE) && !defined(SIMD_SVE2_DISABLE)
 #define SIMD_SVE2_DISABLE
 #endif
 

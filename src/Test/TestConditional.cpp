@@ -315,6 +315,11 @@ namespace Test
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sve2::ConditionalSum), FUNC_S(SimdConditionalSum));
+#endif 
+
         return result;
     }
 
