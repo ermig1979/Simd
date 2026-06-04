@@ -3960,19 +3960,22 @@ extern "C"
 
         \fn void SimdCosineDistance32f(const float * a, const float * b, size_t size, float * distance);
 
-        \short Calculates cosine distance of two 32-bit float arrays.
+        \short Calculates the cosine distance between two 32-bit floating-point vectors.
 
-        All arrays must have the same size.
-
-        Algorithm description:
+        The input vectors must contain size elements. The function writes one scalar result:
         \verbatim
-        distance = 1 - Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
+        aa = Sum(a[i]*a[i]);
+        ab = Sum(a[i]*b[i]);
+        bb = Sum(b[i]*b[i]);
+        distance[0] = 1 - ab/Sqrt(aa*bb);
         \endverbatim
+
+        Both input vectors have to have non-zero Euclidean norm.
 
         \param [in] a - a pointer to the first 32-bit float array.
         \param [in] b - a pointer to the second 32-bit float array.
-        \param [in] size - a size of arrays.
-        \param [out] distance - a pointer to 32-bit float with cosine distance.
+        \param [in] size - a number of elements in both input arrays.
+        \param [out] distance - a pointer to 32-bit float with the cosine distance.
     */
     SIMD_API void SimdCosineDistance32f(const float * a, const float * b, size_t size, float * distance);
 
@@ -3980,26 +3983,35 @@ extern "C"
 
         \fn void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        \short Performs Gaussian blur filtration with window 3x3.
+        \short Performs 3x3 Gaussian blur for an 8-bit interleaved image.
 
-        For every point:
+        The function applies the same separable 3x3 kernel to every channel independently. For every
+        channel c of pixel (x, y):
         \verbatim
-        dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] +
-                    2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
-                    src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16;
+        sx0 = Max(x - 1, 0);
+        sx1 = x;
+        sx2 = Min(x + 1, width - 1);
+        sy0 = Max(y - 1, 0);
+        sy1 = y;
+        sy2 = Min(y + 1, height - 1);
+
+        dst[x, y, c] = (src[sx0, sy0, c] + 2*src[sx1, sy0, c] + src[sx2, sy0, c] +
+                      2*(src[sx0, sy1, c] + 2*src[sx1, sy1, c] + src[sx2, sy1, c]) +
+                         src[sx0, sy2, c] + 2*src[sx1, sy2, c] + src[sx2, sy2, c] + 8) / 16;
         \endverbatim
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The source and destination images must have the same width, height and number of interleaved
+        8-bit channels. Valid channel counts are 1, 2, 3 and 4.
 
         \note This function has a C++ wrapper Simd::GaussianBlur3x3(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of source image.
-        \param [in] srcStride - a row size of the src image.
+        \param [in] srcStride - a row size of the src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] dstStride - a row size of the dst image (in bytes).
     */
     SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
@@ -4008,33 +4020,34 @@ extern "C"
 
         \fn void * SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float * sigma, const float* epsilon);
 
-        \short Creates Gaussian blur filter context.
+        \short Creates a context for separable Gaussian blurring of an 8-bit interleaved image.
 
-        In particular calculates Gaussian blur coefficients:
+        The context stores image parameters and normalized 1D Gaussian coefficients used by
+        ::SimdGaussianBlurRun:
         \verbatim
-        half = floor(sqrt(log(1/epsilon)) * sigma);
-        weight[2*half + 1];
+        half = floor(sqrt(-log(epsilon[0])) * sigma[0]);
+        kernel = 2*half + 1;
+        weight[kernel];
 
         for(x = -half; x <= half; ++x)
-            weight[x + half] = exp(-sqr(x / sigma) / 2);
+            weight[x + half] = exp(-Square(x/sigma[0])/2);
 
         sum = 0;
-        for (x = -half; x <= half; ++x)
+        for(x = -half; x <= half; ++x)
             sum += weight[x + half];
 
-        for (x = -half; x <= half; ++x)
+        for(x = -half; x <= half; ++x)
             weight[x + half] /= sum;
         \endverbatim
 
         \param [in] width - a width of input and output image.
-        \param [in] height - a height of input and output image.    
-        \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
-        \param [in] sigma - a pointer to sigma parameter (blur radius). Its value must be greater than 0.000001.
-        \param [in] epsilon - a pointer to epsilon parameter (permissible relative error). 
-                              Its value must be greater than 0.000001. Pointer can be NULL and by default value 0.001 is used.
+        \param [in] height - a height of input and output image.
+        \param [in] channels - a number of 8-bit channels per pixel. Its value must be in range [1..4].
+        \param [in] sigma - a pointer to sigma parameter (blur radius). Its value must be greater than or equal to 0.000001.
+        \param [in] epsilon - a pointer to epsilon parameter (permissible relative error).
+                              Its value must be in range [0.000001..1.0]. Pointer can be NULL and by default value 0.001 is used.
         \return a pointer to filter context. On error it returns NULL.
-                This pointer is used in functions ::SimdGaussianBlurRun.
-                It must be released with using of function ::SimdRelease.
+                This pointer is used by ::SimdGaussianBlurRun and must be released by ::SimdRelease.
     */
     SIMD_API void* SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float * sigma, const float* epsilon);
 
@@ -4042,21 +4055,22 @@ extern "C"
 
         \fn void SimdGaussianBlurRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
-        \short Performs image Gaussian blurring.
+        \short Performs image Gaussian blurring with a context created by ::SimdGaussianBlurInit.
 
-        Bluring algorithm for every point:
+        The function applies the context's normalized 1D kernel horizontally and vertically to every
+        channel independently. Border pixels are handled by nearest-pixel replication:
         \verbatim
         sum = 0;
-        for(x = -half; x <= half; ++x)
+        for(y = -half; y <= half; ++y)
         {
-            sx = min(max(0, dx + x), width - 1);
-            for(y = -half; y <= half; ++y)
+            sy = Min(Max(0, dy + y), height - 1);
+            for(x = -half; x <= half; ++x)
             {
-                sy = min(max(0, dy + y), height - 1);
-                sum += src[sx, sy]*weight[x + half]*weight[y + half];
+                sx = Min(Max(0, dx + x), width - 1);
+                sum += src[sx, sy, c]*weight[x + half]*weight[y + half];
             }
         }
-        dst[dx, dy] = sum;
+        dst[dx, dy, c] = Round(sum);
         \endverbatim
 
         \param [in] filter - a filter context. It must be created by function ::SimdGaussianBlurInit and released by function ::SimdRelease.
@@ -4071,10 +4085,13 @@ extern "C"
 
         \fn void SimdGemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
-        \short Performs general matrix multiplication (for 32-bit float numbers).
+        \short Performs general matrix multiplication for row-major 32-bit floating-point matrices.
 
+        A and B are used without transposition:
         \verbatim
-        C(M, N) = alpha*A(M, K)*B(K, N) + beta*C(M, N);
+        for(i = 0; i < M; ++i)
+            for(j = 0; j < N; ++j)
+                C[i*ldc + j] = alpha[0]*Sum(A[i*lda + k]*B[k*ldb + j]) + beta[0]*C[i*ldc + j];
         \endverbatim
 
         \note This function supports multithreading (See functions ::SimdGetThreadNumber and ::SimdSetThreadNumber).
@@ -4082,14 +4099,14 @@ extern "C"
         \param [in] M - a height of A and height of C matrices.
         \param [in] N - a width of B and width of C matrices.
         \param [in] K - a width of A and height of B matrices.
-        \param [in] alpha - a pointer to multiplier of the first term.
+        \param [in] alpha - a pointer to scalar multiplier of A*B.
         \param [in] A - a pointer to input A matrix.
-        \param [in] lda - a leading dimension of A matrix.
+        \param [in] lda - a row stride of A matrix (in 32-bit floats).
         \param [in] B - a pointer to input B matrix.
-        \param [in] ldb - a leading dimension of B matrix.
-        \param [in] beta - a pointer to multiplier of the second term.
-        \param [out] C - a pointer to output C matrix.
-        \param [in] ldc - a leading dimension of C matrix.
+        \param [in] ldb - a row stride of B matrix (in 32-bit floats).
+        \param [in] beta - a pointer to scalar multiplier of the original C matrix.
+        \param [out] C - a pointer to input/output C matrix.
+        \param [in] ldc - a row stride of C matrix (in 32-bit floats).
     */
     SIMD_API void SimdGemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
@@ -4097,10 +4114,14 @@ extern "C"
 
         \fn void SimdGemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
-        \short Performs general matrix multiplication (for 32-bit float numbers).
+        \short Performs general matrix multiplication with transposed B for row-major 32-bit floating-point matrices.
 
+        A is an M by K row-major matrix. B is stored as an N by K row-major matrix and is used as
+        Trans(B) in the multiplication:
         \verbatim
-        C(M, N) = alpha*A(M, K)*Trans(B(N, K)) + beta*C(M, N);
+        for(i = 0; i < M; ++i)
+            for(j = 0; j < N; ++j)
+                C[i*ldc + j] = alpha[0]*Sum(A[i*lda + k]*B[j*ldb + k]) + beta[0]*C[i*ldc + j];
         \endverbatim
 
         \note This function supports multithreading (See functions ::SimdGetThreadNumber and ::SimdSetThreadNumber).
@@ -4108,14 +4129,14 @@ extern "C"
         \param [in] M - a height of A and height of C matrices.
         \param [in] N - a height of B and width of C matrices.
         \param [in] K - a width of A and width of B matrices.
-        \param [in] alpha - a pointer to multiplier of the first term.
+        \param [in] alpha - a pointer to scalar multiplier of A*Trans(B).
         \param [in] A - a pointer to input A matrix.
-        \param [in] lda - a leading dimension of A matrix.
+        \param [in] lda - a row stride of A matrix (in 32-bit floats).
         \param [in] B - a pointer to input B matrix.
-        \param [in] ldb - a leading dimension of B matrix.
-        \param [in] beta - a pointer to multiplier of the second term.
-        \param [out] C - a pointer to output C matrix.
-        \param [in] ldc - a leading dimension of C matrix.
+        \param [in] ldb - a row stride of B matrix (in 32-bit floats).
+        \param [in] beta - a pointer to scalar multiplier of the original C matrix.
+        \param [out] C - a pointer to input/output C matrix.
+        \param [in] ldc - a row stride of C matrix (in 32-bit floats).
     */
     SIMD_API void SimdGemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
@@ -4123,7 +4144,17 @@ extern "C"
 
         \fn void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgr, size_t bgrStride);
 
-        \short Converts 8-bit gray image to 24-bit BGR image. Also it can be used for 8-bit gray to 24-bit RGB conversion.
+        \short Converts an 8-bit gray image to a 24-bit BGR image.
+
+        For every pixel:
+        \verbatim
+        bgr[3*x + 0] = gray[x];
+        bgr[3*x + 1] = gray[x];
+        bgr[3*x + 2] = gray[x];
+        \endverbatim
+
+        Since all color channels receive the same value, the function can also be used for gray to
+        RGB conversion.
 
         All images must have the same width and height.
 
@@ -4133,9 +4164,9 @@ extern "C"
         \param [in] gray - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] grayStride - a row size of the gray image.
+        \param [in] grayStride - a row size of the gray image (in bytes).
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image.
-        \param [in] bgrStride - a row size of the bgr image.
+        \param [in] bgrStride - a row size of the bgr image (in bytes).
     */
     SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride);
 
@@ -4143,7 +4174,18 @@ extern "C"
 
         \fn void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-        \short Converts 8-bit gray image to 32-bit BGRA image. Also it can be used for 8-bit gray to 32-bit RGBA conversion.
+        \short Converts an 8-bit gray image to a 32-bit BGRA image.
+
+        For every pixel:
+        \verbatim
+        bgra[4*x + 0] = gray[x];
+        bgra[4*x + 1] = gray[x];
+        bgra[4*x + 2] = gray[x];
+        bgra[4*x + 3] = alpha;
+        \endverbatim
+
+        Since all color channels receive the same value, the function can also be used for gray to
+        RGBA conversion.
 
         All images must have the same width and height.
 
@@ -4153,30 +4195,37 @@ extern "C"
         \param [in] gray - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] grayStride - a row size of the gray image.
+        \param [in] grayStride - a row size of the gray image (in bytes).
         \param [out] bgra - a pointer to pixels data of output 32-bit BGRA (or 32-bit RGBA) image.
-        \param [in] bgraStride - a row size of the bgra image.
-        \param [in] alpha - a value of alpha channel.
+        \param [in] bgraStride - a row size of the bgra image (in bytes).
+        \param [in] alpha - a value of the alpha channel.
     */
     SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride,
         uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
     /*! @ingroup gray_conversion
 
-        \fn void SimdGrayToY(const uint8_t* gray, size_t width, size_t height, size_t grayStride, uint8_t* y, size_t yStride);
+        \fn void SimdGrayToY(const uint8_t* gray, size_t grayStride, size_t width, size_t height, uint8_t* y, size_t yStride);
 
-        \short Converts 8-bit gray image to 8-bit Y-plane of YUV.
+        \short Converts an 8-bit full-range gray image to an 8-bit limited-range Y plane.
+
+        For every pixel:
+        \verbatim
+        y[x] = RestrictRange(((220*gray[x] + 128) >> 8) + 16, 16, 235);
+        \endverbatim
+
+        Thus gray value 0 maps to Y value 16, and gray value 255 maps to Y value 235.
 
         All images must have the same width and height.
 
         \note This function has C++ wrappers: Simd::GrayToY(const View<A>& gray, View<A>& y).
 
         \param [in] gray - a pointer to pixels data of input 8-bit gray image.
-        \param [in] grayStride - a row size of the gray image.
+        \param [in] grayStride - a row size of the gray image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] y - a pointer to pixels data of output 8-bit Y plane of YUV image.
-        \param [in] yStride - a row size of the y image.
+        \param [out] y - a pointer to pixels data of output 8-bit Y plane.
+        \param [in] yStride - a row size of the y image (in bytes).
     */
     SIMD_API void SimdGrayToY(const uint8_t* gray, size_t grayStride, size_t width, size_t height, uint8_t* y, size_t yStride);
 
