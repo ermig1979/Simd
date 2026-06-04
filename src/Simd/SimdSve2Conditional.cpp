@@ -271,7 +271,7 @@ namespace Simd
             const uint8_t* mask, size_t maskStride, uint8_t value, uint64_t* sum)
         {
             assert(width >= 3 && height >= 3);
-            assert(width <= 256 * 256);
+            assert(width <= 256 * 128);
 
             src += srcStride;
             mask += maskStride;
@@ -280,7 +280,7 @@ namespace Simd
 
             size_t A = svlen(svuint8_t());
             size_t widthA = AlignLo(width, A);
-            svbool_t nose = widthA ? svwhilege_b8(0, 1) : svand_b_z(svptrue_b8(), svwhilege_b8(0, 1), svwhilelt_b8(widthA, width));
+            svbool_t nose = widthA ? svwhilege_b8(0, 1) : svand_b_z(svptrue_b8(), svnot_b_z(svptrue_b8(), svwhilege_b8(0, 1)), svwhilelt_b8(widthA, width));
             svbool_t body = svptrue_b8();
             svbool_t tail = svwhilelt_b8(widthA, width);
             svuint8_t _value = svdup_n_u8(value);
