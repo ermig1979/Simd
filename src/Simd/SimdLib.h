@@ -6148,7 +6148,10 @@ extern "C"
 
         \fn void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
 
-        \short Performs bytes reordering for data array.
+        \short Reverses byte order inside every 16-bit element of a data array.
+
+        This function changes endian representation of each 2-byte element independently. The order
+        of elements in the array is not changed.
 
         For every 2 bytes:
         \verbatim
@@ -6156,10 +6159,10 @@ extern "C"
         dst[2*i + 1] = src[2*i + 0];
         \endverbatim
 
-        The data size must be a multiple of 2.
+        The data size must be a multiple of 2 bytes.
 
         \param [in] src - a pointer to the input data.
-        \param [in] size - a size of input and output data.
+        \param [in] size - a size of input and output data in bytes.
         \param [out] dst - a pointer to the output data.
     */
     SIMD_API void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
@@ -6168,7 +6171,10 @@ extern "C"
 
         \fn void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
 
-        \short Performs bytes reordering for data array.
+        \short Reverses byte order inside every 32-bit element of a data array.
+
+        This function changes endian representation of each 4-byte element independently. The order
+        of elements in the array is not changed.
 
         For every 4 bytes:
         \verbatim
@@ -6178,10 +6184,10 @@ extern "C"
         dst[4*i + 3] = src[4*i + 0];
         \endverbatim
 
-        The data size must be a multiple of 4.
+        The data size must be a multiple of 4 bytes.
 
         \param [in] src - a pointer to the input data.
-        \param [in] size - a size of input and output data.
+        \param [in] size - a size of input and output data in bytes.
         \param [out] dst - a pointer to the output data.
     */
     SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
@@ -6190,7 +6196,10 @@ extern "C"
 
         \fn void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
 
-        \short Performs bytes reordering for data array.
+        \short Reverses byte order inside every 64-bit element of a data array.
+
+        This function changes endian representation of each 8-byte element independently. The order
+        of elements in the array is not changed.
 
         For every 8 bytes:
         \verbatim
@@ -6204,10 +6213,10 @@ extern "C"
         dst[8*i + 7] = src[8*i + 0];
         \endverbatim
 
-        The data size must be a multiple of 8.
+        The data size must be a multiple of 8 bytes.
 
         \param [in] src - a pointer to the input data.
-        \param [in] size - a size of input and output data.
+        \param [in] size - a size of input and output data in bytes.
         \param [out] dst - a pointer to the output data.
     */
     SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
@@ -6216,9 +6225,16 @@ extern "C"
 
         \fn void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
 
-        \short Creates resize context.
+        \short Creates a reusable image resize context.
 
-        An using example (resize of RGBA64 image):
+        The context stores source size, destination size, channel count, channel type and resize
+        method. It precomputes interpolation indices and coefficients used by ::SimdResizerRun.
+        Supported combinations are selected from real implementations: nearest methods for all
+        channel types; bilinear for byte, short, float and BFloat16 channels; OpenCV-compatible
+        bilinear, bicubic and area methods for byte channels; Caffe and PyTorch bilinear variants
+        for float and BFloat16 channels. Unsupported combinations return NULL.
+
+        Usage example (resize of RGBA64 image):
         \verbatim
         void * resizer = SimdResizerInit(srcX, srcY, dstX, dstY, 4, SimdResizeChannelShort, SimdResizeMethodBilinear);
         if (resizer)
@@ -6232,12 +6248,12 @@ extern "C"
         \param [in] srcY - a height of the input image.
         \param [in] dstX - a width of the output image.
         \param [in] dstY - a height of the output image.
-        \param [in] channels - a channel number of input and output image.
-        \param [in] type - a type of input and output image channel.
-        \param [in] method - a method used in order to resize image.
-        \return a pointer to resize context. On error it returns NULL. 
-                This pointer is used in functions ::SimdResizerRun. 
-                It must be released with using of function ::SimdRelease.
+        \param [in] channels - a number of channels in input and output images.
+        \param [in] type - a type of input and output image channel (see ::SimdResizeChannelType).
+        \param [in] method - a resize method (see ::SimdResizeMethodType).
+        \return a pointer to resize context. On error or unsupported parameter combination it returns NULL.
+                This pointer is used by function ::SimdResizerRun.
+                It must be released with function ::SimdRelease.
     */
     SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
 
@@ -6245,7 +6261,11 @@ extern "C"
 
         \fn void SimdResizerRun(const void * resizer, const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
 
-        \short Performs image resizing.
+        \short Resizes one image using a context created by ::SimdResizerInit.
+
+        The input and output images must have the sizes, channel count, channel type and resize method
+        stored in \a resizer. Strides are specified in bytes. The context can be reused for multiple
+        images with the same geometry and format parameters.
 
         \param [in] resizer - a resize context. It must be created by function ::SimdResizerInit and released by function ::SimdRelease.
         \param [in] src - a pointer to pixels data of the original input image.
@@ -6259,19 +6279,28 @@ extern "C"
 
         \fn void SimdRgbToBgra(const uint8_t * rgb, size_t width, size_t height, size_t rgbStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-        \short Converts 24-bit RGB image to 32-bit BGRA image. Also it can be used for 24-bit BGR to 32-bit RGBA conversion.
+        \short Converts a 24-bit RGB image to a 32-bit BGRA image.
 
         All images must have the same width and height.
+        For every pixel:
+        \verbatim
+        bgra[4*i + 0] = rgb[3*i + 2]; // blue
+        bgra[4*i + 1] = rgb[3*i + 1]; // green
+        bgra[4*i + 2] = rgb[3*i + 0]; // red
+        bgra[4*i + 3] = alpha;
+        \endverbatim
+        If the input is treated as BGR and the output as RGBA, the same byte shuffle performs
+        BGR-to-RGBA conversion.
 
         \note This function has C++ wrappers: Simd::RgbToBgra(const View<A>& rgb, View<A>& bgra, uint8_t alpha)
             and Simd::BgrToRgba(const View<A>& bgr, View<A>& rgba, uint8_t alpha).
 
-        \param [in] rgb - a pointer to pixels data of input 24-bit RGB (or 24-bit BGR) image.
+        \param [in] rgb - a pointer to pixels data of input 24-bit RGB image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] rgbStride - a row size of the rgb image.
-        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA (or 32-bit RGBA) image.
-        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] rgbStride - a row size of the rgb image in bytes.
+        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+        \param [in] bgraStride - a row size of the bgra image in bytes.
         \param [in] alpha - a value of alpha channel.
     */
     SIMD_API void SimdRgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
@@ -6280,18 +6309,23 @@ extern "C"
 
         \fn void SimdRgbToGray(const uint8_t * rgb, size_t width, size_t height, size_t rgbStride, uint8_t * gray, size_t grayStride);
 
-        \short Converts 24-bit RGB image to 8-bit gray image.
+        \short Converts a 24-bit RGB image to an 8-bit gray image.
 
         All images must have the same width and height.
+        For every pixel:
+        \verbatim
+        gray[i] = (0.299*R + 0.587*G + 0.114*B) rounded to nearest integer,
+        where R = rgb[3*i + 0], G = rgb[3*i + 1], B = rgb[3*i + 2].
+        \endverbatim
 
         \note This function has a C++ wrapper Simd::RgbToGray(const View<A>& rgb, View<A>& gray).
 
         \param [in] rgb - a pointer to pixels data of input 24-bit RGB image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] rgbStride - a row size of the rgb image.
+        \param [in] rgbStride - a row size of the rgb image in bytes.
         \param [out] gray - a pointer to pixels data of output 8-bit gray image.
-        \param [in] grayStride - a row size of the gray image.
+        \param [in] grayStride - a row size of the gray image in bytes.
     */
     SIMD_API void SimdRgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride);
 
@@ -6299,18 +6333,24 @@ extern "C"
 
         \fn void SimdRgbaToGray(const uint8_t * rgba, size_t width, size_t height, size_t rgbaStride, uint8_t * gray, size_t grayStride);
 
-        \short Converts 32-bit RGBA image to 8-bit gray image.
+        \short Converts a 32-bit RGBA image to an 8-bit gray image.
 
         All images must have the same width and height.
+        For every pixel:
+        \verbatim
+        gray[i] = (0.299*R + 0.587*G + 0.114*B) rounded to nearest integer,
+        where R = rgba[4*i + 0], G = rgba[4*i + 1], B = rgba[4*i + 2].
+        The alpha channel is ignored.
+        \endverbatim
 
         \note This function has a C++ wrapper Simd::RgbaToGray(const View<A>& rgba, View<A>& gray).
 
         \param [in] rgba - a pointer to pixels data of input 32-bit RGBA image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] rgbaStride - a row size of the rgba image.
+        \param [in] rgbaStride - a row size of the rgba image in bytes.
         \param [out] gray - a pointer to pixels data of output 8-bit gray image.
-        \param [in] grayStride - a row size of the gray image.
+        \param [in] grayStride - a row size of the gray image in bytes.
     */
     SIMD_API void SimdRgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride);
 
@@ -6318,9 +6358,10 @@ extern "C"
 
         \fn void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 
-        \short Changes certain index in mask.
+        \short Replaces one segmentation index with another inside a mask.
 
-        Mask must have 8-bit gray pixel format.
+        The mask must have 8-bit gray pixel format. Only pixels equal to \a oldIndex are modified;
+        all other pixels keep their values.
 
         For every point:
         \verbatim
@@ -6331,11 +6372,11 @@ extern "C"
         \note This function has a C++ wrappers: Simd::SegmentationChangeIndex(View<A> & mask, uint8_t oldIndex, uint8_t newIndex).
 
         \param [in, out] mask - a pointer to pixels data of 8-bit gray mask image.
-        \param [in] stride - a row size of the mask image.
+        \param [in] stride - a row size of the mask image in bytes.
         \param [in] width - a mask width.
         \param [in] height - a mask height.
-        \param [in] oldIndex - a mask old index.
-        \param [in] newIndex - a mask new index.
+        \param [in] oldIndex - an index value to replace.
+        \param [in] newIndex - a replacement index value.
     */
     SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 
@@ -6343,17 +6384,26 @@ extern "C"
 
         \fn void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
 
-        \short Fill single holes in mask.
+        \short Fills isolated single-pixel holes in a segmentation mask.
 
-        Mask must have 8-bit gray pixel format.
+        The mask must have 8-bit gray pixel format. Only inner pixels are tested; border pixels are
+        not changed. An inner pixel is set to \a index when its upper, lower, left and right neighbors
+        are all equal to \a index.
+
+        For every inner point:
+        \verbatim
+        if(mask[x, y - 1] == index && mask[x, y + 1] == index &&
+           mask[x - 1, y] == index && mask[x + 1, y] == index)
+            mask[x, y] = index;
+        \endverbatim
 
         \note This function has a C++ wrappers: Simd::SegmentationFillSingleHoles(View<A> & mask, uint8_t index).
 
         \param [in, out] mask - a pointer to pixels data of 8-bit gray mask image.
-        \param [in] stride - a row size of the mask image.
+        \param [in] stride - a row size of the mask image in bytes.
         \param [in] width - a mask width.
         \param [in] height - a mask height.
-        \param [in] index - a mask index.
+        \param [in] index - a mask index used to fill single-pixel holes.
     */
     SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
 
@@ -6361,25 +6411,31 @@ extern "C"
 
         \fn void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
 
-        \short Propagates mask index from parent (upper) to child (lower) level of mask pyramid with using 2x2 scan window.
+        \short Propagates a segmentation index from a parent mask pyramid level to a child level.
 
-        For parent and child image must be performed: parentWidth = (childWidth + 1)/2, parentHeight = (childHeight + 1)/2.
-        All images must have 8-bit gray pixel format. Size of different image is equal to child image.
+        The parent and child sizes must satisfy: parentWidth = (childWidth + 1)/2,
+        parentHeight = (childHeight + 1)/2. All images must have 8-bit gray pixel format, and the
+        difference image must have the same size as the child image. The function scans each 2x2
+        parent window and updates the corresponding inner 2x2 child pixels. A child pixel is updated
+        only when its current value is less than \a invalidIndex. It becomes \a currentIndex when all
+        four parent pixels equal \a currentIndex, or when at least one parent pixel equals \a currentIndex
+        and the corresponding difference pixel is greater than \a differenceThreshold. Otherwise it
+        becomes \a emptyIndex.
 
         \note This function has a C++ wrappers: Simd::SegmentationPropagate2x2(const View<A> & parent, View<A> & child, const View<A> & difference, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t thresholdDifference).
 
         \param [in] parent - a pointer to pixels data of 8-bit gray parent mask image.
-        \param [in] parentStride - a row size of the parent mask image.
-        \param [in] width - a parent mask width.
-        \param [in] height - a parent mask height.
+        \param [in] parentStride - a row size of the parent mask image in bytes.
+        \param [in] width - a parent mask width. It must be at least 2.
+        \param [in] height - a parent mask height. It must be at least 2.
         \param [in, out] child - a pointer to pixels data of 8-bit gray child mask image.
-        \param [in] childStride - a row size of the child mask image.
+        \param [in] childStride - a row size of the child mask image in bytes.
         \param [in] difference - a pointer to pixels data of 8-bit gray difference image.
-        \param [in] differenceStride - a row size of the difference image.
-        \param [in] currentIndex - propagated mask index.
-        \param [in] invalidIndex - invalid mask index.
-        \param [in] emptyIndex - empty mask index.
-        \param [in] differenceThreshold - a difference threshold for conditional index propagating.
+        \param [in] differenceStride - a row size of the difference image in bytes.
+        \param [in] currentIndex - a mask index to propagate.
+        \param [in] invalidIndex - a minimum value of child pixels that must not be overwritten.
+        \param [in] emptyIndex - an index written when propagation condition is false.
+        \param [in] differenceThreshold - a threshold for conditional propagation by difference image.
     */
     SIMD_API void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height,
         uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride,
@@ -6389,21 +6445,24 @@ extern "C"
 
         \fn void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
 
-        \short Finds actual region of mask index location.
+        \short Shrinks a rectangular region to the bounding box of a mask index.
 
-        Mask must have 8-bit gray pixel format.
+        The mask must have 8-bit gray pixel format. The input rectangle is passed through \a left,
+        \a top, \a right and \a bottom. The function searches only inside this rectangle and replaces
+        it with the minimal half-open rectangle [left, right) x [top, bottom) that contains all pixels
+        equal to \a index. If the index is not found, all four rectangle coordinates are set to 0.
 
         \note This function has a C++ wrappers: Simd::SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect).
 
         \param [in] mask - a pointer to pixels data of 8-bit gray mask image.
-        \param [in] stride - a row size of the mask image.
+        \param [in] stride - a row size of the mask image in bytes.
         \param [in] width - a mask width.
         \param [in] height - a mask height.
-        \param [in] index - a mask index.
-        \param [in, out] left - a pointer to left side.
-        \param [in, out] top - a pointer to top side.
-        \param [in, out] right - a pointer to right side.
-        \param [in, out] bottom - a pointer to bottom side.
+        \param [in] index - a mask index to search for.
+        \param [in, out] left - a pointer to the left side of the search/result rectangle.
+        \param [in, out] top - a pointer to the top side of the search/result rectangle.
+        \param [in, out] right - a pointer to the right side of the search/result rectangle.
+        \param [in, out] bottom - a pointer to the bottom side of the search/result rectangle.
     */
     SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
         ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
